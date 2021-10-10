@@ -15,7 +15,7 @@ from torch.utils.tensorboard import SummaryWriter
 import os,time
 import argparse
 from tqdm.auto import tqdm
-from transformers_ptuning.ptuning_wrapper import LSTMEmbeddingPromptEncoder, EmbeddingPromptEncoder
+from comet.transformers_ptuning.ptuning_wrapper import LSTMEmbeddingPromptEncoder, EmbeddingPromptEncoder
 #%% argparse
 from pathlib import Path
 import pandas as pd
