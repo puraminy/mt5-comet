@@ -6,7 +6,7 @@ from transformers import (
     MT5ForConditionalGeneration, MT5TokenizerFast,
     get_linear_schedule_with_warmup
 )
-from transformers_ptuning import PTuningWrapper
+from comet.transformers_ptuning import PTuningWrapper
 import torch
 import csv 
 import re
