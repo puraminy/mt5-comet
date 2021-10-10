@@ -68,6 +68,9 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup):
         underlying_model_name = f"/drive2/pretrained/mt5/hf/{model_id}/"
     else:
         underlying_model_name = path
+    if not Path(underlying_model_name).exists():
+        underlying_model_name = model_id
+
     #underlying_model_name = "logs/mt5-small/prompt_length_3/last"
     if sup:
         learning_rate = 0.0001 #6.25e-05
@@ -86,7 +89,7 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup):
     weight_decay = 0.01
     batch_size = 16
     #% creating save folder
-    log_dir = '/drive2/pouramini/plogs/'
+    log_dir = '../../plogs/'
     train_folder=split_col["train"]["input_text"] + "--" + split_col["train"]["target_text"]
     val_folder=split_col["validation"]["input_text"] + "--" + split_col["validation"]["target_text"]
     model_name = os.path.join(model_id,train_folder, val_folder,f"plength_{prompt_length}_lr_{learning_rate}{frozen_str}{sup_str}_{exp_id}")
@@ -143,8 +146,8 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup):
     #data_paths["train"] = pd.read_table("/home/pouramini/atomic/xIntent_en_train_no_dups.tsv")
     #data_paths["validation"] = pd.read_table("/home/pouramini/atomic/xIntent_en_fa_validation_no_dups.tsv")
 
-    data_paths["train"] = pd.read_table("/drive3/pouramini/data/atomic/en_fa/xIntent_en_fa_train_no_dups.tsv")
-    data_paths["validation"] = pd.read_table("/drive3/pouramini/data/atomic/en_fa/xIntent_en_fa_validation_no_dups.tsv")
+    data_paths["train"] = pd.read_table("../../data/xIntent_en_fa_train_no_dups.tsv")
+    data_paths["validation"] = pd.read_table("../../data/xIntent_en_fa_validation_no_dups.tsv")
 
     def my_load_dataset(split_data, split, target_text, input_text):
         data_split = {}
