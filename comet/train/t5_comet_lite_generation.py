@@ -28,8 +28,8 @@ generation_params = {
 #atomic_dataset = load_dataset('atomic')
 
 atomic_dataset = {}
-atomic_dataset["train"] = pd.read_table("/home/pouramini/atomic/xIntent_en_train_no_dups.tsv")
-atomic_dataset["validation"] = pd.read_table("/home/pouramini/atomic/xIntent_en_fa_validation_no_dups.tsv")
+atomic_dataset["train"] = pd.read_table("/drive3/pouramini/data/atomic/en_fa/xIntent_en_train_no_dups.tsv")
+atomic_dataset["validation"] = pd.read_table("/drive3/pouramini/data/atomic/en_fa/xIntent_en_fa_validation_no_dups.tsv")
 
 atomic_relation_mappings = {
     "oEffect":"<oEffect>",

@@ -51,7 +51,7 @@ import click
 )
 @click.option(
     "--step",
-    default=10000,
+    default=1000,
     type=int,
     help=""
 )
@@ -80,7 +80,7 @@ import click
     help=""
 )
 @click.option(
-    "--concat",
+    "--no_concat",
     "-",
     is_flag=True,
     help=""
@@ -91,7 +91,13 @@ import click
     is_flag=True,
     help=""
 )
-def main(fname, pred_pat, path, step, col1, col2, score_col, cpu, concat, addinp):
+def main(fname, pred_pat, path, step, col1, col2, score_col, cpu, no_concat, addinp):
+    concat = not no_concat
+    if not Path(fname).exists():
+        if "val" in pred_pat:
+            fname = "/drive3/pouramini/data/atomic/en_fa/xIntent_en_fa_validation_no_dups.tsv"
+        else:
+            fname = "/drive3/pouramini/data/atomic/en_fa/xIntent_en_fa_train_no_dups.tsv"
     if fname.endswith("csv"):
         srcdf = pd.read_csv(fname)
     else:
