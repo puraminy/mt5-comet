@@ -50,7 +50,7 @@ from tqdm import tqdm
     "--frozen",
     "-f",
     is_flag=True,
-    help=""
+    help="keep model frozen or not"
 )
 @click.option(
     "--sup",
@@ -62,13 +62,13 @@ from tqdm import tqdm
     "--qtemp",
     default="{rel} {event} {ph}",
     type=str,
-    help=""
+    help="template for query"
 )
 @click.option(
     "--anstemp",
     default="{ph} {response} {end}",
     type=str,
-    help=""
+    help="tempate for response"
 )
 @click.option(
     "--beams",
@@ -82,7 +82,7 @@ from tqdm import tqdm
     "-r",
     default=5,
     type=int,
-    help=""
+    help="number of return sequences"
 )
 @click.option(
     "--num_generations",
@@ -93,15 +93,15 @@ from tqdm import tqdm
 )
 @click.option(
     "--is_flax",
-    "-nf",
+    "-if",
     is_flag=True,
-    help=""
+    help="If the model is flaxed it converst it to pytorch compbatible model and save it"
 )
 @click.option(
     "--en",
     "-en",
     is_flag=True,
-    help=""
+    help="The languge of head and tails"
 )
 def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp, beams, ret_seq, num_generations, is_flax, en):
     local_rank = None
@@ -165,13 +165,9 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
         "num_beams":beams,
         "num_return_sequences":ret_seq,
     }
-    generation_params = {
-        "max_length":80,
-        "early_stopping":True
-    }
     ddp = local_rank is not None
-    device = 'cpu'
-    dataset_path = "/home/pouramini/mt5-comet/data/v4_atomic_all_agg.csv"
+    device = 'cuda'
+    #dataset_path = "../../data/v4_atomic_all_agg.csv"
     atomic_relation_prompt_lengths = {
         "xIntent":prompt_length,
         "oEffect":prompt_length,
