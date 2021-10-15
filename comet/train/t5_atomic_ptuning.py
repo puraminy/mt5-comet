@@ -1,9 +1,10 @@
 #%% load libraries
 
-from datasets import load_dataset,load_metric
+from sentence_transformers import SentenceTransformer, util
 from transformers import (
     T5ForConditionalGeneration, T5TokenizerFast, AdamW, AddedToken,
     MT5ForConditionalGeneration, MT5TokenizerFast,
+    AutoTokenizer,
     get_linear_schedule_with_warmup
 )
 from comet.transformers_ptuning import PTuningWrapper
@@ -57,12 +58,57 @@ from tqdm import tqdm
     is_flag=True,
     help="supervised flag"
 )
-def main(model_id, exp_id, path, iterations, cycle, frozen, sup):
+@click.option(
+    "--qtemp",
+    default="{rel} {event} {ph}",
+    type=str,
+    help=""
+)
+@click.option(
+    "--anstemp",
+    default="{ph} {response} {end}",
+    type=str,
+    help=""
+)
+@click.option(
+    "--beams",
+    "-nb",
+    default=5,
+    type=int,
+    help="number of beams"
+)
+@click.option(
+    "--ret_seq",
+    "-r",
+    default=5,
+    type=int,
+    help=""
+)
+@click.option(
+    "--num_generations",
+    "-g",
+    default=0,
+    type=int,
+    help=""
+)
+@click.option(
+    "--is_flax",
+    "-nf",
+    is_flag=True,
+    help=""
+)
+@click.option(
+    "--en",
+    "-en",
+    is_flag=True,
+    help=""
+)
+def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp, beams, ret_seq, num_generations, is_flax, en):
     local_rank = None
     #%%
     cfg = {}
     old_vars = set()
-    old_vars.update(k for k in globals() if not k.startswith('_'))
+    old_vars.update(k for k in locals() if not k.startswith('_'))
     #%% some hyper-parameters
     if not model_id == "path":
         underlying_model_name = f"/drive2/pretrained/mt5/hf/{model_id}/"
@@ -79,22 +125,24 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup):
     #iiiii
     frozen_str = "_frozen" if frozen else "_UNfrozen"
     sup_str = "_SUP" if sup else "_UNsup"
+    iter_str = "_" + str(iterations).replace("000","k")
     prompt_length = 5
     split_col={"train":{}, "validation":{}}
-    split_col["train"]["input_text"]="input_text_fa"
-    split_col["train"]["target_text"]="target_text_fa"
-    split_col["validation"]["input_text"]="input_text_fa"
-    split_col["validation"]["target_text"]="target_text_fa"
+    split_col["train"]["input_text"]="input_text" if en else "input_text_fa"
+    split_col["train"]["target_text"]="target_text" if en else "target_text_fa"
+    split_col["validation"]["input_text"]="input_text" if en else "input_text_fa"
+    split_col["validation"]["target_text"]="target_text" if en else "target_text_fa"
     warm_up_steps = 0.002*iterations
     weight_decay = 0.01
     batch_size = 16
     #% creating save folder
-    log_dir = '../../plogs/'
+    log_dir = '/drive2/pouramini/plogs/'
     train_folder=split_col["train"]["input_text"] + "--" + split_col["train"]["target_text"]
     val_folder=split_col["validation"]["input_text"] + "--" + split_col["validation"]["target_text"]
-    model_name = os.path.join(model_id,train_folder, val_folder,f"plength_{prompt_length}_lr_{learning_rate}{frozen_str}{sup_str}_{exp_id}")
+    model_name = f"plength_{prompt_length}_lr_{learning_rate}{frozen_str}{sup_str}{iter_str}_{exp_id}"
+    model_path = os.path.join(model_id,train_folder, val_folder, model_name)
     if model_id != "path":
-        save_path= os.path.join(log_dir,model_name)
+        save_path= os.path.join(log_dir, model_path)
         ans = ""
         while Path(save_path).exists() and ans != "y":
             ans = input(f"The {save_path} already exists, do you want to overwrite it? (y/n/other(suffix):")
@@ -114,11 +162,15 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup):
     generation_params = {
         "max_length":80,
         "early_stopping":True,
-        "num_beams":5,
-        "num_return_sequences":5,
+        "num_beams":beams,
+        "num_return_sequences":ret_seq,
+    }
+    generation_params = {
+        "max_length":80,
+        "early_stopping":True
     }
     ddp = local_rank is not None
-    device = 'cuda'
+    device = 'cpu'
     dataset_path = "/home/pouramini/mt5-comet/data/v4_atomic_all_agg.csv"
     atomic_relation_prompt_lengths = {
         "xIntent":prompt_length,
@@ -136,18 +188,17 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup):
         "xIntent":prompt_length,
     }
     #%%
-    new_vars = set(k for k in globals() if not k.startswith('_'))
+    new_vars = set(k for k in locals() if not k.startswith('_'))
     cfg_vars = new_vars-old_vars
-    cfg = {k:v for k,v in globals().items() if k in cfg_vars }
+    cfg = {k:v for k,v in locals().items() if k in cfg_vars }
     #%% load atomic data
 
-    import pandas as pd
-    data_paths = {}
-    #data_paths["train"] = pd.read_table("/home/pouramini/atomic/xIntent_en_train_no_dups.tsv")
-    #data_paths["validation"] = pd.read_table("/home/pouramini/atomic/xIntent_en_fa_validation_no_dups.tsv")
+    data_df = {}
+    #data_df["train"] = pd.read_table("/home/pouramini/atomic/xIntent_en_train_no_dups.tsv")
+    #data_df["validation"] = pd.read_table("/home/pouramini/atomic/xIntent_en_fa_validation_no_dups.tsv")
 
-    data_paths["train"] = pd.read_table("../../data/xIntent_en_fa_train_no_dups.tsv")
-    data_paths["validation"] = pd.read_table("../../data/xIntent_en_fa_validation_no_dups.tsv")
+    data_df["train"] = pd.read_table("../../data/xIntent_en_fa_train_no_dups.tsv")
+    data_df["validation"] = pd.read_table("../../data/xIntent_en_fa_validation_no_dups.tsv")
 
     def my_load_dataset(split_data, split, target_text, input_text):
         data_split = {}
@@ -193,11 +244,23 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup):
     # atomic_dataset = load_atomic_dataset(dataset_path)
     #atomic_dataset = load_dataset("atomic")
     atomic_dataset = {}
-    for split, split_data in data_paths.items():
+    for split, split_data in data_df.items():
         print("split:", split)
         atomic_dataset[split] = my_load_dataset(split_data, split, split_col[split]["target_text"], split_col[split]["input_text"])
 
     placeholder_token = "<extra_id_0>"
+    atomic_relation_mappings = {
+        "oEffect":"<oEffect>",
+        "oReact":"<oReact>",
+        "oWant":"<oWant>",
+        "xAttr":"<xAttr>",
+        "xEffect":"<xEffect>",
+        "xIntent":"<xIntent>",
+        "xNeed":"<xNeed>",
+        "xReact":"<xReact>",
+        "xWant":"<xWant>"
+    }
+    gen_token = "<gen>"
     #%% dpp initialize
     is_main_process = (not ddp or local_rank == 0) 
     if ddp:
@@ -210,8 +273,16 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup):
         tokenizer = MT5TokenizerFast.from_pretrained(underlying_model_name)
         model = MT5ForConditionalGeneration.from_pretrained(underlying_model_name)
     else:
-        tokenizer = T5TokenizerFast.from_pretrained(underlying_model_name)
-        model = T5ForConditionalGeneration.from_pretrained(underlying_model_name)
+        tokenizer = AutoTokenizer.from_pretrained(underlying_model_name)
+        if is_flax:
+            model = T5ForConditionalGeneration.from_pretrained(underlying_model_name, from_flax=True)
+            print("converting to ", underlying_model_name + "X")
+
+            model.save_pretrained(underlying_model_name + "X")
+            tokenizer.save_pretrained(underlying_model_name + "X")
+            return
+        else:
+            model = T5ForConditionalGeneration.from_pretrained(underlying_model_name)
 
     for param in model.parameters():
         param.requires_grad = not frozen
@@ -222,18 +293,15 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup):
     clip_logits_hook = model.get_output_embeddings().register_forward_hook(
         lambda m,i,o:clip_logits(o)
     )
-
-
-
     # add new tokens
-    # added_tokens = [ 
+    #added_tokens = [ 
     #     AddedToken(token,lstrip=True,
     #         rstrip=False)
     #     for token in 
     #         list(atomic_relation_mappings.values())
-    # ]
-    # tokenizer.add_special_tokens({"additional_special_tokens":added_tokens})
-    # model.resize_token_embeddings(len(tokenizer))
+    #]
+    #tokenizer.add_special_tokens({"additional_special_tokens":added_tokens})
+    #model.resize_token_embeddings(len(tokenizer))
     embedding_dim = model.config.hidden_size
     print("embedding dim:", embedding_dim)
     wrapped_models = {}
@@ -253,6 +321,7 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup):
                 range(length)
         ]
         tokenizer.add_special_tokens({"additional_special_tokens":added_tokens})
+        model.resize_token_embeddings(len(tokenizer))
         wrapped_models[rel] = PTuningWrapper(model,prompt_encoder,prompt_token_fn=get_prompt_token_fn(id_offset,length))
     #%% Aggregate instances of queries and corresponding responses
     # (str)split_name -> (dict) query -> (list) response 
@@ -268,18 +337,14 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup):
                 if len(d[rel])>0: 
                     rel_tokens = atomic_relation_mappings[rel]
                     #query = f"{rel_tokens} {d['event']}" #Change this line to modify the encoder input
-                    if sup:
-                        query = f"{d['event']} " #Change this line to modify the encoder input
-                    else:
-                        query = f"{rel_tokens} {d['event']} because PersonX intended {placeholder_token}" #Change this line to modify the encoder input
+                    query = qtemp.format(event=d['event'], rel=rel_tokens, ph=placeholder_token) #Change this line to modify the encoder input
                     # query = f"{d['event']} {rel_tokens}" #Change this line to modify the encoder input
                     if query not in atomic_query_responses[split_name][rel]:
                         atomic_query_responses[split_name][rel][query] = []
                     for response in d[rel]:
-                        if sup:
-                            atomic_query_responses[split_name][rel][query].append((f"{response}",response)) #Change this line to modify the decoder input
-                        else:
-                            atomic_query_responses[split_name][rel][query].append((f"{placeholder_token} {response} <extra_id_1>",response)) #Change this line to modify the decoder input
+                        answer = anstemp.format(response=response, rel=rel_tokens, ph=placeholder_token, end="<extra_id_1>")
+                        atomic_query_responses[split_name][rel][query].append((answer,response))
+                            #Change this line to modify the decoder input
                     #didn't convert ___ to <blank>
                     #didn't normalize to lowercase
 
@@ -485,10 +550,24 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup):
     #device = 'cuda:0'
     #model = model.to(device)
     val_set = "validation"
-    num_generations = 0
+    scorer_model = SentenceTransformer('paraphrase-MiniLM-L12-v2')
+    #sss
+    df = data_df[val_set]
+    target = "target_text"
+    df[target] = df[target].astype(str)
+    df = df.groupby(['prefix','input_text'],as_index=False)[target].agg('<br />'.join)
+    print("Scoring...")
+    if num_generations>0:
+        df = df.truncate(after=num_generations)
+
     for rel in ["xIntent"]:
-        for i,(query,responses) in enumerate(tqdm(atomic_query_responses[val_set][rel].items())):
-            if num_generations>0 and i>= num_generations:
+        sum_score = 0 
+        total = num_generations
+        if num_generations == 0:
+            total = len(atomic_query_responses[val_set][rel].items())
+        pbar = tqdm(atomic_query_responses[val_set][rel].items(), total = total)
+        for idx,(query,responses) in enumerate(pbar):
+            if num_generations>0 and idx>= num_generations:
                 break
             hyps = tokenizer.batch_decode(
                             model.generate(**tokenizer(query, return_tensors='pt').to(device=device),**generation_params),
@@ -496,14 +575,61 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup):
                         )
             query = re.sub(r'<.*?>','',query)
             tails = [x[1] for x in responses]
+  
+            sents1 = tails
+            sents2 = hyps
+
+            #Compute embeddings
+            embeddings1 = scorer_model.encode(sents1, device=device, convert_to_tensor=True)
+            embeddings2 = scorer_model.encode(sents2, device=device, convert_to_tensor=True)
+
+            #Compute cosine-similarities for each sentence with each other sentence
+            cosine_scores = util.pytorch_cos_sim(embeddings1, embeddings2)
+
+            #Find the pairs with the highest cosine similarity scores
+            pairs = []
+            rows = cosine_scores.shape[0]
+            cols = cosine_scores.shape[1]
+            for i in range(rows):
+                for j in range(cols):
+                    pairs.append({'index': [i, j], 'score': cosine_scores[i][j]})
+                #print({'index': [i, j], 'score': cosine_scores[i][j]})
+
+        #Sort scores in decreasing order
+            pairs = sorted(pairs, key=lambda x: x['score'], reverse=True)
+
+            top = pairs[0]
+            pred_text = str(sents2[top["index"][1]])
+            closest = str(sents1[top["index"][0]])
+            cond = (df['prefix'] == rel) & (df['input_text'] == query)
+            df.loc[cond, "top"] = closest
+            df.loc[cond, "pred_text1"] = pred_text
+            df.loc[cond, "pred1_score"] = "{:.4f}".format(top["score"])
+            cur_score = top["score"]
+            sum_score += cur_score
+            mean_score = "{:.4f}".format(sum_score / idx)
+            #tqdm.write(f"Mean score:{mean_score}")
+            print(query, "\n" , pred_text, "\n", closest)
+            pbar.set_description(f"Mean score:{mean_score} cur score {cur_score:.2f}")
+            pbar.update(1)
+
             results.append({
                 "head":query,
                 "gens":hyps,
                 "tails":tails,
             })
-        #%%
+        # %%%%%%%%%%%%%%%%%%
+    print("Results:", df["pred1_score"].mean())
+    pbar.close()
     with open(os.path.join(save_path,f"{val_set}_gen.json"),'w') as f:
         json.dump(results,f,ensure_ascii=False,indent=2)
+    # %%
+    out = save_path + "/scored_" + model_name  + ".tsv" 
+    print(out)
+    print(len(df))
+    df.to_csv(out, sep="\t", index=False)
+    with open("/home/pouramini/dflist", "w") as dflist:
+        print(model_name,"=",out, file=dflist)
     # %%
 if __name__ == "__main__":
     main()

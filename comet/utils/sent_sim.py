@@ -1,5 +1,6 @@
 from sentence_transformers import SentenceTransformer, util
-model = SentenceTransformer('paraphrase-MiniLM-L12-v2')
+#model = SentenceTransformer('paraphrase-MiniLM-L12-v2')
+model = SentenceTransformer('/drive2/pretrained/mm/paraphrase-multilingual-MiniLM-L12-v2')
 import pandas as pd
 from tqdm import tqdm
 import glob
