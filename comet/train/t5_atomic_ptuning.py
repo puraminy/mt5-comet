@@ -1,4 +1,17 @@
-#%% load libraries
+# -*- coding: utf-8 -*-
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: title,-all
+#     formats: ipynb,py:percent
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+#       jupytext_version: 1.11.1
+# ---
+
+# %% load libraries
 
 from sentence_transformers import SentenceTransformer, util
 from transformers import (
@@ -17,7 +30,7 @@ import os,time
 import argparse
 from tqdm.auto import tqdm
 from comet.transformers_ptuning.ptuning_wrapper import LSTMEmbeddingPromptEncoder, EmbeddingPromptEncoder
-#%% argparse
+# %% argparse
 from pathlib import Path
 import pandas as pd
 import click
@@ -105,11 +118,11 @@ from tqdm import tqdm
 )
 def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp, beams, ret_seq, num_generations, is_flax, en):
     local_rank = None
-    #%%
+    # %%
     cfg = {}
     old_vars = set()
     old_vars.update(k for k in locals() if not k.startswith('_'))
-    #%% some hyper-parameters
+    # %% some hyper-parameters
     if not model_id == "path":
         underlying_model_name = f"/drive2/pretrained/mt5/hf/{model_id}/"
     else:
@@ -179,15 +192,15 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
         "xReact":prompt_length,
         "xWant":prompt_length
     }
-    #%%
+    # %%
     atomic_relation_prompt_lengths = {
         "xIntent":prompt_length,
     }
-    #%%
+    # %%
     new_vars = set(k for k in locals() if not k.startswith('_'))
     cfg_vars = new_vars-old_vars
     cfg = {k:v for k,v in locals().items() if k in cfg_vars }
-    #%% load atomic data
+# %% load atomic data
 
     data_df = {}
     #data_df["train"] = pd.read_table("/home/pouramini/atomic/xIntent_en_train_no_dups.tsv")
@@ -257,14 +270,14 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
         "xWant":"<xWant>"
     }
     gen_token = "<gen>"
-    #%% dpp initialize
+    # %% dpp initialize
     is_main_process = (not ddp or local_rank == 0) 
     if ddp:
         torch.distributed.init_process_group(backend='nccl')
         torch.cuda.set_device(local_rank)
         print("launch process",local_rank)
         world_size = torch.distributed.get_world_size()
-    #%% tokenizer & model
+    # %% tokenizer & model
     if "mt5" in model_id:
         tokenizer = MT5TokenizerFast.from_pretrained(underlying_model_name)
         model = MT5ForConditionalGeneration.from_pretrained(underlying_model_name)
@@ -319,7 +332,7 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
         tokenizer.add_special_tokens({"additional_special_tokens":added_tokens})
         model.resize_token_embeddings(len(tokenizer))
         wrapped_models[rel] = PTuningWrapper(model,prompt_encoder,prompt_token_fn=get_prompt_token_fn(id_offset,length))
-    #%% Aggregate instances of queries and corresponding responses
+    # %% Aggregate instances of queries and corresponding responses
     # (str)split_name -> (dict) query -> (list) response 
     print("building query responses")
     atomic_query_responses = {}
@@ -355,7 +368,7 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
                 for response,_ in responses:
                     atomic_flattened[split_name][rel].append((query,response))
 
-    #%% Prepare training data
+# %% Prepare training data
 
     def collate_fn_for_flattened(batch):
         queries,responses = zip(*batch)
@@ -371,8 +384,8 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
     #     queries,references = zip(*batch)
     #     new_batch = tokenizer(queries,return_tensors='pt',padding='longest')
     #     return new_batch,references
-    #%% build dataloader
-    #%% dataloader and  parallel
+# %% build dataloader
+    # %% dataloader and  parallel
     node_batch_size = batch_size//accumulation_tiny_steps
     train_sampler = {}
     train_dataloader = {}
@@ -416,7 +429,7 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
     # ]
 
 
-    #%%
+    # %%
     for rel,wrapped_model in wrapped_models.items():
         optimizer_grouped_parameters = [
             {"params":[p for p in wrapped_model.parameters() if p.requires_grad]}
@@ -540,7 +553,7 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
             # end train while
         if is_main_process:
             pbar.close()
-    # %%
+# %%
 
     results = []
     #device = 'cuda:0'
@@ -626,6 +639,6 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
     df.to_csv(out, sep="\t", index=False)
     with open("/home/pouramini/dflist", "w") as dflist:
         print(model_name,"=",out, file=dflist)
-    # %%
+# %%
 if __name__ == "__main__":
     main()
