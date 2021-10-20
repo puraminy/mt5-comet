@@ -1,2 +1,0 @@
-Task,P0,Bleu_1,Bleu_2,Bleu_3,Bleu_4,METEOR,ROUGE_L,CIDEr,Exact_match,Exact_match_not_none,Mean sent BLEU score,Data rows,Records,TopK,T0,Date,Checkpoint,P1,P2
-gen.json,gen.json,0.464,0.248,0.132,0.076,0.287,0.485,0.65,0.345,0.09,0.057,21679.0,21679.0,1.0,gen.json,2021-06-06,5,results,mt5-comet
