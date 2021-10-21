@@ -665,7 +665,7 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
     pbar.close()
     with open(os.path.join(save_path,f"{val_set}_gen.json"),'w') as f:
         json.dump(results,f,ensure_ascii=False,indent=2)
-    # %%
+    # %% save dataframe %
     out = save_path + "/scored_" + model_name  + ".tsv" 
     print(out)
     print(len(df))
