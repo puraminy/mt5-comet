@@ -48,7 +48,7 @@ from tqdm import tqdm
 @click.option(
     "--iterations",
     "-i",
-    default=5000,
+    default=500,
     type=int,
     help=""
 )
@@ -73,13 +73,13 @@ from tqdm import tqdm
 )
 @click.option(
     "--qtemp",
-    default="{rel} {event} {ph}",
+    default="",
     type=str,
     help="template for query"
 )
 @click.option(
     "--anstemp",
-    default="{ph} {response} {end}",
+    default="",
     type=str,
     help="tempate for response"
 )
@@ -100,7 +100,7 @@ from tqdm import tqdm
 @click.option(
     "--num_generations",
     "-g",
-    default=0,
+    default=200,
     type=int,
     help=""
 )
@@ -116,7 +116,26 @@ from tqdm import tqdm
     is_flag=True,
     help="The languge of head and tails"
 )
-def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp, beams, ret_seq, num_generations, is_flax, en):
+@click.option(
+    "--ignore_blanks",
+    "-ib",
+    is_flag=True,
+    help="Ignore rows which have ___ in the input_text"
+)
+@click.option(
+    "--overwrite",
+    "-o",
+    is_flag=True,
+    help="overwrite output directory"
+)
+@click.option(
+    "--learning_rate",
+    "-lr",
+    default=0,
+    type=float,
+    help=""
+)
+def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp, beams, ret_seq, num_generations, is_flax, en, ignore_blanks, overwrite, learning_rate):
     local_rank = None
     # %%
     cfg = {}
@@ -124,7 +143,7 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
     old_vars.update(k for k in locals() if not k.startswith('_'))
     # %% some hyper-parameters
     if not model_id == "path":
-        underlying_model_name = f"/drive2/pretrained/mt5/hf/{model_id}/"
+        underlying_model_name = f"/home/pouramini/pret/{model_id}/"
     else:
         underlying_model_name = path
     if not Path(underlying_model_name).exists():
@@ -132,10 +151,18 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
 
     #underlying_model_name = "logs/mt5-small/prompt_length_3/last"
     if sup:
-        learning_rate = 0.0001 #6.25e-05
+        if qtemp == "": qtemp = "{event}"
+        if anstemp == "": anstemp = "{response}"
+        if learning_rate == 0: learning_rate = 0.0001 #6.25e-05
     else:
-        learning_rate = 0.01 #6.25e-05
+        if qtemp == "": qtemp = "{rel} {event} {ph}"
+        if anstemp == "": anstemp = "{ph} {response} {end}"
+        if learning_rate == 0: learning_rate = 0.01  #6.25e-05
     #iiiii
+    print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+    print("qtemp:", qtemp)
+    print("anstemp:", anstemp)
+    print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
     frozen_str = "_frozen" if frozen else "_UNfrozen"
     sup_str = "_SUP" if sup else "_UNsup"
     iter_str = "_" + str(iterations).replace("000","k")
@@ -149,14 +176,14 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
     weight_decay = 0.01
     batch_size = 16
     #% creating save folder
-    log_dir = '/drive2/pouramini/plogs/'
+    log_dir = 'plogs/'
     train_folder=split_col["train"]["input_text"] + "--" + split_col["train"]["target_text"]
     val_folder=split_col["validation"]["input_text"] + "--" + split_col["validation"]["target_text"]
     model_name = f"plength_{prompt_length}_lr_{learning_rate}{frozen_str}{sup_str}{iter_str}_{exp_id}"
     model_path = os.path.join(model_id,train_folder, val_folder, model_name)
     if model_id != "path":
         save_path= os.path.join(log_dir, model_path)
-        ans = ""
+        ans = "y" if overwrite else ""
         while Path(save_path).exists() and ans != "y":
             ans = input(f"The {save_path} already exists, do you want to overwrite it? (y/n/other(suffix):")
             if ans == "n":
@@ -201,17 +228,21 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
     cfg_vars = new_vars-old_vars
     cfg = {k:v for k,v in locals().items() if k in cfg_vars }
 # %% load atomic data
+    print("%%%%%%%%%%%%%%%%%%%%%%% CFG %%%%%%%%%%%%%%%%%%%%%%")
+    print(cfg)
 
     data_df = {}
     #data_df["train"] = pd.read_table("/home/pouramini/atomic/xIntent_en_train_no_dups.tsv")
     #data_df["validation"] = pd.read_table("/home/pouramini/atomic/xIntent_en_fa_validation_no_dups.tsv")
 
-    data_df["train"] = pd.read_table("../../data/xIntent_en_fa_train_no_dups.tsv")
-    data_df["validation"] = pd.read_table("../../data/xIntent_en_fa_validation_no_dups.tsv")
+    data_df["train"] = pd.read_table("/home/pouramini/atomic/xIntent_en_fa_train_no_dups.tsv")
+    data_df["validation"] = pd.read_table("/home/pouramini/atomic/xIntent_en_fa_validation_no_dups.tsv")
 
-    def my_load_dataset(split_data, split, target_text, input_text):
+    def my_load_dataset(split_data, split, target_text, input_text, ignore_blanks=False):
         data_split = {}
         split_data[target_text] = split_data[target_text].astype(str)
+        if ignore_blanks:
+            split_data = split_data[split_data["input_text"].str.contains('___')==False]
         for index, d in split_data.iterrows():
             rel = d["prefix"]
             if len(d[target_text])>0: 
@@ -255,7 +286,7 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
     atomic_dataset = {}
     for split, split_data in data_df.items():
         print("split:", split)
-        atomic_dataset[split] = my_load_dataset(split_data, split, split_col[split]["target_text"], split_col[split]["input_text"])
+        atomic_dataset[split] = my_load_dataset(split_data, split, split_col[split]["target_text"], split_col[split]["input_text"], ignore_blanks=ignore_blanks)
 
     placeholder_token = "<extra_id_0>"
     atomic_relation_mappings = {
@@ -559,15 +590,16 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
     #device = 'cuda:0'
     #model = model.to(device)
     val_set = "validation"
-    scorer_model = SentenceTransformer('paraphrase-MiniLM-L12-v2')
+    scorer_model = SentenceTransformer('/home/pouramini/pret/mm/paraphrase-multilingual-MiniLM-L12-v2/')
     #sss
     df = data_df[val_set]
     target = "target_text"
     df[target] = df[target].astype(str)
     df = df.groupby(['prefix','input_text'],as_index=False)[target].agg('<br />'.join)
     print("Scoring...")
-    if num_generations>0:
-        df = df.truncate(after=num_generations)
+    df["pred1_score"] = 0
+    df["pred_text1"] = ""
+    df["top"] = ""
 
     for rel in ["xIntent"]:
         sum_score = 0 
@@ -613,7 +645,7 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
             cond = (df['prefix'] == rel) & (df['input_text'] == query)
             df.loc[cond, "top"] = closest
             df.loc[cond, "pred_text1"] = pred_text
-            df.loc[cond, "pred1_score"] = "{:.4f}".format(top["score"])
+            df.loc[cond, "pred1_score"] = float("{:.4f}".format(top["score"]))
             cur_score = top["score"]
             sum_score += cur_score
             mean_score = "{:.4f}".format(sum_score / idx)
@@ -628,6 +660,7 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
                 "tails":tails,
             })
         # %%%%%%%%%%%%%%%%%%
+    df = df[df["pred1_score"] > 0]
     print("Results:", df["pred1_score"].mean())
     pbar.close()
     with open(os.path.join(save_path,f"{val_set}_gen.json"),'w') as f:
@@ -638,7 +671,7 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
     print(len(df))
     df.to_csv(out, sep="\t", index=False)
     with open("/home/pouramini/dflist", "w") as dflist:
-        print(model_name,"=",out, file=dflist)
+        print(f"{model_name}={out}", file=dflist)
 # %%
 if __name__ == "__main__":
     main()
