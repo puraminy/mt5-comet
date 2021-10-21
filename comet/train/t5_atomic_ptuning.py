@@ -135,7 +135,13 @@ from tqdm import tqdm
     type=float,
     help=""
 )
-def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp, beams, ret_seq, num_generations, is_flax, en, ignore_blanks, overwrite, learning_rate):
+@click.option(
+    "--wrap",
+    "-w",
+    is_flag=True,
+    help="Whether wrap model or not"
+)
+def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp, beams, ret_seq, num_generations, is_flax, en, ignore_blanks, overwrite, learning_rate, wrap):
     local_rank = None
     # %%
     cfg = {}
@@ -165,6 +171,7 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
     print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
     frozen_str = "_frozen" if frozen else "_UNfrozen"
     sup_str = "_SUP" if sup else "_UNsup"
+    wrap_str = "_Wrapped" if wrap else "_UNwrapped"
     iter_str = "_" + str(iterations).replace("000","k")
     prompt_length = 5
     split_col={"train":{}, "validation":{}}
@@ -179,7 +186,7 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
     log_dir = 'plogs/'
     train_folder=split_col["train"]["input_text"] + "--" + split_col["train"]["target_text"]
     val_folder=split_col["validation"]["input_text"] + "--" + split_col["validation"]["target_text"]
-    model_name = f"plength_{prompt_length}_lr_{learning_rate}{frozen_str}{sup_str}{iter_str}_{exp_id}"
+    model_name = f"plength_{prompt_length}_lr_{learning_rate}{frozen_str}{sup_str}{wrap_str}{iter_str}_{exp_id}"
     model_path = os.path.join(model_id,train_folder, val_folder, model_name)
     if model_id != "path":
         save_path= os.path.join(log_dir, model_path)
@@ -228,21 +235,38 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
     cfg_vars = new_vars-old_vars
     cfg = {k:v for k,v in locals().items() if k in cfg_vars }
 # %% load atomic data
-    print("%%%%%%%%%%%%%%%%%%%%%%% CFG %%%%%%%%%%%%%%%%%%%%%%")
-    print(cfg)
 
     data_df = {}
     #data_df["train"] = pd.read_table("/home/pouramini/atomic/xIntent_en_train_no_dups.tsv")
     #data_df["validation"] = pd.read_table("/home/pouramini/atomic/xIntent_en_fa_validation_no_dups.tsv")
+    train_df_path = "/home/pouramini/atomic/xIntent_en_fa_train_no_dups.tsv"
 
-    data_df["train"] = pd.read_table("/home/pouramini/atomic/xIntent_en_fa_train_no_dups.tsv")
-    data_df["validation"] = pd.read_table("/home/pouramini/atomic/xIntent_en_fa_validation_no_dups.tsv")
+    if Path("data/train_" + str(iterations) + ".tsv").exists():
+        print("***************** Loading ... saved data")
+        train_df_path= "data/train_" + str(iterations) + ".tsv" 
+        ignore_blanks = False
+    val_df_path = "/home/pouramini/atomic/xIntent_en_fa_validation_no_dups.tsv"
+    if Path("data/validation_" + str(num_generations) + ".tsv").exists():
+        print("***************** Loading ... saved validation data")
+        val_df_path= "data/validation_" + str(num_generations) + ".tsv"
+        ignore_blanks = False
 
-    def my_load_dataset(split_data, split, target_text, input_text, ignore_blanks=False):
+    data_df["train"] = pd.read_table(train_df_path)
+    data_df["validation"] = pd.read_table(val_df_path)
+
+    def my_load_dataset(split_data, split, target_text, input_text, num_rows=0, ignore_blanks=False):
         data_split = {}
         split_data[target_text] = split_data[target_text].astype(str)
         if ignore_blanks:
             split_data = split_data[split_data["input_text"].str.contains('___')==False]
+        if num_rows > 0:
+            print(len(split_data), " ? ", num_rows)
+            assert len(split_data) >= num_rows, "Not enough rows for " + str(num_rows)
+            split_data = split_data.head(num_rows)
+            Path("data").mkdir(exist_ok=True)
+            print(">>>>> Saving data")
+            split_data.to_csv("data/" + split + "_" + str(num_rows)+ ".tsv", sep="\t")
+        
         for index, d in split_data.iterrows():
             rel = d["prefix"]
             if len(d[target_text])>0: 
@@ -286,7 +310,8 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
     atomic_dataset = {}
     for split, split_data in data_df.items():
         print("split:", split)
-        atomic_dataset[split] = my_load_dataset(split_data, split, split_col[split]["target_text"], split_col[split]["input_text"], ignore_blanks=ignore_blanks)
+        num_rows = iterations if split == "train" else num_generations
+        atomic_dataset[split] = my_load_dataset(split_data, split, split_col[split]["target_text"], split_col[split]["input_text"], num_rows=num_rows, ignore_blanks=ignore_blanks)
 
     placeholder_token = "<extra_id_0>"
     atomic_relation_mappings = {
@@ -362,8 +387,11 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
         ]
         tokenizer.add_special_tokens({"additional_special_tokens":added_tokens})
         model.resize_token_embeddings(len(tokenizer))
-        wrapped_models[rel] = PTuningWrapper(model,prompt_encoder,prompt_token_fn=get_prompt_token_fn(id_offset,length))
-    # %% Aggregate instances of queries and corresponding responses
+        if wrap:
+            wrapped_models[rel] = PTuningWrapper(model,prompt_encoder,prompt_token_fn=get_prompt_token_fn(id_offset,length))
+        else:
+            wrapped_models[rel] = model
+        # %% Aggregate instances of queries and corresponding responses
     # (str)split_name -> (dict) query -> (list) response 
     print("building query responses")
     atomic_query_responses = {}
@@ -478,10 +506,11 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
                 if is_main_process and (step % cycle == 0 and step > 0): #validation
                     #print("start validating...")
                     with torch.no_grad():
-                        if ddp:
-                            wrapped_model.module.update_model_weight()
-                        else:
-                            wrapped_model.update_model_weight()
+                        if wrap:
+                            if ddp:
+                                wrapped_model.module.update_model_weight()
+                            else:
+                                wrapped_model.update_model_weight()
                         if frozen:
                             for p in model.parameters():
                                 p.requires_grad = False 
@@ -592,6 +621,12 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
     val_set = "validation"
     scorer_model = SentenceTransformer('/home/pouramini/pret/mm/paraphrase-multilingual-MiniLM-L12-v2/')
     #sss
+    if wrap:
+        with torch.no_grad():
+            if ddp:
+                wrapped_model.module.update_model_weight()
+            else:
+                wrapped_model.update_model_weight()
     df = data_df[val_set]
     target = "target_text"
     df[target] = df[target].astype(str)
@@ -604,12 +639,14 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
     for rel in ["xIntent"]:
         sum_score = 0 
         total = num_generations
-        if num_generations == 0:
-            total = len(atomic_query_responses[val_set][rel].items())
+        #if num_generations == 0:
+        total = min(num_generations, len(atomic_query_responses[val_set][rel].items()))
         pbar = tqdm(atomic_query_responses[val_set][rel].items(), total = total)
         for idx,(query,responses) in enumerate(pbar):
             if num_generations>0 and idx>= num_generations:
+                print("break at ", idx)
                 break
+
             hyps = tokenizer.batch_decode(
                             model.generate(**tokenizer(query, return_tensors='pt').to(device=device),**generation_params),
                             skip_special_tokens=True
@@ -650,7 +687,11 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
             sum_score += cur_score
             mean_score = "{:.4f}".format(sum_score / idx)
             #tqdm.write(f"Mean score:{mean_score}")
-            print(query, "\n" , pred_text, "\n", closest)
+            print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+            print(idx, "::",query)
+            print("Prediction:", pred_text)
+            print("Closest tail:", closest)
+            print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
             pbar.set_description(f"Mean score:{mean_score} cur score {cur_score:.2f}")
             pbar.update(1)
 
