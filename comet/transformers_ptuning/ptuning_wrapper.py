@@ -2,6 +2,7 @@
 #暂时没考虑encoder和decoder的tokenizer不同的情况，以后可以给decoder全套的prompt_token_fn
 
 import re
+from pathlib import Path
 import transformers
 import torch
 import torch.nn.functional as F
@@ -283,6 +284,11 @@ class PromptEncoder(torch.nn.Module):
     
     def dump_embedding(self,weight):
         raise NotImplementedError
+    def save(self, path):
+        raise NotImplementedError
+    def load(self, path):
+        raise NotImplementedError
+
 
 class EmbeddingPromptEncoder(PromptEncoder):
     def __init__(self,length,embedding_dim,id_offset) -> None:
@@ -318,6 +324,27 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
             torch.nn.ReLU(),
             torch.nn.Linear(embedding_dim, embedding_dim)
         )
+        # Print model's state_dict
+        print("LSTM model's state_dict:")
+        for param_tensor in self.lstm.state_dict():
+            print(param_tensor, "\t", self.lstm.state_dict()[param_tensor].size())
+        print("MLP model's state_dict:")
+        for param_tensor in self.mlp.state_dict():
+            print(param_tensor, "\t", self.mlp.state_dict()[param_tensor].size())
+    def save(self, path):
+        torch.save(self.lstm.state_dict(), path + "/lstm")
+        torch.save(self.mlp.state_dict(), path + "/mlp")
+    def load(self, path):
+        if Path(path + "/lstm").exists():
+            print("loading LSTM part")
+            self.lstm.load_state_dict(torch.load(path + "/lstm"))
+        #    self.lstm.eval()
+        if Path(path + "/mlp").exists():
+            print("loading MLP part")
+            self.mlp.load_state_dict(torch.load(path + "/mlp"))
+        #    self.mlp.eval()
+
+
     def forward(self,prompt_token_ids,prompt_ids=None):
         embeds = self.embedding(self.input_ids)
         x = self.lstm(embeds.unsqueeze(0))

@@ -141,18 +141,36 @@ from tqdm import tqdm
     is_flag=True,
     help="Whether wrap model or not"
 )
-def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp, beams, ret_seq, num_generations, is_flax, en, ignore_blanks, overwrite, learning_rate, wrap):
+@click.option(
+    "--prompt_path",
+    default="",
+    type=str,
+    help="Path to save prompt encoder"
+)
+@click.option(
+    "--plm_base_dir",
+    "-base",
+    default="",
+    type=str,
+    help="Base dir for pretrained models"
+)
+def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp, beams, ret_seq, num_generations, is_flax, en, ignore_blanks, overwrite, learning_rate, wrap, prompt_path):
     local_rank = None
+    if prompt_path:
+        Path(prompt_path).mkdir(exist_ok=True, parents=True)
     # %%
     cfg = {}
     old_vars = set()
     old_vars.update(k for k in locals() if not k.startswith('_'))
     # %% some hyper-parameters
     if not model_id == "path":
-        underlying_model_name = f"/home/pouramini/pret/{model_id}/"
+        underlying_model_name = f"{plm_base_dir}/{model_id}/"
     else:
         underlying_model_name = path
     if not Path(underlying_model_name).exists():
+        confirm = input(underlying_model_name + " doesn't exists, do you want to download it?")
+        if confirm != "y":
+            return
         underlying_model_name = model_id
 
     #underlying_model_name = "logs/mt5-small/prompt_length_3/last"
@@ -338,13 +356,13 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
         tokenizer = MT5TokenizerFast.from_pretrained(underlying_model_name)
         model = MT5ForConditionalGeneration.from_pretrained(underlying_model_name)
     else:
-        tokenizer = AutoTokenizer.from_pretrained(underlying_model_name)
+        tokenizer = T5TokenizerFast.from_pretrained(underlying_model_name)
         if is_flax:
             model = T5ForConditionalGeneration.from_pretrained(underlying_model_name, from_flax=True)
-            print("converting to ", underlying_model_name + "X")
+            print("converting to ", underlying_model_name[:-1] + "X")
 
-            model.save_pretrained(underlying_model_name + "X")
-            tokenizer.save_pretrained(underlying_model_name + "X")
+            model.save_pretrained(underlying_model_name[:-1] + "X")
+            tokenizer.save_pretrained(underlying_model_name[:-1] + "X")
             return
         else:
             model = T5ForConditionalGeneration.from_pretrained(underlying_model_name)
@@ -379,6 +397,8 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
         length = atomic_relation_prompt_lengths[rel]
         atomic_relation_mappings[rel] = " ".join(f"<{rel}_{i}>" for i in range(length))
         prompt_encoder = LSTMEmbeddingPromptEncoder(length,embedding_dim,id_offset)
+        if prompt_path:
+            prompt_encoder.load(prompt_path)
         added_tokens = [ 
             AddedToken(f"<{rel}_{i}>",lstrip=True,
                 rstrip=False)
@@ -621,12 +641,6 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
     val_set = "validation"
     scorer_model = SentenceTransformer('/home/pouramini/pret/mm/paraphrase-multilingual-MiniLM-L12-v2/')
     #sss
-    if wrap:
-        with torch.no_grad():
-            if ddp:
-                wrapped_model.module.update_model_weight()
-            else:
-                wrapped_model.update_model_weight()
     df = data_df[val_set]
     target = "target_text"
     df[target] = df[target].astype(str)
@@ -636,7 +650,17 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
     df["pred_text1"] = ""
     df["top"] = ""
 
-    for rel in ["xIntent"]:
+    for rel,wrapped_model in wrapped_models.items():
+        print(">>> saving prompt encoder")
+        if prompt_path:
+            wrapped_model.prompt_encoder.save(prompt_path)
+        if wrap:
+            with torch.no_grad():
+                if ddp:
+                    wrapped_model.module.update_model_weight()
+                else:
+                    wrapped_model.update_model_weight()
+        model.eval()
         sum_score = 0 
         total = num_generations
         #if num_generations == 0:
