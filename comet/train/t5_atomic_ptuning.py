@@ -154,7 +154,7 @@ from tqdm import tqdm
     type=str,
     help="Base dir for pretrained models"
 )
-def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp, beams, ret_seq, num_generations, is_flax, en, ignore_blanks, overwrite, learning_rate, wrap, prompt_path):
+def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp, beams, ret_seq, num_generations, is_flax, en, ignore_blanks, overwrite, learning_rate, wrap, prompt_path, plm_base_dir):
     local_rank = None
     if prompt_path:
         Path(prompt_path).mkdir(exist_ok=True, parents=True)
