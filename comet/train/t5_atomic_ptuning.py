@@ -150,7 +150,7 @@ from tqdm import tqdm
 @click.option(
     "--plm_base_dir",
     "-base",
-    default="",
+    default="/home/pouramini/pret",
     type=str,
     help="Base dir for pretrained models"
 )
@@ -639,7 +639,7 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
     #device = 'cuda:0'
     #model = model.to(device)
     val_set = "validation"
-    scorer_model = SentenceTransformer('/home/pouramini/pret/mm/paraphrase-multilingual-MiniLM-L12-v2/')
+    scorer_model = SentenceTransformer(f'{plm_base_dir}/mm/paraphrase-multilingual-MiniLM-L12-v2/')
     #sss
     df = data_df[val_set]
     target = "target_text"
