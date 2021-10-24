@@ -44,6 +44,8 @@ def make_report(path, fid, df, metrics, match_list, cur_report=""):
     row2 = {}
     row3 = {}
     row4 = {}
+    pred_text1 = match_list[0]
+    target_text = match_list[1]
 
     for field in match_list:
         df[field] = df[field].astype(str)
@@ -57,8 +59,6 @@ def make_report(path, fid, df, metrics, match_list, cur_report=""):
         dpath = f"{path}/all_{fid}.tsv"
         df.to_csv(dpath, sep="\t")
 
-        pred_text1 = match_list[0]
-        target_text = match_list[1]
 
         total_items = len(df)
         unique_items = df["input_text"].nunique()

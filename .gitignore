@@ -16,6 +16,7 @@ logs/*
 **/**/logs/*
 **/**/plogs/*
 **/**/*logs/*
+**/**/*prompts/*
 **/**/*data/*
 # Byte-compiled / optimized / DLL files
 __pycache__/

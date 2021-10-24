@@ -143,6 +143,7 @@ from tqdm import tqdm
 )
 @click.option(
     "--prompt_path",
+    "-pp",
     default="",
     type=str,
     help="Path to save prompt encoder"
@@ -154,10 +155,14 @@ from tqdm import tqdm
     type=str,
     help="Base dir for pretrained models"
 )
-def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp, beams, ret_seq, num_generations, is_flax, en, ignore_blanks, overwrite, learning_rate, wrap, prompt_path, plm_base_dir):
+@click.option(
+    "--append",
+    "-a",
+    is_flag=True,
+    help="Whether append results to old ones or not"
+)
+def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp, beams, ret_seq, num_generations, is_flax, en, ignore_blanks, overwrite, learning_rate, wrap, prompt_path, plm_base_dir, append):
     local_rank = None
-    if prompt_path:
-        Path(prompt_path).mkdir(exist_ok=True, parents=True)
     # %%
     cfg = {}
     old_vars = set()
@@ -191,6 +196,10 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
     sup_str = "_SUP" if sup else "_UNsup"
     wrap_str = "_Wrapped" if wrap else "_UNwrapped"
     iter_str = "_" + str(iterations).replace("000","k")
+    if not prompt_path and wrap:
+        prompt_path = "prompts/" + ("en_" if en else "fa_")  + model_id +  iter_str
+        print("Prompt path:", prompt_path)
+    Path(prompt_path).mkdir(exist_ok=True, parents=True)
     prompt_length = 5
     split_col={"train":{}, "validation":{}}
     split_col["train"]["input_text"]="input_text" if en else "input_text_fa"
@@ -245,10 +254,6 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
         "xWant":prompt_length
     }
     # %%
-    atomic_relation_prompt_lengths = {
-        "xIntent":prompt_length,
-    }
-    # %%
     new_vars = set(k for k in locals() if not k.startswith('_'))
     cfg_vars = new_vars-old_vars
     cfg = {k:v for k,v in locals().items() if k in cfg_vars }
@@ -258,6 +263,7 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
     #data_df["train"] = pd.read_table("/home/pouramini/atomic/xIntent_en_train_no_dups.tsv")
     #data_df["validation"] = pd.read_table("/home/pouramini/atomic/xIntent_en_fa_validation_no_dups.tsv")
     train_df_path = "/home/pouramini/atomic/xIntent_en_fa_train_no_dups.tsv"
+    train_df_path = "/home/pouramini/atomic/en"
 
     if Path("data/train_" + str(iterations) + ".tsv").exists():
         print("***************** Loading ... saved data")
@@ -269,21 +275,21 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
         val_df_path= "data/validation_" + str(num_generations) + ".tsv"
         ignore_blanks = False
 
-    data_df["train"] = pd.read_table(train_df_path)
-    data_df["validation"] = pd.read_table(val_df_path)
+    data_df["train"] = pd.read_table(train_df_path) #, index_col=[0])
+    data_df["validation"] = pd.read_table(val_df_path) #, index_col=[0])
 
     def my_load_dataset(split_data, split, target_text, input_text, num_rows=0, ignore_blanks=False):
         data_split = {}
         split_data[target_text] = split_data[target_text].astype(str)
-        if ignore_blanks:
+        if ignore_blanks: # and len(split_data) > num_rows:
             split_data = split_data[split_data["input_text"].str.contains('___')==False]
-        if num_rows > 0:
+        if num_rows > 0 and len(split_data) > num_rows:
             print(len(split_data), " ? ", num_rows)
-            assert len(split_data) >= num_rows, "Not enough rows for " + str(num_rows)
+            assert len(split_data) > num_rows, "Not enough rows for " + str(num_rows)
             split_data = split_data.head(num_rows)
             Path("data").mkdir(exist_ok=True)
             print(">>>>> Saving data")
-            split_data.to_csv("data/" + split + "_" + str(num_rows)+ ".tsv", sep="\t")
+            split_data.to_csv("data/" + split + "_" + str(num_rows)+ ".tsv", sep="\t", index=False)
         
         for index, d in split_data.iterrows():
             rel = d["prefix"]
@@ -427,6 +433,9 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
                     #query = f"{rel_tokens} {d['event']}" #Change this line to modify the encoder input
                     query = qtemp.format(event=d['event'], rel=rel_tokens, ph=placeholder_token) #Change this line to modify the encoder input
                     # query = f"{d['event']} {rel_tokens}" #Change this line to modify the encoder input
+                    query = query.replace("PersonX", "شخصی")
+                    query = query.replace("PersonY", "فرد دیگری")
+                    query = query.replace("PersonZ", "شخص سومی")
                     if query not in atomic_query_responses[split_name][rel]:
                         atomic_query_responses[split_name][rel][query] = []
                     for response in d[rel]:
@@ -642,13 +651,15 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
     scorer_model = SentenceTransformer(f'{plm_base_dir}/mm/paraphrase-multilingual-MiniLM-L12-v2/')
     #sss
     df = data_df[val_set]
-    target = "target_text"
+    inp = split_col[val_set]["input_text"]
+    target = split_col[val_set]["target_text"]
     df[target] = df[target].astype(str)
-    df = df.groupby(['prefix','input_text'],as_index=False)[target].agg('<br />'.join)
+    #df = df.groupby(['prefix','input_text'],as_index=False)[target].agg({"target_text":'<br />'.join})
     print("Scoring...")
-    df["pred1_score"] = 0
+    df["pred1_score"] = 0.0
     df["pred_text1"] = ""
     df["top"] = ""
+    df.sort_values(by=["prefix", "input_text"], inplace=True)
 
     for rel,wrapped_model in wrapped_models.items():
         print(">>> saving prompt encoder")
@@ -664,19 +675,31 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
         sum_score = 0 
         total = num_generations
         #if num_generations == 0:
-        total = min(num_generations, len(atomic_query_responses[val_set][rel].items()))
-        pbar = tqdm(atomic_query_responses[val_set][rel].items(), total = total)
-        for idx,(query,responses) in enumerate(pbar):
+        total = min(num_generations, len(df))
+        pbar = tqdm(df.iterrows(), total = total)
+        ii = 0
+        old_input = ""
+        max_score = 0
+        for idx,row in pbar:
             if num_generations>0 and idx>= num_generations:
                 print("break at ", idx)
                 break
 
+            rel_tokens = atomic_relation_mappings[rel]
+            #query = f"{rel_tokens} {d['event']}" #Change this line to modify the encoder input
+            query = qtemp.format(event=row[inp], rel=rel_tokens, ph=placeholder_token) #Change this line to modify the encoder input
+            # query = f"{d['event']} {rel_tokens}" #Change this line to modify the encoder input
+            query = query.replace("PersonX", "شخصی")
+            query = query.replace("PersonY", "فرد دیگری")
+            query = query.replace("PersonZ", "شخص سومی")
             hyps = tokenizer.batch_decode(
                             model.generate(**tokenizer(query, return_tensors='pt').to(device=device),**generation_params),
                             skip_special_tokens=True
                         )
             query = re.sub(r'<.*?>','',query)
-            tails = [x[1] for x in responses]
+            #tails = row[target].split("<br />")
+            tails = [row[target]]
+            #tails = [x[1] for x in responses]
   
             sents1 = tails
             sents2 = hyps
@@ -703,20 +726,29 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
             top = pairs[0]
             pred_text = str(sents2[top["index"][1]])
             closest = str(sents1[top["index"][0]])
-            cond = (df['prefix'] == rel) & (df['input_text'] == query)
-            df.loc[cond, "top"] = closest
-            df.loc[cond, "pred_text1"] = pred_text
-            df.loc[cond, "pred1_score"] = float("{:.4f}".format(top["score"]))
+            #cond = (df['prefix'] == rel) & (df[inp] == query)
+            df.at[idx, "top"] = closest
+            df.at[idx, "pred_text1"] = pred_text
             cur_score = top["score"]
-            sum_score += cur_score
-            mean_score = "{:.4f}".format(sum_score / idx)
+            df.at[idx, "pred1_score"] = float("{:.2f}".format(cur_score))
+            print("")
+            if row["input_text"] != old_input:
+                old_input = row["input_text"]
+                sum_score += (max_score if max_score > 0 else cur_score)
+                max_score = cur_score
+                print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+                ii += 1
+            elif cur_score > max_score:
+                max_score = cur_score
+                print("======================================================")
+
+            mean_score = "{:.4f}".format(sum_score / ii)
             #tqdm.write(f"Mean score:{mean_score}")
-            print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
-            print(idx, "::",query)
+            print(ii, "::",query)
             print("Prediction:", pred_text)
             print("Closest tail:", closest)
-            print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
-            pbar.set_description(f"Mean score:{mean_score} cur score {cur_score:.2f}")
+            print("------------------------------------------------------")
+            pbar.set_description(f"Mean score:{mean_score} cur score {cur_score:.2f} max score:{max_score:.2f}")
             pbar.update(1)
 
             results.append({
@@ -726,16 +758,27 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
             })
         # %%%%%%%%%%%%%%%%%%
     df = df[df["pred1_score"] > 0]
-    print("Results:", df["pred1_score"].mean())
     pbar.close()
     with open(os.path.join(save_path,f"{val_set}_gen.json"),'w') as f:
         json.dump(results,f,ensure_ascii=False,indent=2)
     # %% save dataframe %
-    out = save_path + "/scored_" + model_name  + ".tsv" 
+    score_col = "pred1_score"
+    col2 = "target_text" 
+    df = df.sort_values(score_col, ascending=False).\
+      drop_duplicates(['prefix','input_text']).\
+        rename(columns={col2:'top'}).\
+          merge(df.groupby(['prefix','input_text'],as_index=False)[col2].agg('<br />'.join))
+    print("Results:", df["pred1_score"].mean())
+    df_path = (save_path if save_path.startswith("/") else path + "/" + save_path)  
+    out = df_path + "/scored_" + model_name  + ".tsv" 
     print(out)
     print(len(df))
+    print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+    print("qtemp:", qtemp)
+    print("anstemp:", anstemp)
+    print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
     df.to_csv(out, sep="\t", index=False)
-    with open("/home/pouramini/dflist", "w") as dflist:
+    with open("/home/pouramini/dflist", "a" if append else "w") as dflist:
         print(f"{model_name}={out}", file=dflist)
 # %%
 if __name__ == "__main__":

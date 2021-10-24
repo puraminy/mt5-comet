@@ -325,12 +325,12 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
             torch.nn.Linear(embedding_dim, embedding_dim)
         )
         # Print model's state_dict
-        print("LSTM model's state_dict:")
-        for param_tensor in self.lstm.state_dict():
-            print(param_tensor, "\t", self.lstm.state_dict()[param_tensor].size())
-        print("MLP model's state_dict:")
-        for param_tensor in self.mlp.state_dict():
-            print(param_tensor, "\t", self.mlp.state_dict()[param_tensor].size())
+        #print("LSTM model's state_dict:")
+        #for param_tensor in self.lstm.state_dict():
+        #    print(param_tensor, "\t", self.lstm.state_dict()[param_tensor].size())
+        #print("MLP model's state_dict:")
+        #for param_tensor in self.mlp.state_dict():
+        #    print(param_tensor, "\t", self.mlp.state_dict()[param_tensor].size())
     def save(self, path):
         torch.save(self.lstm.state_dict(), path + "/lstm")
         torch.save(self.mlp.state_dict(), path + "/mlp")
