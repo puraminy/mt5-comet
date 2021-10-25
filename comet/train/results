@@ -1,0 +1,63 @@
+######################## parsT5300X #################
+# parsT5300X_en_plength_5_lr_0.01_frozen_UNsup_Wrapped_50_01
+# ************************************************
+Rouge: 0.31013029162214056
+Bert Score: 0.5505555555555557
+labels_count: {'contradiction': 3, 'entailment': 88, 'neutral': 9}
+Distinct preds: 6
+'qtemp': {rel} {event} {ph}
+'anstemp': {ph} {response} {end}
+######################## t5-base #################
+t5-base_en_plength_5_lr_0.01_frozen_UNsup_Wrapped_50_01
+# ************************************************
+Rouge: 0.3387457106641903
+Bert Score: 0.5435
+labels_count: {'contradiction': 19, 'entailment': 49, 'neutral': 181}
+Distinct preds: 18
+'qtemp': {rel} {event} {ph}
+'anstemp': {ph} {response} {end}
+######################## t5-base #################
+t5-base_en_plength_5_lr_0.01_frozen_UNsup_Wrapped_50_01
+# ************************************************
+Rouge: 0.31165814714971163
+Bert Score: 0.561276595744681
+labels_count: {'contradiction': 6, 'entailment': 26, 'neutral': 68}
+Distinct preds: 12
+'qtemp': {rel} {event} {ph}
+'anstemp': {ph} {response} {end}
+######################## t5-base #################
+t5-base_en_plength_5_lr_0.01_frozen_UNsup_Wrapped_50_01
+# ************************************************
+Rouge: 0.29897797418344124
+Bert Score: 0.5368085106382979
+labels_count: {'contradiction': 17, 'entailment': 25, 'neutral': 58}
+Distinct preds: 31
+'qtemp': {rel} {event} {ph}
+'anstemp': {ph} {response} {end}
+######################## t5-base #################
+t5-base_en_plength_5_lr_0.01_frozen_UNsup_Wrapped_50_01
+# ************************************************
+Rouge: 0.3121685616228295
+Bert Score: 0.5654347826086955
+labels_count: {'contradiction': 16, 'entailment': 28, 'neutral': 55}
+Distinct preds: 33
+'qtemp': {rel} {event} {ph}
+'anstemp': {ph} {response} {end}
+######################## t5-base #################
+t5-base_en_plength_5_lr_0.01_frozen_UNsup_Wrapped_100_01
+# ************************************************
+Rouge: 0.3460864598067456
+Bert Score: 0.5948936170212766
+labels_count: {'contradiction': 9, 'entailment': 31, 'neutral': 60}
+Distinct preds: 26
+'qtemp': {rel} {event} {ph}
+'anstemp': {ph} {response} {end}
+######################## t5-base #################
+t5-base_en_plength_5_lr_0.01_frozen_UNsup_Wrapped_100_01
+# ************************************************
+Rouge: 0.34259443352513413
+Bert Score: 0.6006382978723405
+labels_count: {'contradiction': 10, 'entailment': 27, 'neutral': 63}
+Distinct preds: 25
+'qtemp': {rel} {event} {ph}
+'anstemp': {ph} {response} {end}

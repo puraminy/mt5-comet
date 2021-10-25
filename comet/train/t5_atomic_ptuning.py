@@ -14,6 +14,7 @@
 # %% load libraries
 
 from sentence_transformers import SentenceTransformer, util
+from sentence_transformers import CrossEncoder
 from transformers import (
     T5ForConditionalGeneration, T5TokenizerFast, AdamW, AddedToken,
     MT5ForConditionalGeneration, MT5TokenizerFast,
@@ -99,8 +100,8 @@ from tqdm import tqdm
 )
 @click.option(
     "--num_generations",
-    "-g",
-    default=200,
+    "-ng",
+    default=100,
     type=int,
     help=""
 )
@@ -156,12 +157,38 @@ from tqdm import tqdm
     help="Base dir for pretrained models"
 )
 @click.option(
-    "--append",
-    "-a",
+    "--clear",
+    "-c",
     is_flag=True,
-    help="Whether append results to old ones or not"
+    help="Whether append results to old ones or clear results files"
 )
-def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp, beams, ret_seq, num_generations, is_flax, en, ignore_blanks, overwrite, learning_rate, wrap, prompt_path, plm_base_dir, append):
+@click.option(
+    "--epochs",
+    "-e",
+    default=1,
+    type=int,
+    help=""
+)
+@click.option(
+    "--prompt_length",
+    "-pl",
+    default=5,
+    type=int,
+    help=""
+)
+@click.option(
+    "--train_df_path",
+    default= "/home/pouramini/atomic/xIntent_en_fa_train_no_dups.tsv",
+    type=str,
+    help=""
+)
+@click.option(
+    "--val_df_path",
+    default= "/home/pouramini/atomic/xIntent_en_fa_validation_no_dups.tsv",
+    type=str,
+    help=""
+)
+def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp, beams, ret_seq, num_generations, is_flax, en, ignore_blanks, overwrite, learning_rate, wrap, prompt_path, plm_base_dir, clear, epochs, prompt_length, train_df_path, val_df_path):
     local_rank = None
     # %%
     cfg = {}
@@ -200,7 +227,6 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
         prompt_path = "prompts/" + ("en_" if en else "fa_")  + model_id +  iter_str
         print("Prompt path:", prompt_path)
     Path(prompt_path).mkdir(exist_ok=True, parents=True)
-    prompt_length = 5
     split_col={"train":{}, "validation":{}}
     split_col["train"]["input_text"]="input_text" if en else "input_text_fa"
     split_col["train"]["target_text"]="target_text" if en else "target_text_fa"
@@ -209,11 +235,12 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
     warm_up_steps = 0.002*iterations
     weight_decay = 0.01
     batch_size = 16
+    lang = "en" if en else "fa"
     #% creating save folder
     log_dir = 'plogs/'
     train_folder=split_col["train"]["input_text"] + "--" + split_col["train"]["target_text"]
     val_folder=split_col["validation"]["input_text"] + "--" + split_col["validation"]["target_text"]
-    model_name = f"plength_{prompt_length}_lr_{learning_rate}{frozen_str}{sup_str}{wrap_str}{iter_str}_{exp_id}"
+    model_name = f"{model_id}_{lang}_plength_{prompt_length}_lr_{learning_rate}{frozen_str}{sup_str}{wrap_str}{iter_str}_{exp_id}"
     model_path = os.path.join(model_id,train_folder, val_folder, model_name)
     if model_id != "path":
         save_path= os.path.join(log_dir, model_path)
@@ -254,6 +281,10 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
         "xWant":prompt_length
     }
     # %%
+    atomic_relation_prompt_lengths = {
+        "xIntent":prompt_length,
+    }
+    # %%
     new_vars = set(k for k in locals() if not k.startswith('_'))
     cfg_vars = new_vars-old_vars
     cfg = {k:v for k,v in locals().items() if k in cfg_vars }
@@ -262,14 +293,11 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
     data_df = {}
     #data_df["train"] = pd.read_table("/home/pouramini/atomic/xIntent_en_train_no_dups.tsv")
     #data_df["validation"] = pd.read_table("/home/pouramini/atomic/xIntent_en_fa_validation_no_dups.tsv")
-    train_df_path = "/home/pouramini/atomic/xIntent_en_fa_train_no_dups.tsv"
-    train_df_path = "/home/pouramini/atomic/en"
-
     if Path("data/train_" + str(iterations) + ".tsv").exists():
         print("***************** Loading ... saved data")
         train_df_path= "data/train_" + str(iterations) + ".tsv" 
         ignore_blanks = False
-    val_df_path = "/home/pouramini/atomic/xIntent_en_fa_validation_no_dups.tsv"
+
     if Path("data/validation_" + str(num_generations) + ".tsv").exists():
         print("***************** Loading ... saved validation data")
         val_df_path= "data/validation_" + str(num_generations) + ".tsv"
@@ -302,6 +330,25 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
                 data_split[event][rel].append(d[target_text])
                 #didn't convert ___ to <blank>
                 #didn't normalize to lowercase
+        return list(data_split.values())
+
+
+    def my_load_dataset_2(split_df, split, target_text, input_text, ignore_blanks=False):
+        data_split = {}
+        split_df[target_text] = split_df[target_text].astype(str)
+        if ignore_blanks: # and len(split_df) > num_rows:
+            split_df = split_df[split_df["input_text"].str.contains('___')==False]
+        for index, row in split_df.iterrows():
+            rel = row["prefix"]
+            if len(row[target_text])>0: 
+                event = row[input_text]
+                if event not in data_split:
+                    data_split[event] = {"event":event, 'split':split}
+                if not rel in data_split[event]:
+                    data_split[event][rel] = []
+                data_split[event][rel].append(row[target_text])
+            #didn't convert ___ to <blank>
+            #didn't normalize to lowercase
         return list(data_split.values())
 
     def load_atomic_dataset(path):
@@ -422,23 +469,20 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
     print("building query responses")
     atomic_query_responses = {}
     # ttt
-    for split_name,split_data in atomic_dataset.items():
+    for split_name,split_df in atomic_dataset.items():
         atomic_query_responses[split_name] = {}
-        for d in split_data:
+        for row in split_df:
             for rel in atomic_relation_mappings:
                 if rel not in atomic_query_responses[split_name]:
                     atomic_query_responses[split_name][rel] = {}
-                if len(d[rel])>0: 
+                if len(row[rel])>0: 
                     rel_tokens = atomic_relation_mappings[rel]
-                    #query = f"{rel_tokens} {d['event']}" #Change this line to modify the encoder input
-                    query = qtemp.format(event=d['event'], rel=rel_tokens, ph=placeholder_token) #Change this line to modify the encoder input
-                    # query = f"{d['event']} {rel_tokens}" #Change this line to modify the encoder input
-                    query = query.replace("PersonX", "شخصی")
-                    query = query.replace("PersonY", "فرد دیگری")
-                    query = query.replace("PersonZ", "شخص سومی")
+                    #query = f"{rel_tokens} {row['event']}" #Change this line to modify the encoder input
+                    query = qtemp.format(event=row['event'], rel=rel_tokens, ph=placeholder_token) #Change this line to modify the encoder input
+                    # query = f"{row['event']} {rel_tokens}" #Change this line to modify the encoder input
                     if query not in atomic_query_responses[split_name][rel]:
                         atomic_query_responses[split_name][rel][query] = []
-                    for response in d[rel]:
+                    for response in row[rel]:
                         answer = anstemp.format(response=response, rel=rel_tokens, ph=placeholder_token, end="<extra_id_1>")
                         atomic_query_responses[split_name][rel][query].append((answer,response))
                             #Change this line to modify the decoder input
@@ -529,117 +573,122 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
         best_dev_loss = 1e10
         train_iter = iter(train_dataloader[rel])
         if is_main_process:
-            pbar = tqdm(total=iterations,dynamic_ncols=True,desc=rel)
-        while step <= iterations:
-            try:
-                if is_main_process and (step % cycle == 0 and step > 0): #validation
-                    #print("start validating...")
-                    with torch.no_grad():
-                        if wrap:
-                            if ddp:
-                                wrapped_model.module.update_model_weight()
-                            else:
-                                wrapped_model.update_model_weight()
-                        if frozen:
-                            for p in model.parameters():
-                                p.requires_grad = False 
-                        model.eval()
-                        pbar.set_description(f'validating...{rel}')
-                        dev_allset_micro_loss = 0.
-                        dev_token_loss = 0.
-                        dev_token_count = 0
-                        dev_sample_loss = 0. #avg on sample
-                        dev_sample_count = 0
-                        for batch in tqdm(dev_dataloader[rel],desc=f'validating ...',leave=False):
-                            if dev_sample_count>=validation_size:
-                                break
-                            batch = {k:v.to(device=device) for k,v in batch.items()}
-                            result = model(**batch)
-                            # logits = clip_logits(result['logits'])
-                            logits = result['logits']
-                            loss = torch.nn.functional.cross_entropy(
-                                logits.reshape(-1,logits.size(2)),
-                                batch['labels'].reshape(-1,),
-                                reduction='none'
-                            ).reshape(logits.size(0),-1)
-                            labels_mask = (batch['labels'] != -100) 
-                            dev_token_loss += loss.sum().item()
-                            dev_token_count += labels_mask.sum().item()
-                            dev_sample_loss += (loss.sum(dim=-1)/labels_mask.sum(dim=-1)).sum().item()
-                            dev_sample_count += logits.size(0)
-                            del result
-                            del loss
-                            del labels_mask
-                        dev_micro_avg_loss = dev_token_loss/dev_token_count
-                        dev_macro_avg_loss = dev_sample_loss/dev_sample_count
-                        sw.add_scalar(f'dev/{rel}/micro_avg_loss',dev_micro_avg_loss,step)
-                        sw.add_scalar(f'dev/{rel}/macro_avg_loss',dev_macro_avg_loss,step)
-                        if dev_micro_avg_loss < best_dev_loss:
-                            best_dev_loss = dev_micro_avg_loss
-                            model.save_pretrained(serialization_dir)
-                        #ggg
-                        if step == iterations:
-                            generation_results = \
-                            "|Queries|Generation Results| Target |\n"\
-                            "|-|-|-|\n"
-                            for i,(query,responses) in enumerate(tqdm(atomic_query_responses['validation'][rel].items())):
-                            #for i,key in enumerate(tqdm(atomic_query_responses['validation'][rel])):
-                                if i==validation_num_generation:
+            pbar = tqdm(total=iterations*epochs,dynamic_ncols=True,desc=rel)
+        # wwww
+        for epoch in range(epochs):
+            step = 0
+            while step <= iterations:
+                try:
+                    if is_main_process and (step % cycle == 0 and step > 0): #validation
+                        #print("start validating...")
+                        with torch.no_grad():
+                            if wrap:
+                                if ddp:
+                                    wrapped_model.module.update_model_weight()
+                                else:
+                                    wrapped_model.update_model_weight()
+                            if frozen:
+                                for p in model.parameters():
+                                    p.requires_grad = False 
+                            model.eval()
+                            pbar.set_description(f'validating...{rel}')
+                            dev_allset_micro_loss = 0.
+                            dev_token_loss = 0.
+                            dev_token_count = 0
+                            dev_sample_loss = 0. #avg on sample
+                            dev_sample_count = 0
+                            for batch in tqdm(dev_dataloader[rel],desc=f'validating ...',leave=False):
+                                if dev_sample_count>=validation_size:
                                     break
-                                results = tokenizer.batch_decode(
-                                    model.generate(**tokenizer(query, return_tensors='pt').to(device=device),**generation_params),
-                                    skip_special_tokens=True
-                                )
-                                generation_results+=f"|`{query}`|`{str(results)}`|`{str(responses)}`|\n"
-                            sw.add_text(f'dev/{rel}/generation_samples',generation_results,step)
-                # end validation
-                if step > 4000 and frozen and not done:
-                    print("unfreezing the model")
-                    done = True
-                    for p in model.parameters():
-                        p.requires_grad = True # Unfreezing
-                if step > 4000 and not frozen and not done:
-                    print("freezing the model")
-                    done = True
-                    for p in model.parameters():
-                        p.requires_grad = False # freezing
-                model.train()
-                optimizer.zero_grad()
-                batch_loss = torch.tensor(0.)
-                for tiny_step in range(accumulation_tiny_steps):
-                    try:
-                        batch = next(train_iter)
-                    except StopIteration:
-                        train_iter = iter(train_dataloader[rel])
-                        batch = next(train_iter)
-                    batch = {k:v.to(device=device) for k,v in batch.items()}
-                    result = wrapped_model(**batch)
-                    loss = result['loss']/accumulation_tiny_steps
-                    # logits = clip_logits(result['logits'])
-                    # loss = torch.nn.functional.cross_entropy(
-                    #     logits.reshape(-1,logits.size(2)),
-                    #     batch['labels'].reshape(-1,)
-                    # )/accumulation_tiny_steps
-                    loss.backward()
-                    batch_loss += loss.item()
-                optimizer.step()
-                scheduler.step()
-                step+=1
-                if ddp:
-                    # loss = loss.detach()
-                    losses = [torch.zeros_like(batch_loss) for i in range(world_size)]
-                    torch.distributed.all_gather(tensor_list=losses,tensor=batch_loss)
-                    batch_loss = torch.stack(losses).mean()
-                if is_main_process:
-                    pbar.set_description(f'training...{rel}')
-                    pbar.update()
-                    sw.add_scalar(f'train/{rel}/loss',batch_loss.item(),global_step=step)
-                del result
-                del loss
-            except KeyboardInterrupt:
-                print("exiting while ...")
-                break
+                                batch = {k:v.to(device=device) for k,v in batch.items()}
+                                result = model(**batch)
+                                # logits = clip_logits(result['logits'])
+                                logits = result['logits']
+                                loss = torch.nn.functional.cross_entropy(
+                                    logits.reshape(-1,logits.size(2)),
+                                    batch['labels'].reshape(-1,),
+                                    reduction='none'
+                                ).reshape(logits.size(0),-1)
+                                labels_mask = (batch['labels'] != -100) 
+                                dev_token_loss += loss.sum().item()
+                                dev_token_count += labels_mask.sum().item()
+                                dev_sample_loss += (loss.sum(dim=-1)/labels_mask.sum(dim=-1)).sum().item()
+                                dev_sample_count += logits.size(0)
+                                del result
+                                del loss
+                                del labels_mask
+                            dev_micro_avg_loss = dev_token_loss/dev_token_count
+                            dev_macro_avg_loss = dev_sample_loss/dev_sample_count
+                            sw.add_scalar(f'dev/{rel}/micro_avg_loss',dev_micro_avg_loss,step)
+                            sw.add_scalar(f'dev/{rel}/macro_avg_loss',dev_macro_avg_loss,step)
+                            if dev_micro_avg_loss < best_dev_loss:
+                                best_dev_loss = dev_micro_avg_loss
+                                model.save_pretrained(serialization_dir)
+                            #ggg
+                            if step == iterations:
+                                generation_results = \
+                                "|Queries|Generation Results| Target |\n"\
+                                "|-|-|-|\n"
+                                for i,(query,responses) in enumerate(tqdm(atomic_query_responses['validation'][rel].items())):
+                                #for i,key in enumerate(tqdm(atomic_query_responses['validation'][rel])):
+                                    if i==validation_num_generation:
+                                        break
+                                    results = tokenizer.batch_decode(
+                                        model.generate(**tokenizer(query, return_tensors='pt').to(device=device),**generation_params),
+                                        skip_special_tokens=True
+                                    )
+                                    generation_results+=f"|`{query}`|`{str(results)}`|`{str(responses)}`|\n"
+                                sw.add_text(f'dev/{rel}/generation_samples',generation_results,step)
+                    # end validation
+                    if step > 4000 and frozen and not done:
+                        print("unfreezing the model")
+                        done = True
+                        for p in model.parameters():
+                            p.requires_grad = True # Unfreezing
+                    if step > 4000 and not frozen and not done:
+                        print("freezing the model")
+                        done = True
+                        for p in model.parameters():
+                            p.requires_grad = False # freezing
+                    model.train()
+                    optimizer.zero_grad()
+                    batch_loss = torch.tensor(0.)
+                    for tiny_step in range(accumulation_tiny_steps):
+                        try:
+                            batch = next(train_iter)
+                        except StopIteration:
+                            train_iter = iter(train_dataloader[rel])
+                            batch = next(train_iter)
+                        batch = {k:v.to(device=device) for k,v in batch.items()}
+                        result = wrapped_model(**batch)
+                        loss = result['loss']/accumulation_tiny_steps
+                        # logits = clip_logits(result['logits'])
+                        # loss = torch.nn.functional.cross_entropy(
+                        #     logits.reshape(-1,logits.size(2)),
+                        #     batch['labels'].reshape(-1,)
+                        # )/accumulation_tiny_steps
+                        loss.backward()
+                        batch_loss += loss.item()
+                    optimizer.step()
+                    scheduler.step()
+                    step+=1
+                    if ddp:
+                        # loss = loss.detach()
+                        losses = [torch.zeros_like(batch_loss) for i in range(world_size)]
+                        torch.distributed.all_gather(tensor_list=losses,tensor=batch_loss)
+                        batch_loss = torch.stack(losses).mean()
+                    if is_main_process:
+                        pbar.set_description(f'training...{rel}')
+                        pbar.update()
+                        sw.add_scalar(f'train/{rel}/loss',batch_loss.item(),global_step=step)
+                    del result
+                    del loss
+                except KeyboardInterrupt:
+                    print("exiting while ...")
+                    break
             # end train while
+        # end epochs loop
+        # eww
         if is_main_process:
             pbar.close()
 # %%
@@ -650,14 +699,21 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
     val_set = "validation"
     scorer_model = SentenceTransformer(f'{plm_base_dir}/mm/paraphrase-multilingual-MiniLM-L12-v2/')
     #sss
+    nli_model = CrossEncoder('/home/pouramini/pret/mm/nli-roberta-base/')
+    label_mapping = ['contradiction', 'entailment', 'neutral']
+    labels_count = {}
+    for l in label_mapping:
+        labels_count[l] = 0
     df = data_df[val_set]
     inp = split_col[val_set]["input_text"]
     target = split_col[val_set]["target_text"]
+    print("Len Final Df:", len(df))
     df[target] = df[target].astype(str)
     #df = df.groupby(['prefix','input_text'],as_index=False)[target].agg({"target_text":'<br />'.join})
     print("Scoring...")
     df["pred1_score"] = 0.0
     df["pred_text1"] = ""
+    df["nli_group"] = ""
     df["top"] = ""
     df.sort_values(by=["prefix", "input_text"], inplace=True)
 
@@ -676,22 +732,21 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
         total = num_generations
         #if num_generations == 0:
         total = min(num_generations, len(df))
-        pbar = tqdm(df.iterrows(), total = total)
         ii = 0
         old_input = ""
         max_score = 0
+        jj =0
+        pbar = tqdm(df.iterrows(), total = total)
         for idx,row in pbar:
-            if num_generations>0 and idx>= num_generations:
-                print("break at ", idx)
+            if num_generations>0 and jj >= num_generations:
+                print("break at ", jj)
                 break
+            jj += 1
 
             rel_tokens = atomic_relation_mappings[rel]
-            #query = f"{rel_tokens} {d['event']}" #Change this line to modify the encoder input
+            #query = f"{rel_tokens} {row['event']}" #Change this line to modify the encoder input
             query = qtemp.format(event=row[inp], rel=rel_tokens, ph=placeholder_token) #Change this line to modify the encoder input
-            # query = f"{d['event']} {rel_tokens}" #Change this line to modify the encoder input
-            query = query.replace("PersonX", "شخصی")
-            query = query.replace("PersonY", "فرد دیگری")
-            query = query.replace("PersonZ", "شخص سومی")
+            # query = f"{row['event']} {rel_tokens}" #Change this line to modify the encoder input
             hyps = tokenizer.batch_decode(
                             model.generate(**tokenizer(query, return_tensors='pt').to(device=device),**generation_params),
                             skip_special_tokens=True
@@ -726,7 +781,13 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
             top = pairs[0]
             pred_text = str(sents2[top["index"][1]])
             closest = str(sents1[top["index"][0]])
+            pair = (closest, pred_text)
+            nli_scores = nli_model.predict(pair)
+            _max  = nli_scores.argmax()
+            label = label_mapping[_max]
+            labels_count[label] += 1
             #cond = (df['prefix'] == rel) & (df[inp] == query)
+            df.at[idx, "nli_group"] = label
             df.at[idx, "top"] = closest
             df.at[idx, "pred_text1"] = pred_text
             cur_score = top["score"]
@@ -747,9 +808,9 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
             print(ii, "::",query)
             print("Prediction:", pred_text)
             print("Closest tail:", closest)
+            print("Label:", label)
             print("------------------------------------------------------")
             pbar.set_description(f"Mean score:{mean_score} cur score {cur_score:.2f} max score:{max_score:.2f}")
-            pbar.update(1)
 
             results.append({
                 "head":query,
@@ -759,8 +820,23 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
         # %%%%%%%%%%%%%%%%%%
     df = df[df["pred1_score"] > 0]
     pbar.close()
-    with open(os.path.join(save_path,f"{val_set}_gen.json"),'w') as f:
+    genfile = os.path.join(save_path,f"{val_set}_gen.json")
+    with open(genfile,'w') as f:
         json.dump(results,f,ensure_ascii=False,indent=2)
+
+    from comet.evaluation.rouge.rouge import Rouge
+    scorer = Rouge()
+    resfile = os.path.join(save_path,f"{val_set}_results.json")
+    refs = {r['head']:r['tails'] for r in results}
+    hyps = {r['head']:r['gens'] for r in results}
+    score,_ = scorer.compute_score(hyps, refs)
+    res_out = open("results", "w" if clear else "a")
+    print(f"######################## {model_id} #################")
+    print(f"######################## {model_id} #################", file=res_out)
+    print(model_name, file=res_out)
+    print("# ************************************************", file=res_out)
+    print("Rouge:", score)
+    print("Rouge:", score, file = res_out)
     # %% save dataframe %
     score_col = "pred1_score"
     col2 = "target_text" 
@@ -768,18 +844,33 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
       drop_duplicates(['prefix','input_text']).\
         rename(columns={col2:'top'}).\
           merge(df.groupby(['prefix','input_text'],as_index=False)[col2].agg('<br />'.join))
-    print("Results:", df["pred1_score"].mean())
+    print("Bert Score:", df["pred1_score"].mean())
+    print("Bert Score:", df["pred1_score"].mean(), file=res_out)
+    print("labels_count:", labels_count)
+    print("labels_count:", labels_count, file=res_out)
+
+    pred_counts = df['pred_text1'].unique()
+
+    print("Distinct preds:", len(pred_counts))
+    print("Distinct preds:", len(pred_counts), file=res_out)
     df_path = (save_path if save_path.startswith("/") else path + "/" + save_path)  
     out = df_path + "/scored_" + model_name  + ".tsv" 
+    out2 = "data/" + model_name  + ".tsv" 
     print(out)
     print(len(df))
+
     print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
-    print("qtemp:", qtemp)
-    print("anstemp:", anstemp)
+    print("'qtemp':", qtemp)
+    print("'qtemp':", qtemp, file=res_out)
+    print("'anstemp':", anstemp)
+    print("'anstemp':", anstemp, file=res_out)
     print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
     df.to_csv(out, sep="\t", index=False)
-    with open("/home/pouramini/dflist", "a" if append else "w") as dflist:
+    df.to_csv(out2, sep="\t", index=False)
+    with open("/home/pouramini/dflist", "w" if clear else "a") as dflist:
         print(f"{model_name}={out}", file=dflist)
+    res_out.close()
+
 # %%
 if __name__ == "__main__":
     main()
