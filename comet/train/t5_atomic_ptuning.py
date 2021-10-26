@@ -47,7 +47,7 @@ from tqdm import tqdm
     help="The current path (it is set by system)"
 )
 @click.option(
-    "--iterations",
+    "--inp_samples",
     "-i",
     default=500,
     type=int,
@@ -178,35 +178,48 @@ from tqdm import tqdm
 )
 @click.option(
     "--train_df_path",
+    "-tn",
     default= "/home/pouramini/atomic/xIntent_en_fa_train_no_dups.tsv",
     type=str,
     help=""
 )
 @click.option(
     "--val_df_path",
+    "-vl",
     default= "/home/pouramini/atomic/xIntent_en_fa_validation_no_dups.tsv",
     type=str,
     help=""
 )
-def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp, beams, ret_seq, num_generations, is_flax, en, ignore_blanks, overwrite, learning_rate, wrap, prompt_path, plm_base_dir, clear, epochs, prompt_length, train_df_path, val_df_path):
+@click.option(
+    "--val_set",  
+    "-vs",
+    default="validation",
+    type=str,
+    help=""
+)
+def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp, beams, ret_seq, num_generations, is_flax, en, ignore_blanks, overwrite, learning_rate, wrap, prompt_path, plm_base_dir, clear, epochs, prompt_length, train_df_path, val_df_path, val_set):
     local_rank = None
     # %%
     cfg = {}
     old_vars = set()
     old_vars.update(k for k in locals() if not k.startswith('_'))
-    # %% some hyper-parameters
-    if not model_id == "path":
-        underlying_model_name = f"{plm_base_dir}/{model_id}/"
-    else:
+    if val_set == "train":
+        # generate output samples for each input_sample in training set
+        num_generations = inp_samples
+
+    if model_id == "path":
+        # load the model from the current directory
         underlying_model_name = path
+    else:
+        underlying_model_name = f"{plm_base_dir}/{model_id}/"
+
     if not Path(underlying_model_name).exists():
         confirm = input(underlying_model_name + " doesn't exists, do you want to download it?")
         if confirm != "y":
             return
         underlying_model_name = model_id
 
-    #underlying_model_name = "logs/mt5-small/prompt_length_3/last"
-    if sup:
+    if sup: #supervised training
         if qtemp == "": qtemp = "{event}"
         if anstemp == "": anstemp = "{response}"
         if learning_rate == 0: learning_rate = 0.0001 #6.25e-05
@@ -214,33 +227,43 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
         if qtemp == "": qtemp = "{rel} {event} {ph}"
         if anstemp == "": anstemp = "{ph} {response} {end}"
         if learning_rate == 0: learning_rate = 0.01  #6.25e-05
-    #iiiii
     print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
     print("qtemp:", qtemp)
     print("anstemp:", anstemp)
     print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+    #iiiii create output name based on some parameters
     frozen_str = "_frozen" if frozen else "_UNfrozen"
     sup_str = "_SUP" if sup else "_UNsup"
     wrap_str = "_Wrapped" if wrap else "_UNwrapped"
-    iter_str = "_" + str(iterations).replace("000","k")
+    inps_num_str = "_" + str(inp_samples).replace("000","k")
     if not prompt_path and wrap:
-        prompt_path = "prompts/" + ("en_" if en else "fa_")  + model_id +  iter_str
+        prompt_path = "prompts/" + ("en_" if en else "fa_")  + model_id +  inps_num_str
         print("Prompt path:", prompt_path)
     Path(prompt_path).mkdir(exist_ok=True, parents=True)
+    Path("data/").mkdir(exist_ok=True, parents=True)
     split_col={"train":{}, "validation":{}}
-    split_col["train"]["input_text"]="input_text" if en else "input_text_fa"
-    split_col["train"]["target_text"]="target_text" if en else "target_text_fa"
-    split_col["validation"]["input_text"]="input_text" if en else "input_text_fa"
-    split_col["validation"]["target_text"]="target_text" if en else "target_text_fa"
-    warm_up_steps = 0.002*iterations
+    lang = "en" if en else "fa"
+    if lang == "en": #langauge is english
+        split_col["train"]["input_text"]="input_text" 
+        split_col["train"]["targets"]=["target_text", "pred_text1"]
+        split_col["validation"]["input_text"]="input_text"
+        split_col["validation"]["targets"]=["target_text"] 
+    else:
+        split_col["train"]["input_text"]="input_text_fa" 
+        split_col["train"]["targets"]=["target_text_fa", "pred_text1"]
+        split_col["validation"]["input_text"]="input_text_fa"
+        split_col["validation"]["targets"]=["target_text_fa"] 
     weight_decay = 0.01
     batch_size = 16
-    lang = "en" if en else "fa"
     #% creating save folder
     log_dir = 'plogs/'
-    train_folder=split_col["train"]["input_text"] + "--" + split_col["train"]["target_text"]
-    val_folder=split_col["validation"]["input_text"] + "--" + split_col["validation"]["target_text"]
-    model_name = f"{model_id}_{lang}_plength_{prompt_length}_lr_{learning_rate}{frozen_str}{sup_str}{wrap_str}{iter_str}_{exp_id}"
+    train_folder=split_col["train"]["input_text"] + "--"
+    for x in split_col["train"]["targets"]:
+        train_folder += "=" + x
+    val_folder=split_col["validation"]["input_text"] + "--"
+    for x in split_col["validation"]["targets"]:
+        val_folder += "=" + x
+    model_name = f"{model_id}_{lang}_plength_{prompt_length}_lr_{learning_rate}{frozen_str}{sup_str}{wrap_str}{inps_num_str}_{exp_id}"
     model_path = os.path.join(model_id,train_folder, val_folder, model_name)
     if model_id != "path":
         save_path= os.path.join(log_dir, model_path)
@@ -256,7 +279,7 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
     #Cut down memory usage by accumulating tiny steps for multiple backwards;
     #Should be divided exactly by batch_size
     accumulation_tiny_steps = 1 
-    shuffle = True
+    shuffle = False
     shuffle_evaluation=False
     validation_size = 1000
     validation_num_generation = 10
@@ -291,98 +314,54 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
 # %% load atomic data
 
     data_df = {}
-    #data_df["train"] = pd.read_table("/home/pouramini/atomic/xIntent_en_train_no_dups.tsv")
-    #data_df["validation"] = pd.read_table("/home/pouramini/atomic/xIntent_en_fa_validation_no_dups.tsv")
-    if Path("data/train_" + str(iterations) + ".tsv").exists():
-        print("***************** Loading ... saved data")
-        train_df_path= "data/train_" + str(iterations) + ".tsv" 
-        ignore_blanks = False
-
-    if Path("data/validation_" + str(num_generations) + ".tsv").exists():
-        print("***************** Loading ... saved validation data")
-        val_df_path= "data/validation_" + str(num_generations) + ".tsv"
-        ignore_blanks = False
+    if not train_df_path:
+        data_df_path = "/home/pouramini/atomic/xIntent_en_train_no_dups.tsv"
+    if not val_df_path:
+        data_df_path = "/home/pouramini/atomic/xIntent_en_fa_validation_no_dups.tsv"
 
     data_df["train"] = pd.read_table(train_df_path) #, index_col=[0])
     data_df["validation"] = pd.read_table(val_df_path) #, index_col=[0])
-
-    def my_load_dataset(split_data, split, target_text, input_text, num_rows=0, ignore_blanks=False):
+    print("Train:", len(data_df["train"]))
+    print("Val:", len(data_df["validation"]))
+   #mmmmm
+    def my_load_dataset(split_df, split, targets, input_text, inp_samples=0, ignore_blanks=False):
         data_split = {}
-        split_data[target_text] = split_data[target_text].astype(str)
-        if ignore_blanks: # and len(split_data) > num_rows:
-            split_data = split_data[split_data["input_text"].str.contains('___')==False]
-        if num_rows > 0 and len(split_data) > num_rows:
-            print(len(split_data), " ? ", num_rows)
-            assert len(split_data) > num_rows, "Not enough rows for " + str(num_rows)
-            split_data = split_data.head(num_rows)
-            Path("data").mkdir(exist_ok=True)
-            print(">>>>> Saving data")
-            split_data.to_csv("data/" + split + "_" + str(num_rows)+ ".tsv", sep="\t", index=False)
-        
-        for index, d in split_data.iterrows():
-            rel = d["prefix"]
-            if len(d[target_text])>0: 
-                event = d[input_text]
-                if event not in data_split:
-                    data_split[event] = {"event":event, 'split':split}
-                if not rel in data_split[event]:
-                    data_split[event][rel] = []
-                data_split[event][rel].append(d[target_text])
-                #didn't convert ___ to <blank>
-                #didn't normalize to lowercase
-        return list(data_split.values())
-
-
-    def my_load_dataset_2(split_df, split, target_text, input_text, ignore_blanks=False):
-        data_split = {}
-        split_df[target_text] = split_df[target_text].astype(str)
+        if inp_samples == 0: inp_samples = len(split_df)
+        ii = 0
+        split_df = split_df.sort_values(by="input_text")
+        for col in targets:
+            if col in split_df:
+                split_df[col] = split_df[col].astype(str)
         if ignore_blanks: # and len(split_df) > num_rows:
             split_df = split_df[split_df["input_text"].str.contains('___')==False]
         for index, row in split_df.iterrows():
             rel = row["prefix"]
-            if len(row[target_text])>0: 
-                event = row[input_text]
-                if event not in data_split:
-                    data_split[event] = {"event":event, 'split':split}
-                if not rel in data_split[event]:
-                    data_split[event][rel] = []
-                data_split[event][rel].append(row[target_text])
+            event = row[input_text]
+            if event not in data_split:
+                ii += 1
+                if ii > inp_samples:
+                    print("input samples:", ii)
+                    break
+                data_split[event] = {"event":event, 'split':split}
+            if not rel in data_split[event]:
+                data_split[event][rel] = []
+            for col in targets:
+                if (col in row and 
+                        len(row[col])>0 and 
+                        not row[col] in data_split[event][rel]):
+                    data_split[event][rel].append(row[col])
             #didn't convert ___ to <blank>
             #didn't normalize to lowercase
         return list(data_split.values())
 
-    def load_atomic_dataset(path):
-        data={}
-        with open(path) as source_file:
-            source_reader = csv.reader(source_file)
-            # Read first line to get column name
-            source_line = next(source_reader)
-            event_colname = source_line[0]
-            categories_colname = source_line[1:10]
-            prefix_colname = source_line[10]
-            split_colname = source_line[11]
-            for source_line in source_reader:
-                # get every column
-                event = source_line[0]
-                annotationss = [
-                    json.loads(raw_anns) for raw_anns in source_line[1:10]]
-                event_prefix = source_line[10]
-                event_split = source_line[11]
-                if event_split not in data:
-                    data[event_split] = []
-                d = {"event":event}
-                d.update({category:annotations for 
-                    category,annotations in zip(categories_colname,annotationss)})
-                data[event_split].append(d)
-        return data
-
     # atomic_dataset = load_atomic_dataset(dataset_path)
     #atomic_dataset = load_dataset("atomic")
+    #emmm
     atomic_dataset = {}
     for split, split_data in data_df.items():
         print("split:", split)
-        num_rows = iterations if split == "train" else num_generations
-        atomic_dataset[split] = my_load_dataset(split_data, split, split_col[split]["target_text"], split_col[split]["input_text"], num_rows=num_rows, ignore_blanks=ignore_blanks)
+        atomic_dataset[split] = my_load_dataset(split_data, split, split_col[split]["targets"], split_col[split]["input_text"], inp_samples=inp_samples, ignore_blanks=ignore_blanks)
+
 
     placeholder_token = "<extra_id_0>"
     atomic_relation_mappings = {
@@ -492,6 +471,7 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
     #flatten
     print("building flattened pairs")
     atomic_flattened = {}
+    kk = 0
     for split_name,rel_queries_responses in atomic_query_responses.items():
         atomic_flattened[split_name] = {}
         for rel,queries_responses in rel_queries_responses.items():
@@ -499,7 +479,10 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
             for query,responses in queries_responses.items():
                 for response,_ in responses:
                     atomic_flattened[split_name][rel].append((query,response))
+                    kk +=1
 
+    iterations = kk 
+    print("len flattened:", len(atomic_flattened["train"]), "iterations:", kk)
 # %% Prepare training data
 
     def collate_fn_for_flattened(batch):
@@ -562,6 +545,7 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
 
 
     # %%
+    warm_up_steps = 0.002*iterations
     for rel,wrapped_model in wrapped_models.items():
         optimizer_grouped_parameters = [
             {"params":[p for p in wrapped_model.parameters() if p.requires_grad]}
@@ -696,7 +680,6 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
     results = []
     #device = 'cuda:0'
     #model = model.to(device)
-    val_set = "validation"
     scorer_model = SentenceTransformer(f'{plm_base_dir}/mm/paraphrase-multilingual-MiniLM-L12-v2/')
     #sss
     nli_model = CrossEncoder('/home/pouramini/pret/mm/nli-roberta-base/')
@@ -706,7 +689,7 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
         labels_count[l] = 0
     df = data_df[val_set]
     inp = split_col[val_set]["input_text"]
-    target = split_col[val_set]["target_text"]
+    target = split_col[val_set]["targets"][0]
     print("Len Final Df:", len(df))
     df[target] = df[target].astype(str)
     #df = df.groupby(['prefix','input_text'],as_index=False)[target].agg({"target_text":'<br />'.join})
@@ -736,10 +719,10 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
         old_input = ""
         max_score = 0
         jj =0
-        pbar = tqdm(df.iterrows(), total = total)
-        for idx,row in pbar:
-            if num_generations>0 and jj >= num_generations:
-                print("break at ", jj)
+        pbar = tqdm(total = total)
+        for idx,row in df.iterrows():
+            if num_generations>0 and ii >= num_generations:
+                print("break at ", ii)
                 break
             jj += 1
 
@@ -799,6 +782,7 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
                 max_score = cur_score
                 print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
                 ii += 1
+                pbar.update(1)
             elif cur_score > max_score:
                 max_score = cur_score
                 print("======================================================")
@@ -831,15 +815,21 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
     hyps = {r['head']:r['gens'] for r in results}
     score,_ = scorer.compute_score(hyps, refs)
     res_out = open("results", "w" if clear else "a")
-    print(f"######################## {model_id} #################")
-    print(f"######################## {model_id} #################", file=res_out)
+    print(f"###################################### {model_id} #################")
+    print(f"###################################### {model_id} #################", file=res_out)
     print(model_name, file=res_out)
-    print("# ************************************************", file=res_out)
+    print("val_set:", val_set, file=res_out)
+    print("train file:", train_df_path, file=res_out)
+    print("traing samples:", inp_samples, " unique inputs, ",  iterations, " total samples",file=res_out)
+    print("# *****************************************************************", file=res_out)
     print("Rouge:", score)
     print("Rouge:", score, file = res_out)
     # %% save dataframe %
     score_col = "pred1_score"
     col2 = "target_text" 
+    out1 = "data/" + val_set + "_" + model_name  + ".tsv" 
+    df.to_csv(out1, sep="\t", index=False)
+
     df = df.sort_values(score_col, ascending=False).\
       drop_duplicates(['prefix','input_text']).\
         rename(columns={col2:'top'}).\
@@ -855,7 +845,6 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
     print("Distinct preds:", len(pred_counts), file=res_out)
     df_path = (save_path if save_path.startswith("/") else path + "/" + save_path)  
     out = df_path + "/scored_" + model_name  + ".tsv" 
-    out2 = "data/" + model_name  + ".tsv" 
     print(out)
     print(len(df))
 
@@ -866,7 +855,6 @@ def main(model_id, exp_id, path, iterations, cycle, frozen, sup, qtemp, anstemp,
     print("'anstemp':", anstemp, file=res_out)
     print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
     df.to_csv(out, sep="\t", index=False)
-    df.to_csv(out2, sep="\t", index=False)
     with open("/home/pouramini/dflist", "w" if clear else "a") as dflist:
         print(f"{model_name}={out}", file=dflist)
     res_out.close()

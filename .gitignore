@@ -15,6 +15,7 @@ runs/*
 logs/*
 **/**/logs/*
 **/**/plogs/*
+**/**/.rouge/*
 **/**/*logs/*
 **/**/*prompts/*
 **/**/*data/*

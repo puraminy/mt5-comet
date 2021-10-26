@@ -61,3 +61,156 @@ labels_count: {'contradiction': 10, 'entailment': 27, 'neutral': 63}
 Distinct preds: 25
 'qtemp': {rel} {event} {ph}
 'anstemp': {ph} {response} {end}
+######################## t5-base #################
+t5-base_en_plength_5_lr_0.01_frozen_UNsup_Wrapped_100_01
+# ************************************************
+Rouge: 0.35776995246347437
+Bert Score: 0.6399999999999999
+labels_count: {'contradiction': 7, 'entailment': 40, 'neutral': 53}
+Distinct preds: 25
+'qtemp': {rel} {event} {ph}
+'anstemp': {ph} {response} {end}
+######################## t5-base #################
+t5-base_en_plength_5_lr_0.01_frozen_UNsup_Wrapped_300_01
+# ************************************************
+Rouge: 0.3652878241411555
+Bert Score: 0.632894736842105
+labels_count: {'contradiction': 8, 'entailment': 46, 'neutral': 46}
+Distinct preds: 25
+'qtemp': {rel} {event} {ph}
+'anstemp': {ph} {response} {end}
+######################## t5-base #################
+t5-base_en_plength_5_lr_0.01_frozen_UNsup_Wrapped_300_01
+# ************************************************
+Rouge: 0.3798258030214625
+Bert Score: 0.6402631578947366
+labels_count: {'contradiction': 6, 'entailment': 43, 'neutral': 51}
+Distinct preds: 24
+'qtemp': {rel} {event} {ph}
+'anstemp': {ph} {response} {end}
+######################## t5-base #################
+t5-base_en_plength_5_lr_0.01_frozen_UNsup_Wrapped_300_01
+# ************************************************
+Rouge: 0.22020899880558661
+Bert Score: 0.6486842105263159
+labels_count: {'contradiction': 10, 'entailment': 49, 'neutral': 41}
+Distinct preds: 35
+'qtemp': {rel} {event} {ph}
+'anstemp': {ph} {response} {end}
+######################## t5-base #################
+t5-base_en_plength_5_lr_0.01_frozen_UNsup_Wrapped_300_01
+# ************************************************
+Rouge: 0.3749709601858217
+Bert Score: 0.6584210526315788
+labels_count: {'contradiction': 6, 'entailment': 45, 'neutral': 49}
+Distinct preds: 24
+'qtemp': {rel} {event} {ph}
+'anstemp': {ph} {response} {end}
+######################## t5-base #################
+t5-base_en_plength_5_lr_0.01_frozen_UNsup_Wrapped_300_01
+# ************************************************
+Rouge: 0.4040161186237947
+Bert Score: 0.7373684210526316
+labels_count: {'contradiction': 12, 'entailment': 57, 'neutral': 31}
+Distinct preds: 34
+'qtemp': {rel} {event} {ph}
+'anstemp': {ph} {response} {end}
+######################## t5-base #################
+t5-base_en_plength_5_lr_0.01_frozen_UNsup_Wrapped_300_02
+# ************************************************
+Rouge: 0.41633462789842884
+Bert Score: 0.7436842105263158
+labels_count: {'contradiction': 7, 'entailment': 61, 'neutral': 32}
+Distinct preds: 35
+'qtemp': {rel} {event} {ph}
+'anstemp': {ph} {response} {end}
+######################## t5-base #################
+t5-base_en_plength_5_lr_0.01_frozen_UNsup_Wrapped_300_01
+# ************************************************
+Rouge: 0.46359199474714574
+Bert Score: 0.7189333333333329
+labels_count: {'contradiction': 62, 'entailment': 438, 'neutral': 244}
+Distinct preds: 151
+'qtemp': {rel} {event} {ph}
+'anstemp': {ph} {response} {end}
+######################## t5-base #################
+t5-base_en_plength_5_lr_0.01_frozen_UNsup_Wrapped_300_01
+# ************************************************
+Rouge: 0.40195569285746274
+Bert Score: 0.6661000000000005
+labels_count: {'contradiction': 99, 'entailment': 385, 'neutral': 314}
+Distinct preds: 170
+'qtemp': {rel} {event} {ph}
+'anstemp': {ph} {response} {end}
+######################## t5-base #################
+t5-base_en_plength_5_lr_0.01_frozen_UNsup_Wrapped_300_01
+# ************************************************
+Rouge: 0.3787132596785979
+Bert Score: 0.6587000000000004
+labels_count: {'contradiction': 99, 'entailment': 421, 'neutral': 278}
+Distinct preds: 145
+'qtemp': {rel} {event} {ph}
+'anstemp': {ph} {response} {end}
+######################## t5-base #################
+t5-base_en_plength_5_lr_0.01_frozen_UNsup_Wrapped_100_01
+# ************************************************
+Rouge: 0.3921902744902253
+Bert Score: 0.6613333333333338
+labels_count: {'contradiction': 112, 'entailment': 372, 'neutral': 314}
+Distinct preds: 147
+'qtemp': {rel} {event} {ph}
+'anstemp': {ph} {response} {end}
+######################## t5-base #################
+t5-base_en_plength_5_lr_0.01_frozen_UNsup_Wrapped_100_orig
+# ************************************************
+Rouge: 0.38853364921367756
+Bert Score: 0.6481333333333338
+labels_count: {'contradiction': 107, 'entailment': 340, 'neutral': 351}
+Distinct preds: 145
+'qtemp': {rel} {event} {ph}
+'anstemp': {ph} {response} {end}
+######################## t5-base #################
+t5-base_en_plength_5_lr_0.01_frozen_UNsup_Wrapped_3k_01
+# ************************************************
+Rouge: 0.43583405197528896
+Bert Score: 0.7159966666666662
+labels_count: {'contradiction': 1116, 'entailment': 4240, 'neutral': 2953}
+Distinct preds: 940
+'qtemp': {rel} {event} {ph}
+'anstemp': {ph} {response} {end}
+######################## t5-base #################
+t5-base_en_plength_5_lr_0.01_frozen_UNsup_Wrapped_100_01
+# ************************************************
+Rouge: 0.385168747394807
+Bert Score: 0.6812999999999999
+labels_count: {'contradiction': 19, 'entailment': 115, 'neutral': 115}
+Distinct preds: 59
+'qtemp': {rel} {event} {ph}
+'anstemp': {ph} {response} {end}
+######################## t5-base #################
+t5-base_en_plength_5_lr_0.01_frozen_UNsup_Wrapped_100_300
+# ************************************************
+Rouge: 0.3770692479836652
+Bert Score: 0.6715999999999999
+labels_count: {'contradiction': 24, 'entailment': 115, 'neutral': 110}
+Distinct preds: 61
+'qtemp': {rel} {event} {ph}
+'anstemp': {ph} {response} {end}
+######################## t5-base #################
+t5-base_en_plength_5_lr_0.01_frozen_UNsup_Wrapped_100_300
+# ************************************************
+Rouge: 0.3885957128182891
+Bert Score: 0.6636999999999997
+labels_count: {'contradiction': 22, 'entailment': 112, 'neutral': 115}
+Distinct preds: 61
+'qtemp': {rel} {event} {ph}
+'anstemp': {ph} {response} {end}
+######################## t5-base #################
+t5-base_en_plength_5_lr_0.01_frozen_UNsup_Wrapped_100_300
+# ************************************************
+Rouge: 0.39094410876924074
+Bert Score: 0.6761999999999998
+labels_count: {'contradiction': 25, 'entailment': 114, 'neutral': 110}
+Distinct preds: 61
+'qtemp': {rel} {event} {ph}
+'anstemp': {ph} {response} {end}
