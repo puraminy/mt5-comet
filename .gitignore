@@ -16,6 +16,7 @@ logs/*
 **/**/logs/*
 **/**/plogs/*
 **/**/.rouge/*
+**/**/*sels/*
 **/**/*logs/*
 **/**/*prompts/*
 **/**/*data/*
