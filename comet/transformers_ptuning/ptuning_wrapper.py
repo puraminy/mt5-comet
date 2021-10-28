@@ -50,8 +50,10 @@ class PTuningWrapper(torch.nn.Module):
         self.prompt_encoder = prompt_encoder
         self.decoder_prompt_encoder = decoder_prompt_encoder
         self.replacing_token_id = replacing_token_id
+        print("REP id:", replacing_token_id)
         if self.decoder_prompt_encoder:
             self.decoder_original_embedding = model.decoder.embed_tokens
+            print("DECODER original embd:", self.decoder_original_embedding)
         if prompt_token_fn is not None:
             assert prompt_token_id is None and prompt_token_ids is None, \
                 "Use one of prompt_token_fn, prompt_token_id, prompt_token_ids"
@@ -66,6 +68,7 @@ class PTuningWrapper(torch.nn.Module):
             self.prompt_token_id = prompt_token_id
             self.prompt_token_fn = lambda t:(t==prompt_token_id)
         else:
+            print("ITTTTTTTTTT doesn't come here")
             # self.original_embedding_size = self.model.get_input_embeddings()\
             #     .num_embeddings
             self.original_embedding_size = self.model.config.vocab_size
@@ -81,8 +84,9 @@ class PTuningWrapper(torch.nn.Module):
             if self.replacing_token_id is not None:
                 input_ids_[prompt_masks]=self.replacing_token_id
             inputs_embeds = self.original_embedding(input_ids_)
-            prompt_embeds = self.prompt_encoder(input_ids[prompt_masks],\
-                prompt_ids).to(device=inputs_embeds.device)
+            if self.prompt_encoder:
+                prompt_embeds = self.prompt_encoder(input_ids[prompt_masks],\
+                    prompt_ids).to(device=inputs_embeds.device)
             #不能用masked_select，这个是创建新的tensor，修改它不会改原先的变量
             #应该用masked_scatter，或者indexput
             # inputs_embeds.masked_scatter_(prompt_masks.unsqueeze(-1),
@@ -94,7 +98,7 @@ class PTuningWrapper(torch.nn.Module):
             # inputs_embeds[prompt_masks]=prompt_embeds.repeat(inputs_embeds.\
             #     shape[0],1)
             #把repeat交给prompt_encoder进行处理
-            inputs_embeds[prompt_masks]=prompt_embeds
+                inputs_embeds[prompt_masks]=prompt_embeds
         else:
             inputs_embeds = self.original_embedding(input_ids)
         
@@ -102,22 +106,38 @@ class PTuningWrapper(torch.nn.Module):
             if self.decoder_prompt_encoder is not None:
                 decoder_prompt_masks = self.prompt_token_fn(decoder_input_ids)
                 if decoder_prompt_masks.any():
+                    #print("decoder prompt mask:", decoder_prompt_masks)
+                    #print("decoder mask kkkkkkkkkkkkkkkkkk", self.replacing_token_id)
                     decoder_input_ids_ = decoder_input_ids.clone()
+                    #print("decoder input_ids:", decoder_input_ids_)
                     if self.replacing_token_id is not None:
                         decoder_input_ids_[decoder_prompt_masks] = \
                             self.replacing_token_id
+                    #print("after decoder_input_ids:", decoder_input_ids_)
                     decoder_inputs_embeds = self.decoder_original_embedding(
                         decoder_input_ids_
                     )
+                    #print("after decoder_input_embeds:", decoder_inputs_embeds)
+                    #print("kkkk2")
                     decoder_prompt_embeds = self.decoder_prompt_encoder(
                         decoder_input_ids[decoder_prompt_masks],prompt_ids).to\
                         (device=decoder_inputs_embeds.device)
+                    #print("decoder prompt embeds:", decoder_prompt_embeds)
                     decoder_inputs_embeds[decoder_prompt_masks] = \
                         decoder_prompt_embeds
+                    #print("kkkk4")
+                    labels = kwargs['labels']
+                    for l in labels:
+                        l[0] = 0
+                        l[1] = 0
+                    kwargs['labels'] = labels
                 else:
+                    #print("decoder mask nnnnnnnnnnnnnnnnnn")
                     decoder_inputs_embeds = self.decoder_original_embedding(
                         decoder_input_ids
                     )
+                #print("KKKKKKKKKKKKWWW")
+                #print(kwargs)
                 return self.underlying_model(inputs_embeds=inputs_embeds,
                     decoder_inputs_embeds=decoder_inputs_embeds,**kwargs
                 )
@@ -156,11 +176,11 @@ class PTuningWrapper(torch.nn.Module):
                     self.new_decoder_embedding.weight)
             else:
                 self.decoder_prompt_encoder.dump_embedding(
-                    self.decoder_originical_embedding.weight)
+                    self.decoder_original_embedding.weight)
 
     @classmethod
     def interval_prompt(cls,model,tokenizer,intervals,decoder_intervals=None,
-        special_prefix="prompt",prompt_encoder_type="embedding",
+        special_prefix="rel",prompt_encoder_type="lstm",
         return_prompt_string=False,**kwargs):
         """
         Given intervals ,generate a wrapped model, a tokenizer, and a template function.
@@ -236,6 +256,7 @@ class PTuningWrapper(torch.nn.Module):
                     decoder_prompt_string += " {}"
             decoder_prompt_length = counter - prompt_length
         tokenizer.add_special_tokens({"additional_special_tokens":added_tokens})
+        #model.resize_token_embeddings(len(tokenizer))
         if decoder_intervals is not None:
             def prompt_function(*args):
                 return (
@@ -257,6 +278,7 @@ class PTuningWrapper(torch.nn.Module):
         else:
             prompt_encoder = None
         if decoder_intervals is not None and decoder_prompt_length > 0:
+            #print("CCCCCCCCCCCREAting decoder_prompt_encoder", id_offset+prompt_length)
             decoder_prompt_encoder = prompt_encoder_type(decoder_prompt_length,
                 model.config.hidden_size,id_offset+prompt_length,**kwargs)
         else:
@@ -264,6 +286,7 @@ class PTuningWrapper(torch.nn.Module):
         
         #Wrap the model
         id_end = len(tokenizer)
+        #print("IDDDD END:", id_end)
         wrapped_model = PTuningWrapper(model,prompt_encoder,
             decoder_prompt_encoder,
             prompt_token_fn=lambda x: (x>=id_offset)&(x<id_end)
@@ -311,9 +334,10 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
         self.embedding = torch.nn.Embedding(length,embedding_dim)
         self.input_ids = torch.nn.parameter.Parameter(torch.arange(length),
             requires_grad=False)
+        #print("Embedding DIM:", embedding_dim)
         self.lstm = torch.nn.LSTM(
             input_size=embedding_dim,
-            hidden_size=embedding_dim // 2,
+            hidden_size=embedding_dim// 2, #my code
             num_layers=2,
             dropout=0,
             bidirectional=True,
@@ -336,11 +360,11 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
         torch.save(self.mlp.state_dict(), path + "/mlp")
     def load(self, path):
         if Path(path + "/lstm").exists():
-            print("loading LSTM part")
+            #print("loading LSTM part")
             self.lstm.load_state_dict(torch.load(path + "/lstm"))
         #    self.lstm.eval()
         if Path(path + "/mlp").exists():
-            print("loading MLP part")
+            #print("loading MLP part")
             self.mlp.load_state_dict(torch.load(path + "/mlp"))
         #    self.mlp.eval()
 
@@ -349,16 +373,76 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
         embeds = self.embedding(self.input_ids)
         x = self.lstm(embeds.unsqueeze(0))
         running_weight = self.mlp(x[0]).squeeze(0)
+        #print("self.id_offset:", self.id_offset)
         prompt_token_ids = prompt_token_ids - self.id_offset
+        #print("Prompt token ids:", prompt_token_ids)
+        #print("Len weights:", len(running_weight))
         return F.embedding(prompt_token_ids,running_weight)
     def dump_embedding(self, weight):
         with torch.no_grad():
             embeddings = self.forward(self.input_ids+self.id_offset)
+        #print("BEFORE Len weights:", len(weight))
         weight[self.id_offset:self.id_offset+self.length,:]=embeddings.detach()
+        #print("AFTER Len weights:", len(weight))
 
 
 if __name__ == "__main__":
     #Unit Test
+    ## 3. T5
+    model = transformers.T5ForConditionalGeneration.from_pretrained("/home/pouramini/pret/t5-base/")
+    tokenizer = transformers.T5Tokenizer.from_pretrained("/home/pouramini/pret/t5-base/")
+    print(f"Test T5")
+    print(f"Original tokenizer size: {len(tokenizer)}")
+    #wrapped_model,prompt_func,prompt_string = PTuningWrapper.\
+    #    interval_prompt(
+    #        model,tokenizer,(2,3),(1,1),return_prompt_string=True
+    #    )
+    length=5
+    embedding_dim = 768
+    id_offset = len(tokenizer)
+    prompt_encoder = None
+    decoder_prompt_encoder = None
+    #prompt_encoder = LSTMEmbeddingPromptEncoder(length,embedding_dim,id_offset)
+    decoder_prompt_encoder = LSTMEmbeddingPromptEncoder(length,embedding_dim,id_offset)
+    rel="xIntent"
+    def get_prompt_token_fn(id_offset,length):
+        return lambda x: (x>=id_offset)&(x<id_offset+length)
+    added_tokens = [ 
+        transformers.AddedToken(f"<{rel}_{i}>",lstrip=True,
+            rstrip=False)
+        for i in 
+            range(length)
+    ]
+    tokenizer.add_special_tokens({"additional_special_tokens":added_tokens})
+    #model.resize_token_embeddings(len(tokenizer))
+    wrapped_model = PTuningWrapper(model,prompt_encoder,decoder_prompt_encoder,prompt_token_fn=get_prompt_token_fn(id_offset,length))
+    print(f"Tokenizer size: {len(tokenizer)}")
+    example_encoder = "<xIntent_0> <xIntent_1> This is <xIntent_2>"
+    tokenized = tokenizer(example_encoder,return_tensors="pt")
+    example_decoder = "<xIntent_3> <xIntent_4> This is <xIntent_5>"
+    tokenized_decoder_labels = tokenizer(example_decoder,return_tensors="pt")
+    tokenized['decoder_input_ids'] = model.prepare_decoder_input_ids_from_labels(
+        tokenized_decoder_labels['input_ids']
+    )
+    tokenized['decoder_attention_mask'] = tokenized_decoder_labels['attention_mask']
+    #tokenized["decoder_input_ids"] = tokenized_decoder_labels["input_ids"]
+    print("Tokenized:",tokenized)
+    for p in model.parameters():
+        p.requires_grad = False
+    wrapped_model.zero_grad()
+    results = wrapped_model(**tokenized)
+    #print("Forward Results:", results)
+    print("Try backward")
+    loss = torch.sum(results[0])
+    loss.backward()
+    print("Original embedding grads:",model.get_input_embeddings().weight.grad)
+    if wrapped_model.prompt_encoder:
+        print("Prompt embedding grads:", wrapped_model.prompt_encoder.embedding.weight.grad)
+    wrapped_model.update_model_weight()
+    #print(model.get_input_embeddings().weight[wrapped_model.decoder_prompt_encoder.id_offset]==\
+    #    wrapped_model.decoder_prompt_encoder.forward(torch.tensor([wrapped_model.decoder_prompt_encoder.id_offset])))
+    import sys
+    sys.exit() 
     ## 1. BERT
     model = transformers.BertModel.from_pretrained("/drive2/pretrained/bert/parsbert/bert-base-parsbert-uncased")
     tokenizer = transformers.BertTokenizer.from_pretrained("/drive2/pretrained/bert/parsbert/bert-base-parsbert-uncased/")
@@ -409,36 +493,3 @@ if __name__ == "__main__":
     loss.backward()
     print("Original embedding grads:",model.get_input_embeddings().weight.grad)
     print("Prompt embedding grads:", wrapped_model.prompt_encoder.embedding.weight.grad)
-    ## 3. T5
-    model = transformers.T5ForConditionalGeneration.from_pretrained("/drive2/pretrained/t5/hf/t5-small/")
-    tokenizer = transformers.T5Tokenizer.from_pretrained("/drive2/pretrained/t5/hf/t5-small/")
-    print(f"Test T5")
-    print(f"Original tokenizer size: {len(tokenizer)}")
-    wrapped_model,prompt_func,prompt_string = PTuningWrapper.\
-        interval_prompt(
-            model,tokenizer,(2,3),(1,1),return_prompt_string=True
-        )
-    print(f"Prompt length:{wrapped_model.prompt_encoder.length+wrapped_model.decoder_prompt_encoder.length}")
-    print(f"Tokenizer size: {len(tokenizer)}")
-    print("Prompt string:",prompt_string)
-    example = prompt_func("piece one","piece two")
-    print("Example:",example)
-    tokenized = tokenizer(example[0],return_tensors="pt")
-    tokenized_decoder_labels = tokenizer(example[1],return_tensors="pt")
-    tokenized['decoder_input_ids'] = model.prepare_decoder_input_ids_from_labels(
-        tokenized_decoder_labels['input_ids']
-    )
-    tokenized['decoder_attention_mask'] = tokenized_decoder_labels['attention_mask']
-    print("Tokenized:",tokenized)
-    for p in model.parameters():
-        p.requires_grad = False
-    wrapped_model.zero_grad()
-    out = wrapped_model(**tokenized)
-    print("Try backward")
-    loss = torch.sum(out[0])
-    loss.backward()
-    print("Original embedding grads:",model.get_input_embeddings().weight.grad)
-    print("Prompt embedding grads:", wrapped_model.prompt_encoder.embedding.weight.grad)
-    wrapped_model.update_model_weight()
-    print(model.get_input_embeddings().weight[wrapped_model.prompt_encoder.id_offset]==\
-        wrapped_model.prompt_encoder.forward(torch.tensor([wrapped_model.prompt_encoder.id_offset])))

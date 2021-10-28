@@ -1,0 +1,3239 @@
+[
+  {
+    "head": "     PersonX 'd better go ",
+    "gens": [
+      "to go somewhere",
+      "to have fun",
+      "to go to the beach",
+      "to go",
+      "to have a party"
+    ],
+    "tails": [
+      "to go somewhere else more important."
+    ]
+  },
+  {
+    "head": "     PersonX accepts PersonX's diploma ",
+    "gens": [
+      "to get a degree",
+      "to get a job",
+      "to be accepted",
+      "to be successful",
+      "to graduate"
+    ],
+    "tails": [
+      "to graduate from high school"
+    ]
+  },
+  {
+    "head": "     PersonX accepts PersonX's diploma ",
+    "gens": [
+      "to get a degree",
+      "to get a job",
+      "to be accepted",
+      "to be successful",
+      "to graduate"
+    ],
+    "tails": [
+      "to graduate"
+    ]
+  },
+  {
+    "head": "     PersonX accepts PersonY invitation ",
+    "gens": [
+      "to invite person y",
+      "to be a friend",
+      "to be helpful",
+      "to invite persony",
+      "to be with persony"
+    ],
+    "tails": [
+      "to enjoy his time"
+    ]
+  },
+  {
+    "head": "     PersonX accepts PersonY invitation ",
+    "gens": [
+      "to invite person y",
+      "to be a friend",
+      "to be helpful",
+      "to invite persony",
+      "to be with persony"
+    ],
+    "tails": [
+      "the appreciation"
+    ]
+  },
+  {
+    "head": "     PersonX accepts PersonY invitation ",
+    "gens": [
+      "to invite person y",
+      "to be a friend",
+      "to be helpful",
+      "to invite persony",
+      "to be with persony"
+    ],
+    "tails": [
+      "to go the invited program"
+    ]
+  },
+  {
+    "head": "     PersonX accepts PersonY invitation ",
+    "gens": [
+      "to invite person y",
+      "to be a friend",
+      "to be helpful",
+      "to invite persony",
+      "to be with persony"
+    ],
+    "tails": [
+      "to see person"
+    ]
+  },
+  {
+    "head": "     PersonX accepts PersonY invitation ",
+    "gens": [
+      "to invite person y",
+      "to be a friend",
+      "to be helpful",
+      "to invite persony",
+      "to be with persony"
+    ],
+    "tails": [
+      "to gain person's friendship"
+    ]
+  },
+  {
+    "head": "     PersonX accepts PersonY offer ",
+    "gens": [
+      "to be helpful",
+      "to be generous",
+      "to help person y",
+      "to be nice",
+      "to make a decision"
+    ],
+    "tails": [
+      "to gain something"
+    ]
+  },
+  {
+    "head": "     PersonX accepts PersonY offer ",
+    "gens": [
+      "to be helpful",
+      "to be generous",
+      "to help person y",
+      "to be nice",
+      "to make a decision"
+    ],
+    "tails": [
+      "job"
+    ]
+  },
+  {
+    "head": "     PersonX accepts PersonY offer ",
+    "gens": [
+      "to be helpful",
+      "to be generous",
+      "to help person y",
+      "to be nice",
+      "to make a decision"
+    ],
+    "tails": [
+      "to be paid"
+    ]
+  },
+  {
+    "head": "     PersonX accepts PersonY's invitation ",
+    "gens": [
+      "to be a friend",
+      "to be helpful",
+      "to have a party",
+      "to be with persony",
+      "to be nice"
+    ],
+    "tails": [
+      "to be polite"
+    ]
+  },
+  {
+    "head": "     PersonX accepts PersonY's invitation ",
+    "gens": [
+      "to be a friend",
+      "to be helpful",
+      "to have a party",
+      "to be with persony",
+      "to be nice"
+    ],
+    "tails": [
+      "to see persony"
+    ]
+  },
+  {
+    "head": "     PersonX accepts PersonY's invitation ",
+    "gens": [
+      "to be a friend",
+      "to be helpful",
+      "to have a party",
+      "to be with persony",
+      "to be nice"
+    ],
+    "tails": [
+      "to not disappoint persony"
+    ]
+  },
+  {
+    "head": "     PersonX accepts PersonY's invitation ",
+    "gens": [
+      "to be a friend",
+      "to be helpful",
+      "to have a party",
+      "to be with persony",
+      "to be nice"
+    ],
+    "tails": [
+      "they want to go out with persony"
+    ]
+  },
+  {
+    "head": "     PersonX accepts PersonY's invitation ",
+    "gens": [
+      "to be a friend",
+      "to be helpful",
+      "to have a party",
+      "to be with persony",
+      "to be nice"
+    ],
+    "tails": [
+      "they want to be polite"
+    ]
+  },
+  {
+    "head": "     PersonX accepts PersonY's invitation ",
+    "gens": [
+      "to be a friend",
+      "to be helpful",
+      "to have a party",
+      "to be with persony",
+      "to be nice"
+    ],
+    "tails": [
+      "they want to attend the event"
+    ]
+  },
+  {
+    "head": "     PersonX accepts PersonY's offer ",
+    "gens": [
+      "to be helpful",
+      "to be generous",
+      "to be nice",
+      "to be a friend",
+      "to have a conversation"
+    ],
+    "tails": [
+      "to buy the things"
+    ]
+  },
+  {
+    "head": "     PersonX accepts PersonY's offer ",
+    "gens": [
+      "to be helpful",
+      "to be generous",
+      "to be nice",
+      "to be a friend",
+      "to have a conversation"
+    ],
+    "tails": [
+      "to obtain something."
+    ]
+  },
+  {
+    "head": "     PersonX accepts PersonY's offer ",
+    "gens": [
+      "to be helpful",
+      "to be generous",
+      "to be nice",
+      "to be a friend",
+      "to have a conversation"
+    ],
+    "tails": [
+      "to form agreement"
+    ]
+  },
+  {
+    "head": "     PersonX accepts PersonY's offer ",
+    "gens": [
+      "to be helpful",
+      "to be generous",
+      "to be nice",
+      "to be a friend",
+      "to have a conversation"
+    ],
+    "tails": [
+      "to move past disagreement"
+    ]
+  },
+  {
+    "head": "     PersonX accepts ___ in exchange ",
+    "gens": [
+      "to be generous",
+      "to be helpful",
+      "to be nice",
+      "to get something",
+      "to win"
+    ],
+    "tails": [
+      "happy"
+    ]
+  },
+  {
+    "head": "     PersonX accepts ___ in exchange ",
+    "gens": [
+      "to be generous",
+      "to be helpful",
+      "to be nice",
+      "to get something",
+      "to win"
+    ],
+    "tails": [
+      "accepts the dress in exchange"
+    ]
+  },
+  {
+    "head": "     PersonX accepts happily ",
+    "gens": [
+      "to be accepted",
+      "to be happy",
+      "to be loved",
+      "to have a good time",
+      "to have a happy life"
+    ],
+    "tails": [
+      "none"
+    ]
+  },
+  {
+    "head": "     PersonX accepts happily ",
+    "gens": [
+      "to be accepted",
+      "to be happy",
+      "to be loved",
+      "to have a good time",
+      "to have a happy life"
+    ],
+    "tails": [
+      "to take the opportunity"
+    ]
+  },
+  {
+    "head": "     PersonX accepts the invitation ",
+    "gens": [
+      "to attend a party",
+      "to go to a party",
+      "to have a party",
+      "to be a friend",
+      "to be a part of something"
+    ],
+    "tails": [
+      "to go"
+    ]
+  },
+  {
+    "head": "     PersonX accepts the invitation ",
+    "gens": [
+      "to attend a party",
+      "to go to a party",
+      "to have a party",
+      "to be a friend",
+      "to be a part of something"
+    ],
+    "tails": [
+      "to be with other people"
+    ]
+  },
+  {
+    "head": "     PersonX accepts the invitation ",
+    "gens": [
+      "to attend a party",
+      "to go to a party",
+      "to have a party",
+      "to be a friend",
+      "to be a part of something"
+    ],
+    "tails": [
+      "to have fun"
+    ]
+  },
+  {
+    "head": "     PersonX accepts the invitation ",
+    "gens": [
+      "to attend a party",
+      "to go to a party",
+      "to have a party",
+      "to be a friend",
+      "to be a part of something"
+    ],
+    "tails": [
+      "to be polite"
+    ]
+  },
+  {
+    "head": "     PersonX accepts the invitation ",
+    "gens": [
+      "to attend a party",
+      "to go to a party",
+      "to have a party",
+      "to be a friend",
+      "to be a part of something"
+    ],
+    "tails": [
+      "to see some people"
+    ]
+  },
+  {
+    "head": "     PersonX accepts the job ",
+    "gens": [
+      "to be helpful",
+      "to be hired",
+      "to be successful",
+      "to be paid",
+      "to be a leader"
+    ],
+    "tails": [
+      "to work"
+    ]
+  },
+  {
+    "head": "     PersonX accepts the job ",
+    "gens": [
+      "to be helpful",
+      "to be hired",
+      "to be successful",
+      "to be paid",
+      "to be a leader"
+    ],
+    "tails": [
+      "to be employed"
+    ]
+  },
+  {
+    "head": "     PersonX accepts the job ",
+    "gens": [
+      "to be helpful",
+      "to be hired",
+      "to be successful",
+      "to be paid",
+      "to be a leader"
+    ],
+    "tails": [
+      "to make money"
+    ]
+  },
+  {
+    "head": "     PersonX accepts the job ",
+    "gens": [
+      "to be helpful",
+      "to be hired",
+      "to be successful",
+      "to be paid",
+      "to be a leader"
+    ],
+    "tails": [
+      "to get a better career"
+    ]
+  },
+  {
+    "head": "     PersonX accepts the job ",
+    "gens": [
+      "to be helpful",
+      "to be hired",
+      "to be successful",
+      "to be paid",
+      "to be a leader"
+    ],
+    "tails": [
+      "to get better pay"
+    ]
+  },
+  {
+    "head": "     PersonX accepts the job ",
+    "gens": [
+      "to be helpful",
+      "to be hired",
+      "to be successful",
+      "to be paid",
+      "to be a leader"
+    ],
+    "tails": [
+      "to support their family"
+    ]
+  },
+  {
+    "head": "     PersonX accepts the offer ",
+    "gens": [
+      "to be generous",
+      "to be helpful",
+      "to be nice",
+      "to be a friend",
+      "to be a partner"
+    ],
+    "tails": [
+      "the job"
+    ]
+  },
+  {
+    "head": "     PersonX accepts the offer ",
+    "gens": [
+      "to be generous",
+      "to be helpful",
+      "to be nice",
+      "to be a friend",
+      "to be a partner"
+    ],
+    "tails": [
+      "to make a deal"
+    ]
+  },
+  {
+    "head": "     PersonX accepts the offer ",
+    "gens": [
+      "to be generous",
+      "to be helpful",
+      "to be nice",
+      "to be a friend",
+      "to be a partner"
+    ],
+    "tails": [
+      "to get the new job"
+    ]
+  },
+  {
+    "head": "     PersonX accepts the offer ",
+    "gens": [
+      "to be generous",
+      "to be helpful",
+      "to be nice",
+      "to be a friend",
+      "to be a partner"
+    ],
+    "tails": [
+      "to benefit from it"
+    ]
+  },
+  {
+    "head": "     PersonX achieves PersonX's ___ by means ",
+    "gens": [
+      "to be successful",
+      "to achieve something",
+      "to achieve a goal",
+      "to accomplish something",
+      "to be a leader"
+    ],
+    "tails": [
+      "to achieve goal"
+    ]
+  },
+  {
+    "head": "     PersonX achieves PersonX's dream ",
+    "gens": [
+      "to be successful",
+      "to be a better person",
+      "to achieve something",
+      "to be a good person",
+      "to be a successful person"
+    ],
+    "tails": [
+      "to be an astronaut"
+    ]
+  },
+  {
+    "head": "     PersonX achieves PersonX's dream ",
+    "gens": [
+      "to be successful",
+      "to be a better person",
+      "to achieve something",
+      "to be a good person",
+      "to be a successful person"
+    ],
+    "tails": [
+      "to achieve the dream"
+    ]
+  },
+  {
+    "head": "     PersonX achieves PersonX's objective ",
+    "gens": [
+      "to be successful",
+      "to achieve his goal",
+      "to achieve a goal",
+      "to achieve something",
+      "to accomplish something"
+    ],
+    "tails": [
+      "to complete something"
+    ]
+  },
+  {
+    "head": "     PersonX achieves PersonX's objective ",
+    "gens": [
+      "to be successful",
+      "to achieve his goal",
+      "to achieve a goal",
+      "to achieve something",
+      "to accomplish something"
+    ],
+    "tails": [
+      "to accomplish a goal"
+    ]
+  },
+  {
+    "head": "     PersonX achieves PersonX's objective ",
+    "gens": [
+      "to be successful",
+      "to achieve his goal",
+      "to achieve a goal",
+      "to achieve something",
+      "to accomplish something"
+    ],
+    "tails": [
+      "to complete a goal"
+    ]
+  },
+  {
+    "head": "     PersonX achieves PersonX's objective ",
+    "gens": [
+      "to be successful",
+      "to achieve his goal",
+      "to achieve a goal",
+      "to achieve something",
+      "to accomplish something"
+    ],
+    "tails": [
+      "appease himself"
+    ]
+  },
+  {
+    "head": "     PersonX achieves PersonY effect ",
+    "gens": [
+      "to achieve persony effect",
+      "to be successful",
+      "to achieve something",
+      "to be a person",
+      "to achieve persony"
+    ],
+    "tails": [
+      "make person y stronger"
+    ]
+  },
+  {
+    "head": "     PersonX achieves PersonY objective ",
+    "gens": [
+      "to be successful",
+      "to achieve something",
+      "to achieve a goal",
+      "to accomplish something",
+      "to be a leader"
+    ],
+    "tails": [
+      "to succeed for their boss"
+    ]
+  },
+  {
+    "head": "     PersonX achieves ___ by means ",
+    "gens": [
+      "to achieve something",
+      "to be successful",
+      "to accomplish something",
+      "to achieve something.",
+      "to achieve"
+    ],
+    "tails": [
+      "tried hard to come back"
+    ]
+  },
+  {
+    "head": "     PersonX achieves ___ by means ",
+    "gens": [
+      "to achieve something",
+      "to be successful",
+      "to accomplish something",
+      "to achieve something.",
+      "to achieve"
+    ],
+    "tails": [
+      "to be in control"
+    ]
+  },
+  {
+    "head": "     PersonX acts weird ",
+    "gens": [
+      "to be funny",
+      "to be nice",
+      "to be mean",
+      "to be rude",
+      "to be a person"
+    ],
+    "tails": [
+      "none"
+    ]
+  },
+  {
+    "head": "     PersonX acts weird ",
+    "gens": [
+      "to be funny",
+      "to be nice",
+      "to be mean",
+      "to be rude",
+      "to be a person"
+    ],
+    "tails": [
+      "attention"
+    ]
+  },
+  {
+    "head": "     PersonX acts weird ",
+    "gens": [
+      "to be funny",
+      "to be nice",
+      "to be mean",
+      "to be rude",
+      "to be a person"
+    ],
+    "tails": [
+      "to be wacky"
+    ]
+  },
+  {
+    "head": "     PersonX adapts ___ to conditions ",
+    "gens": [
+      "to be adaptable",
+      "to be helpful",
+      "to be a better person",
+      "to be prepared",
+      "to adapt"
+    ],
+    "tails": [
+      "to learn new things"
+    ]
+  },
+  {
+    "head": "     PersonX adapts ___ to conditions ",
+    "gens": [
+      "to be adaptable",
+      "to be helpful",
+      "to be a better person",
+      "to be prepared",
+      "to adapt"
+    ],
+    "tails": [
+      "he is rules and contional is change"
+    ]
+  },
+  {
+    "head": "     PersonX addresses PersonY audience ",
+    "gens": [
+      "to be heard",
+      "to be helpful",
+      "to talk",
+      "to talk to person",
+      "to be heard."
+    ],
+    "tails": [
+      "to give speech"
+    ]
+  },
+  {
+    "head": "     PersonX addresses PersonY audience ",
+    "gens": [
+      "to be heard",
+      "to be helpful",
+      "to talk",
+      "to talk to person",
+      "to be heard."
+    ],
+    "tails": [
+      "to direct attention"
+    ]
+  },
+  {
+    "head": "     PersonX addresses PersonY audience ",
+    "gens": [
+      "to be heard",
+      "to be helpful",
+      "to talk",
+      "to talk to person",
+      "to be heard."
+    ],
+    "tails": [
+      "to provide background"
+    ]
+  },
+  {
+    "head": "     PersonX adjusts spacing as well as minimizing ",
+    "gens": [
+      "to be helpful",
+      "to be more efficient",
+      "to be able to be helpful",
+      "to be a better person",
+      "to be able to be more efficient"
+    ],
+    "tails": [
+      "to have a perfect document"
+    ]
+  },
+  {
+    "head": "     PersonX adopts PersonY attitude ",
+    "gens": [
+      "to be helpful",
+      "to be kind",
+      "to be nice",
+      "to be nice to person",
+      "to be a person"
+    ],
+    "tails": [
+      "to act as the person"
+    ]
+  },
+  {
+    "head": "     PersonX adopts PersonY attitude ",
+    "gens": [
+      "to be helpful",
+      "to be kind",
+      "to be nice",
+      "to be nice to person",
+      "to be a person"
+    ],
+    "tails": [
+      "change"
+    ]
+  },
+  {
+    "head": "     PersonX affects PersonY's interests ",
+    "gens": [
+      "to influence person y",
+      "to be helpful",
+      "to be influential",
+      "to influence persony",
+      "to be a good person"
+    ],
+    "tails": [
+      "to motivate more"
+    ]
+  },
+  {
+    "head": "     PersonX affects children 's ___ ",
+    "gens": [
+      "to be helpful",
+      "to make a difference",
+      "to be responsible",
+      "to be a parent",
+      "to help"
+    ],
+    "tails": [
+      "i like to very satisfied"
+    ]
+  },
+  {
+    "head": "     PersonX affects children 's ___ ",
+    "gens": [
+      "to be helpful",
+      "to make a difference",
+      "to be responsible",
+      "to be a parent",
+      "to help"
+    ],
+    "tails": [
+      "to hurt"
+    ]
+  },
+  {
+    "head": "     PersonX affects every ___ ",
+    "gens": [
+      "to be helpful",
+      "to make a difference",
+      "to be responsible",
+      "to be a person",
+      "none"
+    ],
+    "tails": [
+      "personal object"
+    ]
+  },
+  {
+    "head": "     PersonX affords PersonY every ___ ",
+    "gens": [
+      "to be generous",
+      "none",
+      "to help persony",
+      "to be nice",
+      "to help"
+    ],
+    "tails": [
+      "job facility in good"
+    ]
+  },
+  {
+    "head": "     PersonX affords PersonY every ___ ",
+    "gens": [
+      "to be generous",
+      "none",
+      "to help persony",
+      "to be nice",
+      "to help"
+    ],
+    "tails": [
+      "to show kindness"
+    ]
+  },
+  {
+    "head": "     PersonX affords PersonY protection ",
+    "gens": [
+      "to be safe",
+      "to protect persony",
+      "to be helpful",
+      "to be secure",
+      "none"
+    ],
+    "tails": [
+      "to help person y"
+    ]
+  },
+  {
+    "head": "     PersonX affords PersonY protection ",
+    "gens": [
+      "to be safe",
+      "to protect persony",
+      "to be helpful",
+      "to be secure",
+      "none"
+    ],
+    "tails": [
+      "to be protective of person y."
+    ]
+  },
+  {
+    "head": "     PersonX affords PersonY protection ",
+    "gens": [
+      "to be safe",
+      "to protect persony",
+      "to be helpful",
+      "to be secure",
+      "none"
+    ],
+    "tails": [
+      "to make person y feel secure."
+    ]
+  },
+  {
+    "head": "     PersonX affords PersonY protection ",
+    "gens": [
+      "to be safe",
+      "to protect persony",
+      "to be helpful",
+      "to be secure",
+      "none"
+    ],
+    "tails": [
+      "owes person y a debt"
+    ]
+  },
+  {
+    "head": "     PersonX affords another ___ ",
+    "gens": [
+      "to be generous",
+      "to have a new car",
+      "to have a new home",
+      "to have a good time",
+      "to have a friend"
+    ],
+    "tails": [
+      "to clearly explain the concept"
+    ]
+  },
+  {
+    "head": "     PersonX affords another ___ ",
+    "gens": [
+      "to be generous",
+      "to have a new car",
+      "to have a new home",
+      "to have a good time",
+      "to have a friend"
+    ],
+    "tails": [
+      "this is example for others"
+    ]
+  },
+  {
+    "head": "     PersonX affords every ___ ",
+    "gens": [
+      "to be generous",
+      "none",
+      "to have a good life",
+      "to have a good time",
+      "to have a nice life"
+    ],
+    "tails": [
+      "to be secure in the home"
+    ]
+  },
+  {
+    "head": "     PersonX agrees to the challenge ",
+    "gens": [
+      "to be helpful",
+      "to be challenged",
+      "to be a leader",
+      "to win",
+      "to do something"
+    ],
+    "tails": [
+      "to prove his power"
+    ]
+  },
+  {
+    "head": "     PersonX agrees to the challenge ",
+    "gens": [
+      "to be helpful",
+      "to be challenged",
+      "to be a leader",
+      "to win",
+      "to do something"
+    ],
+    "tails": [
+      "to fulfill his dream to eat as much ice cream as possible"
+    ]
+  },
+  {
+    "head": "     PersonX agrees to the challenge ",
+    "gens": [
+      "to be helpful",
+      "to be challenged",
+      "to be a leader",
+      "to win",
+      "to do something"
+    ],
+    "tails": [
+      "to conquer something"
+    ]
+  },
+  {
+    "head": "     PersonX also decided ",
+    "gens": [
+      "to make a decision",
+      "to have a good time",
+      "to be a better person",
+      "to be a good person",
+      "to be a good friend"
+    ],
+    "tails": [
+      "to think that conclusion is right"
+    ]
+  },
+  {
+    "head": "     PersonX also decided ",
+    "gens": [
+      "to make a decision",
+      "to have a good time",
+      "to be a better person",
+      "to be a good person",
+      "to be a good friend"
+    ],
+    "tails": [
+      "in  charge."
+    ]
+  },
+  {
+    "head": "     PersonX also loved ___ ",
+    "gens": [
+      "to be loved",
+      "to show love",
+      "to have a good time",
+      "to be liked",
+      "to be a friend"
+    ],
+    "tails": [
+      "to be entertained"
+    ]
+  },
+  {
+    "head": "     PersonX also loved ___ ",
+    "gens": [
+      "to be loved",
+      "to show love",
+      "to have a good time",
+      "to be liked",
+      "to be a friend"
+    ],
+    "tails": [
+      "to enjoy themselves"
+    ]
+  },
+  {
+    "head": "     PersonX also ordered ___ ",
+    "gens": [
+      "to eat",
+      "to eat something",
+      "to be helpful",
+      "to have a party",
+      "to have a meal"
+    ],
+    "tails": [
+      "to watch movies"
+    ]
+  },
+  {
+    "head": "     PersonX also ordered ___ ",
+    "gens": [
+      "to eat",
+      "to eat something",
+      "to be helpful",
+      "to have a party",
+      "to have a meal"
+    ],
+    "tails": [
+      "the same meal as them"
+    ]
+  },
+  {
+    "head": "     PersonX also ordered ___ ",
+    "gens": [
+      "to eat",
+      "to eat something",
+      "to be helpful",
+      "to have a party",
+      "to have a meal"
+    ],
+    "tails": [
+      "to drive away hunger"
+    ]
+  },
+  {
+    "head": "     PersonX always ate ",
+    "gens": [
+      "to eat",
+      "to be healthy",
+      "to eat healthy",
+      "to eat something",
+      "to eat healthy food"
+    ],
+    "tails": [
+      "to statisfy hunger"
+    ]
+  },
+  {
+    "head": "     PersonX always ate ",
+    "gens": [
+      "to eat",
+      "to be healthy",
+      "to eat healthy",
+      "to eat something",
+      "to eat healthy food"
+    ],
+    "tails": [
+      "to release stress"
+    ]
+  },
+  {
+    "head": "     PersonX always ate ___ ",
+    "gens": [
+      "to be healthy",
+      "to eat",
+      "to eat something",
+      "to eat healthy",
+      "to eat healthy food"
+    ],
+    "tails": [
+      "to eat food to be sated"
+    ]
+  },
+  {
+    "head": "     PersonX always ate ___ ",
+    "gens": [
+      "to be healthy",
+      "to eat",
+      "to eat something",
+      "to eat healthy",
+      "to eat healthy food"
+    ],
+    "tails": [
+      "to enjoy the taste of chocolate"
+    ]
+  },
+  {
+    "head": "     PersonX always ate ___ ",
+    "gens": [
+      "to be healthy",
+      "to eat",
+      "to eat something",
+      "to eat healthy",
+      "to eat healthy food"
+    ],
+    "tails": [
+      "to be healthy"
+    ]
+  },
+  {
+    "head": "     PersonX always ate ___ ",
+    "gens": [
+      "to be healthy",
+      "to eat",
+      "to eat something",
+      "to eat healthy",
+      "to eat healthy food"
+    ],
+    "tails": [
+      "to not gain weight"
+    ]
+  },
+  {
+    "head": "     PersonX always tries ",
+    "gens": [
+      "to be successful",
+      "to succeed",
+      "to achieve something",
+      "to be helpful",
+      "to be successful."
+    ],
+    "tails": [
+      "to do their best"
+    ]
+  },
+  {
+    "head": "     PersonX always tries ",
+    "gens": [
+      "to be successful",
+      "to succeed",
+      "to achieve something",
+      "to be helpful",
+      "to be successful."
+    ],
+    "tails": [
+      "to never give up"
+    ]
+  },
+  {
+    "head": "     PersonX always tries ",
+    "gens": [
+      "to be successful",
+      "to succeed",
+      "to achieve something",
+      "to be helpful",
+      "to be successful."
+    ],
+    "tails": [
+      "to succeed"
+    ]
+  },
+  {
+    "head": "     PersonX always tries ",
+    "gens": [
+      "to be successful",
+      "to succeed",
+      "to achieve something",
+      "to be helpful",
+      "to be successful."
+    ],
+    "tails": [
+      "to give the best effor"
+    ]
+  },
+  {
+    "head": "     PersonX always tries ",
+    "gens": [
+      "to be successful",
+      "to succeed",
+      "to achieve something",
+      "to be helpful",
+      "to be successful."
+    ],
+    "tails": [
+      "to commit"
+    ]
+  },
+  {
+    "head": "     PersonX always watch ___ ",
+    "gens": [
+      "to be entertained",
+      "to watch a movie",
+      "to be entertained.",
+      "to watch movies",
+      "to watch a show"
+    ],
+    "tails": [
+      "to check whether y is a good person"
+    ]
+  },
+  {
+    "head": "     PersonX always watch ___ ",
+    "gens": [
+      "to be entertained",
+      "to watch a movie",
+      "to be entertained.",
+      "to watch movies",
+      "to watch a show"
+    ],
+    "tails": [
+      "to cheer for his team"
+    ]
+  },
+  {
+    "head": "     PersonX always watch ___ ",
+    "gens": [
+      "to be entertained",
+      "to watch a movie",
+      "to be entertained.",
+      "to watch movies",
+      "to watch a show"
+    ],
+    "tails": [
+      "to watch something interesting"
+    ]
+  },
+  {
+    "head": "     PersonX always wore ",
+    "gens": [
+      "to be fashionable",
+      "to look good",
+      "to look nice",
+      "to be stylish",
+      "to show off his style"
+    ],
+    "tails": [
+      "to be consistent."
+    ]
+  },
+  {
+    "head": "     PersonX always wore ___ ",
+    "gens": [
+      "to be fashionable",
+      "to look good",
+      "to look nice",
+      "to be stylish",
+      "to show off his style"
+    ],
+    "tails": [
+      "to be consistent"
+    ]
+  },
+  {
+    "head": "     PersonX always wore ___ ",
+    "gens": [
+      "to be fashionable",
+      "to look good",
+      "to look nice",
+      "to be stylish",
+      "to show off his style"
+    ],
+    "tails": [
+      "to look good."
+    ]
+  },
+  {
+    "head": "     PersonX amends PersonY act ",
+    "gens": [
+      "to be helpful",
+      "to make person y happy",
+      "to make amends",
+      "to be fair",
+      "to make persony happy"
+    ],
+    "tails": [
+      "to make things right."
+    ]
+  },
+  {
+    "head": "     PersonX amends PersonY act ",
+    "gens": [
+      "to be helpful",
+      "to make person y happy",
+      "to make amends",
+      "to be fair",
+      "to make persony happy"
+    ],
+    "tails": [
+      "to fix the act."
+    ]
+  },
+  {
+    "head": "     PersonX answers PersonX's purpose ",
+    "gens": [
+      "to be helpful",
+      "to fulfill his purpose",
+      "to be understood",
+      "to be helpful.",
+      "to help"
+    ],
+    "tails": [
+      "to have meaning."
+    ]
+  },
+  {
+    "head": "     PersonX answers PersonY question ",
+    "gens": [
+      "to be helpful",
+      "to help person y",
+      "to know something",
+      "to get answers",
+      "to know what person wants"
+    ],
+    "tails": [
+      "helpful"
+    ]
+  },
+  {
+    "head": "     PersonX answers PersonY question ",
+    "gens": [
+      "to be helpful",
+      "to help person y",
+      "to know something",
+      "to get answers",
+      "to know what person wants"
+    ],
+    "tails": [
+      "share knowledge"
+    ]
+  },
+  {
+    "head": "     PersonX answers PersonY question ",
+    "gens": [
+      "to be helpful",
+      "to help person y",
+      "to know something",
+      "to get answers",
+      "to know what person wants"
+    ],
+    "tails": [
+      "to teach"
+    ]
+  },
+  {
+    "head": "     PersonX answers PersonY question ",
+    "gens": [
+      "to be helpful",
+      "to help person y",
+      "to know something",
+      "to get answers",
+      "to know what person wants"
+    ],
+    "tails": [
+      "to help person."
+    ]
+  },
+  {
+    "head": "     PersonX answers PersonY question ",
+    "gens": [
+      "to be helpful",
+      "to help person y",
+      "to know something",
+      "to get answers",
+      "to know what person wants"
+    ],
+    "tails": [
+      "to give out advice"
+    ]
+  },
+  {
+    "head": "     PersonX answers PersonY's letter ",
+    "gens": [
+      "to be helpful",
+      "to help person y",
+      "to be helpful.",
+      "to help persony",
+      "to help"
+    ],
+    "tails": [
+      "to be respectful"
+    ]
+  },
+  {
+    "head": "     PersonX answers PersonY's letter ",
+    "gens": [
+      "to be helpful",
+      "to help person y",
+      "to be helpful.",
+      "to help persony",
+      "to help"
+    ],
+    "tails": [
+      "to reply"
+    ]
+  },
+  {
+    "head": "     PersonX answers PersonY's letter ",
+    "gens": [
+      "to be helpful",
+      "to help person y",
+      "to be helpful.",
+      "to help persony",
+      "to help"
+    ],
+    "tails": [
+      "to respond to y"
+    ]
+  },
+  {
+    "head": "     PersonX answers PersonY's question ",
+    "gens": [
+      "to be helpful",
+      "to answer a question",
+      "to help person y",
+      "to know something",
+      "to know what persony wants"
+    ],
+    "tails": [
+      "let the inquirer get their answer"
+    ]
+  },
+  {
+    "head": "     PersonX answers PersonY's question ",
+    "gens": [
+      "to be helpful",
+      "to answer a question",
+      "to help person y",
+      "to know something",
+      "to know what persony wants"
+    ],
+    "tails": [
+      "inform the person"
+    ]
+  },
+  {
+    "head": "     PersonX answers the door ",
+    "gens": [
+      "to be helpful",
+      "to answer the door",
+      "to go home",
+      "to get in",
+      "none"
+    ],
+    "tails": [
+      "see who is there"
+    ]
+  },
+  {
+    "head": "     PersonX answers the door ",
+    "gens": [
+      "to be helpful",
+      "to answer the door",
+      "to go home",
+      "to get in",
+      "none"
+    ],
+    "tails": [
+      "to greet his friend"
+    ]
+  },
+  {
+    "head": "     PersonX answers the door ",
+    "gens": [
+      "to be helpful",
+      "to answer the door",
+      "to go home",
+      "to get in",
+      "none"
+    ],
+    "tails": [
+      "to see who is at the door"
+    ]
+  },
+  {
+    "head": "     PersonX answers the question ",
+    "gens": [
+      "to be helpful",
+      "to answer the question",
+      "to know the answer",
+      "to know something",
+      "to answer the question."
+    ],
+    "tails": [
+      "to be cooperative"
+    ]
+  },
+  {
+    "head": "     PersonX answers the question ",
+    "gens": [
+      "to be helpful",
+      "to answer the question",
+      "to know the answer",
+      "to know something",
+      "to answer the question."
+    ],
+    "tails": [
+      "to help people"
+    ]
+  },
+  {
+    "head": "     PersonX applies for a loan ",
+    "gens": [
+      "to borrow money",
+      "to get a job",
+      "to get a loan",
+      "to make money",
+      "to be able to borrow"
+    ],
+    "tails": [
+      "to get more money"
+    ]
+  },
+  {
+    "head": "     PersonX applies for a loan ",
+    "gens": [
+      "to borrow money",
+      "to get a job",
+      "to get a loan",
+      "to make money",
+      "to be able to borrow"
+    ],
+    "tails": [
+      "to be financially secure"
+    ]
+  },
+  {
+    "head": "     PersonX applies for a loan ",
+    "gens": [
+      "to borrow money",
+      "to get a job",
+      "to get a loan",
+      "to make money",
+      "to be able to borrow"
+    ],
+    "tails": [
+      "to have money for something they need or want"
+    ]
+  },
+  {
+    "head": "     PersonX applies for a loan ",
+    "gens": [
+      "to borrow money",
+      "to get a job",
+      "to get a loan",
+      "to make money",
+      "to be able to borrow"
+    ],
+    "tails": [
+      "to buy a car."
+    ]
+  },
+  {
+    "head": "     PersonX applies sunscreen ",
+    "gens": [
+      "to protect themselves from the sun",
+      "to protect themselves",
+      "to look good",
+      "to be safe",
+      "to protect themselves from sun damage"
+    ],
+    "tails": [
+      "to protect their skin"
+    ]
+  },
+  {
+    "head": "     PersonX applies sunscreen ",
+    "gens": [
+      "to protect themselves from the sun",
+      "to protect themselves",
+      "to look good",
+      "to be safe",
+      "to protect themselves from sun damage"
+    ],
+    "tails": [
+      "to protect from the sun"
+    ]
+  },
+  {
+    "head": "     PersonX applies sunscreen ",
+    "gens": [
+      "to protect themselves from the sun",
+      "to protect themselves",
+      "to look good",
+      "to be safe",
+      "to protect themselves from sun damage"
+    ],
+    "tails": [
+      "to be healthy"
+    ]
+  },
+  {
+    "head": "     PersonX applies to medical school ",
+    "gens": [
+      "to be educated",
+      "to be a doctor",
+      "to become a doctor",
+      "to get a degree",
+      "to study"
+    ],
+    "tails": [
+      "to be a doctor"
+    ]
+  },
+  {
+    "head": "     PersonX applies to medical school ",
+    "gens": [
+      "to be educated",
+      "to be a doctor",
+      "to become a doctor",
+      "to get a degree",
+      "to study"
+    ],
+    "tails": [
+      "to be a medical doctor"
+    ]
+  },
+  {
+    "head": "     PersonX applies to medical school ",
+    "gens": [
+      "to be educated",
+      "to be a doctor",
+      "to become a doctor",
+      "to get a degree",
+      "to study"
+    ],
+    "tails": [
+      "to learn medicine."
+    ]
+  },
+  {
+    "head": "     PersonX argues a lot ",
+    "gens": [
+      "to be helpful",
+      "to have a good time",
+      "to have a good argument",
+      "to win",
+      "to be a better person"
+    ],
+    "tails": [
+      "his opinion to be recognized as valid"
+    ]
+  },
+  {
+    "head": "     PersonX argues a lot ",
+    "gens": [
+      "to be helpful",
+      "to have a good time",
+      "to have a good argument",
+      "to win",
+      "to be a better person"
+    ],
+    "tails": [
+      "to release stress"
+    ]
+  },
+  {
+    "head": "     PersonX argues a lot ",
+    "gens": [
+      "to be helpful",
+      "to have a good time",
+      "to have a good argument",
+      "to win",
+      "to be a better person"
+    ],
+    "tails": [
+      "to be controversial"
+    ]
+  },
+  {
+    "head": "     PersonX argues a lot ",
+    "gens": [
+      "to be helpful",
+      "to have a good time",
+      "to have a good argument",
+      "to win",
+      "to be a better person"
+    ],
+    "tails": [
+      "convince someone"
+    ]
+  },
+  {
+    "head": "     PersonX arranges a date ",
+    "gens": [
+      "to have a date",
+      "to have fun",
+      "a date",
+      "to get married",
+      "to be with someone"
+    ],
+    "tails": [
+      "to have a date at that time"
+    ]
+  },
+  {
+    "head": "     PersonX arranges a date ",
+    "gens": [
+      "to have a date",
+      "to have fun",
+      "a date",
+      "to get married",
+      "to be with someone"
+    ],
+    "tails": [
+      "to help their friend"
+    ]
+  },
+  {
+    "head": "     PersonX arranges a date ",
+    "gens": [
+      "to have a date",
+      "to have fun",
+      "a date",
+      "to get married",
+      "to be with someone"
+    ],
+    "tails": [
+      "to hang out"
+    ]
+  },
+  {
+    "head": "     PersonX arrives at PersonY understanding ",
+    "gens": [
+      "to be helpful",
+      "to be understood",
+      "to understand",
+      "to help persony",
+      "to help"
+    ],
+    "tails": [
+      "to accepting"
+    ]
+  },
+  {
+    "head": "     PersonX arrives home ",
+    "gens": [
+      "to be home",
+      "to go home",
+      "to relax",
+      "to rest",
+      "to go to work"
+    ],
+    "tails": [
+      "to be at their house"
+    ]
+  },
+  {
+    "head": "     PersonX arrives home ",
+    "gens": [
+      "to be home",
+      "to go home",
+      "to relax",
+      "to rest",
+      "to go to work"
+    ],
+    "tails": [
+      "to relax"
+    ]
+  },
+  {
+    "head": "     PersonX arrives home from lunch ",
+    "gens": [
+      "to relax",
+      "to eat",
+      "to eat lunch",
+      "to have lunch",
+      "to be home"
+    ],
+    "tails": [
+      "to rest after lunch"
+    ]
+  },
+  {
+    "head": "     PersonX arrives home from lunch ",
+    "gens": [
+      "to relax",
+      "to eat",
+      "to eat lunch",
+      "to have lunch",
+      "to be home"
+    ],
+    "tails": [
+      "to eat his food"
+    ]
+  },
+  {
+    "head": "     PersonX arrives home from work ",
+    "gens": [
+      "to relax",
+      "to be home",
+      "to go home",
+      "to rest",
+      "to get home"
+    ],
+    "tails": [
+      "to rest"
+    ]
+  },
+  {
+    "head": "     PersonX arrives home from work ",
+    "gens": [
+      "to relax",
+      "to be home",
+      "to go home",
+      "to rest",
+      "to get home"
+    ],
+    "tails": [
+      "to get home"
+    ]
+  },
+  {
+    "head": "     PersonX arrives home that ___ ",
+    "gens": [
+      "to be home",
+      "to relax",
+      "to go home",
+      "to have a rest",
+      "to go to work"
+    ],
+    "tails": [
+      "to get some rest"
+    ]
+  },
+  {
+    "head": "     PersonX arrives just in time ",
+    "gens": [
+      "to be on time",
+      "to be in time",
+      "to be prepared",
+      "to be there",
+      "to be on time."
+    ],
+    "tails": [
+      "to start the race"
+    ]
+  },
+  {
+    "head": "     PersonX arrives just in time ",
+    "gens": [
+      "to be on time",
+      "to be in time",
+      "to be prepared",
+      "to be there",
+      "to be on time."
+    ],
+    "tails": [
+      "to be on  time"
+    ]
+  },
+  {
+    "head": "     PersonX arrives just in time ",
+    "gens": [
+      "to be on time",
+      "to be in time",
+      "to be prepared",
+      "to be there",
+      "to be on time."
+    ],
+    "tails": [
+      "polite"
+    ]
+  },
+  {
+    "head": "     PersonX arrives shortly ",
+    "gens": [
+      "to be there",
+      "to be home",
+      "to be in the city",
+      "to be in the area",
+      "to be in the office"
+    ],
+    "tails": [
+      "to be on time."
+    ]
+  },
+  {
+    "head": "     PersonX arrives to the restaurant ",
+    "gens": [
+      "to eat",
+      "to have dinner",
+      "to eat dinner",
+      "to have a meal",
+      "to have lunch"
+    ],
+    "tails": [
+      "to join his friends for dinner"
+    ]
+  },
+  {
+    "head": "     PersonX arrives to the restaurant ",
+    "gens": [
+      "to eat",
+      "to have dinner",
+      "to eat dinner",
+      "to have a meal",
+      "to have lunch"
+    ],
+    "tails": [
+      "to take food for his family"
+    ]
+  },
+  {
+    "head": "     PersonX arrives to the restaurant ",
+    "gens": [
+      "to eat",
+      "to have dinner",
+      "to eat dinner",
+      "to have a meal",
+      "to have lunch"
+    ],
+    "tails": [
+      "to have lunch with friends"
+    ]
+  },
+  {
+    "head": "     PersonX arrives to the restaurant ",
+    "gens": [
+      "to eat",
+      "to have dinner",
+      "to eat dinner",
+      "to have a meal",
+      "to have lunch"
+    ],
+    "tails": [
+      "to eat dinner"
+    ]
+  },
+  {
+    "head": "     PersonX arrives to the restaurant ",
+    "gens": [
+      "to eat",
+      "to have dinner",
+      "to eat dinner",
+      "to have a meal",
+      "to have lunch"
+    ],
+    "tails": [
+      "to meet with date"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonX's boyfriend ",
+    "gens": [
+      "to find out",
+      "to get a date",
+      "to know something",
+      "to know",
+      "to find out what is wrong"
+    ],
+    "tails": [
+      "to know the truth"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonX's boyfriend ",
+    "gens": [
+      "to find out",
+      "to get a date",
+      "to know something",
+      "to know",
+      "to find out what is wrong"
+    ],
+    "tails": [
+      "needs help"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonX's grandma ",
+    "gens": [
+      "to know something",
+      "to find out",
+      "to know the answer",
+      "to know",
+      "to find out what happened"
+    ],
+    "tails": [
+      "to visit her."
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonX's grandma ",
+    "gens": [
+      "to know something",
+      "to find out",
+      "to know the answer",
+      "to know",
+      "to find out what happened"
+    ],
+    "tails": [
+      "to know if he can come over"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonX's grandma ",
+    "gens": [
+      "to know something",
+      "to find out",
+      "to know the answer",
+      "to know",
+      "to find out what happened"
+    ],
+    "tails": [
+      "to know where his mother has gone"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonX's grandma ",
+    "gens": [
+      "to know something",
+      "to find out",
+      "to know the answer",
+      "to know",
+      "to find out what happened"
+    ],
+    "tails": [
+      "to confirm his use of new suit to the function"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonX's mother for help ",
+    "gens": [
+      "help",
+      "to get help",
+      "to be helpful",
+      "to help",
+      "to help someone"
+    ],
+    "tails": [
+      "advice"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonX's mother for help ",
+    "gens": [
+      "help",
+      "to get help",
+      "to be helpful",
+      "to help",
+      "to help someone"
+    ],
+    "tails": [
+      "help"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonX's mother for help ",
+    "gens": [
+      "help",
+      "to get help",
+      "to be helpful",
+      "to help",
+      "to help someone"
+    ],
+    "tails": [
+      "to get it right"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonX's mother for help ",
+    "gens": [
+      "help",
+      "to get help",
+      "to be helpful",
+      "to help",
+      "to help someone"
+    ],
+    "tails": [
+      "to learn"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY to go ",
+    "gens": [
+      "to see person y",
+      "to be helpful",
+      "to go somewhere",
+      "to see persony",
+      "to go"
+    ],
+    "tails": [
+      "to be inclusive"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY to go ",
+    "gens": [
+      "to see person y",
+      "to be helpful",
+      "to go somewhere",
+      "to see persony",
+      "to go"
+    ],
+    "tails": [
+      "to do work"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY to go ",
+    "gens": [
+      "to see person y",
+      "to be helpful",
+      "to go somewhere",
+      "to see persony",
+      "to go"
+    ],
+    "tails": [
+      "to buy"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY to make ",
+    "gens": [
+      "to be helpful",
+      "to make something",
+      "to help person y",
+      "to help",
+      "to help persony"
+    ],
+    "tails": [
+      "help"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY to make ",
+    "gens": [
+      "to be helpful",
+      "to make something",
+      "to help person y",
+      "to help",
+      "to help persony"
+    ],
+    "tails": [
+      "to order something"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY to make ",
+    "gens": [
+      "to be helpful",
+      "to make something",
+      "to help person y",
+      "to help",
+      "to help persony"
+    ],
+    "tails": [
+      "support"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY to play ",
+    "gens": [
+      "to have fun",
+      "to play",
+      "to be entertained",
+      "to play with persony",
+      "to have a game"
+    ],
+    "tails": [
+      "to spend time with someone"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY to play ",
+    "gens": [
+      "to have fun",
+      "to play",
+      "to be entertained",
+      "to play with persony",
+      "to have a game"
+    ],
+    "tails": [
+      "to have fun"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY to play ",
+    "gens": [
+      "to have fun",
+      "to play",
+      "to be entertained",
+      "to play with persony",
+      "to have a game"
+    ],
+    "tails": [
+      "company"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY to say ",
+    "gens": [
+      "to be helpful",
+      "to tell person y something",
+      "to know something",
+      "to tell person y",
+      "to know"
+    ],
+    "tails": [
+      "persony to talk"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY to say ",
+    "gens": [
+      "to be helpful",
+      "to tell person y something",
+      "to know something",
+      "to tell person y",
+      "to know"
+    ],
+    "tails": [
+      "persony to tell personx something"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY to say ",
+    "gens": [
+      "to be helpful",
+      "to tell person y something",
+      "to know something",
+      "to tell person y",
+      "to know"
+    ],
+    "tails": [
+      "persony to convey information"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY to say ",
+    "gens": [
+      "to be helpful",
+      "to tell person y something",
+      "to know something",
+      "to tell person y",
+      "to know"
+    ],
+    "tails": [
+      "to be helpful"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY to say ",
+    "gens": [
+      "to be helpful",
+      "to tell person y something",
+      "to know something",
+      "to tell person y",
+      "to know"
+    ],
+    "tails": [
+      "controlling"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY to show ",
+    "gens": [
+      "to show persony something",
+      "to show person y",
+      "to show persony",
+      "to be helpful",
+      "to show something"
+    ],
+    "tails": [
+      "to clarify his doubts"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY to stay ",
+    "gens": [
+      "to be helpful",
+      "to be nice",
+      "to stay",
+      "to be respectful",
+      "to have a conversation"
+    ],
+    "tails": [
+      "to talk"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY to stay ",
+    "gens": [
+      "to be helpful",
+      "to be nice",
+      "to stay",
+      "to be respectful",
+      "to have a conversation"
+    ],
+    "tails": [
+      "to not be alone"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY to stay ",
+    "gens": [
+      "to be helpful",
+      "to be nice",
+      "to stay",
+      "to be respectful",
+      "to have a conversation"
+    ],
+    "tails": [
+      "more off this person's company"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY's boyfriend ",
+    "gens": [
+      "to find out",
+      "to know something",
+      "to get a date",
+      "to know what persony wants",
+      "to know"
+    ],
+    "tails": [
+      "to know what he did last night"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY's boyfriend ",
+    "gens": [
+      "to find out",
+      "to know something",
+      "to get a date",
+      "to know what persony wants",
+      "to know"
+    ],
+    "tails": [
+      "to be informed"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY's grandma ",
+    "gens": [
+      "to know something",
+      "to find out",
+      "to know",
+      "to find out something",
+      "to know what persony wants"
+    ],
+    "tails": [
+      "to see if he can come over for dinner"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY's grandma ",
+    "gens": [
+      "to know something",
+      "to find out",
+      "to know",
+      "to find out something",
+      "to know what persony wants"
+    ],
+    "tails": [
+      "an advice."
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY's grandma ",
+    "gens": [
+      "to know something",
+      "to find out",
+      "to know",
+      "to find out something",
+      "to know what persony wants"
+    ],
+    "tails": [
+      "to ask with person y's grandmother"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY's mother ",
+    "gens": [
+      "to know something",
+      "to find out",
+      "to know",
+      "to know what is going on",
+      "to know what persony wants"
+    ],
+    "tails": [
+      "to go shopping with person."
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY's mother for help ",
+    "gens": [
+      "help",
+      "to be helpful",
+      "to get help",
+      "to help",
+      "to help someone"
+    ],
+    "tails": [
+      "to find answer"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY's mother for help ",
+    "gens": [
+      "help",
+      "to be helpful",
+      "to get help",
+      "to help",
+      "to help someone"
+    ],
+    "tails": [
+      "to figure out how to knit"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY's mother for help ",
+    "gens": [
+      "help",
+      "to be helpful",
+      "to get help",
+      "to help",
+      "to help someone"
+    ],
+    "tails": [
+      "to get support"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY's mother for help ",
+    "gens": [
+      "help",
+      "to be helpful",
+      "to get help",
+      "to help",
+      "to help someone"
+    ],
+    "tails": [
+      "personx cannot do it alone"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY's teacher ",
+    "gens": [
+      "to learn something",
+      "to know something",
+      "to learn",
+      "to be helpful",
+      "to find out"
+    ],
+    "tails": [
+      "to get information."
+    ]
+  },
+  {
+    "head": "     PersonX asks ___ for one ",
+    "gens": [
+      "to be helpful",
+      "to get something",
+      "to get a gift",
+      "to have a friend",
+      "to ask for a gift"
+    ],
+    "tails": [
+      "to ask for something."
+    ]
+  },
+  {
+    "head": "     PersonX asks ___ for one ",
+    "gens": [
+      "to be helpful",
+      "to get something",
+      "to get a gift",
+      "to have a friend",
+      "to ask for a gift"
+    ],
+    "tails": [
+      "one"
+    ]
+  },
+  {
+    "head": "     PersonX asks ___ if PersonY could have one ",
+    "gens": [
+      "to be helpful",
+      "to have a drink",
+      "to have a pet",
+      "to have a friend",
+      "to have a cake"
+    ],
+    "tails": [
+      "to help"
+    ]
+  },
+  {
+    "head": "     PersonX asks ___ if PersonY could have one ",
+    "gens": [
+      "to be helpful",
+      "to have a drink",
+      "to have a pet",
+      "to have a friend",
+      "to have a cake"
+    ],
+    "tails": [
+      "them to have one too"
+    ]
+  },
+  {
+    "head": "     PersonX asks ___ if PersonY could have one ",
+    "gens": [
+      "to be helpful",
+      "to have a drink",
+      "to have a pet",
+      "to have a friend",
+      "to have a cake"
+    ],
+    "tails": [
+      "to try some fish"
+    ]
+  },
+  {
+    "head": "     PersonX asks ___ to go with PersonY ",
+    "gens": [
+      "to go with person y",
+      "to be with person y",
+      "to be with persony",
+      "to go with persony",
+      "to go somewhere"
+    ],
+    "tails": [
+      "them to have someone with them while they go"
+    ]
+  },
+  {
+    "head": "     PersonX asks ___ to go with PersonY ",
+    "gens": [
+      "to go with person y",
+      "to be with person y",
+      "to be with persony",
+      "to go with persony",
+      "to go somewhere"
+    ],
+    "tails": [
+      "to go on a date with persony"
+    ]
+  },
+  {
+    "head": "     PersonX asks ___ to go with PersonY ",
+    "gens": [
+      "to go with person y",
+      "to be with person y",
+      "to be with persony",
+      "to go with persony",
+      "to go somewhere"
+    ],
+    "tails": [
+      "to facilitate a friendship"
+    ]
+  },
+  {
+    "head": "     PersonX asks for the moon ",
+    "gens": [
+      "to see the moon",
+      "to get the moon",
+      "to get a moon",
+      "to have a moon",
+      "to have a good time"
+    ],
+    "tails": [
+      "to be greedy"
+    ]
+  },
+  {
+    "head": "     PersonX asks if PersonY was okay ",
+    "gens": [
+      "to know if persony is okay",
+      "to know",
+      "to know if persony was okay",
+      "to make sure persony is okay",
+      "to know something"
+    ],
+    "tails": [
+      "to know if he can help persony."
+    ]
+  },
+  {
+    "head": "     PersonX asks if PersonY was okay ",
+    "gens": [
+      "to know if persony is okay",
+      "to know",
+      "to know if persony was okay",
+      "to make sure persony is okay",
+      "to know something"
+    ],
+    "tails": [
+      "to gain knowledge"
+    ]
+  },
+  {
+    "head": "     PersonX asks the teacher ",
+    "gens": [
+      "to learn something",
+      "to learn",
+      "to be helpful",
+      "to learn something new",
+      "to know what to do"
+    ],
+    "tails": [
+      "to clarify something"
+    ]
+  },
+  {
+    "head": "     PersonX asks the teacher ",
+    "gens": [
+      "to learn something",
+      "to learn",
+      "to be helpful",
+      "to learn something new",
+      "to know what to do"
+    ],
+    "tails": [
+      "to get an opinion"
+    ]
+  },
+  {
+    "head": "     PersonX asks the teacher ",
+    "gens": [
+      "to learn something",
+      "to learn",
+      "to be helpful",
+      "to learn something new",
+      "to know what to do"
+    ],
+    "tails": [
+      "to know the answer"
+    ]
+  },
+  {
+    "head": "     PersonX asks the teacher ",
+    "gens": [
+      "to learn something",
+      "to learn",
+      "to be helpful",
+      "to learn something new",
+      "to know what to do"
+    ],
+    "tails": [
+      "explanations"
+    ]
+  },
+  {
+    "head": "     PersonX asks to go home ",
+    "gens": [
+      "to go home",
+      "to be home",
+      "to go home.",
+      "to relax",
+      "to be safe"
+    ],
+    "tails": [
+      "to go rest"
+    ]
+  },
+  {
+    "head": "     PersonX asks to play ",
+    "gens": [
+      "to have fun",
+      "to be entertained",
+      "to play",
+      "to have fun.",
+      "to have a game"
+    ],
+    "tails": [
+      "to relax  his mind"
+    ]
+  },
+  {
+    "head": "     PersonX asks to play ",
+    "gens": [
+      "to have fun",
+      "to be entertained",
+      "to play",
+      "to have fun.",
+      "to have a game"
+    ],
+    "tails": [
+      "to be part of a group"
+    ]
+  },
+  {
+    "head": "     PersonX asks to play ",
+    "gens": [
+      "to have fun",
+      "to be entertained",
+      "to play",
+      "to have fun.",
+      "to have a game"
+    ],
+    "tails": [
+      "to be involved"
+    ]
+  },
+  {
+    "head": "     PersonX assumes another ___ ",
+    "gens": [
+      "to be safe",
+      "to be helpful",
+      "to be a friend",
+      "none",
+      "to be nice"
+    ],
+    "tails": [
+      "to change their identity"
+    ]
+  },
+  {
+    "head": "     PersonX attends PersonY school ",
+    "gens": [
+      "to be educated",
+      "to learn",
+      "to learn something new",
+      "to learn something",
+      "to study"
+    ],
+    "tails": [
+      "an education"
+    ]
+  },
+  {
+    "head": "     PersonX attends PersonY school ",
+    "gens": [
+      "to be educated",
+      "to learn",
+      "to learn something new",
+      "to learn something",
+      "to study"
+    ],
+    "tails": [
+      "to be in school"
+    ]
+  },
+  {
+    "head": "     PersonX attends school ",
+    "gens": [
+      "to be educated",
+      "to learn",
+      "to study",
+      "to learn something new",
+      "to learn something"
+    ],
+    "tails": [
+      "to get educated"
+    ]
+  },
+  {
+    "head": "     PersonX attends school ",
+    "gens": [
+      "to be educated",
+      "to learn",
+      "to study",
+      "to learn something new",
+      "to learn something"
+    ],
+    "tails": [
+      "to learn new things"
+    ]
+  },
+  {
+    "head": "     PersonX attends school ",
+    "gens": [
+      "to be educated",
+      "to learn",
+      "to study",
+      "to learn something new",
+      "to learn something"
+    ],
+    "tails": [
+      "to be educated"
+    ]
+  },
+  {
+    "head": "     PersonX babysits PersonX's nephew ",
+    "gens": [
+      "to be helpful",
+      "to be nice",
+      "to be a parent",
+      "to help out",
+      "to be a baby"
+    ],
+    "tails": [
+      "to help"
+    ]
+  },
+  {
+    "head": "     PersonX babysits PersonX's nephew ",
+    "gens": [
+      "to be helpful",
+      "to be nice",
+      "to be a parent",
+      "to help out",
+      "to be a baby"
+    ],
+    "tails": [
+      "to practice"
+    ]
+  },
+  {
+    "head": "     PersonX babysits PersonX's nephew ",
+    "gens": [
+      "to be helpful",
+      "to be nice",
+      "to be a parent",
+      "to help out",
+      "to be a baby"
+    ],
+    "tails": [
+      "to help a sibling"
+    ]
+  },
+  {
+    "head": "     PersonX babysits PersonY's nephew ",
+    "gens": [
+      "to be helpful",
+      "to be nice",
+      "to be a parent",
+      "to help out",
+      "to help"
+    ],
+    "tails": [
+      "to make extra money."
+    ]
+  },
+  {
+    "head": "     PersonX babysits PersonY's nephew ",
+    "gens": [
+      "to be helpful",
+      "to be nice",
+      "to be a parent",
+      "to help out",
+      "to help"
+    ],
+    "tails": [
+      "none"
+    ]
+  },
+  {
+    "head": "     PersonX babysits PersonY's nephew ",
+    "gens": [
+      "to be helpful",
+      "to be nice",
+      "to be a parent",
+      "to help out",
+      "to help"
+    ],
+    "tails": [
+      "to help persony"
+    ]
+  },
+  {
+    "head": "     PersonX bakes PersonX's own bread ",
+    "gens": [
+      "to make bread",
+      "to eat",
+      "to make something",
+      "to have a snack",
+      "to make a meal"
+    ],
+    "tails": [
+      "to be useful"
+    ]
+  },
+  {
+    "head": "     PersonX bakes PersonX's own bread ",
+    "gens": [
+      "to make bread",
+      "to eat",
+      "to make something",
+      "to have a snack",
+      "to make a meal"
+    ],
+    "tails": [
+      "to eat fresh homemade bread"
+    ]
+  },
+  {
+    "head": "     PersonX bakes PersonX's own bread ",
+    "gens": [
+      "to make bread",
+      "to eat",
+      "to make something",
+      "to have a snack",
+      "to make a meal"
+    ],
+    "tails": [
+      "to be healthy"
+    ]
+  },
+  {
+    "head": "     PersonX bakes bread ",
+    "gens": [
+      "to make bread",
+      "to eat",
+      "to satisfy hunger",
+      "to eat something",
+      "to have a snack"
+    ],
+    "tails": [
+      "fresh homemade bread"
+    ]
+  },
+  {
+    "head": "     PersonX bakes bread ",
+    "gens": [
+      "to make bread",
+      "to eat",
+      "to satisfy hunger",
+      "to eat something",
+      "to have a snack"
+    ],
+    "tails": [
+      "to have it for dinner."
+    ]
+  },
+  {
+    "head": "     PersonX bakes bread ",
+    "gens": [
+      "to make bread",
+      "to eat",
+      "to satisfy hunger",
+      "to eat something",
+      "to have a snack"
+    ],
+    "tails": [
+      "to enjoy fresh baked bread"
+    ]
+  },
+  {
+    "head": "     PersonX bases on PersonX's experience ",
+    "gens": [
+      "to make a decision",
+      "to learn something new",
+      "to be informed",
+      "to learn something",
+      "to learn"
+    ],
+    "tails": [
+      "veteran"
+    ]
+  },
+  {
+    "head": "     PersonX bases on PersonX's experience ",
+    "gens": [
+      "to make a decision",
+      "to learn something new",
+      "to be informed",
+      "to learn something",
+      "to learn"
+    ],
+    "tails": [
+      "wise"
+    ]
+  },
+  {
+    "head": "     PersonX bats PersonX's eyelashes ",
+    "gens": [
+      "to look good",
+      "to be nice",
+      "to get rid of a problem",
+      "to show off his eyes",
+      "to be a good person"
+    ],
+    "tails": [
+      "to be flirtatious."
+    ]
+  },
+  {
+    "head": "     PersonX bears ___ unto the PersonY ",
+    "gens": [
+      "to be kind",
+      "to be helpful",
+      "to show love",
+      "to show affection",
+      "none"
+    ],
+    "tails": [
+      "persony to be believed"
+    ]
+  },
+  {
+    "head": "     PersonX bears the brunt ",
+    "gens": [
+      "to be responsible",
+      "none",
+      "to be strong",
+      "to be a burden",
+      "to be in charge"
+    ],
+    "tails": [
+      "none"
+    ]
+  },
+  {
+    "head": "     PersonX beats PersonX's swords into ploughshares ",
+    "gens": [
+      "to get revenge",
+      "to win",
+      "to win the game",
+      "to kill",
+      "to win the fight"
+    ],
+    "tails": [
+      "mean"
+    ]
+  },
+  {
+    "head": "     PersonX beats PersonX's swords into ploughshares ",
+    "gens": [
+      "to get revenge",
+      "to win",
+      "to win the game",
+      "to kill",
+      "to win the fight"
+    ],
+    "tails": [
+      "to destroy it"
+    ]
+  },
+  {
+    "head": "     PersonX becomes PersonY wife ",
+    "gens": [
+      "to be a wife",
+      "to be married",
+      "to have a daughter",
+      "to be a partner",
+      "to get married"
+    ],
+    "tails": [
+      "to be becomes"
+    ]
+  },
+  {
+    "head": "     PersonX becomes PersonY wife ",
+    "gens": [
+      "to be a wife",
+      "to be married",
+      "to have a daughter",
+      "to be a partner",
+      "to get married"
+    ],
+    "tails": [
+      "to be secure"
+    ]
+  },
+  {
+    "head": "     PersonX becomes PersonY wife ",
+    "gens": [
+      "to be a wife",
+      "to be married",
+      "to have a daughter",
+      "to be a partner",
+      "to get married"
+    ],
+    "tails": [
+      "to be together"
+    ]
+  },
+  {
+    "head": "     PersonX becomes PersonY's wife ",
+    "gens": [
+      "to be a wife",
+      "to be married",
+      "to be a partner",
+      "to have a daughter",
+      "to be nice"
+    ],
+    "tails": [
+      "be person y's wife"
+    ]
+  },
+  {
+    "head": "     PersonX becomes PersonY's wife ",
+    "gens": [
+      "to be a wife",
+      "to be married",
+      "to be a partner",
+      "to have a daughter",
+      "to be nice"
+    ],
+    "tails": [
+      "to marry y"
+    ]
+  },
+  {
+    "head": "     PersonX becomes distracted ",
+    "gens": [
+      "to be productive",
+      "to be entertained",
+      "to be distracted",
+      "to be a parent",
+      "none"
+    ],
+    "tails": [
+      "to procrastinate"
+    ]
+  },
+  {
+    "head": "     PersonX becomes distracted ",
+    "gens": [
+      "to be productive",
+      "to be entertained",
+      "to be distracted",
+      "to be a parent",
+      "none"
+    ],
+    "tails": [
+      "to change the topic"
+    ]
+  },
+  {
+    "head": "     PersonX becomes fast ___ ",
+    "gens": [
+      "to be fast",
+      "to be a fast person",
+      "to be a good person",
+      "to get a job",
+      "to be able to move"
+    ],
+    "tails": [
+      "to be social"
+    ]
+  },
+  {
+    "head": "     PersonX becomes fast friends ",
+    "gens": [
+      "to be a friend",
+      "to make friends",
+      "to be social",
+      "to be helpful",
+      "to be fast"
+    ],
+    "tails": [
+      "more friends"
+    ]
+  },
+  {
+    "head": "     PersonX becomes fast friends ",
+    "gens": [
+      "to be a friend",
+      "to make friends",
+      "to be social",
+      "to be helpful",
+      "to be fast"
+    ],
+    "tails": [
+      "to know more people"
+    ]
+  },
+  {
+    "head": "     PersonX becomes flat ",
+    "gens": [
+      "to be nice",
+      "to be comfortable",
+      "to be slender",
+      "to hide",
+      "to be a good person"
+    ],
+    "tails": [
+      "to change to a man"
+    ]
+  },
+  {
+    "head": "     PersonX begs for food ",
+    "gens": [
+      "to eat",
+      "food",
+      "to eat something",
+      "to eat food",
+      "to have food"
+    ],
+    "tails": [
+      "to eat"
+    ]
+  }
+]

@@ -1,0 +1,3239 @@
+[
+  {
+    "head": "     PersonX 'd better go ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to go somewhere else more important."
+    ]
+  },
+  {
+    "head": "     PersonX accepts PersonX's diploma ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to graduate from high school"
+    ]
+  },
+  {
+    "head": "     PersonX accepts PersonX's diploma ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to graduate"
+    ]
+  },
+  {
+    "head": "     PersonX accepts PersonY invitation ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to enjoy his time"
+    ]
+  },
+  {
+    "head": "     PersonX accepts PersonY invitation ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "the appreciation"
+    ]
+  },
+  {
+    "head": "     PersonX accepts PersonY invitation ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to go the invited program"
+    ]
+  },
+  {
+    "head": "     PersonX accepts PersonY invitation ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to see person"
+    ]
+  },
+  {
+    "head": "     PersonX accepts PersonY invitation ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to gain person's friendship"
+    ]
+  },
+  {
+    "head": "     PersonX accepts PersonY offer ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to gain something"
+    ]
+  },
+  {
+    "head": "     PersonX accepts PersonY offer ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "job"
+    ]
+  },
+  {
+    "head": "     PersonX accepts PersonY offer ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to be paid"
+    ]
+  },
+  {
+    "head": "     PersonX accepts PersonY's invitation ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to be polite"
+    ]
+  },
+  {
+    "head": "     PersonX accepts PersonY's invitation ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to see persony"
+    ]
+  },
+  {
+    "head": "     PersonX accepts PersonY's invitation ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to not disappoint persony"
+    ]
+  },
+  {
+    "head": "     PersonX accepts PersonY's invitation ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "they want to go out with persony"
+    ]
+  },
+  {
+    "head": "     PersonX accepts PersonY's invitation ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "they want to be polite"
+    ]
+  },
+  {
+    "head": "     PersonX accepts PersonY's invitation ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "they want to attend the event"
+    ]
+  },
+  {
+    "head": "     PersonX accepts PersonY's offer ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to buy the things"
+    ]
+  },
+  {
+    "head": "     PersonX accepts PersonY's offer ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to obtain something."
+    ]
+  },
+  {
+    "head": "     PersonX accepts PersonY's offer ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to form agreement"
+    ]
+  },
+  {
+    "head": "     PersonX accepts PersonY's offer ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to move past disagreement"
+    ]
+  },
+  {
+    "head": "     PersonX accepts ___ in exchange ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "happy"
+    ]
+  },
+  {
+    "head": "     PersonX accepts ___ in exchange ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "accepts the dress in exchange"
+    ]
+  },
+  {
+    "head": "     PersonX accepts happily ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "none"
+    ]
+  },
+  {
+    "head": "     PersonX accepts happily ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to take the opportunity"
+    ]
+  },
+  {
+    "head": "     PersonX accepts the invitation ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to go"
+    ]
+  },
+  {
+    "head": "     PersonX accepts the invitation ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to be with other people"
+    ]
+  },
+  {
+    "head": "     PersonX accepts the invitation ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to have fun"
+    ]
+  },
+  {
+    "head": "     PersonX accepts the invitation ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to be polite"
+    ]
+  },
+  {
+    "head": "     PersonX accepts the invitation ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to see some people"
+    ]
+  },
+  {
+    "head": "     PersonX accepts the job ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to work"
+    ]
+  },
+  {
+    "head": "     PersonX accepts the job ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to be employed"
+    ]
+  },
+  {
+    "head": "     PersonX accepts the job ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to make money"
+    ]
+  },
+  {
+    "head": "     PersonX accepts the job ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to get a better career"
+    ]
+  },
+  {
+    "head": "     PersonX accepts the job ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to get better pay"
+    ]
+  },
+  {
+    "head": "     PersonX accepts the job ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to support their family"
+    ]
+  },
+  {
+    "head": "     PersonX accepts the offer ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "the job"
+    ]
+  },
+  {
+    "head": "     PersonX accepts the offer ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to make a deal"
+    ]
+  },
+  {
+    "head": "     PersonX accepts the offer ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to get the new job"
+    ]
+  },
+  {
+    "head": "     PersonX accepts the offer ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to benefit from it"
+    ]
+  },
+  {
+    "head": "     PersonX achieves PersonX's ___ by means ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to achieve goal"
+    ]
+  },
+  {
+    "head": "     PersonX achieves PersonX's dream ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to be an astronaut"
+    ]
+  },
+  {
+    "head": "     PersonX achieves PersonX's dream ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to achieve the dream"
+    ]
+  },
+  {
+    "head": "     PersonX achieves PersonX's objective ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to complete something"
+    ]
+  },
+  {
+    "head": "     PersonX achieves PersonX's objective ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to accomplish a goal"
+    ]
+  },
+  {
+    "head": "     PersonX achieves PersonX's objective ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to complete a goal"
+    ]
+  },
+  {
+    "head": "     PersonX achieves PersonX's objective ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "appease himself"
+    ]
+  },
+  {
+    "head": "     PersonX achieves PersonY effect ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "make person y stronger"
+    ]
+  },
+  {
+    "head": "     PersonX achieves PersonY objective ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to succeed for their boss"
+    ]
+  },
+  {
+    "head": "     PersonX achieves ___ by means ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "tried hard to come back"
+    ]
+  },
+  {
+    "head": "     PersonX achieves ___ by means ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to be in control"
+    ]
+  },
+  {
+    "head": "     PersonX acts weird ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "none"
+    ]
+  },
+  {
+    "head": "     PersonX acts weird ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "attention"
+    ]
+  },
+  {
+    "head": "     PersonX acts weird ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to be wacky"
+    ]
+  },
+  {
+    "head": "     PersonX adapts ___ to conditions ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to learn new things"
+    ]
+  },
+  {
+    "head": "     PersonX adapts ___ to conditions ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "he is rules and contional is change"
+    ]
+  },
+  {
+    "head": "     PersonX addresses PersonY audience ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to give speech"
+    ]
+  },
+  {
+    "head": "     PersonX addresses PersonY audience ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to direct attention"
+    ]
+  },
+  {
+    "head": "     PersonX addresses PersonY audience ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to provide background"
+    ]
+  },
+  {
+    "head": "     PersonX adjusts spacing as well as minimizing ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to have a perfect document"
+    ]
+  },
+  {
+    "head": "     PersonX adopts PersonY attitude ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to act as the person"
+    ]
+  },
+  {
+    "head": "     PersonX adopts PersonY attitude ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "change"
+    ]
+  },
+  {
+    "head": "     PersonX affects PersonY's interests ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to motivate more"
+    ]
+  },
+  {
+    "head": "     PersonX affects children 's ___ ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "i like to very satisfied"
+    ]
+  },
+  {
+    "head": "     PersonX affects children 's ___ ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to hurt"
+    ]
+  },
+  {
+    "head": "     PersonX affects every ___ ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "personal object"
+    ]
+  },
+  {
+    "head": "     PersonX affords PersonY every ___ ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "job facility in good"
+    ]
+  },
+  {
+    "head": "     PersonX affords PersonY every ___ ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to show kindness"
+    ]
+  },
+  {
+    "head": "     PersonX affords PersonY protection ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to help person y"
+    ]
+  },
+  {
+    "head": "     PersonX affords PersonY protection ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to be protective of person y."
+    ]
+  },
+  {
+    "head": "     PersonX affords PersonY protection ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to make person y feel secure."
+    ]
+  },
+  {
+    "head": "     PersonX affords PersonY protection ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "owes person y a debt"
+    ]
+  },
+  {
+    "head": "     PersonX affords another ___ ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to clearly explain the concept"
+    ]
+  },
+  {
+    "head": "     PersonX affords another ___ ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "this is example for others"
+    ]
+  },
+  {
+    "head": "     PersonX affords every ___ ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to be secure in the home"
+    ]
+  },
+  {
+    "head": "     PersonX agrees to the challenge ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to prove his power"
+    ]
+  },
+  {
+    "head": "     PersonX agrees to the challenge ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to fulfill his dream to eat as much ice cream as possible"
+    ]
+  },
+  {
+    "head": "     PersonX agrees to the challenge ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to conquer something"
+    ]
+  },
+  {
+    "head": "     PersonX also decided ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to think that conclusion is right"
+    ]
+  },
+  {
+    "head": "     PersonX also decided ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "in  charge."
+    ]
+  },
+  {
+    "head": "     PersonX also loved ___ ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to be entertained"
+    ]
+  },
+  {
+    "head": "     PersonX also loved ___ ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to enjoy themselves"
+    ]
+  },
+  {
+    "head": "     PersonX also ordered ___ ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to watch movies"
+    ]
+  },
+  {
+    "head": "     PersonX also ordered ___ ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "the same meal as them"
+    ]
+  },
+  {
+    "head": "     PersonX also ordered ___ ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to drive away hunger"
+    ]
+  },
+  {
+    "head": "     PersonX always ate ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to statisfy hunger"
+    ]
+  },
+  {
+    "head": "     PersonX always ate ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to release stress"
+    ]
+  },
+  {
+    "head": "     PersonX always ate ___ ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to eat food to be sated"
+    ]
+  },
+  {
+    "head": "     PersonX always ate ___ ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to enjoy the taste of chocolate"
+    ]
+  },
+  {
+    "head": "     PersonX always ate ___ ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to be healthy"
+    ]
+  },
+  {
+    "head": "     PersonX always ate ___ ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to not gain weight"
+    ]
+  },
+  {
+    "head": "     PersonX always tries ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to do their best"
+    ]
+  },
+  {
+    "head": "     PersonX always tries ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to never give up"
+    ]
+  },
+  {
+    "head": "     PersonX always tries ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to succeed"
+    ]
+  },
+  {
+    "head": "     PersonX always tries ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to give the best effor"
+    ]
+  },
+  {
+    "head": "     PersonX always tries ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to commit"
+    ]
+  },
+  {
+    "head": "     PersonX always watch ___ ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to check whether y is a good person"
+    ]
+  },
+  {
+    "head": "     PersonX always watch ___ ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to cheer for his team"
+    ]
+  },
+  {
+    "head": "     PersonX always watch ___ ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to watch something interesting"
+    ]
+  },
+  {
+    "head": "     PersonX always wore ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to be consistent."
+    ]
+  },
+  {
+    "head": "     PersonX always wore ___ ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to be consistent"
+    ]
+  },
+  {
+    "head": "     PersonX always wore ___ ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to look good."
+    ]
+  },
+  {
+    "head": "     PersonX amends PersonY act ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to make things right."
+    ]
+  },
+  {
+    "head": "     PersonX amends PersonY act ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to fix the act."
+    ]
+  },
+  {
+    "head": "     PersonX answers PersonX's purpose ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to have meaning."
+    ]
+  },
+  {
+    "head": "     PersonX answers PersonY question ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "helpful"
+    ]
+  },
+  {
+    "head": "     PersonX answers PersonY question ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "share knowledge"
+    ]
+  },
+  {
+    "head": "     PersonX answers PersonY question ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to teach"
+    ]
+  },
+  {
+    "head": "     PersonX answers PersonY question ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to help person."
+    ]
+  },
+  {
+    "head": "     PersonX answers PersonY question ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to give out advice"
+    ]
+  },
+  {
+    "head": "     PersonX answers PersonY's letter ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to be respectful"
+    ]
+  },
+  {
+    "head": "     PersonX answers PersonY's letter ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to reply"
+    ]
+  },
+  {
+    "head": "     PersonX answers PersonY's letter ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to respond to y"
+    ]
+  },
+  {
+    "head": "     PersonX answers PersonY's question ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "let the inquirer get their answer"
+    ]
+  },
+  {
+    "head": "     PersonX answers PersonY's question ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "inform the person"
+    ]
+  },
+  {
+    "head": "     PersonX answers the door ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "see who is there"
+    ]
+  },
+  {
+    "head": "     PersonX answers the door ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to greet his friend"
+    ]
+  },
+  {
+    "head": "     PersonX answers the door ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to see who is at the door"
+    ]
+  },
+  {
+    "head": "     PersonX answers the question ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to be cooperative"
+    ]
+  },
+  {
+    "head": "     PersonX answers the question ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to help people"
+    ]
+  },
+  {
+    "head": "     PersonX applies for a loan ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to get more money"
+    ]
+  },
+  {
+    "head": "     PersonX applies for a loan ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to be financially secure"
+    ]
+  },
+  {
+    "head": "     PersonX applies for a loan ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to have money for something they need or want"
+    ]
+  },
+  {
+    "head": "     PersonX applies for a loan ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to buy a car."
+    ]
+  },
+  {
+    "head": "     PersonX applies sunscreen ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to protect their skin"
+    ]
+  },
+  {
+    "head": "     PersonX applies sunscreen ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to protect from the sun"
+    ]
+  },
+  {
+    "head": "     PersonX applies sunscreen ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to be healthy"
+    ]
+  },
+  {
+    "head": "     PersonX applies to medical school ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to be a doctor"
+    ]
+  },
+  {
+    "head": "     PersonX applies to medical school ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to be a medical doctor"
+    ]
+  },
+  {
+    "head": "     PersonX applies to medical school ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to learn medicine."
+    ]
+  },
+  {
+    "head": "     PersonX argues a lot ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "his opinion to be recognized as valid"
+    ]
+  },
+  {
+    "head": "     PersonX argues a lot ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to release stress"
+    ]
+  },
+  {
+    "head": "     PersonX argues a lot ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to be controversial"
+    ]
+  },
+  {
+    "head": "     PersonX argues a lot ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "convince someone"
+    ]
+  },
+  {
+    "head": "     PersonX arranges a date ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to have a date at that time"
+    ]
+  },
+  {
+    "head": "     PersonX arranges a date ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to help their friend"
+    ]
+  },
+  {
+    "head": "     PersonX arranges a date ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to hang out"
+    ]
+  },
+  {
+    "head": "     PersonX arrives at PersonY understanding ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to accepting"
+    ]
+  },
+  {
+    "head": "     PersonX arrives home ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to be at their house"
+    ]
+  },
+  {
+    "head": "     PersonX arrives home ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to relax"
+    ]
+  },
+  {
+    "head": "     PersonX arrives home from lunch ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to rest after lunch"
+    ]
+  },
+  {
+    "head": "     PersonX arrives home from lunch ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to eat his food"
+    ]
+  },
+  {
+    "head": "     PersonX arrives home from work ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to rest"
+    ]
+  },
+  {
+    "head": "     PersonX arrives home from work ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to get home"
+    ]
+  },
+  {
+    "head": "     PersonX arrives home that ___ ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to get some rest"
+    ]
+  },
+  {
+    "head": "     PersonX arrives just in time ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to start the race"
+    ]
+  },
+  {
+    "head": "     PersonX arrives just in time ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to be on  time"
+    ]
+  },
+  {
+    "head": "     PersonX arrives just in time ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "polite"
+    ]
+  },
+  {
+    "head": "     PersonX arrives shortly ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to be on time."
+    ]
+  },
+  {
+    "head": "     PersonX arrives to the restaurant ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to join his friends for dinner"
+    ]
+  },
+  {
+    "head": "     PersonX arrives to the restaurant ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to take food for his family"
+    ]
+  },
+  {
+    "head": "     PersonX arrives to the restaurant ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to have lunch with friends"
+    ]
+  },
+  {
+    "head": "     PersonX arrives to the restaurant ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to eat dinner"
+    ]
+  },
+  {
+    "head": "     PersonX arrives to the restaurant ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to meet with date"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonX's boyfriend ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to know the truth"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonX's boyfriend ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "needs help"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonX's grandma ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to visit her."
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonX's grandma ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to know if he can come over"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonX's grandma ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to know where his mother has gone"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonX's grandma ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to confirm his use of new suit to the function"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonX's mother for help ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "advice"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonX's mother for help ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "help"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonX's mother for help ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to get it right"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonX's mother for help ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to learn"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY to go ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to be inclusive"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY to go ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to do work"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY to go ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to buy"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY to make ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "help"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY to make ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to order something"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY to make ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "support"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY to play ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to spend time with someone"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY to play ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to have fun"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY to play ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "company"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY to say ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "persony to talk"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY to say ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "persony to tell personx something"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY to say ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "persony to convey information"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY to say ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to be helpful"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY to say ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "controlling"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY to show ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to clarify his doubts"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY to stay ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to talk"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY to stay ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to not be alone"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY to stay ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "more off this person's company"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY's boyfriend ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to know what he did last night"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY's boyfriend ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to be informed"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY's grandma ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to see if he can come over for dinner"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY's grandma ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "an advice."
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY's grandma ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to ask with person y's grandmother"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY's mother ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to go shopping with person."
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY's mother for help ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to find answer"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY's mother for help ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to figure out how to knit"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY's mother for help ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to get support"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY's mother for help ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "personx cannot do it alone"
+    ]
+  },
+  {
+    "head": "     PersonX asks PersonY's teacher ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to get information."
+    ]
+  },
+  {
+    "head": "     PersonX asks ___ for one ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to ask for something."
+    ]
+  },
+  {
+    "head": "     PersonX asks ___ for one ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "one"
+    ]
+  },
+  {
+    "head": "     PersonX asks ___ if PersonY could have one ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to help"
+    ]
+  },
+  {
+    "head": "     PersonX asks ___ if PersonY could have one ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "them to have one too"
+    ]
+  },
+  {
+    "head": "     PersonX asks ___ if PersonY could have one ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to try some fish"
+    ]
+  },
+  {
+    "head": "     PersonX asks ___ to go with PersonY ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "them to have someone with them while they go"
+    ]
+  },
+  {
+    "head": "     PersonX asks ___ to go with PersonY ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to go on a date with persony"
+    ]
+  },
+  {
+    "head": "     PersonX asks ___ to go with PersonY ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to facilitate a friendship"
+    ]
+  },
+  {
+    "head": "     PersonX asks for the moon ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to be greedy"
+    ]
+  },
+  {
+    "head": "     PersonX asks if PersonY was okay ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to know if he can help persony."
+    ]
+  },
+  {
+    "head": "     PersonX asks if PersonY was okay ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to gain knowledge"
+    ]
+  },
+  {
+    "head": "     PersonX asks the teacher ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to clarify something"
+    ]
+  },
+  {
+    "head": "     PersonX asks the teacher ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to get an opinion"
+    ]
+  },
+  {
+    "head": "     PersonX asks the teacher ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to know the answer"
+    ]
+  },
+  {
+    "head": "     PersonX asks the teacher ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "explanations"
+    ]
+  },
+  {
+    "head": "     PersonX asks to go home ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to go rest"
+    ]
+  },
+  {
+    "head": "     PersonX asks to play ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to relax  his mind"
+    ]
+  },
+  {
+    "head": "     PersonX asks to play ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to be part of a group"
+    ]
+  },
+  {
+    "head": "     PersonX asks to play ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to be involved"
+    ]
+  },
+  {
+    "head": "     PersonX assumes another ___ ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to change their identity"
+    ]
+  },
+  {
+    "head": "     PersonX attends PersonY school ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "an education"
+    ]
+  },
+  {
+    "head": "     PersonX attends PersonY school ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to be in school"
+    ]
+  },
+  {
+    "head": "     PersonX attends school ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to get educated"
+    ]
+  },
+  {
+    "head": "     PersonX attends school ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to learn new things"
+    ]
+  },
+  {
+    "head": "     PersonX attends school ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to be educated"
+    ]
+  },
+  {
+    "head": "     PersonX babysits PersonX's nephew ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to help"
+    ]
+  },
+  {
+    "head": "     PersonX babysits PersonX's nephew ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to practice"
+    ]
+  },
+  {
+    "head": "     PersonX babysits PersonX's nephew ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to help a sibling"
+    ]
+  },
+  {
+    "head": "     PersonX babysits PersonY's nephew ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to make extra money."
+    ]
+  },
+  {
+    "head": "     PersonX babysits PersonY's nephew ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "none"
+    ]
+  },
+  {
+    "head": "     PersonX babysits PersonY's nephew ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to help persony"
+    ]
+  },
+  {
+    "head": "     PersonX bakes PersonX's own bread ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to be useful"
+    ]
+  },
+  {
+    "head": "     PersonX bakes PersonX's own bread ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to eat fresh homemade bread"
+    ]
+  },
+  {
+    "head": "     PersonX bakes PersonX's own bread ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to be healthy"
+    ]
+  },
+  {
+    "head": "     PersonX bakes bread ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "fresh homemade bread"
+    ]
+  },
+  {
+    "head": "     PersonX bakes bread ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to have it for dinner."
+    ]
+  },
+  {
+    "head": "     PersonX bakes bread ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to enjoy fresh baked bread"
+    ]
+  },
+  {
+    "head": "     PersonX bases on PersonX's experience ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "veteran"
+    ]
+  },
+  {
+    "head": "     PersonX bases on PersonX's experience ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "wise"
+    ]
+  },
+  {
+    "head": "     PersonX bats PersonX's eyelashes ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to be flirtatious."
+    ]
+  },
+  {
+    "head": "     PersonX bears ___ unto the PersonY ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "persony to be believed"
+    ]
+  },
+  {
+    "head": "     PersonX bears the brunt ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "none"
+    ]
+  },
+  {
+    "head": "     PersonX beats PersonX's swords into ploughshares ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "mean"
+    ]
+  },
+  {
+    "head": "     PersonX beats PersonX's swords into ploughshares ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to destroy it"
+    ]
+  },
+  {
+    "head": "     PersonX becomes PersonY wife ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to be becomes"
+    ]
+  },
+  {
+    "head": "     PersonX becomes PersonY wife ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to be secure"
+    ]
+  },
+  {
+    "head": "     PersonX becomes PersonY wife ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to be together"
+    ]
+  },
+  {
+    "head": "     PersonX becomes PersonY's wife ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "be person y's wife"
+    ]
+  },
+  {
+    "head": "     PersonX becomes PersonY's wife ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to marry y"
+    ]
+  },
+  {
+    "head": "     PersonX becomes distracted ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to procrastinate"
+    ]
+  },
+  {
+    "head": "     PersonX becomes distracted ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to change the topic"
+    ]
+  },
+  {
+    "head": "     PersonX becomes fast ___ ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to be social"
+    ]
+  },
+  {
+    "head": "     PersonX becomes fast friends ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "more friends"
+    ]
+  },
+  {
+    "head": "     PersonX becomes fast friends ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to know more people"
+    ]
+  },
+  {
+    "head": "     PersonX becomes flat ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "noney",
+      ""
+    ],
+    "tails": [
+      "to change to a man"
+    ]
+  },
+  {
+    "head": "     PersonX begs for food ",
+    "gens": [
+      "none",
+      "none.",
+      "help",
+      "",
+      "social"
+    ],
+    "tails": [
+      "to eat"
+    ]
+  }
+]

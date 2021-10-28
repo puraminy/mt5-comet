@@ -1,0 +1,1 @@
+{"eos_token": "</s>", "unk_token": "<unk>", "pad_token": "<pad>", "extra_ids": 0, "additional_special_tokens": null, "special_tokens_map_file": "/home/pouramini/pret/mt5-small/special_tokens_map.json", "name_or_path": "sels/mt5-3k/", "sp_model_kwargs": {}, "tokenizer_class": "T5Tokenizer"}

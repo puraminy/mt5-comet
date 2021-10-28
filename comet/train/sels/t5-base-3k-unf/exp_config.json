@@ -1,0 +1,48 @@
+{
+    "underlying_model_name": "/home/pouramini/pret/t5-base/",
+    "frozen_str": "_UNfrozen",
+    "sup_str": "_UNsup",
+    "wrap_str": "_Wrapped",
+    "inps_num_str": "_3k",
+    "split_col": {
+        "train": {
+            "input_text": "input_text",
+            "targets": [
+                "target_text",
+                "pred_text1",
+                "all_preds"
+            ]
+        },
+        "validation": {
+            "input_text": "input_text",
+            "targets": [
+                "target_text"
+            ]
+        }
+    },
+    "lang": "en",
+    "weight_decay": 0.01,
+    "batch_size": 16,
+    "log_dir": "plogs/",
+    "train_folder": "input_text--=target_text=pred_text1=all_preds",
+    "x": "target_text",
+    "val_folder": "input_text--=target_text",
+    "model_name": "t5-base_en_plength_5_lr_0.01_UNfrozen_UNsup_Wrapped_3k_01",
+    "save_path": "sels/t5-base-3k-unf",
+    "accumulation_tiny_steps": 1,
+    "shuffle": false,
+    "shuffle_evaluation": false,
+    "validation_size": 1000,
+    "validation_num_generation": 10,
+    "generation_params": {
+        "max_length": 80,
+        "early_stopping": true,
+        "num_beams": 5,
+        "num_return_sequences": 5
+    },
+    "ddp": false,
+    "atomic_relation_prompt_lengths": {
+        "xIntent": 5
+    },
+    "device": "cuda"
+}

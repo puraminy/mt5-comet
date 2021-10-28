@@ -74,12 +74,14 @@ from tqdm import tqdm
 )
 @click.option(
     "--qtemp",
+    "-qt",
     default="",
     type=str,
     help="template for query"
 )
 @click.option(
     "--anstemp",
+    "-at",
     default="",
     type=str,
     help="tempate for response"
@@ -197,8 +199,52 @@ from tqdm import tqdm
     type=str,
     help=""
 )
-def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp, beams, ret_seq, num_generations, is_flax, en, ignore_blanks, overwrite, learning_rate, wrap, prompt_path, plm_base_dir, clear, epochs, prompt_length, train_df_path, val_df_path, val_set):
+@click.option(
+    "--tresh_score",
+    "-ts",
+    default=0.0,
+    type=float,
+    help=""
+)
+@click.option(
+    "--nli_cat",
+    "-nli",
+    default=-1,
+    type=int,
+    help=""
+)
+@click.option(
+    "--sel_model",
+    "-sel",
+    default="",
+    type=str,
+    help=""
+)
+@click.option(
+    "--slow",
+    "-slow",
+    default=0,
+    type=int,
+    help="Milliseconds to delay in showing results"
+)
+@click.option(
+    "--batch_size",
+    "-bs",
+    default=32,
+    type=int,
+    help=""
+)
+@click.option(
+    "--emb",
+    "-emb",
+    is_flag=True,
+    help="Whether to use embedding prompt encoder"
+)
+def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp, beams, ret_seq, num_generations, is_flax, en, ignore_blanks, overwrite, learning_rate, wrap, prompt_path, plm_base_dir, clear, epochs, prompt_length, train_df_path, val_df_path, val_set, tresh_score, nli_cat, sel_model, slow, batch_size, emb):
     local_rank = None
+    # nli categories for evaluating predictions
+    nli_map = ['contradiction', 'entailment', 'neutral']
+    nli_group = nli_map[nli_cat] if nli_cat >= 0 else "all"
     # %%
     cfg = {}
     old_vars = set()
@@ -222,11 +268,11 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
     if sup: #supervised training
         if qtemp == "": qtemp = "{event}"
         if anstemp == "": anstemp = "{response}"
-        if learning_rate == 0: learning_rate = 0.0001 #6.25e-05
     else:
         if qtemp == "": qtemp = "{rel} {event} {ph}"
         if anstemp == "": anstemp = "{ph} {response} {end}"
-        if learning_rate == 0: learning_rate = 0.01  #6.25e-05
+    if not frozen and learning_rate == 0: learning_rate = 0.0001 #6.25e-05
+    if frozen and learning_rate == 0: learning_rate = 0.01  #6.25e-05
     print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
     print("qtemp:", qtemp)
     print("anstemp:", anstemp)
@@ -236,25 +282,26 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
     sup_str = "_SUP" if sup else "_UNsup"
     wrap_str = "_Wrapped" if wrap else "_UNwrapped"
     inps_num_str = "_" + str(inp_samples).replace("000","k")
-    if not prompt_path and wrap:
-        prompt_path = "prompts/" + ("en_" if en else "fa_")  + model_id +  inps_num_str
+    if not prompt_path and wrap and sel_model:
+        prompt_path = f"sels/{sel_model}/prompt"
         print("Prompt path:", prompt_path)
     Path(prompt_path).mkdir(exist_ok=True, parents=True)
     Path("data/").mkdir(exist_ok=True, parents=True)
     split_col={"train":{}, "validation":{}}
+    if not en and model_id in ["t5-base", "t5-large"]:
+        en = True
     lang = "en" if en else "fa"
     if lang == "en": #langauge is english
         split_col["train"]["input_text"]="input_text" 
-        split_col["train"]["targets"]=["target_text", "pred_text1"]
+        split_col["train"]["targets"]=["target_text", "pred_text1", "all_preds"]
         split_col["validation"]["input_text"]="input_text"
         split_col["validation"]["targets"]=["target_text"] 
     else:
         split_col["train"]["input_text"]="input_text_fa" 
-        split_col["train"]["targets"]=["target_text_fa", "pred_text1"]
+        split_col["train"]["targets"]=["target_text_fa", "pred_text1", "all_preds"]
         split_col["validation"]["input_text"]="input_text_fa"
         split_col["validation"]["targets"]=["target_text_fa"] 
     weight_decay = 0.01
-    batch_size = 16
     #% creating save folder
     log_dir = 'plogs/'
     train_folder=split_col["train"]["input_text"] + "--"
@@ -264,18 +311,22 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
     for x in split_col["validation"]["targets"]:
         val_folder += "=" + x
     model_name = f"{model_id}_{lang}_plength_{prompt_length}_lr_{learning_rate}{frozen_str}{sup_str}{wrap_str}{inps_num_str}_{exp_id}"
-    model_path = os.path.join(model_id,train_folder, val_folder, model_name)
-    if model_id != "path":
-        save_path= os.path.join(log_dir, model_path)
-        ans = "y" if overwrite else ""
-        while Path(save_path).exists() and ans != "y":
-            ans = input(f"The {save_path} already exists, do you want to overwrite it? (y/n/other(suffix):")
-            if ans == "n":
-                return
-            elif ans != "y":
-                save_path += "_" + ans
+    if not sel_model:
+        model_path = os.path.join(model_id,train_folder, val_folder, model_name)
+        if model_id != "path":
+            save_path= os.path.join(log_dir, model_path)
+            ans = "y" if overwrite else ""
+            while Path(save_path).exists() and ans != "y":
+                ans = input(f"The {save_path} already exists, do you want to overwrite it? (y/n/other(suffix):")
+                if ans == "n":
+                    return
+                elif ans != "y":
+                    save_path += "_" + ans
+        else:
+            save_path = path
     else:
-        save_path = path
+        save_path = f"sels/{sel_model}"
+        Path(save_path).mkdir(exist_ok=True, parents=True)
     #Cut down memory usage by accumulating tiny steps for multiple backwards;
     #Should be divided exactly by batch_size
     accumulation_tiny_steps = 1 
@@ -290,7 +341,7 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
         "num_return_sequences":ret_seq,
     }
     ddp = local_rank is not None
-    device = 'cuda'
+    device = "cuda"
     #dataset_path = "../../data/v4_atomic_all_agg.csv"
     atomic_relation_prompt_lengths = {
         "xIntent":prompt_length,
@@ -334,6 +385,13 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
                 split_df[col] = split_df[col].astype(str)
         if ignore_blanks: # and len(split_df) > num_rows:
             split_df = split_df[split_df["input_text"].str.contains('___')==False]
+        if tresh_score > 0 and "pred1_score" in split_df:
+            split_df = split_df[split_df["pred1_score"] > tresh_score]
+            print("*** Filtered based on pred1 score higher than ", tresh_score)
+        if nli_group != "all" and "nli_group" in split_df:
+            split_df = split_df[split_df["nli_group"] == nli_group]
+            print("*** Filtered based on nli_group ", nli_group)
+
         for index, row in split_df.iterrows():
             rel = row["prefix"]
             event = row[input_text]
@@ -346,10 +404,11 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
             if not rel in data_split[event]:
                 data_split[event][rel] = []
             for col in targets:
-                if (col in row and 
-                        len(row[col])>0 and 
-                        not row[col] in data_split[event][rel]):
-                    data_split[event][rel].append(row[col])
+                if (col in row and len(row[col])>0):
+                    target_vals = row[col].split("<br />")
+                    for trg in target_vals:
+                        if not trg in data_split[event][rel]:
+                            data_split[event][rel].append(trg)
             #didn't convert ___ to <blank>
             #didn't normalize to lowercase
         return list(data_split.values())
@@ -428,21 +487,48 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
         print("id_offset:", id_offset)
         length = atomic_relation_prompt_lengths[rel]
         atomic_relation_mappings[rel] = " ".join(f"<{rel}_{i}>" for i in range(length))
-        prompt_encoder = LSTMEmbeddingPromptEncoder(length,embedding_dim,id_offset)
-        if prompt_path:
-            prompt_encoder.load(prompt_path)
-        added_tokens = [ 
-            AddedToken(f"<{rel}_{i}>",lstrip=True,
-                rstrip=False)
-            for i in 
-                range(length)
-        ]
-        tokenizer.add_special_tokens({"additional_special_tokens":added_tokens})
+
+        #prompt_encoder = None
+        #decoder_prompt_encoder = None
+        #if emb:
+        #    prompt_encoder = EmbeddingPromptEncoder(length,embedding_dim,id_offset)
+        #    decoder_prompt_encoder = EmbeddingPromptEncoder(length,embedding_dim,id_offset)
+        #else:
+        #    prompt_encoder = LSTMEmbeddingPromptEncoder(length,embedding_dim,id_offset)
+        #    decoder_prompt_encoder = LSTMEmbeddingPromptEncoder(length,embedding_dim,id_offset)
+
+        #added_tokens = [ 
+        #    AddedToken(f"<{rel}_{i}>",lstrip=True,
+        #        rstrip=False)
+        #    for i in 
+        #        range(length)
+        #]
+        #tokenizer.add_special_tokens({"additional_special_tokens":added_tokens})
+        #model.resize_token_embeddings(len(tokenizer))
+        #if wrap:
+        #    wrapped_models[rel] = PTuningWrapper(model,prompt_encoder,decoder_prompt_encoder,prompt_token_fn=get_prompt_token_fn(id_offset,length))
+        #else:
+        #    wrapped_models[rel] = model
         model.resize_token_embeddings(len(tokenizer))
+        print(f"Tokenizer size: {len(tokenizer)}")
+        wrapped_model,prompt_func,prompt_string = PTuningWrapper.\
+            interval_prompt(
+                model,tokenizer,(3,0,0),(2,0,0),return_prompt_string=True
+            )
+        print(f"Prompt length:", wrapped_model.prompt_encoder.length)
+        if wrapped_model.decoder_prompt_encoder:
+            print("Decoder Prompt length:", wrapped_model.decoder_prompt_encoder.length)
+        print(f"Tokenizer size: {len(tokenizer)}")
+        print("Prompt string:",prompt_string)
+        #example = prompt_func("piece one","piece two")
+        #print("Example:",example)
+        if prompt_path:
+            wrapped_model.prompt_encoder.load(prompt_path)
         if wrap:
-            wrapped_models[rel] = PTuningWrapper(model,prompt_encoder,prompt_token_fn=get_prompt_token_fn(id_offset,length))
+            wrapped_models[rel] = wrapped_model
         else:
             wrapped_models[rel] = model
+        #model.resize_token_embeddings(len(tokenizer))
         # %% Aggregate instances of queries and corresponding responses
     # (str)split_name -> (dict) query -> (list) response 
     print("building query responses")
@@ -457,12 +543,20 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
                 if len(row[rel])>0: 
                     rel_tokens = atomic_relation_mappings[rel]
                     #query = f"{rel_tokens} {row['event']}" #Change this line to modify the encoder input
-                    query = qtemp.format(event=row['event'], rel=rel_tokens, ph=placeholder_token) #Change this line to modify the encoder input
+                    #query = qtemp.format(event=row['event'], rel=rel_tokens, ph=placeholder_token) #Change this line to modify the encoder input
                     # query = f"{row['event']} {rel_tokens}" #Change this line to modify the encoder input
-                    if query not in atomic_query_responses[split_name][rel]:
-                        atomic_query_responses[split_name][rel][query] = []
                     for response in row[rel]:
-                        answer = anstemp.format(response=response, rel=rel_tokens, ph=placeholder_token, end="<extra_id_1>")
+                        inp_target = prompt_func(row["event"],
+                                placeholder_token, 
+                                placeholder_token, 
+                                response)
+                        query = inp_target[0]
+                        print("Query:", query)
+                        answer = inp_target[1]
+                        print("Answer:", answer)
+                        if query not in atomic_query_responses[split_name][rel]:
+                            atomic_query_responses[split_name][rel][query] = []
+                        #answer = anstemp.format(response=response, rel=rel_tokens, ph=placeholder_token, end="<extra_id_1>")
                         atomic_query_responses[split_name][rel][query].append((answer,response))
                             #Change this line to modify the decoder input
                     #didn't convert ___ to <blank>
@@ -483,8 +577,8 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
 
     iterations = kk 
     print("len flattened:", len(atomic_flattened["train"]), "iterations:", kk)
+#llllll
 # %% Prepare training data
-
     def collate_fn_for_flattened(batch):
         queries,responses = zip(*batch)
         new_batch = tokenizer(list(queries),return_tensors='pt',padding='longest')
@@ -493,6 +587,11 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
             labels = outputs['input_ids']
             labels[labels==tokenizer.pad_token_id] = -100
             new_batch['labels']=labels
+            #print("Len labels:", len(labels))
+            new_batch['decoder_input_ids'] = model.prepare_decoder_input_ids_from_labels(
+                outputs['input_ids']
+            )
+            new_batch['decoder_attention_mask'] = outputs['attention_mask']
         return new_batch
 
     # def collate_fn_for_generation(batch):
@@ -547,6 +646,7 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
     # %%
     warm_up_steps = 0.002*iterations
     for rel,wrapped_model in wrapped_models.items():
+        wrapped_model.zero_grad()
         optimizer_grouped_parameters = [
             {"params":[p for p in wrapped_model.parameters() if p.requires_grad]}
         ]
@@ -563,7 +663,7 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
             step = 0
             while step <= iterations:
                 try:
-                    if is_main_process and (step % cycle == 0 and step > 0): #validation
+                    if False and is_main_process and (step % cycle == 0 and step > 0): #validation
                         #print("start validating...")
                         with torch.no_grad():
                             if wrap:
@@ -644,13 +744,21 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
                             train_iter = iter(train_dataloader[rel])
                             batch = next(train_iter)
                         batch = {k:v.to(device=device) for k,v in batch.items()}
+                        #print("BEEEEEEEEEFOR Batch")
+                        #print(batch)
                         result = wrapped_model(**batch)
                         loss = result['loss']/accumulation_tiny_steps
-                        # logits = clip_logits(result['logits'])
-                        # loss = torch.nn.functional.cross_entropy(
+                        #logits = clip_logits(result['logits'])
+                        #labels = batch['labels']
+                        #print("LLLLLLLLLLLLLLLLL", logits)
+                        #for l in labels:
+                        #    l[0] = 0
+                        #    l[1] = 0
+                        #print("LLLLLLLLLLLLLLLLL", labels)
+                        #loss = torch.nn.functional.cross_entropy(
                         #     logits.reshape(-1,logits.size(2)),
-                        #     batch['labels'].reshape(-1,)
-                        # )/accumulation_tiny_steps
+                        #     labels.reshape(-1,)
+                        #)/accumulation_tiny_steps
                         loss.backward()
                         batch_loss += loss.item()
                     optimizer.step()
@@ -680,12 +788,11 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
     results = []
     #device = 'cuda:0'
     #model = model.to(device)
-    scorer_model = SentenceTransformer(f'{plm_base_dir}/mm/paraphrase-multilingual-MiniLM-L12-v2/')
+    scorer_model = SentenceTransformer(f'/home/pouramini/pret/mm/paraphrase-multilingual-MiniLM-L12-v2/')
     #sss
     nli_model = CrossEncoder('/home/pouramini/pret/mm/nli-roberta-base/')
-    label_mapping = ['contradiction', 'entailment', 'neutral']
     labels_count = {}
-    for l in label_mapping:
+    for l in nli_map:
         labels_count[l] = 0
     df = data_df[val_set]
     inp = split_col[val_set]["input_text"]
@@ -693,6 +800,8 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
     print("Len Final Df:", len(df))
     df[target] = df[target].astype(str)
     #df = df.groupby(['prefix','input_text'],as_index=False)[target].agg({"target_text":'<br />'.join})
+    resp_const_parts = re.split("{.*}", anstemp)
+    resp_const_parts += ["<extra_id_0>", "<extra_id_1>"]
     print("Scoring...")
     df["pred1_score"] = 0.0
     df["pred_text1"] = ""
@@ -701,8 +810,8 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
     df.sort_values(by=["prefix", "input_text"], inplace=True)
 
     for rel,wrapped_model in wrapped_models.items():
-        print(">>> saving prompt encoder")
-        if prompt_path:
+        if prompt_path and sel_model and wrap:
+            print(">>> saving prompt encoder")
             wrapped_model.prompt_encoder.save(prompt_path)
         if wrap:
             with torch.no_grad():
@@ -738,6 +847,13 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
             #tails = row[target].split("<br />")
             tails = [row[target]]
             #tails = [x[1] for x in responses]
+            new_hyps = []
+            for hyp in hyps:
+                for const in resp_const_parts:
+                    hyp = hyp.replace(const, "")
+                new_hyps.append(hyp)
+
+            hyps = new_hyps
   
             sents1 = tails
             sents2 = hyps
@@ -767,12 +883,14 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
             pair = (closest, pred_text)
             nli_scores = nli_model.predict(pair)
             _max  = nli_scores.argmax()
-            label = label_mapping[_max]
+            label = nli_map[_max]
             labels_count[label] += 1
             #cond = (df['prefix'] == rel) & (df[inp] == query)
             df.at[idx, "nli_group"] = label
             df.at[idx, "top"] = closest
+
             df.at[idx, "pred_text1"] = pred_text
+            df.at[idx, "all_preds"] = "<br />".join(hyps) 
             cur_score = top["score"]
             df.at[idx, "pred1_score"] = float("{:.2f}".format(cur_score))
             print("")
@@ -789,6 +907,8 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
 
             mean_score = "{:.4f}".format(sum_score / ii)
             #tqdm.write(f"Mean score:{mean_score}")
+            if slow > 0:
+                time.sleep(slow)
             print(ii, "::",query)
             print("Prediction:", pred_text)
             print("Closest tail:", closest)
@@ -821,6 +941,10 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
     print("val_set:", val_set, file=res_out)
     print("train file:", train_df_path, file=res_out)
     print("traing samples:", inp_samples, " unique inputs, ",  iterations, " total samples",file=res_out)
+    print("ignore blanks:", ignore_blanks, file=res_out)
+    print("treshold_score:",tresh_score, file=res_out)
+    print("nli_group:",nli_group, file=res_out)
+
     print("# *****************************************************************", file=res_out)
     print("Rouge:", score)
     print("Rouge:", score, file = res_out)
