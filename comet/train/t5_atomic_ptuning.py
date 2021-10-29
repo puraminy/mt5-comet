@@ -240,7 +240,13 @@ from tqdm import tqdm
     is_flag=True,
     help="Whether to use embedding prompt encoder"
 )
-def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp, beams, ret_seq, num_generations, is_flax, en, ignore_blanks, overwrite, learning_rate, wrap, prompt_path, plm_base_dir, clear, epochs, prompt_length, train_df_path, val_df_path, val_set, tresh_score, nli_cat, sel_model, slow, batch_size, emb):
+@click.option(
+    "--cpu",
+    "-cpu",
+    is_flag=True,
+    help=""
+)
+def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp, beams, ret_seq, num_generations, is_flax, en, ignore_blanks, overwrite, learning_rate, wrap, prompt_path, plm_base_dir, clear, epochs, prompt_length, train_df_path, val_df_path, val_set, tresh_score, nli_cat, sel_model, slow, batch_size, emb, cpu):
     local_rank = None
     # nli categories for evaluating predictions
     nli_map = ['contradiction', 'entailment', 'neutral']
@@ -341,7 +347,7 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
         "num_return_sequences":ret_seq,
     }
     ddp = local_rank is not None
-    device = "cuda"
+    device = "cpu" if cpu else "cuda"
     #dataset_path = "../../data/v4_atomic_all_agg.csv"
     atomic_relation_prompt_lengths = {
         "xIntent":prompt_length,
@@ -434,6 +440,9 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
         "xReact":"<xReact>",
         "xWant":"<xWant>"
     }
+    atomic_relation_mappings = {
+        "xIntent":"<xIntent>",
+    }
     gen_token = "<gen>"
     # %% dpp initialize
     is_main_process = (not ddp or local_rank == 0) 
@@ -479,61 +488,64 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
     embedding_dim = model.config.hidden_size
     print("embedding dim:", embedding_dim)
     wrapped_models = {}
-    atomic_relation_mappings = {}
+    encoder_relation_mappings = {}
+    decoder_relation_mappings = {}
     def get_prompt_token_fn(id_offset,length):
-        return lambda x: (x>=id_offset)&(x<id_offset+length)
+        return lambda x: (x>=id_offset)&(x<=id_offset+2*length)
     for rel in atomic_relation_prompt_lengths:
         id_offset = len(tokenizer)
         print("id_offset:", id_offset)
         length = atomic_relation_prompt_lengths[rel]
-        atomic_relation_mappings[rel] = " ".join(f"<{rel}_{i}>" for i in range(length))
+        encoder_relation_mappings[rel] = " ".join(f"<{rel}_{i}>" for i in range(length))
+        decoder_relation_mappings[rel] = " ".join(f"<{rel}_{i}>" for i in range(length,2*length))
+#ppppppp
+        prompt_encoder = None
+        decoder_prompt_encoder = None
+        if emb:
+            prompt_encoder = EmbeddingPromptEncoder(length,embedding_dim,id_offset)
+            decoder_prompt_encoder = EmbeddingPromptEncoder(length,embedding_dim,id_offset)
+        else:
+            prompt_encoder = LSTMEmbeddingPromptEncoder(length,embedding_dim,id_offset)
+            #decoder_prompt_encoder = LSTMEmbeddingPromptEncoder(length,embedding_dim,id_offset+length)
 
-        #prompt_encoder = None
-        #decoder_prompt_encoder = None
-        #if emb:
-        #    prompt_encoder = EmbeddingPromptEncoder(length,embedding_dim,id_offset)
-        #    decoder_prompt_encoder = EmbeddingPromptEncoder(length,embedding_dim,id_offset)
-        #else:
-        #    prompt_encoder = LSTMEmbeddingPromptEncoder(length,embedding_dim,id_offset)
-        #    decoder_prompt_encoder = LSTMEmbeddingPromptEncoder(length,embedding_dim,id_offset)
-
-        #added_tokens = [ 
-        #    AddedToken(f"<{rel}_{i}>",lstrip=True,
-        #        rstrip=False)
-        #    for i in 
-        #        range(length)
-        #]
-        #tokenizer.add_special_tokens({"additional_special_tokens":added_tokens})
-        #model.resize_token_embeddings(len(tokenizer))
-        #if wrap:
-        #    wrapped_models[rel] = PTuningWrapper(model,prompt_encoder,decoder_prompt_encoder,prompt_token_fn=get_prompt_token_fn(id_offset,length))
-        #else:
-        #    wrapped_models[rel] = model
+        added_tokens = [ 
+            AddedToken(f"<{rel}_{i}>",lstrip=True,
+                rstrip=False)
+            for i in 
+                range(2*length)
+        ]
+        tokenizer.add_special_tokens({"additional_special_tokens":added_tokens})
         model.resize_token_embeddings(len(tokenizer))
+        if wrap:
+            wrapped_models[rel] = PTuningWrapper(model,prompt_encoder,decoder_prompt_encoder,prompt_token_fn=get_prompt_token_fn(id_offset,length))
+        else:
+            wrapped_models[rel] = model
+        #model.resize_token_embeddings(len(tokenizer))
         print(f"Tokenizer size: {len(tokenizer)}")
-        wrapped_model,prompt_func,prompt_string = PTuningWrapper.\
-            interval_prompt(
-                model,tokenizer,(3,0,0),(2,0,0),return_prompt_string=True
-            )
-        print(f"Prompt length:", wrapped_model.prompt_encoder.length)
-        if wrapped_model.decoder_prompt_encoder:
-            print("Decoder Prompt length:", wrapped_model.decoder_prompt_encoder.length)
+        #wrapped_model,prompt_func,prompt_string = PTuningWrapper.\
+        #    interval_prompt(
+        #        model,tokenizer,(2,3,0),(0,0,0),return_prompt_string=True
+        #    )
+        print(f"Prompt length:", wrapped_models[rel].prompt_encoder.length)
+        if wrapped_models[rel].decoder_prompt_encoder:
+            print("Decoder Prompt length:", wrapped_models[rel].decoder_prompt_encoder.length)
         print(f"Tokenizer size: {len(tokenizer)}")
-        print("Prompt string:",prompt_string)
+        #print("Prompt string:",prompt_string)
         #example = prompt_func("piece one","piece two")
         #print("Example:",example)
         if prompt_path:
             wrapped_model.prompt_encoder.load(prompt_path)
-        if wrap:
-            wrapped_models[rel] = wrapped_model
-        else:
-            wrapped_models[rel] = model
+        #if wrap:
+        #    wrapped_models[rel] = wrapped_model
+        #else:
+        #    wrapped_models[rel] = model
         #model.resize_token_embeddings(len(tokenizer))
         # %% Aggregate instances of queries and corresponding responses
     # (str)split_name -> (dict) query -> (list) response 
     print("building query responses")
     atomic_query_responses = {}
     # ttt
+    ss = 0
     for split_name,split_df in atomic_dataset.items():
         atomic_query_responses[split_name] = {}
         for row in split_df:
@@ -541,22 +553,19 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
                 if rel not in atomic_query_responses[split_name]:
                     atomic_query_responses[split_name][rel] = {}
                 if len(row[rel])>0: 
-                    rel_tokens = atomic_relation_mappings[rel]
+                    encoder_rel_tokens = encoder_relation_mappings[rel]
+                    decoder_rel_tokens = decoder_relation_mappings[rel]
                     #query = f"{rel_tokens} {row['event']}" #Change this line to modify the encoder input
-                    #query = qtemp.format(event=row['event'], rel=rel_tokens, ph=placeholder_token) #Change this line to modify the encoder input
+                    query = qtemp.format(event=row['event'], rel=encoder_rel_tokens, ph=placeholder_token) #Change this line to modify the encoder input
                     # query = f"{row['event']} {rel_tokens}" #Change this line to modify the encoder input
+                    if query not in atomic_query_responses[split_name][rel]:
+                        atomic_query_responses[split_name][rel][query] = []
                     for response in row[rel]:
-                        inp_target = prompt_func(row["event"],
-                                placeholder_token, 
-                                placeholder_token, 
-                                response)
-                        query = inp_target[0]
-                        print("Query:", query)
-                        answer = inp_target[1]
-                        print("Answer:", answer)
-                        if query not in atomic_query_responses[split_name][rel]:
-                            atomic_query_responses[split_name][rel][query] = []
-                        #answer = anstemp.format(response=response, rel=rel_tokens, ph=placeholder_token, end="<extra_id_1>")
+                        answer = anstemp.format(response=response, rel=decoder_rel_tokens, ph=placeholder_token, end="<extra_id_1>")
+                        if ss < 3:
+                            print(query)
+                            print(answer)
+                            ss+=1 
                         atomic_query_responses[split_name][rel][query].append((answer,response))
                             #Change this line to modify the decoder input
                     #didn't convert ___ to <blank>
@@ -587,11 +596,10 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
             labels = outputs['input_ids']
             labels[labels==tokenizer.pad_token_id] = -100
             new_batch['labels']=labels
-            #print("Len labels:", len(labels))
-            new_batch['decoder_input_ids'] = model.prepare_decoder_input_ids_from_labels(
-                outputs['input_ids']
-            )
-            new_batch['decoder_attention_mask'] = outputs['attention_mask']
+            #new_batch['decoder_input_ids'] = model.prepare_decoder_input_ids_from_labels(
+            #    outputs['input_ids']
+            #)
+            #new_batch['decoder_attention_mask'] = outputs['attention_mask']
         return new_batch
 
     # def collate_fn_for_generation(batch):
@@ -749,12 +757,6 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
                         result = wrapped_model(**batch)
                         loss = result['loss']/accumulation_tiny_steps
                         #logits = clip_logits(result['logits'])
-                        #labels = batch['labels']
-                        #print("LLLLLLLLLLLLLLLLL", logits)
-                        #for l in labels:
-                        #    l[0] = 0
-                        #    l[1] = 0
-                        #print("LLLLLLLLLLLLLLLLL", labels)
                         #loss = torch.nn.functional.cross_entropy(
                         #     logits.reshape(-1,logits.size(2)),
                         #     labels.reshape(-1,)

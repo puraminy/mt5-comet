@@ -77,15 +77,23 @@ class PTuningWrapper(torch.nn.Module):
             #Default: All token ids beyond num_embeddings are seen as prompt token
 
     def forward(self,input_ids,decoder_input_ids=None,prompt_ids=None,**kwargs):
+        #print("MMMMMMain forward: Prompt ids:", prompt_ids)
+        # find masks based on the range of prompt ids (offset_id < X < offset_id + prompt_length)
         prompt_masks = self.prompt_token_fn(input_ids)
-        #由于本wrapper只处理单个prompt，所以长度应该是一样的，可以使用masked_select再reshape
+        #Because this wrapper only deals with a single prompt, the length should be the same, you can use masked_select to reshape 
         if prompt_masks.any():
+            #print("MASSSSSSSSSSK:", prompt_masks)
             input_ids_ = input_ids.clone()
             if self.replacing_token_id is not None:
+                # replace prompt ids in input_ids with replacing token
                 input_ids_[prompt_masks]=self.replacing_token_id
+            # find the embedding of input ids 
             inputs_embeds = self.original_embedding(input_ids_)
             if self.prompt_encoder:
-                prompt_embeds = self.prompt_encoder(input_ids[prompt_masks],\
+                #find input ids for prompt tokens
+                prompt_input_ids = input_ids[prompt_masks]
+                # call forwards on prompt encoder whose outputs are prompt embeddings
+                prompt_embeds = self.prompt_encoder(prompt_input_ids,\
                     prompt_ids).to(device=inputs_embeds.device)
             #不能用masked_select，这个是创建新的tensor，修改它不会改原先的变量
             #应该用masked_scatter，或者indexput
@@ -98,16 +106,18 @@ class PTuningWrapper(torch.nn.Module):
             # inputs_embeds[prompt_masks]=prompt_embeds.repeat(inputs_embeds.\
             #     shape[0],1)
             #把repeat交给prompt_encoder进行处理
+                 # replace prompt_embeddings calculated by prompt encoder in input embeddings
                 inputs_embeds[prompt_masks]=prompt_embeds
         else:
             inputs_embeds = self.original_embedding(input_ids)
         
         if decoder_input_ids is not None:
             if self.decoder_prompt_encoder is not None:
+                #print("DDDDEcoder")
                 decoder_prompt_masks = self.prompt_token_fn(decoder_input_ids)
                 if decoder_prompt_masks.any():
                     #print("decoder prompt mask:", decoder_prompt_masks)
-                    #print("decoder mask kkkkkkkkkkkkkkkkkk", self.replacing_token_id)
+                    print("decoder mask kkkkkkkkkkkkkkkkkk", self.replacing_token_id)
                     decoder_input_ids_ = decoder_input_ids.clone()
                     #print("decoder input_ids:", decoder_input_ids_)
                     if self.replacing_token_id is not None:
@@ -126,24 +136,19 @@ class PTuningWrapper(torch.nn.Module):
                     decoder_inputs_embeds[decoder_prompt_masks] = \
                         decoder_prompt_embeds
                     #print("kkkk4")
-                    labels = kwargs['labels']
-                    for l in labels:
-                        l[0] = 0
-                        l[1] = 0
-                    kwargs['labels'] = labels
+                    decoder_labels_masks = self.prompt_token_fn(labels)
+                    labels[decoder_labels_masks] = 0
+                    #print(labels)
                 else:
-                    #print("decoder mask nnnnnnnnnnnnnnnnnn")
                     decoder_inputs_embeds = self.decoder_original_embedding(
                         decoder_input_ids
                     )
-                #print("KKKKKKKKKKKKWWW")
-                #print(kwargs)
                 return self.underlying_model(inputs_embeds=inputs_embeds,
-                    decoder_inputs_embeds=decoder_inputs_embeds,**kwargs
+                    decoder_inputs_embeds=decoder_inputs_embeds, **kwargs
                 )
             else: #decoder_prompt_encoder is not defined, so decoder_originical_embedding is not set.
                 return self.underlying_model(inputs_embeds=inputs_embeds,
-                    decoder_input_ids=decoder_input_ids,**kwargs)
+                    decoder_input_ids=decoder_input_ids, **kwargs)
         else:
             return self.underlying_model(inputs_embeds=inputs_embeds,**kwargs)
     
@@ -151,16 +156,24 @@ class PTuningWrapper(torch.nn.Module):
         if self.prompt_encoder:
             new_num_tokens = self.prompt_encoder.id_offset+self.prompt_encoder.length
             if (self.original_embedding.num_embeddings < new_num_tokens):
-                #print("Resizing encoder", new_num_tokens)
+                print("Resizing encoder", new_num_tokens)
                 self.underlying_model.resize_token_embeddings(
                    new_num_tokens 
                 )
                 #print("original:", self.original_embedding)
-                self.new_embedding = self.underlying_model.get_input_embeddings()
-                #print("new:", self.new_embeddings)
-                self.prompt_encoder.dump_embedding(self.new_embedding.weight)
+                self.cur_embedding = self.underlying_model.get_input_embeddings()
+                print("before update:", self.cur_embeddings)
+                # fill the current embeddings with weights of encoder
+                self.prompt_encoder.dump_embedding(self.cur_embeddings.weight)
+                print("after update:", self.cur_embeddings)
             else:
-                self.prompt_encoder.dump_embedding(self.original_embedding.weight)
+                self.cur_embeddings = self.underlying_model.get_input_embeddings()
+                print("before update:", self.cur_embeddings)
+                # fill the current embeddings with weights of encoder
+                self.prompt_encoder.dump_embedding(self.cur_embeddings.weight)
+                print("after update:", self.cur_embeddings)
+                #print("dump_embeddings")
+                #self.prompt_encoder.dump_embedding(self.original_embedding.weight)
 
         if self.decoder_prompt_encoder:
             if (self.decoder_original_embedding.num_embeddings < 
@@ -171,9 +184,11 @@ class PTuningWrapper(torch.nn.Module):
                     self.decoder_prompt_encoder.id_offset+
                     self.decoder_prompt_encoder.length
                 )
-                self.new_decoder_embedding = self.underlying_model.decoder.embed_tokens
+                self.cur_decoder_embedding = self.underlying_model.decoder.embed_tokens
+                print("before updating decoder:", self.cur_decoder_embeddings)
                 self.decoder_prompt_encoder.dump_embedding(
-                    self.new_decoder_embedding.weight)
+                    self.cur_decoder_embedding.weight)
+                print("after updating decoder:", self.cur_decoder_embeddings)
             else:
                 self.decoder_prompt_encoder.dump_embedding(
                     self.decoder_original_embedding.weight)
@@ -332,9 +347,9 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
     def __init__(self,length,embedding_dim,id_offset) -> None:
         super().__init__(length,embedding_dim,id_offset)
         self.embedding = torch.nn.Embedding(length,embedding_dim)
+        # weights to be updated
         self.input_ids = torch.nn.parameter.Parameter(torch.arange(length),
             requires_grad=False)
-        #print("Embedding DIM:", embedding_dim)
         self.lstm = torch.nn.LSTM(
             input_size=embedding_dim,
             hidden_size=embedding_dim// 2, #my code
@@ -348,42 +363,35 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
             torch.nn.ReLU(),
             torch.nn.Linear(embedding_dim, embedding_dim)
         )
-        # Print model's state_dict
-        #print("LSTM model's state_dict:")
-        #for param_tensor in self.lstm.state_dict():
-        #    print(param_tensor, "\t", self.lstm.state_dict()[param_tensor].size())
-        #print("MLP model's state_dict:")
-        #for param_tensor in self.mlp.state_dict():
-        #    print(param_tensor, "\t", self.mlp.state_dict()[param_tensor].size())
     def save(self, path):
         torch.save(self.lstm.state_dict(), path + "/lstm")
         torch.save(self.mlp.state_dict(), path + "/mlp")
     def load(self, path):
         if Path(path + "/lstm").exists():
-            #print("loading LSTM part")
             self.lstm.load_state_dict(torch.load(path + "/lstm"))
-        #    self.lstm.eval()
         if Path(path + "/mlp").exists():
-            #print("loading MLP part")
             self.mlp.load_state_dict(torch.load(path + "/mlp"))
-        #    self.mlp.eval()
 
 
     def forward(self,prompt_token_ids,prompt_ids=None):
+        #print("Here is prompt encoder forward: prompt_token_ids:", prompt_token_ids, " ", prompt_ids)
+        #print("input ids:", self.input_ids) 
+        # create embedding vectors for input ids
         embeds = self.embedding(self.input_ids)
+        # do forward calculations
         x = self.lstm(embeds.unsqueeze(0))
+
         running_weight = self.mlp(x[0]).squeeze(0)
-        #print("self.id_offset:", self.id_offset)
+        #print("running weights:", running_weight)
+        # find zero based ids 
         prompt_token_ids = prompt_token_ids - self.id_offset
-        #print("Prompt token ids:", prompt_token_ids)
-        #print("Len weights:", len(running_weight))
+        # return weights for prompt_token_ids 
         return F.embedding(prompt_token_ids,running_weight)
     def dump_embedding(self, weight):
+        # get embedding weights as the output of forward pass
         with torch.no_grad():
             embeddings = self.forward(self.input_ids+self.id_offset)
-        #print("BEFORE Len weights:", len(weight))
         weight[self.id_offset:self.id_offset+self.length,:]=embeddings.detach()
-        #print("AFTER Len weights:", len(weight))
 
 
 if __name__ == "__main__":
