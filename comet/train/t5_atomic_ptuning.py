@@ -181,14 +181,14 @@ from tqdm import tqdm
 @click.option(
     "--train_df_path",
     "-tn",
-    default= "/home/pouramini/atomic/xIntent_en_fa_train_no_dups.tsv",
+    default= "atomic/xIntent_en_fa_train_no_dups.tsv",
     type=str,
     help=""
 )
 @click.option(
     "--val_df_path",
     "-vl",
-    default= "/home/pouramini/atomic/xIntent_en_fa_validation_no_dups.tsv",
+    default= "atomic/xIntent_en_fa_validation_no_dups.tsv",
     type=str,
     help=""
 )
@@ -438,11 +438,6 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
 # %% load atomic data
 
     data_df = {}
-    if not train_df_path:
-        data_df_path = "/home/pouramini/atomic/xIntent_en_train_no_dups.tsv"
-    if not val_df_path:
-        data_df_path = "/home/pouramini/atomic/xIntent_en_fa_validation_no_dups.tsv"
-
     data_df["train"] = pd.read_table(train_df_path) #, index_col=[0])
     data_df["validation"] = pd.read_table(val_df_path) #, index_col=[0])
     print("Train:", len(data_df["train"]))
