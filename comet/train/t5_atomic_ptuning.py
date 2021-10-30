@@ -296,7 +296,7 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
         underlying_model_name = f"{plm_base_dir}/{model_id}/"
 
     if not Path(underlying_model_name).exists():
-        confirm = input(underlying_model_name + " doesn't exists, do you want to download it?")
+        confirm = "y" #input(underlying_model_name + " doesn't exists, do you want to download it?")
         if confirm != "y":
             return
         underlying_model_name = model_id
@@ -446,9 +446,14 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
     # eeeeee
     # ################################### Evaluation #########################
     def eval(model, data_df, val_set, num_generations, inter, save_path):  
-        scorer_model = SentenceTransformer(f'/home/pouramini/pret/mm/paraphrase-multilingual-MiniLM-L12-v2/')
-        #sss
-        nli_model = CrossEncoder('/home/pouramini/pret/mm/nli-roberta-base/')
+        mname = "localpath"        
+        if not Path(mname).exists():
+            mname = 'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2'
+        scorer_model = SentenceTransformer(mname)
+        mname = "localpath"
+        if not Path(mname).exists():
+            mname = 'sentence-transformers/nli-roberta-base'
+        nli_model = CrossEncoder(mname)
         results = []
         labels_count = {}
         for l in nli_map:
@@ -777,7 +782,7 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
         #example = prompt_func("piece one","piece two")
         #print("Example:",example)
         if prompt_path:
-            wrapped_model.prompt_encoder.load(prompt_path)
+            wrapped_models[rel].prompt_encoder.load(prompt_path)
         #if wrap:
         #    wrapped_models[rel] = wrapped_model
         #else:
@@ -1040,7 +1045,7 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
                     wrapped_model.module.update_model_weight()
                 else:
                     wrapped_model.update_model_weight()
-        eval(wrapped_model.model, data_df, val_set, num_generations, inter, save_path)  
+        eval(model, data_df, val_set, num_generations, inter, save_path)  
     #device = 'cuda:0'
     #model = model.to(device)
 # %%
