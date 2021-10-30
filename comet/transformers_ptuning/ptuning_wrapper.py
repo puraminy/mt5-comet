@@ -353,8 +353,7 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
         self.lstm = torch.nn.LSTM(
             input_size=embedding_dim,
             hidden_size=embedding_dim// 2, #my code
-            hidden_size=embedding_dim// 2, #my code
-            num_layers=3,
+            num_layers=2,
             dropout=0,
             bidirectional=True,
             batch_first=True

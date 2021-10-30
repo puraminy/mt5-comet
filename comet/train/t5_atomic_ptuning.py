@@ -260,7 +260,19 @@ from tqdm import tqdm
     type=int,
     help=""
 )
-def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp, beams, ret_seq, num_generations, is_flax, en, ignore_blanks, overwrite, learning_rate, wrap, prompt_path, plm_base_dir, clear, epochs, prompt_length, train_df_path, val_df_path, val_set, tresh_score, nli_cat, sel_model, slow, batch_size, emb, cpu, freez_step, unfreez_step):
+@click.option(
+    "--inter",
+    "-inter",
+    is_flag=True,
+    help="Interactive mode"
+)
+@click.option(
+    "--do_eval",
+    "-eval",
+    is_flag=True,
+    help=""
+)
+def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp, beams, ret_seq, num_generations, is_flax, en, ignore_blanks, overwrite, learning_rate, wrap, prompt_path, plm_base_dir, clear, epochs, prompt_length, train_df_path, val_df_path, val_set, tresh_score, nli_cat, sel_model, slow, batch_size, emb, cpu, freez_step, unfreez_step, inter, do_eval):
     local_rank = None
     # nli categories for evaluating predictions
     nli_map = ['contradiction', 'entailment', 'neutral']
@@ -269,6 +281,10 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
     cfg = {}
     old_vars = set()
     old_vars.update(k for k in locals() if not k.startswith('_'))
+    # %%
+    new_vars = set(k for k in locals() if not k.startswith('_'))
+    cfg_vars = new_vars-old_vars
+    cfg = {k:v for k,v in locals().items() if k in cfg_vars }
     if val_set == "train":
         # generate output samples for each input_sample in training set
         num_generations = inp_samples
@@ -346,7 +362,7 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
             save_path = path
     else:
         save_path = f"sels/{sel_model}"
-        Path(save_path).mkdir(exist_ok=True, parents=True)
+    Path(save_path).mkdir(exist_ok=True, parents=True)
     #Cut down memory usage by accumulating tiny steps for multiple backwards;
     #Should be divided exactly by batch_size
     accumulation_tiny_steps = 1 
@@ -362,6 +378,21 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
     }
     ddp = local_rank is not None
     device = "cpu" if cpu else "cuda"
+    # %% tokenizer & model
+    if "mt5" in model_id:
+        tokenizer = MT5TokenizerFast.from_pretrained(underlying_model_name)
+        model = MT5ForConditionalGeneration.from_pretrained(underlying_model_name)
+    else:
+        tokenizer = T5TokenizerFast.from_pretrained(underlying_model_name)
+        if is_flax:
+            model = T5ForConditionalGeneration.from_pretrained(underlying_model_name, from_flax=True)
+            print("converting to ", underlying_model_name[:-1] + "X")
+
+            model.save_pretrained(underlying_model_name[:-1] + "X")
+            tokenizer.save_pretrained(underlying_model_name[:-1] + "X")
+            return
+        else:
+            model = T5ForConditionalGeneration.from_pretrained(underlying_model_name)
     #dataset_path = "../../data/v4_atomic_all_agg.csv"
     atomic_relation_prompt_lengths = {
         "xIntent":prompt_length,
@@ -378,10 +409,32 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
     atomic_relation_prompt_lengths = {
         "xIntent":prompt_length,
     }
-    # %%
-    new_vars = set(k for k in locals() if not k.startswith('_'))
-    cfg_vars = new_vars-old_vars
-    cfg = {k:v for k,v in locals().items() if k in cfg_vars }
+    atomic_relation_mappings = {
+        "oEffect":"<oEffect>",
+        "oReact":"<oReact>",
+        "oWant":"<oWant>",
+        "xAttr":"<xAttr>",
+        "xEffect":"<xEffect>",
+        "xIntent":"<xIntent>",
+        "xNeed":"<xNeed>",
+        "xReact":"<xReact>",
+        "xWant":"<xWant>"
+    }
+    atomic_relation_mappings = {
+        "xIntent":"<xIntent>",
+    }  
+    placeholder_token = "<extra_id_0>"
+    gen_token = "<gen>"
+    encoder_relation_mappings = {}
+    decoder_relation_mappings = {}
+    def get_prompt_token_fn(id_offset,length):
+        return lambda x: (x>=id_offset)&(x<=id_offset+length+1)
+    for rel in atomic_relation_prompt_lengths:
+        id_offset = len(tokenizer)
+        print("id_offset:", id_offset)
+        length = atomic_relation_prompt_lengths[rel]
+        encoder_relation_mappings[rel] = " ".join(f"<{rel}_{i}>" for i in range(length))
+        decoder_relation_mappings[rel] = " ".join(f"<{rel}_{i}>" for i in range(length,length+1))
 # %% load atomic data
 
     data_df = {}
@@ -394,6 +447,232 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
     data_df["validation"] = pd.read_table(val_df_path) #, index_col=[0])
     print("Train:", len(data_df["train"]))
     print("Val:", len(data_df["validation"]))
+    iterations = 0 # it's calculated based on num_samples before training 
+    # eeeeee
+    # ################################### Evaluation #########################
+    def eval(model, data_df, val_set, num_generations, inter, save_path):  
+        scorer_model = SentenceTransformer(f'/home/pouramini/pret/mm/paraphrase-multilingual-MiniLM-L12-v2/')
+        #sss
+        nli_model = CrossEncoder('/home/pouramini/pret/mm/nli-roberta-base/')
+        results = []
+        labels_count = {}
+        for l in nli_map:
+            labels_count[l] = 0
+        df = data_df[val_set]
+        inp = split_col[val_set]["input_text"]
+        target = split_col[val_set]["targets"][0]
+        print("Len Final Df:", len(df))
+        df[target] = df[target].astype(str)
+        #df = df.groupby(['prefix','input_text'],as_index=False)[target].agg({"target_text":'<br />'.join})
+        resp_const_parts = re.split("{.*}", anstemp)
+        resp_const_parts += ["<extra_id_0>", "<extra_id_1>"]
+        print("Scoring...")
+        df["pred1_score"] = 0.0
+        df["pred_text1"] = ""
+        df["nli_group"] = ""
+        df["top"] = ""
+        df.sort_values(by=["prefix", "input_text"], inplace=True)
+
+        model.eval()
+        sum_score = 0 
+        total = num_generations
+        #if num_generations == 0:
+        total = min(num_generations, len(df))
+        ii = 0
+        old_input = ""
+        max_score = 0
+        jj =0
+        pbar = tqdm(total = total)
+        exit_loop = False
+        for idx,row in df.iterrows():
+            if num_generations>0 and ii >= num_generations:
+                print("break at ", ii)
+                break
+            jj += 1
+            rel = row["prefix"]
+
+            encoder_rel_tokens = encoder_relation_mappings[rel]
+            decoder_rel_tokens = decoder_relation_mappings[rel]
+            #query = f"{rel_tokens} {row['event']}" #Change this line to modify the encoder input
+            event = row[inp]
+            if inter: #interactive mode
+                while True:
+                    try:
+                        user_event = input("Enter event or skip (Enter), c)ontinue, e)xit:")
+                        if user_event == "e":
+                            exit_loop = True
+                        if user_event == "c":
+                            inter = False
+                        if user_event != "":
+                            event = user_event
+                        break
+                    except KeyboardInterrupt:
+                        break
+                    except:
+                        print("Error occured, please try again or hit e for exit")
+                        continue
+            if exit_loop:
+                break
+
+            query = qtemp.format(event=event, rel=encoder_rel_tokens, ph=placeholder_token) 
+            if "{rel}" in anstemp:
+                hyps = tokenizer.batch_decode(
+                                model.generate(**tokenizer(query, return_tensors='pt').to(device=device),decoder_start_token_id=32105,**generation_params),
+                                skip_special_tokens=True
+                            )
+            else:
+                hyps = tokenizer.batch_decode(
+                                model.generate(**tokenizer(query, return_tensors='pt').to(device=device),**generation_params),
+                                skip_special_tokens=True
+                            )
+
+            query = re.sub(r'<.*?>','',query)
+            #tails = row[target].split("<br />")
+            tails = [row[target]] if event == row[inp] else "NA"
+            #tails = [x[1] for x in responses]
+            new_hyps = []
+            for hyp in hyps:
+                if hyp == "":
+                    hyp = "."
+                for const in resp_const_parts:
+                    hyp = hyp.replace(const, "")
+                new_hyps.append(hyp)
+
+            hyps = new_hyps
+  
+            sents1 = tails
+            sents2 = hyps
+
+            #Compute embeddings
+            embeddings1 = scorer_model.encode(sents1, device=device, convert_to_tensor=True)
+            embeddings2 = scorer_model.encode(sents2, device=device, convert_to_tensor=True)
+
+            #Compute cosine-similarities for each sentence with each other sentence
+            cosine_scores = util.pytorch_cos_sim(embeddings1, embeddings2)
+
+            #Find the pairs with the highest cosine similarity scores
+            pairs = []
+            rows = cosine_scores.shape[0]
+            cols = cosine_scores.shape[1]
+            for i in range(rows):
+                for j in range(cols):
+                    pairs.append({'index': [i, j], 'score': cosine_scores[i][j]})
+                #print({'index': [i, j], 'score': cosine_scores[i][j]})
+
+            #Sort scores in decreasing order
+            pairs = sorted(pairs, key=lambda x: x['score'], reverse=True)
+
+            top = pairs[0]
+            pred_text = str(sents2[top["index"][1]])
+            closest = str(sents1[top["index"][0]])
+            pair = (closest, pred_text)
+            nli_scores = nli_model.predict(pair)
+            _max  = nli_scores.argmax()
+            label = nli_map[_max]
+            labels_count[label] += 1
+            #cond = (df['prefix'] == rel) & (df[inp] == query)
+            df.at[idx, "nli_group"] = label
+            df.at[idx, "top"] = closest
+
+            df.at[idx, "pred_text1"] = pred_text
+            df.at[idx, "all_preds"] = "<br />".join(hyps) 
+            cur_score = top["score"]
+            df.at[idx, "pred1_score"] = float("{:.2f}".format(cur_score))
+            print("")
+            if row["input_text"] != old_input:
+                old_input = row["input_text"]
+                sum_score += (max_score if max_score > 0 else cur_score)
+                max_score = cur_score
+                print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+                ii += 1
+                pbar.update(1)
+            elif cur_score > max_score:
+                max_score = cur_score
+                print("======================================================")
+
+            mean_score = "{:.4f}".format(sum_score / ii)
+            #tqdm.write(f"Mean score:{mean_score}")
+            if slow > 0:
+                time.sleep(slow)
+            print(ii, "::",query)
+            print("Prediction:", pred_text)
+            print("Closest tail:", closest)
+            print("Label:", label)
+            print("------------------------------------------------------")
+            pbar.set_description(f"Mean score:{mean_score} cur score {cur_score:.2f} max score:{max_score:.2f}")
+
+            results.append({
+                "head":query,
+                "gens":hyps,
+                "tails":tails,
+            })
+            # %%%%%%%%%%%%%%%%%%
+        df = df[df["pred1_score"] > 0]
+        pbar.close()
+        genfile = os.path.join(save_path,f"{val_set}_gen.json")
+        with open(genfile,'w') as f:
+            json.dump(results,f,ensure_ascii=False,indent=2)
+
+        from comet.evaluation.rouge.rouge import Rouge
+        scorer = Rouge()
+        resfile = os.path.join(save_path,f"{val_set}_results.json")
+        refs = {r['head']:r['tails'] for r in results}
+        hyps = {r['head']:r['gens'] for r in results}
+        score,_ = scorer.compute_score(hyps, refs)
+        res_out = open("results", "w" if clear else "a")
+        print(f"###################################### {model_id} #################")
+        print(f"###################################### {model_id} #################", file=res_out)
+        print(model_name, file=res_out)
+        print("val_set:", val_set, file=res_out)
+        print("train file:", train_df_path, file=res_out)
+        print("traing samples:", inp_samples, " unique inputs, ",  iterations, " total samples",file=res_out)
+        print("ignore blanks:", ignore_blanks, file=res_out)
+        print("treshold_score:",tresh_score, file=res_out)
+        print("nli_group:",nli_group, file=res_out)
+
+        print("# *****************************************************************", file=res_out)
+        print("Rouge:", score)
+        print("Rouge:", score, file = res_out)
+        # %% save dataframe %
+        score_col = "pred1_score"
+        col2 = "target_text" 
+        out1 = "data/" + val_set + "_" + model_name  + ".tsv" 
+        df.to_csv(out1, sep="\t", index=False)
+
+        df = df.sort_values(score_col, ascending=False).\
+          drop_duplicates(['prefix','input_text']).\
+            rename(columns={col2:'top'}).\
+              merge(df.groupby(['prefix','input_text'],as_index=False)[col2].agg('<br />'.join))
+        print("Bert Score:", df["pred1_score"].mean())
+        print("Bert Score:", df["pred1_score"].mean(), file=res_out)
+        print("labels_count:", labels_count)
+        print("labels_count:", labels_count, file=res_out)
+
+        pred_counts = df['pred_text1'].unique()
+
+        print("Distinct preds:", len(pred_counts))
+        print("Distinct preds:", len(pred_counts), file=res_out)
+        df_path = (save_path if save_path.startswith("/") else path + "/" + save_path)  
+        out = df_path + "/scored_" + model_name  + ".tsv" 
+        print(out)
+        print(len(df))
+
+        print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+        print("'qtemp':", qtemp)
+        print("'qtemp':", qtemp, file=res_out)
+        print("'anstemp':", anstemp)
+        print("'anstemp':", anstemp, file=res_out)
+        print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+        df.to_csv(out, sep="\t", index=False)
+        with open("/home/pouramini/dflist", "w" if clear else "a") as dflist:
+            print(f"{model_name}={out}", file=dflist)
+        res_out.close()
+
+    if do_eval:
+        model.to(device=device)
+        eval(model, data_df, val_set, num_generations, inter, save_path)  
+        return
+
    #mmmmm
     def my_load_dataset(split_df, split, targets, input_text, inp_samples=0, ignore_blanks=False):
         data_split = {}
@@ -442,22 +721,6 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
         atomic_dataset[split] = my_load_dataset(split_data, split, split_col[split]["targets"], split_col[split]["input_text"], inp_samples=inp_samples, ignore_blanks=ignore_blanks)
 
 
-    placeholder_token = "<extra_id_0>"
-    atomic_relation_mappings = {
-        "oEffect":"<oEffect>",
-        "oReact":"<oReact>",
-        "oWant":"<oWant>",
-        "xAttr":"<xAttr>",
-        "xEffect":"<xEffect>",
-        "xIntent":"<xIntent>",
-        "xNeed":"<xNeed>",
-        "xReact":"<xReact>",
-        "xWant":"<xWant>"
-    }
-    atomic_relation_mappings = {
-        "xIntent":"<xIntent>",
-    }
-    gen_token = "<gen>"
     # %% dpp initialize
     is_main_process = (not ddp or local_rank == 0) 
     if ddp:
@@ -465,22 +728,6 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
         torch.cuda.set_device(local_rank)
         print("launch process",local_rank)
         world_size = torch.distributed.get_world_size()
-    # %% tokenizer & model
-    if "mt5" in model_id:
-        tokenizer = MT5TokenizerFast.from_pretrained(underlying_model_name)
-        model = MT5ForConditionalGeneration.from_pretrained(underlying_model_name)
-    else:
-        tokenizer = T5TokenizerFast.from_pretrained(underlying_model_name)
-        if is_flax:
-            model = T5ForConditionalGeneration.from_pretrained(underlying_model_name, from_flax=True)
-            print("converting to ", underlying_model_name[:-1] + "X")
-
-            model.save_pretrained(underlying_model_name[:-1] + "X")
-            tokenizer.save_pretrained(underlying_model_name[:-1] + "X")
-            return
-        else:
-            model = T5ForConditionalGeneration.from_pretrained(underlying_model_name)
-
     for param in model.parameters():
         param.requires_grad = not frozen
     allowed_out_token_length = len(tokenizer)
@@ -502,17 +749,8 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
     embedding_dim = model.config.hidden_size
     print("embedding dim:", embedding_dim)
     wrapped_models = {}
-    encoder_relation_mappings = {}
-    decoder_relation_mappings = {}
-    def get_prompt_token_fn(id_offset,length):
-        return lambda x: (x>=id_offset)&(x<=id_offset+length+1)
-    for rel in atomic_relation_prompt_lengths:
-        id_offset = len(tokenizer)
-        print("id_offset:", id_offset)
-        length = atomic_relation_prompt_lengths[rel]
-        encoder_relation_mappings[rel] = " ".join(f"<{rel}_{i}>" for i in range(length))
-        decoder_relation_mappings[rel] = " ".join(f"<{rel}_{i}>" for i in range(length,length+1))
 #ppppppp
+    for rel in atomic_relation_prompt_lengths:
         prompt_encoder = None
         decoder_prompt_encoder = None
         if emb:
@@ -554,7 +792,7 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
     # (str)split_name -> (dict) query -> (list) response 
     print("building query responses")
     atomic_query_responses = {}
-    # ttt
+    # ttttt
     ss = 0
     for split_name,split_df in atomic_dataset.items():
         atomic_query_responses[split_name] = {}
@@ -646,7 +884,6 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
         serialization_dir = save_path
         tokenizer.save_pretrained(serialization_dir)
         with open(os.path.join(serialization_dir,'exp_config.json'),'w') as f:
-            import json
             json.dump(cfg,f,ensure_ascii=False,indent=4)
     for wrapped_model in wrapped_models.values():
         wrapped_model.to(device=device)
@@ -797,34 +1034,8 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
             pbar.close()
 # %%
 
-    for p in model.parameters():
-        p.requires_grad = True 
     model.save_pretrained(serialization_dir)
-    results = []
-    #device = 'cuda:0'
-    #model = model.to(device)
-    scorer_model = SentenceTransformer(f'/home/pouramini/pret/mm/paraphrase-multilingual-MiniLM-L12-v2/')
-    #sss
-    nli_model = CrossEncoder('/home/pouramini/pret/mm/nli-roberta-base/')
-    labels_count = {}
-    for l in nli_map:
-        labels_count[l] = 0
-    df = data_df[val_set]
-    inp = split_col[val_set]["input_text"]
-    target = split_col[val_set]["targets"][0]
-    print("Len Final Df:", len(df))
-    df[target] = df[target].astype(str)
-    #df = df.groupby(['prefix','input_text'],as_index=False)[target].agg({"target_text":'<br />'.join})
-    resp_const_parts = re.split("{.*}", anstemp)
-    resp_const_parts += ["<extra_id_0>", "<extra_id_1>"]
-    print("Scoring...")
-    df["pred1_score"] = 0.0
-    df["pred_text1"] = ""
-    df["nli_group"] = ""
-    df["top"] = ""
-    df.sort_values(by=["prefix", "input_text"], inplace=True)
-
-    for rel,wrapped_model in wrapped_models.items():
+    for rel, wrapped_model in wrapped_models.items():
         if prompt_path and sel_model and wrap:
             print(">>> saving prompt encoder")
             wrapped_model.prompt_encoder.save(prompt_path)
@@ -834,178 +1045,9 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
                     wrapped_model.module.update_model_weight()
                 else:
                     wrapped_model.update_model_weight()
-        model.eval()
-        sum_score = 0 
-        total = num_generations
-        #if num_generations == 0:
-        total = min(num_generations, len(df))
-        ii = 0
-        old_input = ""
-        max_score = 0
-        jj =0
-        pbar = tqdm(total = total)
-        for idx,row in df.iterrows():
-            if num_generations>0 and ii >= num_generations:
-                print("break at ", ii)
-                break
-            jj += 1
-
-            encoder_rel_tokens = encoder_relation_mappings[rel]
-            decoder_rel_tokens = decoder_relation_mappings[rel]
-            #query = f"{rel_tokens} {row['event']}" #Change this line to modify the encoder input
-            query = qtemp.format(event=row[inp], rel=encoder_rel_tokens, ph=placeholder_token) #Change this line to modify the encoder input
-            # query = f"{row['event']} {rel_tokens}" #Change this line to modify the encoder input
-            if "{rel}" in anstemp:
-                hyps = tokenizer.batch_decode(
-                                model.generate(**tokenizer(query, return_tensors='pt').to(device=device),decoder_start_token_id=32105,**generation_params),
-                                skip_special_tokens=True
-                            )
-            else:
-                hyps = tokenizer.batch_decode(
-                                model.generate(**tokenizer(query, return_tensors='pt').to(device=device),**generation_params),
-                                skip_special_tokens=True
-                            )
-
-            query = re.sub(r'<.*?>','',query)
-            #tails = row[target].split("<br />")
-            tails = [row[target]]
-            #tails = [x[1] for x in responses]
-            new_hyps = []
-            for hyp in hyps:
-                for const in resp_const_parts:
-                    hyp = hyp.replace(const, "")
-                new_hyps.append(hyp)
-
-            hyps = new_hyps
-  
-            sents1 = tails
-            sents2 = hyps
-
-            #Compute embeddings
-            embeddings1 = scorer_model.encode(sents1, device=device, convert_to_tensor=True)
-            embeddings2 = scorer_model.encode(sents2, device=device, convert_to_tensor=True)
-
-            #Compute cosine-similarities for each sentence with each other sentence
-            cosine_scores = util.pytorch_cos_sim(embeddings1, embeddings2)
-
-            #Find the pairs with the highest cosine similarity scores
-            pairs = []
-            rows = cosine_scores.shape[0]
-            cols = cosine_scores.shape[1]
-            for i in range(rows):
-                for j in range(cols):
-                    pairs.append({'index': [i, j], 'score': cosine_scores[i][j]})
-                #print({'index': [i, j], 'score': cosine_scores[i][j]})
-
-        #Sort scores in decreasing order
-            pairs = sorted(pairs, key=lambda x: x['score'], reverse=True)
-
-            top = pairs[0]
-            pred_text = str(sents2[top["index"][1]])
-            closest = str(sents1[top["index"][0]])
-            pair = (closest, pred_text)
-            nli_scores = nli_model.predict(pair)
-            _max  = nli_scores.argmax()
-            label = nli_map[_max]
-            labels_count[label] += 1
-            #cond = (df['prefix'] == rel) & (df[inp] == query)
-            df.at[idx, "nli_group"] = label
-            df.at[idx, "top"] = closest
-
-            df.at[idx, "pred_text1"] = pred_text
-            df.at[idx, "all_preds"] = "<br />".join(hyps) 
-            cur_score = top["score"]
-            df.at[idx, "pred1_score"] = float("{:.2f}".format(cur_score))
-            print("")
-            if row["input_text"] != old_input:
-                old_input = row["input_text"]
-                sum_score += (max_score if max_score > 0 else cur_score)
-                max_score = cur_score
-                print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
-                ii += 1
-                pbar.update(1)
-            elif cur_score > max_score:
-                max_score = cur_score
-                print("======================================================")
-
-            mean_score = "{:.4f}".format(sum_score / ii)
-            #tqdm.write(f"Mean score:{mean_score}")
-            if slow > 0:
-                time.sleep(slow)
-            print(ii, "::",query)
-            print("Prediction:", pred_text)
-            print("Closest tail:", closest)
-            print("Label:", label)
-            print("------------------------------------------------------")
-            pbar.set_description(f"Mean score:{mean_score} cur score {cur_score:.2f} max score:{max_score:.2f}")
-
-            results.append({
-                "head":query,
-                "gens":hyps,
-                "tails":tails,
-            })
-        # %%%%%%%%%%%%%%%%%%
-    df = df[df["pred1_score"] > 0]
-    pbar.close()
-    genfile = os.path.join(save_path,f"{val_set}_gen.json")
-    with open(genfile,'w') as f:
-        json.dump(results,f,ensure_ascii=False,indent=2)
-
-    from comet.evaluation.rouge.rouge import Rouge
-    scorer = Rouge()
-    resfile = os.path.join(save_path,f"{val_set}_results.json")
-    refs = {r['head']:r['tails'] for r in results}
-    hyps = {r['head']:r['gens'] for r in results}
-    score,_ = scorer.compute_score(hyps, refs)
-    res_out = open("results", "w" if clear else "a")
-    print(f"###################################### {model_id} #################")
-    print(f"###################################### {model_id} #################", file=res_out)
-    print(model_name, file=res_out)
-    print("val_set:", val_set, file=res_out)
-    print("train file:", train_df_path, file=res_out)
-    print("traing samples:", inp_samples, " unique inputs, ",  iterations, " total samples",file=res_out)
-    print("ignore blanks:", ignore_blanks, file=res_out)
-    print("treshold_score:",tresh_score, file=res_out)
-    print("nli_group:",nli_group, file=res_out)
-
-    print("# *****************************************************************", file=res_out)
-    print("Rouge:", score)
-    print("Rouge:", score, file = res_out)
-    # %% save dataframe %
-    score_col = "pred1_score"
-    col2 = "target_text" 
-    out1 = "data/" + val_set + "_" + model_name  + ".tsv" 
-    df.to_csv(out1, sep="\t", index=False)
-
-    df = df.sort_values(score_col, ascending=False).\
-      drop_duplicates(['prefix','input_text']).\
-        rename(columns={col2:'top'}).\
-          merge(df.groupby(['prefix','input_text'],as_index=False)[col2].agg('<br />'.join))
-    print("Bert Score:", df["pred1_score"].mean())
-    print("Bert Score:", df["pred1_score"].mean(), file=res_out)
-    print("labels_count:", labels_count)
-    print("labels_count:", labels_count, file=res_out)
-
-    pred_counts = df['pred_text1'].unique()
-
-    print("Distinct preds:", len(pred_counts))
-    print("Distinct preds:", len(pred_counts), file=res_out)
-    df_path = (save_path if save_path.startswith("/") else path + "/" + save_path)  
-    out = df_path + "/scored_" + model_name  + ".tsv" 
-    print(out)
-    print(len(df))
-
-    print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
-    print("'qtemp':", qtemp)
-    print("'qtemp':", qtemp, file=res_out)
-    print("'anstemp':", anstemp)
-    print("'anstemp':", anstemp, file=res_out)
-    print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
-    df.to_csv(out, sep="\t", index=False)
-    with open("/home/pouramini/dflist", "w" if clear else "a") as dflist:
-        print(f"{model_name}={out}", file=dflist)
-    res_out.close()
-
+        eval(wrapped_model.model, data_df, val_set, num_generations, inter, save_path)  
+    #device = 'cuda:0'
+    #model = model.to(device)
 # %%
 if __name__ == "__main__":
     main()

@@ -1654,3 +1654,187 @@ labels_count: {'contradiction': 26, 'entailment': 133, 'neutral': 90}
 Distinct preds: 81
 'qtemp': {rel} {event} {ph}
 'anstemp': {rel} {ph} {response} {end}
+###################################### parsT5_70X #################
+parsT5_70X_fa_plength_5_lr_0.01_frozen_UNsup_Wrapped_30_01
+val_set: validation
+train file: /home/pouramini/atomic/xIntent_en_fa_train_no_dups.tsv
+traing samples: 30  unique inputs,  152  total samples
+ignore blanks: False
+treshold_score: 0.0
+nli_group: all
+# *****************************************************************
+Rouge: 0.12797359519496718
+Bert Score: 0.6645999999999995
+labels_count: {'contradiction': 170, 'entailment': 65, 'neutral': 14}
+Distinct preds: 39
+'qtemp': {rel} {event} {ph}
+'anstemp': {ph} {response} {end}
+###################################### t5-base #################
+t5-base_en_plength_5_lr_0.01_frozen_UNsup_Wrapped_60_01
+val_set: validation
+train file: /home/pouramini/atomic/xIntent_en_fa_train_no_dups.tsv
+traing samples: 60  unique inputs,  301  total samples
+ignore blanks: False
+treshold_score: 0.0
+nli_group: all
+# *****************************************************************
+Rouge: 0.3181574392622515
+Bert Score: 0.5583999999999999
+labels_count: {'contradiction': 23, 'entailment': 97, 'neutral': 129}
+Distinct preds: 33
+'qtemp': {rel} {event} {ph}
+'anstemp': {ph} {response} {end}
+###################################### t5-base #################
+t5-base_en_plength_5_lr_0.01_frozen_UNsup_Wrapped_60_01
+val_set: validation
+train file: /home/pouramini/atomic/xIntent_en_fa_train_no_dups.tsv
+traing samples: 60  unique inputs,  301  total samples
+ignore blanks: False
+treshold_score: 0.0
+nli_group: all
+# *****************************************************************
+Rouge: 0.3442826427313935
+Bert Score: 0.6085000000000002
+labels_count: {'contradiction': 23, 'entailment': 112, 'neutral': 114}
+Distinct preds: 60
+'qtemp': {rel} {event} {ph}
+'anstemp': {ph} {response} {end}
+###################################### t5-base #################
+t5-base_en_plength_5_lr_0.0001_UNfrozen_UNsup_UNwrapped_10_01
+val_set: validation
+train file: /home/pouramini/atomic/xIntent_en_fa_train_no_dups.tsv
+traing samples: 10  unique inputs,  55  total samples
+ignore blanks: False
+treshold_score: 0.0
+nli_group: all
+# *****************************************************************
+Rouge: 0.24993772333838846
+Bert Score: 0.5727999999999999
+labels_count: {'contradiction': 32, 'entailment': 103, 'neutral': 114}
+Distinct preds: 89
+'qtemp': {rel} {event} {ph}
+'anstemp': {ph} {response} {end}
+###################################### t5-base #################
+t5-base_en_plength_5_lr_0.0001_UNfrozen_UNsup_UNwrapped_60_01
+val_set: validation
+train file: /home/pouramini/atomic/xIntent_en_fa_train_no_dups.tsv
+traing samples: 60  unique inputs,  301  total samples
+ignore blanks: False
+treshold_score: 0.0
+nli_group: all
+# *****************************************************************
+Rouge: 0.3252232117466425
+Bert Score: 0.6072
+labels_count: {'contradiction': 30, 'entailment': 107, 'neutral': 112}
+Distinct preds: 88
+'qtemp': {rel} {event} {ph}
+'anstemp': {ph} {response} {end}
+###################################### t5-base #################
+t5-base_en_plength_5_lr_0.0001_UNfrozen_UNsup_UNwrapped_60_01
+val_set: validation
+train file: /home/pouramini/atomic/xIntent_en_fa_train_no_dups.tsv
+###################################### t5-base #################
+t5-base_en_plength_5_lr_0.0001_UNfrozen_UNsup_UNwrapped_30_01
+val_set: validation
+train file: /home/pouramini/atomic/xIntent_en_fa_train_no_dups.tsv
+traing samples: 30  unique inputs,  0  total samples
+ignore blanks: False
+treshold_score: 0.0
+nli_group: all
+# *****************************************************************
+Rouge: 0.0
+Bert Score: 0.31
+labels_count: {'contradiction': 1, 'entailment': 0, 'neutral': 0}
+Distinct preds: 1
+'qtemp': {rel} {event} {ph}
+'anstemp': {ph} {response} {end}
+###################################### t5-base #################
+t5-base_en_plength_5_lr_0.0001_UNfrozen_UNsup_UNwrapped_500_01
+val_set: validation
+train file: /home/pouramini/atomic/xIntent_en_fa_train_no_dups.tsv
+traing samples: 500  unique inputs,  0  total samples
+ignore blanks: False
+treshold_score: 0.0
+nli_group: all
+# *****************************************************************
+Rouge: 0.08201710661599985
+Bert Score: 0.49610000000000015
+labels_count: {'contradiction': 29, 'entailment': 148, 'neutral': 72}
+Distinct preds: 54
+'qtemp': {rel} {event} {ph}
+'anstemp': {ph} {response} {end}
+###################################### t5-base #################
+t5-base_en_plength_5_lr_0.0001_UNfrozen_UNsup_UNwrapped_500_01
+val_set: validation
+train file: /home/pouramini/atomic/xIntent_en_fa_train_no_dups.tsv
+traing samples: 500  unique inputs,  0  total samples
+ignore blanks: False
+treshold_score: 0.0
+nli_group: all
+# *****************************************************************
+Rouge: 0.12196727272895666
+Bert Score: 0.5235000000000001
+labels_count: {'contradiction': 33, 'entailment': 143, 'neutral': 73}
+Distinct preds: 56
+'qtemp': {rel} {event} {ph}
+'anstemp': {ph} {response} {end}
+###################################### mt5-small #################
+mt5-small_en_plength_5_lr_0.0001_UNfrozen_UNsup_UNwrapped_500_01
+val_set: validation
+train file: /home/pouramini/atomic/xIntent_en_fa_train_no_dups.tsv
+traing samples: 500  unique inputs,  0  total samples
+ignore blanks: False
+treshold_score: 0.0
+nli_group: all
+# *****************************************************************
+Rouge: 0.038480054160723025
+Bert Score: 0.5012000000000001
+labels_count: {'contradiction': 88, 'entailment': 128, 'neutral': 33}
+Distinct preds: 34
+'qtemp': {rel} {event} {ph}
+'anstemp': {ph} {response} {end}
+###################################### mt5-small #################
+mt5-small_fa_plength_5_lr_0.0001_UNfrozen_UNsup_UNwrapped_30_01
+val_set: validation
+train file: /home/pouramini/atomic/xIntent_en_fa_train_no_dups.tsv
+traing samples: 30  unique inputs,  152  total samples
+ignore blanks: False
+treshold_score: 0.0
+nli_group: all
+# *****************************************************************
+Rouge: 0.005208333333333333
+Bert Score: 0.5838000000000002
+labels_count: {'contradiction': 249, 'entailment': 0, 'neutral': 0}
+Distinct preds: 23
+'qtemp': {rel} {event} {ph}
+'anstemp': {rel} {ph} {response} {end}
+###################################### mt5-small #################
+mt5-small_fa_plength_5_lr_0.0001_UNfrozen_UNsup_UNwrapped_300_01
+val_set: validation
+train file: /home/pouramini/atomic/xIntent_en_fa_train_no_dups.tsv
+traing samples: 300  unique inputs,  1635  total samples
+ignore blanks: False
+treshold_score: 0.0
+nli_group: all
+# *****************************************************************
+Rouge: 0.1195444883974822
+Bert Score: 0.5923
+labels_count: {'contradiction': 249, 'entailment': 0, 'neutral': 0}
+Distinct preds: 15
+'qtemp': {rel} {event} {ph}
+'anstemp': {rel} {ph} {response} {end}
+###################################### mt5-small #################
+mt5-small_fa_plength_5_lr_0.0001_UNfrozen_UNsup_UNwrapped_300_01
+val_set: validation
+train file: /home/pouramini/atomic/xIntent_en_fa_train_no_dups.tsv
+traing samples: 300  unique inputs,  1635  total samples
+ignore blanks: False
+treshold_score: 0.0
+nli_group: all
+# *****************************************************************
+Rouge: 0.13446219420124625
+Bert Score: 0.6899000000000001
+labels_count: {'contradiction': 222, 'entailment': 27, 'neutral': 0}
+Distinct preds: 19
+'qtemp': {rel} {event} {ph}
+'anstemp': {ph} {response} {end}
