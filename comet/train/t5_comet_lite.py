@@ -21,7 +21,7 @@ from tqdm import tqdm
 @click.command()
 @click.option(
     "--model_id",
-    default="",
+    default="t5-base",
     type=str,
     help=""
 )
@@ -34,13 +34,13 @@ from tqdm import tqdm
 )
 @click.option(
     "--input_text",
-    default="",
+    default="input_text",
     type=str,
     help=""
 )
 @click.option(
     "--target_text",
-    default="",
+    default="target_text",
     type=str,
     help=""
 )
@@ -82,7 +82,7 @@ def main(model_id, path, input_text, target_text, from_dir, iterations, val_set,
     if from_dir:
         underlying_model_name = path
     else:
-        underlying_model_name = f"/drive2/pretrained/mt5/hf/{model_id}"
+        underlying_model_name = f"/home/pouramini/pret/{model_id}"
     learning_rate = 6.25e-5
     cycle = 1000 #500
     warm_up_steps = 0.002*iterations
@@ -97,7 +97,7 @@ def main(model_id, path, input_text, target_text, from_dir, iterations, val_set,
         "early_stopping":True
     }
     device = 'cuda'
-    log_dir = '/drive2/pouramini/logs/'
+    log_dir = 'logs/'
     model_name = f"{learning_rate}_{cycle}_{iterations}"
     serialization_dir = os.path.join(log_dir,model_id, model_name)
     ii = 1
@@ -112,8 +112,10 @@ def main(model_id, path, input_text, target_text, from_dir, iterations, val_set,
     #%% load atomic data
     import pandas as pd
     atomic_dataset = {}
-    atomic_dataset["train"] = pd.read_table("/drive3/pouramini/data/atomic/en_fa/xIntent_en_fa_train_no_dups.tsv")
-    atomic_dataset["validation"] = pd.read_table("/drive3/pouramini/data/atomic/en_fa/xIntent_en_fa_validation_no_dups.tsv")
+    train_path= "/home/pouramini/atomic/xIntent_en_fa_train_no_dups.tsv"
+    val_path= "/home/pouramini/atomic/xIntent_en_fa_validation_no_dups.tsv"
+    atomic_dataset["train"] = pd.read_table(train_path)
+    atomic_dataset["validation"] = pd.read_table(val_path)
 
     atomic_relation_mappings = {
         "oEffect":"<oEffect>",

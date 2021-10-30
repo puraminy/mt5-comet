@@ -246,7 +246,21 @@ from tqdm import tqdm
     is_flag=True,
     help=""
 )
-def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp, beams, ret_seq, num_generations, is_flax, en, ignore_blanks, overwrite, learning_rate, wrap, prompt_path, plm_base_dir, clear, epochs, prompt_length, train_df_path, val_df_path, val_set, tresh_score, nli_cat, sel_model, slow, batch_size, emb, cpu):
+@click.option(
+    "--freez_step",
+    "-fs",
+    default=0,
+    type=int,
+    help=""
+)
+@click.option(
+    "--unfreez_step",
+    "-ufs",
+    default=0,
+    type=int,
+    help=""
+)
+def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp, beams, ret_seq, num_generations, is_flax, en, ignore_blanks, overwrite, learning_rate, wrap, prompt_path, plm_base_dir, clear, epochs, prompt_length, train_df_path, val_df_path, val_set, tresh_score, nli_cat, sel_model, slow, batch_size, emb, cpu, freez_step, unfreez_step):
     local_rank = None
     # nli categories for evaluating predictions
     nli_map = ['contradiction', 'entailment', 'neutral']
@@ -491,28 +505,28 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
     encoder_relation_mappings = {}
     decoder_relation_mappings = {}
     def get_prompt_token_fn(id_offset,length):
-        return lambda x: (x>=id_offset)&(x<=id_offset+2*length)
+        return lambda x: (x>=id_offset)&(x<=id_offset+length+1)
     for rel in atomic_relation_prompt_lengths:
         id_offset = len(tokenizer)
         print("id_offset:", id_offset)
         length = atomic_relation_prompt_lengths[rel]
         encoder_relation_mappings[rel] = " ".join(f"<{rel}_{i}>" for i in range(length))
-        decoder_relation_mappings[rel] = " ".join(f"<{rel}_{i}>" for i in range(length,2*length))
+        decoder_relation_mappings[rel] = " ".join(f"<{rel}_{i}>" for i in range(length,length+1))
 #ppppppp
         prompt_encoder = None
         decoder_prompt_encoder = None
         if emb:
             prompt_encoder = EmbeddingPromptEncoder(length,embedding_dim,id_offset)
-            decoder_prompt_encoder = EmbeddingPromptEncoder(length,embedding_dim,id_offset)
+            decoder_prompt_encoder = EmbeddingPromptEncoder(1,embedding_dim,id_offset+length)
         else:
             prompt_encoder = LSTMEmbeddingPromptEncoder(length,embedding_dim,id_offset)
-            #decoder_prompt_encoder = LSTMEmbeddingPromptEncoder(length,embedding_dim,id_offset+length)
+            decoder_prompt_encoder = LSTMEmbeddingPromptEncoder(1,embedding_dim,id_offset+length)
 
         added_tokens = [ 
             AddedToken(f"<{rel}_{i}>",lstrip=True,
                 rstrip=False)
             for i in 
-                range(2*length)
+                range(length + 1)
         ]
         tokenizer.add_special_tokens({"additional_special_tokens":added_tokens})
         model.resize_token_embeddings(len(tokenizer))
@@ -526,10 +540,6 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
         #    interval_prompt(
         #        model,tokenizer,(2,3,0),(0,0,0),return_prompt_string=True
         #    )
-        print(f"Prompt length:", wrapped_models[rel].prompt_encoder.length)
-        if wrapped_models[rel].decoder_prompt_encoder:
-            print("Decoder Prompt length:", wrapped_models[rel].decoder_prompt_encoder.length)
-        print(f"Tokenizer size: {len(tokenizer)}")
         #print("Prompt string:",prompt_string)
         #example = prompt_func("piece one","piece two")
         #print("Example:",example)
@@ -596,10 +606,10 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
             labels = outputs['input_ids']
             labels[labels==tokenizer.pad_token_id] = -100
             new_batch['labels']=labels
-            #new_batch['decoder_input_ids'] = model.prepare_decoder_input_ids_from_labels(
-            #    outputs['input_ids']
-            #)
-            #new_batch['decoder_attention_mask'] = outputs['attention_mask']
+            new_batch['decoder_input_ids'] = model.prepare_decoder_input_ids_from_labels(
+                outputs['input_ids']
+            )
+            new_batch['decoder_attention_mask'] = outputs['attention_mask']
         return new_batch
 
     # def collate_fn_for_generation(batch):
@@ -661,7 +671,7 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
         optimizer = AdamW(optimizer_grouped_parameters,lr=learning_rate,eps=1e-8)
         scheduler = get_linear_schedule_with_warmup(optimizer,warm_up_steps,iterations)
         step = 0
-        done = True
+        done = False
         best_dev_loss = 1e10
         train_iter = iter(train_dataloader[rel])
         if is_main_process:
@@ -732,12 +742,12 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
                                     generation_results+=f"|`{query}`|`{str(results)}`|`{str(responses)}`|\n"
                                 sw.add_text(f'dev/{rel}/generation_samples',generation_results,step)
                     # end validation
-                    if step > 4000 and frozen and not done:
+                    if unfreez_step > 0 and step > unfreez_step and frozen and not done:
                         print("unfreezing the model")
                         done = True
                         for p in model.parameters():
                             p.requires_grad = True # Unfreezing
-                    if step > 4000 and not frozen and not done:
+                    if freez_step > 0 and step > freez_step and not frozen and not done:
                         print("freezing the model")
                         done = True
                         for p in model.parameters():
@@ -787,6 +797,9 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
             pbar.close()
 # %%
 
+    for p in model.parameters():
+        p.requires_grad = True 
+    model.save_pretrained(serialization_dir)
     results = []
     #device = 'cuda:0'
     #model = model.to(device)
@@ -837,14 +850,22 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
                 break
             jj += 1
 
-            rel_tokens = atomic_relation_mappings[rel]
+            encoder_rel_tokens = encoder_relation_mappings[rel]
+            decoder_rel_tokens = decoder_relation_mappings[rel]
             #query = f"{rel_tokens} {row['event']}" #Change this line to modify the encoder input
-            query = qtemp.format(event=row[inp], rel=rel_tokens, ph=placeholder_token) #Change this line to modify the encoder input
+            query = qtemp.format(event=row[inp], rel=encoder_rel_tokens, ph=placeholder_token) #Change this line to modify the encoder input
             # query = f"{row['event']} {rel_tokens}" #Change this line to modify the encoder input
-            hyps = tokenizer.batch_decode(
-                            model.generate(**tokenizer(query, return_tensors='pt').to(device=device),**generation_params),
-                            skip_special_tokens=True
-                        )
+            if "{rel}" in anstemp:
+                hyps = tokenizer.batch_decode(
+                                model.generate(**tokenizer(query, return_tensors='pt').to(device=device),decoder_start_token_id=32105,**generation_params),
+                                skip_special_tokens=True
+                            )
+            else:
+                hyps = tokenizer.batch_decode(
+                                model.generate(**tokenizer(query, return_tensors='pt').to(device=device),**generation_params),
+                                skip_special_tokens=True
+                            )
+
             query = re.sub(r'<.*?>','',query)
             #tails = row[target].split("<br />")
             tails = [row[target]]

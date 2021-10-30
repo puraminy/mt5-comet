@@ -353,8 +353,7 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
         self.lstm = torch.nn.LSTM(
             input_size=embedding_dim,
             hidden_size=embedding_dim// 2, #my code
-            hidden_size=embedding_dim// 2, #my code
-            num_layers=3,
+            num_layers=2,
             dropout=0,
             bidirectional=True,
             batch_first=True
@@ -392,7 +391,9 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
         # get embedding weights as the output of forward pass
         with torch.no_grad():
             embeddings = self.forward(self.input_ids+self.id_offset)
-        weight[self.id_offset:self.id_offset+self.length,:]=embeddings.detach()
+        w = embeddings.detach()
+        w.retain_grad()
+        weight[self.id_offset:self.id_offset+self.length,:]=w
 
 
 if __name__ == "__main__":
