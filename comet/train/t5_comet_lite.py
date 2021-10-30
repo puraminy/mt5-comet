@@ -99,7 +99,7 @@ def main(model_id, path, input_text, target_text, from_dir, iterations, val_set,
         underlying_model_name = path
     else:
         underlying_model_name = f"/home/pouramini/pret/{model_id}"
-    if not Path(underlying_model_nam):
+    if not Path(underlying_model_name).exists():
         underlying_model_name = model_id
        
     learning_rate = 6.25e-5
@@ -117,7 +117,7 @@ def main(model_id, path, input_text, target_text, from_dir, iterations, val_set,
     }
     device = 'cuda'
     log_dir = 'logs/' if not base else base + "/logs/"
-    Path(log_dir).mkdir(exit_ok=True, parents=True)
+    Path(log_dir).mkdir(exist_ok=True, parents=True)
     model_name = f"{learning_rate}_{cycle}_{iterations}"
     serialization_dir = os.path.join(log_dir,model_id)
     ii = 1
@@ -202,7 +202,7 @@ def main(model_id, path, input_text, target_text, from_dir, iterations, val_set,
             rstrip=False)
         for token in 
             list(atomic_relation_mappings.values())+
-            [gen_token]
+            lang_tokens
     ]
     tokenizer.add_special_tokens({"additional_special_tokens":added_tokens})
     model.resize_token_embeddings(len(tokenizer))
