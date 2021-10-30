@@ -76,19 +76,38 @@ from tqdm import tqdm
     is_flag=True,
     help=""
 )
-def main(model_id, path, input_text, target_text, from_dir, iterations, val_set, num_generations, is_flax):
+@click.option(
+    "--base",
+    "-base",
+    default="validation",
+    type=str,
+    help=""
+)
+@click.option(
+    "--lang",
+    "-lang",
+    default="lang",
+    type=str,
+    help=""
+)
+
+def main(model_id, path, input_text, target_text, from_dir, iterations, val_set, 
+         num_generations, is_flax, base, lang):
     #%% some hyper-parameters
     #underlying_model_name = "logs/atomic-mt5/last"
     if from_dir:
         underlying_model_name = path
     else:
         underlying_model_name = f"/home/pouramini/pret/{model_id}"
+    if not Path(underlying_model_nam):
+        underlying_model_name = model_id
+       
     learning_rate = 6.25e-5
     cycle = 1000 #500
     warm_up_steps = 0.002*iterations
     weight_decay = 0.01
     batch_size = 1
-    shuffle = True
+    shuffle = False
     shuffle_evaluation=False
     validation_size = 100 #10000
     validation_num_generation = 10
@@ -97,9 +116,10 @@ def main(model_id, path, input_text, target_text, from_dir, iterations, val_set,
         "early_stopping":True
     }
     device = 'cuda'
-    log_dir = 'logs/'
+    log_dir = 'logs/' if not base else base + "/logs/"
+    Path(log_dir).mkdir(exit_ok=True, parents=True)
     model_name = f"{learning_rate}_{cycle}_{iterations}"
-    serialization_dir = os.path.join(log_dir,model_id, model_name)
+    serialization_dir = os.path.join(log_dir,model_id)
     ii = 1
     while Path(serialization_dir).exists():
         ans = input("The output directory already exists, do you want to load the model from it? (y/n)")
@@ -112,8 +132,8 @@ def main(model_id, path, input_text, target_text, from_dir, iterations, val_set,
     #%% load atomic data
     import pandas as pd
     atomic_dataset = {}
-    train_path= "/home/pouramini/atomic/xIntent_en_fa_train_no_dups.tsv"
-    val_path= "/home/pouramini/atomic/xIntent_en_fa_validation_no_dups.tsv"
+    train_path= "atomic/xIntent_en_fa_train_no_dups.tsv"
+    val_path= "atomic/xIntent_en_fa_validation_no_dups.tsv"
     atomic_dataset["train"] = pd.read_table(train_path)
     atomic_dataset["validation"] = pd.read_table(val_path)
 
@@ -128,7 +148,12 @@ def main(model_id, path, input_text, target_text, from_dir, iterations, val_set,
         "xReact":"<xReact>",
         "xWant":"<xWant>"
     }
-    gen_token = "<gen>"
+    gen_token_en = "<gen_en>"
+    gen_token_fa = "<gen_fa>"
+    lang_tokens = [gen_token_en, gen_token_fa]
+    targets = ["target_text", "target_text_fa"]
+    inputs = ["input_text", "input_text_fa"]
+    
     #%% Aggregate instances of queries and corresponding responses
     # (str)split_name -> (dict) query -> (list) response 
     print("building query responses")
@@ -139,12 +164,15 @@ def main(model_id, path, input_text, target_text, from_dir, iterations, val_set,
         for index, d in split_data.iterrows():
             rel = d["prefix"]
             if len(d[target_text])>0: 
-                rel_token = atomic_relation_mappings[rel]
-                event = d[input_text]
-                query = f"{event} {rel_token} {gen_token}"
-                if query not in atomic_query_responses[split_name]:
-                    atomic_query_responses[split_name][query] = []
-                atomic_query_responses[split_name][query].append(d[target_text])
+                for inp in inputs:
+                    rel_token = atomic_relation_mappings[rel]
+                    event = d[inp]
+                    query = f"{rel_token}: {event}"
+                    if query not in atomic_query_responses[split_name]:
+                        atomic_query_responses[split_name][query] = []                
+                    for lang_token, col in zip(lang_tokens, targets):
+                        resp = lang_token + d[col]
+                        atomic_query_responses[split_name][query].append(resp)
                 #didn't convert ___ to <blank>
                 #didn't normalize to lowercase
 
@@ -285,86 +313,6 @@ def main(model_id, path, input_text, target_text, from_dir, iterations, val_set,
     pbar.close()
     sw.close()
     # %%
-    scorer_model = SentenceTransformer('/drive2/pretrained/mm/paraphrase-multilingual-MiniLM-L12-v2/')
-    #sss
-    results=[]
-    df = atomic_dataset[val_set]
-    df[target_text] = df[target_text].astype(str)
-    df = df.merge(df.groupby(['prefix','input_text'],as_index=False)[target_text].agg('<br />'.join))
-    print("Scoring...")
-    if num_generations>0:
-        df = df.truncate(after=num_generations)
-    sum_score = 0 
-    total = num_generations
-    if num_generations == 0:
-        total = len(atomic_query_responses[val_set].items())
-    with tqdm(total = total) as pbar:
-        for idx,(query,responses) in enumerate(atomic_query_responses[val_set].items()):
-            if num_generations>0 and idx>= num_generations:
-                break
-            hyps = tokenizer.batch_decode(
-                            model.generate(**tokenizer(query, return_tensors='pt').to(device=device),**generation_params),
-                            skip_special_tokens=True
-                        )
-            query = re.sub(r'<.*?>','',query)
-            tails = responses
-
-            device = torch.device("cuda")
-            sents1 = tails
-            sents2 = hyps
-
-            #Compute embeddings
-            embeddings1 = scorer_model.encode(sents1, device=device, convert_to_tensor=True)
-            embeddings2 = scorer_model.encode(sents2, device=device, convert_to_tensor=True)
-
-            #Compute cosine-similarities for each sentence with each other sentence
-            cosine_scores = util.pytorch_cos_sim(embeddings1, embeddings2)
-
-            #Find the pairs with the highest cosine similarity scores
-            pairs = []
-            rows = cosine_scores.shape[0]
-            cols = cosine_scores.shape[1]
-            for i in range(rows):
-                for j in range(cols):
-                    pairs.append({'index': [i, j], 'score': cosine_scores[i][j]})
-                #print({'index': [i, j], 'score': cosine_scores[i][j]})
-
-        #Sort scores in decreasing order
-            pairs = sorted(pairs, key=lambda x: x['score'], reverse=True)
-
-            top = pairs[0]
-            pred_text = str(sents2[top["index"][1]])
-            closest = str(sents1[top["index"][0]])
-            cond = (df['prefix'] == rel) & (df['input_text'] == query)
-            df.loc[cond, "top"] = closest
-            df.loc[cond, "pred_text1"] = pred_text
-            df.loc[cond, "pred1_score"] = "{:.4f}".format(top["score"])
-            cur_score = top["score"]
-            sum_score += cur_score
-            mean_score = "{:.4f}".format(sum_score / idx)
-            #tqdm.write(f"Mean score:{mean_score}")
-            print(query, "\n" , pred_text, "\n", closest)
-            pbar.set_description(f"Mean score:{mean_score} cur score {cur_score:.2f}")
-            pbar.update(1)
-
-            results.append({
-                "head":query,
-                "gens":hyps,
-                "tails":tails,
-            })
-        # %%%%%%%%%%%%%%%%%%
-    print("Results:", df["pred1_score"].mean())
-    pbar.close()
-    with open(os.path.join(serialization_dir,f"{val_set}_gen.json"),'w') as f:
-        json.dump(results,f,ensure_ascii=False,indent=2)
-    # %%
-    model_name = model_id + "_" + model_name
-    out = serialization_dir + "/scored_" + model_name  + ".tsv" 
-    print(out)
-    print(len(df))
-    df.to_csv(out, sep="\t", index=False)
-    with open("/home/pouramini/dflist", "w") as dflist:
-        print(f"{model_name}={out}", file=dflist)
     # %%
 if __name__ == "__main__":
     main()
