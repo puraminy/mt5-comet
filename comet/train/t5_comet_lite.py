@@ -46,9 +46,9 @@ from tqdm import tqdm
     help=""
 )
 @click.option(
-    "--iterations",
-    "-i",
-    default=2000,
+    "--num_samples",
+    "-n",
+    default=100,
     type=int,
     help=""
 )
@@ -94,16 +94,36 @@ from tqdm import tqdm
 @click.option(
     "--qtemp",
     "-qt",
-    default="",
+    default="{rel_token}: {event} {gen} {ph}",
     type=str,
     help="template for query"
 )
 @click.option(
     "--anstemp",
     "-at",
-    default="",
+    default="{ph} {response}",
     type=str,
     help="tempate for response"
+)
+@click.option(
+    "--pred_tresh",
+    "-pred_tresh",
+    default=0,
+    type=int,
+    help="Minimum prediction score to be selected"
+)
+@click.option(
+    "--ignore_blanks",
+    "-ib",
+    is_flag=True,
+    help=""
+)
+@click.option(
+    "--nli_group",
+    "-nli",
+    default="all",
+    type=str,
+    help="nli group"
 )
 @click.option(
     "--learning_rate",
@@ -112,8 +132,8 @@ from tqdm import tqdm
     type=float,
     help="learning rate"
 )
-def main(model_id, path, input_text, target_text, from_dir, iterations, val_set, 
-         num_generations, is_flax, overwrite, base, lang, qtemp, anstemp, learning_rate):
+def main(model_id, path, input_text, target_text, from_dir, num_samples, val_set, 
+         num_generations, is_flax, overwrite, base, lang, qtemp, anstemp, pred_tresh, ignore_blanks, nli_group, learning_rate):
     #%% some hyper-parameters
     #underlying_model_name = "logs/atomic-mt5/last"
     if from_dir:
@@ -126,7 +146,6 @@ def main(model_id, path, input_text, target_text, from_dir, iterations, val_set,
         underlying_model_name = model_id
         
     cycle = 1000 #500
-    warm_up_steps = 0.002*iterations
     weight_decay = 0.01
     batch_size = 1
     shuffle = False
@@ -140,15 +159,16 @@ def main(model_id, path, input_text, target_text, from_dir, iterations, val_set,
     device = 'cuda'
     log_dir = 'logs/' if not base else base + "/logs/"
     Path(log_dir).mkdir(exist_ok=True, parents=True)
-    model_name = f"{learning_rate}_{cycle}_{iterations}"
-    serialization_dir = os.path.join(log_dir,model_id)
+    model_name = f"{learning_rate}_{cycle}_{num_samples}"
+    save_path = os.path.join(log_dir,model_id)
+    print("SAVE Path:", save_path)
     ii = 1
-    while not overwrite and Path(serialization_dir).exists():
+    while not overwrite and Path(save_path).exists():
         ans = input("The output directory already exists, do you want to load the model from it? (y/n)")
         if ans == "y":
-            underlying_model_name = serialization_dir
+            underlying_model_name = save_path
             overwrite = True
-        serialization_dir = os.path.join(log_dir,model_id, "_"+str(ii))
+        save_path = os.path.join(log_dir,model_id, "_"+str(ii))
         ii += 1
 
 
@@ -197,13 +217,32 @@ def main(model_id, path, input_text, target_text, from_dir, iterations, val_set,
 
     #%% Aggregate instances of queries and corresponding responses
     # (str)split_name -> (dict) query -> (list) response 
-    print("building query responses")
-    ii = 0
-    atomic_query_responses = {}
-    for split_name,split_data in atomic_dataset.items():
-        atomic_query_responses[split_name] = {}
-        split_data[target_text] = split_data[target_text].astype(str)
-        for index, d in split_data.iterrows():
+    # mmmmmmmmmmmmmm
+    def my_load_dataset(split_df, inputs, targets, 
+                        num_samples=0, 
+                        ignore_blanks=False,
+                        pred_tresh=0,
+                        nli_group="all"):
+        print("building query responses")
+        data_split = {}
+        if num_samples == 0: num_samples = len(split_df)
+        split_df = split_df.sort_values(by="input_text")
+        for col in targets:
+            if col in split_df:
+                split_df[col] = split_df[col].astype(str)
+        if ignore_blanks: # and len(split_df) > num_rows:
+            split_df = split_df[split_df["input_text"].str.contains('___')==False]
+        if pred_tresh > 0 and "pred1_score" in split_df:
+            split_df = split_df[split_df["pred1_score"] > pred_tresh]
+            print("*** Filtered based on pred1 score higher than ", pred_tresh)
+        if nli_group != "all" and "nli_group" in split_df:
+            split_df = split_df[split_df["nli_group"] == nli_group]
+            print("*** Filtered based on nli_group ", nli_group)
+
+        split_df[target_text] = split_df[target_text].astype(str)
+        jj = 0
+        ii = 0
+        for index, d in split_df.iterrows():
             rel = d["prefix"]
             for inp in inputs:
                 for targ_col in targets:
@@ -215,24 +254,42 @@ def main(model_id, path, input_text, target_text, from_dir, iterations, val_set,
                     gen_token = gen_tokens[targ_col]
                     query = format_temp(qtemp, rel, event, gen_token, resp) 
                     resp = format_temp(anstemp, rel, event, gen_token, resp)
-                    if query not in atomic_query_responses[split_name]:
-                        atomic_query_responses[split_name][query] = []                
+                    if query not in data_split:
+                        jj+=1
+                        if jj >= num_samples:
+                            return data_split
+                        data_split[query] = []                
                         if ii < 3:
-                            print(query)
-                            print(resp)
+                            print("Q:",query)
+                            print("R:",resp)
                         ii+=1
-                    atomic_query_responses[split_name][query].append(resp)
+                    data_split[query].append(resp)
                 #didn't convert ___ to <blank>
                 #didn't normalize to lowercase
+        return data_split
 
+    atomic_query_responses = {}
+    for split_name,split_df in atomic_dataset.items():
+        atomic_query_responses[split_name] = my_load_dataset(split_df, inputs, targets,
+                                                            num_samples, 
+                                                            ignore_blanks, 
+                                                            pred_tresh, nli_group)
     #flatten
-    print("building flattened pairs")
-    atomic_flattened = {}
-    for split_name,queries_responses in atomic_query_responses.items():
-        atomic_flattened[split_name] = []
-        for query,responses in queries_responses.items():
-            for response in responses:
-                atomic_flattened[split_name].append((query,response))
+    def flatten(atomic_query_responses):
+        atomic_flattened = {}
+        kk = 0
+        for split_name,queries_responses in atomic_query_responses.items():
+            print("building flattened pairs for ", split_name)
+            atomic_flattened[split_name] = []
+            for query,responses in queries_responses.items():
+                for response in responses:
+                    atomic_flattened[split_name].append((query,response))
+                    kk +=1
+        return atomic_flattened,kk
+
+    atomic_flattened, iterations = flatten(atomic_query_responses)
+    print("Iterations:", iterations)
+    warm_up_steps = 0.002*iterations
     #%% tokenizer & model
     if "mt5" in model_id:
         tokenizer = MT5TokenizerFast.from_pretrained(underlying_model_name)
@@ -277,8 +334,8 @@ def main(model_id, path, input_text, target_text, from_dir, iterations, val_set,
     dev_dataloader = torch.utils.data.DataLoader(atomic_flattened['validation'],
         batch_size=batch_size,shuffle=shuffle,collate_fn=collate_fn_for_flattened)
     # %% prepare for training
-    sw = SummaryWriter(serialization_dir, flush_secs=1)
-    tokenizer.save_pretrained(serialization_dir)
+    sw = SummaryWriter(save_path, flush_secs=1)
+    tokenizer.save_pretrained(save_path)
     model = model.to(device=device)
     no_decay = ['bias', 'LayerNorm.weight']
     optimizer_grouped_parameters = [
@@ -327,7 +384,7 @@ def main(model_id, path, input_text, target_text, from_dir, iterations, val_set,
                 sw.add_scalar('dev/macro_avg_loss',dev_macro_avg_loss,step)
                 if dev_micro_avg_loss < best_dev_loss:
                     best_dev_loss = dev_micro_avg_loss
-                    model.save_pretrained(serialization_dir)
+                    model.save_pretrained(save_path)
                 generation_results = \
                 "|Queries|Generation Results|\n"\
                 "|-|-|\n"
