@@ -72,15 +72,22 @@ from tqdm import tqdm
     help=""
 )
 @click.option(
+    "--load_path",
+    "-load",
+    default="/home/pouramini/pret",
+    type=str,
+    help=""
+)
+@click.option(
     "--overwrite",
     "-o",
     is_flag=True,
     help=""
 )
 @click.option(
-    "--base",
-    "-base",
-    default="validation",
+    "--save_path",
+    "-save",
+    default="logs",
     type=str,
     help=""
 )
@@ -133,13 +140,13 @@ from tqdm import tqdm
     help="learning rate"
 )
 def main(model_id, path, input_text, target_text, from_dir, num_samples, val_set, 
-         num_generations, is_flax, overwrite, base, lang, qtemp, anstemp, pred_tresh, ignore_blanks, nli_group, learning_rate):
+         num_generations, is_flax, load_path, overwrite, save_path, lang, qtemp, anstemp, pred_tresh, ignore_blanks, nli_group, learning_rate):
     #%% some hyper-parameters
     #underlying_model_name = "logs/atomic-mt5/last"
     if from_dir:
         underlying_model_name = path
-    elif not Path(model_id).exists():
-        underlying_model_name = f"/home/pouramini/pret/{model_id}"
+    elif Path(load_path).exists():
+        underlying_model_name = f"{load_path}/{model_id}"
         if not Path(underlying_model_name).exists():
             underlying_model_name = model_id        
     else:
@@ -157,10 +164,10 @@ def main(model_id, path, input_text, target_text, from_dir, num_samples, val_set
         "early_stopping":True
     }
     device = 'cuda'
-    log_dir = 'logs/' if not base else base + "/logs/"
-    Path(log_dir).mkdir(exist_ok=True, parents=True)
+    log_dir = save_path
+    save_path = os.path.join(log_dir, model_id)
+    Path(save_path).mkdir(exist_ok=True, parents=True)
     model_name = f"{learning_rate}_{cycle}_{num_samples}"
-    save_path = os.path.join(log_dir,model_id)
     print("SAVE Path:", save_path)
     ii = 1
     while not overwrite and Path(save_path).exists():
@@ -385,6 +392,10 @@ def main(model_id, path, input_text, target_text, from_dir, num_samples, val_set
                 if dev_micro_avg_loss < best_dev_loss:
                     best_dev_loss = dev_micro_avg_loss
                     model.save_pretrained(save_path)
+                    with open(save_path + "/best_model.txt", "a") as f:
+                        print("step:", step, file=f)
+                        print("best dev loss:", best_dev_loss, file=f)
+
                 generation_results = \
                 "|Queries|Generation Results|\n"\
                 "|-|-|\n"
