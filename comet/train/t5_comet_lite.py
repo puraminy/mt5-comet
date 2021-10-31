@@ -194,6 +194,7 @@ def main(model_id, path, input_text, target_text, from_dir, iterations, val_set,
     #%% Aggregate instances of queries and corresponding responses
     # (str)split_name -> (dict) query -> (list) response 
     print("building query responses")
+    ii = 0
     atomic_query_responses = {}
     for split_name,split_data in atomic_dataset.items():
         atomic_query_responses[split_name] = {}
@@ -208,10 +209,13 @@ def main(model_id, path, input_text, target_text, from_dir, iterations, val_set,
                     event = d[inp]
                     resp = d[targ_col]
                     gen_token = gen_tokens[targ_col]
-                    query = format_temp(qtemp, rel, event, gen_token, resp)                                          
+                    query = format_temp(qtemp, rel, event, gen_token, resp)                                     resp = format_temp(anstemp, rel, event, gen_token, resp)
                     if query not in atomic_query_responses[split_name]:
                         atomic_query_responses[split_name][query] = []                
-                    resp = format_temp(anstemp, rel, event, gen_token, resp)
+                        if ii < 3:
+                            print(query)
+                            print(resp)
+                        ii+=1
                     atomic_query_responses[split_name][query].append(resp)
                 #didn't convert ___ to <blank>
                 #didn't normalize to lowercase
