@@ -105,9 +105,15 @@ from tqdm import tqdm
     type=str,
     help="tempate for response"
 )
-
+@click.option(
+    "--learning_rate",
+    "-lr",
+    default=6.25e-5,
+    type=float,
+    help="learning rate"
+)
 def main(model_id, path, input_text, target_text, from_dir, iterations, val_set, 
-         num_generations, is_flax, overwrite, base, lang, qtemp, anstemp):
+         num_generations, is_flax, overwrite, base, lang, qtemp, anstemp, learning_rate):
     #%% some hyper-parameters
     #underlying_model_name = "logs/atomic-mt5/last"
     if from_dir:
@@ -119,8 +125,6 @@ def main(model_id, path, input_text, target_text, from_dir, iterations, val_set,
     else:
         underlying_model_name = model_id
         
-       
-    learning_rate = 6.25e-4
     cycle = 1000 #500
     warm_up_steps = 0.002*iterations
     weight_decay = 0.01
@@ -273,7 +277,7 @@ def main(model_id, path, input_text, target_text, from_dir, iterations, val_set,
     dev_dataloader = torch.utils.data.DataLoader(atomic_flattened['validation'],
         batch_size=batch_size,shuffle=shuffle,collate_fn=collate_fn_for_flattened)
     # %% prepare for training
-    sw = SummaryWriter(serialization_dir)
+    sw = SummaryWriter(serialization_dir, flush_secs=1)
     tokenizer.save_pretrained(serialization_dir)
     model = model.to(device=device)
     no_decay = ['bias', 'LayerNorm.weight']
