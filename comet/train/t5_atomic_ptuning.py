@@ -809,13 +809,14 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
                 if len(row[rel])>0: 
                     encoder_rel_tokens = encoder_relation_mappings[rel]
                     decoder_rel_tokens = decoder_relation_mappings[rel]
+                    gen_token = gen_token_fa if lang == "fa" else gen_token_en
                     #query = f"{rel_tokens} {row['event']}" #Change this line to modify the encoder input
-                    query = qtemp.format(event=row['event'], rel=encoder_rel_tokens, ph=placeholder_token) #Change this line to modify the encoder input
+                    query = qtemp.format(gen=gen_token, event=row['event'], rel=encoder_rel_tokens, ph=placeholder_token) #Change this line to modify the encoder input
                     # query = f"{row['event']} {rel_tokens}" #Change this line to modify the encoder input
                     if query not in atomic_query_responses[split_name][rel]:
                         atomic_query_responses[split_name][rel][query] = []
                     for response in row[rel]:
-                        answer = anstemp.format(response=response, rel=decoder_rel_tokens, ph=placeholder_token, end="<extra_id_1>")
+                        answer = anstemp.format((gen=gen_token, response=response, rel=decoder_rel_tokens, ph=placeholder_token, end="<extra_id_1>")
                         if ss < 3:
                             print(query)
                             print(answer)
