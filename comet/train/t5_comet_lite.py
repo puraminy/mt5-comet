@@ -77,6 +77,12 @@ from tqdm import tqdm
     help=""
 )
 @click.option(
+    "--overwrite",
+    "-o",
+    is_flag=True,
+    help=""
+)
+@click.option(
     "--base",
     "-base",
     default="validation",
@@ -92,7 +98,7 @@ from tqdm import tqdm
 )
 
 def main(model_id, path, input_text, target_text, from_dir, iterations, val_set, 
-         num_generations, is_flax, base, lang):
+         num_generations, is_flax, overwrite, base, lang):
     #%% some hyper-parameters
     #underlying_model_name = "logs/atomic-mt5/last"
     if from_dir:
@@ -121,10 +127,11 @@ def main(model_id, path, input_text, target_text, from_dir, iterations, val_set,
     model_name = f"{learning_rate}_{cycle}_{iterations}"
     serialization_dir = os.path.join(log_dir,model_id)
     ii = 1
-    while Path(serialization_dir).exists():
+    while not overwrite and Path(serialization_dir).exists():
         ans = input("The output directory already exists, do you want to load the model from it? (y/n)")
         if ans == "y":
             underlying_model_name = serialization_dir
+            overwrite = True
         serialization_dir = os.path.join(log_dir,model_name, "_"+str(ii))
         ii += 1
 
