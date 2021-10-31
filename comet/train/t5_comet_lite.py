@@ -189,8 +189,7 @@ def main(model_id, path, input_text, target_text, from_dir, iterations, val_set,
                              rel=rel, 
                              rel_token=rel_token,
                              gen=gen_token,
-                             ph=placeholder_token,                                           
-                             end=end_token)
+                             ph=placeholder_token,                                                                       end=end_token)
 
     #%% Aggregate instances of queries and corresponding responses
     # (str)split_name -> (dict) query -> (list) response 
