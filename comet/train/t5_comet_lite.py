@@ -19,12 +19,7 @@ import pandas as pd
 import click
 from tqdm import tqdm
 @click.command()
-@click.option(
-    "--model_id",
-    default="t5-base",
-    type=str,
-    help=""
-)
+@click.argument("model_id", type=str)
 @click.option(
     "--path",
     envvar="PWD",
@@ -103,12 +98,15 @@ def main(model_id, path, input_text, target_text, from_dir, iterations, val_set,
     #underlying_model_name = "logs/atomic-mt5/last"
     if from_dir:
         underlying_model_name = path
-    else:
+    elif not Path(model_id).exists():
         underlying_model_name = f"/home/pouramini/pret/{model_id}"
-    if not Path(underlying_model_name).exists():
+        if not Path(underlying_model_name).exists():
+            underlying_model_name = model_id        
+    else:
         underlying_model_name = model_id
+        
        
-    learning_rate = 6.25e-5
+    learning_rate = 6.25e-4
     cycle = 1000 #500
     warm_up_steps = 0.002*iterations
     weight_decay = 0.01
