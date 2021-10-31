@@ -816,7 +816,7 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
                     if query not in atomic_query_responses[split_name][rel]:
                         atomic_query_responses[split_name][rel][query] = []
                     for response in row[rel]:
-                        answer = anstemp.format((gen=gen_token, response=response, rel=decoder_rel_tokens, ph=placeholder_token, end="<extra_id_1>")
+                        answer = anstemp.format(gen=gen_token, response=response, rel=decoder_rel_tokens, ph=placeholder_token, end="<extra_id_1>")
                         if ss < 3:
                             print(query)
                             print(answer)
