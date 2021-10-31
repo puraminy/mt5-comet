@@ -203,13 +203,14 @@ def main(model_id, path, input_text, target_text, from_dir, iterations, val_set,
             rel = d["prefix"]
             for inp in inputs:
                 for targ_col in targets:
-                    if not targ_col in d and len(d[targ_col]) > 0:
+                    if not targ_col in d or len(d[targ_col]) > 0:
                         continue
                     rel_token = atomic_relation_mappings[rel]
                     event = d[inp]
                     resp = d[targ_col]
                     gen_token = gen_tokens[targ_col]
-                    query = format_temp(qtemp, rel, event, gen_token, resp)                                     resp = format_temp(anstemp, rel, event, gen_token, resp)
+                    query = format_temp(qtemp, rel, event, gen_token, resp) 
+                    resp = format_temp(anstemp, rel, event, gen_token, resp)
                     if query not in atomic_query_responses[split_name]:
                         atomic_query_responses[split_name][query] = []                
                         if ii < 3:
