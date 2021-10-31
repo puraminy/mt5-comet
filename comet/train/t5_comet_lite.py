@@ -247,7 +247,7 @@ def main(model_id, path, input_text, target_text, from_dir, iterations, val_set,
             rstrip=False)
         for token in 
             list(atomic_relation_mappings.values())+
-            gen_tokens.values()
+            list(gen_tokens.values())
     ]
     tokenizer.add_special_tokens({"additional_special_tokens":added_tokens})
     model.resize_token_embeddings(len(tokenizer))
