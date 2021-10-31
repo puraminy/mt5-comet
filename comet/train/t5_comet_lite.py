@@ -203,7 +203,7 @@ def main(model_id, path, input_text, target_text, from_dir, iterations, val_set,
             rel = d["prefix"]
             for inp in inputs:
                 for targ_col in targets:
-                    if not targ_col in d or len(d[targ_col]) > 0:
+                    if not targ_col in d or len(d[targ_col]) <= 1:
                         continue
                     rel_token = atomic_relation_mappings[rel]
                     event = d[inp]
