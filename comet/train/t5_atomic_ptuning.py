@@ -424,14 +424,15 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
         "xIntent":"<xIntent>",
     }  
     placeholder_token = "<extra_id_0>"
-    gen_token = "<gen>"
+    gen_token_en = "<gen_en>"
+    gen_token_fa = "<gen_fa>"
+    lang_tokens = [gen_token_en, gen_token_fa]    
     encoder_relation_mappings = {}
     decoder_relation_mappings = {}
     def get_prompt_token_fn(id_offset,length):
         return lambda x: (x>=id_offset)&(x<=id_offset+length+1)
     for rel in atomic_relation_prompt_lengths:
         id_offset = len(tokenizer)
-        print("id_offset:", id_offset)
         length = atomic_relation_prompt_lengths[rel]
         encoder_relation_mappings[rel] = " ".join(f"<{rel}_{i}>" for i in range(length))
         decoder_relation_mappings[rel] = " ".join(f"<{rel}_{i}>" for i in range(length,length+1))
@@ -515,14 +516,18 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
                 break
 
             query = qtemp.format(event=event, rel=encoder_rel_tokens, ph=placeholder_token) 
-            if "{rel}" in anstemp:
+            gen_token = gen_token_fa if target=="target_text_fa" else gen_token_en
+            gen_token_id = tokenizer.convert_tokens_to_ids(gen_token)
+            if "{gen}" in anstemp:
                 hyps = tokenizer.batch_decode(
-                                model.generate(**tokenizer(query, return_tensors='pt').to(device=device),decoder_start_token_id=32105,**generation_params),
+                                model.generate(**tokenizer(query, return_tensors='pt').to(device=device),
+                                               decoder_start_token_id=gen_token_id,**generation_params),
                                 skip_special_tokens=True
                             )
             else:
                 hyps = tokenizer.batch_decode(
-                                model.generate(**tokenizer(query, return_tensors='pt').to(device=device),**generation_params),
+                                model.generate(**tokenizer(query, return_tensors='pt').to(device=device),
+                                               **generation_params),
                                 skip_special_tokens=True
                             )
 
@@ -766,6 +771,7 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
             for i in 
                 range(length + 1)
         ]
+        added_tokens += [AddedToken(token, lstrip=True, rstrip=True) for token in lang_tokens]
         tokenizer.add_special_tokens({"additional_special_tokens":added_tokens})
         model.resize_token_embeddings(len(tokenizer))
         if wrap:
