@@ -92,6 +92,13 @@ from tqdm import tqdm
     help=""
 )
 @click.option(
+    "--output_name",
+    "-out",
+    default="",
+    type=str,
+    help=""
+)
+@click.option(
     "--lang",
     "-lang",
     default="lang",
@@ -140,7 +147,7 @@ from tqdm import tqdm
     help="learning rate"
 )
 def main(model_id, path, input_text, target_text, from_dir, num_samples, val_set, 
-         num_generations, is_flax, load_path, overwrite, save_path, lang, qtemp, anstemp, pred_tresh, ignore_blanks, nli_group, learning_rate):
+         num_generations, is_flax, load_path, overwrite, save_path, output_name, lang, qtemp, anstemp, pred_tresh, ignore_blanks, nli_group, learning_rate):
     #%% some hyper-parameters
     #underlying_model_name = "logs/atomic-mt5/last"
     if from_dir:
@@ -165,7 +172,8 @@ def main(model_id, path, input_text, target_text, from_dir, num_samples, val_set
     }
     device = 'cuda'
     log_dir = save_path
-    save_path = os.path.join(log_dir, model_id)
+    output_name = model_id if not output_name else output_name
+    save_path = os.path.join(log_dir, output_name)
     Path(save_path).mkdir(exist_ok=True, parents=True)
     model_name = f"{learning_rate}_{cycle}_{num_samples}"
     print("SAVE Path:", save_path)
@@ -175,7 +183,7 @@ def main(model_id, path, input_text, target_text, from_dir, num_samples, val_set
         if ans == "y":
             underlying_model_name = save_path
             overwrite = True
-        save_path = os.path.join(log_dir,model_id, "_"+str(ii))
+        save_path = os.path.join(log_dir,output_name, "_"+str(ii))
         ii += 1
 
 
