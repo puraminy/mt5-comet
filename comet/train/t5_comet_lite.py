@@ -91,9 +91,23 @@ from tqdm import tqdm
     type=str,
     help=""
 )
+@click.option(
+    "--qtemp",
+    "-qt",
+    default="",
+    type=str,
+    help="template for query"
+)
+@click.option(
+    "--anstemp",
+    "-at",
+    default="",
+    type=str,
+    help="tempate for response"
+)
 
 def main(model_id, path, input_text, target_text, from_dir, iterations, val_set, 
-         num_generations, is_flax, overwrite, base, lang):
+         num_generations, is_flax, overwrite, base, lang, qtemp, anstemp):
     #%% some hyper-parameters
     #underlying_model_name = "logs/atomic-mt5/last"
     if from_dir:
@@ -130,7 +144,7 @@ def main(model_id, path, input_text, target_text, from_dir, iterations, val_set,
         if ans == "y":
             underlying_model_name = serialization_dir
             overwrite = True
-        serialization_dir = os.path.join(log_dir,model_name, "_"+str(ii))
+        serialization_dir = os.path.join(log_dir,model_id, "_"+str(ii))
         ii += 1
 
 
@@ -155,10 +169,29 @@ def main(model_id, path, input_text, target_text, from_dir, iterations, val_set,
     }
     gen_token_en = "<gen_en>"
     gen_token_fa = "<gen_fa>"
-    lang_tokens = [gen_token_en, gen_token_fa]
-    targets = ["target_text", "target_text_fa"]
+    gen_tokens = {"target_text":gen_token_en, 
+                  "target_text_fa":gen_token_fa,
+                  "pred_text1":gen_token_en,
+                  "pred_text_fa":gen_token_fa,
+                  "all_preds":gen_token_en,
+                  "all_preds_fa":gen_token_fa}
+                  
+    targets = ["target_text", "target_text_fa", "pred_text1", "all_preds", "pred_text_fa","all_preds_fa"]
     inputs = ["input_text", "input_text_fa"]
-    
+
+    placeholder_token = "<extra_id_0>"
+    end_token = "<extar_id_1>"
+
+    def format_temp(template, rel, event, gen_token, resp):
+        rel_token = atomic_relation_mappings[rel]        
+        return template.format(event=event, 
+                             response=resp,
+                             rel=rel, 
+                             rel_token=rel_token,
+                             gen=gen_token,
+                             ph=placeholder_token,                                           
+                             end=end_token)
+
     #%% Aggregate instances of queries and corresponding responses
     # (str)split_name -> (dict) query -> (list) response 
     print("building query responses")
@@ -168,16 +201,19 @@ def main(model_id, path, input_text, target_text, from_dir, iterations, val_set,
         split_data[target_text] = split_data[target_text].astype(str)
         for index, d in split_data.iterrows():
             rel = d["prefix"]
-            if len(d[target_text])>0: 
-                for inp in inputs:
+            for inp in inputs:
+                for targ_col in targets:
+                    if not targ_col in d and len(d[targ_col]) > 0:
+                        continue
                     rel_token = atomic_relation_mappings[rel]
                     event = d[inp]
-                    query = f"{rel_token}: {event}"
+                    resp = d[targ_col]
+                    gen_token = gen_tokens[targ_col]
+                    query = format_temp(qtemp, rel, event, gen_token, resp)                                          
                     if query not in atomic_query_responses[split_name]:
                         atomic_query_responses[split_name][query] = []                
-                    for lang_token, col in zip(lang_tokens, targets):
-                        resp = lang_token + d[col]
-                        atomic_query_responses[split_name][query].append(resp)
+                    resp = format_temp(anstemp, rel, event, gen_token, resp)
+                    atomic_query_responses[split_name][query].append(resp)
                 #didn't convert ___ to <blank>
                 #didn't normalize to lowercase
 
@@ -207,7 +243,7 @@ def main(model_id, path, input_text, target_text, from_dir, iterations, val_set,
             rstrip=False)
         for token in 
             list(atomic_relation_mappings.values())+
-            lang_tokens
+            gen_tokens.values()
     ]
     tokenizer.add_special_tokens({"additional_special_tokens":added_tokens})
     model.resize_token_embeddings(len(tokenizer))
