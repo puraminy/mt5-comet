@@ -108,7 +108,7 @@ from tqdm import tqdm
 @click.option(
     "--qtemp",
     "-qt",
-    default="{rel_token}: {event} {gen} {ph}",
+    default="{rel_token}: {event} {rel_natural} {gen} {ph}",
     type=str,
     help="template for query"
 )
@@ -174,7 +174,6 @@ def main(model_id, path, input_text, target_text, from_dir, num_samples, val_set
     log_dir = save_path
     output_name = model_id if not output_name else output_name
     save_path = os.path.join(log_dir, output_name)
-    Path(save_path).mkdir(exist_ok=True, parents=True)
     model_name = f"{learning_rate}_{cycle}_{num_samples}"
     print("SAVE Path:", save_path)
     ii = 1
@@ -187,6 +186,7 @@ def main(model_id, path, input_text, target_text, from_dir, num_samples, val_set
         ii += 1
 
 
+    Path(save_path).mkdir(exist_ok=True, parents=True)
     #%% load atomic data
     import pandas as pd
     atomic_dataset = {}
@@ -206,6 +206,20 @@ def main(model_id, path, input_text, target_text, from_dir, num_samples, val_set
         "xReact":"<xReact>",
         "xWant":"<xWant>"
     }
+    relation_natural_mappings = {
+        "oEffect":"<oEffect>",
+        "oReact":"<oReact>",
+        "oWant":"<oWant>",
+        "xAttr":"<xAttr>",
+        "xEffect":"<xEffect>",
+        "xIntent":{ 
+            "en":"because PersonX intended ",
+            "fa":"زیرا PersonX می خواست"
+        },
+        "xNeed":"<xNeed>",
+        "xReact":"<xReact>",
+        "xWant":"<xWant>"
+    }
     gen_token_en = "<gen_en>"
     gen_token_fa = "<gen_fa>"
     gen_tokens = {"target_text":gen_token_en, 
@@ -214,6 +228,14 @@ def main(model_id, path, input_text, target_text, from_dir, num_samples, val_set
                   "pred_text_fa":gen_token_fa,
                   "all_preds":gen_token_en,
                   "all_preds_fa":gen_token_fa}
+    langs = {"target_text":"en", 
+                  "target_text_fa":"fa",
+                  "input_text":"en",
+                  "input_text_fa":"fa",
+                  "pred_text1":"en",
+                  "pred_text_fa":"fa",
+                  "all_preds":"en",
+                  "all_preds_fa":"fa"}
                   
     targets = ["target_text", "target_text_fa", "pred_text1", "all_preds", "pred_text_fa","all_preds_fa"]
     inputs = ["input_text", "input_text_fa"]
@@ -221,12 +243,14 @@ def main(model_id, path, input_text, target_text, from_dir, num_samples, val_set
     placeholder_token = "<extra_id_0>"
     end_token = "<extar_id_1>"
 
-    def format_temp(template, rel, event, gen_token, resp):
+    def format_temp(template, rel, event, gen_token, resp, lang):
         rel_token = atomic_relation_mappings[rel]        
+        rel_natural = relation_natural_mappings[rel][lang]        
         return template.format(event=event, 
                              response=resp,
                              rel=rel, 
                              rel_token=rel_token,
+                             rel_natural=rel_natural,
                              gen=gen_token,
                              ph=placeholder_token,                                                                       end=end_token)
 
@@ -267,8 +291,9 @@ def main(model_id, path, input_text, target_text, from_dir, num_samples, val_set
                     event = d[inp]
                     resp = d[targ_col]
                     gen_token = gen_tokens[targ_col]
-                    query = format_temp(qtemp, rel, event, gen_token, resp) 
-                    resp = format_temp(anstemp, rel, event, gen_token, resp)
+                    lang = langs[targ_col]
+                    query = format_temp(qtemp, rel, event, gen_token, resp, lang) 
+                    resp = format_temp(anstemp, rel, event, gen_token, resp, lang)
                     if query not in data_split:
                         jj+=1
                         if jj >= num_samples:
