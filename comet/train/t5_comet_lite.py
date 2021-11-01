@@ -1,6 +1,5 @@
 #%% load libraries
-
-from sentence_transformers import SentenceTransformer, util
+from comet.train.t5_comet_eval import *
 from transformers import (
     T5ForConditionalGeneration, T5TokenizerFast, 
     MT5ForConditionalGeneration, MT5TokenizerFast, AdamW, AddedToken,
@@ -301,8 +300,8 @@ def main(model_id, path, from_dir, num_samples, val_set,
     batch_size = 1
     shuffle = False
     shuffle_evaluation=False
-    validation_size = 100 #10000
-    validation_num_generation = 10
+    validation_size = 200 #10000
+    validation_num_generation = 20
     generation_params = {
         "max_length":80,
         "early_stopping":True
@@ -432,6 +431,7 @@ def main(model_id, path, from_dir, num_samples, val_set,
                     del result
                     del loss
                     del labels_mask
+                if dev_token_count == 0: dev_token_count = 0.0001
                 dev_micro_avg_loss = dev_token_loss/dev_token_count
                 dev_macro_avg_loss = dev_sample_loss/dev_sample_count
                 sw.add_scalar('dev/micro_avg_loss',dev_micro_avg_loss,step)
