@@ -18,6 +18,149 @@ from pathlib import Path
 import pandas as pd
 import click
 from tqdm import tqdm
+
+
+atomic_relation_mappings = {
+    "oEffect":"<oEffect>",
+    "oReact":"<oReact>",
+    "oWant":"<oWant>",
+    "xAttr":"<xAttr>",
+    "xEffect":"<xEffect>",
+    "xIntent":"<xIntent>",
+    "xNeed":"<xNeed>",
+    "xReact":"<xReact>",
+    "xWant":"<xWant>"
+}
+relation_natural_mappings = {
+    "oEffect":"<oEffect>",
+    "oReact":"<oReact>",
+    "oWant":"<oWant>",
+    "xAttr":"<xAttr>",
+    "xEffect":"<xEffect>",
+    "xIntent":{ 
+        "en":"because PersonX intended ",
+        "fa":"زیرا PersonX می خواست"
+    },
+    "xNeed":"<xNeed>",
+    "xReact":"<xReact>",
+    "xWant":"<xWant>"
+}
+gen_token_en = "<gen_en>"
+gen_token_fa = "<gen_fa>"
+gen_tokens = {"target_text":gen_token_en, 
+              "target_text_fa":gen_token_fa,
+              "natural_target_text_fa":gen_token_fa,
+              "natural_target_text":gen_token_en,
+              "natural_input_text_fa":gen_token_fa,
+              "natural_input_text":gen_token_en,
+              "pred_text1":gen_token_en,
+              "pred_text_fa":gen_token_fa,
+              "all_preds":gen_token_en,
+              "all_preds_fa":gen_token_fa}
+langs = {"target_text":"en", 
+              "target_text_fa":"fa",
+              "input_text":"en",
+              "input_text_fa":"fa",
+              "natural_target_text_fa":"fa",
+              "natural_target_text":"en",
+              "natural_input_text_fa":"fa",
+              "natural_input_text":"en",
+              "pred_text1":"en",
+              "pred_text_fa":"fa",
+              "all_preds":"en",
+              "all_preds_fa":"fa"}
+              
+targets = ["target_text", "target_text_fa", "pred_text1", "all_preds", "pred_text_fa","all_preds_fa", "natural_target_text_fa", "natural_target_text"]
+inputs = ["input_text", "input_text_fa", "natural_input_text_en", "natural_input_text_fa"]
+
+placeholder_token = "<extra_id_0>"
+end_token = "<extar_id_1>"
+
+def format_temp(template, rel, event, gen_token, resp, lang):
+    rel_token = atomic_relation_mappings[rel]        
+    rel_natural = relation_natural_mappings[rel][lang]        
+    return template.format(event=event, 
+                         response=resp,
+                         rel=rel, 
+                         rel_token=rel_token,
+                         rel_natural=rel_natural,
+                         gen=gen_token,
+                         ph=placeholder_token,                                                                       end=end_token)
+
+#%% Aggregate instances of queries and corresponding responses
+# (str)split_name -> (dict) query -> (list) response 
+# mmmmmmmmmmmmmm
+def my_load_dataset(split_df, inputs, targets, qtemp, anstemp, 
+                    num_samples=0, 
+                    ignore_blanks=False,
+                    pred_tresh=0,
+                    natural=False,
+                    nli_group="all"):
+    print("building query responses")
+    data_split = {}
+    if num_samples == 0: num_samples = len(split_df)
+    split_df = split_df.sort_values(by="input_text")
+    for col in targets:
+        if col in split_df:
+            split_df[col] = split_df[col].astype(str)
+    if ignore_blanks: # and len(split_df) > num_rows:
+        split_df = split_df[split_df["input_text"].str.contains('___')==False]
+    if pred_tresh > 0 and "pred1_score" in split_df:
+        split_df = split_df[split_df["pred1_score"] > pred_tresh]
+        print("*** Filtered based on pred1 score higher than ", pred_tresh)
+    if nli_group != "all" and "nli_group" in split_df:
+        split_df = split_df[split_df["nli_group"] == nli_group]
+        print("*** Filtered based on nli_group ", nli_group)
+
+    jj = 0
+    ii = 0
+    for index, d in split_df.iterrows():
+        rel = d["prefix"]
+        for inp in inputs:
+            if natural and not "natural" in inp:
+                continue
+            for targ_col in targets:
+                if not targ_col in d or len(d[targ_col]) <= 1:
+                    continue
+                if natural and not "natural" in targ_col:
+                    continue
+                rel_token = atomic_relation_mappings[rel]
+                event = d[inp]
+                resp = d[targ_col]
+                gen_token = gen_tokens[targ_col]
+                lang = langs[targ_col]
+                query = format_temp(qtemp, rel, event, gen_token, resp, lang) 
+                resp = format_temp(anstemp, rel, event, gen_token, resp, lang)
+                if query not in data_split:
+                    jj+=1
+                    if jj >= num_samples:
+                        return data_split
+                    data_split[query] = []                
+                    if ii < 3:
+                        print("Q:",query)
+                        print("R:",resp)
+                    ii+=1
+                data_split[query].append(resp)
+            #didn't convert ___ to <blank>
+            #didn't normalize to lowercase
+    return data_split
+
+#flatten
+def flatten(atomic_query_responses):
+    atomic_flattened = {}
+    kk = 0
+    for split_name,queries_responses in atomic_query_responses.items():
+        print("building flattened pairs for ", split_name)
+        atomic_flattened[split_name] = []
+        for query,responses in queries_responses.items():
+            for response in responses:
+                atomic_flattened[split_name].append((query,response))
+                kk +=1
+    return atomic_flattened,kk
+
+
+
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Training %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @click.command()
 @click.argument("model_id", type=str)
 @click.option(
@@ -26,18 +169,6 @@ from tqdm import tqdm
     #    multiple=True,
     type=click.Path(),
     help="The current path (it is set by system)"
-)
-@click.option(
-    "--input_text",
-    default="input_text",
-    type=str,
-    help=""
-)
-@click.option(
-    "--target_text",
-    default="target_text",
-    type=str,
-    help=""
 )
 @click.option(
     "--from_dir",
@@ -108,7 +239,7 @@ from tqdm import tqdm
 @click.option(
     "--qtemp",
     "-qt",
-    default="{rel_token}: {event} {rel_natural} {gen} {ph}",
+    default="{rel_token}: {event} {gen} {ph}",
     type=str,
     help="template for query"
 )
@@ -133,11 +264,17 @@ from tqdm import tqdm
     help=""
 )
 @click.option(
+    "--natural",
+    "-nat",
+    is_flag=True,
+    help="Whether use natural (with template) input output or not"
+)
+@click.option(
     "--nli_group",
     "-nli",
     default="all",
     type=str,
-    help="nli group"
+    help="filter by predicted nli group"
 )
 @click.option(
     "--learning_rate",
@@ -146,8 +283,8 @@ from tqdm import tqdm
     type=float,
     help="learning rate"
 )
-def main(model_id, path, input_text, target_text, from_dir, num_samples, val_set, 
-         num_generations, is_flax, load_path, overwrite, save_path, output_name, lang, qtemp, anstemp, pred_tresh, ignore_blanks, nli_group, learning_rate):
+def main(model_id, path, from_dir, num_samples, val_set, 
+         num_generations, is_flax, load_path, overwrite, save_path, output_name, lang, qtemp, anstemp, pred_tresh, ignore_blanks, natural, nli_group, learning_rate):
     #%% some hyper-parameters
     #underlying_model_name = "logs/atomic-mt5/last"
     if from_dir:
@@ -177,7 +314,7 @@ def main(model_id, path, input_text, target_text, from_dir, num_samples, val_set
     model_name = f"{learning_rate}_{cycle}_{num_samples}"
     print("SAVE Path:", save_path)
     ii = 1
-    while not overwrite and Path(save_path).exists():
+    while not overwrite and Path(save_path).exists() and not model_id=="test":
         ans = input("The output directory already exists, do you want to load the model from it? (y/n)")
         if ans == "y":
             underlying_model_name = save_path
@@ -195,142 +332,19 @@ def main(model_id, path, input_text, target_text, from_dir, num_samples, val_set
     atomic_dataset["train"] = pd.read_table(train_path)
     atomic_dataset["validation"] = pd.read_table(val_path)
 
-    atomic_relation_mappings = {
-        "oEffect":"<oEffect>",
-        "oReact":"<oReact>",
-        "oWant":"<oWant>",
-        "xAttr":"<xAttr>",
-        "xEffect":"<xEffect>",
-        "xIntent":"<xIntent>",
-        "xNeed":"<xNeed>",
-        "xReact":"<xReact>",
-        "xWant":"<xWant>"
-    }
-    relation_natural_mappings = {
-        "oEffect":"<oEffect>",
-        "oReact":"<oReact>",
-        "oWant":"<oWant>",
-        "xAttr":"<xAttr>",
-        "xEffect":"<xEffect>",
-        "xIntent":{ 
-            "en":"because PersonX intended ",
-            "fa":"زیرا PersonX می خواست"
-        },
-        "xNeed":"<xNeed>",
-        "xReact":"<xReact>",
-        "xWant":"<xWant>"
-    }
-    gen_token_en = "<gen_en>"
-    gen_token_fa = "<gen_fa>"
-    gen_tokens = {"target_text":gen_token_en, 
-                  "target_text_fa":gen_token_fa,
-                  "pred_text1":gen_token_en,
-                  "pred_text_fa":gen_token_fa,
-                  "all_preds":gen_token_en,
-                  "all_preds_fa":gen_token_fa}
-    langs = {"target_text":"en", 
-                  "target_text_fa":"fa",
-                  "input_text":"en",
-                  "input_text_fa":"fa",
-                  "pred_text1":"en",
-                  "pred_text_fa":"fa",
-                  "all_preds":"en",
-                  "all_preds_fa":"fa"}
-                  
-    targets = ["target_text", "target_text_fa", "pred_text1", "all_preds", "pred_text_fa","all_preds_fa"]
-    inputs = ["input_text", "input_text_fa"]
-
-    placeholder_token = "<extra_id_0>"
-    end_token = "<extar_id_1>"
-
-    def format_temp(template, rel, event, gen_token, resp, lang):
-        rel_token = atomic_relation_mappings[rel]        
-        rel_natural = relation_natural_mappings[rel][lang]        
-        return template.format(event=event, 
-                             response=resp,
-                             rel=rel, 
-                             rel_token=rel_token,
-                             rel_natural=rel_natural,
-                             gen=gen_token,
-                             ph=placeholder_token,                                                                       end=end_token)
-
-    #%% Aggregate instances of queries and corresponding responses
-    # (str)split_name -> (dict) query -> (list) response 
-    # mmmmmmmmmmmmmm
-    def my_load_dataset(split_df, inputs, targets, 
-                        num_samples=0, 
-                        ignore_blanks=False,
-                        pred_tresh=0,
-                        nli_group="all"):
-        print("building query responses")
-        data_split = {}
-        if num_samples == 0: num_samples = len(split_df)
-        split_df = split_df.sort_values(by="input_text")
-        for col in targets:
-            if col in split_df:
-                split_df[col] = split_df[col].astype(str)
-        if ignore_blanks: # and len(split_df) > num_rows:
-            split_df = split_df[split_df["input_text"].str.contains('___')==False]
-        if pred_tresh > 0 and "pred1_score" in split_df:
-            split_df = split_df[split_df["pred1_score"] > pred_tresh]
-            print("*** Filtered based on pred1 score higher than ", pred_tresh)
-        if nli_group != "all" and "nli_group" in split_df:
-            split_df = split_df[split_df["nli_group"] == nli_group]
-            print("*** Filtered based on nli_group ", nli_group)
-
-        split_df[target_text] = split_df[target_text].astype(str)
-        jj = 0
-        ii = 0
-        for index, d in split_df.iterrows():
-            rel = d["prefix"]
-            for inp in inputs:
-                for targ_col in targets:
-                    if not targ_col in d or len(d[targ_col]) <= 1:
-                        continue
-                    rel_token = atomic_relation_mappings[rel]
-                    event = d[inp]
-                    resp = d[targ_col]
-                    gen_token = gen_tokens[targ_col]
-                    lang = langs[targ_col]
-                    query = format_temp(qtemp, rel, event, gen_token, resp, lang) 
-                    resp = format_temp(anstemp, rel, event, gen_token, resp, lang)
-                    if query not in data_split:
-                        jj+=1
-                        if jj >= num_samples:
-                            return data_split
-                        data_split[query] = []                
-                        if ii < 3:
-                            print("Q:",query)
-                            print("R:",resp)
-                        ii+=1
-                    data_split[query].append(resp)
-                #didn't convert ___ to <blank>
-                #didn't normalize to lowercase
-        return data_split
-
     atomic_query_responses = {}
     for split_name,split_df in atomic_dataset.items():
         atomic_query_responses[split_name] = my_load_dataset(split_df, inputs, targets,
+                                                            qtemp, anstemp,
                                                             num_samples, 
                                                             ignore_blanks, 
                                                             pred_tresh, nli_group)
-    #flatten
-    def flatten(atomic_query_responses):
-        atomic_flattened = {}
-        kk = 0
-        for split_name,queries_responses in atomic_query_responses.items():
-            print("building flattened pairs for ", split_name)
-            atomic_flattened[split_name] = []
-            for query,responses in queries_responses.items():
-                for response in responses:
-                    atomic_flattened[split_name].append((query,response))
-                    kk +=1
-        return atomic_flattened,kk
-
     atomic_flattened, iterations = flatten(atomic_query_responses)
     print("Iterations:", iterations)
     warm_up_steps = 0.002*iterations
     #%% tokenizer & model
+    if model_id == "test":
+        return
     if "mt5" in model_id:
         tokenizer = MT5TokenizerFast.from_pretrained(underlying_model_name)
         model = MT5ForConditionalGeneration.from_pretrained(underlying_model_name)
