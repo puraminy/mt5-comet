@@ -70,7 +70,7 @@ langs = {"target_text":"en",
               "all_preds_fa":"fa"}
               
 targets = ["target_text", "target_text_fa", "pred_text1", "all_preds", "pred_text_fa","all_preds_fa", "natural_target_text_fa", "natural_target_text"]
-inputs = ["input_text", "input_text_fa", "natural_input_text_en", "natural_input_text_fa"]
+inputs = ["input_text", "input_text_fa", "natural_input_text", "natural_input_text_fa"]
 
 placeholder_token = "<extra_id_0>"
 end_token = "<extar_id_1>"
@@ -89,13 +89,16 @@ def format_temp(template, rel, event, gen_token, resp, lang):
 #%% Aggregate instances of queries and corresponding responses
 # (str)split_name -> (dict) query -> (list) response 
 # mmmmmmmmmmmmmm
-def my_load_dataset(split_df, inputs, targets, qtemp, anstemp, 
+def my_load_dataset(split_df, split_name, inputs, targets, qtemp, anstemp, 
                     num_samples=0, 
                     ignore_blanks=False,
-                    pred_tresh=0,
                     natural=False,
+                    pred_tresh=0,
                     nli_group="all"):
-    print("building query responses")
+    print("building query responses for ", split_name)
+    if natural and split_name != "train": natural = False 
+    if natural:
+        print("natural is ON")
     data_split = {}
     if num_samples == 0: num_samples = len(split_df)
     split_df = split_df.sort_values(by="input_text")
@@ -116,6 +119,8 @@ def my_load_dataset(split_df, inputs, targets, qtemp, anstemp,
     for index, d in split_df.iterrows():
         rel = d["prefix"]
         for inp in inputs:
+            if not inp in d or len(d[inp]) <= 1:
+                continue
             if natural and not "natural" in inp:
                 continue
             for targ_col in targets:
@@ -126,6 +131,10 @@ def my_load_dataset(split_df, inputs, targets, qtemp, anstemp,
                 rel_token = atomic_relation_mappings[rel]
                 event = d[inp]
                 resp = d[targ_col]
+                if natural:
+                    resp = resp.replace("PersonX intends", "")
+                    resp = resp.replace("PersonX قصد دارد", "")
+                resp = resp.strip()
                 gen_token = gen_tokens[targ_col]
                 lang = langs[targ_col]
                 query = format_temp(qtemp, rel, event, gen_token, resp, lang) 
@@ -238,7 +247,7 @@ def flatten(atomic_query_responses):
 @click.option(
     "--qtemp",
     "-qt",
-    default="{rel_token}: {event} {gen} {ph}",
+    default="{rel_token}: {event} {rel_natural} {gen} {ph}",
     type=str,
     help="template for query"
 )
@@ -333,10 +342,12 @@ def main(model_id, path, from_dir, num_samples, val_set,
 
     atomic_query_responses = {}
     for split_name,split_df in atomic_dataset.items():
-        atomic_query_responses[split_name] = my_load_dataset(split_df, inputs, targets,
+        atomic_query_responses[split_name] = my_load_dataset(split_df, split_name,
+                                                            inputs, targets,
                                                             qtemp, anstemp,
                                                             num_samples, 
-                                                            ignore_blanks, 
+                                                            ignore_blanks,
+                                                            natural,
                                                             pred_tresh, nli_group)
     atomic_flattened, iterations = flatten(atomic_query_responses)
     print("Iterations:", iterations)
@@ -431,7 +442,6 @@ def main(model_id, path, from_dir, num_samples, val_set,
                     del result
                     del loss
                     del labels_mask
-                if dev_token_count == 0: dev_token_count = 0.0001
                 dev_micro_avg_loss = dev_token_loss/dev_token_count
                 dev_macro_avg_loss = dev_sample_loss/dev_sample_count
                 sw.add_scalar('dev/micro_avg_loss',dev_micro_avg_loss,step)
