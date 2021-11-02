@@ -7,7 +7,7 @@ from tqdm import tqdm
 import re
 import os
 
-device = 'cpu'
+device = 'cuda'
 nli_map = ['contradiction', 'entailment', 'neutral']
 atomic_relation_mappings = {
     "oEffect":"<oEffect>",
