@@ -1,5 +1,5 @@
 #%% load libraries
-from comet.train.t5_comet_eval import *
+from comet.train.common import *
 from transformers import (
     T5ForConditionalGeneration, T5TokenizerFast, 
     MT5ForConditionalGeneration, MT5TokenizerFast, AdamW, AddedToken,
@@ -17,154 +17,6 @@ from pathlib import Path
 import pandas as pd
 import click
 from tqdm import tqdm
-
-
-atomic_relation_mappings = {
-    "oEffect":"<oEffect>",
-    "oReact":"<oReact>",
-    "oWant":"<oWant>",
-    "xAttr":"<xAttr>",
-    "xEffect":"<xEffect>",
-    "xIntent":"<xIntent>",
-    "xNeed":"<xNeed>",
-    "xReact":"<xReact>",
-    "xWant":"<xWant>"
-}
-relation_natural_mappings = {
-    "oEffect":"<oEffect>",
-    "oReact":"<oReact>",
-    "oWant":"<oWant>",
-    "xAttr":"<xAttr>",
-    "xEffect":"<xEffect>",
-    "xIntent":{ 
-        "en":"because PersonX intended ",
-        "fa":"زیرا PersonX می خواست"
-    },
-    "xNeed":"<xNeed>",
-    "xReact":"<xReact>",
-    "xWant":"<xWant>"
-}
-gen_token_en = "<gen_en>"
-gen_token_fa = "<gen_fa>"
-gen_tokens = {"target_text":gen_token_en, 
-              "target_text_fa":gen_token_fa,
-              "natural_target_text_fa":gen_token_fa,
-              "natural_target_text":gen_token_en,
-              "natural_input_text_fa":gen_token_fa,
-              "natural_input_text":gen_token_en,
-              "pred_text1":gen_token_en,
-              "pred_text_fa":gen_token_fa,
-              "all_preds":gen_token_en,
-              "all_preds_fa":gen_token_fa}
-langs = {"target_text":"en", 
-              "target_text_fa":"fa",
-              "input_text":"en",
-              "input_text_fa":"fa",
-              "natural_target_text_fa":"fa",
-              "natural_target_text":"en",
-              "natural_input_text_fa":"fa",
-              "natural_input_text":"en",
-              "pred_text1":"en",
-              "pred_text_fa":"fa",
-              "all_preds":"en",
-              "all_preds_fa":"fa"}
-              
-targets = ["target_text", "target_text_fa", "pred_text1", "all_preds", "pred_text_fa","all_preds_fa", "natural_target_text_fa", "natural_target_text"]
-inputs = ["input_text", "input_text_fa", "natural_input_text", "natural_input_text_fa"]
-
-placeholder_token = "<extra_id_0>"
-end_token = "<extar_id_1>"
-
-def format_temp(template, rel, event, gen_token, resp, lang):
-    rel_token = atomic_relation_mappings[rel]        
-    rel_natural = relation_natural_mappings[rel][lang]        
-    return template.format(event=event, 
-                         response=resp,
-                         rel=rel, 
-                         rel_token=rel_token,
-                         rel_natural=rel_natural,
-                         gen=gen_token,
-                         ph=placeholder_token,                                                                       end=end_token)
-
-#%% Aggregate instances of queries and corresponding responses
-# (str)split_name -> (dict) query -> (list) response 
-# mmmmmmmmmmmmmm
-def my_load_dataset(split_df, split_name, inputs, targets, qtemp, anstemp, 
-                    num_samples=0, 
-                    ignore_blanks=False,
-                    natural=False,
-                    pred_tresh=0,
-                    nli_group="all"):
-    print("building query responses for ", split_name)
-    if natural and split_name != "train": natural = False 
-    if natural:
-        print("natural is ON")
-    data_split = {}
-    if num_samples == 0: num_samples = len(split_df)
-    split_df = split_df.sort_values(by="input_text")
-    for col in targets:
-        if col in split_df:
-            split_df[col] = split_df[col].astype(str)
-    if ignore_blanks: # and len(split_df) > num_rows:
-        split_df = split_df[split_df["input_text"].str.contains('___')==False]
-    if pred_tresh > 0 and "pred1_score" in split_df:
-        split_df = split_df[split_df["pred1_score"] > pred_tresh]
-        print("*** Filtered based on pred1 score higher than ", pred_tresh)
-    if nli_group != "all" and "nli_group" in split_df:
-        split_df = split_df[split_df["nli_group"] == nli_group]
-        print("*** Filtered based on nli_group ", nli_group)
-
-    jj = 0
-    ii = 0
-    for index, d in split_df.iterrows():
-        rel = d["prefix"]
-        for inp in inputs:
-            if not inp in d or len(d[inp]) <= 1:
-                continue
-            if natural and not "natural" in inp:
-                continue
-            for targ_col in targets:
-                if not targ_col in d or len(d[targ_col]) <= 1:
-                    continue
-                if natural and not "natural" in targ_col:
-                    continue
-                rel_token = atomic_relation_mappings[rel]
-                event = d[inp]
-                resp = d[targ_col]
-                if natural:
-                    resp = resp.replace("PersonX intends", "")
-                    resp = resp.replace("PersonX قصد دارد", "")
-                resp = resp.strip()
-                gen_token = gen_tokens[targ_col]
-                lang = langs[targ_col]
-                query = format_temp(qtemp, rel, event, gen_token, resp, lang) 
-                resp = format_temp(anstemp, rel, event, gen_token, resp, lang)
-                if query not in data_split:
-                    jj+=1
-                    if jj >= num_samples:
-                        return data_split
-                    data_split[query] = []                
-                    if ii < 3:
-                        print("Q:",query)
-                        print("R:",resp)
-                    ii+=1
-                data_split[query].append(resp)
-            #didn't convert ___ to <blank>
-            #didn't normalize to lowercase
-    return data_split
-
-#flatten
-def flatten(atomic_query_responses):
-    atomic_flattened = {}
-    kk = 0
-    for split_name,queries_responses in atomic_query_responses.items():
-        print("building flattened pairs for ", split_name)
-        atomic_flattened[split_name] = []
-        for query,responses in queries_responses.items():
-            for response in responses:
-                atomic_flattened[split_name].append((query,response))
-                kk +=1
-    return atomic_flattened,kk
 
 
 
@@ -193,13 +45,14 @@ def flatten(atomic_query_responses):
 )
 @click.option(
     "--val_set",
+    "-vs",
     default="validation",
     type=str,
     help=""
 )
 @click.option(
     "--num_generations",
-    "-g",
+    "-ng",
     default=0,
     type=int,
     help=""
@@ -322,7 +175,7 @@ def main(model_id, path, from_dir, num_samples, val_set,
     else:
         underlying_model_name = model_id
         
-    cycle = 1000 #500
+    cycle = 1 #500
     weight_decay = 0.01
     batch_size = 1
     shuffle = False
@@ -360,15 +213,20 @@ def main(model_id, path, from_dir, num_samples, val_set,
     atomic_dataset["validation"] = pd.read_table(val_path)
 
     atomic_query_responses = {}
+    atomic_flattened = {}
+    nums = {}
     for split_name,split_df in atomic_dataset.items():
-        atomic_query_responses[split_name] = my_load_dataset(split_df, split_name,
-                                                            inputs, targets,
-                                                            qtemp, anstemp,
-                                                            num_samples, 
-                                                            ignore_blanks,
-                                                            natural,
-                                                            pred_tresh, nli_group)
-    atomic_flattened, iterations = flatten(atomic_query_responses)
+        (atomic_query_responses[split_name], 
+         atomic_flattened[split_name],
+         nums[split_name]
+        )= fill_data(split_df, split_name,
+                            inputs, targets,
+                            qtemp, anstemp,
+                            num_samples, 
+                            ignore_blanks,
+                            natural,
+                            pred_tresh, nli_group)
+    iterations = nums["train"]
     print("Iterations:", iterations)
     warm_up_steps = 0.002*iterations
     #%% tokenizer & model
@@ -399,7 +257,8 @@ def main(model_id, path, from_dir, num_samples, val_set,
 
     if do_eval:
         model.to(device=device)
-        eval(model, atomic_dataset, val_set, num_generations, inter, save_path)  
+        val_data = atomic_query_responses[val_set]
+        eval(model, tokenizer, val_data, num_generations, inter, save_path)  
         return
 
     def collate_fn_for_flattened(batch):
@@ -481,11 +340,11 @@ def main(model_id, path, from_dir, num_samples, val_set,
                         generation_results = \
                         "|Queries|Generation Results|\n"\
                         "|-|-|\n"
-                        for i,key in enumerate(atomic_query_responses['validation']):
+                        for i,key in enumerate(atomic_flattened['validation']):
                             if i==validation_num_generation:
                                 break
                             results = tokenizer.batch_decode(
-                                model.generate(**tokenizer(key,return_tensors='pt').to(device=device),**generation_params),
+                                model.generate(**tokenizer(key[0],return_tensors='pt').to(device=device),**generation_params),
                                 skip_special_tokens=True
                             )
                             generation_results+=f"|`{key}`|`{str(results)}`|\n"
@@ -515,6 +374,7 @@ def main(model_id, path, from_dir, num_samples, val_set,
     # end train while
     pbar.close()
     sw.close()
+    eval(model, tokenizer, atomic_query_responses[val_set], num_generations, inter, save_path)  
     # %%
     # %%
 if __name__ == "__main__":

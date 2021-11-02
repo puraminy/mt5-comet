@@ -274,7 +274,6 @@ from tqdm import tqdm
 def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp, beams, ret_seq, num_generations, is_flax, en, ignore_blanks, overwrite, learning_rate, wrap, prompt_path, plm_base_dir, clear, epochs, prompt_length, train_df_path, val_df_path, val_set, tresh_score, nli_cat, sel_model, slow, batch_size, emb, cpu, freez_step, unfreez_step, inter, do_eval):
     local_rank = None
     # nli categories for evaluating predictions
-    nli_map = ['contradiction', 'entailment', 'neutral']
     nli_group = nli_map[nli_cat] if nli_cat >= 0 else "all"
     # %%
     cfg = {}
@@ -369,12 +368,6 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
     shuffle_evaluation=False
     validation_size = 1000
     validation_num_generation = 10
-    generation_params = {
-        "max_length":80,
-        "early_stopping":True,
-        "num_beams":beams,
-        "num_return_sequences":ret_seq,
-    }
     ddp = local_rank is not None
     device = "cpu" if cpu else "cuda"
     # %% tokenizer & model
@@ -393,48 +386,8 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
         else:
             model = T5ForConditionalGeneration.from_pretrained(underlying_model_name)
     #dataset_path = "../../data/v4_atomic_all_agg.csv"
-    atomic_relation_prompt_lengths = {
-        "xIntent":prompt_length,
-        "oEffect":prompt_length,
-        "oReact":prompt_length,
-        "oWant":prompt_length,
-        "xAttr":prompt_length,
-        "xEffect":prompt_length,
-        "xNeed":prompt_length,
-        "xReact":prompt_length,
-        "xWant":prompt_length
-    }
-    # %%
-    atomic_relation_prompt_lengths = {
-        "xIntent":prompt_length,
-    }
-    atomic_relation_mappings = {
-        "oEffect":"<oEffect>",
-        "oReact":"<oReact>",
-        "oWant":"<oWant>",
-        "xAttr":"<xAttr>",
-        "xEffect":"<xEffect>",
-        "xIntent":"<xIntent>",
-        "xNeed":"<xNeed>",
-        "xReact":"<xReact>",
-        "xWant":"<xWant>"
-    }
-    atomic_relation_mappings = {
-        "xIntent":"<xIntent>",
-    }  
-    placeholder_token = "<extra_id_0>"
-    gen_token_en = "<gen_en>"
-    gen_token_fa = "<gen_fa>"
-    lang_tokens = [gen_token_en, gen_token_fa]    
-    encoder_relation_mappings = {}
-    decoder_relation_mappings = {}
-    def get_prompt_token_fn(id_offset,length):
-        return lambda x: (x>=id_offset)&(x<=id_offset+length+1)
-    for rel in atomic_relation_prompt_lengths:
-        id_offset = len(tokenizer)
-        length = atomic_relation_prompt_lengths[rel]
-        encoder_relation_mappings[rel] = " ".join(f"<{rel}_{i}>" for i in range(length))
-        decoder_relation_mappings[rel] = " ".join(f"<{rel}_{i}>" for i in range(length,length+1))
+    id_offset = len(tokenizer)
+    encoder_relation_mappings, decoder_relation_mappings = map_relations(id_offset, length)
 # %% load atomic data
 
     data_df = {}

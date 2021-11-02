@@ -1838,3 +1838,43 @@ labels_count: {'contradiction': 222, 'entailment': 27, 'neutral': 0}
 Distinct preds: 19
 'qtemp': {rel} {event} {ph}
 'anstemp': {ph} {response} {end}
+Rouge Score: nan
+Rouge Score: nan
+Bert Score: nan
+labels_count: {'contradiction': 0, 'entailment': 0, 'neutral': 0}
+Rouge Score: nan
+Bert Score: nan
+labels_count: {'contradiction': 0, 'entailment': 0, 'neutral': 0}
+Distinct preds: 0
+Rouge Score: nan
+Bert Score: nan
+labels_count: {'contradiction': 0, 'entailment': 0, 'neutral': 0}
+Distinct preds: 0
+Rouge Score: nan
+Bert Score: nan
+labels_count: {'contradiction': 0, 'entailment': 0, 'neutral': 0}
+Distinct preds: 0
+Rouge Score: nan
+Bert Score: nan
+labels_count: {'contradiction': 0, 'entailment': 0, 'neutral': 0}
+Distinct preds: 0
+Rouge Score: nan
+Bert Score: nan
+labels_count: {'contradiction': 0, 'entailment': 0, 'neutral': 0}
+Distinct preds: 0
+Rouge Score: nan
+Bert Score: nan
+labels_count: {'contradiction': 0, 'entailment': 0, 'neutral': 0}
+Distinct preds: 0
+Rouge Score: nan
+Bert Score: nan
+labels_count: {'contradiction': 0, 'entailment': 0, 'neutral': 0}
+Distinct preds: 0
+Rouge Score: nan
+Bert Score: nan
+labels_count: {'contradiction': 0, 'entailment': 0, 'neutral': 0}
+Distinct preds: 0
+Rouge Score: 1.0
+Bert Score: 1.0
+labels_count: {'contradiction': 30, 'entailment': 0, 'neutral': 0}
+Distinct preds: 1
