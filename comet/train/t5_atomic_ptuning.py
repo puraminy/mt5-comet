@@ -12,6 +12,7 @@
 # ---
 
 # %% load libraries
+from comet.train.t5_comet_eval import *
 
 from transformers import (
     T5ForConditionalGeneration, T5TokenizerFast, AdamW, AddedToken,

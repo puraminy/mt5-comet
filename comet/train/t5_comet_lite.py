@@ -213,7 +213,7 @@ def flatten(atomic_query_responses):
 @click.option(
     "--load_path",
     "-load",
-    default="/home/pouramini/pret",
+    default="/home/ahmad/pret",
     type=str,
     help=""
 )
@@ -291,8 +291,26 @@ def flatten(atomic_query_responses):
     type=float,
     help="learning rate"
 )
+@click.option(
+    "--do_eval",
+    "-eval",
+    is_flag=True,
+    help=""
+)
+@click.option(
+    "--inter",
+    "-inter",
+    is_flag=True,
+    help="Interactive output generation"
+)
+@click.option(
+    "--cont",
+    "-c",
+    is_flag=True,
+    help="continue training"
+)
 def main(model_id, path, from_dir, num_samples, val_set, 
-         num_generations, is_flax, load_path, overwrite, save_path, output_name, lang, qtemp, anstemp, pred_tresh, ignore_blanks, natural, nli_group, learning_rate):
+         num_generations, is_flax, load_path, overwrite, save_path, output_name, lang, qtemp, anstemp, pred_tresh, ignore_blanks, natural, nli_group, learning_rate, do_eval, inter, cont):
     #%% some hyper-parameters
     #underlying_model_name = "logs/atomic-mt5/last"
     if from_dir:
@@ -315,21 +333,22 @@ def main(model_id, path, from_dir, num_samples, val_set,
         "max_length":80,
         "early_stopping":True
     }
-    device = 'cuda'
+    device = 'cpu'
     log_dir = save_path
     output_name = model_id if not output_name else output_name
     save_path = os.path.join(log_dir, output_name)
     model_name = f"{learning_rate}_{cycle}_{num_samples}"
     print("SAVE Path:", save_path)
+    if Path(save_path).exists() and not model_id=="test" and cont:
+        underlying_model_name = save_path
     ii = 1
     while not overwrite and Path(save_path).exists() and not model_id=="test":
-        ans = input("The output directory already exists, do you want to load the model from it? (y/n)")
+        ans = input("The output directory already exists, do you want to overwite it? (y/n)")
         if ans == "y":
-            underlying_model_name = save_path
             overwrite = True
-        save_path = os.path.join(log_dir,output_name, "_"+str(ii))
+        save_path = os.path.join(log_dir,output_name + "_"+str(ii))
+        print(save_path)
         ii += 1
-
 
     Path(save_path).mkdir(exist_ok=True, parents=True)
     #%% load atomic data
@@ -378,6 +397,11 @@ def main(model_id, path, from_dir, num_samples, val_set,
     model.resize_token_embeddings(len(tokenizer))
     #%% Prepare training data
 
+    if do_eval:
+        model.to(device=device)
+        eval(model, atomic_dataset, val_set, num_generations, inter, save_path)  
+        return
+
     def collate_fn_for_flattened(batch):
         queries,responses = zip(*batch)
         new_batch = tokenizer(list(queries),return_tensors='pt',padding='longest')
@@ -415,75 +439,80 @@ def main(model_id, path, from_dir, num_samples, val_set,
     train_iter = iter(train_dataloader)
     pbar = tqdm(total=iterations) #,dynamic_ncols=True)
     while step <= iterations:
-        if (step % cycle == 0 and step > 0): #validation
-            with torch.no_grad():
-                model.eval()
-                pbar.set_description('validating...')
-                dev_allset_micro_loss = 0.
-                dev_token_loss = 0.
-                dev_token_count = 0
-                dev_sample_loss = 0. #avg on sample
-                dev_sample_count = 0
-                for batch in tqdm(dev_dataloader,desc=f'validating...',leave=False):
-                    if dev_sample_count>=validation_size:
-                        break
-                    batch = {k:v.to(device=device) for k,v in batch.items()}
-                    result = model(**batch)
-                    loss = torch.nn.functional.cross_entropy(
-                        result['logits'].reshape(-1,result['logits'].size(2)),
-                        batch['labels'].reshape(-1,),
-                        reduction='none'
-                    ).reshape(result['logits'].size(0),-1)
-                    labels_mask = (batch['labels'] != -100) 
-                    dev_token_loss += loss.sum().item()
-                    dev_token_count += labels_mask.sum().item()
-                    dev_sample_loss += (loss.sum(dim=-1)/labels_mask.sum(dim=-1)).sum().item()
-                    dev_sample_count += result['logits'].size(0)
-                    del result
-                    del loss
-                    del labels_mask
-                dev_micro_avg_loss = dev_token_loss/dev_token_count
-                dev_macro_avg_loss = dev_sample_loss/dev_sample_count
-                sw.add_scalar('dev/micro_avg_loss',dev_micro_avg_loss,step)
-                sw.add_scalar('dev/macro_avg_loss',dev_macro_avg_loss,step)
-                if dev_micro_avg_loss < best_dev_loss:
-                    best_dev_loss = dev_micro_avg_loss
-                    model.save_pretrained(save_path)
-                    with open(save_path + "/best_model.txt", "a") as f:
-                        print("step:", step, file=f)
-                        print("best dev loss:", best_dev_loss, file=f)
-
-                generation_results = \
-                "|Queries|Generation Results|\n"\
-                "|-|-|\n"
-                for i,key in enumerate(atomic_query_responses['validation']):
-                    if i==validation_num_generation:
-                        break
-                    results = tokenizer.batch_decode(
-                        model.generate(**tokenizer(key,return_tensors='pt').to(device=device),**generation_params),
-                        skip_special_tokens=True
-                    )
-                    generation_results+=f"|`{key}`|`{str(results)}`|\n"
-                sw.add_text('dev/generation_samples',generation_results,step)
-        pbar.set_description('training...')
-        pbar.update()
-        model.train()
-        optimizer.zero_grad()
         try:
-            batch = next(train_iter)
-        except StopIteration:
-            train_iter = iter(train_dataloader)
-            batch = next(train_iter)
-        batch = {k:v.to(device=device) for k,v in batch.items()}
-        result = model(**batch)
-        loss = result['loss']
-        loss.backward()
-        optimizer.step()
-        scheduler.step()
-        step+=1
-        sw.add_scalar('train/loss',loss.item(),global_step=step)
-        del result
-        del loss
+            if (step % cycle == 0 and step > 0): #validation
+                with torch.no_grad():
+                    model.eval()
+                    pbar.set_description('validating...')
+                    dev_allset_micro_loss = 0.
+                    dev_token_loss = 0.
+                    dev_token_count = 0
+                    dev_sample_loss = 0. #avg on sample
+                    dev_sample_count = 0
+                    for batch in tqdm(dev_dataloader,desc=f'validating...',leave=False):
+                        if dev_sample_count>=validation_size:
+                            break
+                        batch = {k:v.to(device=device) for k,v in batch.items()}
+                        result = model(**batch)
+                        loss = torch.nn.functional.cross_entropy(
+                            result['logits'].reshape(-1,result['logits'].size(2)),
+                            batch['labels'].reshape(-1,),
+                            reduction='none'
+                        ).reshape(result['logits'].size(0),-1)
+                        labels_mask = (batch['labels'] != -100) 
+                        dev_token_loss += loss.sum().item()
+                        dev_token_count += labels_mask.sum().item()
+                        dev_sample_loss += (loss.sum(dim=-1)/labels_mask.sum(dim=-1)).sum().item()
+                        dev_sample_count += result['logits'].size(0)
+                        del result
+                        del loss
+                        del labels_mask
+                    dev_micro_avg_loss = dev_token_loss/dev_token_count
+                    dev_macro_avg_loss = dev_sample_loss/dev_sample_count
+                    sw.add_scalar('dev/micro_avg_loss',dev_micro_avg_loss,step)
+                    sw.add_scalar('dev/macro_avg_loss',dev_macro_avg_loss,step)
+                    if dev_micro_avg_loss < best_dev_loss:
+                        best_dev_loss = dev_micro_avg_loss
+                        model.save_pretrained(save_path)
+                        with open(save_path + "/best_model.txt", "a") as f:
+                            print("step:", step, file=f)
+                            print("best dev loss:", best_dev_loss, file=f)
+
+                        generation_results = \
+                        "|Queries|Generation Results|\n"\
+                        "|-|-|\n"
+                        for i,key in enumerate(atomic_query_responses['validation']):
+                            if i==validation_num_generation:
+                                break
+                            results = tokenizer.batch_decode(
+                                model.generate(**tokenizer(key,return_tensors='pt').to(device=device),**generation_params),
+                                skip_special_tokens=True
+                            )
+                            generation_results+=f"|`{key}`|`{str(results)}`|\n"
+                        sw.add_text('dev/generation_samples',generation_results,step)
+            pbar.set_description('training...')
+            pbar.update()
+            model.train()
+            optimizer.zero_grad()
+            try:
+                batch = next(train_iter)
+            except StopIteration:
+                train_iter = iter(train_dataloader)
+                batch = next(train_iter)
+            batch = {k:v.to(device=device) for k,v in batch.items()}
+            result = model(**batch)
+            loss = result['loss']
+            loss.backward()
+            optimizer.step()
+            scheduler.step()
+            step+=1
+            sw.add_scalar('train/loss',loss.item(),global_step=step)
+            del result
+            del loss
+        except KeyboardInterrupt:
+            print("exiting while ...")
+            break
+    # end train while
     pbar.close()
     sw.close()
     # %%
