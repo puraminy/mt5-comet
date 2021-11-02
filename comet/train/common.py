@@ -124,7 +124,7 @@ generation_params = {
 }
 def gen_resp(model, tokenizer, query, gen_token = ""):
     inputs = tokenizer(query,return_tensors='pt').to(device=device)
-    if gen_token != "":
+    if False: #gen_token != "":
         gen_token_id = tokenizer.convert_tokens_to_ids(gen_token)
         hyps = model.generate(**inputs,**generation_params,
                 decoder_start_token_id=gen_token_id)

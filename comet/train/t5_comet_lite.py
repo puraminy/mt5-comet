@@ -186,7 +186,7 @@ def main(model_id, path, from_dir, num_samples, val_set,
         "max_length":80,
         "early_stopping":True
     }
-    device = 'cpu'
+    device = 'cuda'
     log_dir = save_path
     output_name = model_id if not output_name else output_name
     save_path = os.path.join(log_dir, output_name)
