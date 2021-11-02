@@ -304,7 +304,6 @@ def eval(model, tokenizer, val_data, num_generations,
                     hyps = gen_resp(model, tokenizer, query, gen_token)
                     input_text = re.sub(r'<.*?>','',query)
                     top_hyp = hyps[0]
-                    top_hyp = tails[0]
                     if top_hyp == "":
                         top_hyp = "."
                     new_tails = []
