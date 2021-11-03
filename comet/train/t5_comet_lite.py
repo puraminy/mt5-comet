@@ -200,6 +200,7 @@ def main(model_id, path, from_dir, num_samples, val_set,
     #%% some hyper-parameters
     #underlying_model_name = "logs/atomic-mt5/last"
     global device
+    print("Running version 1")
 
     if from_dir:
         underlying_model_name = path
