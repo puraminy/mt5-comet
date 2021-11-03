@@ -1,7 +1,10 @@
 from pathlib import Path
 from sentence_transformers import SentenceTransformer, util
+from transformers import AddedToken 
 from sentence_transformers import CrossEncoder
 import pandas as pd
+from comet.transformers_ptuning import PTuningWrapper
+from comet.transformers_ptuning.ptuning_wrapper import LSTMEmbeddingPromptEncoder, EmbeddingPromptEncoder
 from comet.evaluation.rouge.rouge import Rouge
 from tqdm import tqdm
 import re
@@ -68,21 +71,9 @@ inputs = ["input_text", "input_text_fa", "natural_input_text", "natural_input_te
 
 placeholder_token = "<extra_id_0>"
 end_token = "<extar_id_1>"
-prompt_length = 5
-atomic_relation_prompt_lengths = {
-    "xIntent":prompt_length,
-    "oEffect":prompt_length,
-    "oReact":prompt_length,
-    "oWant":prompt_length,
-    "xAttr":prompt_length,
-    "xEffect":prompt_length,
-    "xNeed":prompt_length,
-    "xReact":prompt_length,
-    "xWant":prompt_length
-}
 # %%
 atomic_relation_prompt_lengths = {
-    "xIntent":prompt_length,
+    "xIntent":(3,0),
 }
 
 def get_prompt_token_fn(id_offset,length):
@@ -90,14 +81,41 @@ def get_prompt_token_fn(id_offset,length):
 
 encoder_relation_mappings = {}
 decoder_relation_mappings = {}
-def map_relations(id_offset, length):
+def map_relations():
     global encoder_relation_mappings, decoder_relation_mappings
-    for rel in atomic_relation_prompt_lengths:
-        id_offset = len(tokenizer)
-        length = atomic_relation_prompt_lengths[rel]
-        encoder_relation_mappings[rel] = " ".join(f"<{rel}_{i}>" for i in range(length))
-        decoder_relation_mappings[rel] = " ".join(f"<{rel}_{i}>" for i in range(length,length+1))
-        return encoder_relation_mappings, decoder_relation_mappings
+    for rel,(enc_plen, dec_plen) in atomic_relation_prompt_lengths.items():
+        encoder_relation_mappings[rel] = " ".join(f"<{rel}_{i}>" for i in range(enc_plen))
+        decoder_relation_mappings[rel] = " ".join(f"<{rel}_{i}>" for i in range(enc_plen,enc_plen+dec_plen))
+    return encoder_relation_mappings, decoder_relation_mappings
+
+def wrap_model(model, tokenizer, rel, emb=False, prompt_path=""):
+    id_offset = len(tokenizer)
+    embedding_dim = model.config.hidden_size
+    enc_plen = atomic_relation_prompt_lengths[rel][0]
+    dec_plen = atomic_relation_prompt_lengths[rel][1]
+    dec_offset = id_offset + enc_plen
+    prompt_encoder = None
+    decoder_prompt_encoder = None
+    if emb:
+        prompt_encoder = EmbeddingPromptEncoder(enc_plen,embedding_dim,id_offset)
+        decoder_prompt_encoder = EmbeddingPromptEncoder(dec_plen,embedding_dim,dec_offset)
+    else:
+        prompt_encoder = LSTMEmbeddingPromptEncoder(enc_plen,embedding_dim,id_offset)
+        decoder_prompt_encoder = LSTMEmbeddingPromptEncoder(dec_plen,embedding_dim,dec_offset)
+
+    added_tokens = [ 
+        AddedToken(rel,lstrip=True,
+            rstrip=False)
+        for rel in 
+           encoder_relation_mappings[rel] + decoder_relation_mappings[rel]
+    ]
+    tokenizer.add_special_tokens({"additional_special_tokens":added_tokens})
+    model.resize_token_embeddings(len(tokenizer))
+    wrapped_model = PTuningWrapper(model,prompt_encoder,decoder_prompt_encoder,prompt_token_fn=get_prompt_token_fn(id_offset,enc_plen + dec_plen))
+    if prompt_path:
+        wrapped_model.prompt_encoder.load(prompt_path)
+
+    return wrapped_model
 
 def format_temp(template, rel, event, gen_token, resp, lang):
     rel_token = atomic_relation_mappings[rel]        

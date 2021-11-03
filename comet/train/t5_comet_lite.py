@@ -162,10 +162,45 @@ from tqdm import tqdm
     is_flag=True,
     help="continue training"
 )
+@click.option(
+    "--wrap",
+    "-w",
+    default="",
+    type=str,
+    help=""
+)
+@click.option(
+    "--frozen",
+    "-f",
+    is_flag=True,
+    help=""
+)
+@click.option(
+    "--freez_step",
+    "-fs",
+    default=0,
+    type=int,
+    help=""
+)
+@click.option(
+    "--unfreez_step",
+    "-ufs",
+    default=0,
+    type=int,
+    help=""
+)
+@click.option(
+    "--cpu",
+    "-cpu",
+    is_flag=True,
+    help=""
+)
 def main(model_id, path, from_dir, num_samples, val_set, 
-         num_generations, is_flax, load_path, overwrite, save_path, output_name, lang, qtemp, anstemp, pred_tresh, ignore_blanks, natural, nli_group, learning_rate, do_eval, inter, cont):
+         num_generations, is_flax, load_path, overwrite, save_path, output_name, lang, qtemp, anstemp, pred_tresh, ignore_blanks, natural, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu):
     #%% some hyper-parameters
     #underlying_model_name = "logs/atomic-mt5/last"
+    global device
+
     if from_dir:
         underlying_model_name = path
     elif Path(load_path).exists():
@@ -186,7 +221,7 @@ def main(model_id, path, from_dir, num_samples, val_set,
         "max_length":80,
         "early_stopping":True
     }
-    device = 'cuda'
+    device = 'cuda' if not cpu else 'cpu'
     log_dir = save_path
     output_name = model_id if not output_name else output_name
     save_path = os.path.join(log_dir, output_name)
@@ -242,6 +277,12 @@ def main(model_id, path, from_dir, num_samples, val_set,
         tokenizer = AutoTokenizer.from_pretrained(underlying_model_name)
         model = T5ForConditionalGeneration.from_pretrained(underlying_model_name) 
 
+    allowed_out_token_length = len(tokenizer)
+    def clip_logits(logits):
+        return logits[:,:,:allowed_out_token_length]
+    clip_logits_hook = model.get_output_embeddings().register_forward_hook(
+        lambda m,i,o:clip_logits(o)
+    )
     # add new tokens
     # added_tokens = list(atomic_relation_mappings.values()) + [gen_token]
     added_tokens = [ 
@@ -261,6 +302,7 @@ def main(model_id, path, from_dir, num_samples, val_set,
         eval(model, tokenizer, val_data, num_generations, inter, save_path)  
         return
 
+
     def collate_fn_for_flattened(batch):
         queries,responses = zip(*batch)
         new_batch = tokenizer(list(queries),return_tensors='pt',padding='longest')
@@ -269,6 +311,10 @@ def main(model_id, path, from_dir, num_samples, val_set,
             labels = outputs['input_ids']
             labels[labels==tokenizer.pad_token_id] = -100
             new_batch['labels']=labels
+            new_batch['decoder_input_ids'] = model.prepare_decoder_input_ids_from_labels(
+                outputs['input_ids']
+            )
+            new_batch['decoder_attention_mask'] = outputs['attention_mask']
         return new_batch
 
     # def collate_fn_for_generation(batch):
@@ -283,17 +329,27 @@ def main(model_id, path, from_dir, num_samples, val_set,
     # %% prepare for training
     sw = SummaryWriter(save_path, flush_secs=1)
     tokenizer.save_pretrained(save_path)
-    model = model.to(device=device)
     no_decay = ['bias', 'LayerNorm.weight']
-    optimizer_grouped_parameters = [
-        {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay)], 'weight_decay': weight_decay},
-        {'params': [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay)], 'weight_decay': 0.0}
-    ]
+    if wrap:
+        map_relations()
+        wrapped_model = wrap_model(model, tokenizer, wrap) 
+        optimizer_grouped_parameters = [
+            {"params":[p for p in wrapped_model.parameters() if p.requires_grad]}
+        ]
+    else:
+        model = model.to(device=device)
+        optimizer_grouped_parameters = [
+            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay)], 'weight_decay': weight_decay},
+            {'params': [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay)], 'weight_decay': 0.0}
+        ]
     optimizer = AdamW(optimizer_grouped_parameters,lr=learning_rate,eps=1e-8)
     scheduler = get_linear_schedule_with_warmup(optimizer,warm_up_steps,iterations)
     step = 0
     best_dev_loss = 1e10
 
+    if frozen:
+        for p in model.parameters():
+            p.requires_grad = False 
     #%%
     train_iter = iter(train_dataloader)
     pbar = tqdm(total=iterations) #,dynamic_ncols=True)
@@ -301,6 +357,11 @@ def main(model_id, path, from_dir, num_samples, val_set,
         try:
             if (step % cycle == 0 and step > 0): #validation
                 with torch.no_grad():
+                    if wrap:
+                        wrapped_model.update_model_weight()
+                    if frozen:
+                        for p in model.parameters():
+                            p.requires_grad = False 
                     model.eval()
                     pbar.set_description('validating...')
                     dev_allset_micro_loss = 0.
@@ -351,6 +412,16 @@ def main(model_id, path, from_dir, num_samples, val_set,
                         sw.add_text('dev/generation_samples',generation_results,step)
             pbar.set_description('training...')
             pbar.update()
+            if unfreez_step > 0 and step > unfreez_step and froze:
+                print("unfreezing the model")
+                unfreez_step = 0
+                for p in model.parameters():
+                    p.requires_grad = True # Unfreezing
+            if freez_step > 0 and step > freez_step and not frozen:
+                print("freezing the model")
+                freez_step = 0
+                for p in model.parameters():
+                    p.requires_grad = False # freezing
             model.train()
             optimizer.zero_grad()
             try:
@@ -359,7 +430,10 @@ def main(model_id, path, from_dir, num_samples, val_set,
                 train_iter = iter(train_dataloader)
                 batch = next(train_iter)
             batch = {k:v.to(device=device) for k,v in batch.items()}
-            result = model(**batch)
+            if wrap:
+                result = wrapped_model(**batch)
+            else:
+                result = model(**batch)
             loss = result['loss']
             loss.backward()
             optimizer.step()
@@ -374,7 +448,14 @@ def main(model_id, path, from_dir, num_samples, val_set,
     # end train while
     pbar.close()
     sw.close()
+    if wrap:
+        if prompt_path and sel_model and wrap:
+            print(">>> saving prompt encoder")
+            wrapped_model.prompt_encoder.save(prompt_path)
+        with torch.no_grad():
+            wrapped_model.update_model_weight()
     eval(model, tokenizer, atomic_query_responses[val_set], num_generations, inter, save_path)  
+    model.save_pretrained(save_path)
     # %%
     # %%
 if __name__ == "__main__":

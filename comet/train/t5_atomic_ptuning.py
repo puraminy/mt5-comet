@@ -462,7 +462,6 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
     allowed_out_token_length = len(tokenizer)
     def clip_logits(logits):
         return logits[:,:,:allowed_out_token_length]
-    #可以在这里就加钩子，因为模型不会替换模块，只会更新权重
     clip_logits_hook = model.get_output_embeddings().register_forward_hook(
         lambda m,i,o:clip_logits(o)
     )
