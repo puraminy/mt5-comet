@@ -11,6 +11,11 @@ import re
 import os
 
 device = 'cuda'
+
+def set_device(dev):
+    global device
+    device = dev
+
 nli_map = ['contradiction', 'entailment', 'neutral']
 atomic_relation_mappings = {
     "oEffect":"<oEffect>",
@@ -232,7 +237,8 @@ def fill_data(split_df, split_name, inputs, targets, qtemp, anstemp,
                     if jj >= num_samples:
                         return data_split, flat_data, kk
                     if ii < 3:
-                        print(data_split)
+                        print("Q:", query)
+                        print("R:", resp)
                     ii+=1
                 else:
                     data_split[rel][lang][query].append(resp)
@@ -270,8 +276,8 @@ def bert_score(bert_scorer, hyps, refs):
 
         return best_hyp, best_ref, top["score"] 
 # vvvvvvvvvvvvvvv
-base_path = "/content/drive/MyDrive/pret"
-#base_path = "/home/ahmad/pret"
+#base_path = "/content/drive/MyDrive/pret"
+base_path = "/home/ahmad/pret"
 # ################################### Evaluation #########################
 def eval(model, tokenizer, val_data, num_generations, 
         interactive, save_path):  

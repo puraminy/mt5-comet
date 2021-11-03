@@ -100,14 +100,14 @@ from tqdm import tqdm
 @click.option(
     "--qtemp",
     "-qt",
-    default="{rel_token}: {event} {rel_natural} {gen} {ph}",
+    default="{rel_token}: {event} {gen} {ph}",
     type=str,
     help="template for query"
 )
 @click.option(
     "--anstemp",
     "-at",
-    default="{ph} {response}",
+    default="{ph} {response} {end}",
     type=str,
     help="tempate for response"
 )
@@ -230,6 +230,7 @@ def main(model_id, path, from_dir, num_samples, val_set,
         "early_stopping":True
     }
     device = 'cuda' if not cpu else 'cpu'
+    set_device(device)
     log_dir = save_path
     output_name = model_id if not output_name else output_name
     save_path = os.path.join(log_dir, output_name)
@@ -272,7 +273,7 @@ def main(model_id, path, from_dir, num_samples, val_set,
     iterations = nums["train"]
     print("Iterations:", iterations)
     warm_up_steps = 0.002*iterations
-    if not frozen and learning_rate == 0: learning_rate = 0.0001 #6.25e-05
+    if not frozen and learning_rate == 0: learning_rate = 6.25e-05
     if frozen and learning_rate == 0: learning_rate = 0.01  #6.25e-05
     #%% tokenizer & model
     if model_id == "test":
@@ -340,6 +341,8 @@ def main(model_id, path, from_dir, num_samples, val_set,
     sw = SummaryWriter(save_path, flush_secs=1)
     tokenizer.save_pretrained(save_path)
     no_decay = ['bias', 'LayerNorm.weight']
+    for p in model.parameters():
+        p.requires_grad = not frozen 
     if wrap:
         map_relations()
         wrapped_model = wrap_model(model, tokenizer, wrap) 
@@ -358,8 +361,6 @@ def main(model_id, path, from_dir, num_samples, val_set,
     step = 0
     best_dev_loss = 1e10
 
-    for p in model.parameters():
-        p.requires_grad = not frozen 
     #%%
     train_iter = iter(train_dataloader)
     pbar = tqdm(total=iterations) #,dynamic_ncols=True)
