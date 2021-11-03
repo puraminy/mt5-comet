@@ -1894,3 +1894,15 @@ Rouge Score: 0.0
 Bert Score: 0.22
 labels_count: {'contradiction': 25, 'entailment': 0, 'neutral': 0}
 Distinct preds: 1
+Rouge Score: 0.0
+Bert Score: 0.22
+labels_count: {'contradiction': 25, 'entailment': 0, 'neutral': 0}
+Distinct preds: 1
+Rouge Score: 0.0
+Bert Score: 0.2699999999999999
+labels_count: {'contradiction': 30, 'entailment': 0, 'neutral': 0}
+Distinct preds: 1
+Rouge Score: 0.0
+Bert Score: 0.2699999999999999
+labels_count: {'contradiction': 30, 'entailment': 0, 'neutral': 0}
+Distinct preds: 1

@@ -78,7 +78,7 @@ placeholder_token = "<extra_id_0>"
 end_token = "<extar_id_1>"
 # %%
 atomic_relation_prompt_lengths = {
-    "xIntent":(3,3),
+    "xIntent":(5,3),
 }
 
 def get_prompt_token_fn(id_offset,length):
@@ -208,13 +208,15 @@ def fill_data(split_df, split_name, inputs, targets, qtemp, anstemp,
         for inp in inputs:
             if not inp in d or len(d[inp]) <= 1:
                 continue
-            if natural and not "natural" in inp:
+            if ((natural and not "natural" in inp) or 
+                (not natural and "natural" in inp)):
                 continue
             input_lang = langs[inp]
             for targ_col in targets:
                 if not targ_col in d or len(d[targ_col]) <= 1:
                     continue
-                if natural and not "natural" in targ_col:
+                if ((natural and not "natural" in targ_col) or 
+                    (not natural and "natural" in targ_col)):
                     continue
                 rel_token = atomic_relation_mappings[rel]
                 event = d[inp]
@@ -363,6 +365,9 @@ def eval(model, tokenizer, val_data, num_generations,
                     print(ii, ":",query)
                     print("Prediction:", top_hyp)
                     print("Closest tail:", best_ref)
+                    print("&&&&&&&&&&&&&&&&& All Targets &&&&&&&&&&&&&&")
+                    for _tail in tails:
+                        print(_tail)
 
                     rouge_score = rouge_scorer.calc_score(candidate=[top_hyp], refs=tails)
                     data["rouge_score"] = rouge_score
