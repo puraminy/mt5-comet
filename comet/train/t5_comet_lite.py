@@ -336,8 +336,9 @@ def main(model_id, path, from_dir, num_samples, val_set,
         optimizer_grouped_parameters = [
             {"params":[p for p in wrapped_model.parameters() if p.requires_grad]}
         ]
+        wrapped_model.to(device=device)
     else:
-        model = model.to(device=device)
+        model.to(device=device)
         optimizer_grouped_parameters = [
             {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay)], 'weight_decay': weight_decay},
             {'params': [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay)], 'weight_decay': 0.0}
