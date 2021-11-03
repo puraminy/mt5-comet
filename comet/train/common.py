@@ -73,7 +73,7 @@ placeholder_token = "<extra_id_0>"
 end_token = "<extar_id_1>"
 # %%
 atomic_relation_prompt_lengths = {
-    "xIntent":(3,0),
+    "xIntent":(3,3),
 }
 
 def get_prompt_token_fn(id_offset,length):
@@ -104,10 +104,10 @@ def wrap_model(model, tokenizer, rel, emb=False, prompt_path=""):
         decoder_prompt_encoder = LSTMEmbeddingPromptEncoder(dec_plen,embedding_dim,dec_offset)
 
     added_tokens = [ 
-        AddedToken(rel,lstrip=True,
-            rstrip=False)
-        for rel in 
-           encoder_relation_mappings[rel] + decoder_relation_mappings[rel]
+            AddedToken(f"<{rel}_{i}>",lstrip=True,
+                rstrip=False)
+            for i in 
+                range(enc_plen + dec_plen + 1)
     ]
     tokenizer.add_special_tokens({"additional_special_tokens":added_tokens})
     model.resize_token_embeddings(len(tokenizer))

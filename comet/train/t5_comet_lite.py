@@ -140,7 +140,7 @@ from tqdm import tqdm
 @click.option(
     "--learning_rate",
     "-lr",
-    default=6.25e-5,
+    default=0,
     type=float,
     help="learning rate"
 )
@@ -195,8 +195,15 @@ from tqdm import tqdm
     is_flag=True,
     help=""
 )
+@click.option(
+    "--prompt_path",
+    "-pp",
+    default="",
+    type=str,
+    help=""
+)
 def main(model_id, path, from_dir, num_samples, val_set, 
-         num_generations, is_flax, load_path, overwrite, save_path, output_name, lang, qtemp, anstemp, pred_tresh, ignore_blanks, natural, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu):
+         num_generations, is_flax, load_path, overwrite, save_path, output_name, lang, qtemp, anstemp, pred_tresh, ignore_blanks, natural, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, prompt_path):
     #%% some hyper-parameters
     #underlying_model_name = "logs/atomic-mt5/last"
     global device
@@ -211,7 +218,7 @@ def main(model_id, path, from_dir, num_samples, val_set,
     else:
         underlying_model_name = model_id
         
-    cycle = 1 #500
+    cycle = 500
     weight_decay = 0.01
     batch_size = 1
     shuffle = False
@@ -265,6 +272,8 @@ def main(model_id, path, from_dir, num_samples, val_set,
     iterations = nums["train"]
     print("Iterations:", iterations)
     warm_up_steps = 0.002*iterations
+    if not frozen and learning_rate == 0: learning_rate = 0.0001 #6.25e-05
+    if frozen and learning_rate == 0: learning_rate = 0.01  #6.25e-05
     #%% tokenizer & model
     if model_id == "test":
         return
@@ -349,9 +358,8 @@ def main(model_id, path, from_dir, num_samples, val_set,
     step = 0
     best_dev_loss = 1e10
 
-    if frozen:
-        for p in model.parameters():
-            p.requires_grad = False 
+    for p in model.parameters():
+        p.requires_grad = not frozen 
     #%%
     train_iter = iter(train_dataloader)
     pbar = tqdm(total=iterations) #,dynamic_ncols=True)
@@ -451,7 +459,7 @@ def main(model_id, path, from_dir, num_samples, val_set,
     pbar.close()
     sw.close()
     if wrap:
-        if prompt_path and sel_model and wrap:
+        if prompt_path and wrap:
             print(">>> saving prompt encoder")
             wrapped_model.prompt_encoder.save(prompt_path)
         with torch.no_grad():
