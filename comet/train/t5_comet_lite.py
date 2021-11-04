@@ -221,7 +221,7 @@ def main(model_id, path, from_dir, num_samples, val_set,
     #%% some hyper-parameters
     #bbbbbbbbbbb
     #underlying_model_name = "logs/atomic-mt5/last"
-    mlog.info("Running version 1")
+    mlog.info("Running version 3")
 
     if from_dir:
         underlying_model_name = path

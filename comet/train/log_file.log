@@ -439,3 +439,42 @@ DEBUG:comet.wrapper:Here is prompt encoder forward: prompt_token_ids:tensor([321
 DEBUG:comet.wrapper:input ids:Parameter containing:
 tensor([0, 1, 2])
 INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: /home/ahmad/pret/paraphrase-multilingual-MiniLM-L12-v2
+INFO:comet.main:Running version 1
+INFO:comet.main:SAVE Path:/content/drive/MyDrive/backup/logs/fat5-large-xIntent-8k-wrapped
+INFO:comet.main:Running version 1
+INFO:comet.main:SAVE Path:logs/t5-sm
+INFO:comet.data:building query responses for train
+INFO:comet.data:len:47449
+INFO:comet.data:len after filtering:47449
+INFO:comet.data:Q:<xIntent>: PersonX abandons ___ altogether <gen_en> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> put a stop <extar_id_1>
+INFO:comet.data:Q:<xIntent>: PersonX abandons ___ altogether <gen_fa> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> توقف کنید <extar_id_1>
+INFO:comet.data:building query responses for validation
+INFO:comet.data:len:5388
+INFO:comet.data:len after filtering:5388
+INFO:comet.data:Q:<xIntent>: PersonX 'd better go <gen_en> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> to go somewhere else more important. <extar_id_1>
+INFO:comet.data:Q:<xIntent>: PersonX 'd better go <gen_fa> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> برای رفتن به جای دیگری مهم تر <extar_id_1>
+INFO:comet.main:Iterations:29
+INFO:comet.main:exiting while ...
+INFO:comet.main:Running version 3
+INFO:comet.main:SAVE Path:logs/t5-sm
+INFO:comet.data:building query responses for train
+INFO:comet.data:len:47449
+INFO:comet.data:len after filtering:47449
+INFO:comet.data:Q:<xIntent>: PersonX abandons ___ altogether <gen_en> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> put a stop <extar_id_1>
+INFO:comet.data:Q:<xIntent>: PersonX abandons ___ altogether <gen_fa> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> توقف کنید <extar_id_1>
+INFO:comet.data:building query responses for validation
+INFO:comet.data:len:5388
+INFO:comet.data:len after filtering:5388
+INFO:comet.data:Q:<xIntent>: PersonX 'd better go <gen_en> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> to go somewhere else more important. <extar_id_1>
+INFO:comet.data:Q:<xIntent>: PersonX 'd better go <gen_fa> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> برای رفتن به جای دیگری مهم تر <extar_id_1>
+INFO:comet.main:Iterations:29
+INFO:comet.main:exiting while ...
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: /home/ahmad/pret/paraphrase-multilingual-MiniLM-L12-v2

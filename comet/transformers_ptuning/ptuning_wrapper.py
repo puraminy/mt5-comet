@@ -10,8 +10,8 @@ def _isin(tensor:torch.Tensor,values:torch.Tensor):
 import logging
 
 wlog = logging.getLogger("comet.wrapper")
-logPath = "logs/"
-wHandler = logging.FileHandler("{0}/{1}.log".format(logPath, "wrapper"))
+logPath = ""
+wHandler = logging.FileHandler("wrapper.log")
 wlog.addHandler(wHandler)
 wlog.setLevel(logging.DEBUG)
 
