@@ -13,7 +13,7 @@ import os
 import torch
 from os.path import expanduser
 home = expanduser("~")
-#logging.basicConfig()
+logging.basicConfig(level=logging.CRITICAL)
 consoleHandler = logging.StreamHandler()
 mlog = logging.getLogger("comet.main")
 mlog.setLevel(logging.INFO)
@@ -210,6 +210,7 @@ def fill_data(split_df, split_name, inputs, targets, qtemp, anstemp,
     kk = 0
     dlog.info(f"len after filtering:{len(split_df)}")
     flat_data = []
+    old_input = ""
     pbar = tqdm(total = num_samples)
     for index, d in split_df.iterrows():
         rel = d["prefix"]
@@ -242,16 +243,18 @@ def fill_data(split_df, split_name, inputs, targets, qtemp, anstemp,
                 lang = input_lang + "2" + target_lang
                 if not lang in data_split[rel]:
                     data_split[rel][lang] = []
+                if d["input_text"] != old_input:
+                    old_input = d["input_text"]
+                    ii+=1
+                if ii >= num_samples:
+                    return data_split, flat_data, kk
                 if query not in data_split[rel][lang]:
                     jj+=1
                     pbar.update(1)
                     data_split[rel][lang].append({query:[resp]})
-                    if jj >= num_samples:
-                        return data_split, flat_data, kk
                     if jj < 3:
                         dlog.info("Q:"+ query)
                         dlog.info("R:"+ resp)
-                    ii+=1
                 else:
                     data_split[rel][lang][query].append(resp)
                 flat_data.append((query, resp))
