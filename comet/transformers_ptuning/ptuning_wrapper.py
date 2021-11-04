@@ -14,10 +14,10 @@ home = expanduser("~")
 
 wlog = logging.getLogger("comet.wrapper")
 if "ahmad" in home:
-    logPath = "/home/ahmad/logs/wrapper.log"
+    logFilename = "/home/ahmad/logs/wrapper.log"
 else:
-    logPath = "/content/wrapper.log"
-wHandler = logging.FileHandler(logPath)
+    logFilename = "/content/wrapper.log"
+wHandler = logging.FileHandler(logFilename)
 wlog.addHandler(wHandler)
 #wlog.setLevel(logging.DEBUG)
 

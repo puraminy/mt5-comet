@@ -13,14 +13,32 @@ import os
 import torch
 from os.path import expanduser
 home = expanduser("~")
-logging.basicConfig(level=logging.CRITICAL)
+if "ahmad" in home:
+    logPath = "/home/ahmad/logs/wrapper.log"
+else:
+    logPath = "/content/wrapper.log"
+logFilename = os.path.join(logPath, "all.log") #app_path + '/log_file.log'
+# log only important messages
+logging.basicConfig(filename=logFilename)
 consoleHandler = logging.StreamHandler()
 mlog = logging.getLogger("comet.main")
 mlog.setLevel(logging.INFO)
 mlog.addHandler(consoleHandler)
 
-device = 'cuda'
 
+dlog = logging.getLogger("comet.data")
+logFilename = os.path.join(logPath, "data.log") #app_path + '/log_file.log'
+dHandler = logging.FileHandler(logFilename)
+dlog.addHandler(dHandler)
+
+vlog = logging.getLogger("comet.eval")
+
+logFilename = os.path.join(logPath, "eval.log") #app_path + '/log_file.log'
+vHandler = logging.FileHandler(logFilename)
+vlog.addHandler(vHandler)
+
+
+device = 'cuda'
 def set_device(dev):
     global device
     device = dev
@@ -184,7 +202,6 @@ def fill_data(split_df, split_name, inputs, targets, qtemp, anstemp,
             natural=False,
             pred_tresh=0,
             nli_group="all"): 
-    dlog = logging.getLogger("comet.data")
     dlog.info("building query responses for {}".format(split_name))
     dlog.info(f"len:{len(split_df)}")
     if natural and split_name != "train": natural = False 
@@ -313,7 +330,6 @@ def eval(model, tokenizer, val_data, num_generations,
     base_path = "/content/drive/MyDrive/pret"
     if "ahmad" in home:
         base_path = "/home/ahmad/pret"
-    vlog = logging.getLogger("comet.eval")
     if verbose:
         vlog.addHandler(StreamHandler)
 
