@@ -13,10 +13,10 @@ import os
 import torch
 from os.path import expanduser
 home = expanduser("~")
-logFilename = "log_file.log" #app_path + '/log_file.log'
-logging.basicConfig(filename=logFilename, level=logging.INFO)
+#logging.basicConfig()
 consoleHandler = logging.StreamHandler()
 mlog = logging.getLogger("comet.main")
+mlog.setLevel(logging.INFO)
 mlog.addHandler(consoleHandler)
 
 device = 'cuda'
@@ -338,7 +338,6 @@ def eval(model, tokenizer, val_data, num_generations,
     total = num_generations
     max_score = 0
     pbar = tqdm(total = total)
-    data = {}
     rows = []
     old_input = ""
     ii = 0
@@ -350,6 +349,7 @@ def eval(model, tokenizer, val_data, num_generations,
                 break
             for queries in val_data[rel][lang]:
                 for query, tails in queries.items():
+                    data = {}
                     if verbose:
                         vlog.debug("&&&&&&&&&&&&&&&&& All Targets &&&&&&&&&&&&&&")
                         for _tail in tails:
@@ -417,25 +417,22 @@ def eval(model, tokenizer, val_data, num_generations,
     new_df = pd.DataFrame(rows)
     new_df = new_df[new_df["pred1_score"] > 0]
     pbar.close()
-    rlog = logging.getLogger("comet.eval.results")
-    rlog.addHandler(consoleHandler)
-
     out = os.path.join(save_path,"scored_results.tsv")
-    rlog.info("Len data frame: {}".format(len(new_df)))
-    rlog.info(f"Bert:{mean_bert} Rouge {mean_rouge} ")
+    mlog.info("Len data frame: {}".format(len(new_df)))
+    mlog.info(f"Bert:{mean_bert} Rouge {mean_rouge} ")
     new_df.to_csv(out, sep="\t", index=False)
 
     #with open("/home/pouramini/dflist","a") as dflist:
-    #    rlog.info(f"{model_name}={out}", file=dflist)
+    #    mlog.info(f"{model_name}={out}", file=dflist)
 
     #new_df = new_df.sort_values(score_col, ascending=False).\
     #  drop_duplicates(['prefix','input_text']).\
     #    rename(columns={col2:'top'}).\
     #      merge(new_df.groupby(['prefix','input_text'],as_index=False)[col2].agg('<br />'.join))
 
-    rlog.info("Bert Score: {}".format(new_df["pred1_score"].mean()))
-    rlog.info("Rouge Score: {}".format(new_df["rouge_score"].mean()))
-    rlog.info("labels_count: {}".format(labels_count))
+    mlog.info("Bert Score: {}".format(new_df["pred1_score"].mean()))
+    mlog.info("Rouge Score: {}".format(new_df["rouge_score"].mean()))
+    mlog.info("labels_count: {}".format(labels_count))
     pred_counts = new_df['pred_text1'].unique()
-    rlog.info("Distinct preds:{}".format(len(pred_counts)))
+    mlog.info("Distinct preds:{}".format(len(pred_counts)))
 
