@@ -11,8 +11,10 @@ import logging, sys
 import re
 import os
 import torch
+from os.path import expanduser
+home = expanduser("~")
 logFilename = "log_file.log" #app_path + '/log_file.log'
-logging.basicConfig(filename=logFilename, level=logging.CRITICAL)
+logging.basicConfig(filename=logFilename, level=logging.INFO)
 consoleHandler = logging.StreamHandler()
 mlog = logging.getLogger("comet.main")
 mlog.addHandler(consoleHandler)
@@ -301,12 +303,17 @@ def bert_score(bert_scorer, hyps, refs):
 
         return best_hyp, best_ref, top["score"] 
 # vvvvvvvvvvvvvvv
-#base_path = "/content/drive/MyDrive/pret"
-base_path = "/home/ahmad/pret"
 # ################################### Evaluation #########################
 def eval(model, tokenizer, val_data, num_generations, 
         interactive, save_path, verbose):  
+
+    base_path = "/content/drive/MyDrive/pret"
+    if "ahmad" in home:
+        base_path = "/home/ahmad/pret"
     vlog = logging.getLogger("comet.eval")
+    if verbose:
+        vlog.addHandler(StreamHandler)
+
     local_path = f"{base_path}/paraphrase-multilingual-MiniLM-L12-v2"        
     if not Path(local_path).exists():
         local_path = 'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2'

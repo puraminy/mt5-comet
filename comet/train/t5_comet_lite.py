@@ -158,7 +158,7 @@ from tqdm import tqdm
 )
 @click.option(
     "--cont",
-    "-c",
+    "-cont",
     is_flag=True,
     help="continue training"
 )
@@ -208,8 +208,15 @@ from tqdm import tqdm
     is_flag=True,
     help=""
 )
+@click.option(
+    "--cycle",
+    "-c",
+    default=500,
+    type=int,
+    help=""
+)
 def main(model_id, path, from_dir, num_samples, val_set, 
-         num_generations, is_flax, load_path, overwrite, save_path, output_name, lang, qtemp, anstemp, pred_tresh, ignore_blanks, natural, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose):
+         num_generations, is_flax, load_path, overwrite, save_path, output_name, lang, qtemp, anstemp, pred_tresh, ignore_blanks, natural, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle):
 
     #%% some hyper-parameters
     #bbbbbbbbbbb
@@ -225,7 +232,6 @@ def main(model_id, path, from_dir, num_samples, val_set,
     else:
         underlying_model_name = model_id
         
-    cycle = 500
     weight_decay = 0.01
     batch_size = 1
     shuffle = False

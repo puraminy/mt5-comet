@@ -337,3 +337,105 @@ INFO:comet.eval.results:Bert Score: 0.14000000000000004
 INFO:comet.eval.results:Rouge Score: 0.0
 INFO:comet.eval.results:labels_count: {'contradiction': 20, 'entailment': 0, 'neutral': 0}
 INFO:comet.eval.results:Distinct preds:1
+INFO:comet.main:Running version 1
+INFO:comet.main:SAVE Path:logs/t5-sm
+INFO:comet.data:building query responses for train
+INFO:comet.data:len:47449
+INFO:comet.data:len after filtering:47449
+INFO:comet.data:Q:<xIntent>: PersonX abandons ___ altogether <gen_en> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> put a stop <extar_id_1>
+INFO:comet.data:Q:<xIntent>: PersonX abandons ___ altogether <gen_fa> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> توقف کنید <extar_id_1>
+INFO:comet.data:building query responses for validation
+INFO:comet.data:len:5388
+INFO:comet.data:len after filtering:5388
+INFO:comet.data:Q:<xIntent>: PersonX 'd better go <gen_en> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> to go somewhere else more important. <extar_id_1>
+INFO:comet.data:Q:<xIntent>: PersonX 'd better go <gen_fa> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> برای رفتن به جای دیگری مهم تر <extar_id_1>
+INFO:comet.main:Iterations:299
+DEBUG:comet.wrapper:%%%%%%%%%%%%%%%%%%%%%%%% New version %%%%%%%%%%%%%%%%%%
+INFO:comet.main:exiting while ...
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: /home/ahmad/pret/paraphrase-multilingual-MiniLM-L12-v2
+INFO:comet.main:Running version 1
+INFO:comet.main:SAVE Path:logs/t5-sm
+INFO:comet.main:logs/t5-sm_1
+INFO:comet.data:building query responses for train
+INFO:comet.data:len:47449
+INFO:comet.data:len after filtering:47449
+INFO:comet.data:Q:<xIntent>: PersonX abandons ___ altogether <gen_en> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> put a stop <extar_id_1>
+INFO:comet.data:Q:<xIntent>: PersonX abandons ___ altogether <gen_fa> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> توقف کنید <extar_id_1>
+INFO:comet.data:building query responses for validation
+INFO:comet.data:len:5388
+INFO:comet.data:len after filtering:5388
+INFO:comet.data:Q:<xIntent>: PersonX 'd better go <gen_en> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> to go somewhere else more important. <extar_id_1>
+INFO:comet.data:Q:<xIntent>: PersonX 'd better go <gen_fa> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> برای رفتن به جای دیگری مهم تر <extar_id_1>
+INFO:comet.main:Iterations:299
+DEBUG:comet.wrapper:%%%%%%%%%%%%%%%%%%%%%%%% New version %%%%%%%%%%%%%%%%%%
+DEBUG:comet.wrapper:self.original embedding:Embedding(32120, 512)
+DEBUG:comet.wrapper:original embedding_size:32120
+DEBUG:comet.wrapper:REP id:0
+DEBUG:comet.wrapper:DECODER original embd:Embedding(32120, 512)
+DEBUG:comet.wrapper:MMMMMMain forward: Prompt ids:None
+INFO:comet.wrapper:DDDDEcoder
+DEBUG:comet.wrapper:MMMMMMain forward: Prompt ids:None
+INFO:comet.wrapper:DDDDEcoder
+DEBUG:comet.wrapper:MMMMMMain forward: Prompt ids:None
+INFO:comet.wrapper:DDDDEcoder
+DEBUG:comet.wrapper:MMMMMMain forward: Prompt ids:None
+INFO:comet.wrapper:DDDDEcoder
+DEBUG:comet.wrapper:MMMMMMain forward: Prompt ids:None
+INFO:comet.wrapper:DDDDEcoder
+DEBUG:comet.wrapper:MMMMMMain forward: Prompt ids:None
+INFO:comet.wrapper:DDDDEcoder
+DEBUG:comet.wrapper:MMMMMMain forward: Prompt ids:None
+INFO:comet.wrapper:DDDDEcoder
+DEBUG:comet.wrapper:MMMMMMain forward: Prompt ids:None
+INFO:comet.wrapper:DDDDEcoder
+DEBUG:comet.wrapper:MMMMMMain forward: Prompt ids:None
+INFO:comet.wrapper:DDDDEcoder
+DEBUG:comet.wrapper:MMMMMMain forward: Prompt ids:None
+INFO:comet.wrapper:DDDDEcoder
+DEBUG:comet.wrapper:MMMMMMain forward: Prompt ids:None
+INFO:comet.wrapper:DDDDEcoder
+DEBUG:comet.wrapper:MMMMMMain forward: Prompt ids:None
+INFO:comet.wrapper:DDDDEcoder
+DEBUG:comet.wrapper:MMMMMMain forward: Prompt ids:None
+INFO:comet.wrapper:DDDDEcoder
+DEBUG:comet.wrapper:MMMMMMain forward: Prompt ids:None
+INFO:comet.wrapper:DDDDEcoder
+DEBUG:comet.wrapper:MMMMMMain forward: Prompt ids:None
+INFO:comet.wrapper:DDDDEcoder
+DEBUG:comet.wrapper:MMMMMMain forward: Prompt ids:None
+INFO:comet.wrapper:DDDDEcoder
+DEBUG:comet.wrapper:MMMMMMain forward: Prompt ids:None
+INFO:comet.wrapper:DDDDEcoder
+DEBUG:comet.wrapper:MMMMMMain forward: Prompt ids:None
+INFO:comet.wrapper:DDDDEcoder
+DEBUG:comet.wrapper:MMMMMMain forward: Prompt ids:None
+INFO:comet.wrapper:DDDDEcoder
+DEBUG:comet.wrapper:MMMMMMain forward: Prompt ids:None
+INFO:comet.wrapper:DDDDEcoder
+DEBUG:comet.wrapper:MMMMMMain forward: Prompt ids:None
+INFO:comet.wrapper:DDDDEcoder
+DEBUG:comet.wrapper:MMMMMMain forward: Prompt ids:None
+INFO:comet.wrapper:DDDDEcoder
+DEBUG:comet.wrapper:MMMMMMain forward: Prompt ids:None
+INFO:comet.wrapper:DDDDEcoder
+DEBUG:comet.wrapper:MMMMMMain forward: Prompt ids:None
+INFO:comet.wrapper:DDDDEcoder
+DEBUG:comet.wrapper:MMMMMMain forward: Prompt ids:None
+INFO:comet.wrapper:DDDDEcoder
+INFO:comet.main:exiting while ...
+DEBUG:comet.wrapper:Here is prompt encoder forward: prompt_token_ids:tensor([32111, 32112, 32113, 32114, 32115]), prompt ids: None
+DEBUG:comet.wrapper:input ids:Parameter containing:
+tensor([0, 1, 2, 3, 4])
+DEBUG:comet.wrapper:dump_embeddings
+DEBUG:comet.wrapper:Here is prompt encoder forward: prompt_token_ids:tensor([32116, 32117, 32118]), prompt ids: None
+DEBUG:comet.wrapper:input ids:Parameter containing:
+tensor([0, 1, 2])
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: /home/ahmad/pret/paraphrase-multilingual-MiniLM-L12-v2
