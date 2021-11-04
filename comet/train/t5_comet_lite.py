@@ -196,18 +196,25 @@ from tqdm import tqdm
     help=""
 )
 @click.option(
-    "--prompt_path",
+    "--load_prompt_path",
     "-pp",
     default="",
     type=str,
     help=""
 )
+@click.option(
+    "--verbose",
+    "-v",
+    is_flag=True,
+    help=""
+)
 def main(model_id, path, from_dir, num_samples, val_set, 
-         num_generations, is_flax, load_path, overwrite, save_path, output_name, lang, qtemp, anstemp, pred_tresh, ignore_blanks, natural, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, prompt_path):
+         num_generations, is_flax, load_path, overwrite, save_path, output_name, lang, qtemp, anstemp, pred_tresh, ignore_blanks, natural, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose):
+
     #%% some hyper-parameters
+    #bbbbbbbbbbb
     #underlying_model_name = "logs/atomic-mt5/last"
-    global device
-    print("Running version 1")
+    mlog.info("Running version 1")
 
     if from_dir:
         underlying_model_name = path
@@ -230,24 +237,42 @@ def main(model_id, path, from_dir, num_samples, val_set,
         "early_stopping":True
     }
     device = 'cuda' if not cpu else 'cpu'
+    args = locals()
+
     set_device(device)
     log_dir = save_path
     output_name = model_id if not output_name else output_name
     save_path = os.path.join(log_dir, output_name)
     model_name = f"{learning_rate}_{cycle}_{num_samples}"
-    print("SAVE Path:", save_path)
-    if Path(save_path).exists() and not model_id=="test" and cont:
+    mlog.info(f"SAVE Path:{save_path}")
+    conf_path = os.path.join(save_path,'conf.json')
+    checkpoint = None
+    if Path(save_path).exists() and not model_id=="test" and (cont or do_eval):
+        mlog.info("Loading from ", save_path)
         underlying_model_name = save_path
+        checkpoint = torch.load(os.path.join(save_path,"saved_states"))
+        if Path(conf_path).exists():
+           with open(conf_path, 'r') as f:
+               args = json.load(f) 
+           mlog.info(args)
+           mlog.info("Loading from configuration file")
+           qtemp = args['qtemp']
+           atemp = args['atemp']
+           mlog.info("Qtemp:", args['qtemp'])
+           mlog.info("Atemp:", args['atemp'])
     ii = 1
     while not overwrite and Path(save_path).exists() and not model_id=="test":
         ans = input("The output directory already exists, do you want to overwite it? (y/n)")
         if ans == "y":
             overwrite = True
         save_path = os.path.join(log_dir,output_name + "_"+str(ii))
-        print(save_path)
+        mlog.info(save_path)
         ii += 1
 
     Path(save_path).mkdir(exist_ok=True, parents=True)
+    Path(os.path.join(save_path, "best_model")).mkdir(exist_ok=True, parents=True)
+    with open(conf_path, 'w') as outfile:
+        json.dump(args, outfile, indent=4)
     #%% load atomic data
     import pandas as pd
     atomic_dataset = {}
@@ -271,7 +296,7 @@ def main(model_id, path, from_dir, num_samples, val_set,
                             natural,
                             pred_tresh, nli_group)
     iterations = nums["train"]
-    print("Iterations:", iterations)
+    mlog.info("Iterations:"  + str(iterations))
     warm_up_steps = 0.002*iterations
     if not frozen and learning_rate == 0: learning_rate = 6.25e-05
     if frozen and learning_rate == 0: learning_rate = 0.01  #6.25e-05
@@ -345,7 +370,7 @@ def main(model_id, path, from_dir, num_samples, val_set,
         p.requires_grad = not frozen 
     if wrap:
         map_relations()
-        wrapped_model = wrap_model(model, tokenizer, wrap) 
+        wrapped_model = wrap_model(model, tokenizer, wrap, load_prompt_path) 
         optimizer_grouped_parameters = [
             {"params":[p for p in wrapped_model.parameters() if p.requires_grad]}
         ]
@@ -360,8 +385,16 @@ def main(model_id, path, from_dir, num_samples, val_set,
     scheduler = get_linear_schedule_with_warmup(optimizer,warm_up_steps,iterations)
     step = 0
     best_dev_loss = 1e10
+    best_eval_step = 0
+    if checkpoint:
+        mlog.info("Restoring optimizer and scheduler")
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
+        step = checkpoint['step']
+        best_eval_step = checkpoint['best_eval_step']
+        best_dev_loss = checkpoint['best_dev_loss']
 
-    #%%
+    #%% tttttt
     train_iter = iter(train_dataloader)
     pbar = tqdm(total=iterations) #,dynamic_ncols=True)
     while step <= iterations:
@@ -404,10 +437,10 @@ def main(model_id, path, from_dir, num_samples, val_set,
                     sw.add_scalar('dev/macro_avg_loss',dev_macro_avg_loss,step)
                     if dev_micro_avg_loss < best_dev_loss:
                         best_dev_loss = dev_micro_avg_loss
-                        model.save_pretrained(save_path)
-                        with open(save_path + "/best_model.txt", "a") as f:
-                            print("step:", step, file=f)
-                            print("best dev loss:", best_dev_loss, file=f)
+                        best_eval_step = step
+                        save_checkpoint(model, optimizer, scheduler, step, 
+                                        best_eval_step, best_dev_loss,
+                                        os.path.join(save_path, "best_model"))
 
                         generation_results = \
                         "|Queries|Generation Results|\n"\
@@ -424,12 +457,12 @@ def main(model_id, path, from_dir, num_samples, val_set,
             pbar.set_description('training...')
             pbar.update()
             if unfreez_step > 0 and step > unfreez_step and froze:
-                print("unfreezing the model")
+                mlog.info("unfreezing the model")
                 unfreez_step = 0
                 for p in model.parameters():
                     p.requires_grad = True # Unfreezing
             if freez_step > 0 and step > freez_step and not frozen:
-                print("freezing the model")
+                mlog.info("freezing the model")
                 freez_step = 0
                 for p in model.parameters():
                     p.requires_grad = False # freezing
@@ -454,20 +487,22 @@ def main(model_id, path, from_dir, num_samples, val_set,
             del result
             del loss
         except KeyboardInterrupt:
-            print("exiting while ...")
+            mlog.info("exiting while ...")
             break
     # end train while
     pbar.close()
     sw.close()
     if wrap:
-        if prompt_path and wrap:
-            print(">>> saving prompt encoder")
-            wrapped_model.prompt_encoder.save(prompt_path)
+        prompt_path = os.path.join(save_path, "prompt")
+        Path(prompt_path).mkdir(exist_ok=True, parents=True)
+        wrapped_model.prompt_encoder.save(prompt_path)
         with torch.no_grad():
             wrapped_model.update_model_weight()
-    eval(model, tokenizer, atomic_query_responses[val_set], num_generations, inter, save_path)  
-    model.save_pretrained(save_path)
-    # %%
-    # %%
+    save_checkpoint(model, optimizer, scheduler, step, 
+                    best_eval_step, best_dev_loss,
+                    save_path)
+
+    eval(model, tokenizer, atomic_query_responses[val_set], num_generations, inter, save_path, verbose)  
+
 if __name__ == "__main__":
     main()

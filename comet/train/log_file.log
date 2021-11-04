@@ -1,0 +1,339 @@
+INFO:comet.main:Running version 1
+INFO:comet.main:SAVE Path:logs/test
+INFO:comet.data:building query responses for train
+INFO:comet.data:len:47449
+INFO:comet.data:len after filtering:47449
+INFO:comet.data:Q:<xIntent>: PersonX abandons ___ altogether <gen_en> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> put a stop <extar_id_1>
+INFO:comet.data:Q:<xIntent>: PersonX abandons ___ altogether <gen_fa> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> توقف کنید <extar_id_1>
+INFO:comet.data:building query responses for validation
+INFO:comet.data:len:5388
+INFO:comet.data:len after filtering:5388
+INFO:comet.data:Q:<xIntent>: PersonX 'd better go <gen_en> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> to go somewhere else more important. <extar_id_1>
+INFO:comet.data:Q:<xIntent>: PersonX 'd better go <gen_fa> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> برای رفتن به جای دیگری مهم تر <extar_id_1>
+INFO:comet.main:Iterations:99
+INFO:comet.main:Running version 1
+INFO:comet.main:SAVE Path:logs/t5-sm
+INFO:comet.data:building query responses for train
+INFO:comet.data:len:47449
+INFO:comet.data:len after filtering:47449
+INFO:comet.data:Q:<xIntent>: PersonX abandons ___ altogether <gen_en> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> put a stop <extar_id_1>
+INFO:comet.data:Q:<xIntent>: PersonX abandons ___ altogether <gen_fa> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> توقف کنید <extar_id_1>
+INFO:comet.data:building query responses for validation
+INFO:comet.data:len:5388
+INFO:comet.data:len after filtering:5388
+INFO:comet.data:Q:<xIntent>: PersonX 'd better go <gen_en> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> to go somewhere else more important. <extar_id_1>
+INFO:comet.data:Q:<xIntent>: PersonX 'd better go <gen_fa> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> برای رفتن به جای دیگری مهم تر <extar_id_1>
+INFO:comet.main:Iterations:29
+INFO:comet.main:Running version 1
+INFO:comet.main:SAVE Path:logs/t5-sm
+INFO:comet.main:logs/t5-sm_1
+INFO:comet.data:building query responses for train
+INFO:comet.data:len:47449
+INFO:comet.data:len after filtering:47449
+INFO:comet.data:Q:<xIntent>: PersonX abandons ___ altogether <gen_en> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> put a stop <extar_id_1>
+INFO:comet.data:Q:<xIntent>: PersonX abandons ___ altogether <gen_fa> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> توقف کنید <extar_id_1>
+INFO:comet.data:building query responses for validation
+INFO:comet.data:len:5388
+INFO:comet.data:len after filtering:5388
+INFO:comet.data:Q:<xIntent>: PersonX 'd better go <gen_en> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> to go somewhere else more important. <extar_id_1>
+INFO:comet.data:Q:<xIntent>: PersonX 'd better go <gen_fa> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> برای رفتن به جای دیگری مهم تر <extar_id_1>
+INFO:comet.main:Iterations:29
+INFO:comet.main:Running version 1
+INFO:comet.main:SAVE Path:logs/t5-sm
+INFO:comet.data:building query responses for train
+INFO:comet.data:len:47449
+INFO:comet.data:len after filtering:47449
+INFO:comet.data:Q:<xIntent>: PersonX abandons ___ altogether <gen_en> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> put a stop <extar_id_1>
+INFO:comet.data:Q:<xIntent>: PersonX abandons ___ altogether <gen_fa> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> توقف کنید <extar_id_1>
+INFO:comet.data:building query responses for validation
+INFO:comet.data:len:5388
+INFO:comet.data:len after filtering:5388
+INFO:comet.data:Q:<xIntent>: PersonX 'd better go <gen_en> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> to go somewhere else more important. <extar_id_1>
+INFO:comet.data:Q:<xIntent>: PersonX 'd better go <gen_fa> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> برای رفتن به جای دیگری مهم تر <extar_id_1>
+INFO:comet.main:Iterations:29
+INFO:comet.main:Running version 1
+INFO:comet.main:SAVE Path:logs/t5-sm
+INFO:comet.data:building query responses for train
+INFO:comet.data:len:47449
+INFO:comet.data:len after filtering:47449
+INFO:comet.data:Q:<xIntent>: PersonX abandons ___ altogether <gen_en> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> put a stop <extar_id_1>
+INFO:comet.data:Q:<xIntent>: PersonX abandons ___ altogether <gen_fa> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> توقف کنید <extar_id_1>
+INFO:comet.data:building query responses for validation
+INFO:comet.data:len:5388
+INFO:comet.data:len after filtering:5388
+INFO:comet.data:Q:<xIntent>: PersonX 'd better go <gen_en> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> to go somewhere else more important. <extar_id_1>
+INFO:comet.data:Q:<xIntent>: PersonX 'd better go <gen_fa> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> برای رفتن به جای دیگری مهم تر <extar_id_1>
+INFO:comet.main:Iterations:29
+INFO:comet.main:Running version 1
+INFO:comet.main:SAVE Path:logs/t5-sm
+INFO:comet.data:building query responses for train
+INFO:comet.data:len:47449
+INFO:comet.data:len after filtering:47449
+INFO:comet.data:Q:<xIntent>: PersonX abandons ___ altogether <gen_en> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> put a stop <extar_id_1>
+INFO:comet.data:Q:<xIntent>: PersonX abandons ___ altogether <gen_fa> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> توقف کنید <extar_id_1>
+INFO:comet.data:building query responses for validation
+INFO:comet.data:len:5388
+INFO:comet.data:len after filtering:5388
+INFO:comet.data:Q:<xIntent>: PersonX 'd better go <gen_en> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> to go somewhere else more important. <extar_id_1>
+INFO:comet.data:Q:<xIntent>: PersonX 'd better go <gen_fa> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> برای رفتن به جای دیگری مهم تر <extar_id_1>
+INFO:comet.main:Iterations:29
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
+INFO:comet.main:Running version 1
+INFO:comet.main:SAVE Path:logs/t5-sm
+INFO:comet.data:building query responses for train
+INFO:comet.data:len:47449
+INFO:comet.data:len after filtering:47449
+INFO:comet.data:Q:<xIntent>: PersonX abandons ___ altogether <gen_en> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> put a stop <extar_id_1>
+INFO:comet.data:Q:<xIntent>: PersonX abandons ___ altogether <gen_fa> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> توقف کنید <extar_id_1>
+INFO:comet.data:building query responses for validation
+INFO:comet.data:len:5388
+INFO:comet.data:len after filtering:5388
+INFO:comet.data:Q:<xIntent>: PersonX 'd better go <gen_en> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> to go somewhere else more important. <extar_id_1>
+INFO:comet.data:Q:<xIntent>: PersonX 'd better go <gen_fa> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> برای رفتن به جای دیگری مهم تر <extar_id_1>
+INFO:comet.main:Iterations:29
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: /home/ahmad/pret/paraphrase-multilingual-MiniLM-L12-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:sentence_transformers.cross_encoder.CrossEncoder:Use pytorch device: cpu
+INFO:comet.main:Scoring...
+INFO:comet.eval:%%%%%%%%%%%%%%%%%%%%%%%%% xIntent %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+INFO:comet.eval:%%%%%%%%%%%%%%%%%%%%%%%%%% en2en %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+INFO:comet.eval:Label:contradiction
+INFO:comet.eval:
+INFO:comet.eval:1:<xIntent>: PersonX 'd better go <gen_en> <extra_id_0>
+INFO:comet.eval:Prediction:.
+INFO:comet.eval:Closest tail: to go somewhere else more important. <extar_id_1>
+INFO:comet.eval:------------------------------------------------------
+INFO:comet.eval:Label:contradiction
+INFO:comet.eval:
+INFO:comet.eval:2:<xIntent>: PersonX accepts PersonX's diploma <gen_en> <extra_id_0>
+INFO:comet.eval:Prediction:: PersonX accepts PersonX's diploma
+INFO:comet.eval:Closest tail: to graduate from high school <extar_id_1>
+INFO:comet.eval:------------------------------------------------------
+INFO:comet.eval:Label:contradiction
+INFO:comet.eval:
+INFO:comet.eval:3:<xIntent>: PersonX accepts PersonX's diploma <gen_en> <extra_id_0>
+INFO:comet.eval:Prediction:: PersonX accepts PersonX's diploma
+INFO:comet.eval:Closest tail: to graduate <extar_id_1>
+INFO:comet.eval:------------------------------------------------------
+INFO:comet.eval:Label:contradiction
+INFO:comet.eval:
+INFO:comet.eval:4:<xIntent>: PersonX accepts PersonY invitation <gen_en> <extra_id_0>
+INFO:comet.eval:Prediction::
+INFO:comet.eval:Closest tail: to go the invited program <extar_id_1>
+INFO:comet.eval:------------------------------------------------------
+INFO:comet.eval:Label:contradiction
+INFO:comet.eval:
+INFO:comet.eval:5:<xIntent>: PersonX accepts PersonY invitation <gen_en> <extra_id_0>
+INFO:comet.eval:Prediction::
+INFO:comet.eval:Closest tail: to see person <extar_id_1>
+INFO:comet.eval:------------------------------------------------------
+INFO:comet.eval:Label:contradiction
+INFO:comet.eval:
+INFO:comet.eval:6:<xIntent>: PersonX accepts PersonY invitation <gen_en> <extra_id_0>
+INFO:comet.eval:Prediction::
+INFO:comet.eval:Closest tail: to gain person's friendship <extar_id_1>
+INFO:comet.eval:------------------------------------------------------
+INFO:comet.eval:Label:contradiction
+INFO:comet.eval:
+INFO:comet.eval:7:<xIntent>: PersonX accepts PersonY invitation <gen_en> <extra_id_0>
+INFO:comet.eval:Prediction::
+INFO:comet.eval:Closest tail: to enjoy his time <extar_id_1>
+INFO:comet.eval:------------------------------------------------------
+INFO:comet.eval:Label:contradiction
+INFO:comet.eval:
+INFO:comet.eval:8:<xIntent>: PersonX accepts PersonY invitation <gen_en> <extra_id_0>
+INFO:comet.eval:Prediction::
+INFO:comet.eval:Closest tail: the appreciation <extar_id_1>
+INFO:comet.eval:------------------------------------------------------
+INFO:comet.eval:%%%%%%%%%%%%%%%%%%%%%%%%%% en2fa %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+INFO:comet.eval.results:Len data frame: 8
+INFO:comet.eval.results:Bert Score: 0.41
+INFO:comet.eval.results:Rouge Score: 0.0
+INFO:comet.main:Running version 1
+INFO:comet.main:SAVE Path:logs/t5-sm
+INFO:comet.main:Running version 1
+INFO:comet.main:SAVE Path:logs/t5-sm
+INFO:comet.main:Running version 1
+INFO:comet.main:SAVE Path:logs/t5-sm
+INFO:comet.main:Loading from configuration file
+INFO:comet.main:Running version 1
+INFO:comet.main:SAVE Path:logs/t5-sm
+INFO:comet.main:<generator object load_all at 0x7f6f2045e0b0>
+INFO:comet.main:Loading from configuration file
+INFO:comet.main:Running version 1
+INFO:comet.main:SAVE Path:logs/t5-sm
+INFO:comet.data:building query responses for train
+INFO:comet.data:len:47449
+INFO:comet.data:len after filtering:47449
+INFO:comet.data:Q:<xIntent>: PersonX abandons ___ altogether <gen_en> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> put a stop <extar_id_1>
+INFO:comet.data:Q:<xIntent>: PersonX abandons ___ altogether <gen_fa> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> توقف کنید <extar_id_1>
+INFO:comet.data:building query responses for validation
+INFO:comet.data:len:5388
+INFO:comet.data:len after filtering:5388
+INFO:comet.data:Q:<xIntent>: PersonX 'd better go <gen_en> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> to go somewhere else more important. <extar_id_1>
+INFO:comet.data:Q:<xIntent>: PersonX 'd better go <gen_fa> <extra_id_0>
+INFO:comet.data:R:<extra_id_0> برای رفتن به جای دیگری مهم تر <extar_id_1>
+INFO:comet.main:Iterations:79
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: /home/ahmad/pret/paraphrase-multilingual-MiniLM-L12-v2
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device: cpu
+INFO:sentence_transformers.cross_encoder.CrossEncoder:Use pytorch device: cpu
+INFO:comet.main:Scoring...
+INFO:comet.eval:%%%%%%%%%%%%%%%%%%%%%%%%% xIntent %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+INFO:comet.eval:%%%%%%%%%%%%%%%%%%%%%%%%%% en2en %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+INFO:comet.eval:Label:contradiction
+INFO:comet.eval:
+INFO:comet.eval:1:<xIntent>: PersonX 'd better go <gen_en> <extra_id_0>
+INFO:comet.eval:Prediction:.
+INFO:comet.eval:Closest tail: to go somewhere else more important. <extar_id_1>
+INFO:comet.eval:------------------------------------------------------
+INFO:comet.eval:Label:contradiction
+INFO:comet.eval:
+INFO:comet.eval:2:<xIntent>: PersonX accepts PersonX's diploma <gen_en> <extra_id_0>
+INFO:comet.eval:Prediction:: PersonX accepts PersonX's diploma.
+INFO:comet.eval:Closest tail: to graduate from high school <extar_id_1>
+INFO:comet.eval:------------------------------------------------------
+INFO:comet.eval:Label:contradiction
+INFO:comet.eval:
+INFO:comet.eval:3:<xIntent>: PersonX accepts PersonX's diploma <gen_en> <extra_id_0>
+INFO:comet.eval:Prediction:: PersonX accepts PersonX's diploma.
+INFO:comet.eval:Closest tail: to graduate <extar_id_1>
+INFO:comet.eval:------------------------------------------------------
+INFO:comet.eval:Label:contradiction
+INFO:comet.eval:
+INFO:comet.eval:4:<xIntent>: PersonX accepts PersonY invitation <gen_en> <extra_id_0>
+INFO:comet.eval:Prediction::
+INFO:comet.eval:Closest tail: to go the invited program <extar_id_1>
+INFO:comet.eval:------------------------------------------------------
+INFO:comet.eval:Label:contradiction
+INFO:comet.eval:
+INFO:comet.eval:5:<xIntent>: PersonX accepts PersonY invitation <gen_en> <extra_id_0>
+INFO:comet.eval:Prediction::
+INFO:comet.eval:Closest tail: to see person <extar_id_1>
+INFO:comet.eval:------------------------------------------------------
+INFO:comet.eval:Label:contradiction
+INFO:comet.eval:
+INFO:comet.eval:6:<xIntent>: PersonX accepts PersonY invitation <gen_en> <extra_id_0>
+INFO:comet.eval:Prediction::
+INFO:comet.eval:Closest tail: to gain person's friendship <extar_id_1>
+INFO:comet.eval:------------------------------------------------------
+INFO:comet.eval:Label:contradiction
+INFO:comet.eval:
+INFO:comet.eval:7:<xIntent>: PersonX accepts PersonY invitation <gen_en> <extra_id_0>
+INFO:comet.eval:Prediction::
+INFO:comet.eval:Closest tail: to enjoy his time <extar_id_1>
+INFO:comet.eval:------------------------------------------------------
+INFO:comet.eval:Label:contradiction
+INFO:comet.eval:
+INFO:comet.eval:8:<xIntent>: PersonX accepts PersonY invitation <gen_en> <extra_id_0>
+INFO:comet.eval:Prediction::
+INFO:comet.eval:Closest tail: the appreciation <extar_id_1>
+INFO:comet.eval:------------------------------------------------------
+INFO:comet.eval:Label:contradiction
+INFO:comet.eval:
+INFO:comet.eval:9:<xIntent>: PersonX accepts PersonY offer <gen_en> <extra_id_0>
+INFO:comet.eval:Prediction::
+INFO:comet.eval:Closest tail: job <extar_id_1>
+INFO:comet.eval:------------------------------------------------------
+INFO:comet.eval:Label:contradiction
+INFO:comet.eval:
+INFO:comet.eval:10:<xIntent>: PersonX accepts PersonY offer <gen_en> <extra_id_0>
+INFO:comet.eval:Prediction::
+INFO:comet.eval:Closest tail: to gain something <extar_id_1>
+INFO:comet.eval:------------------------------------------------------
+INFO:comet.eval:Label:contradiction
+INFO:comet.eval:
+INFO:comet.eval:11:<xIntent>: PersonX accepts PersonY offer <gen_en> <extra_id_0>
+INFO:comet.eval:Prediction::
+INFO:comet.eval:Closest tail: to be paid <extar_id_1>
+INFO:comet.eval:------------------------------------------------------
+INFO:comet.eval:Label:contradiction
+INFO:comet.eval:
+INFO:comet.eval:12:<xIntent>: PersonX accepts PersonY's invitation <gen_en> <extra_id_0>
+INFO:comet.eval:Prediction:: PersonX accepts PersonY's invitation.
+INFO:comet.eval:Closest tail: they want to be polite <extar_id_1>
+INFO:comet.eval:------------------------------------------------------
+INFO:comet.eval:Label:contradiction
+INFO:comet.eval:
+INFO:comet.eval:13:<xIntent>: PersonX accepts PersonY's invitation <gen_en> <extra_id_0>
+INFO:comet.eval:Prediction:: PersonX accepts PersonY's invitation.
+INFO:comet.eval:Closest tail: to not disappoint persony <extar_id_1>
+INFO:comet.eval:------------------------------------------------------
+INFO:comet.eval:Label:contradiction
+INFO:comet.eval:
+INFO:comet.eval:14:<xIntent>: PersonX accepts PersonY's invitation <gen_en> <extra_id_0>
+INFO:comet.eval:Prediction:: PersonX accepts PersonY's invitation.
+INFO:comet.eval:Closest tail: they want to attend the event <extar_id_1>
+INFO:comet.eval:------------------------------------------------------
+INFO:comet.eval:Label:contradiction
+INFO:comet.eval:
+INFO:comet.eval:15:<xIntent>: PersonX accepts PersonY's invitation <gen_en> <extra_id_0>
+INFO:comet.eval:Prediction:: PersonX accepts PersonY's invitation.
+INFO:comet.eval:Closest tail: to be polite <extar_id_1>
+INFO:comet.eval:------------------------------------------------------
+INFO:comet.eval:Label:contradiction
+INFO:comet.eval:
+INFO:comet.eval:16:<xIntent>: PersonX accepts PersonY's invitation <gen_en> <extra_id_0>
+INFO:comet.eval:Prediction:: PersonX accepts PersonY's invitation.
+INFO:comet.eval:Closest tail: to see persony <extar_id_1>
+INFO:comet.eval:------------------------------------------------------
+INFO:comet.eval:Label:contradiction
+INFO:comet.eval:
+INFO:comet.eval:17:<xIntent>: PersonX accepts PersonY's invitation <gen_en> <extra_id_0>
+INFO:comet.eval:Prediction:: PersonX accepts PersonY's invitation.
+INFO:comet.eval:Closest tail: they want to go out with persony <extar_id_1>
+INFO:comet.eval:------------------------------------------------------
+INFO:comet.eval:Label:contradiction
+INFO:comet.eval:
+INFO:comet.eval:18:<xIntent>: PersonX accepts PersonY's offer <gen_en> <extra_id_0>
+INFO:comet.eval:Prediction:: PersonX accepts PersonY's offer.
+INFO:comet.eval:Closest tail: to buy the things <extar_id_1>
+INFO:comet.eval:------------------------------------------------------
+INFO:comet.eval:Label:contradiction
+INFO:comet.eval:
+INFO:comet.eval:19:<xIntent>: PersonX accepts PersonY's offer <gen_en> <extra_id_0>
+INFO:comet.eval:Prediction:: PersonX accepts PersonY's offer.
+INFO:comet.eval:Closest tail: to obtain something. <extar_id_1>
+INFO:comet.eval:------------------------------------------------------
+INFO:comet.eval:Label:contradiction
+INFO:comet.eval:
+INFO:comet.eval:20:<xIntent>: PersonX accepts PersonY's offer <gen_en> <extra_id_0>
+INFO:comet.eval:Prediction:: PersonX accepts PersonY's offer.
+INFO:comet.eval:Closest tail: to move past disagreement <extar_id_1>
+INFO:comet.eval:------------------------------------------------------
+INFO:comet.eval:%%%%%%%%%%%%%%%%%%%%%%%%%% en2fa %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+INFO:comet.eval.results:Len data frame: 20
+INFO:comet.eval.results:Bert Score: 0.14000000000000004
+INFO:comet.eval.results:Rouge Score: 0.0
+INFO:comet.eval.results:labels_count: {'contradiction': 20, 'entailment': 0, 'neutral': 0}
+INFO:comet.eval.results:Distinct preds:1

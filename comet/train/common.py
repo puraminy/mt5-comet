@@ -7,8 +7,15 @@ from comet.transformers_ptuning import PTuningWrapper
 from comet.transformers_ptuning.ptuning_wrapper import LSTMEmbeddingPromptEncoder, EmbeddingPromptEncoder
 from comet.evaluation.rouge.rouge import Rouge
 from tqdm import tqdm
+import logging, sys
 import re
 import os
+import torch
+logFilename = "log_file.log" #app_path + '/log_file.log'
+logging.basicConfig(filename=logFilename, level=logging.CRITICAL)
+consoleHandler = logging.StreamHandler()
+mlog = logging.getLogger("comet.main")
+mlog.addHandler(consoleHandler)
 
 device = 'cuda'
 
@@ -175,11 +182,12 @@ def fill_data(split_df, split_name, inputs, targets, qtemp, anstemp,
             natural=False,
             pred_tresh=0,
             nli_group="all"): 
-    print("building query responses for ", split_name)
-    print("len:", len(split_df))
+    dlog = logging.getLogger("comet.data")
+    dlog.info("building query responses for {}".format(split_name))
+    dlog.info(f"len:{len(split_df)}")
     if natural and split_name != "train": natural = False 
     if natural:
-        print("natural is ON")
+        dlog.info("natural is ON")
     data_split = {}
     if num_samples == 0: num_samples = len(split_df)
     split_df = split_df.sort_values(by="input_text")
@@ -190,15 +198,15 @@ def fill_data(split_df, split_name, inputs, targets, qtemp, anstemp,
         split_df = split_df[split_df["input_text"].str.contains('___')==False]
     if pred_tresh > 0 and "pred1_score" in split_df:
         split_df = split_df[split_df["pred1_score"] > pred_tresh]
-        print("*** Filtered based on pred1 score higher than ", pred_tresh)
+        dlog.info("*** Filtered based on pred1 score higher than "+ pred_tresh)
     if nli_group != "all" and "nli_group" in split_df:
         split_df = split_df[split_df["nli_group"] == nli_group]
-        print("*** Filtered based on nli_group ", nli_group)
+        dlog.info("*** Filtered based on nli_group "+ nli_group)
 
     jj = 0
     ii = 0
     kk = 0
-    print("len after filtering:", len(split_df))
+    dlog.info(f"len after filtering:{len(split_df)}")
     flat_data = []
     pbar = tqdm(total = num_samples)
     for index, d in split_df.iterrows():
@@ -239,8 +247,8 @@ def fill_data(split_df, split_name, inputs, targets, qtemp, anstemp,
                     if jj >= num_samples:
                         return data_split, flat_data, kk
                     if jj < 3:
-                        print("Q:", query)
-                        print("R:", resp)
+                        dlog.info("Q:"+ query)
+                        dlog.info("R:"+ resp)
                     ii+=1
                 else:
                     data_split[rel][lang][query].append(resp)
@@ -249,6 +257,21 @@ def fill_data(split_df, split_name, inputs, targets, qtemp, anstemp,
             #didn't convert ___ to <blank>
             #didn't normalize to lowercase
     return data_split, flat_data, kk
+
+def save_checkpoint(model, optimizer, scheduler, step, 
+                   best_eval_step, best_dev_loss, save_path):
+    model.save_pretrained(save_path)
+    torch.save({
+            'step': step,
+            'eval_step': best_eval_step,
+            'model_state_dict': model.state_dict(),
+            'optimizer_state_dict': optimizer.state_dict(),
+            'scheduler_state_dict': scheduler.state_dict(),
+            }, os.path.join(save_path, "saved_states"))
+
+    with open(save_path + "/best_model.txt", "a") as f:
+        print("best_step:", best_eval_step, file=f)
+        print("best dev loss:", best_dev_loss, file=f)
 
 def bert_score(bert_scorer, hyps, refs):
         if bert_scorer == None:
@@ -267,7 +290,7 @@ def bert_score(bert_scorer, hyps, refs):
         for i in range(rows):
             for j in range(cols):
                 pairs.append({'index': [i, j], 'score': cosine_scores[i][j]})
-            #print({'index': [i, j], 'score': cosine_scores[i][j]})
+            #logging.info({'index': [i, j], 'score': cosine_scores[i][j]})
 
         #Sort scores in decreasing order
         pairs = sorted(pairs, key=lambda x: x['score'], reverse=True)
@@ -278,11 +301,12 @@ def bert_score(bert_scorer, hyps, refs):
 
         return best_hyp, best_ref, top["score"] 
 # vvvvvvvvvvvvvvv
-base_path = "/content/drive/MyDrive/pret"
-#base_path = "/home/ahmad/pret"
+#base_path = "/content/drive/MyDrive/pret"
+base_path = "/home/ahmad/pret"
 # ################################### Evaluation #########################
 def eval(model, tokenizer, val_data, num_generations, 
-        interactive, save_path):  
+        interactive, save_path, verbose):  
+    vlog = logging.getLogger("comet.eval")
     local_path = f"{base_path}/paraphrase-multilingual-MiniLM-L12-v2"        
     if not Path(local_path).exists():
         local_path = 'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2'
@@ -298,7 +322,7 @@ def eval(model, tokenizer, val_data, num_generations,
     #df = df.groupby(['prefix','input_text'],as_index=False)[target].agg({"target_text":'<br />'.join})
     #resp_const_parts = re.split("{.*}", anstemp)
     resp_const_parts = ["<extra_id_0>", "<extra_id_1>"]
-    print("Scoring...")
+    mlog.info("Scoring...")
     model.eval()
     sum_bert = 0 
     sum_rouge = 0
@@ -312,17 +336,18 @@ def eval(model, tokenizer, val_data, num_generations,
     old_input = ""
     ii = 0
     for rel in val_data.keys():
-        print(f"%%%%%%%%%%%%%%%%%%%%%%%%% {rel} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+        vlog.info(f"%%%%%%%%%%%%%%%%%%%%%%%%% {rel} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
         for lang in val_data[rel].keys():
-            print(f"%%%%%%%%%%%%%%%%%%%%%%%%%% { lang } %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+            vlog.info(f"%%%%%%%%%%%%%%%%%%%%%%%%%% { lang } %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
             if ii > num_generations:
                 break
             for queries in val_data[rel][lang]:
                 for query, tails in queries.items():
-                    print("&&&&&&&&&&&&&&&&& All Targets &&&&&&&&&&&&&&")
-                    for _tail in tails:
-                        print(_tail)
-                    print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
+                    if verbose:
+                        vlog.debug("&&&&&&&&&&&&&&&&& All Targets &&&&&&&&&&&&&&")
+                        for _tail in tails:
+                            vlog.debug(_tail)
+                        vlog.debug("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
                     if interactive: #interactive mode
                         query = get_input("Enter an even or Enter) skip, c) continue, e) exit.")
                         resp = "NA"
@@ -359,7 +384,7 @@ def eval(model, tokenizer, val_data, num_generations,
                         label = nli_map[_max]
                         labels_count[label] += 1
                         data["nli_group"] = label
-                        print("Label:", label)
+                        vlog.info("Label:"+ label)
                     data["top"] = best_ref
                     data["all_preds"] = "<br />".join(hyps) 
                     data["pred1_score"] = float("{:.2f}".format(cur_score))
@@ -368,16 +393,16 @@ def eval(model, tokenizer, val_data, num_generations,
                     ii += 1
                     mean_bert = "{:.4f}".format(sum_bert / ii)
                     #tqdm.write(f"Mean score:{mean_bert}")
-                    print("")
-                    print(ii, ":",query)
-                    print("Prediction:", top_hyp)
-                    print("Closest tail:", best_ref)
+                    vlog.info("")
+                    vlog.info(str(ii)+ ":"+query)
+                    vlog.info("Prediction:"+ top_hyp)
+                    vlog.info("Closest tail:"+ best_ref)
 
                     rouge_score = rouge_scorer.calc_score(candidate=[top_hyp], refs=tails)
                     data["rouge_score"] = rouge_score
                     sum_rouge += rouge_score
                     mean_rouge = "{:.4f}".format(sum_rouge / ii)
-                    print("------------------------------------------------------")
+                    vlog.info("------------------------------------------------------")
                     pbar.set_description(f"Bert:{mean_bert} Rouge {mean_rouge} ")
                     pbar.update(1)
 
@@ -385,30 +410,25 @@ def eval(model, tokenizer, val_data, num_generations,
     new_df = pd.DataFrame(rows)
     new_df = new_df[new_df["pred1_score"] > 0]
     pbar.close()
+    rlog = logging.getLogger("comet.eval.results")
+    rlog.addHandler(consoleHandler)
 
     out = os.path.join(save_path,"scored_results.tsv")
-    print(len(new_df))
+    rlog.info("Len data frame: {}".format(len(new_df)))
+    rlog.info(f"Bert:{mean_bert} Rouge {mean_rouge} ")
     new_df.to_csv(out, sep="\t", index=False)
 
     #with open("/home/pouramini/dflist","a") as dflist:
-    #    print(f"{model_name}={out}", file=dflist)
+    #    rlog.info(f"{model_name}={out}", file=dflist)
 
     #new_df = new_df.sort_values(score_col, ascending=False).\
     #  drop_duplicates(['prefix','input_text']).\
     #    rename(columns={col2:'top'}).\
     #      merge(new_df.groupby(['prefix','input_text'],as_index=False)[col2].agg('<br />'.join))
 
-    res_out = open("results", "a")
-    print("Bert Score:", new_df["pred1_score"].mean())
-    print("Rouge Score:", new_df["rouge_score"].mean())
-    print("Rouge Score:", new_df["rouge_score"].mean(), file=res_out)
-    print("Bert Score:", new_df["pred1_score"].mean(), file=res_out)
-    print("labels_count:", labels_count)
-    print("labels_count:", labels_count, file=res_out)
-
+    rlog.info("Bert Score: {}".format(new_df["pred1_score"].mean()))
+    rlog.info("Rouge Score: {}".format(new_df["rouge_score"].mean()))
+    rlog.info("labels_count: {}".format(labels_count))
     pred_counts = new_df['pred_text1'].unique()
-
-    print("Distinct preds:", len(pred_counts))
-    print("Distinct preds:", len(pred_counts), file=res_out)
-    res_out.close()
+    rlog.info("Distinct preds:{}".format(len(pred_counts)))
 
