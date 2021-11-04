@@ -414,9 +414,9 @@ def main(model_id, path, from_dir, num_samples, val_set,
                 with torch.no_grad():
                     if wrap:
                         wrapped_model.update_model_weight()
-                    if frozen:
-                        for p in model.parameters():
-                            p.requires_grad = False 
+                    #if frozen:
+                    #    for p in model.parameters():
+                    #        p.requires_grad = False 
                     model.eval()
                     pbar.set_description('validating...')
                     dev_allset_micro_loss = 0.
