@@ -322,6 +322,7 @@ def eval(model, tokenizer, val_data, num_generations,
                     print("&&&&&&&&&&&&&&&&& All Targets &&&&&&&&&&&&&&")
                     for _tail in tails:
                         print(_tail)
+                    print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
                     if interactive: #interactive mode
                         query = get_input("Enter an even or Enter) skip, c) continue, e) exit.")
                         resp = "NA"
