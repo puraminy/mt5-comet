@@ -238,7 +238,7 @@ def fill_data(split_df, split_name, inputs, targets, qtemp, anstemp,
                     data_split[rel][lang].append({query:[resp]})
                     if jj >= num_samples:
                         return data_split, flat_data, kk
-                    if ii < 3:
+                    if jj < 3:
                         print("Q:", query)
                         print("R:", resp)
                     ii+=1
@@ -319,6 +319,9 @@ def eval(model, tokenizer, val_data, num_generations,
                 break
             for queries in val_data[rel][lang]:
                 for query, tails in queries.items():
+                    print("&&&&&&&&&&&&&&&&& All Targets &&&&&&&&&&&&&&")
+                    for _tail in tails:
+                        print(_tail)
                     if interactive: #interactive mode
                         query = get_input("Enter an even or Enter) skip, c) continue, e) exit.")
                         resp = "NA"
@@ -332,11 +335,14 @@ def eval(model, tokenizer, val_data, num_generations,
                     top_hyp = hyps[0]
                     if top_hyp == "":
                         top_hyp = "."
-                    new_tails = []
                     for const in resp_const_parts:
                         top_hyp = top_hyp.replace(const, "")
-                        for tail in tails:
-                            new_tails.append(tail.replace(const,""))
+                    new_tails = []
+                    for tail in tails:
+                        nt = tail
+                        for const in resp_const_parts:
+                            nt = nt.replace(const,"")
+                        new_tails.append(nt)
                     tails = new_tails
                     data["input_text"] = input_text 
                     data["target_text"] = "<br />".join(tails)
@@ -365,9 +371,6 @@ def eval(model, tokenizer, val_data, num_generations,
                     print(ii, ":",query)
                     print("Prediction:", top_hyp)
                     print("Closest tail:", best_ref)
-                    print("&&&&&&&&&&&&&&&&& All Targets &&&&&&&&&&&&&&")
-                    for _tail in tails:
-                        print(_tail)
 
                     rouge_score = rouge_scorer.calc_score(candidate=[top_hyp], refs=tails)
                     data["rouge_score"] = rouge_score
