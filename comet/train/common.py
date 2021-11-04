@@ -14,9 +14,9 @@ import torch
 from os.path import expanduser
 home = expanduser("~")
 if "ahmad" in home:
-    logPath = "/home/ahmad/logs/wrapper.log"
+    logPath = "/home/ahmad/logs/"
 else:
-    logPath = "/content/wrapper.log"
+    logPath = "/content/"
 logFilename = os.path.join(logPath, "all.log") #app_path + '/log_file.log'
 # log only important messages
 logging.basicConfig(filename=logFilename)

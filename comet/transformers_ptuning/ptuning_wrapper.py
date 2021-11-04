@@ -19,7 +19,7 @@ else:
     logFilename = "/content/wrapper.log"
 wHandler = logging.FileHandler(logFilename)
 wlog.addHandler(wHandler)
-#wlog.setLevel(logging.DEBUG)
+wlog.setLevel(logging.DEBUG)
 
 class PTuningWrapper(torch.nn.Module):
     def __init__(self,model,prompt_encoder,decoder_prompt_encoder=None,
