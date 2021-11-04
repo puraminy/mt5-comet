@@ -278,8 +278,8 @@ def bert_score(bert_scorer, hyps, refs):
 
         return best_hyp, best_ref, top["score"] 
 # vvvvvvvvvvvvvvv
-#base_path = "/content/drive/MyDrive/pret"
-base_path = "/home/ahmad/pret"
+base_path = "/content/drive/MyDrive/pret"
+#base_path = "/home/ahmad/pret"
 # ################################### Evaluation #########################
 def eval(model, tokenizer, val_data, num_generations, 
         interactive, save_path):  
