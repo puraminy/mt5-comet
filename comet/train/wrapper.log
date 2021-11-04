@@ -1,0 +1,168 @@
+%%%%%%%%%%%%%%%%%%%%%%%% New version %%%%%%%%%%%%%%%%%%
+self.original embedding:Embedding(32120, 512)
+original embedding_size:32120
+REP id:0
+DECODER original embd:Embedding(32120, 512)
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+Here is prompt encoder forward: prompt_token_ids:tensor([32111, 32112, 32113, 32114, 32115]), prompt ids: None
+input ids:Parameter containing:
+tensor([0, 1, 2, 3, 4])
+dump_embeddings
+Here is prompt encoder forward: prompt_token_ids:tensor([32116, 32117, 32118]), prompt ids: None
+input ids:Parameter containing:
+tensor([0, 1, 2])
+%%%%%%%%%%%%%%%%%%%%%%%% New version %%%%%%%%%%%%%%%%%%
+self.original embedding:Embedding(32120, 512)
+original embedding_size:32120
+REP id:0
+DECODER original embd:Embedding(32120, 512)
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+Here is prompt encoder forward: prompt_token_ids:tensor([32111, 32112, 32113, 32114, 32115]), prompt ids: None
+input ids:Parameter containing:
+tensor([0, 1, 2, 3, 4])
+dump_embeddings
+Here is prompt encoder forward: prompt_token_ids:tensor([32116, 32117, 32118]), prompt ids: None
+input ids:Parameter containing:
+tensor([0, 1, 2])
+%%%%%%%%%%%%%%%%%%%%%%%% New version %%%%%%%%%%%%%%%%%%
+self.original embedding:Embedding(32120, 512)
+original embedding_size:32120
+REP id:0
+DECODER original embd:Embedding(32120, 512)
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+MMMMMMain forward: Prompt ids:None
+DDDDEcoder
+Here is prompt encoder forward: prompt_token_ids:tensor([32111, 32112, 32113, 32114, 32115]), prompt ids: None
+input ids:Parameter containing:
+tensor([0, 1, 2, 3, 4])
+dump_embeddings
+Here is prompt encoder forward: prompt_token_ids:tensor([32116, 32117, 32118]), prompt ids: None
+input ids:Parameter containing:
+tensor([0, 1, 2])

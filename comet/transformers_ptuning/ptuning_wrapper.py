@@ -13,7 +13,7 @@ wlog = logging.getLogger("comet.wrapper")
 logPath = ""
 wHandler = logging.FileHandler("wrapper.log")
 wlog.addHandler(wHandler)
-wlog.setLevel(logging.DEBUG)
+#wlog.setLevel(logging.DEBUG)
 
 class PTuningWrapper(torch.nn.Module):
     def __init__(self,model,prompt_encoder,decoder_prompt_encoder=None,
@@ -119,11 +119,11 @@ class PTuningWrapper(torch.nn.Module):
         
         if decoder_input_ids is not None:
             if self.decoder_prompt_encoder is not None:
-                wlog.info("DDDDEcoder")
+                wlog.debug("DDDDEcoder")
                 decoder_prompt_masks = self.prompt_token_fn(decoder_input_ids)
                 if decoder_prompt_masks.any():
                     wlog.debug("decoder prompt mask:{}".format(decoder_prompt_masks))
-                    wlog.info(f"decoder mask, replacing token: {self.replacing_token_id}")
+                    wlog.debug(f"decoder mask, replacing token: {self.replacing_token_id}")
                     decoder_input_ids_ = decoder_input_ids.clone()
                     if self.replacing_token_id is not None:
                         decoder_input_ids_[decoder_prompt_masks] = \
