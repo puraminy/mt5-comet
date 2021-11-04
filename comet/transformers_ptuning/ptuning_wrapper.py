@@ -9,9 +9,15 @@ def _isin(tensor:torch.Tensor,values:torch.Tensor):
     return (tensor[..., None] == values).any(-1)
 import logging
 
+from os.path import expanduser
+home = expanduser("~")
+
 wlog = logging.getLogger("comet.wrapper")
-logPath = ""
-wHandler = logging.FileHandler("wrapper.log")
+if "ahmad" in home:
+    logPath = "/home/ahmad/logs/wrapper.log"
+else:
+    logPath = "/content/wrapper.log"
+wHandler = logging.FileHandler(logPath)
 wlog.addHandler(wHandler)
 #wlog.setLevel(logging.DEBUG)
 

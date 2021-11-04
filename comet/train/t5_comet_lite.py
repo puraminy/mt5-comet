@@ -79,7 +79,7 @@ from tqdm import tqdm
 @click.option(
     "--save_path",
     "-save",
-    default="logs",
+    default="",
     type=str,
     help=""
 )
@@ -221,6 +221,11 @@ def main(model_id, path, from_dir, num_samples, val_set,
     #%% some hyper-parameters
     #bbbbbbbbbbb
     #underlying_model_name = "logs/atomic-mt5/last"
+    if save_path == "":
+        save_path = "/content/drive/MyDrive/backup/logs"
+        if "ahmad" in home:
+            save_path = "/home/ahmad/logs"
+
     mlog.info("Running version 3")
 
     if from_dir:
