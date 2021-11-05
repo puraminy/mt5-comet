@@ -626,7 +626,7 @@ def create_confs():
                             json.dump(args, outfile, indent=4)
 if __name__ == "__main__":
     #create_confs()
-    if "conf_path" in os.environ:
+    if True: #"conf_path" in os.environ:
        run()
     else:
        main()
