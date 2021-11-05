@@ -249,7 +249,7 @@ def main(model_id, qtemp, anstemp, train_samples, val_set,
         json.dump(args, outfile, indent=4)
 
     if config:
-        mlog.info("Config was created at %s", config_path)
+        mlog.info("Config was created at %s", conf_path)
         return
 
     if save_path != logPath:
