@@ -284,7 +284,7 @@ def main(model_id, qtemp, anstemp, train_samples, val_set,
     clog.info(args_str)
     vlog.info(args_str)
 
-    for logger in [mlog, vlog, clog]:
+    for logger in [mlog, vlog, clog, dlog]:
         logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
         logger.info(f"%%%%%%%%%%%%%%%%%% { model_id } ")
         logger.info(f"%%%%%%%%%%%%%%%%%% { output_name } ")
@@ -409,8 +409,8 @@ def main(model_id, qtemp, anstemp, train_samples, val_set,
     else:
         model.to(device=device)
         optimizer_grouped_parameters = [
-            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay)], 'weight_decay': weight_decay},
-            {'params': [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay)], 'weight_decay': 0.0}
+            {'params': [p for n, p in model.named_parameters() if p.requires_grad and not any(nd in n for nd in no_decay)], 'weight_decay': weight_decay},
+            {'params': [p for n, p in model.named_parameters() if p.requires_grad and any(nd in n for nd in no_decay)], 'weight_decay': 0.0}
         ]
     optimizer = AdamW(optimizer_grouped_parameters,lr=learning_rate,eps=1e-8)
     scheduler = get_linear_schedule_with_warmup(optimizer,warm_up_steps,iterations)
