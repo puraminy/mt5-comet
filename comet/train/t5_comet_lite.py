@@ -241,7 +241,7 @@ def main(model_id, path, from_dir, num_samples, val_set,
     batch_size = 16
     shuffle = False
     shuffle_evaluation=False
-    validation_size = 200 #10000
+    validation_size = 100
     validation_num_generation = 20
     if not frozen and learning_rate == 0: learning_rate = 6.25e-05
     if frozen and learning_rate == 0: learning_rate = 0.01  #6.25e-05
@@ -261,7 +261,7 @@ def main(model_id, path, from_dir, num_samples, val_set,
     conf_path = os.path.join(save_path,'conf.json')
     checkpoint = None
     if Path(save_path).exists() and not model_id=="test" and (cont or do_eval):
-        mlog.info("Loading from ", save_path)
+        mlog.info("Loading from %s", save_path)
         underlying_model_name = save_path
         checkpoint = torch.load(os.path.join(save_path,"saved_states"))
         if Path(conf_path).exists():
@@ -270,9 +270,9 @@ def main(model_id, path, from_dir, num_samples, val_set,
            mlog.info(args)
            mlog.info("Loading from configuration file")
            qtemp = args['qtemp']
-           atemp = args['atemp']
-           mlog.info("Qtemp:", args['qtemp'])
-           mlog.info("Atemp:", args['atemp'])
+           atemp = args['anstemp']
+           mlog.info("Qtemp: %s", args['qtemp'])
+           mlog.info("Anstemp: %s", args['anstemp'])
 
 
     args_str = json.dumps(args, indent=4)
@@ -414,7 +414,7 @@ def main(model_id, path, from_dir, num_samples, val_set,
 
     #%% tttttt
     train_iter = iter(train_dataloader)
-    pbar = tqdm(total=iterations) #,dynamic_ncols=True)
+    pbar = tqdm(total=iterations, position=0, leave=True) #,dynamic_ncols=True)
     while step <= iterations:
         try:
             if (step % cycle == 0 and step > 0): #validation
@@ -431,7 +431,7 @@ def main(model_id, path, from_dir, num_samples, val_set,
                     dev_token_count = 0
                     dev_sample_loss = 0. #avg on sample
                     dev_sample_count = 0
-                    for batch in tqdm(dev_dataloader,desc=f'validating...',leave=False):
+                    for batch in tqdm(dev_dataloader,desc=f'validating...',leave=True):
                         if dev_sample_count>=validation_size:
                             break
                         batch = {k:v.to(device=device) for k,v in batch.items()}
