@@ -307,7 +307,7 @@ def save_checkpoint(model, optimizer, scheduler, step,
 
 def bert_score(bert_scorer, hyps, refs):
         if bert_scorer == None:
-            return hyps[0], refs[0], 0.0
+            return 0, 0, 0.0
 
         embeddings1 = bert_scorer.encode(hyps, device=device, convert_to_tensor=True)
         embeddings2 = bert_scorer.encode(refs, device=device, convert_to_tensor=True)
@@ -328,10 +328,10 @@ def bert_score(bert_scorer, hyps, refs):
         pairs = sorted(pairs, key=lambda x: x['score'], reverse=True)
 
         top = pairs[0]
-        best_hyp = str(hyps[top["index"][0]])
-        best_ref = str(refs[top["index"][1]])
+        best_hyp_index = top["index"][0]
+        best_ref_index = top["index"][1]
 
-        return best_hyp, best_ref, top["score"] 
+        return best_hyp_index, best_ref_index, top["score"] 
 # vvvvvvvvvvvvvvv
 # ################################### Evaluation #########################
 def eval(model, tokenizer, val_data, num_generations, 
@@ -352,9 +352,9 @@ def eval(model, tokenizer, val_data, num_generations,
     if not Path(local_path).exists():
         local_path = 'sentence-transformers/nli-roberta-base'
     nli_model = CrossEncoder(local_path)
-    labels_count = {}
+    nli_counter = {}
     for l in nli_map:
-        labels_count[l] = 0
+        nli_counter[l] = 0
     #df = df.groupby(['prefix','input_text'],as_index=False)[target].agg({"target_text":'<br />'.join})
     #resp_const_parts = re.split("{.*}", anstemp)
     resp_const_parts = ["<extra_id_0>", "<extra_id_1>"]
@@ -370,6 +370,7 @@ def eval(model, tokenizer, val_data, num_generations,
     rows = []
     old_input = ""
     ii = 0
+    hyp_counter = [0]*5
     for rel in val_data.keys():
         vlog.info(f"%%%%%%%%%%%%%%%%%%%%%%%%% {rel} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
         for lang in val_data[rel].keys():
@@ -412,13 +413,16 @@ def eval(model, tokenizer, val_data, num_generations,
                     data["prefix"] = rel
                     data["langs"] = lang
                     #Compute embeddings
-                    best_hyp, best_ref, cur_score = bert_score(bert_scorer, top_hyp, tails)
+                    hi, ri, cur_score = bert_score(bert_scorer, hyps, tails)
+                    best_hyp = hyps[hi]
+                    best_ref = tails[ri]
+                    hyp_counter[hi] += 1
                     if nli_model:
                         pair = (best_hyp, best_ref)
                         nli_scores = nli_model.predict(pair)  
                         _max  = nli_scores.argmax()
                         label = nli_map[_max]
-                        labels_count[label] += 1
+                        nli_counter[label] += 1
                         data["nli_group"] = label
                         vlog.info("Label:"+ label)
                     data["top"] = best_ref
@@ -447,24 +451,16 @@ def eval(model, tokenizer, val_data, num_generations,
     new_df = new_df[new_df["pred1_score"] > 0]
     pbar.close()
     out = os.path.join(save_path,"scored_results.tsv")
-    mlog.info("Len data frame: {}".format(len(new_df)))
-    mlog.info(f"Bert:{mean_bert} Rouge {mean_rouge} ")
-    clog.info(f"Bert:{mean_bert} Rouge {mean_rouge} ")
-    vlog.info(f"Bert:{mean_bert} Rouge {mean_rouge} ")
+    out2 = os.path.join(logPath,"scored_results.tsv")
     new_df.to_csv(out, sep="\t", index=False)
-
-    #with open("/home/pouramini/dflist","a") as dflist:
-    #    mlog.info(f"{model_name}={out}", file=dflist)
-
-    #new_df = new_df.sort_values(score_col, ascending=False).\
-    #  drop_duplicates(['prefix','input_text']).\
-    #    rename(columns={col2:'top'}).\
-    #      merge(new_df.groupby(['prefix','input_text'],as_index=False)[col2].agg('<br />'.join))
-
-    mlog.info("DF mean Bert Score: {}".format(new_df["pred1_score"].mean()))
-    mlog.info("DF mean Rouge Score: {}".format(new_df["rouge_score"].mean()))
-    mlog.info("labels_count: {}".format(labels_count))
-    pred_counts = new_df['pred_text1'].unique()
-    mlog.info("Distinct preds:{}".format(len(pred_counts)))
-    clog.info("Distinct preds:{}".format(len(pred_counts)))
+    new_df.to_csv(out2, sep="\t", index=False)
+    for logger in [mlog, vlog, clog]:
+        logger.info("Len data frame: {}".format(len(new_df)))
+        logger.info(f"Bert:{mean_bert} Rouge {mean_rouge} ")
+        logger.info("DF mean Bert Score: {}".format(new_df["pred1_score"].mean()))
+        logger.info("DF mean Rouge Score: {}".format(new_df["rouge_score"].mean()))
+        logger.info("nli_counter: {}".format(nli_counter))
+        logger.info("hyp_counter: {}".format(hyp_counter))
+        pred_counts = new_df['pred_text1'].unique()
+        logger.info("Distinct preds:{}".format(len(pred_counts)))
 
