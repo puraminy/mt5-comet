@@ -271,6 +271,11 @@ def main(model_id, path, from_dir, num_samples, val_set,
            atemp = args['atemp']
            mlog.info("Qtemp:", args['qtemp'])
            mlog.info("Atemp:", args['atemp'])
+
+
+    args_str = json.dump(args, indent=4)
+    clog.info(args_str)
+
     ii = 1
     while not overwrite and Path(save_path).exists() and not model_id=="test":
         ans = input("The output directory already exists, do you want to overwite it? (y/n)")

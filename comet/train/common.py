@@ -28,6 +28,11 @@ mHandler = logging.FileHandler(logFilename)
 mlog.addHandler(mHandler)
 mlog.addHandler(consoleHandler)
 
+clog = logging.getLogger("comet.cfg")
+logFilename = os.path.join(logPath, "cfg.log") #app_path + '/log_file.log'
+cHandler = logging.FileHandler(logFilename)
+clog.addHandler(cHandler)
+clog.setLevel(logging.INFO)
 
 dlog = logging.getLogger("comet.data")
 logFilename = os.path.join(logPath, "data.log") #app_path + '/log_file.log'
@@ -444,6 +449,7 @@ def eval(model, tokenizer, val_data, num_generations,
     out = os.path.join(save_path,"scored_results.tsv")
     mlog.info("Len data frame: {}".format(len(new_df)))
     mlog.info(f"Bert:{mean_bert} Rouge {mean_rouge} ")
+    clog.info(f"Bert:{mean_bert} Rouge {mean_rouge} ")
     new_df.to_csv(out, sep="\t", index=False)
 
     #with open("/home/pouramini/dflist","a") as dflist:
@@ -454,9 +460,10 @@ def eval(model, tokenizer, val_data, num_generations,
     #    rename(columns={col2:'top'}).\
     #      merge(new_df.groupby(['prefix','input_text'],as_index=False)[col2].agg('<br />'.join))
 
-    mlog.info("Bert Score: {}".format(new_df["pred1_score"].mean()))
-    mlog.info("Rouge Score: {}".format(new_df["rouge_score"].mean()))
+    mlog.info("DF mean Bert Score: {}".format(new_df["pred1_score"].mean()))
+    mlog.info("DF mean Rouge Score: {}".format(new_df["rouge_score"].mean()))
     mlog.info("labels_count: {}".format(labels_count))
     pred_counts = new_df['pred_text1'].unique()
     mlog.info("Distinct preds:{}".format(len(pred_counts)))
+    clog.info("Distinct preds:{}".format(len(pred_counts)))
 
