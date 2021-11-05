@@ -363,8 +363,9 @@ def main(model_id, qtemp, anstemp, train_samples, val_set,
     model.resize_token_embeddings(len(tokenizer))
     #%% Prepare training data
 
-    if do_eval or (not wrap and not frozen):
+    if do_eval or (not wrap and frozen):
         model.to(device=device)
+        mlog.info("Evaluating the model...")
         val_data = atomic_query_responses[val_set]
         eval(model, tokenizer, val_data, inter, save_path, output_name, val_records)  
         return
@@ -429,6 +430,7 @@ def main(model_id, qtemp, anstemp, train_samples, val_set,
     train_iter = iter(train_dataloader)
     pbar = tqdm(total=iterations, position=0, leave=True) #,dynamic_ncols=True)
     while step <= iterations and (wrap or not frozen):
+        mlog.info("Training...")
         try:
             if (step % cycle == 0 and step > 0): #validation
                 with torch.no_grad():
@@ -536,4 +538,12 @@ def main(model_id, qtemp, anstemp, train_samples, val_set,
     eval(model, tokenizer, atomic_query_responses[val_set], inter, save_path, output_name, val_records)  
 
 if __name__ == "__main__":
-    main()
+    if "conf_path" in os.environ:
+        conf_path=os.environ["conf_path"]
+        mlog.info("Reading from conf %s", conf_path)
+        if Path(conf_path).exists():
+           with open(conf_path, 'r') as f:
+               args = json.load(f) 
+           print(args)
+    else:
+        main()
