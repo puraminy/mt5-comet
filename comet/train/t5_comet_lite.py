@@ -561,7 +561,7 @@ def main(model_id, qtemp, anstemp, train_samples, val_set,
 @click.command()
 @click.pass_context
 def run(ctx):
-    conf_path=os.environ["conf_path"]
+    conf_path= "confs" #os.environ["conf_path"]
     mlog.info("Reading from conf %s", conf_path)
     confs = glob.glob(f"{conf_path}/conf_*")
     for conf in confs:
