@@ -11,6 +11,7 @@ import logging, sys
 import re
 import os
 import torch
+import json
 from os.path import expanduser
 home = expanduser("~")
 if "ahmad" in home:
@@ -225,8 +226,8 @@ def fill_data(split_df, split_name, inputs, targets, qtemp, anstemp,
             split_df[col] = split_df[col].astype(str)
     if ignore_blanks: # and len(split_df) > num_rows:
         split_df = split_df[split_df["input_text"].str.contains('___')==False]
-    if pred_tresh > 0 and "pred1_score" in split_df:
-        split_df = split_df[split_df["pred1_score"] > pred_tresh]
+    if pred_tresh > 0 and "bert_score" in split_df:
+        split_df = split_df[split_df["bert_score"] > pred_tresh]
         dlog.info("*** Filtered based on pred1 score higher than "+ pred_tresh)
     if nli_group != "all" and "nli_group" in split_df:
         split_df = split_df[split_df["nli_group"] == nli_group]
@@ -334,14 +335,10 @@ def bert_score(bert_scorer, hyps, refs):
         return best_hyp_index, best_ref_index, top["score"] 
 # vvvvvvvvvvvvvvv
 # ################################### Evaluation #########################
-def eval(model, tokenizer, val_data, num_generations, 
-        interactive, save_path, verbose):  
-
+def eval(model, tokenizer, val_data, interactive, save_path, output_name, val_records):  
     base_path = "/content/drive/MyDrive/pret"
     if "ahmad" in home:
         base_path = "/home/ahmad/pret"
-    if verbose:
-        vlog.addHandler(StreamHandler)
 
     local_path = f"{base_path}/paraphrase-multilingual-MiniLM-L12-v2"        
     if not Path(local_path).exists():
@@ -360,31 +357,30 @@ def eval(model, tokenizer, val_data, num_generations,
     resp_const_parts = ["<extra_id_0>", "<extra_id_1>"]
     mlog.info("Scoring...")
     model.eval()
-    sum_bert = 0 
-    sum_rouge = 0
-    total = num_generations
-    #if num_generations == 0:
-    total = num_generations
-    max_score = 0
-    pbar = tqdm(total = total)
+    pbar = tqdm(total = val_records)
     rows = []
-    old_input = ""
-    ii = 0
+    counter = {"all":0}
+    sum_bert = {} 
+    sum_rouge = {}
+    mean_bert = {}
+    mean_rouge = {}
     hyp_counter = [0]*5
     for rel in val_data.keys():
         vlog.info(f"%%%%%%%%%%%%%%%%%%%%%%%%% {rel} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
         for lang in val_data[rel].keys():
             vlog.info(f"%%%%%%%%%%%%%%%%%%%%%%%%%% { lang } %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
-            if ii > num_generations:
-                break
             for queries in val_data[rel][lang]:
                 for query, tails in queries.items():
                     data = {}
-                    if verbose:
-                        vlog.debug("&&&&&&&&&&&&&&&&& All Targets &&&&&&&&&&&&&&")
-                        for _tail in tails:
-                            vlog.debug(_tail)
-                        vlog.debug("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
+                    scope = rel + "_" + lang
+                    if not scope in sum_bert: 
+                        sum_bert[scope] = 0
+                        sum_rouge[scope] = 0
+                        counter[scope] = 0
+                    vlog.debug("&&&&&&&&&&&&&&&&& All Targets &&&&&&&&&&&&&&")
+                    for _tail in tails:
+                        vlog.debug(_tail)
+                    vlog.debug("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
                     if interactive: #interactive mode
                         query = get_input("Enter an even or Enter) skip, c) continue, e) exit.")
                         resp = "NA"
@@ -427,37 +423,41 @@ def eval(model, tokenizer, val_data, num_generations,
                         vlog.info("Label:"+ label)
                     data["top"] = best_ref
                     data["all_preds"] = "<br />".join(hyps) 
-                    data["pred1_score"] = float("{:.2f}".format(cur_score))
+                    data["top_pred"] = best_hyp
+                    data["bert_score"] = float("{:.2f}".format(cur_score))
                     rows.append(data)
-                    sum_bert += cur_score
-                    ii += 1
-                    mean_bert = "{:.4f}".format(sum_bert / ii)
+                    sum_bert[scope] += cur_score
+                    counter[scope] += 1
+                    counter["all"] += 1
+                    mean_bert[scope] = "{:.4f}".format(sum_bert[scope] / counter[scope])
                     #tqdm.write(f"Mean score:{mean_bert}")
                     vlog.info("")
-                    vlog.info(str(ii)+ ":"+query)
+                    vlog.info(str(counter["all"])+ ":"+query)
                     vlog.info("Prediction:"+ top_hyp)
                     vlog.info("Closest tail:"+ best_ref)
 
                     rouge_score = rouge_scorer.calc_score(candidate=[top_hyp], refs=tails)
                     data["rouge_score"] = rouge_score
-                    sum_rouge += rouge_score
-                    mean_rouge = "{:.4f}".format(sum_rouge / ii)
+                    sum_rouge[scope] += rouge_score
+                    mean_rouge[scope] = "{:.4f}".format(sum_rouge[scope] / counter[scope])
                     vlog.info("------------------------------------------------------")
-                    pbar.set_description(f"Bert:{mean_bert} Rouge {mean_rouge} ")
+                    pbar.set_description(f"Bert:{mean_bert[scope]} Rouge {mean_rouge[scope]} ")
                     pbar.update(1)
 
     # %%%%%%%%%%%%%%%%%%
     new_df = pd.DataFrame(rows)
-    new_df = new_df[new_df["pred1_score"] > 0]
+    new_df = new_df[new_df["bert_score"] > 0]
     pbar.close()
-    out = os.path.join(save_path,"scored_results.tsv")
-    out2 = os.path.join(logPath,"scored_results.tsv")
+    out = os.path.join(save_path,f"scored_{output_name}.tsv")
+    out2 = os.path.join(logPath,f"scored_{output_name}.tsv")
     new_df.to_csv(out, sep="\t", index=False)
     new_df.to_csv(out2, sep="\t", index=False)
+    mean_bert_str = json.dumps(mean_bert, indent=2)
+    mean_rouge_str = json.dumps(mean_rouge, indent=2)
     for logger in [mlog, vlog, clog]:
         logger.info("Len data frame: {}".format(len(new_df)))
-        logger.info(f"Bert:{mean_bert} Rouge {mean_rouge} ")
-        logger.info("DF mean Bert Score: {}".format(new_df["pred1_score"].mean()))
+        logger.info("Rouge:{} BERT {} ".format(mean_rouge_str, mean_bert_str))
+        logger.info("DF mean Bert Score: {}".format(new_df["bert_score"].mean()))
         logger.info("DF mean Rouge Score: {}".format(new_df["rouge_score"].mean()))
         logger.info("nli_counter: {}".format(nli_counter))
         logger.info("hyp_counter: {}".format(hyp_counter))

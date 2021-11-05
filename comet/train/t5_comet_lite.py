@@ -37,7 +37,7 @@ from tqdm import tqdm
     help=""
 )
 @click.option(
-    "--num_samples",
+    "--train_samples",
     "-n",
     default=100,
     type=int,
@@ -51,7 +51,7 @@ from tqdm import tqdm
     help=""
 )
 @click.option(
-    "--num_generations",
+    "--val_samples",
     "-ng",
     default=0,
     type=int,
@@ -222,8 +222,8 @@ from tqdm import tqdm
     type=int,
     help=""
 )
-def main(model_id, path, from_dir, num_samples, val_set, 
-         num_generations, is_flax, load_path, overwrite, save_path, output_name, lang, qtemp, anstemp, pred_tresh, ignore_blanks, natural, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size):
+def main(model_id, qtemp, anstemp, train_samples, val_set, 
+         val_samples, load_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks, natural, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax):
 
     #%% some hyper-parameters
     #bbbbbbbbbbb
@@ -233,7 +233,6 @@ def main(model_id, path, from_dir, num_samples, val_set,
         if "ahmad" in home:
             save_path = "/home/ahmad/logs"
 
-    mlog.info("Running version 3")
 
     if from_dir:
         underlying_model_name = path
@@ -262,7 +261,7 @@ def main(model_id, path, from_dir, num_samples, val_set,
     log_dir = save_path
     output_name = model_id if not output_name else output_name
     save_path = os.path.join(log_dir, output_name)
-    model_name = f"{learning_rate}_{cycle}_{num_samples}"
+    model_name = f"{learning_rate}_{cycle}_{train_samples}"
     mlog.info(f"SAVE Path:{save_path}")
     conf_path = os.path.join(save_path,'conf.json')
     checkpoint = None
@@ -285,6 +284,11 @@ def main(model_id, path, from_dir, num_samples, val_set,
     clog.info(args_str)
     vlog.info(args_str)
 
+    for logger in [mlog, vlog, clog]:
+        logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+        logger.info(f"%%%%%%%%%%%%%%%%%% { model_id } %%%%%%%%%%%%%%%%%%%%%%%%")
+        logger.info(f"%%%%%%%%%%%%%%%%%% { output_name } %%%%%%%%%%%%%%%%%%%%%%%%")
+        logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
     ii = 1
     while not overwrite and Path(save_path).exists() and not model_id=="test":
         ans = input("The output directory already exists, do you want to overwite it? (y/n)")
@@ -308,21 +312,24 @@ def main(model_id, path, from_dir, num_samples, val_set,
 
     atomic_query_responses = {}
     atomic_flattened = {}
-    nums = {}
+    num_records = {}
+    num_samples = {"train": train_samples, "validation":val_samples}
     for split_name,split_df in atomic_dataset.items():
         (atomic_query_responses[split_name], 
          atomic_flattened[split_name],
-         nums[split_name]
+         num_records[split_name]
         )= fill_data(split_df, split_name,
                             inputs, targets,
                             qtemp, anstemp,
-                            num_samples, 
+                            num_samples[split_name], 
                             ignore_blanks,
                             natural,
                             pred_tresh, nli_group)
-    iterations = nums["train"]
-    mlog.info("Iterations:"  + str(iterations))
-    clog.info("iterations %s", iterations)
+    iterations = num_records["train"]
+    val_records = num_records["validation"]
+    for logger in [mlog, clog, vlog]:
+        logger.info("Iterations:"  + str(iterations))
+        logger.info("Val Records:"  + str(val_records))
     warm_up_steps = 0.002*iterations
     #%% tokenizer & model
     if model_id == "test":
@@ -359,7 +366,7 @@ def main(model_id, path, from_dir, num_samples, val_set,
     if do_eval:
         model.to(device=device)
         val_data = atomic_query_responses[val_set]
-        eval(model, tokenizer, val_data, num_generations, inter, save_path)  
+        eval(model, tokenizer, val_data, inter, save_path, output_name, val_records)  
         return
 
 
@@ -526,7 +533,7 @@ def main(model_id, path, from_dir, num_samples, val_set,
                     best_eval_step, best_dev_loss,
                     save_path)
 
-    eval(model, tokenizer, atomic_query_responses[val_set], num_generations, inter, save_path, verbose)  
+    eval(model, tokenizer, atomic_query_responses[val_set], inter, save_path, output_name, val_records)  
 
 if __name__ == "__main__":
     main()
