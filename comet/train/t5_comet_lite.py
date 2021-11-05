@@ -569,10 +569,65 @@ def run(ctx):
         if Path(conf).exists():
            with open(conf, 'r') as f:
                args = json.load(f) 
-        ctx.invoke(main, **args)
+           ctx.invoke(main, **args)
 
+def create_confs():
+    print("Creating configurations...")
+    conf = "/home/ahmad/logs/confs/conf_.json"
+    save_path = "/home/ahmad/mt5-comet/comet/train/"
+    conf_path = os.path.join(save_path,"confs")
+    Path(conf_path).mkdir(exist_ok=True, parents=True)
+    if Path(conf).exists():
+       with open(conf, 'r') as f:
+           args = json.load(f) 
+    samples = 100
+    args["train_samples"] = samples
+    args["val_samples"] = 50
+    args["load_path"] = "/content/drive/MyDrive/backup/logs/"
+    args["save_path"] = "/content/drive/MyDrive/backup/new_logs"
+    args["overwrite"] = True
+    args["cpu"] = False 
+    args["config"] = False 
+    for model in ["fat5-large-xIntent-8k","fat5-large-orig0"]:
+        for s in ["sup", "unsup"]:
+            for w in ["wrapped", "unwrapped"]:
+               for f in ["freezed", "unfreezed"]:
+                   name = f"conf_{model}-{samples}-{s}-{w}-{f}"
+                   print(name)
+                   if f == "freezed" and s == "sup" and w == "unwrapped":
+                       continue
+                   args["model_id"]= model
+                   args["output_name"] = name
+                   args["frozen"] = False
+                   if f == "freezed":
+                       args["frozen"] = True
+                   args["wrap"] = ""
+                   if w == "wrapped":
+                       args["wrap"] = "xIntent"
+                   if s == "sup":
+                       if w == "wrapped":
+                           args["qtemp"] = "{enc_token} {event} {gen}"
+                           args["anstemp"] = "{response}"
+                       else: #unwrapped
+                           args["qtemp"] = "{rel_token} {event} {gen}"
+                           args["anstemp"] = "{response}"
+                   elif s == "unsup":
+                       if w == "wrapped":
+                           args["qtemp"] = "{enc_token} {event} {gen} {ph}"
+                           args["anstemp"] = "{ph} {response} {end}"
+                       else: #unwrapped
+                           if f == "unfreezed":
+                               args["qtemp"] = "{rel_token} {event} {gen} {ph}"
+                               args["anstemp"] = "{ph} {response} {end}"
+                           else:
+                               args["qtemp"] = "{event} {rel_natural} {ph}"
+                               args["anstemp"] = "{ph} {response} {end}"
+                   with open(os.path.join(conf_path, f'{name}.json'), 'w') as outfile:
+                            json.dump(args, outfile, indent=4)
 if __name__ == "__main__":
-    if "conf_path" in os.environ:
-        run()
-    else:
-        main()
+    create_confs()
+
+    #if "conf_path" in os.environ:
+    #    run()
+    #else:
+    #    main()
