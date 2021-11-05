@@ -626,7 +626,7 @@ def create_confs():
                    with open(os.path.join(conf_path, f'{name}.json'), 'w') as outfile:
                             json.dump(args, outfile, indent=4)
 if __name__ == "__main__":
-    create_confs()
+    #create_confs()
     if True: #"conf_path" in os.environ:
        run()
     else:
