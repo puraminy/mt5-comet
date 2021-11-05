@@ -588,6 +588,7 @@ def create_confs():
     args["overwrite"] = True
     args["cpu"] = False 
     args["config"] = False 
+    args["batch_size"] = 4 
     for model in ["fat5-large-xIntent-8k","fat5-large-orig0"]:
         for s in ["sup", "unsup"]:
             for w in ["wrapped", "unwrapped"]:
@@ -625,7 +626,7 @@ def create_confs():
                    with open(os.path.join(conf_path, f'{name}.json'), 'w') as outfile:
                             json.dump(args, outfile, indent=4)
 if __name__ == "__main__":
-    #create_confs()
+    create_confs()
     if True: #"conf_path" in os.environ:
        run()
     else:
