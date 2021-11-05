@@ -238,11 +238,13 @@ def main(model_id, path, from_dir, num_samples, val_set,
         underlying_model_name = model_id
         
     weight_decay = 0.01
-    batch_size = 1
+    batch_size = 16
     shuffle = False
     shuffle_evaluation=False
     validation_size = 200 #10000
     validation_num_generation = 20
+    if not frozen and learning_rate == 0: learning_rate = 6.25e-05
+    if frozen and learning_rate == 0: learning_rate = 0.01  #6.25e-05
     generation_params = {
         "max_length":80,
         "early_stopping":True
@@ -314,9 +316,8 @@ def main(model_id, path, from_dir, num_samples, val_set,
                             pred_tresh, nli_group)
     iterations = nums["train"]
     mlog.info("Iterations:"  + str(iterations))
+    clog.info("iterations %s", iterations)
     warm_up_steps = 0.002*iterations
-    if not frozen and learning_rate == 0: learning_rate = 6.25e-05
-    if frozen and learning_rate == 0: learning_rate = 0.01  #6.25e-05
     #%% tokenizer & model
     if model_id == "test":
         return
