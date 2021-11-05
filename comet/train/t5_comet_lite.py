@@ -1,5 +1,6 @@
 #%% load libraries
 from comet.train.common import *
+from comet.utils.myutils import *
 from transformers import (
     T5ForConditionalGeneration, T5TokenizerFast, 
     MT5ForConditionalGeneration, MT5TokenizerFast, AdamW, AddedToken,
@@ -9,6 +10,7 @@ from transformers import (
 import torch
 import re
 import json
+import glob
 from torch.utils.tensorboard import SummaryWriter
 import os,time
 import argparse
@@ -86,7 +88,7 @@ from tqdm import tqdm
 @click.option(
     "--output_name",
     "-out",
-    default="",
+    default="out",
     type=str,
     help=""
 )
@@ -222,8 +224,14 @@ from tqdm import tqdm
     type=int,
     help=""
 )
+@click.option(
+    "--config",
+    "-cfg",
+    is_flag=True,
+    help="Only create a configuration file from input parameters"
+)
 def main(model_id, qtemp, anstemp, train_samples, val_set, 
-         val_samples, load_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks, natural, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax):
+         val_samples, load_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks, natural, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config):
 
     #%% some hyper-parameters
     #bbbbbbbbbbb
@@ -233,6 +241,21 @@ def main(model_id, qtemp, anstemp, train_samples, val_set,
         if "ahmad" in home:
             save_path = "/home/ahmad/logs"
 
+    args = locals()
+    conf_path = os.path.join(save_path,"confs")
+    Path(conf_path).mkdir(exist_ok=True, parents=True)
+    with open(os.path.join(conf_path, f'conf_{output_name}.json'), 'w') as outfile:
+        json.dump(args, outfile, indent=4)
+
+    if config:
+        mlog.info("Config was created at %s", config_path)
+        return
+
+    if save_path != logPath:
+        for logger, fname in zip([mlog,dlog,clog,vlog], ["main","data","cfg","eval"]):
+            logFilename = os.path.join(save_path, fname + ".log")
+            handler = logging.FileHandler(logFilename)
+            logger.addHandler(handler)
 
     if from_dir:
         underlying_model_name = path
@@ -255,15 +278,13 @@ def main(model_id, qtemp, anstemp, train_samples, val_set,
         "early_stopping":True
     }
     device = 'cuda' if not cpu else 'cpu'
-    args = locals()
 
-    set_device(device)
     log_dir = save_path
+    set_device(device)
     output_name = model_id if not output_name else output_name
     save_path = os.path.join(log_dir, output_name)
     model_name = f"{learning_rate}_{cycle}_{train_samples}"
     mlog.info(f"SAVE Path:{save_path}")
-    conf_path = os.path.join(save_path,'conf.json')
     checkpoint = None
     if Path(save_path).exists() and not model_id=="test" and (cont or do_eval):
         mlog.info("Loading from %s", save_path)
@@ -300,8 +321,6 @@ def main(model_id, qtemp, anstemp, train_samples, val_set,
 
     Path(save_path).mkdir(exist_ok=True, parents=True)
     Path(os.path.join(save_path, "best_model")).mkdir(exist_ok=True, parents=True)
-    with open(conf_path, 'w') as outfile:
-        json.dump(args, outfile, indent=4)
     #%% load atomic data
     import pandas as pd
     atomic_dataset = {}
@@ -429,8 +448,9 @@ def main(model_id, qtemp, anstemp, train_samples, val_set,
     #%% tttttt
     train_iter = iter(train_dataloader)
     pbar = tqdm(total=iterations, position=0, leave=True) #,dynamic_ncols=True)
-    while step <= iterations and (wrap or not frozen):
+    if step <= iterations and (wrap or not frozen):
         mlog.info("Training...")
+    while step <= iterations and (wrap or not frozen):
         try:
             if (step % cycle == 0 and step > 0): #validation
                 with torch.no_grad():
@@ -537,13 +557,21 @@ def main(model_id, qtemp, anstemp, train_samples, val_set,
 
     eval(model, tokenizer, atomic_query_responses[val_set], inter, save_path, output_name, val_records)  
 
+@click.command()
+@click.pass_context
+def run(ctx):
+    conf_path=os.environ["conf_path"]
+    mlog.info("Reading from conf %s", conf_path)
+    confs = glob.glob(f"{conf_path}/conf_*")
+    for conf in confs:
+        mlog.info(f"%%% {conf} %%%")
+        if Path(conf).exists():
+           with open(conf, 'r') as f:
+               args = json.load(f) 
+        ctx.invoke(main, **args)
+
 if __name__ == "__main__":
     if "conf_path" in os.environ:
-        conf_path=os.environ["conf_path"]
-        mlog.info("Reading from conf %s", conf_path)
-        if Path(conf_path).exists():
-           with open(conf_path, 'r') as f:
-               args = json.load(f) 
-           print(args)
+        run()
     else:
         main()

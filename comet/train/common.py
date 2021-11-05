@@ -24,29 +24,15 @@ logging.basicConfig(filename=logFilename)
 consoleHandler = logging.StreamHandler()
 mlog = logging.getLogger("comet.main")
 mlog.setLevel(logging.INFO)
-logFilename = os.path.join(logPath, "main.log") #app_path + '/log_file.log'
-mHandler = logging.FileHandler(logFilename)
-mlog.addHandler(mHandler)
-mlog.addHandler(consoleHandler)
-
 clog = logging.getLogger("comet.cfg")
-logFilename = os.path.join(logPath, "cfg.log") #app_path + '/log_file.log'
-cHandler = logging.FileHandler(logFilename)
-clog.addHandler(cHandler)
-clog.setLevel(logging.INFO)
-
 dlog = logging.getLogger("comet.data")
-logFilename = os.path.join(logPath, "data.log") #app_path + '/log_file.log'
-dHandler = logging.FileHandler(logFilename)
-dlog.addHandler(dHandler)
-dlog.setLevel(logging.INFO)
-
 vlog = logging.getLogger("comet.eval")
 
-logFilename = os.path.join(logPath, "eval.log") #app_path + '/log_file.log'
-vHandler = logging.FileHandler(logFilename)
-vlog.addHandler(vHandler)
-vlog.setLevel(logging.INFO)
+
+for logger, fname in zip([mlog,dlog,clog,vlog], ["main","data","cfg","eval"]):
+    logFilename = os.path.join(logPath, fname + ".log")
+    handler = logging.FileHandler(logFilename)
+    logger.addHandler(handler)
 
 
 device = 'cuda'
