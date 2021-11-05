@@ -275,6 +275,7 @@ def main(model_id, path, from_dir, num_samples, val_set,
 
     args_str = json.dumps(args, indent=4)
     clog.info(args_str)
+    vlog.info(args_str)
 
     ii = 1
     while not overwrite and Path(save_path).exists() and not model_id=="test":

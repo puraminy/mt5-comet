@@ -450,6 +450,7 @@ def eval(model, tokenizer, val_data, num_generations,
     mlog.info("Len data frame: {}".format(len(new_df)))
     mlog.info(f"Bert:{mean_bert} Rouge {mean_rouge} ")
     clog.info(f"Bert:{mean_bert} Rouge {mean_rouge} ")
+    vlog.info(f"Bert:{mean_bert} Rouge {mean_rouge} ")
     new_df.to_csv(out, sep="\t", index=False)
 
     #with open("/home/pouramini/dflist","a") as dflist:
