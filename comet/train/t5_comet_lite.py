@@ -363,7 +363,7 @@ def main(model_id, qtemp, anstemp, train_samples, val_set,
     model.resize_token_embeddings(len(tokenizer))
     #%% Prepare training data
 
-    if do_eval:
+    if do_eval or (not wrap and not frozen):
         model.to(device=device)
         val_data = atomic_query_responses[val_set]
         eval(model, tokenizer, val_data, inter, save_path, output_name, val_records)  
@@ -428,7 +428,7 @@ def main(model_id, qtemp, anstemp, train_samples, val_set,
     #%% tttttt
     train_iter = iter(train_dataloader)
     pbar = tqdm(total=iterations, position=0, leave=True) #,dynamic_ncols=True)
-    while step <= iterations:
+    while step <= iterations and (wrap or not frozen):
         try:
             if (step % cycle == 0 and step > 0): #validation
                 with torch.no_grad():
