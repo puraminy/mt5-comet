@@ -286,8 +286,8 @@ def main(model_id, qtemp, anstemp, train_samples, val_set,
 
     for logger in [mlog, vlog, clog]:
         logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
-        logger.info(f"%%%%%%%%%%%%%%%%%% { model_id } %%%%%%%%%%%%%%%%%%%%%%%%")
-        logger.info(f"%%%%%%%%%%%%%%%%%% { output_name } %%%%%%%%%%%%%%%%%%%%%%%%")
+        logger.info(f"%%%%%%%%%%%%%%%%%% { model_id } ")
+        logger.info(f"%%%%%%%%%%%%%%%%%% { output_name } ")
         logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
     ii = 1
     while not overwrite and Path(save_path).exists() and not model_id=="test":
