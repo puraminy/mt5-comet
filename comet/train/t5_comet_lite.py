@@ -273,7 +273,7 @@ def main(model_id, path, from_dir, num_samples, val_set,
            mlog.info("Atemp:", args['atemp'])
 
 
-    args_str = json.dump(args, indent=4)
+    args_str = json.dumps(args, indent=4)
     clog.info(args_str)
 
     ii = 1

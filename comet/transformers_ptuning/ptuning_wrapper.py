@@ -19,7 +19,7 @@ else:
     logFilename = "/content/wrapper.log"
 wHandler = logging.FileHandler(logFilename)
 wlog.addHandler(wHandler)
-wlog.setLevel(logging.DEBUG)
+wlog.setLevel(logging.INFO)
 
 class PTuningWrapper(torch.nn.Module):
     def __init__(self,model,prompt_encoder,decoder_prompt_encoder=None,
@@ -53,6 +53,7 @@ class PTuningWrapper(torch.nn.Module):
                 embedding layer of the transformer model.
         """
         super().__init__()
+        self.ll = logging.INFO
         wlog.debug("%%%%%%%%%%%%%%%%%%%%%%%% New version %%%%%%%%%%%%%%%%%%")
         self.underlying_model = model
         self.original_embedding = model.get_input_embeddings()
@@ -89,12 +90,14 @@ class PTuningWrapper(torch.nn.Module):
             #Default: All token ids beyond num_embeddings are seen as prompt token
 
     def forward(self,input_ids, labels, decoder_input_ids=None,prompt_ids=None,**kwargs):
-        wlog.debug("MMMMMMain forward: Prompt ids:{}".format(prompt_ids))
+        ll = self.ll # log level
+        wlog.log(ll, "wrapper forward was called")
+        wlog.log(ll, "Prompt ids:{}".format(prompt_ids))
         # find masks based on the range of prompt ids (offset_id < X < offset_id + prompt_length)
         prompt_masks = self.prompt_token_fn(input_ids)
         #Because this wrapper only deals with a single prompt, the length should be the same, you can use masked_select to reshape 
         if prompt_masks.any():
-            wlog.debug("MASSSSSSSSSSK:{}".format(prompt_masks))
+            wlog.log(ll, "promp masks:{}".format(prompt_masks))
             input_ids_ = input_ids.clone()
             if self.replacing_token_id is not None:
                 # replace prompt ids in input_ids with replacing token
@@ -104,6 +107,8 @@ class PTuningWrapper(torch.nn.Module):
             if self.prompt_encoder:
                 #find input ids for prompt tokens
                 prompt_input_ids = input_ids[prompt_masks]
+                wlog.log(ll, "promp encoder exists")
+                wlog.log(ll, "promp input ids:{}".format(prompt_input_ids))
                 # call forwards on prompt encoder whose outputs are prompt embeddings
                 prompt_embeds = self.prompt_encoder(prompt_input_ids,\
                     prompt_ids).to(device=inputs_embeds.device)
@@ -125,11 +130,11 @@ class PTuningWrapper(torch.nn.Module):
         
         if decoder_input_ids is not None:
             if self.decoder_prompt_encoder is not None:
-                wlog.debug("DDDDEcoder")
+                wlog.log(ll, "prompt decoder exists")
                 decoder_prompt_masks = self.prompt_token_fn(decoder_input_ids)
                 if decoder_prompt_masks.any():
-                    wlog.debug("decoder prompt mask:{}".format(decoder_prompt_masks))
-                    wlog.debug(f"decoder mask, replacing token: {self.replacing_token_id}")
+                    wlog.log(ll,"decoder prompt mask:{}".format(decoder_prompt_masks))
+                    wlog.log(ll,f"decoder mask, replacing token id: {self.replacing_token_id}")
                     decoder_input_ids_ = decoder_input_ids.clone()
                     if self.replacing_token_id is not None:
                         decoder_input_ids_[decoder_prompt_masks] = \
@@ -137,16 +142,15 @@ class PTuningWrapper(torch.nn.Module):
                     decoder_inputs_embeds = self.decoder_original_embedding(
                         decoder_input_ids_
                     )
-                    wlog.debug("kkkk2")
+                    wlog.log(ll,f"decoder input ids {decoder_input_ids}")
                     decoder_prompt_embeds = self.decoder_prompt_encoder(
                         decoder_input_ids[decoder_prompt_masks],prompt_ids).to\
                         (device=decoder_inputs_embeds.device)
                     decoder_inputs_embeds[decoder_prompt_masks] = \
                         decoder_prompt_embeds
-                    wlog.debug("kkkk4")
                     decoder_labels_masks = self.prompt_token_fn(labels)
                     labels[decoder_labels_masks] = 0
-                    wlog.debug(labels)
+                    wlog.log(ll, labels)
                 else:
                     decoder_inputs_embeds = self.decoder_original_embedding(
                         decoder_input_ids
@@ -155,9 +159,11 @@ class PTuningWrapper(torch.nn.Module):
                     decoder_inputs_embeds=decoder_inputs_embeds, labels=labels,**kwargs
                 )
             else: #decoder_prompt_encoder is not defined, so decoder_originical_embedding is not set.
+                self.ll = logging.DEBUG
                 return self.underlying_model(inputs_embeds=inputs_embeds,
                     decoder_input_ids=decoder_input_ids, labels=labels,**kwargs)
         else:
+            self.ll = logging.DEBUG
             return self.underlying_model(inputs_embeds=inputs_embeds,**kwargs)
     
     def update_model_weight(self):
