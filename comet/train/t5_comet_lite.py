@@ -236,6 +236,7 @@ def main(model_id, qtemp, anstemp, train_samples, val_set,
     #%% some hyper-parameters
     #bbbbbbbbbbb
     #underlying_model_name = "logs/atomic-mt5/last"
+    mlog.info("========================= Version 6 ========================")
     if save_path == "":
         save_path = "/content/drive/MyDrive/backup/logs"
         if "ahmad" in home:
