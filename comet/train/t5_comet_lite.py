@@ -279,15 +279,15 @@ def main(model_id, qtemp, anstemp, train_samples, val_set,
            mlog.info("Qtemp: %s", args['qtemp'])
            mlog.info("Anstemp: %s", args['anstemp'])
 
-
-    args_str = json.dumps(args, indent=4)
-    clog.info(args_str)
-    vlog.info(args_str)
-
     for logger in [mlog, vlog, clog, dlog]:
         logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
         logger.info(f"%%%%%%%%%%%%%%%%%% { model_id } ")
         logger.info(f"%%%%%%%%%%%%%%%%%% { output_name } ")
+        logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+
+    args_str = json.dumps(args, indent=4)
+    for logger in [clog, vlog]:
+        logger.info(args_str)
         logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
     ii = 1
     while not overwrite and Path(save_path).exists() and not model_id=="test":

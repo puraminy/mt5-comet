@@ -5,7 +5,7 @@ from sentence_transformers import CrossEncoder
 import pandas as pd
 from comet.transformers_ptuning import PTuningWrapper
 from comet.transformers_ptuning.ptuning_wrapper import LSTMEmbeddingPromptEncoder, EmbeddingPromptEncoder
-from comet.evaluation.rouge.rouge import Rouge
+from rouge import Rouge
 from tqdm import tqdm
 import logging, sys
 import re
@@ -354,7 +354,7 @@ def eval(model, tokenizer, val_data, interactive, save_path, output_name, val_re
         nli_counter[l] = 0
     #df = df.groupby(['prefix','input_text'],as_index=False)[target].agg({"target_text":'<br />'.join})
     #resp_const_parts = re.split("{.*}", anstemp)
-    resp_const_parts = ["<extra_id_0>", "<extra_id_1>"]
+    resp_const_parts = ["<extra_id_0>", "<extra_id_1>", "."]
     mlog.info("Scoring...")
     model.eval()
     pbar = tqdm(total = val_records)
@@ -392,12 +392,14 @@ def eval(model, tokenizer, val_data, interactive, save_path, output_name, val_re
                     hyps = gen_resp(model, tokenizer, query, gen_token)
                     input_text = re.sub(r'<.*?>','',query)
                     top_hyp = hyps[0]
-                    if top_hyp == "":
-                        top_hyp = "."
                     for const in resp_const_parts:
                         top_hyp = top_hyp.replace(const, "")
+                    if not top_hyp.strip():
+                        top_hyp = "EMPT"
                     new_tails = []
                     for tail in tails:
+                        if not tail.strip():
+                            continue
                         nt = tail
                         for const in resp_const_parts:
                             nt = nt.replace(const,"")
@@ -435,8 +437,12 @@ def eval(model, tokenizer, val_data, interactive, save_path, output_name, val_re
                     vlog.info(str(counter["all"])+ ":"+query)
                     vlog.info("Prediction:"+ top_hyp)
                     vlog.info("Closest tail:"+ best_ref)
+                    
 
-                    rouge_score = rouge_scorer.calc_score(candidate=[top_hyp], refs=tails)
+                    mlog.debug(f"TOP hyp:{top_hyp}")
+                    mlog.debug(f"Tails: {tails}")
+                    rouge_score = rouge_scorer.get_scores(top_hyp, ".".join(tails), avg=True, ignore_empty=True)
+                    rouge_score = rouge_score["rouge-l"]["f"]
                     data["rouge_score"] = rouge_score
                     sum_rouge[scope] += rouge_score
                     mean_rouge[scope] = "{:.4f}".format(sum_rouge[scope] / counter[scope])
