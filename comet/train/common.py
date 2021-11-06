@@ -468,7 +468,7 @@ def eval(model, tokenizer, val_data, interactive, save_path, output_name, val_re
     mean_rouge_str = json.dumps(mean_rouge, indent=2)
     res = {}
     res["rouge"] = mean_rouge
-    res["bert"] = mean_berit
+    res["bert"] = mean_bert
     dictPath(output_name, results, res, sep="_")
     with open(os.path.join(resPath, "results.json"), "w") as f:
         json.dump(results, f, indent=2)
