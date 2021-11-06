@@ -154,15 +154,15 @@ def run(ctx, conf_path):
     help=""
 )
 @click.option(
-    "--filter_inp",
-    "-finp",
+    "--include",
+    "-inc",
     default="",
     type=str,
     help="filter input columns (must have this substring)"
 )
 @click.option(
-    "--filter_targ",
-    "-ftarg",
+    "--exclude",
+    "-exc",
     default="",
     type=str,
     help="filter target columns (must have this substring)"
@@ -279,7 +279,7 @@ def run(ctx, conf_path):
     help=""
 )
 def train(model_id, qtemp, anstemp, train_samples, val_set, 
-         val_samples, load_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks, filter_inp, filter_targ, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param):
+         val_samples, load_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks, include, exclude, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param):
 
     #%% some hyper-parameters
     #bbbbbbbbbbb
@@ -390,8 +390,8 @@ def train(model_id, qtemp, anstemp, train_samples, val_set,
                             qtemp, anstemp,
                             num_samples[split_name], 
                             ignore_blanks,
-                            filter_inp,
-                            filter_targ,
+                            include,
+                            exclude,
                             pred_tresh, nli_group)
     iterations = num_records["train"]
     val_records = num_records["validation"]
@@ -633,6 +633,7 @@ def create_confs():
     args["config"] = False 
     args["batch_size"] = 4 
     args["gen_param"] = "top_p" 
+    args["exclude"] = "natural" 
     #for lang in ["en", "fa", "natural", "mix"]:
     for model in ["fat5-large-xIntent-8k","fat5-large-orig0"]:
         for s in ["sup", "unsup"]:

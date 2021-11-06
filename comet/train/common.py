@@ -220,13 +220,13 @@ def get_input(msg):
 def fill_data(split_df, split_name, inputs, targets, qtemp, anstemp, 
             num_samples=0, 
             ignore_blanks=False,
-            filter_inp="",
-            filter_targ="",
+            include="",
+            exclude="",
             pred_tresh=0,
             nli_group="all"): 
     dlog.info("building query responses for {}".format(split_name))
     dlog.info(f"len:{len(split_df)}")
-    natural = filter_inp == "natural"
+    natural = include == "natural"
     if natural and split_name != "train": natural = False 
     if natural:
         dlog.info("natural is ON")
@@ -259,7 +259,9 @@ def fill_data(split_df, split_name, inputs, targets, qtemp, anstemp,
         for inp in inputs:
             if not inp in d or len(d[inp]) <= 1:
                 continue
-            if filter_inp and not filter_inp in inp:
+            if include and not include in inp:
+                continue
+            if exclude and exclude in inp:
                 continue
             input_lang = langs[inp]
             if "{event_en}" in qtemp and input_lang != "en":
@@ -267,7 +269,9 @@ def fill_data(split_df, split_name, inputs, targets, qtemp, anstemp,
             for targ_col in targets:
                 if not targ_col in d or len(d[targ_col]) <= 1:
                     continue
-                if filter_targ and not filter_targ in targ_col:
+                if exclude and exclude in targ_col:
+                    continue
+                if include and not include in targ_col:
                     continue
                 rel_token = atomic_relation_mappings[rel]
                 event = d[inp]
