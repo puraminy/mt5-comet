@@ -1,12 +1,12 @@
 
-def dictPath(string, dictionary, val, sep="/"):
-    "set value in a nested dictionaries"
-    while string.startswith(sep):
-        string = string[1:]
-    parts = string.split(sep, 1)
+def dictPath(path, dictionary, val, sep="/"):
+    "set a value in a nested dictionary"
+    while path.startswith(sep):
+        path = path[1:]
+    parts = path.split(sep, 1)
     if len(parts) > 1:
         branch = dictionary.setdefault(parts[0], {})
-        dictPath(parts[1], branch, val)
+        dictPath(parts[1], branch, val, sep)
     else:
         dictionary[parts[0]] = val
 
