@@ -39,7 +39,10 @@ def run(ctx, conf_path):
             fname = Path(conf).stem
             mlog.info(f"%%% {fname} %%%")
             val = getVal(fname, results) 
-            mlog.info("current val: %s".format(val))
+            mlog.info("current val: {}".format(val))
+            if val != "NA":
+                mlog.info("This was done before ...")
+                continue
             if Path(conf).exists():
                with open(conf, 'r') as f:
                    args = json.load(f) 
@@ -260,8 +263,15 @@ def run(ctx, conf_path):
     is_flag=True,
     help=""
 )
+@click.option(
+    "--gen_param",
+    "-gp",
+    default="greedy",
+    type=str,
+    help=""
+)
 def train(model_id, qtemp, anstemp, train_samples, val_set, 
-         val_samples, load_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks, natural, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs):
+         val_samples, load_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks, natural, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param):
 
     #%% some hyper-parameters
     #bbbbbbbbbbb
@@ -306,10 +316,6 @@ def train(model_id, qtemp, anstemp, train_samples, val_set,
     validation_num_generation = 20
     if not frozen and learning_rate == 0: learning_rate = 6.25e-05
     if frozen and learning_rate == 0: learning_rate = 0.01  #6.25e-05
-    generation_params = {
-        "max_length":80,
-        "early_stopping":True
-    }
     device = 'cuda' if not cpu else 'cpu'
 
     log_dir = save_path
@@ -419,7 +425,7 @@ def train(model_id, qtemp, anstemp, train_samples, val_set,
         model.to(device=device)
         mlog.info("Evaluating the model...")
         val_data = atomic_query_responses[val_set]
-        eval(model, tokenizer, val_data, inter, save_path, output_name, val_records)  
+        eval(model, tokenizer, val_data, inter, save_path, output_name, val_records, gen_param)  
         return
 
 
@@ -534,10 +540,7 @@ def train(model_id, qtemp, anstemp, train_samples, val_set,
                         for i,key in enumerate(atomic_flattened['validation']):
                             if i==validation_num_generation:
                                 break
-                            results = tokenizer.batch_decode(
-                                model.generate(**tokenizer(key[0],return_tensors='pt').to(device=device),**generation_params),
-                                skip_special_tokens=True
-                            )
+                            results = gen_resp(model, tokenizer, key[0]) 
                             generation_results+=f"|`{key}`|`{str(results)}`|\n"
                         sw.add_text('dev/generation_samples',generation_results,step)
             pbar.set_description('training...')
@@ -588,7 +591,7 @@ def train(model_id, qtemp, anstemp, train_samples, val_set,
                     best_eval_step, best_dev_loss,
                     save_path)
 
-    eval(model, tokenizer, atomic_query_responses[val_set], inter, save_path, output_name, val_records)  
+    eval(model, tokenizer, atomic_query_responses[val_set], inter, save_path, output_name, val_records, gen_param)  
 
 @run.command()
 def create_confs():
@@ -608,7 +611,8 @@ def create_confs():
     args["overwrite"] = True
     args["cpu"] = False 
     args["config"] = False 
-    args["batch_size"] = 1 
+    args["batch_size"] = 4 
+    args["gen_param"] = "top_p" 
     for model in ["fat5-large-xIntent-8k","fat5-large-orig0"]:
         for s in ["sup", "unsup"]:
             for w in ["wrapped", "unwrapped"]:

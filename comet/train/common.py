@@ -177,13 +177,22 @@ def format_temp(template, rel, event, gen_token, resp, lang):
 
 #%% Aggregate instances of queries and corresponding responses
 # (str)split_name -> (dict) query -> (list) response 
-generation_params = {
-    "max_length":80,
-    "early_stopping":True,
-    "num_beams":5,
-    "num_return_sequences":3,
-}
-def gen_resp(model, tokenizer, query, gen_token = ""):
+def gen_resp(model, tokenizer, query, gen_token = "", gen_param = "greedy"):
+    if gen_param == "greedy":
+        generation_params = {
+            "max_length":80,
+            "early_stopping":True,
+            "num_beams":5,
+            "num_return_sequences":3,
+        }
+    elif gen_param == "top_p":
+        generation_params = {
+            "do_sample":True, 
+            "top_p":0.95, 
+            "num_return_sequences":3, 
+            "repetition_penalty":2.5,
+            "max_length":80,
+        }
     inputs = tokenizer(query,return_tensors='pt').to(device=device)
     if False: #gen_token != "":
         gen_token_id = tokenizer.convert_tokens_to_ids(gen_token)
@@ -335,7 +344,7 @@ def bert_score(bert_scorer, hyps, refs):
         return best_hyp_index, best_ref_index, top["score"] 
 # vvvvvvvvvvvvvvv
 # ################################### Evaluation #########################
-def eval(model, tokenizer, val_data, interactive, save_path, output_name, val_records):  
+def eval(model, tokenizer, val_data, interactive, save_path, output_name, val_records, gen_param="greedy"):  
     base_path = "/content/drive/MyDrive/pret"
     if "ahmad" in home:
         base_path = "/home/ahmad/pret"
@@ -389,7 +398,7 @@ def eval(model, tokenizer, val_data, interactive, save_path, output_name, val_re
                         if query == "c":
                             interactive = False
                     gen_token = gen_tokens[lang]
-                    hyps = gen_resp(model, tokenizer, query, gen_token)
+                    hyps = gen_resp(model, tokenizer, query, gen_token, gen_param)
                     input_text = re.sub(r'<.*?>','',query)
                     top_hyp = hyps[0]
                     for const in resp_const_parts:
