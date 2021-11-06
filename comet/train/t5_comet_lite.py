@@ -574,7 +574,7 @@ def train(model_id, qtemp, anstemp, train_samples, val_set,
                 try:
                     batch = next(train_iter)
                 except StopIteration:
-                    train_iter = iter(train_dataloader[rel])
+                    train_iter = iter(train_dataloader)
                     batch = next(train_iter)
                 batch = {k:v.to(device=device) for k,v in batch.items()}
                 if wrap:
