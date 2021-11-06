@@ -29,15 +29,25 @@ from tqdm import tqdm
     type=str,
     help=""
 )
+@click.option(
+    "--experiment",
+    "-exp",
+    default="conf",
+    type=str,
+    help="Select the pattern of configurations files for an experiment (starts with)"
+)
 @click.pass_context
 #rrrrrrrrrrr
-def run(ctx, conf_path):
+def run(ctx, conf_path, experiment):
      if ctx.invoked_subcommand is None:
         mlog.info("Reading from conf %s", conf_path)
-        confs = glob.glob(f"{conf_path}/conf_*")
+        confs = glob.glob(f"{conf_path}/*")
         for conf in confs:
             fname = Path(conf).stem
             mlog.info(f"%%% {fname} %%%")
+            if not fname.startswith(experiment):
+                mlog.info("Skipping .... This was not in experiments")
+                continue
             val = getVal(fname, results) 
             mlog.info("current val: {}".format(val))
             if val != "NA":
@@ -614,7 +624,14 @@ def train(model_id, qtemp, anstemp, train_samples, val_set,
     eval(model, tokenizer, atomic_query_responses[val_set], inter, save_path, output_name, val_records, gen_param)  
 
 @run.command()
-def create_confs():
+@click.option(
+    "--experiment",
+    "-exp",
+    default="exp",
+    type=str,
+    help=""
+)
+def create_confs(experiment):
     print("Creating configurations...")
     conf = "/home/ahmad/logs/confs/conf_out.json"
     save_path = "/home/ahmad/mt5-comet/comet/train/"
@@ -623,55 +640,64 @@ def create_confs():
     if Path(conf).exists():
        with open(conf, 'r') as f:
            args = json.load(f) 
-    samples = 100
+    samples = 60
     args["train_samples"] = samples
-    args["val_samples"] = 50
+    args["val_samples"] = 30
     args["load_path"] = "/content/drive/MyDrive/backup/logs/"
     args["save_path"] = "/content/drive/MyDrive/backup/new_logs"
     args["overwrite"] = True
     args["cpu"] = False 
     args["config"] = False 
-    args["batch_size"] = 4 
+    args["batch_size"] = 2 
     args["gen_param"] = "top_p" 
     args["exclude"] = "natural" 
-    #for lang in ["en", "fa", "natural", "mix"]:
-    for model in ["fat5-large-xIntent-8k","fat5-large-orig0"]:
-        for s in ["sup", "unsup"]:
-            for w in ["wrapped", "unwrapped"]:
-               for f in ["freezed", "unfreezed"]:
-                   name = f"conf_{model}-{samples}_{s}_{w}_{f}"
-                   #name = name.replace("_unwrapped", "")
-                   #name = name.replace("_unfreezed", "")
-                   print("new:", name)
-                   if f == "freezed" and s == "sup" and w == "unwrapped":
-                       continue
-                   args["model_id"]= model
-                   args["output_name"] = name
-                   args["frozen"] = False
-                   if f == "freezed":
-                       args["frozen"] = True
-                   args["wrap"] = ""
-                   if w == "wrapped":
-                       args["wrap"] = "xIntent"
-                   if s == "sup":
+    for model in ["fat5-large-orig0"]: #,"fat5-large-xIntent-8"]:
+        for lang in ["en", "fa", "mix"]:
+            for s in ["sup", "unsup"]:
+                for w in ["wrapped", "unwrapped"]:
+                   for f in ["freezed", "unfreezed"]:
+                       name = f"{experiment}_{model}-{samples}_{lang}_{s}_{w}_{f}"
+                       #name = name.replace("_unwrapped", "")
+                       #name = name.replace("_unfreezed", "")
+                       print(name)
+                       if lang == "en":
+                           args["exclude"] = "natural|_fa"
+                           args["include"] = ""
+                       if lang == "fa":
+                           args["exclude"] = "natural"
+                           args["include"] = "_fa"
+                       if lang == "mix":
+                           args["exclude"] = "natural"
+                           args["include"] = ""
+                       if f == "freezed" and s == "sup" and w == "unwrapped":
+                           continue
+                       args["model_id"]= model
+                       args["output_name"] = name
+                       args["frozen"] = False
+                       if f == "freezed":
+                           args["frozen"] = True
+                       args["wrap"] = ""
                        if w == "wrapped":
-                           args["qtemp"] = "{enc_token} {event} {gen}"
-                           args["anstemp"] = "{response}"
-                       else: #unwrapped
-                           args["qtemp"] = "{rel_token} {event} {gen}"
-                           args["anstemp"] = "{response}"
-                   elif s == "unsup":
-                       if w == "wrapped":
-                           args["qtemp"] = "{enc_token} {event} {gen} {ph}"
-                           args["anstemp"] = "{ph} {response} {end}"
-                       else: #unwrapped
-                           if f == "unfreezed":
-                               args["qtemp"] = "{rel_token} {event} {gen} {ph}"
+                           args["wrap"] = "xIntent"
+                       if s == "sup":
+                           if w == "wrapped":
+                               args["qtemp"] = "{enc_token} {event} {gen}"
+                               args["anstemp"] = "{response}"
+                           else: #unwrapped
+                               args["qtemp"] = "{rel_token} {event} {gen}"
+                               args["anstemp"] = "{response}"
+                       elif s == "unsup":
+                           if w == "wrapped":
+                               args["qtemp"] = "{enc_token} {event} {gen} {ph}"
                                args["anstemp"] = "{ph} {response} {end}"
-                           else:
-                               args["qtemp"] = "{event} {rel_natural} {ph}"
-                               args["anstemp"] = "{ph} {response} {end}"
-                   with open(os.path.join(conf_path, f'{name}.json'), 'w') as outfile:
-                            json.dump(args, outfile, indent=4)
+                           else: #unwrapped
+                               if f == "unfreezed":
+                                   args["qtemp"] = "{rel_token} {event} {gen} {ph}"
+                                   args["anstemp"] = "{ph} {response} {end}"
+                               else:
+                                   args["qtemp"] = "{event} {rel_natural} {ph}"
+                                   args["anstemp"] = "{ph} {response} {end}"
+                       with open(os.path.join(conf_path, f'{name}.json'), 'w') as outfile:
+                                json.dump(args, outfile, indent=4)
 if __name__ == "__main__":
    run()

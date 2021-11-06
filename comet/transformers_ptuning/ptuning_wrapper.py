@@ -19,7 +19,8 @@ else:
     logFilename = "/content/wrapper.log"
 wHandler = logging.FileHandler(logFilename)
 wlog.addHandler(wHandler)
-wlog.setLevel(logging.INFO)
+#wlog.setLevel(logging.INFO)
+wlog.disabled = True
 
 class PTuningWrapper(torch.nn.Module):
     def __init__(self,model,prompt_encoder,decoder_prompt_encoder=None,

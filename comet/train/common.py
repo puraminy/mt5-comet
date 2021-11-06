@@ -259,9 +259,9 @@ def fill_data(split_df, split_name, inputs, targets, qtemp, anstemp,
         for inp in inputs:
             if not inp in d or len(d[inp]) <= 1:
                 continue
-            if include and not include in inp:
+            if include and not any(x in inp for x in include.split("|")):
                 continue
-            if exclude and exclude in inp:
+            if exclude and any(x in inp for x in exclude.split("|")):
                 continue
             input_lang = langs[inp]
             if "{event_en}" in qtemp and input_lang != "en":
@@ -269,9 +269,9 @@ def fill_data(split_df, split_name, inputs, targets, qtemp, anstemp,
             for targ_col in targets:
                 if not targ_col in d or len(d[targ_col]) <= 1:
                     continue
-                if exclude and exclude in targ_col:
+                if include and not any(x in targ_col for x in include.split("|")):
                     continue
-                if include and not include in targ_col:
+                if exclude and any(x in targ_col for x in exclude.split("|")):
                     continue
                 rel_token = atomic_relation_mappings[rel]
                 event = d[inp]
