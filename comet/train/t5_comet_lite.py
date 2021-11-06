@@ -30,12 +30,16 @@ from tqdm import tqdm
     help=""
 )
 @click.pass_context
+#rrrrrrrrrrr
 def run(ctx, conf_path):
      if ctx.invoked_subcommand is None:
         mlog.info("Reading from conf %s", conf_path)
         confs = glob.glob(f"{conf_path}/conf_*")
         for conf in confs:
-            mlog.info(f"%%% {conf} %%%")
+            fname = Path(conf).stem
+            mlog.info(f"%%% {fname} %%%")
+            val = getVal(fname, results) 
+            mlog.info("current val: %s".format(val))
             if Path(conf).exists():
                with open(conf, 'r') as f:
                    args = json.load(f) 
@@ -604,14 +608,14 @@ def create_confs():
     args["overwrite"] = True
     args["cpu"] = False 
     args["config"] = False 
-    args["batch_size"] = 2 
+    args["batch_size"] = 1 
     for model in ["fat5-large-xIntent-8k","fat5-large-orig0"]:
         for s in ["sup", "unsup"]:
             for w in ["wrapped", "unwrapped"]:
                for f in ["freezed", "unfreezed"]:
                    name = f"conf_{model}-{samples}_{s}_{w}_{f}"
-                   name = name.replace("_unwrapped", "")
-                   name = name.replace("_unfreezed", "")
+                   #name = name.replace("_unwrapped", "")
+                   #name = name.replace("_unfreezed", "")
                    print("new:", name)
                    if f == "freezed" and s == "sup" and w == "unwrapped":
                        continue

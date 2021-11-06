@@ -51,7 +51,7 @@ def set_device(dev):
 results = {}
 resFile = os.path.join(resPath, "results.json")
 if Path(resFile).exists():
-    with open(resFile, "w") as f:
+    with open(resFile, "r") as f:
         results = json.load(f)
 
 nli_map = ['contradiction', 'entailment', 'neutral']
