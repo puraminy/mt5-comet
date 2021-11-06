@@ -472,12 +472,16 @@ def eval(model, tokenizer, val_data, interactive, save_path, output_name, val_re
     new_df.to_csv(out1, sep="\t", index=False)
     new_df.to_csv(out2, sep="\t", index=False)
     new_df.to_csv(out3, sep="\t", index=False)
+    pred_counts = new_df['pred_text1'].unique()
 
     mean_bert_str = json.dumps(mean_bert, indent=2)
     mean_rouge_str = json.dumps(mean_rouge, indent=2)
     res = {}
     res["rouge"] = mean_rouge
     res["bert"] = mean_bert
+    res["distinct"] = len(pred_counts)
+    res["hyps"] = hyp_counter
+
     dictPath(output_name, results, res, sep="_")
     with open(os.path.join(resPath, "results.json"), "w") as f:
         json.dump(results, f, indent=2)
@@ -491,6 +495,5 @@ def eval(model, tokenizer, val_data, interactive, save_path, output_name, val_re
         logger.info("DF mean Rouge Score: {}".format(new_df["rouge_score"].mean()))
         logger.info("nli_counter: {}".format(nli_counter))
         logger.info("hyp_counter: {}".format(hyp_counter))
-        pred_counts = new_df['pred_text1'].unique()
         logger.info("Distinct preds:{}".format(len(pred_counts)))
 
