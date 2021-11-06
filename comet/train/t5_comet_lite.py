@@ -610,9 +610,9 @@ def create_confs():
             for w in ["wrapped", "unwrapped"]:
                for f in ["freezed", "unfreezed"]:
                    name = f"conf_{model}-{samples}_{s}_{w}_{f}"
-                   name = name.replace("-unwrapped", "")
-                   name = name.replace("-unfreezed", "")
-                   print(name)
+                   name = name.replace("_unwrapped", "")
+                   name = name.replace("_unfreezed", "")
+                   print("new:", name)
                    if f == "freezed" and s == "sup" and w == "unwrapped":
                        continue
                    args["model_id"]= model
