@@ -1,6 +1,5 @@
 #%% load libraries
 from comet.train.common import *
-from comet.utils.myutils import *
 from transformers import (
     T5ForConditionalGeneration, T5TokenizerFast, 
     MT5ForConditionalGeneration, MT5TokenizerFast, AdamW, AddedToken,
@@ -21,9 +20,30 @@ import click
 from tqdm import tqdm
 
 
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Run    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+@click.group(invoke_without_command=True)
+@click.option(
+    "--conf_path",
+    "-cp",
+    default="confs",
+    type=str,
+    help=""
+)
+@click.pass_context
+def run(ctx, conf_path):
+     if ctx.invoked_subcommand is None:
+        mlog.info("Reading from conf %s", conf_path)
+        confs = glob.glob(f"{conf_path}/conf_*")
+        for conf in confs:
+            mlog.info(f"%%% {conf} %%%")
+            if Path(conf).exists():
+               with open(conf, 'r') as f:
+                   args = json.load(f) 
+               ctx.invoke(train, **args)
+
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Training %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-@click.command()
+@run.command()
 @click.argument("model_id", type=str)
 @click.option(
     "--path",
@@ -236,7 +256,7 @@ from tqdm import tqdm
     is_flag=True,
     help=""
 )
-def main(model_id, qtemp, anstemp, train_samples, val_set, 
+def train(model_id, qtemp, anstemp, train_samples, val_set, 
          val_samples, load_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks, natural, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs):
 
     #%% some hyper-parameters
@@ -566,19 +586,7 @@ def main(model_id, qtemp, anstemp, train_samples, val_set,
 
     eval(model, tokenizer, atomic_query_responses[val_set], inter, save_path, output_name, val_records)  
 
-@click.command()
-@click.pass_context
-def run(ctx):
-    conf_path= "confs" #os.environ["conf_path"]
-    mlog.info("Reading from conf %s", conf_path)
-    confs = glob.glob(f"{conf_path}/conf_*")
-    for conf in confs:
-        mlog.info(f"%%% {conf} %%%")
-        if Path(conf).exists():
-           with open(conf, 'r') as f:
-               args = json.load(f) 
-           ctx.invoke(main, **args)
-
+@run.command()
 def create_confs():
     print("Creating configurations...")
     conf = "/home/ahmad/logs/confs/conf_.json"
@@ -596,12 +604,15 @@ def create_confs():
     args["overwrite"] = True
     args["cpu"] = False 
     args["config"] = False 
-    args["batch_size"] = 4 
+    args["batch_size"] = 2 
     for model in ["fat5-large-xIntent-8k","fat5-large-orig0"]:
         for s in ["sup", "unsup"]:
             for w in ["wrapped", "unwrapped"]:
                for f in ["freezed", "unfreezed"]:
-                   name = f"conf_{model}-{samples}-{s}-{w}-{f}"
+                   name = f"conf_{model}-{samples}_{s}_{w}_{f}"
+                   name = name.replace("-unwrapped", "")
+                   name = name.replace("-unfreezed", "")
+                   print(name)
                    if f == "freezed" and s == "sup" and w == "unwrapped":
                        continue
                    args["model_id"]= model
@@ -630,14 +641,7 @@ def create_confs():
                            else:
                                args["qtemp"] = "{event} {rel_natural} {ph}"
                                args["anstemp"] = "{ph} {response} {end}"
-                   name = name.replace("-unwrapped", "")
-                   name = name.replace("-unfreezed", "")
-                   print(name)
                    with open(os.path.join(conf_path, f'{name}.json'), 'w') as outfile:
                             json.dump(args, outfile, indent=4)
 if __name__ == "__main__":
-    #create_confs()
-    if True: #"conf_path" in os.environ:
-       run()
-    else:
-       main()
+   run()

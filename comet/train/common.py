@@ -1,4 +1,5 @@
 from pathlib import Path
+from comet.utils.myutils import *
 from sentence_transformers import SentenceTransformer, util
 from transformers import AddedToken 
 from sentence_transformers import CrossEncoder
@@ -16,8 +17,14 @@ from os.path import expanduser
 home = expanduser("~")
 if "ahmad" in home:
     logPath = "/home/ahmad/logs/"
+    resPath = "/home/ahmad/logs/"
 else:
     logPath = "/content/"
+    resPath = "/content/drive/MyDrive/backup/results"
+
+Path(resPath).mkdir(exist_ok=True, parents=True)
+Path(logPath).mkdir(exist_ok=True, parents=True)
+
 logFilename = os.path.join(logPath, "all.log") #app_path + '/log_file.log'
 # log only important messages
 logging.basicConfig(filename=logFilename)
@@ -40,6 +47,12 @@ device = 'cuda'
 def set_device(dev):
     global device
     device = dev
+
+results = {}
+resFile = os.path.join(resPath, "results.json")
+if Path(resFile).exists():
+    with open(resFile, "w") as f:
+        results = json.load(f)
 
 nli_map = ['contradiction', 'entailment', 'neutral']
 atomic_relation_mappings = {
@@ -443,12 +456,23 @@ def eval(model, tokenizer, val_data, interactive, save_path, output_name, val_re
     new_df = pd.DataFrame(rows)
     new_df = new_df[new_df["bert_score"] > 0]
     pbar.close()
-    out = os.path.join(save_path,f"scored_{output_name}.tsv")
-    out2 = os.path.join(logPath,f"scored_{output_name}.tsv")
-    new_df.to_csv(out, sep="\t", index=False)
+    out1 = os.path.join(save_path,f"scored_{output_name}.tsv")
+    out2 = os.path.join(resPath,f"scored_{output_name}.tsv")
+    out3 = os.path.join(logPath,f"scored_{output_name}.tsv")
+
+    new_df.to_csv(out1, sep="\t", index=False)
     new_df.to_csv(out2, sep="\t", index=False)
+    new_df.to_csv(out3, sep="\t", index=False)
+
     mean_bert_str = json.dumps(mean_bert, indent=2)
     mean_rouge_str = json.dumps(mean_rouge, indent=2)
+    res = {}
+    res["rouge"] = mean_rouge
+    res["bert"] = mean_bert
+    dictPath(output_name, results, res, sep="_")
+    with open(os.path.join(logPath, "results.json"), "w") as f:
+        json.dump(results, f, indent=2)
+
     for logger in [mlog, vlog, clog]:
         logger.info("Len data frame: {}".format(len(new_df)))
         logger.info("Rouge:{} BERT {} ".format(mean_rouge_str, mean_bert_str))
