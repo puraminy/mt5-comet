@@ -32,7 +32,7 @@ vlog = logging.getLogger("comet.eval")
 
 for logger, fname in zip([mlog,dlog,clog,vlog], ["main","data","cfg","eval"]):
     logFilename = os.path.join(logPath, fname + ".log")
-    handler = logging.FileHandler(logFilename)
+    handler = logging.FileHandler(logFilename, mode="w")
     logger.addHandler(handler)
 
 
@@ -436,7 +436,7 @@ def eval(model, tokenizer, val_data, interactive, save_path, output_name, val_re
                     vlog.info("Bert Score:{:.4f}--{}".format(cur_score, mean_bert[scope]))
                     vlog.info("Rouge Score:{:.4f}--{}".format(rouge_score, mean_rouge[scope]))
                     vlog.info("------------------------------------------------------")
-                    pbar.set_description(f"Bert:{mean_bert[scope]} Rouge {mean_rouge[scope]} ")
+                    pbar.set_description(f"{scope} :Bert:{mean_bert[scope]} Rouge {mean_rouge[scope]} ")
                     pbar.update(1)
 
     # %%%%%%%%%%%%%%%%%%

@@ -230,8 +230,14 @@ from tqdm import tqdm
     is_flag=True,
     help="Only create a configuration file from input parameters"
 )
+@click.option(
+    "--clear_logs",
+    "-cl",
+    is_flag=True,
+    help=""
+)
 def main(model_id, qtemp, anstemp, train_samples, val_set, 
-         val_samples, load_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks, natural, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config):
+         val_samples, load_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks, natural, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs):
 
     #%% some hyper-parameters
     #bbbbbbbbbbb
@@ -254,8 +260,10 @@ def main(model_id, qtemp, anstemp, train_samples, val_set,
 
     if save_path != logPath:
         for logger, fname in zip([mlog,dlog,clog,vlog], ["main","data","cfg","eval"]):
+            if len(logger.handlers) >= 2:
+                continue
             logFilename = os.path.join(save_path, fname + ".log")
-            handler = logging.FileHandler(logFilename)
+            handler = logging.FileHandler(logFilename, mode = "w" if clear_logs else "a")
             logger.addHandler(handler)
 
     if from_dir:
@@ -594,7 +602,6 @@ def create_confs():
             for w in ["wrapped", "unwrapped"]:
                for f in ["freezed", "unfreezed"]:
                    name = f"conf_{model}-{samples}-{s}-{w}-{f}"
-                   print(name)
                    if f == "freezed" and s == "sup" and w == "unwrapped":
                        continue
                    args["model_id"]= model
@@ -623,10 +630,13 @@ def create_confs():
                            else:
                                args["qtemp"] = "{event} {rel_natural} {ph}"
                                args["anstemp"] = "{ph} {response} {end}"
+                   name = name.replace("-unwrapped", "")
+                   name = name.replace("-unfreezed", "")
+                   print(name)
                    with open(os.path.join(conf_path, f'{name}.json'), 'w') as outfile:
                             json.dump(args, outfile, indent=4)
 if __name__ == "__main__":
-    #create_confs()
+    create_confs()
     if True: #"conf_path" in os.environ:
        run()
     else:
