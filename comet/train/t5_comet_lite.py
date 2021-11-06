@@ -640,9 +640,9 @@ def create_confs(experiment):
     if Path(conf).exists():
        with open(conf, 'r') as f:
            args = json.load(f) 
-    samples = 60
+    samples = 100
     args["train_samples"] = samples
-    args["val_samples"] = 30
+    args["val_samples"] = 50
     args["load_path"] = "/content/drive/MyDrive/backup/logs/"
     args["save_path"] = "/content/drive/MyDrive/backup/new_logs"
     args["overwrite"] = True
