@@ -362,12 +362,12 @@ def eval(model, tokenizer, val_data, interactive, save_path, output_name, val_re
     local_path = f"{base_path}/paraphrase-multilingual-MiniLM-L12-v2"        
     if not Path(local_path).exists():
         local_path = 'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2'
-    bert_scorer = SentenceTransformer(local_path)
+    bert_scorer = None #SentenceTransformer(local_path)
     rouge_scorer = Rouge()
     local_path = f"{base_path}/nli-roberta-base"
     if not Path(local_path).exists():
         local_path = 'sentence-transformers/nli-roberta-base'
-    nli_model = CrossEncoder(local_path)
+    nli_model = None #CrossEncoder(local_path)
     nli_counter = {}
     for l in nli_map:
         nli_counter[l] = 0
