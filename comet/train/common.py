@@ -53,6 +53,7 @@ results = {}
 resFile = os.path.join(resPath, "results.json")
 if Path(resFile).exists():
     with open(resFile, "r") as f:
+        mlog.info("Reading stored results...")
         results = json.load(f)
 
 nli_map = ['contradiction', 'entailment', 'neutral']
@@ -362,7 +363,7 @@ def eval(model, tokenizer, val_data, interactive, save_path, output_name, val_re
     local_path = f"{base_path}/paraphrase-multilingual-MiniLM-L12-v2"        
     if not Path(local_path).exists():
         local_path = 'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2'
-    bert_scorer = None #SentenceTransformer(local_path)
+    bert_scorer = SentenceTransformer(local_path)
     rouge_scorer = Rouge()
     local_path = f"{base_path}/nli-roberta-base"
     if not Path(local_path).exists():
