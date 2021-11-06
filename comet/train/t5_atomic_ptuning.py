@@ -729,8 +729,6 @@ def main(model_id, exp_id, path, inp_samples, cycle, frozen, sup, qtemp, anstemp
                             train_iter = iter(train_dataloader[rel])
                             batch = next(train_iter)
                         batch = {k:v.to(device=device) for k,v in batch.items()}
-                        #print("BEEEEEEEEEFOR Batch")
-                        #print(batch)
                         result = wrapped_model(**batch)
                         loss = result['loss']/accumulation_tiny_steps
                         #logits = clip_logits(result['logits'])

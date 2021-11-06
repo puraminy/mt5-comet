@@ -38,6 +38,7 @@ vlog = logging.getLogger("comet.eval")
 
 
 for logger, fname in zip([mlog,dlog,clog,vlog], ["main","data","cfg","eval"]):
+    logger.setLevel(logging.INFO)
     logFilename = os.path.join(logPath, fname + ".log")
     handler = logging.FileHandler(logFilename, mode="w")
     logger.addHandler(handler)
@@ -219,7 +220,8 @@ def get_input(msg):
 def fill_data(split_df, split_name, inputs, targets, qtemp, anstemp, 
             num_samples=0, 
             ignore_blanks=False,
-            natural=False,
+            filter_inp="",
+            filter_targ="",
             pred_tresh=0,
             nli_group="all"): 
     dlog.info("building query responses for {}".format(split_name))
@@ -249,6 +251,7 @@ def fill_data(split_df, split_name, inputs, targets, qtemp, anstemp,
     flat_data = []
     old_input = ""
     pbar = tqdm(total = num_samples)
+    natural = filter_inp == "natural"
     for index, d in split_df.iterrows():
         rel = d["prefix"]
         if not rel in data_split:
@@ -256,15 +259,15 @@ def fill_data(split_df, split_name, inputs, targets, qtemp, anstemp,
         for inp in inputs:
             if not inp in d or len(d[inp]) <= 1:
                 continue
-            if ((natural and not "natural" in inp) or 
-                (not natural and "natural" in inp)):
+            if filter_inp and not filter_inp in inp:
                 continue
             input_lang = langs[inp]
+            if "{event_en}" in qtemp and input_lang != "en":
+                continue
             for targ_col in targets:
                 if not targ_col in d or len(d[targ_col]) <= 1:
                     continue
-                if ((natural and not "natural" in targ_col) or 
-                    (not natural and "natural" in targ_col)):
+                if filter_targ and not filter_targ in targ_col:
                     continue
                 rel_token = atomic_relation_mappings[rel]
                 event = d[inp]
@@ -275,6 +278,9 @@ def fill_data(split_df, split_name, inputs, targets, qtemp, anstemp,
                 resp = resp.strip()
                 gen_token = gen_tokens[targ_col]
                 target_lang = langs[targ_col]
+                if (("{response_en}" in anstemp or "{response_en}" in qtemp) 
+                    and target_lang != "en"):
+                    continue
                 query = format_temp(qtemp, rel, event, gen_token, resp, input_lang) 
                 resp = format_temp(anstemp, rel, event, gen_token, resp, target_lang)
                 lang = input_lang + "2" + target_lang

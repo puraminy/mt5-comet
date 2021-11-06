@@ -41,7 +41,7 @@ def run(ctx, conf_path):
             val = getVal(fname, results) 
             mlog.info("current val: {}".format(val))
             if val != "NA":
-                mlog.info("This was done before ...")
+                mlog.info("Skipping .... This was done before")
                 continue
             if Path(conf).exists():
                with open(conf, 'r') as f:
@@ -154,10 +154,18 @@ def run(ctx, conf_path):
     help=""
 )
 @click.option(
-    "--natural",
-    "-nat",
-    is_flag=True,
-    help="Whether use natural (with template) input output or not"
+    "--filter_inp",
+    "-finp",
+    default="",
+    type=str,
+    help="filter input columns (must have this substring)"
+)
+@click.option(
+    "--filter_targ",
+    "-ftarg",
+    default="",
+    type=str,
+    help="filter target columns (must have this substring)"
 )
 @click.option(
     "--nli_group",
@@ -271,7 +279,7 @@ def run(ctx, conf_path):
     help=""
 )
 def train(model_id, qtemp, anstemp, train_samples, val_set, 
-         val_samples, load_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks, natural, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param):
+         val_samples, load_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks, filter_inp, filter_targ, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param):
 
     #%% some hyper-parameters
     #bbbbbbbbbbb
@@ -296,6 +304,7 @@ def train(model_id, qtemp, anstemp, train_samples, val_set,
         for logger, fname in zip([mlog,dlog,clog,vlog], ["main","data","cfg","eval"]):
             if len(logger.handlers) >= 2:
                 continue
+            logger.setLevel(logging.INFO)
             logFilename = os.path.join(save_path, fname + ".log")
             handler = logging.FileHandler(logFilename, mode = "w" if clear_logs else "a")
             logger.addHandler(handler)
@@ -381,7 +390,8 @@ def train(model_id, qtemp, anstemp, train_samples, val_set,
                             qtemp, anstemp,
                             num_samples[split_name], 
                             ignore_blanks,
-                            natural,
+                            filter_inp,
+                            filter_targ,
                             pred_tresh, nli_group)
     iterations = num_records["train"]
     val_records = num_records["validation"]
@@ -389,6 +399,8 @@ def train(model_id, qtemp, anstemp, train_samples, val_set,
         logger.info("Iterations:"  + str(iterations))
         logger.info("Val Records:"  + str(val_records))
     warm_up_steps = 0.002*iterations
+    accumulation_tiny_steps = 2 
+    node_batch_size = batch_size//accumulation_tiny_steps
     #%% tokenizer & model
     if model_id == "test":
         return
@@ -449,9 +461,9 @@ def train(model_id, qtemp, anstemp, train_samples, val_set,
     #     return new_batch,references
     #%% build dataloader
     train_dataloader = torch.utils.data.DataLoader(atomic_flattened['train'],
-        batch_size=batch_size,shuffle=shuffle,collate_fn=collate_fn_for_flattened)
+        batch_size=node_batch_size,shuffle=shuffle,collate_fn=collate_fn_for_flattened)
     dev_dataloader = torch.utils.data.DataLoader(atomic_flattened['validation'],
-        batch_size=batch_size,shuffle=shuffle,collate_fn=collate_fn_for_flattened)
+        batch_size=node_batch_size,shuffle=shuffle,collate_fn=collate_fn_for_flattened)
     # %% prepare for training
     sw = SummaryWriter(save_path, flush_secs=1)
     tokenizer.save_pretrained(save_path)
@@ -557,18 +569,26 @@ def train(model_id, qtemp, anstemp, train_samples, val_set,
                     p.requires_grad = False # freezing
             model.train()
             optimizer.zero_grad()
-            try:
-                batch = next(train_iter)
-            except StopIteration:
-                train_iter = iter(train_dataloader)
-                batch = next(train_iter)
-            batch = {k:v.to(device=device) for k,v in batch.items()}
-            if wrap:
-                result = wrapped_model(**batch)
-            else:
-                result = model(**batch)
-            loss = result['loss']
-            loss.backward()
+            batch_loss = torch.tensor(0.)
+            for tiny_step in range(accumulation_tiny_steps):
+                try:
+                    batch = next(train_iter)
+                except StopIteration:
+                    train_iter = iter(train_dataloader[rel])
+                    batch = next(train_iter)
+                batch = {k:v.to(device=device) for k,v in batch.items()}
+                if wrap:
+                    result = wrapped_model(**batch)
+                else:
+                    result = model(**batch)
+                loss = result['loss']/accumulation_tiny_steps
+                #logits = clip_logits(result['logits'])
+                #loss = torch.nn.functional.cross_entropy(
+                #     logits.reshape(-1,logits.size(2)),
+                #     labels.reshape(-1,)
+                #)/accumulation_tiny_steps
+                loss.backward()
+                batch_loss += loss.item()
             optimizer.step()
             scheduler.step()
             step+=1
@@ -596,7 +616,7 @@ def train(model_id, qtemp, anstemp, train_samples, val_set,
 @run.command()
 def create_confs():
     print("Creating configurations...")
-    conf = "/home/ahmad/logs/confs/conf_.json"
+    conf = "/home/ahmad/logs/confs/conf_out.json"
     save_path = "/home/ahmad/mt5-comet/comet/train/"
     conf_path = os.path.join(save_path,"confs")
     Path(conf_path).mkdir(exist_ok=True, parents=True)
@@ -613,6 +633,7 @@ def create_confs():
     args["config"] = False 
     args["batch_size"] = 4 
     args["gen_param"] = "top_p" 
+    #for lang in ["en", "fa", "natural", "mix"]:
     for model in ["fat5-large-xIntent-8k","fat5-large-orig0"]:
         for s in ["sup", "unsup"]:
             for w in ["wrapped", "unwrapped"]:
