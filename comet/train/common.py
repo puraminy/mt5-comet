@@ -226,6 +226,7 @@ def fill_data(split_df, split_name, inputs, targets, qtemp, anstemp,
             nli_group="all"): 
     dlog.info("building query responses for {}".format(split_name))
     dlog.info(f"len:{len(split_df)}")
+    natural = filter_inp == "natural"
     if natural and split_name != "train": natural = False 
     if natural:
         dlog.info("natural is ON")
@@ -251,7 +252,6 @@ def fill_data(split_df, split_name, inputs, targets, qtemp, anstemp,
     flat_data = []
     old_input = ""
     pbar = tqdm(total = num_samples)
-    natural = filter_inp == "natural"
     for index, d in split_df.iterrows():
         rel = d["prefix"]
         if not rel in data_split:
