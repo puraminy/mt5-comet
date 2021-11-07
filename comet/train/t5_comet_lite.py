@@ -372,14 +372,14 @@ def train(model_id, qtemp, anstemp, train_samples, val_set,
 
     ii = 1
     while not overwrite and Path(save_path).exists() and not model_id=="test":
-        ans = input("The output directory already exists, do you want to overwite it? (y/n)")
+        ans = input("The output directory already exists, do you want to overwrite it? (y/n)")
         if ans == "y":
             overwrite = True
         save_path = os.path.join(log_dir,output_name + "_"+str(ii))
         mlog.info(save_path)
         ii += 1
 
-    if overwite:
+    if overwrite:
         save_path = os.path.join(log_dir, overwrite)
 
     Path(save_path).mkdir(exist_ok=True, parents=True)
