@@ -690,8 +690,6 @@ def create_confs(experiment):
                        if w == "wrapped":
                            args["wrap"] = "xIntent"
                        if s == "context":
-                           if w != "wrapped" or lang!="fa":
-                               continue
                            args["qtemp"] = "{enc_token} {event_en} {rel_natural_en} {response_en} {evant_fa} {rel_natural_fa} {gen_fa} {ph}"
                            args["anstemp"] = "{ph} {response_fa} {end}"
                        elif s == "sup":
