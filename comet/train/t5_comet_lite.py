@@ -36,12 +36,27 @@ from tqdm import tqdm
     type=str,
     help="Select the pattern of configurations files for an experiment (starts with)"
 )
+@click.option(
+    "--print_log",
+    "-p",
+    default="mlog",
+    type=str,
+    help=""
+)
+@click.option(
+    "--model_id",
+    "-m",
+    default="",
+    type=str,
+    help=""
+)
 @click.pass_context
 #rrrrrrrrrrr
-def run(ctx, conf_path, experiment):
+def run(ctx, conf_path, experiment, print_log, model_id):
      if ctx.invoked_subcommand is None:
         mlog.info("Reading from conf %s", conf_path)
         confs = glob.glob(f"{conf_path}/*")
+        default_model = ""
         for conf in confs:
             fname = Path(conf).stem
             mlog.info(f"%%% {fname} %%%")
@@ -56,6 +71,17 @@ def run(ctx, conf_path, experiment):
             if Path(conf).exists():
                with open(conf, 'r') as f:
                    args = json.load(f) 
+               args["print_log"] = print_log
+               if model_id:
+                   if default_model and args["model_id"] != default_model:
+                       break
+                   elif args["model_id"] != default_model:
+                       default_model = args["model_id"]
+                   mlog.info(f"Replacing {default_model} with {model_id}")
+                   args["model_id"] = model_id
+                   out = args["output_name"].split("_")
+                   out[1] = model_id
+                   args["output_name"] = "_".join(out)
                ctx.invoke(train, **args)
 
 
@@ -147,7 +173,7 @@ def run(ctx, conf_path, experiment):
 @click.option(
     "--anstemp",
     "-at",
-    default="{ph} {response} {end}",
+    default="{ph} {resp} {end}",
     type=str,
     help="tempate for response"
 )
@@ -289,12 +315,26 @@ def run(ctx, conf_path, experiment):
     type=str,
     help=""
 )
+@click.option(
+    "--print_log",
+    "-print",
+    default="mlog",
+    type=str,
+    help=""
+)
 def train(model_id, qtemp, anstemp, train_samples, val_set, 
-         val_samples, load_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks, include, exclude, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param):
+         val_samples, load_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks, include, exclude, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log):
 
     #%% some hyper-parameters
     #bbbbbbbbbbb
     #underlying_model_name = "logs/atomic-mt5/last"
+    if "dlog" in print_log: # data logger
+        dlog.addHandler(consoleHandler)
+    if "vlog" in print_log: # evaluation logger
+        vlog.addHandler(consoleHandler)
+    if "clog" in print_log: # config logger
+        clog.addHandler(consoleHandler)
+
     mlog.info("========================= Version 6 ========================")
     if save_path == "":
         save_path = "/content/drive/MyDrive/backup/logs"
@@ -302,6 +342,8 @@ def train(model_id, qtemp, anstemp, train_samples, val_set,
             save_path = "/home/ahmad/logs"
 
     args = locals()
+    if model_id == "test":
+        save_path = ""
     conf_path = os.path.join(save_path,"confs")
     Path(conf_path).mkdir(exist_ok=True, parents=True)
     with open(os.path.join(conf_path, f'conf_{output_name}.json'), 'w') as outfile:
@@ -657,8 +699,8 @@ def create_confs(experiment):
     args["gen_param"] = "top_p" 
     args["exclude"] = "natural" 
     models = {"fat5-large-orig0":True, "fat5-large-xIntent-8":True}
-    langs = {"en":True, "fa":False, "mix":True}
-    methods = {"unsup":True, "context":False, "sup": False}
+    langs = {"en":True, "fa":True, "mix":True}
+    methods = {"unsup":True, "context":True, "sup": False}
     to_wrap = {"wrapped":True, "unwrapped": False}
     to_freez = {"freezed":True, "unfreezed": True}
     for model in [k for k in models.keys() if models[k]]:
@@ -666,10 +708,8 @@ def create_confs(experiment):
             for s in [k for k in methods.keys() if methods[k]]:
                 for w in [k for k in to_wrap.keys() if to_wrap[k]]:
                    for f in [k for k in to_freez.keys() if to_freez[k]]:
-                       name = f"{experiment}_{model}-{samples}_{lang}_{s}_{w}_{f}"
-                       #name = name.replace("_unwrapped", "")
-                       #name = name.replace("_unfreezed", "")
-                       print(name)
+                       if s == "context" and lang != "fa":
+                           continue
                        if lang == "en":
                            args["exclude"] = "natural|_fa"
                            args["include"] = ""
@@ -682,7 +722,6 @@ def create_confs(experiment):
                        if f == "freezed" and s == "sup" and w == "unwrapped":
                            continue
                        args["model_id"]= model
-                       args["output_name"] = name
                        args["frozen"] = False
                        if f == "freezed":
                            args["frozen"] = True
@@ -690,26 +729,31 @@ def create_confs(experiment):
                        if w == "wrapped":
                            args["wrap"] = "xIntent"
                        if s == "context":
-                           args["qtemp"] = "{enc_token} {event_en} {rel_natural_en} {response_en} {evant_fa} {rel_natural_fa} {gen_fa} {ph}"
-                           args["anstemp"] = "{ph} {response_fa} {end}"
+                           args["qtemp"] = "{enc_token} {input_text} {rel_natural_en} {target_text} {event} {rel_natural} {gen} {ph}"
+                           args["anstemp"] = "{ph} {resp} {end}"
                        elif s == "sup":
                            if w == "wrapped":
                                args["qtemp"] = "{enc_token} {event} {gen}"
-                               args["anstemp"] = "{response}"
+                               args["anstemp"] = "{resp}"
                            else: #unwrapped
                                args["qtemp"] = "{rel_token} {event} {gen}"
-                               args["anstemp"] = "{response}"
+                               args["anstemp"] = "{resp}"
                        elif s == "unsup":
                            if w == "wrapped":
                                args["qtemp"] = "{enc_token} {event} {gen} {ph}"
-                               args["anstemp"] = "{ph} {response} {end}"
+                               args["anstemp"] = "{ph} {resp} {end}"
                            else: #unwrapped
                                if f == "unfreezed":
                                    args["qtemp"] = "{rel_token} {event} {gen} {ph}"
-                                   args["anstemp"] = "{ph} {response} {end}"
+                                   args["anstemp"] = "{ph} {resp} {end}"
                                else:
                                    args["qtemp"] = "{event} {rel_natural} {ph}"
-                                   args["anstemp"] = "{ph} {response} {end}"
+                                   args["anstemp"] = "{ph} {resp} {end}"
+                       name = f"{experiment}_{model}-{samples}_{lang}_{s}_{w}_{f}"
+                       args["output_name"] = name
+                       #name = name.replace("_unwrapped", "")
+                       #name = name.replace("_unfreezed", "")
+                       print(name)
                        with open(os.path.join(conf_path, f'{name}.json'), 'w') as outfile:
                                 json.dump(args, outfile, indent=4)
 if __name__ == "__main__":

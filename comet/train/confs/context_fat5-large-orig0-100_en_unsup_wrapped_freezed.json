@@ -1,7 +1,7 @@
 {
     "model_id": "fat5-large-orig0",
     "qtemp": "{enc_token} {event} {gen} {ph}",
-    "anstemp": "{ph} {response} {end}",
+    "anstemp": "{ph} {resp} {end}",
     "train_samples": 100,
     "val_set": "validation",
     "val_samples": 50,

@@ -162,26 +162,42 @@ def wrap_model(model, tokenizer, rel, emb=False, prompt_path=""):
 
     return wrapped_model
 
-def format_temp(template, rel, event, gen_token, resp, lang):
+def fill_consts(template, row):
+    text = template
+    rel = row["prefix"]
     rel_token = atomic_relation_mappings[rel]        
     enc_token = encoder_relation_mappings[rel] if rel in encoder_relation_mappings else ""
     dec_token = decoder_relation_mappings[rel] if rel in encoder_relation_mappings else ""
-    rel_natural = relation_natural_mappings[rel][lang]        
     rel_natural_en = relation_natural_mappings[rel]["en"]        
     rel_natural_fa = relation_natural_mappings[rel]["fa"]        
-    return template.format(event=event, 
-                         response=resp,
-                         rel=rel, 
-                         enc_token=enc_token, 
-                         dec_token=dec_token, 
-                         rel_token=rel_token,
-                         rel_natural=rel_natural,
-                         rel_natural_en=rel_natural_en,
-                         rel_natural_fa=rel_natural_fa,
-                         gen=gen_token,
-                         gen_fa=gen_token_fa,
-                         gen_en=gen_token_en,
-                         ph=placeholder_token,                                                                       end=end_token)
+    rep  = {"{rel}":rel, 
+            "{enc_token}":enc_token, 
+            "{dec_token}":dec_token, 
+            "{rel_token}":rel_token,
+            "{rel_natural_en}":rel_natural_en,
+            "{rel_natural_fa}":rel_natural_fa,
+            "{gen_fa}":gen_token_fa,
+            "{gen_en}":gen_token_en,
+            "{ph}":placeholder_token,
+            "{end}":end_token}
+    rep = dict((re.escape(k), v) for k, v in rep.items()) 
+    pattern = re.compile("|".join(rep.keys()))
+    text = pattern.sub(lambda m: rep[re.escape(m.group(0))], template)
+    for key,value in row.items():
+        val = str(value)
+        text = text.replace("{" + key + "}", val)
+    return text
+
+def fill_vars(template, rel, event, gen_token, resp, inp_lang, resp_lang):
+    rel_natural = relation_natural_mappings[rel][inp_lang]        
+    rep  = {"{event}":event, 
+            "{resp}":resp,
+            "{rel_natural}":rel_natural,
+            "{gen}":gen_token}
+    rep = dict((re.escape(k), v) for k, v in rep.items()) 
+    pattern = re.compile("|".join(rep.keys()))
+    text = pattern.sub(lambda m: rep[re.escape(m.group(0))], template)
+    return text
 
 #%% Aggregate instances of queries and corresponding responses
 # (str)split_name -> (dict) query -> (list) response 
@@ -233,6 +249,8 @@ def fill_data(split_df, split_name, inputs, targets, qtemp, anstemp,
             nli_group="all"): 
     dlog.info("building query responses for {}".format(split_name))
     dlog.info(f"len:{len(split_df)}")
+    dlog.info(f"qtemp:{qtemp}")
+    dlog.info(f"anstemp:{anstemp}")
     natural = include == "natural"
     if natural and split_name != "train": natural = False 
     if natural:
@@ -261,6 +279,8 @@ def fill_data(split_df, split_name, inputs, targets, qtemp, anstemp,
     pbar = tqdm(total = num_samples)
     for index, d in split_df.iterrows():
         rel = d["prefix"]
+        query = fill_consts(qtemp,d)
+        response = fill_consts(anstemp,d)
         if not rel in data_split:
             data_split = {rel:{}}
         for inp in inputs:
@@ -271,8 +291,6 @@ def fill_data(split_df, split_name, inputs, targets, qtemp, anstemp,
             if exclude and any(x in inp for x in exclude.split("|")):
                 continue
             input_lang = langs[inp]
-            if "{event_en}" in qtemp and input_lang != "en":
-                continue
             for targ_col in targets:
                 if not targ_col in d or len(d[targ_col]) <= 1:
                     continue
@@ -289,11 +307,10 @@ def fill_data(split_df, split_name, inputs, targets, qtemp, anstemp,
                 resp = resp.strip()
                 gen_token = gen_tokens[targ_col]
                 target_lang = langs[targ_col]
-                if (("{response_en}" in anstemp or "{response_en}" in qtemp) 
-                    and target_lang != "en"):
-                    continue
-                query = format_temp(qtemp, rel, event, gen_token, resp, input_lang) 
-                resp = format_temp(anstemp, rel, event, gen_token, resp, target_lang)
+                query = fill_vars(query, rel, event, gen_token, resp, 
+                        input_lang, target_lang) 
+                response = fill_vars(response, rel, event, gen_token, resp, 
+                        input_lang, target_lang)
                 lang = input_lang + "2" + target_lang
                 if not lang in data_split[rel]:
                     data_split[rel][lang] = []
@@ -305,13 +322,13 @@ def fill_data(split_df, split_name, inputs, targets, qtemp, anstemp,
                 if query not in data_split[rel][lang]:
                     jj+=1
                     pbar.update(1)
-                    data_split[rel][lang].append({query:[resp]})
+                    data_split[rel][lang].append({query:[response]})
                     if jj < 3:
                         dlog.info("Q:"+ query)
-                        dlog.info("R:"+ resp)
+                        dlog.info("R:"+ response)
                 else:
-                    data_split[rel][lang][query].append(resp)
-                flat_data.append((query, resp))
+                    data_split[rel][lang][query].append(response)
+                flat_data.append((query, response))
                 kk += 1
             #didn't convert ___ to <blank>
             #didn't normalize to lowercase
