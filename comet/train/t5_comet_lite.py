@@ -343,7 +343,6 @@ def train(model_id, qtemp, anstemp, train_samples, val_set,
     output_name = model_id if not output_name else output_name
     save_path = os.path.join(log_dir, output_name)
     model_name = f"{learning_rate}_{cycle}_{train_samples}"
-    mlog.info(f"SAVE Path:{save_path}")
     checkpoint = None
     if Path(save_path).exists() and not model_id=="test" and (cont or do_eval):
         mlog.info("Loading from %s", save_path)
@@ -382,6 +381,7 @@ def train(model_id, qtemp, anstemp, train_samples, val_set,
     if overwrite:
         save_path = os.path.join(log_dir, overwrite)
 
+    mlog.info(f"SAVE Path:{save_path}")
     Path(save_path).mkdir(exist_ok=True, parents=True)
     Path(os.path.join(save_path, "best_model")).mkdir(exist_ok=True, parents=True)
     #%% load atomic data
@@ -656,11 +656,16 @@ def create_confs(experiment):
     args["batch_size"] = 2 
     args["gen_param"] = "top_p" 
     args["exclude"] = "natural" 
-    for model in ["fat5-large-orig0"]: #,"fat5-large-xIntent-8"]:
-        for lang in ["en", "fa", "mix"]:
-            for s in ["sup", "unsup"]:
-                for w in ["wrapped", "unwrapped"]:
-                   for f in ["freezed", "unfreezed"]:
+    models = {"fat5-large-orig0":True, "fat5-large-xIntent-8":False}
+    langs = {"en":True, "fa":True, "mix":True}
+    methods = {"unsup":False, "context":True, "sup": False}
+    to_wrap = {"wrapped":True, "unwrapped": False}
+    to_freez = {"freezed":True, "unfreezed": True}
+    for model in [k for k in models.keys() if models[k]]:
+        for lang in [k for k in langs.keys() if langs[k]]: 
+            for s in [k for k in methods.keys() if methods[k]]:
+                for w in [k for k in to_wrap.keys() if to_wrap[k]]:
+                   for f in [k for k in to_freez.keys() if to_freez[k]]:
                        name = f"{experiment}_{model}-{samples}_{lang}_{s}_{w}_{f}"
                        #name = name.replace("_unwrapped", "")
                        #name = name.replace("_unfreezed", "")
@@ -684,7 +689,12 @@ def create_confs(experiment):
                        args["wrap"] = ""
                        if w == "wrapped":
                            args["wrap"] = "xIntent"
-                       if s == "sup":
+                       if s == "context":
+                           if w != "wrapped" or lang!="fa":
+                               continue
+                           args["qtemp"] = "{enc_token} {event_en} {rel_natural_en} {response_en} {evant_fa} {rel_natural_fa} {gen_fa} {ph}"
+                           args["anstemp"] = "{ph} {response_fa} {end}"
+                       elif s == "sup":
                            if w == "wrapped":
                                args["qtemp"] = "{enc_token} {event} {gen}"
                                args["anstemp"] = "{response}"

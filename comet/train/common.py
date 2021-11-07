@@ -167,6 +167,8 @@ def format_temp(template, rel, event, gen_token, resp, lang):
     enc_token = encoder_relation_mappings[rel] if rel in encoder_relation_mappings else ""
     dec_token = decoder_relation_mappings[rel] if rel in encoder_relation_mappings else ""
     rel_natural = relation_natural_mappings[rel][lang]        
+    rel_natural_en = relation_natural_mappings[rel]["en"]        
+    rel_natural_fa = relation_natural_mappings[rel]["fa"]        
     return template.format(event=event, 
                          response=resp,
                          rel=rel, 
@@ -174,7 +176,11 @@ def format_temp(template, rel, event, gen_token, resp, lang):
                          dec_token=dec_token, 
                          rel_token=rel_token,
                          rel_natural=rel_natural,
+                         rel_natural_en=rel_natural_en,
+                         rel_natural_fa=rel_natural_fa,
                          gen=gen_token,
+                         gen_fa=gen_token_fa,
+                         gen_en=gen_token_en,
                          ph=placeholder_token,                                                                       end=end_token)
 
 #%% Aggregate instances of queries and corresponding responses

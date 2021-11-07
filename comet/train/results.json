@@ -1,0 +1,42 @@
+{
+  "conf": {
+    "fat5-large-orig0-100": {
+      "sup": {
+        "wrapped": {
+          "freezed": {
+            "rouge": {
+              "xIntent_en2en": "0.2720",
+              "xIntent_en2fa": "0.0263",
+              "xIntent_fa2en": "0.2832",
+              "xIntent_fa2fa": "0.0162"
+            },
+            "bert": {
+              "xIntent_en2en": "0.4587",
+              "xIntent_en2fa": "0.5170",
+              "xIntent_fa2en": "0.4503",
+              "xIntent_fa2fa": "0.5181"
+            }
+          }
+        }
+      },
+      "unsup": {
+        "wrapped": {
+          "freezed": {
+            "rouge": {
+              "xIntent_en2en": "0.4524",
+              "xIntent_en2fa": "0.3264",
+              "xIntent_fa2en": "0.4392",
+              "xIntent_fa2fa": "0.3329"
+            },
+            "bert": {
+              "xIntent_en2en": "0.5758",
+              "xIntent_en2fa": "0.6560",
+              "xIntent_fa2en": "0.5918",
+              "xIntent_fa2fa": "0.6692"
+            }
+          }
+        }
+      }
+    }
+  }
+}
