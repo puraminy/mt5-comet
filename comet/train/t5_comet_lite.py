@@ -658,7 +658,7 @@ def create_confs(experiment):
     args["exclude"] = "natural" 
     models = {"fat5-large-orig0":True, "fat5-large-xIntent-8":True}
     langs = {"en":True, "fa":False, "mix":True}
-    methods = {"unsup":True, "context":True, "sup": False}
+    methods = {"unsup":True, "context":False, "sup": False}
     to_wrap = {"wrapped":True, "unwrapped": False}
     to_freez = {"freezed":True, "unfreezed": True}
     for model in [k for k in models.keys() if models[k]]:
