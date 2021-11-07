@@ -656,9 +656,9 @@ def create_confs(experiment):
     args["batch_size"] = 2 
     args["gen_param"] = "top_p" 
     args["exclude"] = "natural" 
-    models = {"fat5-large-orig0":True, "fat5-large-xIntent-8":False}
-    langs = {"en":True, "fa":True, "mix":True}
-    methods = {"unsup":False, "context":True, "sup": False}
+    models = {"fat5-large-orig0":True, "fat5-large-xIntent-8":True}
+    langs = {"en":True, "fa":False, "mix":True}
+    methods = {"unsup":True, "context":True, "sup": False}
     to_wrap = {"wrapped":True, "unwrapped": False}
     to_freez = {"freezed":True, "unfreezed": True}
     for model in [k for k in models.keys() if models[k]]:
