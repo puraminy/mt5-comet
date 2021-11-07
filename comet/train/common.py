@@ -496,6 +496,8 @@ def eval(model, tokenizer, val_data, interactive, save_path, output_name, val_re
     dictPath(output_name, results, res, sep="_")
     with open(os.path.join(resPath, "results.json"), "w") as f:
         json.dump(results, f, indent=2)
+    with open(os.path.join(resPath, f"results_{output_name}.json"), "w") as f:
+        json.dump(results, f, indent=2)
     with open(os.path.join(logPath, "results.json"), "w") as f:
         json.dump(results, f, indent=2)
 

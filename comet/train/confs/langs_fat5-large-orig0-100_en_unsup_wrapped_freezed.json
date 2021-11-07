@@ -6,7 +6,7 @@
     "val_set": "validation",
     "val_samples": 50,
     "load_path": "/content/drive/MyDrive/backup/logs/",
-    "overwrite": true,
+    "overwrite": "langs",
     "save_path": "/content/drive/MyDrive/backup/new_logs",
     "output_name": "langs_fat5-large-orig0-100_en_unsup_wrapped_freezed",
     "lang": "lang",

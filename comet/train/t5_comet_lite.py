@@ -112,7 +112,8 @@ def run(ctx, conf_path, experiment):
 @click.option(
     "--overwrite",
     "-o",
-    is_flag=True,
+    default="",
+    type=str,
     help=""
 )
 @click.option(
@@ -368,6 +369,7 @@ def train(model_id, qtemp, anstemp, train_samples, val_set,
     for logger in [clog, vlog]:
         logger.info(args_str)
         logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+
     ii = 1
     while not overwrite and Path(save_path).exists() and not model_id=="test":
         ans = input("The output directory already exists, do you want to overwite it? (y/n)")
@@ -376,6 +378,9 @@ def train(model_id, qtemp, anstemp, train_samples, val_set,
         save_path = os.path.join(log_dir,output_name + "_"+str(ii))
         mlog.info(save_path)
         ii += 1
+
+    if overwite:
+        save_path = os.path.join(log_dir, overwrite)
 
     Path(save_path).mkdir(exist_ok=True, parents=True)
     Path(os.path.join(save_path, "best_model")).mkdir(exist_ok=True, parents=True)
@@ -645,7 +650,7 @@ def create_confs(experiment):
     args["val_samples"] = 50
     args["load_path"] = "/content/drive/MyDrive/backup/logs/"
     args["save_path"] = "/content/drive/MyDrive/backup/new_logs"
-    args["overwrite"] = True
+    args["overwrite"] = experiment
     args["cpu"] = False 
     args["config"] = False 
     args["batch_size"] = 2 
