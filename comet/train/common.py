@@ -115,7 +115,7 @@ targets = ["target_text", "target_text_fa", "pred_text1", "all_preds", "pred_tex
 inputs = ["input_text", "input_text_fa", "natural_input_text", "natural_input_text_fa"]
 
 placeholder_token = "<extra_id_0>"
-end_token = "<extar_id_1>"
+end_token = "<extra_id_1>"
 # %%
 atomic_relation_prompt_lengths = {
     "xIntent":(5,3),
