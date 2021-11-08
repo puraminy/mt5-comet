@@ -89,6 +89,13 @@ def run(ctx, conf_path, experiment, print_log, model_id):
 @run.command()
 @click.argument("model_id", type=str)
 @click.option(
+    "--experiment",
+    "-exp",
+    default="",
+    type=str,
+    help=""
+)
+@click.option(
     "--path",
     envvar="PWD",
     #    multiple=True,
@@ -159,7 +166,7 @@ def run(ctx, conf_path, experiment, print_log, model_id):
 @click.option(
     "--lang",
     "-lang",
-    default="lang",
+    default="",
     type=str,
     help=""
 )
@@ -176,6 +183,13 @@ def run(ctx, conf_path, experiment, print_log, model_id):
     default="{ph} {resp} {end}",
     type=str,
     help="tempate for response"
+)
+@click.option(
+    "--method",
+    "-mt",
+    default="",
+    type=str,
+    help="Based on the method (sup, unsup, context-en, ... ) templates for query and answer are created."
 )
 @click.option(
     "--pred_tresh",
@@ -322,7 +336,7 @@ def run(ctx, conf_path, experiment, print_log, model_id):
     type=str,
     help=""
 )
-def train(model_id, qtemp, anstemp, train_samples, val_set, 
+def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set, 
          val_samples, load_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks, include, exclude, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log):
 
     #%% some hyper-parameters
@@ -334,23 +348,37 @@ def train(model_id, qtemp, anstemp, train_samples, val_set,
         vlog.addHandler(consoleHandler)
     if "clog" in print_log: # config logger
         clog.addHandler(consoleHandler)
+    if method:    
+        qtemp, anstemp = create_templates(method, wrap, froze)
+    if lang:
+        _include, _exclude = filter_inputs(lang)
+        include = _include if not include else include + "|" + _include
+        exclude = _exclude if not exclude else exclude + "|" + _exclude
 
-    mlog.info("========================= Version 6 ========================")
+
+    mlog.info("========================= Version 7 ========================")
     if save_path == "":
-        save_path = "/content/drive/MyDrive/backup/logs"
-        if "ahmad" in home:
-            save_path = "/home/ahmad/logs"
+        if "ahmad" or "pouramini" in home:
+            save_path = os.path.join(home, "logs")
+        else:
+            save_path = "/content/drive/MyDrive/backup/logs"
+
+    if not output_name:
+        w_str = "wrapped" if wrap else "unwrapped"
+        f_str = "freezed" if frozen else "unfreezed"
+        name = f"{experiment}_{model_id}-{train_samples}_{lang}_{method}_{w_str}_{f_str}"
 
     args = locals()
     if model_id == "test":
         save_path = ""
+        output_name = "test"
     conf_path = os.path.join(save_path,"confs")
     Path(conf_path).mkdir(exist_ok=True, parents=True)
     with open(os.path.join(conf_path, f'conf_{output_name}.json'), 'w') as outfile:
         json.dump(args, outfile, indent=4)
 
     if config:
-        mlog.info("Config was created at %s", conf_path)
+        mlog.info("Config %s was created at %s", "conf_" + output_name, conf_path)
         return
 
     if save_path != logPath:
@@ -423,7 +451,8 @@ def train(model_id, qtemp, anstemp, train_samples, val_set,
     if overwrite:
         save_path = os.path.join(log_dir, overwrite)
 
-    mlog.info(f"SAVE Path:{save_path}")
+    mlog.info(f"SAVE Path:{save_path}" + " (Overwrite)" if overwrite else "")
+    mlog.info(f"LOAD Path:{underlying_model_name}")
     Path(save_path).mkdir(exist_ok=True, parents=True)
     Path(os.path.join(save_path, "best_model")).mkdir(exist_ok=True, parents=True)
     #%% load atomic data
@@ -680,14 +709,15 @@ def train(model_id, qtemp, anstemp, train_samples, val_set,
 )
 def create_confs(experiment):
     print("Creating configurations...")
-    conf = "/home/ahmad/logs/confs/conf_out.json"
-    save_path = "/home/ahmad/mt5-comet/comet/train/"
+    conf = os.path.join(home, "logs/confs/conf_test.json")
+    save_path = os.path.join(home, "mt5-comet/comet/train/")
     conf_path = os.path.join(save_path,"confs")
     Path(conf_path).mkdir(exist_ok=True, parents=True)
     if Path(conf).exists():
        with open(conf, 'r') as f:
            args = json.load(f) 
     samples = 100
+    args["experiment"] = experiment
     args["train_samples"] = samples
     args["val_samples"] = 50
     args["load_path"] = "/content/drive/MyDrive/backup/logs/"
@@ -700,26 +730,19 @@ def create_confs(experiment):
     args["exclude"] = "natural" 
     models = {"fat5-large-orig0":True, "fat5-large-xIntent-8":True}
     langs = {"en":True, "fa":True, "mix":True}
-    methods = {"unsup":True, "context":True, "sup": False}
+    methods = {"unsup":True, "context-en":True,"context-fa":True, "sup": False}
     to_wrap = {"wrapped":True, "unwrapped": False}
     to_freez = {"freezed":True, "unfreezed": True}
     for model in [k for k in models.keys() if models[k]]:
         for lang in [k for k in langs.keys() if langs[k]]: 
-            for s in [k for k in methods.keys() if methods[k]]:
+            for method in [k for k in methods.keys() if methods[k]]:
                 for w in [k for k in to_wrap.keys() if to_wrap[k]]:
                    for f in [k for k in to_freez.keys() if to_freez[k]]:
-                       if s == "context" and lang != "fa":
+                       if method == "context-en" and lang != "fa":
                            continue
-                       if lang == "en":
-                           args["exclude"] = "natural|_fa"
-                           args["include"] = ""
-                       if lang == "fa":
-                           args["exclude"] = "natural"
-                           args["include"] = "_fa"
-                       if lang == "mix":
-                           args["exclude"] = "natural"
-                           args["include"] = ""
-                       if f == "freezed" and s == "sup" and w == "unwrapped":
+                       if method == "context-fa" and lang != "en":
+                           continue
+                       if f == "freezed" and method == "sup" and w == "unwrapped":
                            continue
                        args["model_id"]= model
                        args["frozen"] = False
@@ -728,28 +751,7 @@ def create_confs(experiment):
                        args["wrap"] = ""
                        if w == "wrapped":
                            args["wrap"] = "xIntent"
-                       if s == "context":
-                           args["qtemp"] = "{enc_token} {input_text} {rel_natural_en} {target_text} {event} {rel_natural} {gen} {ph}"
-                           args["anstemp"] = "{ph} {resp} {end}"
-                       elif s == "sup":
-                           if w == "wrapped":
-                               args["qtemp"] = "{enc_token} {event} {gen}"
-                               args["anstemp"] = "{resp}"
-                           else: #unwrapped
-                               args["qtemp"] = "{rel_token} {event} {gen}"
-                               args["anstemp"] = "{resp}"
-                       elif s == "unsup":
-                           if w == "wrapped":
-                               args["qtemp"] = "{enc_token} {event} {gen} {ph}"
-                               args["anstemp"] = "{ph} {resp} {end}"
-                           else: #unwrapped
-                               if f == "unfreezed":
-                                   args["qtemp"] = "{rel_token} {event} {gen} {ph}"
-                                   args["anstemp"] = "{ph} {resp} {end}"
-                               else:
-                                   args["qtemp"] = "{event} {rel_natural} {ph}"
-                                   args["anstemp"] = "{ph} {resp} {end}"
-                       name = f"{experiment}_{model}-{samples}_{lang}_{s}_{w}_{f}"
+                       name = f"{experiment}_{model}-{samples}_{lang}_{method}_{w}_{f}"
                        args["output_name"] = name
                        #name = name.replace("_unwrapped", "")
                        #name = name.replace("_unfreezed", "")

@@ -15,9 +15,9 @@ import torch
 import json
 from os.path import expanduser
 home = expanduser("~")
-if "ahmad" in home:
-    logPath = "/home/ahmad/logs/"
-    resPath = "/home/ahmad/logs/"
+if "ahmad" or "pouramini" in home:
+    logPath = os.path.join(home, "logs")
+    resPath = os.path.join(home, "results") 
 else:
     logPath = "/content/"
     resPath = "/content/drive/MyDrive/backup/results"
@@ -187,6 +187,46 @@ def fill_consts(template, row):
         val = str(value)
         text = text.replace("{" + key + "}", val)
     return text
+
+def filter_inputs(lang):
+   if lang == "en":
+       exclude = "natural|_fa"
+       include = ""
+   if lang == "fa":
+       exclude = "natural"
+       include = "_fa"
+   if lang == "mix":
+       exclude = "natural"
+       include = ""
+   return include, exclude
+
+#tttttttttt
+def create_templates(method, wrapped, frozen):
+       if method == "context-en":
+           qtemp = "{enc_token} {input_text} {rel_natural_en} {target_text} {event} {rel_natural} {gen} {ph}"
+           anstemp = "{ph} {resp} {end}"
+       if method == "context-fa":
+           qtemp = "{enc_token} {input_text} {rel_natural_en} {target_text} {event} {rel_natural} {gen} {ph}"
+           anstemp = "{ph} {resp} {end}"
+       elif method == "sup":
+           if wrapped:
+               qtemp = "{enc_token} {event} {gen}"
+               anstemp = "{resp}"
+           else: #unwrapped
+               qtemp = "{rel_token} {event} {gen}"
+               anstemp = "{resp}"
+       elif method == "unsup":
+           if wrapped:
+               qtemp = "{enc_token} {event} {gen} {ph}"
+               anstemp = "{ph} {resp} {end}"
+           else: #unwrapped
+               if frozen:
+                   qtemp = "{rel_token} {event} {gen} {ph}"
+                   anstemp = "{ph} {resp} {end}"
+               else:
+                   qtemp = "{event} {rel_natural} {ph}"
+                   anstemp = "{ph} {resp} {end}"
+       return qtemp, anstemp
 
 def fill_vars(template, rel, event, gen_token, resp, inp_lang, resp_lang):
     rel_natural = relation_natural_mappings[rel][inp_lang]        
