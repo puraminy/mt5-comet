@@ -205,8 +205,8 @@ def create_templates(method, wrapped, frozen):
        if method == "context-en":
            qtemp = "{enc_token} {input_text} {rel_natural_en} {target_text} {event} {rel_natural} {gen} {ph}"
            anstemp = "{ph} {resp} {end}"
-       if method == "context-fa":
-           qtemp = "{enc_token} {input_text} {rel_natural_en} {target_text} {event} {rel_natural} {gen} {ph}"
+       elif method == "context-fa":
+           qtemp = "{enc_token} {input_text_fa} {rel_natural_fa} {target_text_fa} {event} {rel_natural} {gen} {ph}"
            anstemp = "{ph} {resp} {end}"
        elif method == "sup":
            if wrapped:
@@ -226,6 +226,8 @@ def create_templates(method, wrapped, frozen):
                else:
                    qtemp = "{event} {rel_natural} {ph}"
                    anstemp = "{ph} {resp} {end}"
+       else:
+           raise ValueError("not supprted method: " + method)
        return qtemp, anstemp
 
 def fill_vars(template, rel, event, gen_token, resp, inp_lang, resp_lang):
@@ -376,18 +378,20 @@ def fill_data(split_df, split_name, inputs, targets, qtemp, anstemp,
 
 def save_checkpoint(model, optimizer, scheduler, step, 
                    best_eval_step, best_dev_loss, save_path):
-    model.save_pretrained(save_path)
-    torch.save({
-            'step': step,
-            'eval_step': best_eval_step,
-            'model_state_dict': model.state_dict(),
-            'optimizer_state_dict': optimizer.state_dict(),
-            'scheduler_state_dict': scheduler.state_dict(),
-            }, os.path.join(save_path, "saved_states"))
-
+    mlog.info("Saving model ...")
     with open(save_path + "/best_model.txt", "a") as f:
         print("best_step:", best_eval_step, file=f)
         print("best dev loss:", best_dev_loss, file=f)
+    model.save_pretrained(save_path)
+
+#    torch.save({
+#            'step': step,
+#            'eval_step': best_eval_step,
+#            'model_state_dict': model.state_dict(),
+#            'optimizer_state_dict': optimizer.state_dict(),
+#            'scheduler_state_dict': scheduler.state_dict(),
+#            }, os.path.join(save_path, "saved_states"))
+#
 
 def bert_score(bert_scorer, hyps, refs):
         if bert_scorer == None:
@@ -420,8 +424,10 @@ def bert_score(bert_scorer, hyps, refs):
 # ################################### Evaluation #########################
 def eval(model, tokenizer, val_data, interactive, save_path, output_name, val_records, gen_param="greedy"):  
     base_path = "/content/drive/MyDrive/pret"
-    if "ahmad" in home:
-        base_path = "/home/ahmad/pret"
+    if "ahmad" or "pouramini" in home:
+        base_path = os.path.join(home, "pret", "mm")
+
+    mlog.info("Loading models for evaluation ..")
 
     local_path = f"{base_path}/paraphrase-multilingual-MiniLM-L12-v2"        
     if not Path(local_path).exists():

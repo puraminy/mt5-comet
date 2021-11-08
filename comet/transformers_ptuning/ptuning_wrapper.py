@@ -8,13 +8,13 @@ import torch.nn.functional as F
 def _isin(tensor:torch.Tensor,values:torch.Tensor):
     return (tensor[..., None] == values).any(-1)
 import logging
-
+import os
 from os.path import expanduser
 home = expanduser("~")
 
 wlog = logging.getLogger("comet.wrapper")
-if "ahmad" in home:
-    logFilename = "/home/ahmad/logs/wrapper.log"
+if "ahmad"  or "pouramini" in home:
+    logFilename = os.path.join(home, "logs/wrapper.log")
 else:
     logFilename = "/content/wrapper.log"
 wHandler = logging.FileHandler(logFilename)

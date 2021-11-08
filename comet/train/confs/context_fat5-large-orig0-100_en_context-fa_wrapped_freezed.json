@@ -10,7 +10,7 @@
     "load_path": "/home/pouramini/pret",
     "overwrite": "context",
     "save_path": "/home/pouramini/logs",
-    "output_name": "context_fat5-large-orig0-100_en_unsup_wrapped_freezed",
+    "output_name": "context_fat5-large-orig0-100_en_context-fa_wrapped_freezed",
     "lang": "",
     "pred_tresh": 0,
     "ignore_blanks": false,

@@ -60,7 +60,7 @@ def run(ctx, conf_path, experiment, print_log, model_id):
         for conf in confs:
             fname = Path(conf).stem
             mlog.info(f"%%% {fname} %%%")
-            if not fname.startswith(experiment):
+            if not experiment in fname:
                 mlog.info("Skipping .... This was not in experiments")
                 continue
             val = getVal(fname, results) 
@@ -125,7 +125,7 @@ def run(ctx, conf_path, experiment, print_log, model_id):
 @click.option(
     "--val_samples",
     "-ng",
-    default=0,
+    default=40,
     type=int,
     help=""
 )
@@ -138,7 +138,7 @@ def run(ctx, conf_path, experiment, print_log, model_id):
 @click.option(
     "--load_path",
     "-load",
-    default="/home/ahmad/pret",
+    default="",
     type=str,
     help=""
 )
@@ -159,7 +159,7 @@ def run(ctx, conf_path, experiment, print_log, model_id):
 @click.option(
     "--output_name",
     "-out",
-    default="out",
+    default="",
     type=str,
     help=""
 )
@@ -349,7 +349,7 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
     if "clog" in print_log: # config logger
         clog.addHandler(consoleHandler)
     if method:    
-        qtemp, anstemp = create_templates(method, wrap, froze)
+        qtemp, anstemp = create_templates(method, wrap, frozen)
     if lang:
         _include, _exclude = filter_inputs(lang)
         include = _include if not include else include + "|" + _include
@@ -369,10 +369,11 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
         name = f"{experiment}_{model_id}-{train_samples}_{lang}_{method}_{w_str}_{f_str}"
 
     args = locals()
+    conf_path = os.path.join(save_path,"confs")
     if model_id == "test":
         save_path = ""
         output_name = "test"
-    conf_path = os.path.join(save_path,"confs")
+        conf_path = os.path.join(home, "logs/confs")
     Path(conf_path).mkdir(exist_ok=True, parents=True)
     with open(os.path.join(conf_path, f'conf_{output_name}.json'), 'w') as outfile:
         json.dump(args, outfile, indent=4)
@@ -389,6 +390,9 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
             logFilename = os.path.join(save_path, fname + ".log")
             handler = logging.FileHandler(logFilename, mode = "w" if clear_logs else "a")
             logger.addHandler(handler)
+
+    if not load_path:
+        load_path = os.path.join(home, "pret")
 
     if from_dir:
         underlying_model_name = path
@@ -439,17 +443,19 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
         logger.info(args_str)
         logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
 
+    do_overwrite = False
+    if overwrite:
+        save_path = os.path.join(log_dir, overwrite)
+        do_overwrite = True
     ii = 1
-    while not overwrite and Path(save_path).exists() and not model_id=="test":
-        ans = input("The output directory already exists, do you want to overwrite it? (y/n)")
+    while not do_overwrite and Path(save_path).exists() and not model_id=="test":
+        ans = input(f"The output directory {save_path} already exists, do you want to overwrite it? (y/n)")
         if ans == "y":
-            overwrite = True
+            do_overwrite = True 
+            break
         save_path = os.path.join(log_dir,output_name + "_"+str(ii))
         mlog.info(save_path)
         ii += 1
-
-    if overwrite:
-        save_path = os.path.join(log_dir, overwrite)
 
     mlog.info(f"SAVE Path:{save_path}" + " (Overwrite)" if overwrite else "")
     mlog.info(f"LOAD Path:{underlying_model_name}")
@@ -488,6 +494,7 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
     accumulation_tiny_steps = 2 
     node_batch_size = batch_size//accumulation_tiny_steps
     #%% tokenizer & model
+    mlog.info("Loading model ...")
     if model_id == "test":
         return
     if "mt5" in model_id:
@@ -707,28 +714,39 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
     type=str,
     help=""
 )
-def create_confs(experiment):
+@click.option(
+    "--base_dir",
+    default="",
+    type=str,
+    help=""
+)
+def create_confs(experiment, base_dir):
     print("Creating configurations...")
-    conf = os.path.join(home, "logs/confs/conf_test.json")
-    save_path = os.path.join(home, "mt5-comet/comet/train/")
+    if not base_dir:
+        base_dir = home
+    conf = os.path.join(base_dir, "logs/confs/conf_test.json")
+    save_path = os.path.join(base_dir, "mt5-comet/comet/train/")
     conf_path = os.path.join(save_path,"confs")
     Path(conf_path).mkdir(exist_ok=True, parents=True)
     if Path(conf).exists():
        with open(conf, 'r') as f:
            args = json.load(f) 
+    else:
+        print(conf + " doesn't exists!")
+        return
     samples = 100
     args["experiment"] = experiment
     args["train_samples"] = samples
     args["val_samples"] = 50
-    args["load_path"] = "/content/drive/MyDrive/backup/logs/"
-    args["save_path"] = "/content/drive/MyDrive/backup/new_logs"
+    args["load_path"] = os.path.join(base_dir, "pret")
+    args["save_path"] = os.path.join(base_dir, "logs")
     args["overwrite"] = experiment
     args["cpu"] = False 
     args["config"] = False 
     args["batch_size"] = 2 
     args["gen_param"] = "top_p" 
     args["exclude"] = "natural" 
-    models = {"fat5-large-orig0":True, "fat5-large-xIntent-8":True}
+    models = {"fat5-large":True, "fat5-large-xIntent-8k":True}
     langs = {"en":True, "fa":True, "mix":True}
     methods = {"unsup":True, "context-en":True,"context-fa":True, "sup": False}
     to_wrap = {"wrapped":True, "unwrapped": False}
