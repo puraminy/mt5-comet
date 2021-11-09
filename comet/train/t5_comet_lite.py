@@ -342,6 +342,8 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
     #%% some hyper-parameters
     #bbbbbbbbbbb
     #underlying_model_name = "logs/atomic-mt5/last"
+    mlog.info("given load path:", load_path)
+    mlog.info("given save path:", save_path)
     if "dlog" in print_log: # data logger
         dlog.addHandler(consoleHandler)
     if "vlog" in print_log: # evaluation logger
