@@ -511,8 +511,8 @@ def eval(model, tokenizer, val_data, interactive, save_path, output_name, val_re
                         new_tails.append(nt)
                     tails = new_tails
                     data["input_text"] = input_text 
-                    data["target_text"] = "<br />".join(tails)
                     data["pred_text1"] = top_hyp
+                    data["target_text"] = "<br />".join(tails)
                     data["prefix"] = rel
                     data["langs"] = lang
                     #Compute embeddings
