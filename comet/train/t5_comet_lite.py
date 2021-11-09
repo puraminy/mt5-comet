@@ -716,6 +716,7 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
 )
 @click.option(
     "--base_dir",
+    "-b",
     default="",
     type=str,
     help=""
