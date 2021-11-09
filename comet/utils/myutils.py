@@ -1,3 +1,11 @@
+def superitems(obj):
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            for i in superitems(v):
+                yield (k,) + i
+    else:
+        yield (obj,)
+
 def dictPath(path, dictionary, val, sep="_"):
     "set a value in a nested dictionary"
     while path.startswith(sep):

@@ -299,7 +299,7 @@ def run(ctx, conf_path, experiment, print_log, model_id):
 @click.option(
     "--cycle",
     "-c",
-    default=500,
+    default=1000,
     type=int,
     help=""
 )
@@ -718,6 +718,7 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
     help=""
 )
 def create_confs(experiment, models_dir):
+    #cccccccccccc
     print("Creating configurations...")
     base_dir = home
     conf = os.path.join(base_dir, "logs/confs/conf_test.json")
@@ -772,5 +773,42 @@ def create_confs(experiment, models_dir):
                        print(name)
                        with open(os.path.join(conf_path, f'{name}.json'), 'w') as outfile:
                                 json.dump(args, outfile, indent=4)
+
+@run.command()
+@click.option(
+    "--stype",
+    "-s",
+    default="rouge",
+    type=str,
+    help="score type (rouge, bert, etc.)"
+)
+@click.option(
+    "--model",
+    "-m",
+    default="",
+    type=str,
+    help=""
+)
+@click.option(
+    "--method",
+    "-mt",
+    default="",
+    type=str,
+    help=""
+)
+def res(stype, model, method):
+    mlog.info("Reading results from %s", resPath)
+    with open(os.path.join(resPath, "results.json"), "r") as f:
+        data = json.load(f)
+    
+    sd = superitems(data)
+    df = pd.DataFrame(sd, columns=["exp","model","lang", "method","wrap","frozen","stype", "dir", "score"])
+    df.to_csv(os.path.join(resPath, "table_all.tsv"), sep="\t", index = False)
+    df = df[df["stype"] == stype]
+    del df["stype"] 
+    df = df.sort_values(by=["score"], ascending=False)
+    df.to_csv(os.path.join(resPath, f"table_{stype}.tsv"), sep="\t", index = False)
+    print(df)
+
 if __name__ == "__main__":
    run()
