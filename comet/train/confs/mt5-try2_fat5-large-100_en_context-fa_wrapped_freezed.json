@@ -35,6 +35,6 @@
     "is_flax": false,
     "config": false,
     "clear_logs": false,
-    "gen_param": "top_p",
+    "gen_param": "greedy",
     "print_log": "mlog"
 }
