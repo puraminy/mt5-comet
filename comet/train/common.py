@@ -1,4 +1,5 @@
 from pathlib import Path
+import nltk
 from nltk.tokenize import word_tokenize
 from nltk.translate.bleu_score import SmoothingFunction, sentence_bleu
 from sentence_transformers import SentenceTransformer, util
@@ -428,6 +429,11 @@ def bert_score(bert_scorer, hyps, refs):
 # ################################### Evaluation #########################
 def eval(model, tokenizer, val_data, interactive, save_path, output_name, val_records, gen_param="greedy"):  
 
+    try:
+        nltk_path = str(nltk.data.find("tokenizers/punkt"))
+        logger.info(f"using nltk from: {nltk_path}")
+    except LookupError:
+        nltk.download('punkt')
     base_path = "/content/drive/MyDrive/pret"
     if "ahmad" or "pouramini" in home:
         base_path = os.path.join(home, "pret", "mm")
@@ -460,6 +466,7 @@ def eval(model, tokenizer, val_data, interactive, save_path, output_name, val_re
     mean_rouge = {}
     sum_bleu = {}
     mean_bleu = {}
+    smoothie = SmoothingFunction().method4 # a function for smooth
     hyp_counter = [0]*5
     for rel in val_data.keys():
         vlog.info(f"%%%%%%%%%%%%%%%%%%%%%%%%% {rel} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")

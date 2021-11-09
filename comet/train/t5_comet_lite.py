@@ -606,7 +606,8 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
                     #    for p in model.parameters():
                     #        p.requires_grad = False 
                     model.eval()
-                    pbar.set_description('validating...')
+                    pbar.set_description(f'validating on {cycle}...')
+                    vlog.info(f'validating on {cycle}...')
                     dev_allset_micro_loss = 0.
                     dev_token_loss = 0.
                     dev_token_count = 0
@@ -633,7 +634,9 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
                     dev_micro_avg_loss = dev_token_loss/dev_token_count
                     dev_macro_avg_loss = dev_sample_loss/dev_sample_count
                     sw.add_scalar('dev/micro_avg_loss',dev_micro_avg_loss,step)
+                    vlog.info('dev/micro_avg_loss: %s-%s',dev_micro_avg_loss,step)
                     sw.add_scalar('dev/macro_avg_loss',dev_macro_avg_loss,step)
+                    vlog.info('dev/macro_avg_loss: %s-%s',dev_macro_avg_loss,step)
                     if dev_micro_avg_loss < best_dev_loss:
                         best_dev_loss = dev_micro_avg_loss
                         best_eval_step = step
@@ -648,6 +651,7 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
                             if i==validation_num_generation:
                                 break
                             results = gen_resp(model, tokenizer, key[0]) 
+                            vlog.info(results)
                             generation_results+=f"|`{key}`|`{str(results)}`|\n"
                         sw.add_text('dev/generation_samples',generation_results,step)
             if unfreez_step > 0 and step > unfreez_step and froze:
@@ -689,7 +693,7 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
             tot_loss += bloss
             mean_loss = tot_loss/step
             sw.add_scalar('train/loss',bloss,global_step=step)
-            tlog.info("%s: %s >> %s", step, bloss, mean_loss)
+            tlog.info(f"{:<5}: {:.2f} >> {:.2f}", step, bloss, mean_loss)
             pbar.set_description(f'training ...[loss:{bloss:.2f} ({mean_loss:.2f})]')
             pbar.update()
             del result
