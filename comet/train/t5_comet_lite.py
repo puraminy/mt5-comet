@@ -649,8 +649,6 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
                             results = gen_resp(model, tokenizer, key[0]) 
                             generation_results+=f"|`{key}`|`{str(results)}`|\n"
                         sw.add_text('dev/generation_samples',generation_results,step)
-            pbar.set_description('training...')
-            pbar.update()
             if unfreez_step > 0 and step > unfreez_step and froze:
                 mlog.info("unfreezing the model")
                 unfreez_step = 0
@@ -689,7 +687,8 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
             bloss = batch_loss.item()
             sw.add_scalar('train/loss',bloss,global_step=step)
             tlog.info("%s: %s", step, bloss)
-            pbar.set_description(f'traing ...[loss: {bloss}]')
+            pbar.set_description(f'training ...[loss: {bloss}]')
+            pbar.update()
             del result
             del loss
         except KeyboardInterrupt:
