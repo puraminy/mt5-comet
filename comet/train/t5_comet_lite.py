@@ -340,6 +340,8 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
          val_samples, load_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks, include, exclude, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log):
 
     #%% some hyper-parameters
+
+
     #bbbbbbbbbbb
     #underlying_model_name = "logs/atomic-mt5/last"
     mlog.info("given load path: %s", load_path)
@@ -353,11 +355,9 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
     if method:    
         qtemp, anstemp = create_templates(method, wrap, frozen)
     if lang:
-        _include, _exclude = filter_inputs(lang)
-        include = _include if not include else include + "|" + _include
-        exclude = _exclude if not exclude else exclude + "|" + _exclude
+        include, exclude = filter_inputs(include, exclude, lang)
 
-
+    args = locals() # input parameters
     mlog.info("========================= Version 7 ========================")
     if save_path == "":
         if "ahmad" or "pouramini" in home:
@@ -368,9 +368,7 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
     if not output_name:
         w_str = "wrapped" if wrap else "unwrapped"
         f_str = "freezed" if frozen else "unfreezed"
-        name = f"{experiment}_{model_id}-{train_samples}_{lang}_{method}_{w_str}_{f_str}"
-
-    args = locals()
+        output_name = f"{experiment}_{model_id}-{train_samples}_{lang}_{method}_{w_str}_{f_str}"
     conf_path = os.path.join(save_path,"confs")
     if model_id == "test":
         save_path = ""
@@ -379,6 +377,8 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
     Path(conf_path).mkdir(exist_ok=True, parents=True)
     with open(os.path.join(conf_path, f'conf_{output_name}.json'), 'w') as outfile:
         json.dump(args, outfile, indent=4)
+
+
 
     if config:
         mlog.info("Config %s was created at %s", "conf_" + output_name, conf_path)

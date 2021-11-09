@@ -189,16 +189,16 @@ def fill_consts(template, row):
         text = text.replace("{" + key + "}", val)
     return text
 
-def filter_inputs(lang):
+def filter_inputs(include, exclude, lang):
    if lang == "en":
-       exclude = "natural|_fa"
-       include = ""
+       exclude += "|natural|_fa"
    if lang == "fa":
-       exclude = "natural"
-       include = "_fa"
+       exclude += "|natural"
+       include += "|_fa"
    if lang == "mix":
-       exclude = "natural"
-       include = ""
+       exclude += "|natural"
+   include = include.strip("|")
+   exclude = exclude.strip("|")
    return include, exclude
 
 #tttttttttt

@@ -37,7 +37,5 @@
     "clear_logs": false,
     "gen_param": "top_p",
     "print_log": "mlog",
-    "w_str": "unwrapped",
-    "f_str": "unfreezed",
     "name": "_test-100___unwrapped_unfreezed"
 }
