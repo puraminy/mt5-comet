@@ -759,7 +759,7 @@ def create_confs(experiment, models_dir):
     args["cpu"] = False 
     args["config"] = False 
     args["batch_size"] = 2 
-    args["gen_param"] = "top_p" 
+    args["gen_param"] = "greedy" 
     args["exclude"] = "natural" 
     models = {"fat5-large":True, "fat5-large-xIntent-8k":False}
     langs = {"en":True, "fa":False, "mix":True}

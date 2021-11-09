@@ -588,9 +588,11 @@ def eval(model, tokenizer, val_data, interactive, save_path, output_name, val_re
 
     mean_bert_str = json.dumps(mean_bert, indent=2)
     mean_rouge_str = json.dumps(mean_rouge, indent=2)
+    mean_bleu_str = json.dumps(mean_bleu, indent=2)
     res = {}
     res["rouge"] = mean_rouge
     res["bert"] = mean_bert
+    res["bleu"] = mean_bleu
     res["distinct"] = len(pred_counts)
     res["hyps"] = hyp_counter
 
@@ -604,7 +606,8 @@ def eval(model, tokenizer, val_data, interactive, save_path, output_name, val_re
 
     for logger in [mlog, vlog, clog]:
         logger.info("Len data frame: {}".format(len(new_df)))
-        logger.info("Rouge:{} BERT {} ".format(mean_rouge_str, mean_bert_str))
+        logger.info("Rouge:{} BERT: {} BLEU: {}".format(mean_rouge_str, 
+                mean_bert_str, mean_bleu_str))
         logger.info("DF mean Bert Score: {}".format(new_df["bert_score"].mean()))
         logger.info("DF mean Rouge Score: {}".format(new_df["rouge_score"].mean()))
         logger.info("nli_counter: {}".format(nli_counter))
