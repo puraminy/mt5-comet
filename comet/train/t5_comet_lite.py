@@ -715,7 +715,7 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
 @click.option(
     "--models_dir",
     "-m",
-    default="",
+    default="/content/drive/MyDrive",
     type=str,
     help=""
 )
