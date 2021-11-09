@@ -11,9 +11,8 @@ import logging
 import os
 from os.path import expanduser
 home = expanduser("~")
-print("home:", home)
 wlog = logging.getLogger("comet.wrapper")
-if "ahmad"  or "pouramini" in home:
+if "ahmad" in home or "pouramini" in home:
     logFilename = os.path.join(home, "logs/wrapper.log")
 else:
     logFilename = "/content/wrapper.log"
