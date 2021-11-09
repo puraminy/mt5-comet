@@ -480,6 +480,7 @@ def eval(model, tokenizer, val_data, interactive, save_path, output_name, val_re
                     if not scope in sum_bert: 
                         sum_bert[scope] = 0
                         sum_rouge[scope] = 0
+                        sum_bleu[scope] = 0
                         counter[scope] = 0
                     vlog.debug("&&&&&&&&&&&&&&&&& All Targets &&&&&&&&&&&&&&")
                     for _tail in tails:
