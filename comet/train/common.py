@@ -15,12 +15,13 @@ import torch
 import json
 from os.path import expanduser
 home = expanduser("~")
-if "ahmad" or "pouramini" in home:
+if "ahmad" in home or "pouramini" in home:
     logPath = os.path.join(home, "logs")
     resPath = os.path.join(home, "results") 
 else:
+    home = "/content/drive/MyDrive/pouramini"
     logPath = "/content/"
-    resPath = "/content/drive/MyDrive/backup/results"
+    resPath = "/content/drive/MyDrive/pouramini/results"
 
 Path(resPath).mkdir(exist_ok=True, parents=True)
 Path(logPath).mkdir(exist_ok=True, parents=True)

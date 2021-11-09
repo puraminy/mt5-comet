@@ -361,7 +361,7 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
         if "ahmad" or "pouramini" in home:
             save_path = os.path.join(home, "logs")
         else:
-            save_path = "/content/drive/MyDrive/backup/logs"
+            save_path = "/content/drive/MyDrive/pouramini/logs"
 
     if not output_name:
         w_str = "wrapped" if wrap else "unwrapped"
@@ -707,24 +707,17 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
     eval(model, tokenizer, atomic_query_responses[val_set], inter, save_path, output_name, val_records, gen_param)  
 
 @run.command()
+@click.argument("experiment", type=str)
 @click.option(
-    "--experiment",
-    "-exp",
-    default="exp",
-    type=str,
-    help=""
-)
-@click.option(
-    "--base_dir",
+    "--models_dir",
     "-b",
     default="",
     type=str,
     help=""
 )
-def create_confs(experiment, base_dir):
+def create_confs(experiment, models_dir):
     print("Creating configurations...")
-    if not base_dir:
-        base_dir = home
+    base_dir = home
     conf = os.path.join(base_dir, "logs/confs/conf_test.json")
     save_path = os.path.join(base_dir, "mt5-comet/comet/train/")
     conf_path = os.path.join(save_path,"confs")
@@ -739,8 +732,8 @@ def create_confs(experiment, base_dir):
     args["experiment"] = experiment
     args["train_samples"] = samples
     args["val_samples"] = 50
-    args["load_path"] = os.path.join(base_dir, "pret")
-    args["save_path"] = os.path.join(base_dir, "logs")
+    args["load_path"] = os.path.join(models_dir, "pret")
+    args["save_path"] = os.path.join(models_dir, "logs")
     args["overwrite"] = experiment
     args["cpu"] = False 
     args["config"] = False 
