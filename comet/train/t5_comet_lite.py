@@ -687,7 +687,7 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
             step+=1
             bloss = batch_loss.item()
             tot_loss += bloss
-            mean_loss = tot_loess/step
+            mean_loss = tot_loss/step
             sw.add_scalar('train/loss',bloss,global_step=step)
             tlog.info("%s: %s >> %s", step, bloss, mean_loss)
             pbar.set_description(f'training ...[loss:{bloss} ({mean_loss})]')
