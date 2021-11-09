@@ -1,4 +1,9 @@
 from pathlib import Path
+from nltk.tokenize import word_tokenize
+from nltk.translate.bleu_score import SmoothingFunction, sentence_bleu
+from sentence_transformers import SentenceTransformer, util
+from sentence_transformers import CrossEncoder
+from rouge import Rouge
 from comet.utils.myutils import *
 from transformers import AddedToken 
 import pandas as pd
@@ -422,11 +427,6 @@ def bert_score(bert_scorer, hyps, refs):
 # vvvvvvvvvvvvvvv
 # ################################### Evaluation #########################
 def eval(model, tokenizer, val_data, interactive, save_path, output_name, val_records, gen_param="greedy"):  
-    from nltk.tokenize import word_tokenize
-    from nltk.translate.bleu_score import SmoothingFunction, sentence_bleu
-    from sentence_transformers import SentenceTransformer, util
-    from sentence_transformers import CrossEncoder
-    from rouge import Rouge
 
     base_path = "/content/drive/MyDrive/pret"
     if "ahmad" or "pouramini" in home:

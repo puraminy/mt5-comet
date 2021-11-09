@@ -690,7 +690,7 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
             mean_loss = tot_loss/step
             sw.add_scalar('train/loss',bloss,global_step=step)
             tlog.info("%s: %s >> %s", step, bloss, mean_loss)
-            pbar.set_description(f'training ...[loss:{bloss} ({mean_loss})]')
+            pbar.set_description(f'training ...[loss:{bloss:.2f} ({mean_loss:.2f})]')
             pbar.update()
             del result
             del loss
