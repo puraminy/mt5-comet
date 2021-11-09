@@ -1,12 +1,9 @@
 from pathlib import Path
 from comet.utils.myutils import *
-from sentence_transformers import SentenceTransformer, util
 from transformers import AddedToken 
-from sentence_transformers import CrossEncoder
 import pandas as pd
 from comet.transformers_ptuning import PTuningWrapper
 from comet.transformers_ptuning.ptuning_wrapper import LSTMEmbeddingPromptEncoder, EmbeddingPromptEncoder
-from rouge import Rouge
 from tqdm import tqdm
 import logging, sys
 import re
@@ -36,9 +33,10 @@ mlog.addHandler(consoleHandler)
 clog = logging.getLogger("comet.cfg")
 dlog = logging.getLogger("comet.data")
 vlog = logging.getLogger("comet.eval")
+tlog = logging.getLogger("comet.train")
 
 
-for logger, fname in zip([mlog,dlog,clog,vlog], ["main","data","cfg","eval"]):
+for logger, fname in zip([mlog,dlog,clog,vlog,tlog], ["all_main","all_data","all_cfg","all_eval","all_train"]):
     logger.setLevel(logging.INFO)
     logFilename = os.path.join(logPath, fname + ".log")
     handler = logging.FileHandler(logFilename, mode="w")
@@ -283,7 +281,7 @@ def get_input(msg):
             continue
 # fill a dataset or generate based on a model
 # mmmmmmmmmmmmmm
-def fill_data(split_df, split_name, inputs, targets, qtemp, anstemp, 
+def fill_data(split_df, split_name, qtemp, anstemp, 
             num_samples=0, 
             ignore_blanks=False,
             include="",
@@ -424,6 +422,13 @@ def bert_score(bert_scorer, hyps, refs):
 # vvvvvvvvvvvvvvv
 # ################################### Evaluation #########################
 def eval(model, tokenizer, val_data, interactive, save_path, output_name, val_records, gen_param="greedy"):  
+    from nltk.translate.bleu_score import sentence_bleu
+    from nltk.tokenize import word_tokenize
+    from nltk.translate.bleu_score import smoothingfunction
+    from sentence_transformers import SentenceTransformer, util
+    from sentence_transformers import CrossEncoder
+    from rouge import Rouge
+
     base_path = "/content/drive/MyDrive/pret"
     if "ahmad" or "pouramini" in home:
         base_path = os.path.join(home, "pret", "mm")
@@ -451,9 +456,11 @@ def eval(model, tokenizer, val_data, interactive, save_path, output_name, val_re
     rows = []
     counter = {"all":0}
     sum_bert = {} 
-    sum_rouge = {}
     mean_bert = {}
+    sum_rouge = {}
     mean_rouge = {}
+    sum_bleu = {}
+    mean_bleu = {}
     hyp_counter = [0]*5
     for rel in val_data.keys():
         vlog.info(f"%%%%%%%%%%%%%%%%%%%%%%%%% {rel} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
@@ -531,15 +538,31 @@ def eval(model, tokenizer, val_data, interactive, save_path, output_name, val_re
 
                     mlog.debug(f"TOP hyp:{top_hyp}")
                     mlog.debug(f"Tails: {tails}")
-                    rouge_score = rouge_scorer.get_scores(top_hyp, ".".join(tails), avg=True, ignore_empty=True)
+                    #### BLUE score
+                    tokenized_rs = []
+                    for r in tails:
+                        tokenized_rs.append(word_tokenize(r))
+                    hypo = word_tokenize(top_hyp)
+                    try:
+                        bleu_score = sentence_bleu(tokenized_rs, hypo, smoothing_function=smoothie)
+                    except ValueError: # TODO ZeroDivisionError
+                        logger.warning("math domain error in bleu, set to 0.0. generated sentence: {}".format(hypo))
+                        bleu_score = 0.0
+                    data["bleu_score"] = bleu_score 
+                    sum_bleu[scope] += bleu_score 
+                    mean_bleu[scope] = "{:.4f}".format(sum_bleu[scope] / counter[scope])
+                    #### Rouge score
+                    rouge_score = rouge_scorer.get_scores(top_hyp, ".".join(tails), 
+                                                        avg=True, ignore_empty=True)
                     rouge_score = rouge_score["rouge-l"]["f"]
                     data["rouge_score"] = rouge_score
                     sum_rouge[scope] += rouge_score
                     mean_rouge[scope] = "{:.4f}".format(sum_rouge[scope] / counter[scope])
                     vlog.info("Bert Score:{:.4f}--{}".format(cur_score, mean_bert[scope]))
                     vlog.info("Rouge Score:{:.4f}--{}".format(rouge_score, mean_rouge[scope]))
+                    vlog.info("BLEU Score:{:.4f}--{}".format(bleu_score, mean_bleu[scope]))
                     vlog.info("------------------------------------------------------")
-                    pbar.set_description(f"{scope} :Bert:{mean_bert[scope]} Rouge {mean_rouge[scope]} ")
+                    pbar.set_description(f"{scope} :Bert:{mean_bert[scope]} Rouge {mean_rouge[scope]} Bleu {mean_bleu[scope]} ")
                     pbar.update(1)
 
     # %%%%%%%%%%%%%%%%%%

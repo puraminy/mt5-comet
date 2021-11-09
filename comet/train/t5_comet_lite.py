@@ -385,7 +385,7 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
         return
 
     if save_path != logPath:
-        for logger, fname in zip([mlog,dlog,clog,vlog], ["main","data","cfg","eval"]):
+        for logger, fname in zip([mlog,dlog,clog,vlog,tlog], ["main","data","cfg","eval","train"]):
             if len(logger.handlers) >= 2:
                 continue
             logger.setLevel(logging.INFO)
@@ -434,7 +434,7 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
            mlog.info("Qtemp: %s", args['qtemp'])
            mlog.info("Anstemp: %s", args['anstemp'])
 
-    for logger in [mlog, vlog, clog, dlog]:
+    for logger in [mlog, vlog, clog, dlog, tlog]:
         logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
         logger.info(f"%%%%%%%%%%%%%%%%%% { model_id } ")
         logger.info(f"%%%%%%%%%%%%%%%%%% { output_name } ")
@@ -480,7 +480,6 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
          atomic_flattened[split_name],
          num_records[split_name]
         )= fill_data(split_df, split_name,
-                            inputs, targets,
                             qtemp, anstemp,
                             num_samples[split_name], 
                             ignore_blanks,
@@ -687,7 +686,10 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
             optimizer.step()
             scheduler.step()
             step+=1
-            sw.add_scalar('train/loss',loss.item(),global_step=step)
+            bloss = batch_loss.item()
+            sw.add_scalar('train/loss',bloss,global_step=step)
+            tlog.info("%s: %s", step, bloss)
+            pbar.set_description(f'traing ...[loss: {bloss}]')
             del result
             del loss
         except KeyboardInterrupt:
@@ -743,19 +745,19 @@ def create_confs(experiment, models_dir):
     args["batch_size"] = 2 
     args["gen_param"] = "top_p" 
     args["exclude"] = "natural" 
-    models = {"fat5-large":True, "fat5-large-xIntent-8k":True}
-    langs = {"en":True, "fa":True, "mix":True}
+    models = {"fat5-large":True, "fat5-large-xIntent-8k":False}
+    langs = {"en":True, "fa":False, "mix":True}
     methods = {"unsup":True, "context-en":True,"context-fa":True, "sup": False}
     to_wrap = {"wrapped":True, "unwrapped": False}
-    to_freez = {"freezed":True, "unfreezed": True}
+    to_freez = {"freezed":True, "unfreezed": False}
     for model in [k for k in models.keys() if models[k]]:
         for lang in [k for k in langs.keys() if langs[k]]: 
             for method in [k for k in methods.keys() if methods[k]]:
                 for w in [k for k in to_wrap.keys() if to_wrap[k]]:
                    for f in [k for k in to_freez.keys() if to_freez[k]]:
-                       if method == "context-en" and lang != "fa":
+                       if method == "context-en" and lang == "en":
                            continue
-                       if method == "context-fa" and lang != "en":
+                       if method == "context-fa" and lang == "fa":
                            continue
                        if f == "freezed" and method == "sup" and w == "unwrapped":
                            continue
@@ -796,7 +798,14 @@ def create_confs(experiment, models_dir):
     type=str,
     help=""
 )
-def res(stype, model, method):
+@click.option(
+    "--sort",
+    "-so",
+    default="score",
+    type=str,
+    help=""
+)
+def res(stype, model, method, sort):
     mlog.info("Reading results from %s", resPath)
     with open(os.path.join(resPath, "results.json"), "r") as f:
         data = json.load(f)
@@ -804,9 +813,12 @@ def res(stype, model, method):
     sd = superitems(data)
     df = pd.DataFrame(sd, columns=["exp","model","lang", "method","wrap","frozen","stype", "dir", "score"])
     df.to_csv(os.path.join(resPath, "table_all.tsv"), sep="\t", index = False)
+    if stype == "all":
+        print(df)
+        return
     df = df[df["stype"] == stype]
     del df["stype"] 
-    df = df.sort_values(by=["score"], ascending=False)
+    df = df.sort_values(by=[sort], ascending=False)
     df.to_csv(os.path.join(resPath, f"table_{stype}.tsv"), sep="\t", index = False)
     print(df)
 
