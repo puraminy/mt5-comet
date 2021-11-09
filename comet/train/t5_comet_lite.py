@@ -299,7 +299,7 @@ def run(ctx, conf_path, experiment, print_log, model_id):
 @click.option(
     "--cycle",
     "-c",
-    default=1000,
+    default=0,
     type=int,
     help=""
 )
@@ -593,11 +593,12 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
     #%% tttttt
     train_iter = iter(train_dataloader)
     pbar = tqdm(total=iterations, position=0, leave=True) #,dynamic_ncols=True)
+    tot_loss = 0
     if step <= iterations and (wrap or not frozen):
         mlog.info("Training...")
     while step <= iterations and (wrap or not frozen):
         try:
-            if (step % cycle == 0 and step > 0): #validation
+            if cycle > 0 and (step % cycle == 0 and step > 0): #validation
                 with torch.no_grad():
                     if wrap:
                         wrapped_model.update_model_weight()
@@ -685,9 +686,11 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
             scheduler.step()
             step+=1
             bloss = batch_loss.item()
+            tot_loss += bloss
+            mean_loss = tot_loess/step
             sw.add_scalar('train/loss',bloss,global_step=step)
-            tlog.info("%s: %s", step, bloss)
-            pbar.set_description(f'training ...[loss: {bloss}]')
+            tlog.info("%s: %s >> %s", step, bloss, mean_loss)
+            pbar.set_description(f'training ...[loss:{bloss} ({mean_loss})]')
             pbar.update()
             del result
             del loss

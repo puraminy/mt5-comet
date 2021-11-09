@@ -422,9 +422,8 @@ def bert_score(bert_scorer, hyps, refs):
 # vvvvvvvvvvvvvvv
 # ################################### Evaluation #########################
 def eval(model, tokenizer, val_data, interactive, save_path, output_name, val_records, gen_param="greedy"):  
-    from nltk.translate.bleu_score import sentence_bleu
     from nltk.tokenize import word_tokenize
-    from nltk.translate.bleu_score import smoothingfunction
+    from nltk.translate.bleu_score import SmoothingFunction, sentence_bleu
     from sentence_transformers import SentenceTransformer, util
     from sentence_transformers import CrossEncoder
     from rouge import Rouge
