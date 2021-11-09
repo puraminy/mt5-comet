@@ -57,9 +57,22 @@ from tqdm import tqdm
     type=int,
     help=""
 )
+@click.option(
+    "--recal",
+    "-rc",
+    is_flag=True,
+    help=""
+)
+@click.option(
+    "--exclude",
+    "-ex",
+    default="",
+    type=str,
+    help=""
+)
 @click.pass_context
 #rrrrrrrrrrr
-def run(ctx, conf_path, experiment, print_log, model_id, train_samples):
+def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal, exclude):
      if ctx.invoked_subcommand is None:
         mlog.info("Reading from conf %s", conf_path)
         confs = glob.glob(f"{conf_path}/*")
@@ -70,9 +83,12 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples):
             if not experiment in fname:
                 mlog.info("Skipping .... This was not in experiments")
                 continue
+            if exclude and exclude in fname:
+                mlog.info("Skipping .... by exclude")
+                continue
             val = getVal(fname, results) 
             mlog.info("current val: {}".format(val))
-            if val != "NA":
+            if val != "NA" and not recal:
                 mlog.info("Skipping .... This was done before")
                 continue
             if Path(conf).exists():
