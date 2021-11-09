@@ -36,6 +36,5 @@
     "config": false,
     "clear_logs": false,
     "gen_param": "top_p",
-    "print_log": "mlog",
-    "name": "_test-100___unwrapped_unfreezed"
+    "print_log": "mlog"
 }
