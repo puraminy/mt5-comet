@@ -259,10 +259,11 @@ def gen_resp(model, tokenizer, query, gen_token = "", gen_param = "greedy"):
     elif gen_param == "top_p":
         generation_params = {
             "do_sample":True, 
-            "top_p":0.95, 
+            "top_p":0.9, 
+            "temperature": 1.0,
             "num_return_sequences":3, 
-            "repetition_penalty":2.5,
-            "max_length":80,
+            "repetition_penalty":1.5,
+            "max_length":120,
         }
     inputs = tokenizer(query,return_tensors='pt').to(device=device)
     if False: #gen_token != "":
@@ -431,7 +432,7 @@ def eval(model, tokenizer, val_data, interactive, save_path, output_name, val_re
 
     try:
         nltk_path = str(nltk.data.find("tokenizers/punkt"))
-        logger.info(f"using nltk from: {nltk_path}")
+        mlog.info(f"using nltk from: {nltk_path}")
     except LookupError:
         nltk.download('punkt')
     base_path = "/content/drive/MyDrive/pret"

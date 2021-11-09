@@ -28,7 +28,7 @@
     "cpu": false,
     "load_prompt_path": "",
     "verbose": false,
-    "cycle": 500,
+    "cycle": 0,
     "batch_size": 2,
     "path": "/home/ahmad/mt5-comet/comet/train",
     "from_dir": false,

@@ -50,9 +50,16 @@ from tqdm import tqdm
     type=str,
     help=""
 )
+@click.option(
+    "--train_samples",
+    "-n",
+    default=0,
+    type=int,
+    help=""
+)
 @click.pass_context
 #rrrrrrrrrrr
-def run(ctx, conf_path, experiment, print_log, model_id):
+def run(ctx, conf_path, experiment, print_log, model_id, train_samples):
      if ctx.invoked_subcommand is None:
         mlog.info("Reading from conf %s", conf_path)
         confs = glob.glob(f"{conf_path}/*")
@@ -72,6 +79,8 @@ def run(ctx, conf_path, experiment, print_log, model_id):
                with open(conf, 'r') as f:
                    args = json.load(f) 
                args["print_log"] = print_log
+               if train_samples > 0:
+                   args["train_samples"] = train_samples
                if model_id:
                    if default_model and args["model_id"] != default_model:
                        break
@@ -693,7 +702,7 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
             tot_loss += bloss
             mean_loss = tot_loss/step
             sw.add_scalar('train/loss',bloss,global_step=step)
-            tlog.info("{:<5}: {:.2f} >> {:.2f}".format(step, bloss, mean_loss))
+            tlog.info("{:<5}: {:3.2f} > {:3.2f}".format(step, bloss, mean_loss))
             pbar.set_description(f'training ...[loss:{bloss:.2f} ({mean_loss:.2f})]')
             pbar.update()
             del result
@@ -743,6 +752,7 @@ def create_confs(experiment, models_dir):
     args["experiment"] = experiment
     args["train_samples"] = samples
     args["val_samples"] = 50
+    args["cycle"] = 0
     args["load_path"] = os.path.join(models_dir, "pret")
     args["save_path"] = os.path.join(models_dir, "logs")
     args["overwrite"] = experiment
