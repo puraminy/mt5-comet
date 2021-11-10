@@ -665,8 +665,8 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
     if step <= iterations and (wrap or not frozen):
         mlog.info("Training...")
     for epoch in range(epochs_num):
-        tlog.info(f"============== epoch {epoch}")
-        mlog.info(f"============== epoch {epoch}")
+        tlog.info(f"============== epoch {epoch}\n")
+        mlog.info(f"============== epoch {epoch}\n")
         while step <= iterations and (wrap or not frozen):
             try:
                 if cycle > 0 and (step % cycle == 0 and step > 0): #validation
@@ -824,7 +824,7 @@ def create_confs(experiment, models_dir):
     args["batch_size"] = 2 
     args["gen_param"] = "greedy" 
     args["exclude"] = "natural" 
-    models = {"fat5-large":True, "fat5-large-xIntent-8k":False}
+    models = {"fat5-large":True, "fat5-1k":True}
     langs = {"en":True, "fa":True, "mix":True}
     methods = {"unsup":True, "context-en":False,"context-fa":False, "sup": True}
     to_wrap = {"wrapped":True, "unwrapped": True}
