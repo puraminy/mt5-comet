@@ -426,9 +426,9 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
         else:
             save_path = "/content/drive/MyDrive/pouramini/logs"
 
+    w_str = "wrapped" if wrap else "unwrapped"
+    f_str = "freezed" if frozen else "unfreezed"
     if not output_name:
-        w_str = "wrapped" if wrap else "unwrapped"
-        f_str = "freezed" if frozen else "unfreezed"
         output_name = f"{experiment}_{model_id}-{train_samples}_{lang}_{method}_{w_str}_{f_str}"
     conf_path = os.path.join(save_path,"confs")
     if model_id == "test":
