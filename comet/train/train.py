@@ -170,7 +170,7 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal, e
 )
 @click.option(
     "--overwrite",
-    "-o",
+    "-ow",
     default="",
     type=str,
     help=""
@@ -556,7 +556,7 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
     # add new tokens
     # added_tokens = list(atomic_relation_mappings.values()) + [gen_token]
     mlog.info("len tokenizer %s", len(tokenizer))
-    extend_tokenizer(tokenizer, wrap)
+    extend_tokenizer(tokenizer, "")
     mlog.info("len tokenizer after extending %s", len(tokenizer))
     model.resize_token_embeddings(len(tokenizer))
     #%% Prepare training data
