@@ -369,8 +369,14 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal, e
     type=int,
     help=""
 )
+@click.option(
+    "--is_record",
+    "-recs",
+    is_flag=True,
+    help="Show if train_samples are records or unique heads"
+)
 def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set, 
-         val_samples, load_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks, include, exclude, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, epochs_num):
+         val_samples, load_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks, include, exclude, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, epochs_num, is_record):
 
     #%% some hyper-parameters
 
@@ -518,7 +524,7 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
                             ignore_blanks,
                             include,
                             exclude,
-                            pred_tresh, nli_group)
+                            pred_tresh, nli_group, is_record)
     iterations = num_records["train"]
     val_records = num_records["validation"]
     for logger in [mlog, clog, vlog]:

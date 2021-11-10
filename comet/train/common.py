@@ -272,7 +272,7 @@ def fill_data(split_df, split_name, qtemp, anstemp,
             include="",
             exclude="",
             pred_tresh=0,
-            nli_group="all"): 
+            nli_group="all", is_record): 
     dlog.info("building query responses for {}".format(split_name))
     dlog.info(f"len:{len(split_df)}")
     dlog.info(f"qtemp:{qtemp}")
@@ -356,6 +356,8 @@ def fill_data(split_df, split_name, qtemp, anstemp,
                     data_split[rel][lang][query].append(response)
                 flat_data.append((query, response))
                 kk += 1
+                if is_record and kk > num_samples:
+                    return data_split, flat_data, kk
             #didn't convert ___ to <blank>
             #didn't normalize to lowercase
     return data_split, flat_data, kk
