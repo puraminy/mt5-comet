@@ -813,10 +813,11 @@ def create_confs(experiment, models_dir):
     args["gen_param"] = "greedy" 
     args["exclude"] = "natural" 
     models = {"fat5-large":True, "fat5-large-xIntent-8k":False}
-    langs = {"en":True, "fa":False, "mix":True}
-    methods = {"unsup":True, "context-en":True,"context-fa":True, "sup": False}
-    to_wrap = {"wrapped":True, "unwrapped": False}
-    to_freez = {"freezed":True, "unfreezed": False}
+    langs = {"en":True, "fa":True, "mix":True}
+    methods = {"unsup":True, "context-en":False,"context-fa":False, "sup": True}
+    to_wrap = {"wrapped":True, "unwrapped": True}
+    to_freez = {"freezed":True, "unfreezed": True}
+    ii = 0
     for model in [k for k in models.keys() if models[k]]:
         for lang in [k for k in langs.keys() if langs[k]]: 
             for method in [k for k in methods.keys() if methods[k]]:
@@ -839,7 +840,8 @@ def create_confs(experiment, models_dir):
                        args["output_name"] = name
                        #name = name.replace("_unwrapped", "")
                        #name = name.replace("_unfreezed", "")
-                       print(name)
+                       ii +=1
+                       print(str(ii) + ":" + name)
                        with open(os.path.join(conf_path, f'{name}.json'), 'w') as outfile:
                                 json.dump(args, outfile, indent=4)
 
