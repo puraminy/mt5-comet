@@ -666,7 +666,7 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
         mlog.info("Training...")
     for epoch in range(epochs_num):
         tlog.info(f"============== epoch {epoch}\n")
-        mlog.info(f"============== epoch {epoch}\n")
+        step = 0
         while step <= iterations and (wrap or not frozen):
             try:
                 if cycle > 0 and (step % cycle == 0 and step > 0): #validation
