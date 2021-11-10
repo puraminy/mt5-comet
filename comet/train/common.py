@@ -141,6 +141,8 @@ def extend_tokenizer(tokenizer, rel=""):
     ]
     tokenizer.add_special_tokens({"additional_special_tokens":added_tokens}) 
     if rel:
+        enc_plen = atomic_relation_prompt_lengths[rel][0]
+        dec_plen = atomic_relation_prompt_lengths[rel][1]
         added_tokens = [ 
                 AddedToken(f"<{rel}_{i}>",lstrip=True,
                     rstrip=False)
