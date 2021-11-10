@@ -596,23 +596,34 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
     sw = SummaryWriter(save_path, flush_secs=1)
     tokenizer.save_pretrained(save_path)
     no_decay = ['bias', 'LayerNorm.weight']
-    for p in model.parameters():
-        p.requires_grad = not frozen 
+    if frozen:
+        for p in model.parameters():
+            p.requires_grad = False 
+    else:
+        for p in model.parameters():
+            p.requires_grad = True 
     if wrap:
         map_relations()
         wrapped_model = wrap_model(model, tokenizer, wrap, load_prompt_path) 
-        optimizer_grouped_parameters = [
-            {"params":[p for p in wrapped_model.parameters() if p.requires_grad]}
-        ]
         wrapped_model.to(device=device)
     else:
         model.to(device=device)
-        optimizer_grouped_parameters = [
-            {'params': [p for n, p in model.named_parameters() if p.requires_grad and not any(nd in n for nd in no_decay)], 'weight_decay': weight_decay},
-            {'params': [p for n, p in model.named_parameters() if p.requires_grad and any(nd in n for nd in no_decay)], 'weight_decay': 0.0}
-        ]
-    optimizer = AdamW(optimizer_grouped_parameters,lr=learning_rate,eps=1e-8)
-    scheduler = get_linear_schedule_with_warmup(optimizer,warm_up_steps,iterations)
+
+    def get_optimizer(model, learning_rate, wrap):
+        if wrap:
+            optimizer_grouped_parameters = [
+                {"params":[p for p in wrapped_model.parameters() if p.requires_grad]}
+            ]
+        else:
+            optimizer_grouped_parameters = [
+                {'params': [p for n, p in model.named_parameters() if p.requires_grad and not any(nd in n for nd in no_decay)], 'weight_decay': weight_decay},
+                {'params': [p for n, p in model.named_parameters() if p.requires_grad and any(nd in n for nd in no_decay)], 'weight_decay': 0.0}
+            ]
+        optimizer = AdamW(optimizer_grouped_parameters,lr=learning_rate,eps=1e-8)
+        scheduler = get_linear_schedule_with_warmup(optimizer,warm_up_steps,iterations)
+        return optimizer, scheduler
+
+    optimizer, scheduler = get_optimizer(model, learning_rate, wrap) 
     step = 0
     best_dev_loss = 1e10
     best_eval_step = 0
@@ -633,15 +644,14 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
     if step <= iterations and (wrap or not frozen):
         mlog.info("Training...")
     for epoch in range(epochs_num):
+        tlog.info(f"============== epoch {epoch}")
+        mlog.info(f"============== epoch {epoch}")
         while step <= iterations and (wrap or not frozen):
             try:
                 if cycle > 0 and (step % cycle == 0 and step > 0): #validation
                     with torch.no_grad():
                         if wrap:
                             wrapped_model.update_model_weight()
-                        #if frozen:
-                        #    for p in model.parameters():
-                        #        p.requires_grad = False 
                         model.eval()
                         pbar.set_description(f'validating on {cycle}...')
                         vlog.info(f'validating on {cycle}...')
@@ -696,11 +706,15 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
                     unfreez_step = 0
                     for p in model.parameters():
                         p.requires_grad = True # Unfreezing
+                    last_lr = scheduler.get_last_lr()[0]
+                    optimizer, scheduler = get_optimizer(model, last_lr, wrap)
                 if freez_step > 0 and step > freez_step and not frozen:
                     mlog.info("freezing the model")
                     freez_step = 0
                     for p in model.parameters():
                         p.requires_grad = False # freezing
+                    last_lr = scheduler.get_last_lr()[0]
+                    optimizer, scheduler = get_optimizer(model, last_lr, wrap)
                 model.train()
                 optimizer.zero_grad()
                 batch_loss = torch.tensor(0.)
