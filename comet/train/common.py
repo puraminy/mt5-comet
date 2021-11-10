@@ -272,7 +272,7 @@ def fill_data(split_df, split_name, qtemp, anstemp,
             include="",
             exclude="",
             pred_tresh=0,
-            nli_group="all", is_record): 
+            nli_group="all", is_record=False): 
     dlog.info("building query responses for {}".format(split_name))
     dlog.info(f"len:{len(split_df)}")
     dlog.info(f"qtemp:{qtemp}")
