@@ -192,7 +192,7 @@ def eval(model, tokenizer, val_data, interactive, save_path, output_name, val_re
                     try:
                         bleu_score = sentence_bleu(tokenized_rs, hypo, smoothing_function=smoothie)
                     except ValueError: # TODO ZeroDivisionError
-                        logger.warning("math domain error in bleu, set to 0.0. generated sentence: {}".format(hypo))
+                        vlog.warning("math domain error in bleu, set to 0.0. generated sentence: {}".format(hypo))
                         bleu_score = 0.0
                     data["bleu_score"] = bleu_score 
                     sum_bleu[scope] += bleu_score 
