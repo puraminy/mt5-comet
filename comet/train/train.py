@@ -556,7 +556,7 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
     # add new tokens
     # added_tokens = list(atomic_relation_mappings.values()) + [gen_token]
     mlog.info("len tokenizer %s", len(tokenizer))
-    extend_tokenizer(tokenizer, wrap)
+    extend_tokenizer(tokenizer, "")
     mlog.info("len tokenizer after extending %s", len(tokenizer))
     model.resize_token_embeddings(len(tokenizer))
     #%% Prepare training data
@@ -625,6 +625,8 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
         best_dev_loss = checkpoint['best_dev_loss']
 
     #%% tttttt
+    mlog.info("batch size: %s", batch_size)
+    mlog.info("node batch size: %s", node_batch_size)
     train_iter = iter(train_dataloader)
     pbar = tqdm(total=iterations, position=0, leave=True) #,dynamic_ncols=True)
     tot_loss = 0

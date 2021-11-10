@@ -132,16 +132,17 @@ def map_relations():
     return encoder_relation_mappings, decoder_relation_mappings
 
 def extend_tokenizer(tokenizer, rel=""):
-    added_tokens = [ 
-        AddedToken(token,lstrip=True,
-            rstrip=False)
-        for token in 
-            list(atomic_relation_mappings.values())+
-            list(gen_tokens.values())
-    ]
-    tokenizer.add_special_tokens({"additional_special_tokens":added_tokens}) 
-    enc_plen = atomic_relation_prompt_lengths[rel][0]
-    dec_plen = atomic_relation_prompt_lengths[rel][1]
+    if not rel:
+        added_tokens = [ 
+            AddedToken(token,lstrip=True,
+                rstrip=False)
+            for token in 
+                list(atomic_relation_mappings.values())+
+                list(gen_tokens.values())
+        ]
+        tokenizer.add_special_tokens({"additional_special_tokens":added_tokens}) 
+        enc_plen = atomic_relation_prompt_lengths[rel][0]
+        dec_plen = atomic_relation_prompt_lengths[rel][1]
     if rel:
         added_tokens = [ 
                 AddedToken(f"<{rel}_{i}>",lstrip=True,
@@ -166,8 +167,8 @@ def wrap_model(model, tokenizer, rel, emb=False, prompt_path=""):
         prompt_encoder = LSTMEmbeddingPromptEncoder(enc_plen,embedding_dim,id_offset)
         decoder_prompt_encoder = LSTMEmbeddingPromptEncoder(dec_plen,embedding_dim,dec_offset)
 
-    #extend_tokenizer(tokenizer, rel)
-    #model.resize_token_embeddings(len(tokenizer))
+    extend_tokenizer(tokenizer, rel)
+    model.resize_token_embeddings(len(tokenizer))
     wrapped_model = PTuningWrapper(model,prompt_encoder,decoder_prompt_encoder,prompt_token_fn=get_prompt_token_fn(id_offset,enc_plen + dec_plen))
     if prompt_path:
         wrapped_model.prompt_encoder.load(prompt_path)
