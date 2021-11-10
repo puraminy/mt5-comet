@@ -375,8 +375,10 @@ def fill_data(split_df, split_name, qtemp, anstemp,
 
 def save_checkpoint(model, optimizer, scheduler, step, 
                    best_eval_step, best_dev_loss, save_path):
+    if not "pret" in save_path:
+        mlog.info("Models are only saved in pret directory ...")
+        return
     mlog.info("Saving model ...")
-    return
     with open(save_path + "/best_model.txt", "a") as f:
         print("best_step:", best_eval_step, file=f)
         print("best dev loss:", best_dev_loss, file=f)
