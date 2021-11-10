@@ -542,14 +542,7 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
     )
     # add new tokens
     # added_tokens = list(atomic_relation_mappings.values()) + [gen_token]
-    added_tokens = [ 
-        AddedToken(token,lstrip=True,
-            rstrip=False)
-        for token in 
-            list(atomic_relation_mappings.values())+
-            list(gen_tokens.values())
-    ]
-    tokenizer.add_special_tokens({"additional_special_tokens":added_tokens})
+    tokenizer = extend_tokenizer(tokenizer, wrap)
     model.resize_token_embeddings(len(tokenizer))
     #%% Prepare training data
 
