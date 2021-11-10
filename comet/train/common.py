@@ -167,7 +167,7 @@ def wrap_model(model, tokenizer, rel, emb=False, prompt_path=""):
         prompt_encoder = LSTMEmbeddingPromptEncoder(enc_plen,embedding_dim,id_offset)
         decoder_prompt_encoder = LSTMEmbeddingPromptEncoder(dec_plen,embedding_dim,dec_offset)
 
-    tokenizer = extend_tokenizer(tokenizer, rel)
+    extend_tokenizer(tokenizer, rel)
     model.resize_token_embeddings(len(tokenizer))
     wrapped_model = PTuningWrapper(model,prompt_encoder,decoder_prompt_encoder,prompt_token_fn=get_prompt_token_fn(id_offset,enc_plen + dec_plen))
     if prompt_path:
