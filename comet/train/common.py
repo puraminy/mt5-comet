@@ -130,7 +130,7 @@ decoder_relation_mappings = {}
 def map_relations():
     global encoder_relation_mappings, decoder_relation_mappings
     for rel,(enc_plen, dec_plen) in atomic_relation_prompt_lengths.items():
-        mlog.info("map relations for %s", rel)
+        #dlog.info("map relations for %s", rel)
         encoder_relation_mappings[rel] = " ".join(f"<{rel}_{i}>" for i in range(enc_plen))
         decoder_relation_mappings[rel] = " ".join(f"<{rel}_{i}>" for i in range(enc_plen,enc_plen+dec_plen))
 
