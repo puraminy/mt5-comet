@@ -1,4 +1,5 @@
 from pathlib import Path
+import datetime
 from transformers import AddedToken 
 import pandas as pd
 from comet.transformers_ptuning import PTuningWrapper
@@ -10,6 +11,8 @@ import os
 import torch
 import json
 from os.path import expanduser
+now = datetime.datetime.now()
+now.strftime('%Y-%m-%d-%H-%M')
 home = expanduser("~")
 if "ahmad" in home or "pouramini" in home:
     logPath = os.path.join(home, "logs")
@@ -127,9 +130,9 @@ decoder_relation_mappings = {}
 def map_relations():
     global encoder_relation_mappings, decoder_relation_mappings
     for rel,(enc_plen, dec_plen) in atomic_relation_prompt_lengths.items():
+        mlog.info("map relations for %s", rel)
         encoder_relation_mappings[rel] = " ".join(f"<{rel}_{i}>" for i in range(enc_plen))
         decoder_relation_mappings[rel] = " ".join(f"<{rel}_{i}>" for i in range(enc_plen,enc_plen+dec_plen))
-    return encoder_relation_mappings, decoder_relation_mappings
 
 def extend_tokenizer(tokenizer, rel=""):
     if not rel:
@@ -176,11 +179,19 @@ def wrap_model(model, tokenizer, rel, emb=False, prompt_path=""):
     return wrapped_model
 
 def fill_consts(template, row):
+    map_relations()
     text = template
     rel = row["prefix"]
+    dlog.info("Relation: %s", rel)
+    dlog.info("Encoder Relation Mappings: %s", encoder_relation_mappings)
     rel_token = atomic_relation_mappings[rel]        
-    enc_token = encoder_relation_mappings[rel] if rel in encoder_relation_mappings else ""
-    dec_token = decoder_relation_mappings[rel] if rel in encoder_relation_mappings else ""
+    assert rel in encoder_relation_mappings, rel + " is not in encoer relation mappings"
+    enc_token = encoder_relation_mappings[rel] 
+    assert rel in decoder_relation_mappings, rel + " is not in decoer relation mappings"
+    dec_token = decoder_relation_mappings[rel] 
+
+    dlog.info("Encoder token: %s", enc_token)
+    dlog.info("Decoder token: %s", dec_token)
     rel_natural_en = relation_natural_mappings[rel]["en"]        
     rel_natural_fa = relation_natural_mappings[rel]["fa"]        
     rep  = {"{rel}":rel, 

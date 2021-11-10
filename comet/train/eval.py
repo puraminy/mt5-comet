@@ -66,7 +66,7 @@ def bert_score(bert_scorer, hyps, refs):
         return best_hyp_index, best_ref_index, top["score"] 
 # vvvvvvvvvvvvvvv
 # ################################### Evaluation #########################
-def eval(model, tokenizer, val_data, interactive, save_path, output_name, val_records, gen_param="greedy"):  
+def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_records, gen_param="greedy"):  
 
     try:
         nltk_path = str(nltk.data.find("tokenizers/punkt"))
@@ -215,9 +215,9 @@ def eval(model, tokenizer, val_data, interactive, save_path, output_name, val_re
     new_df = pd.DataFrame(rows)
     new_df = new_df[new_df["bert_score"] > 0]
     pbar.close()
-    out1 = os.path.join(save_path,f"scored_{output_name}.tsv")
-    out2 = os.path.join(resPath,f"scored_{output_name}.tsv")
-    out3 = os.path.join(logPath,f"scored_{output_name}.tsv")
+    out1 = os.path.join(save_path,f"scored_{results_info}.tsv")
+    out2 = os.path.join(resPath,f"scored_{results_info}.tsv")
+    out3 = os.path.join(logPath,f"scored_{results_info}.tsv")
 
     new_df.to_csv(out1, sep="\t", index=False)
     new_df.to_csv(out2, sep="\t", index=False)
@@ -234,10 +234,10 @@ def eval(model, tokenizer, val_data, interactive, save_path, output_name, val_re
     res["distinct"] = len(pred_counts)
     res["hyps"] = hyp_counter
 
-    dictPath(output_name, results, res, sep="_")
+    dictPath(results_info, results, res, sep="_")
     with open(os.path.join(resPath, "results.json"), "w") as f:
         json.dump(results, f, indent=2)
-    with open(os.path.join(resPath, f"results_{output_name}.json"), "w") as f:
+    with open(os.path.join(resPath, f"results_{results_info}.json"), "w") as f:
         json.dump(results, f, indent=2)
     with open(os.path.join(logPath, "results.json"), "w") as f:
         json.dump(results, f, indent=2)
