@@ -84,9 +84,7 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
      global results
      if ctx.invoked_subcommand is None:
         if reset_results:
-            with open(os.path.join(resPath, f"results_{now}.json"), "w") as f:
-                json.dump(results, f, indent=2)
-            results = {}
+            set_results({})
         mlog.info("Reading from conf %s", conf_path)
         confs = glob.glob(f"{conf_path}/*")
         default_model = ""
@@ -414,9 +412,6 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
         include, exclude = filter_inputs(include, exclude, lang)
 
     args = locals() # input parameters
-
-    if reset_results:
-        set_results({}) 
 
     mlog.info("========================= Version 7 ========================")
     if save_path == "":

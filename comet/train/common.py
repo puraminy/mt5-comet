@@ -114,12 +114,11 @@ def get_prompt_token_fn(id_offset,length):
 
 encoder_relation_mappings = {}
 decoder_relation_mappings = {}
-def map_relations():
-    global encoder_relation_mappings, decoder_relation_mappings
-    for rel,(enc_plen, dec_plen) in atomic_relation_prompt_lengths.items():
-        #dlog.info("map relations for %s", rel)
-        encoder_relation_mappings[rel] = " ".join(f"<{rel}_{i}>" for i in range(enc_plen))
-        decoder_relation_mappings[rel] = " ".join(f"<{rel}_{i}>" for i in range(enc_plen,enc_plen+dec_plen))
+for rel,(enc_plen, dec_plen) in atomic_relation_prompt_lengths.items():
+    #dlog.info("map relations for %s", rel)
+    encoder_relation_mappings[rel] = " ".join(f"<{rel}_{i}>" for i in range(enc_plen))
+    decoder_relation_mappings[rel] = " ".join(f"<{rel}_{i}>" for i in range(enc_plen,enc_plen+dec_plen))
+
 
 def extend_tokenizer(tokenizer, rel=""):
     if not rel:
@@ -166,19 +165,14 @@ def wrap_model(model, tokenizer, rel, emb=False, prompt_path=""):
     return wrapped_model
 
 def fill_consts(template, row):
-    map_relations()
     text = template
     rel = row["prefix"]
-    dlog.info("Relation: %s", rel)
-    dlog.info("Encoder Relation Mappings: %s", encoder_relation_mappings)
     rel_token = atomic_relation_mappings[rel]        
     assert rel in encoder_relation_mappings, rel + " is not in encoer relation mappings"
     enc_token = encoder_relation_mappings[rel] 
     assert rel in decoder_relation_mappings, rel + " is not in decoer relation mappings"
     dec_token = decoder_relation_mappings[rel] 
 
-    dlog.info("Encoder token: %s", enc_token)
-    dlog.info("Decoder token: %s", dec_token)
     rel_natural_en = relation_natural_mappings[rel]["en"]        
     rel_natural_fa = relation_natural_mappings[rel]["fa"]        
     rep  = {"{rel}":rel, 
@@ -294,13 +288,12 @@ def fill_data(split_df, split_name, qtemp, anstemp,
         split_df = split_df[split_df["nli_group"] == nli_group]
         dlog.info("*** Filtered based on nli_group "+ nli_group)
 
-    jj = 0
+    cat_counter = {}
     ii = 0
     kk = 0
     dlog.info(f"len after filtering:{len(split_df)}")
     flat_data = []
     old_input = ""
-    pbar = tqdm(total = num_samples)
     for index, d in split_df.iterrows():
         rel = d["prefix"]
         query = fill_consts(qtemp,d)
@@ -331,25 +324,26 @@ def fill_data(split_df, split_name, qtemp, anstemp,
                 resp = resp.strip()
                 gen_token = gen_tokens[targ_col]
                 target_lang = langs[targ_col]
-                query = fill_vars(query, rel, event, gen_token, resp, 
+                query = fill_vars(qtemp, rel, event, gen_token, resp, 
                         input_lang, target_lang) 
-                response = fill_vars(response, rel, event, gen_token, resp, 
+                response = fill_vars(anstemp, rel, event, gen_token, resp, 
                         input_lang, target_lang)
                 lang = input_lang + "2" + target_lang
+                if not lang in cat_counter:
+                    cat_counter[lang] = 1
+                else:
+                    cat_counter[lang] += 1
+                if cat_counter[lang] < 3:
+                    dlog.info(f"%%%%%%%%%%%%%%%%%% {lang} %%%%%%%%%%%%%%%%%%%")
+                    dlog.info(inp + "====>" + targ_col)
+                    dlog.info(input_lang + ":"+ query)
+                    dlog.info(target_lang + ":" + response)
+                if cat_counter[lang] > num_samples:
+                    return data_split, flat_data, kk
                 if not lang in data_split[rel]:
                     data_split[rel][lang] = []
-                if d["input_text"] != old_input:
-                    old_input = d["input_text"]
-                    ii+=1
-                if ii >= num_samples:
-                    return data_split, flat_data, kk
                 if query not in data_split[rel][lang]:
-                    jj+=1
-                    pbar.update(1)
                     data_split[rel][lang].append({query:[response]})
-                    if jj < 3:
-                        dlog.info("Q:"+ query)
-                        dlog.info("R:"+ response)
                 else:
                     data_split[rel][lang][query].append(response)
                 flat_data.append((query, response))
