@@ -296,8 +296,8 @@ def fill_data(split_df, split_name, qtemp, anstemp,
     old_input = ""
     for index, d in split_df.iterrows():
         rel = d["prefix"]
-        query = fill_consts(qtemp,d)
-        response = fill_consts(anstemp,d)
+        _qtemp = fill_consts(qtemp,d)
+        _anstemp = fill_consts(anstemp,d)
         if not rel in data_split:
             data_split = {rel:{}}
         for inp in inputs:
@@ -324,9 +324,9 @@ def fill_data(split_df, split_name, qtemp, anstemp,
                 resp = resp.strip()
                 gen_token = gen_tokens[targ_col]
                 target_lang = langs[targ_col]
-                query = fill_vars(qtemp, rel, event, gen_token, resp, 
+                query = fill_vars(_qtemp, rel, event, gen_token, resp, 
                         input_lang, target_lang) 
-                response = fill_vars(anstemp, rel, event, gen_token, resp, 
+                response = fill_vars(_anstemp, rel, event, gen_token, resp, 
                         input_lang, target_lang)
                 lang = input_lang + "2" + target_lang
                 if not lang in cat_counter:
