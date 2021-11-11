@@ -547,7 +547,7 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
         logger.info("Val Records:"  + str(val_records))
     accumulation_tiny_steps = 2 
     node_batch_size = batch_size//accumulation_tiny_steps
-    iterations = train_records//node_batch_size
+    iterations = train_records//batch_size
     for logger in [mlog, tlog]:
         logger.info("Iterations:"  + str(iterations))
     warm_up_steps = 0.002*iterations
