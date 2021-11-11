@@ -226,10 +226,10 @@ def create_templates(method, wrapped, frozen):
                anstemp = "{ph} {resp} {end}"
            else: #unwrapped
                if frozen:
-                   qtemp = "{rel_token} {gen} {event} {ph}"
+                   qtemp = "{gen} {event} {rel_natural} {ph}"
                    anstemp = "{ph} {resp} {end}"
                else:
-                   qtemp = "{gen} {event} {rel_natural} {ph}"
+                   qtemp = "{rel_token} {gen} {event} {ph}"
                    anstemp = "{ph} {resp} {end}"
        else:
            raise ValueError("not supprted method: " + method)
