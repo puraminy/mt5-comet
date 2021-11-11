@@ -11,7 +11,9 @@ import os
 import torch
 import json
 from os.path import expanduser
-now = datetime.datetime.now()
+from pytz import timezone
+tehran = timezone('Asia/Tehran')
+now = datetime.datetime.now(tehran)
 now = now.strftime('%Y-%m-%d-%H:%M')
 home = expanduser("~")
 if "ahmad" in home or "pouramini" in home:
@@ -37,6 +39,7 @@ dlog = logging.getLogger("comet.data")
 vlog = logging.getLogger("comet.eval")
 tlog = logging.getLogger("comet.train")
 
+mlog.info(now)
 
 for logger, fname in zip([mlog,dlog,clog,vlog,tlog], ["all_main","all_data","all_cfg","all_eval","all_train"]):
     logger.setLevel(logging.INFO)
