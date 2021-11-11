@@ -548,11 +548,13 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
     train_records = num_records["train"]
     val_records = num_records["validation"]
     for logger in [mlog, clog, vlog]:
-        logger.info("Iterations:"  + str(iterations))
+        logger.info("Train records:"  + str(train_records))
         logger.info("Val Records:"  + str(val_records))
     accumulation_tiny_steps = 2 
     node_batch_size = batch_size//accumulation_tiny_steps
     iterations = train_records//node_batch_size
+    for logger in [mlog, tlog]:
+        logger.info("Iterations:"  + str(iterations))
     warm_up_steps = 0.002*iterations
     #%% tokenizer & model
     mlog.info("Loading model ...")
