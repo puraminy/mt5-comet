@@ -12,7 +12,7 @@ import torch
 import json
 from os.path import expanduser
 now = datetime.datetime.now()
-now.strftime('%Y-%m-%d-%H')
+now = now.strftime('%Y-%m-%d-%H')
 home = expanduser("~")
 if "ahmad" in home or "pouramini" in home:
     logPath = os.path.join(home, "logs")
