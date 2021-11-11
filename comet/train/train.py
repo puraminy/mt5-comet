@@ -545,14 +545,15 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
                             include,
                             exclude,
                             pred_tresh, nli_group, is_record)
-    iterations = num_records["train"]
+    train_records = num_records["train"]
     val_records = num_records["validation"]
     for logger in [mlog, clog, vlog]:
         logger.info("Iterations:"  + str(iterations))
         logger.info("Val Records:"  + str(val_records))
-    warm_up_steps = 0.002*iterations
     accumulation_tiny_steps = 2 
     node_batch_size = batch_size//accumulation_tiny_steps
+    iterations = train_records//node_batch_size
+    warm_up_steps = 0.002*iterations
     #%% tokenizer & model
     mlog.info("Loading model ...")
     if model_id == "test":
@@ -580,7 +581,7 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
     mlog.info("len tokenizer after extending %s", len(tokenizer))
     model.resize_token_embeddings(len(tokenizer))
     #%% Prepare training data
-    results_info = f"{experiment}_{model_id}_{lang}_{method}_{w_str}_{f_str}_{epochs_num}-{iterations}-{val_records}_{now}"
+    results_info = f"{experiment}_{model_id}_{lang}_{method}_{w_str}_{f_str}_{epochs_num}-{train_records}-{val_records}_{now}"
 
     if do_eval or (not wrap and frozen):
         model.to(device=device)
@@ -658,14 +659,15 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
     #%% tttttt
     mlog.info("batch size: %s", batch_size)
     mlog.info("node batch size: %s", node_batch_size)
-    train_iter = iter(train_dataloader)
-    pbar = tqdm(total=iterations, position=0, leave=True) #,dynamic_ncols=True)
-    tot_loss = 0
     if step <= iterations and (wrap or not frozen):
         mlog.info("Training...")
     for epoch in range(epochs_num):
+        pbar = tqdm(total=iterations, position=0, leave=True) #,dynamic_ncols=True)
+        mlog.info(f"============== epoch {epoch}\n")
         tlog.info(f"============== epoch {epoch}\n")
+        tot_loss = 0
         step = 0
+        train_iter = iter(train_dataloader)
         while step <= iterations and (wrap or not frozen):
             try:
                 if cycle > 0 and (step % cycle == 0 and step > 0): #validation
@@ -742,6 +744,7 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
                     try:
                         batch = next(train_iter)
                     except StopIteration:
+                        tlog.info("Stop Iteration occured at %s", step)
                         train_iter = iter(train_dataloader)
                         batch = next(train_iter)
                     batch = {k:v.to(device=device) for k,v in batch.items()}
