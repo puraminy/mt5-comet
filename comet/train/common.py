@@ -267,7 +267,7 @@ def fill_data(split_df, split_name, qtemp, anstemp,
             include="",
             exclude="",
             pred_tresh=0,
-            nli_group="all", is_record=False): 
+            nli_group="all", is_record=False, start=0): 
     dlog.info("building query responses for {}".format(split_name))
     dlog.info(f"len:{len(split_df)}")
     dlog.info(f"qtemp:{qtemp}")
@@ -299,6 +299,9 @@ def fill_data(split_df, split_name, qtemp, anstemp,
     old_input = ""
     for index, d in split_df.iterrows():
         rel = d["prefix"]
+        ii += 1
+        if ii < start:
+            continue
         _qtemp = fill_consts(qtemp,d)
         _anstemp = fill_consts(anstemp,d)
         if not rel in data_split:
