@@ -817,7 +817,7 @@ def create_confs(experiment, models_dir):
     else:
         print(conf + " doesn't exists!")
         return
-    samples = 100
+    samples = 300
     args["experiment"] = experiment
     args["train_samples"] = samples
     args["val_samples"] = 50
@@ -830,9 +830,9 @@ def create_confs(experiment, models_dir):
     args["batch_size"] = 2 
     args["gen_param"] = "greedy" 
     args["exclude"] = "natural" 
-    models = {"fat5-large":True, "fat5-1k":True}
+    models = {"fat5-large":True, "fat5-3k-gen":True}
     langs = {"en":True, "fa":True, "mix":True}
-    methods = {"unsup":True, "context-en":False,"context-fa":False, "sup": True}
+    methods = {"unsup":True, "context-en":True,"context-fa":False, "sup": True}
     to_wrap = {"wrapped":True, "unwrapped": True}
     to_freez = {"freezed":True, "unfreezed": True}
     ii = 0

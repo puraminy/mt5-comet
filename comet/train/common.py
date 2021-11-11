@@ -209,33 +209,40 @@ def filter_inputs(include, exclude, lang):
    return include, exclude
 
 #tttttttttt
-def create_templates(method, wrapped, frozen):
+def create_templates(method, wrapped, frozen, gen_at_end=True):
        if method == "context-en":
-           qtemp = "{enc_token} {gen} {input_text} {rel_natural_en} {target_text} {event} {rel_natural} {ph}"
+           qtemp = "{enc_token} {gen_start} {input_text} {rel_natural_en} {target_text} {event} {rel_natural} {gen_end} {ph}"
            anstemp = "{ph} {resp} {end}"
        elif method == "context-fa":
-           qtemp = "{enc_token} {gen} {input_text_fa} {rel_natural_fa} {target_text_fa} {event} {rel_natural} {ph}"
+           qtemp = "{enc_token} {gen_start} {input_text_fa} {rel_natural_fa} {target_text_fa} {event} {rel_natural} {gen_end} {ph}"
            anstemp = "{ph} {resp} {end}"
        elif method == "sup":
            if wrapped:
-               qtemp = "{enc_token} {gen} {event}"
+               qtemp = "{enc_token} {gen_start} {event} {gen_end}"
                anstemp = "{resp}"
            else: #unwrapped
-               qtemp = "{rel_token} {gen} {event}"
+               qtemp = "{rel_token} {gen_start} {event} {gen_end}"
                anstemp = "{resp}"
        elif method == "unsup":
            if wrapped:
-               qtemp = "{enc_token} {gen} {event} {ph}"
+               qtemp = "{enc_token} {gen_start} {event} {gen_end} {ph}"
                anstemp = "{ph} {resp} {end}"
            else: #unwrapped
                if frozen:
-                   qtemp = "{gen} {event} {rel_natural} {ph}"
+                   qtemp = "{gen_start} {event} {rel_natural} {gen_end} {ph}"
                    anstemp = "{ph} {resp} {end}"
                else:
-                   qtemp = "{rel_token} {gen} {event} {ph}"
+                   qtemp = "{rel_token} {gen_start} {event} {gen_end} {ph}"
                    anstemp = "{ph} {resp} {end}"
        else:
            raise ValueError("not supprted method: " + method)
+       if gen_at_end:
+           qtemp = qtemp.replace("{gen_start} ","")
+           qtemp = qtemp.replace("{gen_end}","{gen}")
+       else:
+           qtemp = qtemp.replace(" {gen_end}","")
+           qtemp = qtemp.replace("{gen_start}","{gen}")
+
        return qtemp, anstemp
 
 def fill_vars(template, rel, event, gen_token, resp, inp_lang, resp_lang):
