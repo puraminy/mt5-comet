@@ -202,7 +202,7 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
 @click.option(
     "--lang",
     "-lang",
-    default="",
+    default="mix",
     type=str,
     help=""
 )
