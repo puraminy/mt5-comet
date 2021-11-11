@@ -84,7 +84,7 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
      global results
      if ctx.invoked_subcommand is None:
         if reset_results:
-            with open(os.path.join(resPath, "results_{now}.json"), "w") as f:
+            with open(os.path.join(resPath, f"results_{now}.json"), "w") as f:
                 json.dump(results, f, indent=2)
             results = {}
         mlog.info("Reading from conf %s", conf_path)
@@ -397,12 +397,7 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
          val_samples, load_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks, include, exclude, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, epochs_num, is_record, reset_results):
 
     #%% some hyper-parameters
-    global results
 
-    if reset_results:
-        with open(os.path.join(resPath, "results_{now}.json"), "w") as f:
-            json.dump(results, f, indent=2)
-        results = {}
     #bbbbbbbbbbb
     #underlying_model_name = "logs/atomic-mt5/last"
     mlog.info("given load path: %s", load_path)
@@ -419,6 +414,10 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
         include, exclude = filter_inputs(include, exclude, lang)
 
     args = locals() # input parameters
+
+    if reset_results:
+        set_results({}) 
+
     mlog.info("========================= Version 7 ========================")
     if save_path == "":
         if "ahmad" or "pouramini" in home:

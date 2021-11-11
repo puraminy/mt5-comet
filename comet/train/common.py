@@ -12,7 +12,7 @@ import torch
 import json
 from os.path import expanduser
 now = datetime.datetime.now()
-now.strftime('%Y-%m-%d-%H-%M')
+now.strftime('%Y-%m-%d-%H')
 home = expanduser("~")
 if "ahmad" in home or "pouramini" in home:
     logPath = os.path.join(home, "logs")
@@ -43,19 +43,6 @@ for logger, fname in zip([mlog,dlog,clog,vlog,tlog], ["all_main","all_data","all
     logFilename = os.path.join(logPath, fname + ".log")
     handler = logging.FileHandler(logFilename, mode="w")
     logger.addHandler(handler)
-
-
-device = 'cuda'
-def set_device(dev):
-    global device
-    device = dev
-
-results = {}
-resFile = os.path.join(resPath, "results.json")
-if Path(resFile).exists():
-    with open(resFile, "r") as f:
-        mlog.info("Reading stored results...")
-        results = json.load(f)
 
 nli_map = ['contradiction', 'entailment', 'neutral']
 atomic_relation_mappings = {
@@ -227,28 +214,28 @@ def filter_inputs(include, exclude, lang):
 #tttttttttt
 def create_templates(method, wrapped, frozen):
        if method == "context-en":
-           qtemp = "{enc_token} {input_text} {rel_natural_en} {target_text} {event} {rel_natural} {gen} {ph}"
+           qtemp = "{enc_token} {gen} {input_text} {rel_natural_en} {target_text} {event} {rel_natural} {ph}"
            anstemp = "{ph} {resp} {end}"
        elif method == "context-fa":
-           qtemp = "{enc_token} {input_text_fa} {rel_natural_fa} {target_text_fa} {event} {rel_natural} {gen} {ph}"
+           qtemp = "{enc_token} {gen} {input_text_fa} {rel_natural_fa} {target_text_fa} {event} {rel_natural} {ph}"
            anstemp = "{ph} {resp} {end}"
        elif method == "sup":
            if wrapped:
-               qtemp = "{enc_token} {event} {gen}"
+               qtemp = "{enc_token} {gen} {event}"
                anstemp = "{resp}"
            else: #unwrapped
-               qtemp = "{rel_token} {event} {gen}"
+               qtemp = "{rel_token} {gen} {event}"
                anstemp = "{resp}"
        elif method == "unsup":
            if wrapped:
-               qtemp = "{enc_token} {event} {gen} {ph}"
+               qtemp = "{enc_token} {gen} {event} {ph}"
                anstemp = "{ph} {resp} {end}"
            else: #unwrapped
                if frozen:
-                   qtemp = "{rel_token} {event} {gen} {ph}"
+                   qtemp = "{rel_token} {gen} {event} {ph}"
                    anstemp = "{ph} {resp} {end}"
                else:
-                   qtemp = "{event} {rel_natural} {ph}"
+                   qtemp = "{gen} {event} {rel_natural} {ph}"
                    anstemp = "{ph} {resp} {end}"
        else:
            raise ValueError("not supprted method: " + method)
@@ -376,7 +363,7 @@ def fill_data(split_df, split_name, qtemp, anstemp,
 def save_checkpoint(model, optimizer, scheduler, step, 
                    best_eval_step, best_dev_loss, save_path):
     if not "pret" in save_path:
-        mlog.info("Models are only saved in pret directory ...")
+        mlog.warning("Models are only saved in pret directory ...")
         return
     mlog.info("Saving model ...")
     with open(save_path + "/best_model.txt", "a") as f:

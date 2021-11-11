@@ -9,6 +9,25 @@ from rouge import Rouge
 from comet.utils.myutils import *
 #%% Aggregate instances of queries and corresponding responses
 # (str)split_name -> (dict) query -> (list) response 
+
+results = {}
+resFile = os.path.join(resPath, "results.json")
+if Path(resFile).exists():
+    with open(resFile, "r") as f:
+        mlog.info("Reading stored results...")
+        results = json.load(f)
+
+def set_results(res):
+    global results
+    with open(os.path.join(resPath, f"results_{now}.json"), "w") as f:
+        json.dump(results, f, indent=2)
+    results = res
+
+device = "cpu"
+def set_device(dev):
+    global device
+    device = dev
+
 def gen_resp(model, tokenizer, query, gen_token = "", gen_param = "greedy"):
     if gen_param == "greedy":
         generation_params = {
@@ -82,7 +101,10 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
     local_path = f"{base_path}/paraphrase-multilingual-MiniLM-L12-v2"        
     if not Path(local_path).exists():
         local_path = 'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2'
-    bert_scorer = SentenceTransformer(local_path)
+    if "ahmad" in home:
+        bert_scorer = None
+    else:
+        bert_scorer = SentenceTransformer(local_path)
     rouge_scorer = Rouge()
     local_path = f"{base_path}/nli-roberta-base"
     if not Path(local_path).exists():
@@ -234,6 +256,8 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
     res["distinct"] = len(pred_counts)
     res["hyps"] = hyp_counter
 
+    print(f"%%%rrrrrrrrrrrrrrrrrr%%%%% {now} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+    print(results)
     dictPath(results_info, results, res, sep="_")
     with open(os.path.join(resPath, "results.json"), "w") as f:
         json.dump(results, f, indent=2)
