@@ -662,8 +662,9 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
         for p in model.parameters():
             p.requires_grad = True 
     if wrap:
-        if not load_prompt_path and Path(os.path.join(load_path, "prompt")).exists():
-            load_prompt_path = os.path.join(load_path, "prompt")
+        if not load_prompt_path and Path(os.path.join(load_path, model_id, "prompt")).exists():
+            load_prompt_path = os.path.join(load_path, model_id, "prompt")
+            mlog.info("prompt path:%s ", load_prompt_path)
         mlog.info("Wrapping the model ...")
         wrapped_model = wrap_model(model, tokenizer, wrap, load_prompt_path) 
         wrapped_model.to(device=device)
