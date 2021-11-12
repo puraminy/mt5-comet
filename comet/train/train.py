@@ -442,7 +442,7 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
         clog.addHandler(consoleHandler)
     if method:    
         qtemp, anstemp = create_templates(method, wrap, frozen,
-                gen_pos="end", prompt_pos=prompt_pos, zero_shot=zero_shot)
+                gen_pos="end", prompt_pos=prompt_pos, zero_shot=zero_shot, lang=lang)
     if lang:
         include, exclude = filter_inputs(include, exclude, lang)
 

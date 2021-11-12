@@ -216,7 +216,7 @@ def filter_inputs(include, exclude, lang):
 
 #tttttttttt
 def create_templates(method, wrapped, frozen, 
-        gen_pos="end", prompt_pos="start", zero_shot=False):
+        gen_pos="end", prompt_pos="start", zero_shot=False, lang="mix"):
        if method == "context-z":
            qtemp = "{enc_token_start} {gen_start} {input_text} {rel_natural_en} {gen_en} {target_text} {enc_token_start} {event} {rel_natural} {gen_end} {enc_token_end} {ph}"
            anstemp = "{ph} {resp} {end}"
@@ -256,6 +256,10 @@ def create_templates(method, wrapped, frozen,
            qtemp = qtemp.replace("{enc_token}","{rel_token}")
        if zero_shot:
            qtemp = qtemp.replace("{rel_token}","")
+       if lang != "mix":
+           qtemp = qtemp.replace("{gen}","")
+           qtemp = qtemp.replace("{gen_en}","")
+           qtemp = qtemp.replace("{gen_fa}","")
        while "  " in qtemp:
            qtemp = qtemp.replace("  "," ")
 
