@@ -168,6 +168,7 @@ def wrap_model(model, tokenizer, rel, emb=False, prompt_path=""):
     model.resize_token_embeddings(len(tokenizer))
     wrapped_model = PTuningWrapper(model,prompt_encoder,decoder_prompt_encoder,prompt_token_fn=get_prompt_token_fn(id_offset,enc_plen + dec_plen))
     if prompt_path:
+        mlog.info("Loding saved prompt...")
         wrapped_model.prompt_encoder.load(prompt_path)
 
     return wrapped_model

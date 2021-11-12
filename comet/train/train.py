@@ -406,7 +406,7 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
     help="Start record number for training data"
 )
 @click.option(
-    "--prompt_lenth",
+    "--prompt_length",
     "-pl",
     default="5-0",
     type=str,
@@ -420,7 +420,7 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
     help=""
 )
 def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set, 
-         val_samples, load_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks, include, exclude, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, is_record, reset_results, start, prompt_lenth, prompt_pos):
+         val_samples, load_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks, include, exclude, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, is_record, reset_results, start, prompt_length, prompt_pos):
 
     #%% some hyper-parameters
 
@@ -555,7 +555,7 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
     atomic_dataset["train"] = pd.read_table(train_path)
     atomic_dataset["validation"] = pd.read_table(val_path)
 
-    length = prompt_lenth.split("-")
+    length = prompt_length.split("-")
     enc_pl = int(length[0]) 
     dec_pl = int(length[1])
     map_relations_to_prompts(wrap, enc_pl, dec_pl)
@@ -662,6 +662,8 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
         for p in model.parameters():
             p.requires_grad = True 
     if wrap:
+        if not load_prompt_path and Path(os.join.path(load_path, "prompt")).exists():
+            load_prompt_path = os.join.path(load_path, "prompt")
         wrapped_model = wrap_model(model, tokenizer, wrap, load_prompt_path) 
         wrapped_model.to(device=device)
     else:
