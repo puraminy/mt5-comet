@@ -614,7 +614,11 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
     #%% Prepare training data
     if start > 0 and training_round == 1:
         training_round += 1
-    results_info = f"{experiment}_{model_id}_{lang}_{method}_{w_str}_{f_str}_tr:{training_round}-ep:{epochs_num}-({start}-{train_records})-{val_records}_{now}"
+    extra = "_" + now
+    if experiment == "custom":
+        experiment = now
+        extra = ""
+    results_info = f"{experiment}_{model_id}_{lang}_{method}_{w_str}_{f_str}_tr:{training_round}-ep:{epochs_num}-({start}-{train_records})-{val_records}{extra}"
 
     if do_eval or (not wrap and frozen):
         model.to(device=device)

@@ -301,6 +301,8 @@ def fill_data(split_df, split_name, qtemp, anstemp,
     dlog.info(f"qtemp:{qtemp}")
     dlog.info(f"anstemp:{anstemp}")
     natural = include == "natural"
+    if split_name != "train":
+        start = 0
     if natural and split_name != "train": natural = False 
     if natural:
         dlog.info("natural is ON")
