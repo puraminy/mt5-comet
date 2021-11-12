@@ -127,7 +127,7 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
 @click.option(
     "--experiment",
     "-exp",
-    default="",
+    default="custom",
     type=str,
     help=""
 )
