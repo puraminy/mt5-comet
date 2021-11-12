@@ -19,7 +19,7 @@ else:
 wHandler = logging.FileHandler(logFilename)
 wlog.addHandler(wHandler)
 wlog.setLevel(logging.INFO)
-wlog.disabled = False
+wlog.disabled = True
 
 class PTuningWrapper(torch.nn.Module):
     def __init__(self,model,prompt_encoder,decoder_prompt_encoder=None,
