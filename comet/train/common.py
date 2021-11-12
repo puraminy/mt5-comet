@@ -215,10 +215,10 @@ def filter_inputs(include, exclude, lang):
 #tttttttttt
 def create_templates(method, wrapped, frozen, gen_pos="end", prompt_pos="start"):
        if method == "context-en":
-           qtemp = "{enc_token_start} {gen_start} {input_text} {rel_natural_en} {target_text} {event} {rel_natural} {gen_end} {enc_token_end} {ph}"
+           qtemp = "{enc_token_start} {gen_start} {input_text} {rel_natural_en} {gen_token_en} {target_text} {enc_token_start} {event} {rel_natural} {gen_end} {enc_token_end} {ph}"
            anstemp = "{ph} {resp} {end}"
        elif method == "context-fa":
-           qtemp = "{enc_token_start} {gen_start} {input_text_fa} {rel_natural_fa} {target_text_fa} {event} {rel_natural} {enc_token_end} {gen_end} {ph}"
+           qtemp = "{enc_token_start} {gen_start} {input_text_fa} {rel_natural_fa} {gen_token_fa} {target_text_fa} {enc_token_start} {event} {rel_natural} {enc_token_end} {gen_end} {ph}"
            anstemp = "{ph} {resp} {end}"
        elif method == "sup":
            if wrapped:
