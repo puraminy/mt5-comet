@@ -16,7 +16,8 @@ tehran = timezone('Asia/Tehran')
 now = datetime.datetime.now(tehran)
 now = now.strftime('%Y-%m-%d-%H:%M')
 home = expanduser("~")
-if "ahmad" in home or "pouramini" in home:
+colab = not "ahmad" in home and not "pouramini" in home
+if not colab: 
     logPath = os.path.join(home, "logs")
     resPath = os.path.join(home, "results") 
 else:

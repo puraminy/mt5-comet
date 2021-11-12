@@ -93,7 +93,7 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
     except LookupError:
         nltk.download('punkt')
     base_path = "/content/drive/MyDrive/pret"
-    if "ahmad" or "pouramini" in home:
+    if not colab:
         base_path = os.path.join(home, "pret", "mm")
 
     mlog.info("Loading models for evaluation ..")
@@ -239,11 +239,12 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
     pbar.close()
     out1 = os.path.join(save_path,f"scored_{results_info}.tsv")
     out2 = os.path.join(resPath,f"scored_{results_info}.tsv")
-    #out3 = os.path.join(logPath,f"scored_{results_info}.tsv")
+    out3 = os.path.join(logPath,f"scored_{results_info}.tsv")
 
     new_df.to_csv(out1, sep="\t", index=False)
     new_df.to_csv(out2, sep="\t", index=False)
-    #new_df.to_csv(out3, sep="\t", index=False)
+    if colab:
+       new_df.to_csv(out3, sep="\t", index=False)
     pred_counts = new_df['pred_text1'].unique()
 
     mean_bert_str = json.dumps(mean_bert, indent=2)
