@@ -256,8 +256,6 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
     res["distinct"] = len(pred_counts)
     res["hyps"] = hyp_counter
 
-    print(f"%%%rrrrrrrrrrrrrrrrrr%%%%% {now} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
-    print(results)
     dictPath(results_info, results, res, sep="_")
     with open(os.path.join(resPath, "results.json"), "w") as f:
         json.dump(results, f, indent=2)
