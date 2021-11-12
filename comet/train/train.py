@@ -666,7 +666,7 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
             load_prompt_path = os.path.join(load_path, model_id, "prompt")
             mlog.info("prompt path:%s ", load_prompt_path)
         mlog.info("Wrapping the model ...")
-        wrapped_model = wrap_model(model, tokenizer, wrap, load_prompt_path) 
+        wrapped_model = wrap_model(model, tokenizer, wrap, False, load_prompt_path) 
         wrapped_model.to(device=device)
     else:
         model.to(device=device)
@@ -822,6 +822,7 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
     if wrap:
         prompt_path = os.path.join(save_path, "prompt")
         Path(prompt_path).mkdir(exist_ok=True, parents=True)
+        mlog.info("Saving prompt at %s", prompt_path)
         wrapped_model.prompt_encoder.save(prompt_path)
         with torch.no_grad():
             wrapped_model.update_model_weight()
