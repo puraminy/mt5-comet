@@ -380,6 +380,13 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
     help=""
 )
 @click.option(
+    "--training_round",
+    "-tr",
+    default=1,
+    type=int,
+    help="If you want to retrain a model or continue trainig it on new data set it incremntally"
+)
+@click.option(
     "--is_record",
     "-recs",
     is_flag=True,
@@ -398,8 +405,22 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
     type=int,
     help="Start record number for training data"
 )
+@click.option(
+    "--prompt_lenth",
+    "-pl",
+    default="5-0",
+    type=str,
+    help="Encoder-decoder prompt length"
+)
+@click.option(
+    "--prompt_pos",
+    "-ppos",
+    default="start",
+    type=str,
+    help=""
+)
 def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set, 
-         val_samples, load_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks, include, exclude, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, epochs_num, is_record, reset_results, start):
+         val_samples, load_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks, include, exclude, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, is_record, reset_results, start, prompt_lenth, prompt_pos):
 
     #%% some hyper-parameters
 
@@ -414,7 +435,8 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
     if "clog" in print_log: # config logger
         clog.addHandler(consoleHandler)
     if method:    
-        qtemp, anstemp = create_templates(method, wrap, frozen)
+        qtemp, anstemp = create_templates(method, wrap, frozen,
+                gen_pos="end", prompt_pos=prompt_pos)
     if lang:
         include, exclude = filter_inputs(include, exclude, lang)
 
@@ -532,6 +554,11 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
     val_path= "atomic/xIntent_en_fa_validation_no_dups.tsv"
     atomic_dataset["train"] = pd.read_table(train_path)
     atomic_dataset["validation"] = pd.read_table(val_path)
+
+    length = prompt_lenth.split("-")
+    enc_pl = int(length[0]) 
+    dec_pl = int(length[1])
+    map_relations_to_prompts(wrap, enc_pl, dec_pl)
     atomic_query_responses = {}
     atomic_flattened = {}
     num_records = {}
@@ -585,7 +612,9 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
     mlog.info("len tokenizer after extending %s", len(tokenizer))
     model.resize_token_embeddings(len(tokenizer))
     #%% Prepare training data
-    results_info = f"{experiment}_{model_id}_{lang}_{method}_{w_str}_{f_str}_{epochs_num}-{train_records}-{val_records}_{now}"
+    if start > 0 and training_round == 1:
+        training_round += 1
+    results_info = f"{experiment}_{model_id}_{lang}_{method}_{w_str}_{f_str}_tr:{training_round}-ep:{epochs_num}-({start}-{train_records})-{val_records}_{now}"
 
     if do_eval or (not wrap and frozen):
         model.to(device=device)

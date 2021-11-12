@@ -117,11 +117,15 @@ def get_prompt_token_fn(id_offset,length):
 
 encoder_relation_mappings = {}
 decoder_relation_mappings = {}
-for rel,(enc_plen, dec_plen) in atomic_relation_prompt_lengths.items():
-    #dlog.info("map relations for %s", rel)
+def map_relations_to_prompts(rel, enc_plen=0, dec_plen=0):
+    global encoder_relation_mappings, decoder_relation_mappings
+    if enc_plen == 0 and dec_plen == 0:
+        (enc_plen, dec_plen) = atomic_relation_prompt_lengths[rel]
     encoder_relation_mappings[rel] = " ".join(f"<{rel}_{i}>" for i in range(enc_plen))
     decoder_relation_mappings[rel] = " ".join(f"<{rel}_{i}>" for i in range(enc_plen,enc_plen+dec_plen))
 
+for rel,(enc_plen, dec_plen) in atomic_relation_prompt_lengths.items():
+   map_relations_to_prompts(rel)
 
 def extend_tokenizer(tokenizer, rel=""):
     if not rel:
@@ -209,39 +213,49 @@ def filter_inputs(include, exclude, lang):
    return include, exclude
 
 #tttttttttt
-def create_templates(method, wrapped, frozen, gen_at_end=True):
+def create_templates(method, wrapped, frozen, gen_pos="end", prompt_pos="start"):
        if method == "context-en":
-           qtemp = "{enc_token} {gen_start} {input_text} {rel_natural_en} {target_text} {event} {rel_natural} {gen_end} {ph}"
+           qtemp = "{enc_token_start} {gen_start} {input_text} {rel_natural_en} {target_text} {event} {rel_natural} {gen_end} {enc_token_end} {ph}"
            anstemp = "{ph} {resp} {end}"
        elif method == "context-fa":
-           qtemp = "{enc_token} {gen_start} {input_text_fa} {rel_natural_fa} {target_text_fa} {event} {rel_natural} {gen_end} {ph}"
+           qtemp = "{enc_token_start} {gen_start} {input_text_fa} {rel_natural_fa} {target_text_fa} {event} {rel_natural} {enc_token_end} {gen_end} {ph}"
            anstemp = "{ph} {resp} {end}"
        elif method == "sup":
            if wrapped:
-               qtemp = "{enc_token} {gen_start} {event} {gen_end}"
+               qtemp = "{enc_token_start} {gen_start} {event} {enc_token_end} {gen_end}"
                anstemp = "{resp}"
            else: #unwrapped
-               qtemp = "{rel_token} {gen_start} {event} {gen_end}"
+               qtemp = "{rel_token_start} {gen_start} {event} {rel_token_end} {gen_end}"
                anstemp = "{resp}"
        elif method == "unsup":
            if wrapped:
-               qtemp = "{enc_token} {gen_start} {event} {gen_end} {ph}"
+               qtemp = "{enc_token_start} {gen_start} {event} {enc_token_end} {gen_end} {ph}"
                anstemp = "{ph} {resp} {end}"
            else: #unwrapped
                if frozen:
                    qtemp = "{gen_start} {event} {rel_natural} {gen_end} {ph}"
                    anstemp = "{ph} {resp} {end}"
                else:
-                   qtemp = "{rel_token} {gen_start} {event} {gen_end} {ph}"
+                   qtemp = "{rel_token_start} {gen_start} {event} {rel_token_end} {gen_end} {ph}"
                    anstemp = "{ph} {resp} {end}"
        else:
            raise ValueError("not supprted method: " + method)
-       if gen_at_end:
+       if gen_pos == "end":
            qtemp = qtemp.replace("{gen_start} ","")
            qtemp = qtemp.replace("{gen_end}","{gen}")
        else:
            qtemp = qtemp.replace(" {gen_end}","")
            qtemp = qtemp.replace("{gen_start}","{gen}")
+       if prompt_pos == "end":
+           qtemp = qtemp.replace("{enc_token_start} ","")
+           qtemp = qtemp.replace("{enc_token_end}","{enc_token}")
+           qtemp = qtemp.replace("{rel_token_start} ","")
+           qtemp = qtemp.replace("{rel_token_end}","{rel_token}")
+       else:
+           qtemp = qtemp.replace(" {enc_token_end} ","")
+           qtemp = qtemp.replace("{enc_token_start}","{enc_token}")
+           qtemp = qtemp.replace(" {rel_token_end} ","")
+           qtemp = qtemp.replace("{rel_token_start}","{rel_token}")
 
        return qtemp, anstemp
 
