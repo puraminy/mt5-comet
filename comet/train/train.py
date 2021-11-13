@@ -567,7 +567,7 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
     length = prompt_length.split("-")
     enc_pl = int(length[0]) 
     dec_pl = int(length[1]) if len(length) > 1 else 0
-    map_relations_to_prompts(wrap, enc_pl, dec_pl)
+    set_prompt_lengths(wrap, enc_pl, dec_pl)
     atomic_query_responses = {}
     atomic_flattened = {}
     num_records = {}

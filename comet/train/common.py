@@ -118,32 +118,12 @@ def get_prompt_token_fn(id_offset,length):
 
 encoder_relation_mappings = {}
 decoder_relation_mappings = {}
-encoder_counter = 0
-decoder_counter = 0
-def map_relations_to_prompts(rel, enc_plen=0, dec_plen=0):
-    global encoder_relation_mappings, decoder_relation_mappings
+def set_prompt_lengths(rel, enc_plen=0, dec_plen=0):
     global atomic_relation_prompt_lengths
     if rel == "":
         return
-    if enc_plen == 0 and dec_plen == 0:
-        (enc_plen, dec_plen) = atomic_relation_prompt_lengths[rel]
-    else:
-        atomic_relation_prompt_lengths[rel] = (enc_plen, dec_plen)
+    atomic_relation_prompt_lengths[rel] = (enc_plen, dec_plen)
 
-def get_econder_prompt(rel):
-    global encoder_counter
-    enc_plen,_ = atomic_relation_prompt_lengths[rel]
-    prompt = " ".join(f"<{rel}_{i}>" for i in range(enc_plen))
-    encoder_counter += enc_plen
-    return prompt
-
-def get_decoder_prompt(rel):
-    decoder_relation_mappings[rel] = " ".join(f"<{rel}_{i}>" for i in range(enc_plen,enc_plen+dec_plen))
-    dlog.info("Encoder mappings for %s is %s", rel, encoder_relation_mappings[rel])
-    dlog.info("Decoder mappings for %s is %s", rel, decoder_relation_mappings[rel])
-
-for rel,(enc_plen, dec_plen) in atomic_relation_prompt_lengths.items():
-   map_relations_to_prompts(rel)
 
 def extend_tokenizer(tokenizer, rel=""):
     if not rel:
@@ -156,13 +136,10 @@ def extend_tokenizer(tokenizer, rel=""):
         ]
         tokenizer.add_special_tokens({"additional_special_tokens":added_tokens}) 
     if rel:
-        enc_plen = atomic_relation_prompt_lengths[rel][0]
-        dec_plen = atomic_relation_prompt_lengths[rel][1]
         added_tokens = [ 
-                AddedToken(f"<{rel}_{i}>",lstrip=True,
+                AddedToken(prompt,lstrip=True,
                     rstrip=False)
-                for i in 
-                    range(enc_plen + dec_plen + 1)
+                for prompt in encoder_prompts[rel] + decoder_prompts[rel]
         ]
         tokenizer.add_special_tokens({"additional_special_tokens":added_tokens})
 
@@ -171,12 +148,14 @@ def wrap_model(model, tokenizer, rel, emb=False, prompt_path=""):
     embedding_dim = model.config.hidden_size
     enc_plen = atomic_relation_prompt_lengths[rel][0]
     dec_plen = atomic_relation_prompt_lengths[rel][1]
-    dec_offset = id_offset + enc_plen
+    assert rel in encoder_prompts and len(encoder_prompts[rel]) > 0, "No encoder prompt defined!"
+    dec_offset = id_offset + len(encoder_prompts[rel])
     prompt_encoder = None
     decoder_prompt_encoder = None
     mlog.info("id_offset: %s", id_offset)
     mlog.info("enc_plan: %s", enc_plen)
     mlog.info("dec_plan: %s", dec_plen)
+    mlog.info("decoder offset: %s", dec_offset)
     if emb:
         if enc_plen > 0:
             prompt_encoder = EmbeddingPromptEncoder(enc_plen,embedding_dim,id_offset)
@@ -197,21 +176,17 @@ def wrap_model(model, tokenizer, rel, emb=False, prompt_path=""):
 
     return wrapped_model
 
+encoder_prompts = {} 
+decoder_prompts = {}
 def fill_consts(template, row):
     text = template
     dlog.info("Fill constants for %s", text)
     rel = row["prefix"]
     rel_token = atomic_relation_mappings[rel]        
-    assert rel in encoder_relation_mappings, rel + " is not in encoer relation mappings"
-    enc_token = encoder_relation_mappings[rel] 
-    assert rel in decoder_relation_mappings, rel + " is not in decoer relation mappings"
-    dec_token = decoder_relation_mappings[rel] 
 
     rel_natural_en = relation_natural_mappings[rel]["en"]        
     rel_natural_fa = relation_natural_mappings[rel]["fa"]        
     rep  = {"{rel}":rel, 
-            "{enc_token}":enc_token, 
-            "{dec_token}":dec_token, 
             "{rel_token}":rel_token,
             "{rel_natural_en}":rel_natural_en,
             "{rel_natural_fa}":rel_natural_fa,
@@ -222,6 +197,25 @@ def fill_consts(template, row):
     rep = dict((re.escape(k), v) for k, v in rep.items()) 
     pattern = re.compile("|".join(rep.keys()))
     text = pattern.sub(lambda m: rep[re.escape(m.group(0))], template)
+    enc_plen,dec_plen = atomic_relation_prompt_lengths[rel]
+    if not rel in encoder_prompts:
+        encoder_prompts[rel] = []
+    if not rel in decoder_prompts:
+        decoder_prompts[rel] = []
+    counter = 0
+    while "{enc_token}" in text:
+        prompt = " ".join(f"<enc_{rel}_{i}>" for i in range(counter, enc_plen))
+        if not prompt in encoder_prompts:
+            encoder_prompts[rel].append(prompt)
+        text = text.replace("{enc_token}",prompt, 1)
+        counter += enc_plen 
+    counter = 0
+    while "{dec_token}" in text:
+        prompt = " ".join(f"<dec_{rel}_{i}>" for i in range(counter, dec_plen))
+        if not prompt in decoder_prompts:
+            decoder_prompts[rel].append(prompt)
+        text = text.replace("{dec_token}",prompt, 1)
+        counter += dec_plen 
     for key,value in row.items():
         val = str(value)
         text = text.replace("{" + key + "}", val)
