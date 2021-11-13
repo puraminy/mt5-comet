@@ -397,8 +397,8 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
         running_weight = self.mlp(x[0]).squeeze(0)
         # find zero based ids 
         prompt_token_ids = prompt_token_ids - self.id_offset
-        print("self id offset:", self.id_offset)
-        print("prompt token ids:", prompt_token_ids)
+        wlog.critical("self id offset:%s", self.id_offset)
+        wlog.critical("prompt token ids:%s", prompt_token_ids)
         # return weights for prompt_token_ids 
         return F.embedding(prompt_token_ids,running_weight)
     def dump_embedding(self, weight):
