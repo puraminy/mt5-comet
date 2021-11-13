@@ -170,7 +170,8 @@ def wrap_model(model, tokenizer, rel, emb=False, prompt_path=""):
         decoder_prompt_encoder = EmbeddingPromptEncoder(dec_plen,embedding_dim,dec_offset)
     else:
         prompt_encoder = LSTMEmbeddingPromptEncoder(enc_plen,embedding_dim,id_offset)
-        decoder_prompt_encoder = LSTMEmbeddingPromptEncoder(dec_plen,embedding_dim,dec_offset)
+        if dec_plen > 0:
+            decoder_prompt_encoder = LSTMEmbeddingPromptEncoder(dec_plen,embedding_dim,dec_offset)
 
     extend_tokenizer(tokenizer, rel)
     model.resize_token_embeddings(len(tokenizer))
