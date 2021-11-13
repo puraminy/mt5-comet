@@ -76,3 +76,81 @@ en:<extra_id_0> to graduate from high school <extra_id_1>
 input_text_fa====>target_text_fa
 fa:<xIntent>: PersonX دیپلم PersonX را می پذیرد <gen_fa> <extra_id_0>
 fa:<extra_id_0> برای فارغ التحصیلی از دبیرستان <extra_id_1>
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%% test 
+%%%%%%%%%%%%%%%%%% test 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+building query responses for train
+len:47449
+qtemp:{enc_token} {event}{gen} {ph}
+anstemp:{dec_token} {ph} {resp} {end}
+len after filtering:47449
+%%%%%%%%%%%%%%%%%% en2en %%%%%%%%%%%%%%%%%%%
+input_text====>target_text
+en:<xIntent_0> <xIntent_1> <xIntent_2> <xIntent_3> <xIntent_4> <xIntent_5> <xIntent_6> <xIntent_7> PersonX abandons ___ altogether<gen_en> <extra_id_0>
+en: <extra_id_0> put a stop <extra_id_1>
+%%%%%%%%%%%%%%%%%% en2fa %%%%%%%%%%%%%%%%%%%
+input_text====>target_text_fa
+en:<xIntent_0> <xIntent_1> <xIntent_2> <xIntent_3> <xIntent_4> <xIntent_5> <xIntent_6> <xIntent_7> PersonX abandons ___ altogether<gen_fa> <extra_id_0>
+fa: <extra_id_0> توقف کنید <extra_id_1>
+%%%%%%%%%%%%%%%%%% fa2en %%%%%%%%%%%%%%%%%%%
+input_text_fa====>target_text
+fa:<xIntent_0> <xIntent_1> <xIntent_2> <xIntent_3> <xIntent_4> <xIntent_5> <xIntent_6> <xIntent_7> PersonX ___ را به کلی کنار می گذارد<gen_en> <extra_id_0>
+en: <extra_id_0> put a stop <extra_id_1>
+%%%%%%%%%%%%%%%%%% fa2fa %%%%%%%%%%%%%%%%%%%
+input_text_fa====>target_text_fa
+fa:<xIntent_0> <xIntent_1> <xIntent_2> <xIntent_3> <xIntent_4> <xIntent_5> <xIntent_6> <xIntent_7> PersonX ___ را به کلی کنار می گذارد<gen_fa> <extra_id_0>
+fa: <extra_id_0> توقف کنید <extra_id_1>
+%%%%%%%%%%%%%%%%%% en2en %%%%%%%%%%%%%%%%%%%
+input_text====>target_text
+en:<xIntent_0> <xIntent_1> <xIntent_2> <xIntent_3> <xIntent_4> <xIntent_5> <xIntent_6> <xIntent_7> PersonX abandons the ___ altogether<gen_en> <extra_id_0>
+en: <extra_id_0> to appear not interested <extra_id_1>
+%%%%%%%%%%%%%%%%%% en2fa %%%%%%%%%%%%%%%%%%%
+input_text====>target_text_fa
+en:<xIntent_0> <xIntent_1> <xIntent_2> <xIntent_3> <xIntent_4> <xIntent_5> <xIntent_6> <xIntent_7> PersonX abandons the ___ altogether<gen_fa> <extra_id_0>
+fa: <extra_id_0> به نظر نمی رسد علاقه مند است <extra_id_1>
+%%%%%%%%%%%%%%%%%% fa2en %%%%%%%%%%%%%%%%%%%
+input_text_fa====>target_text
+fa:<xIntent_0> <xIntent_1> <xIntent_2> <xIntent_3> <xIntent_4> <xIntent_5> <xIntent_6> <xIntent_7> PersonX ___ را به کلی کنار می گذارد<gen_en> <extra_id_0>
+en: <extra_id_0> to appear not interested <extra_id_1>
+%%%%%%%%%%%%%%%%%% fa2fa %%%%%%%%%%%%%%%%%%%
+input_text_fa====>target_text_fa
+fa:<xIntent_0> <xIntent_1> <xIntent_2> <xIntent_3> <xIntent_4> <xIntent_5> <xIntent_6> <xIntent_7> PersonX ___ را به کلی کنار می گذارد<gen_fa> <extra_id_0>
+fa: <extra_id_0> به نظر نمی رسد علاقه مند است <extra_id_1>
+building query responses for validation
+len:5388
+qtemp:{enc_token} {event}{gen} {ph}
+anstemp:{dec_token} {ph} {resp} {end}
+len after filtering:5388
+%%%%%%%%%%%%%%%%%% en2en %%%%%%%%%%%%%%%%%%%
+input_text====>target_text
+en:<xIntent_0> <xIntent_1> <xIntent_2> <xIntent_3> <xIntent_4> <xIntent_5> <xIntent_6> <xIntent_7> PersonX 'd better go<gen_en> <extra_id_0>
+en: <extra_id_0> to go somewhere else more important. <extra_id_1>
+%%%%%%%%%%%%%%%%%% en2fa %%%%%%%%%%%%%%%%%%%
+input_text====>target_text_fa
+en:<xIntent_0> <xIntent_1> <xIntent_2> <xIntent_3> <xIntent_4> <xIntent_5> <xIntent_6> <xIntent_7> PersonX 'd better go<gen_fa> <extra_id_0>
+fa: <extra_id_0> برای رفتن به جای دیگری مهم تر <extra_id_1>
+%%%%%%%%%%%%%%%%%% fa2en %%%%%%%%%%%%%%%%%%%
+input_text_fa====>target_text
+fa:<xIntent_0> <xIntent_1> <xIntent_2> <xIntent_3> <xIntent_4> <xIntent_5> <xIntent_6> <xIntent_7> PersonX بهتر است برود<gen_en> <extra_id_0>
+en: <extra_id_0> to go somewhere else more important. <extra_id_1>
+%%%%%%%%%%%%%%%%%% fa2fa %%%%%%%%%%%%%%%%%%%
+input_text_fa====>target_text_fa
+fa:<xIntent_0> <xIntent_1> <xIntent_2> <xIntent_3> <xIntent_4> <xIntent_5> <xIntent_6> <xIntent_7> PersonX بهتر است برود<gen_fa> <extra_id_0>
+fa: <extra_id_0> برای رفتن به جای دیگری مهم تر <extra_id_1>
+%%%%%%%%%%%%%%%%%% en2en %%%%%%%%%%%%%%%%%%%
+input_text====>target_text
+en:<xIntent_0> <xIntent_1> <xIntent_2> <xIntent_3> <xIntent_4> <xIntent_5> <xIntent_6> <xIntent_7> PersonX accepts PersonX's diploma<gen_en> <extra_id_0>
+en: <extra_id_0> to graduate from high school <extra_id_1>
+%%%%%%%%%%%%%%%%%% en2fa %%%%%%%%%%%%%%%%%%%
+input_text====>target_text_fa
+en:<xIntent_0> <xIntent_1> <xIntent_2> <xIntent_3> <xIntent_4> <xIntent_5> <xIntent_6> <xIntent_7> PersonX accepts PersonX's diploma<gen_fa> <extra_id_0>
+fa: <extra_id_0> برای فارغ التحصیلی از دبیرستان <extra_id_1>
+%%%%%%%%%%%%%%%%%% fa2en %%%%%%%%%%%%%%%%%%%
+input_text_fa====>target_text
+fa:<xIntent_0> <xIntent_1> <xIntent_2> <xIntent_3> <xIntent_4> <xIntent_5> <xIntent_6> <xIntent_7> PersonX دیپلم PersonX را می پذیرد<gen_en> <extra_id_0>
+en: <extra_id_0> to graduate from high school <extra_id_1>
+%%%%%%%%%%%%%%%%%% fa2fa %%%%%%%%%%%%%%%%%%%
+input_text_fa====>target_text_fa
+fa:<xIntent_0> <xIntent_1> <xIntent_2> <xIntent_3> <xIntent_4> <xIntent_5> <xIntent_6> <xIntent_7> PersonX دیپلم PersonX را می پذیرد<gen_fa> <extra_id_0>
+fa: <extra_id_0> برای فارغ التحصیلی از دبیرستان <extra_id_1>

@@ -129,6 +129,8 @@ def map_relations_to_prompts(rel, enc_plen=0, dec_plen=0):
         atomic_relation_prompt_lengths[rel] = (enc_plen, dec_plen)
     encoder_relation_mappings[rel] = " ".join(f"<{rel}_{i}>" for i in range(enc_plen))
     decoder_relation_mappings[rel] = " ".join(f"<{rel}_{i}>" for i in range(enc_plen,enc_plen+dec_plen))
+    dlog.info("Encoder mappings for %s is %s", rel, encoder_relation_mappings[rel])
+    dlog.info("Decoder mappings for %s is %s", rel, decoder_relation_mappings[rel])
 
 for rel,(enc_plen, dec_plen) in atomic_relation_prompt_lengths.items():
    map_relations_to_prompts(rel)
@@ -184,6 +186,7 @@ def wrap_model(model, tokenizer, rel, emb=False, prompt_path=""):
 
 def fill_consts(template, row):
     text = template
+    dlog.info("Fill constants for %s", text)
     rel = row["prefix"]
     rel_token = atomic_relation_mappings[rel]        
     assert rel in encoder_relation_mappings, rel + " is not in encoer relation mappings"
@@ -209,6 +212,8 @@ def fill_consts(template, row):
     for key,value in row.items():
         val = str(value)
         text = text.replace("{" + key + "}", val)
+
+    dlog.info("After: %s", text)
     return text
 
 def filter_inputs(include, exclude, lang):
