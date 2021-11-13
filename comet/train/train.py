@@ -501,6 +501,7 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
     validation_size = 100
     validation_num_generation = 20
     if not frozen and learning_rate == 0: learning_rate = 6.25e-05
+    mlog.info("learning rate %s:", learning_rate)
     if frozen and learning_rate == 0: learning_rate = 0.01  #6.25e-05
     device = 'cuda' if not cpu else 'cpu'
 
