@@ -118,6 +118,8 @@ def get_prompt_token_fn(id_offset,length):
 
 encoder_relation_mappings = {}
 decoder_relation_mappings = {}
+encoder_counter = 0
+decoder_counter = 0
 def map_relations_to_prompts(rel, enc_plen=0, dec_plen=0):
     global encoder_relation_mappings, decoder_relation_mappings
     global atomic_relation_prompt_lengths
@@ -127,7 +129,15 @@ def map_relations_to_prompts(rel, enc_plen=0, dec_plen=0):
         (enc_plen, dec_plen) = atomic_relation_prompt_lengths[rel]
     else:
         atomic_relation_prompt_lengths[rel] = (enc_plen, dec_plen)
-    encoder_relation_mappings[rel] = " ".join(f"<{rel}_{i}>" for i in range(enc_plen))
+
+def get_econder_prompt(rel):
+    global encoder_counter
+    enc_plen,_ = atomic_relation_prompt_lengths[rel]
+    prompt = " ".join(f"<{rel}_{i}>" for i in range(enc_plen))
+    encoder_counter += enc_plen
+    return prompt
+
+def get_decoder_prompt(rel):
     decoder_relation_mappings[rel] = " ".join(f"<{rel}_{i}>" for i in range(enc_plen,enc_plen+dec_plen))
     dlog.info("Encoder mappings for %s is %s", rel, encoder_relation_mappings[rel])
     dlog.info("Decoder mappings for %s is %s", rel, decoder_relation_mappings[rel])

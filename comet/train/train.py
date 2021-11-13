@@ -629,12 +629,6 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
         extra = ""
     results_info = f"{experiment}_{model_id}_{lang}_{method}_{w_str}_{f_str}_tr:{training_round}-ep:{epochs_num}-({start}-{train_records})-{val_records}{extra}"
 
-    if do_eval or (not wrap and frozen):
-        model.to(device=device)
-        mlog.info("Evaluating the model...")
-        val_data = atomic_query_responses[val_set]
-        eval(model, tokenizer, val_data, inter, save_path, results_info, val_records, gen_param)  
-        return
 
 
     def collate_fn_for_flattened(batch):
@@ -670,6 +664,7 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
     else:
         for p in model.parameters():
             p.requires_grad = True 
+    wrapped_model = None
     if wrap:
         if not load_prompt_path and Path(os.path.join(load_path, model_id, "prompt")).exists():
             load_prompt_path = os.path.join(load_path, model_id, "prompt")
@@ -680,6 +675,15 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
     else:
         model.to(device=device)
 
+    if do_eval or (not wrap and frozen):
+        mlog.info("Evaluating the model...")
+        if wrapped_model:
+            with torch.no_grad():
+                mlog.info("Updating the model weights before evaluaton...")
+                wrapped_model.update_model_weight()
+        val_data = atomic_query_responses[val_set]
+        eval(model, tokenizer, val_data, inter, save_path, results_info, val_records, gen_param)  
+        return
     def get_optimizer(model, learning_rate, wrap):
         if wrap:
             optimizer_grouped_parameters = [
@@ -840,6 +844,7 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
             mlog.info("Saving decoder prompt at %s", prompt_path)
             wrapped_model.decoder_prompt_encoder.save(prompt_path)
         with torch.no_grad():
+            mlog.info("Updating the model weights before evaluaton...")
             wrapped_model.update_model_weight()
     save_checkpoint(model, optimizer, scheduler, step, 
                     best_eval_step, best_dev_loss,
