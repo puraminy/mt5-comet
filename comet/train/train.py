@@ -501,6 +501,7 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
     validation_size = 100
     validation_num_generation = 20
     if not frozen and learning_rate == 0: learning_rate = 6.25e-05
+    if wrap and frozen and learning_rate == 0: learning_rate = 0.01
     mlog.info("learning rate %s:", learning_rate)
     if frozen and learning_rate == 0: learning_rate = 0.01  #6.25e-05
     device = 'cuda' if not cpu else 'cpu'
@@ -564,7 +565,7 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
 
     length = prompt_length.split("-")
     enc_pl = int(length[0]) 
-    dec_pl = int(length[1])
+    dec_pl = int(length[1]) if len(length) > 1 else 0
     map_relations_to_prompts(wrap, enc_pl, dec_pl)
     atomic_query_responses = {}
     atomic_flattened = {}
