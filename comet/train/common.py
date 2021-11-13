@@ -179,7 +179,7 @@ encoder_prompts = {}
 decoder_prompts = {}
 def fill_consts(template, row):
     text = template
-    dlog.debug("Fill constants for %s", text)
+    dlog.debug("fill const for: %s", text)
     rel = row["prefix"]
     rel_token = atomic_relation_mappings[rel]        
 
@@ -205,18 +205,26 @@ def fill_consts(template, row):
     pi = 0
     while "{enc_token}" in text:
         enc_plen = plen[pi] if pi < len(plen) else plen[-1] 
-        prompt = " ".join(f"<enc_{rel}_{i}>" for i in range(counter, counter + enc_plen))
-        if not prompt in encoder_prompts[rel]:
-            encoder_prompts[rel].append(prompt)
+        prompt = ""
+        for i in range(counter, counter + enc_plen):
+            token = f"<enc_{rel}_{i}>" 
+            prompt += " " + token
+            if not token in encoder_prompts[rel]:
+                encoder_prompts[rel].append(token)
+        prompt = prompt.strip()
         text = text.replace("{enc_token}",prompt, 1)
         counter += enc_plen 
         pi += 1
     counter = 0
     while "{dec_token}" in text:
         dec_plen = plen[pi] if pi < len(plen) else plen[-1] 
-        prompt = " ".join(f"<dec_{rel}_{i}>" for i in range(counter, counter+dec_plen))
-        if not prompt in decoder_prompts[rel]:
-            decoder_prompts[rel].append(prompt)
+        prompt=""
+        for i in range(counter, counter+dec_plen):
+            token = f"<dec_{rel}_{i}>" 
+            prompt += " " + token
+            if not token in decoder_prompts[rel]:
+                decoder_prompts[rel].append(token)
+        prompt = prompt.strip()
         text = text.replace("{dec_token}",prompt, 1)
         counter += dec_plen 
         pi += 1
@@ -224,7 +232,7 @@ def fill_consts(template, row):
         val = str(value)
         text = text.replace("{" + key + "}", val)
 
-    dlog.info("After: %s", text)
+    dlog.debug("after: %s", text)
     return text
 
 def filter_inputs(include, exclude, lang):
