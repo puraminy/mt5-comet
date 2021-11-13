@@ -408,7 +408,7 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
 @click.option(
     "--prompt_length",
     "-pl",
-    default="5-0",
+    default="5-2",
     type=str,
     help="Encoder-decoder prompt length"
 )
@@ -567,10 +567,8 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
     atomic_dataset["train"] = pd.read_table(train_path)
     atomic_dataset["validation"] = pd.read_table(val_path)
 
-    length = prompt_length.split("-")
-    enc_pl = int(length[0]) 
-    dec_pl = int(length[1]) if len(length) > 1 else 0
-    set_prompt_lengths(wrap, enc_pl, dec_pl)
+    length = [int(s) for s in prompt_length.split("-")]
+    set_prompt_lengths(wrap, length)
     atomic_query_responses = {}
     atomic_flattened = {}
     num_records = {}

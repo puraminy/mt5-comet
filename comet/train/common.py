@@ -110,7 +110,7 @@ placeholder_token = "<extra_id_0>"
 end_token = "<extra_id_1>"
 # %%
 atomic_relation_prompt_lengths = {
-    "xIntent":(5,3),
+    "xIntent":[5,3],
 }
 
 def get_prompt_token_fn(id_offset,length):
@@ -118,11 +118,10 @@ def get_prompt_token_fn(id_offset,length):
 
 encoder_relation_mappings = {}
 decoder_relation_mappings = {}
-def set_prompt_lengths(rel, enc_plen=0, dec_plen=0):
-    global atomic_relation_prompt_lengths
+def set_prompt_lengths(rel, length):
     if rel == "":
         return
-    atomic_relation_prompt_lengths[rel] = (enc_plen, dec_plen)
+    atomic_relation_prompt_lengths[rel] = length
 
 
 def extend_tokenizer(tokenizer, rel=""):
@@ -146,10 +145,10 @@ def extend_tokenizer(tokenizer, rel=""):
 def wrap_model(model, tokenizer, rel, emb=False, prompt_path=""):
     id_offset = len(tokenizer)
     embedding_dim = model.config.hidden_size
-    enc_plen = atomic_relation_prompt_lengths[rel][0]
-    dec_plen = atomic_relation_prompt_lengths[rel][1]
-    assert rel in encoder_prompts and len(encoder_prompts[rel]) > 0, "No encoder prompt defined!"
-    dec_offset = id_offset + len(encoder_prompts[rel])
+    enc_plen = len(encoder_prompts[rel])
+    dec_plen = len(decoder_prompts[rel])
+    assert rel in encoder_prompts and enc_plen > 0, "No encoder prompt defined!"
+    dec_offset = id_offset + enc_plen
     prompt_encoder = None
     decoder_prompt_encoder = None
     mlog.info("id_offset: %s", id_offset)
@@ -197,25 +196,30 @@ def fill_consts(template, row):
     rep = dict((re.escape(k), v) for k, v in rep.items()) 
     pattern = re.compile("|".join(rep.keys()))
     text = pattern.sub(lambda m: rep[re.escape(m.group(0))], template)
-    enc_plen,dec_plen = atomic_relation_prompt_lengths[rel]
+    plen = atomic_relation_prompt_lengths[rel]
     if not rel in encoder_prompts:
         encoder_prompts[rel] = []
     if not rel in decoder_prompts:
         decoder_prompts[rel] = []
     counter = 0
+    pi = 0
     while "{enc_token}" in text:
+        enc_plen = plen[pi] if pi < len(plen) else plen[-1] 
         prompt = " ".join(f"<enc_{rel}_{i}>" for i in range(counter, counter + enc_plen))
         if not prompt in encoder_prompts:
             encoder_prompts[rel].append(prompt)
         text = text.replace("{enc_token}",prompt, 1)
         counter += enc_plen 
+        pi += 1
     counter = 0
     while "{dec_token}" in text:
+        dec_plen = plen[pi] if pi < len(plen) else plen[-1] 
         prompt = " ".join(f"<dec_{rel}_{i}>" for i in range(counter, counter+dec_plen))
         if not prompt in decoder_prompts:
             decoder_prompts[rel].append(prompt)
         text = text.replace("{dec_token}",prompt, 1)
         counter += dec_plen 
+        pi += 1
     for key,value in row.items():
         val = str(value)
         text = text.replace("{" + key + "}", val)
