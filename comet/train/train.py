@@ -834,11 +834,11 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
             Path(prompt_path).mkdir(exist_ok=True, parents=True)
             mlog.info("Saving encoder prompt at %s", prompt_path)
             wrapped_model.prompt_encoder.save(prompt_path)
-        if wrapped_model.prompt_decoder:
+        if wrapped_model.decoder_prompt_encoder:
             prompt_path = os.path.join(save_path, "prompt", "decoder")
             Path(prompt_path).mkdir(exist_ok=True, parents=True)
             mlog.info("Saving decoder prompt at %s", prompt_path)
-            wrapped_model.prompt_decoder.save(prompt_path)
+            wrapped_model.decoder_prompt_encoder.save(prompt_path)
         with torch.no_grad():
             wrapped_model.update_model_weight()
     save_checkpoint(model, optimizer, scheduler, step, 
