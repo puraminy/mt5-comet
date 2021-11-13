@@ -829,10 +829,15 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
     pbar.close()
     sw.close()
     if wrap:
-        prompt_path = os.path.join(save_path, "prompt")
+        prompt_path = os.path.join(save_path, "prompt", "encoder")
         Path(prompt_path).mkdir(exist_ok=True, parents=True)
-        mlog.info("Saving prompt at %s", prompt_path)
+        mlog.info("Saving encoder prompt at %s", prompt_path)
         wrapped_model.prompt_encoder.save(prompt_path)
+        if wrapped_model.prompt_decoder:
+            prompt_path = os.path.join(save_path, "prompt", "decoder")
+            Path(prompt_path).mkdir(exist_ok=True, parents=True)
+            mlog.info("Saving decoder prompt at %s", prompt_path)
+            wrapped_model.prompt_decoder.save(prompt_path)
         with torch.no_grad():
             wrapped_model.update_model_weight()
     save_checkpoint(model, optimizer, scheduler, step, 
@@ -840,6 +845,8 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
                     save_path)
 
     eval(model, tokenizer, atomic_query_responses[val_set], inter, save_path, results_info, val_records, gen_param)  
+
+#ettt
 
 @run.command()
 @click.argument("experiment", type=str)
