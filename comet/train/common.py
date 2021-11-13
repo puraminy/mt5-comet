@@ -206,7 +206,7 @@ def fill_consts(template, row):
     while "{enc_token}" in text:
         enc_plen = plen[pi] if pi < len(plen) else plen[-1] 
         prompt = " ".join(f"<enc_{rel}_{i}>" for i in range(counter, counter + enc_plen))
-        if not prompt in encoder_prompts:
+        if not prompt in encoder_prompts[rel]:
             encoder_prompts[rel].append(prompt)
         text = text.replace("{enc_token}",prompt, 1)
         counter += enc_plen 
@@ -215,7 +215,7 @@ def fill_consts(template, row):
     while "{dec_token}" in text:
         dec_plen = plen[pi] if pi < len(plen) else plen[-1] 
         prompt = " ".join(f"<dec_{rel}_{i}>" for i in range(counter, counter+dec_plen))
-        if not prompt in decoder_prompts:
+        if not prompt in decoder_prompts[rel]:
             decoder_prompts[rel].append(prompt)
         text = text.replace("{dec_token}",prompt, 1)
         counter += dec_plen 

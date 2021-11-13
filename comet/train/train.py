@@ -573,6 +573,7 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
     atomic_flattened = {}
     num_records = {}
     num_samples = {"train": train_samples, "validation":val_samples}
+    mlog.info("Perparing data ...")
     for split_name,split_df in atomic_dataset.items():
         (atomic_query_responses[split_name], 
          atomic_flattened[split_name],
