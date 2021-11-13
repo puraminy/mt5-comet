@@ -180,7 +180,7 @@ encoder_prompts = {}
 decoder_prompts = {}
 def fill_consts(template, row):
     text = template
-    dlog.info("Fill constants for %s", text)
+    dlog.debug("Fill constants for %s", text)
     rel = row["prefix"]
     rel_token = atomic_relation_mappings[rel]        
 
@@ -204,14 +204,14 @@ def fill_consts(template, row):
         decoder_prompts[rel] = []
     counter = 0
     while "{enc_token}" in text:
-        prompt = " ".join(f"<enc_{rel}_{i}>" for i in range(counter, enc_plen))
+        prompt = " ".join(f"<enc_{rel}_{i}>" for i in range(counter, counter + enc_plen))
         if not prompt in encoder_prompts:
             encoder_prompts[rel].append(prompt)
         text = text.replace("{enc_token}",prompt, 1)
         counter += enc_plen 
     counter = 0
     while "{dec_token}" in text:
-        prompt = " ".join(f"<dec_{rel}_{i}>" for i in range(counter, dec_plen))
+        prompt = " ".join(f"<dec_{rel}_{i}>" for i in range(counter, counter+dec_plen))
         if not prompt in decoder_prompts:
             decoder_prompts[rel].append(prompt)
         text = text.replace("{dec_token}",prompt, 1)

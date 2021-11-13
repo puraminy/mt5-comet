@@ -436,10 +436,13 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
     mlog.info("given save path: %s", save_path)
     if "dlog" in print_log: # data logger
         dlog.addHandler(consoleHandler)
+        dlog.setLevel(logging.DEBUG)
     if "vlog" in print_log: # evaluation logger
         vlog.addHandler(consoleHandler)
+        vlog.setLevel(logging.DEBUG)
     if "clog" in print_log: # config logger
         clog.addHandler(consoleHandler)
+        clog.setLevel(logging.DEBUG)
     if method:    
         qtemp, anstemp = create_templates(method, wrap, frozen,
                 gen_pos="end", prompt_pos=prompt_pos, zero_shot=zero_shot, lang=lang)
@@ -958,7 +961,7 @@ def res(stype, model, method, sort):
         data = json.load(f)
     
     sd = superitems(data)
-    df = pd.DataFrame(sd, columns=["exp","model","lang", "method","wrap","frozen","stype", "dir", "score"])
+    df = pd.DataFrame(sd, columns=["exp","model","lang", "method","wrap","frozen","epochs","stype", "dir", "score"])
     df.to_csv(os.path.join(resPath, "table_all.tsv"), sep="\t", index = False)
     if stype == "all":
         print(df)
