@@ -178,7 +178,7 @@ class PTuningWrapper(torch.nn.Module):
                 self.underlying_model.resize_token_embeddings(
                    new_num_tokens 
                 )
-                self.cur_embedding = self.underlying_model.get_input_embeddings()
+                self.cur_embeddings = self.underlying_model.get_input_embeddings()
                 wlog.debug("before update")
                 # fill the current embeddings with weights of encoder
                 self.prompt_encoder.dump_embedding(self.cur_embeddings.weight)
