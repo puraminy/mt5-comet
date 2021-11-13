@@ -411,8 +411,8 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
 if __name__ == "__main__":
     #Unit Test
     ## 3. T5
-    model = transformers.T5ForConditionalGeneration.from_pretrained("/home/pouramini/pret/t5-base/")
-    tokenizer = transformers.T5Tokenizer.from_pretrained("/home/pouramini/pret/t5-base/")
+    model = transformers.T5ForConditionalGeneration.from_pretrained("/home/ahmad/pret/t5-small/")
+    tokenizer = transformers.T5Tokenizer.from_pretrained("/home/ahmad/pret/t5-small/")
     print(f"Test T5")
     print(f"Original tokenizer size: {len(tokenizer)}")
     #wrapped_model,prompt_func,prompt_string = PTuningWrapper.\
@@ -420,11 +420,11 @@ if __name__ == "__main__":
     #        model,tokenizer,(2,3),(1,1),return_prompt_string=True
     #    )
     length=5
-    embedding_dim = 768
+    embedding_dim = 512
     id_offset = len(tokenizer)
     prompt_encoder = None
     decoder_prompt_encoder = None
-    #prompt_encoder = LSTMEmbeddingPromptEncoder(length,embedding_dim,id_offset)
+    prompt_encoder = LSTMEmbeddingPromptEncoder(length,embedding_dim,id_offset)
     decoder_prompt_encoder = LSTMEmbeddingPromptEncoder(length,embedding_dim,id_offset)
     rel="xIntent"
     def get_prompt_token_fn(id_offset,length):
@@ -436,7 +436,7 @@ if __name__ == "__main__":
             range(length)
     ]
     tokenizer.add_special_tokens({"additional_special_tokens":added_tokens})
-    #model.resize_token_embeddings(len(tokenizer))
+    model.resize_token_embeddings(len(tokenizer))
     wrapped_model = PTuningWrapper(model,prompt_encoder,decoder_prompt_encoder,prompt_token_fn=get_prompt_token_fn(id_offset,length))
     print(f"Tokenizer size: {len(tokenizer)}")
     example_encoder = "<xIntent_0> <xIntent_1> This is <xIntent_2>"
@@ -446,6 +446,7 @@ if __name__ == "__main__":
     tokenized['decoder_input_ids'] = model.prepare_decoder_input_ids_from_labels(
         tokenized_decoder_labels['input_ids']
     )
+    tokenized['labels'] = tokenized['input_ids'] #mycode
     tokenized['decoder_attention_mask'] = tokenized_decoder_labels['attention_mask']
     #tokenized["decoder_input_ids"] = tokenized_decoder_labels["input_ids"]
     print("Tokenized:",tokenized)

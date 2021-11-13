@@ -120,8 +120,13 @@ encoder_relation_mappings = {}
 decoder_relation_mappings = {}
 def map_relations_to_prompts(rel, enc_plen=0, dec_plen=0):
     global encoder_relation_mappings, decoder_relation_mappings
+    global atomic_relation_prompt_lengths
+    if rel == "":
+        return
     if enc_plen == 0 and dec_plen == 0:
         (enc_plen, dec_plen) = atomic_relation_prompt_lengths[rel]
+    else:
+        atomic_relation_prompt_lengths[rel] = (enc_plen, dec_plen)
     encoder_relation_mappings[rel] = " ".join(f"<{rel}_{i}>" for i in range(enc_plen))
     decoder_relation_mappings[rel] = " ".join(f"<{rel}_{i}>" for i in range(enc_plen,enc_plen+dec_plen))
 
@@ -157,9 +162,9 @@ def wrap_model(model, tokenizer, rel, emb=False, prompt_path=""):
     dec_offset = id_offset + enc_plen
     prompt_encoder = None
     decoder_prompt_encoder = None
-    mlog.debug("id_offset:", id_offset)
-    mlog.debug("enc_plan:", enc_plen)
-    mlog.debug("dec_plan:", dec_plen)
+    mlog.info("id_offset: %s", id_offset)
+    mlog.info("enc_plan: %s", enc_plen)
+    mlog.info("dec_plan: %s", dec_plen)
     if emb:
         prompt_encoder = EmbeddingPromptEncoder(enc_plen,embedding_dim,id_offset)
         decoder_prompt_encoder = EmbeddingPromptEncoder(dec_plen,embedding_dim,dec_offset)
