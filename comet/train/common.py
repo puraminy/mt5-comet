@@ -226,7 +226,7 @@ def filter_inputs(include, exclude, lang):
 def create_templates(method, wrapped, frozen, 
         gen_pos="end", prompt_pos="start", zero_shot=False, lang="mix"):
        if method == "pred-enfa":
-           qtemp = "{enc_token_start} {gen_start} {input_text} {rel_natural_en} {gen_en} {ph} {event} {rel_natural} {enc_token_end} {gen_end} {extra_id_1}"
+           qtemp = "{enc_token_start} {gen_start} {input_text} {rel_natural_en} {gen_en} {ph} {event} {rel_natural} {enc_token_end} {gen_end} <extra_id_1>"
            anstemp = "{ph} {target_text} <extra_id_1> {resp} <extra_id_2>"
        elif method == "context-en":
            qtemp = "{enc_token_start} {gen_start} {input_text} {rel_natural_en} {gen_en} {target_text} {enc_token_start} {event} {rel_natural} {enc_token_end} {gen_end} {ph}"
