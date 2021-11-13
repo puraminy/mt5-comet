@@ -262,6 +262,9 @@ def create_templates(method, wrapped, frozen,
        elif method == "unsup-dec":
            qtemp = "{enc_token_start} {gen_start} {event} {enc_token_end} {gen_end} {ph}"
            anstemp = "{dec_token} {ph} {resp} {end}"
+       elif method == "unsup-2":
+           qtemp = "{enc_token} {gen_start} {event} {enc_token} {gen_end} {ph}"
+           anstemp = "{ph} {resp} {end}"
        else:
            raise ValueError("not supprted method: " + method)
        if gen_pos == "end":
