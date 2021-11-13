@@ -157,6 +157,9 @@ def wrap_model(model, tokenizer, rel, emb=False, prompt_path=""):
     dec_offset = id_offset + enc_plen
     prompt_encoder = None
     decoder_prompt_encoder = None
+    mlog.debug("id_offset:", id_offset)
+    mlog.debug("enc_plan:", enc_plen)
+    mlog.debug("dec_plan:", dec_plen)
     if emb:
         prompt_encoder = EmbeddingPromptEncoder(enc_plen,embedding_dim,id_offset)
         decoder_prompt_encoder = EmbeddingPromptEncoder(dec_plen,embedding_dim,dec_offset)
