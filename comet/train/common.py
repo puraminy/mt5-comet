@@ -168,10 +168,13 @@ def wrap_model(model, tokenizer, rel, emb=False, prompt_path=""):
     mlog.info("enc_plan: %s", enc_plen)
     mlog.info("dec_plan: %s", dec_plen)
     if emb:
-        prompt_encoder = EmbeddingPromptEncoder(enc_plen,embedding_dim,id_offset)
-        decoder_prompt_encoder = EmbeddingPromptEncoder(dec_plen,embedding_dim,dec_offset)
+        if enc_plen > 0:
+            prompt_encoder = EmbeddingPromptEncoder(enc_plen,embedding_dim,id_offset)
+        if dec_plen > 0:
+            decoder_prompt_encoder = EmbeddingPromptEncoder(dec_plen,embedding_dim,dec_offset)
     else:
-        prompt_encoder = LSTMEmbeddingPromptEncoder(enc_plen,embedding_dim,id_offset)
+        if enc_plen > 0:
+            prompt_encoder = LSTMEmbeddingPromptEncoder(enc_plen,embedding_dim,id_offset)
         if dec_plen > 0:
             decoder_prompt_encoder = LSTMEmbeddingPromptEncoder(dec_plen,embedding_dim,dec_offset)
 

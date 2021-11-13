@@ -829,10 +829,11 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
     pbar.close()
     sw.close()
     if wrap:
-        prompt_path = os.path.join(save_path, "prompt", "encoder")
-        Path(prompt_path).mkdir(exist_ok=True, parents=True)
-        mlog.info("Saving encoder prompt at %s", prompt_path)
-        wrapped_model.prompt_encoder.save(prompt_path)
+        if wrapped_model.prompt_encoder:
+            prompt_path = os.path.join(save_path, "prompt", "encoder")
+            Path(prompt_path).mkdir(exist_ok=True, parents=True)
+            mlog.info("Saving encoder prompt at %s", prompt_path)
+            wrapped_model.prompt_encoder.save(prompt_path)
         if wrapped_model.prompt_decoder:
             prompt_path = os.path.join(save_path, "prompt", "decoder")
             Path(prompt_path).mkdir(exist_ok=True, parents=True)
