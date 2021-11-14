@@ -250,7 +250,10 @@ def filter_inputs(include, exclude, lang):
 #tttttttttt
 def create_templates(method, wrapped, frozen, 
         gen_pos="end", prompt_pos="start", zero_shot=False, lang="mix"):
-       if method == "sup-enfa":
+       if method == "sup-pred-enfa":
+           qtemp = "{input_text} {enc_token} {gen_fa}"
+           anstemp = "{input_text_fa} {dec_token} {target_text_fa}"
+       elif method == "sup-enfa":
            qtemp = "{input_text} {enc_token} {target_text} {gen_fa}"
            anstemp = "{input_text_fa} {dec_token} {target_text_fa}"
        elif method == "sup-enmix":
