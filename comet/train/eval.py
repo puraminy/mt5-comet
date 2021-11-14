@@ -31,18 +31,19 @@ def set_device(dev):
 def gen_resp(model, tokenizer, query, gen_token = "", gen_param = "greedy"):
     if gen_param == "greedy":
         generation_params = {
-            "max_length":80,
+            "max_length":120,
             "early_stopping":True,
             "num_beams":5,
+            "repetition_penalty":2.5,
             "num_return_sequences":3,
         }
     elif gen_param == "top_p":
         generation_params = {
             "do_sample":True, 
-            "top_p":0.9, 
+            "top_p":0.95, 
             "temperature": 1.0,
             "num_return_sequences":3, 
-            "repetition_penalty":1.5,
+            "repetition_penalty":2.5,
             "max_length":120,
         }
     inputs = tokenizer(query,return_tensors='pt').to(device=device)
