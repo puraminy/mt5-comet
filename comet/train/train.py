@@ -765,9 +765,10 @@ def train(model_id, experiment, qtemp, anstemp, method, train_samples, val_set,
                         if dev_micro_avg_loss < best_dev_loss:
                             best_dev_loss = dev_micro_avg_loss
                             best_eval_step = step
-                            save_checkpoint(model, optimizer, scheduler, step, 
-                                            best_eval_step, best_dev_loss,
-                                            os.path.join(save_path, "best_model"))
+                            tlog.info("epoch %s, best_eval_step: %s", epoch, best_eval_step)
+                            #save_checkpoint(model, optimizer, scheduler, step, 
+                            #                best_eval_step, best_dev_loss,
+                            #                os.path.join(save_path, "best_model"))
 
                             generation_results = \
                             "|Queries|Generation Results|\n"\
