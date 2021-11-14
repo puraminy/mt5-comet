@@ -253,7 +253,7 @@ def create_templates(method, wrapped, frozen,
        if method == "sup-enfa":
            qtemp = "{input_text} {enc_token} {target_text} {gen_fa}"
            anstemp = "{input_text_fa} {dec_token} {gen_fa} {target_text_fa}"
-       if method == "sup-enmix":
+       elif method == "sup-enmix":
            qtemp = "{input_text} {enc_token} {target_text} {gen}"
            anstemp = "{event} {dec_token} {gen} {resp}"
        elif method == "pred-enfa":
