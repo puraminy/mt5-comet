@@ -476,7 +476,7 @@ def fill_data(split_df, split_name, qtemp, anstemp, extemp,
                     data_split[rel][lang].append({query:[response]})
                 else:
                     data_split[rel][lang][query].append(response)
-                flat_data.append((query, response))
+                flat_data.append((_query, response))
                 kk += 1
                 if is_record and kk > num_samples:
                     return data_split, flat_data, kk
