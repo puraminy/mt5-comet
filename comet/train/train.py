@@ -531,6 +531,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
         learning_rate = 0.01  #6.25e-05
     assert learning_rate > 0, "Learning rate is zero!"
     device = 'cuda' if not cpu else 'cpu'
+    mlog.info("Optimizer type %s:", opt_type)
     mlog.info("learning rate %s:", learning_rate)
 
     log_dir = save_path
