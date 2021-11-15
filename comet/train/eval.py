@@ -116,7 +116,7 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
         nli_counter[l] = 0
     #df = df.groupby(['prefix','input_text'],as_index=False)[target].agg({"target_text":'<br />'.join})
     #resp_const_parts = re.split("{.*}", anstemp)
-    resp_const_parts = ["<extra_id_0>", "<extra_id_1>", "."]
+    resp_const_parts = ["<extra_id_0>", "<extra_id_1>", "<extra_id_2>", "</s>", "."]
     mlog.info("Scoring...")
     model.eval()
     pbar = tqdm(total = val_records)
@@ -135,7 +135,9 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
         for lang in val_data[rel].keys():
             vlog.info(f"%%%%%%%%%%%%%%%%%%%%%%%%%% { lang } %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
             for queries in val_data[rel][lang]:
-                for query, tails in queries.items():
+                for index_query, tails in queries.items():
+                    qid = index_query[0]
+                    query = index_query[1]
                     data = {}
                     scope = rel + "_" + lang
                     if not scope in sum_bert: 
@@ -171,6 +173,7 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
                             nt = nt.replace(const,"")
                         new_tails.append(nt)
                     tails = new_tails
+                    data["qid"] = qid
                     data["input_text"] = input_text 
                     data["pred_text1"] = top_hyp
                     data["target_text"] = "<br />".join(tails)
@@ -237,6 +240,7 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
     # %%%%%%%%%%%%%%%%%%
     new_df = pd.DataFrame(rows)
     new_df = new_df[new_df["bert_score"] > 0]
+    new_df = new_df.sort_values(by="qid")
     pbar.close()
     out1 = os.path.join(save_path,f"scored_{results_info}.tsv")
     out2 = os.path.join(resPath,f"scored_{results_info}.tsv")

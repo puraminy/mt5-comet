@@ -453,8 +453,9 @@ def fill_data(split_df, split_name, qtemp, anstemp, extemp,
                 resp = resp.strip()
                 gen_token = gen_tokens[targ_col]
                 target_lang = langs[targ_col]
-                query = fill_vars(_qtemp, rel, event, gen_token, resp, 
+                _query = fill_vars(_qtemp, rel, event, gen_token, resp, 
                         input_lang, target_lang) 
+                query = (index, _query)
                 response = fill_vars(_anstemp, rel, event, gen_token, resp, 
                         input_lang, target_lang)
                 lang = input_lang + "2" + target_lang
@@ -465,7 +466,7 @@ def fill_data(split_df, split_name, qtemp, anstemp, extemp,
                 if cat_counter[lang] < 3:
                     dlog.info(f"%%%%%%%%%%%%%%%%%% {lang} %%%%%%%%%%%%%%%%%%%")
                     dlog.info(inp + "====>" + targ_col)
-                    dlog.info(input_lang + ":"+ query)
+                    dlog.info(input_lang + ":"+ _query)
                     dlog.info(target_lang + ":" + response)
                 if cat_counter[lang] > num_samples:
                     return data_split, flat_data, kk
