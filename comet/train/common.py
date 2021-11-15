@@ -248,6 +248,7 @@ def fill_consts(template, extemp, row, rows=[]):
             example = extemp
             if "{enc_token}" in extemp:
                 assert enc_prompt != "", "Prompt was not set!"
+            example = pattern.sub(lambda m: rep[re.escape(m.group(0))], example)
             example = example.replace("{enc_token}", enc_prompt)
             example = example.replace("{dec_token}", dec_prompt)
             for key,value in _row.items():
@@ -301,6 +302,10 @@ def create_templates(method, wrapped, frozen,
            qtemp = "{examples} {event} {enc_token} {gen} {ph}"
            extemp = "{input_text} {enc_token} {target_text} {end}"
            anstemp = "{ph} {resp} {end}"
+       elif method == "context-n-dec":
+           qtemp = "{event} {enc_token} {gen} {ph}"
+           extemp = "{input_text} {target_text} {end}"
+           anstemp = "{examples} {ph} {resp} {end}"
        elif method == "context-enfa":
            qtemp = "{enc_token_start} {gen_start} {input_text} {rel_natural_en} {gen_fa} {target_text_fa} {enc_token_start} {event} {rel_natural} {enc_token_end} {gen_end} {ph}"
            anstemp = "{ph} {resp} {end}"
