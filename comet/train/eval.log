@@ -3759,3 +3759,60 @@ Val Records:112
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Train records:400
 Val Records:112
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%% test 
+%%%%%%%%%%%%%%%%%% test 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+{
+    "model_id": "test",
+    "experiment": "custom",
+    "qtemp": "{examples} {event} {enc_token} {gen} {ph}",
+    "anstemp": "{ph} {resp} {end}",
+    "extemp": "{input_text} {enc_token} {target_text} {end}",
+    "method": "context-n",
+    "train_samples": 100,
+    "val_set": "validation",
+    "val_samples": 40,
+    "load_path": "",
+    "overwrite": "",
+    "save_path": "",
+    "output_name": "",
+    "lang": "mix",
+    "pred_tresh": 0,
+    "ignore_blanks": false,
+    "include": "",
+    "exclude": "natural",
+    "nli_group": "all",
+    "learning_rate": 0.0,
+    "do_eval": false,
+    "inter": false,
+    "cont": false,
+    "wrap": "xIntent",
+    "frozen": false,
+    "freez_step": 0,
+    "unfreez_step": 0,
+    "cpu": true,
+    "load_prompt_path": "",
+    "verbose": false,
+    "cycle": 0,
+    "batch_size": 8,
+    "path": "/home/ahmad/mt5-comet/comet/train",
+    "from_dir": false,
+    "is_flax": false,
+    "config": false,
+    "clear_logs": false,
+    "gen_param": "greedy",
+    "print_log": "dlog",
+    "training_round": 1,
+    "epochs_num": 1,
+    "is_record": false,
+    "reset_results": false,
+    "start": 0,
+    "prompt_length": "3-3",
+    "prompt_pos": "start",
+    "zero_shot": false,
+    "sampling": 2
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Train records:400
+Val Records:112

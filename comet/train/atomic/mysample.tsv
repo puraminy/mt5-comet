@@ -1,0 +1,29 @@
+id	prefix	input_text	target_text	input_text_fa	target_text_fa
+11	xIntent	PersonX performs ablutions	to pray	PersonX وضو می‌گیرد	نماز بخواند
+12	xIntent	PersonX goes to the mosque	to pray	PersonX به مسجد می‌رود	نماز بخواند
+133	xIntent	PersonX goes to the front	to fight	PersonX به جبهه می رود	بجنگد
+14	xIntent	PersonX goes to the front	to be martyred	PersonX به جبهه می‌رود	شهید شود
+1	xIntent	PersonX plays a ___ in the war	to participate	PersonX در جنگ ___ بازی می کند	به شرکت
+4	xIntent	PersonX plays a ___ in the war	to help out	PersonX در جنگ ___ بازی می کند	کمک کردن
+40	xIntent	PersonX plays a ___ in the economy	to be a productive citizen	PersonX ___ در اقتصاد بازی می کند	یک شهروند مولد باشد
+44	xIntent	PersonX plays a ___ in the economy	to help	PersonX ___ در اقتصاد بازی می کند	برای کمک به
+79	xIntent	PersonX focuses ___ on issues	to show appreciation	PersonX ___ را روی مسائل متمرکز می کند	برای نشان دادن قدردانی
+104	xIntent	PersonX hardens pharaoh 's ___	events to play out a certain way	PersonX سختگیرانه فرعون ___ است	وقایع را به روش خاصی بازی کنید
+135	xIntent	PersonX proposes another ___	another draft the person	PersonX ___ دیگری پیشنهاد می کند	پیش نویس دیگری از شخص
+140	xIntent	PersonX proposes another ___	to be helpful	PersonX ___ دیگری پیشنهاد می کند	مفید بودن
+141	xIntent	PersonX proposes another ___	to collaborate	PersonX ___ دیگری پیشنهاد می کند	همکاری کردن
+177	xIntent	PersonX kills ___ for food	surprised	PersonX ___ را برای غذا می کشد	غافلگیر شدن
+180	xIntent	PersonX kills ___ for food	meet	PersonX ___ را برای غذا می کشد	ملاقات
+208	xIntent	PersonX connects the ___ together	to form something from the pieces	PersonX ___ را به هم متصل می کند	تا از قطعات چیزی تشکیل دهد
+209	xIntent	PersonX connects the ___ together	to complete something	PersonX ___ را به هم متصل می کند	برای تکمیل چیزی
+238	xIntent	PersonX pays ___ to details	to gain knowledge	PersonX به جزئیات ___ پرداخت می کند	برای به دست آوردن دانش
+241	xIntent	PersonX pays ___ to details	to be sure he has the correct	PersonX به جزئیات ___ پرداخت می کند	تا مطمئن شوم که او صحیح است
+267	xIntent	PersonX shuts PersonY's ___ to the fact	none	PersonX ___ مربوط به PersonY را مسدود می کند	هیچ یک
+270	xIntent	PersonX shuts PersonY's ___ to the fact	to mislead persony	PersonX ___ مربوط به PersonY را مسدود می کند	به شخصه گمراه کردن
+321	xIntent	PersonX prevents the ___ from moving	the  prevent the  from movings	PersonX از حرکت ___ جلوگیری می کند	جلوگیری از جابجایی
+324	xIntent	PersonX prevents the ___ from moving	to control __	PersonX از حرکت ___ جلوگیری می کند	برای کنترل __
+357	xIntent	PersonX removes ___ from the blood	cure a sick patient.	PersonX ___ را از خون خارج می کند	یک بیمار بیمار را درمان کند.
+358	xIntent	PersonX removes ___ from the blood	perform an experiment.	PersonX ___ را از خون خارج می کند	یک آزمایش انجام دهید
+363	xIntent	PersonX removes ___ from the blood	to be healthy and feel clean they wouldfeel good	PersonX ___ را از خون خارج می کند	برای داشتن سلامتی و احساس تمیز بودن احساس خوبی دارند
+395	xIntent	PersonX gets ___ quickly	income	PersonX به سرعت ___ می شود	درآمد
+398	xIntent	PersonX gets ___ quickly	to survive and to satisfy the needs	PersonX به سرعت ___ می شود	برای زنده ماندن و برآوردن نیازها
