@@ -443,7 +443,7 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
 @click.option(
     "--opt_type",
     "-ot",
-    default="ada",
+    default="ada_no_lr",
     type=str,
     help="optimizer type (adam, ada, ada_no_lr)"
 )
@@ -737,7 +737,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
                     scale_parameter=True, 
                     relative_step=True, warmup_init=True, lr=None)
             scheduler = AdafactorSchedule(optimizer)
-        else:
+        elif opt_type == "ada":
             # replace AdamW with Adafactor
             optimizer = Adafactor(
                 model.parameters(),
@@ -752,6 +752,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
                 warmup_init=False
             )
             scheduler = AdafactorSchedule(optimizer)
+        else:
+            raise ValueError(opt_type + " must be one of adam, ada, ada_no_lr")
         return optimizer, scheduler
 
     optimizer, scheduler = get_optimizer(model, learning_rate, wrap, opt_type) 
