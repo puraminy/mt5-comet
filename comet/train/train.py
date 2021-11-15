@@ -447,8 +447,15 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
     type=str,
     help="optimizer type (adam, ada, ada_no_lr)"
 )
+@click.option(
+    "--samples_per_head",
+    "-sph",
+    default=2,
+    type=int,
+    help=""
+)
 def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, val_set, 
-         val_samples, load_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks, include, exclude, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, is_record, reset_results, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type):
+         val_samples, load_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks, include, exclude, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, is_record, reset_results, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head):
 
     #%% some hyper-parameters
 
@@ -609,6 +616,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
                             include,
                             exclude,
                             pred_tresh, nli_group, is_record, start, sampling,
+                            samples_per_head,
                     )
     train_records = num_records["train"]
     val_records = num_records["validation"]
