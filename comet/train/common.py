@@ -107,7 +107,7 @@ targets = ["target_text", "target_text_fa", "pred_text1", "all_preds", "pred_tex
 inputs = ["input_text", "input_text_fa", "natural_input_text", "natural_input_text_fa"]
 
 placeholder_token = "<extra_id_0>"
-end_token = "<extra_id_1>"
+end_token = "</s>"
 # %%
 atomic_relation_prompt_lengths = {
     "xIntent":[5,3],
@@ -299,7 +299,7 @@ def create_templates(method, wrapped, frozen,
            anstemp = "{ph} {resp} {end}"
        elif method == "context-n":
            qtemp = "{examples} {event} {enc_token} {gen} {ph}"
-           extemp = "{input_text} {enc_token} {target_text}"
+           extemp = "{input_text} {enc_token} {target_text} {end}"
            anstemp = "{ph} {resp} {end}"
        elif method == "context-enfa":
            qtemp = "{enc_token_start} {gen_start} {input_text} {rel_natural_en} {gen_fa} {target_text_fa} {enc_token_start} {event} {rel_natural} {enc_token_end} {gen_end} {ph}"
