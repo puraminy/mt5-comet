@@ -448,7 +448,7 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
     help="optimizer type (adam, ada, ada_no_lr)"
 )
 def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, val_set, 
-         val_samples, load_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks, include, exclude, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, is_record, reset_results, start, prompt_length, prompt_pos, zero_shot, sampling):
+         val_samples, load_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks, include, exclude, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, is_record, reset_results, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type):
 
     #%% some hyper-parameters
 
@@ -526,7 +526,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     validation_size = 100
     validation_num_generation = 20
     if not frozen and learning_rate == 0: 
-        learning_rate = 6.25e-05 if opt_type = "adam" else 1e-3
+        learning_rate = 6.25e-05 if opt_type == "adam" else 1e-3
     if frozen and learning_rate == 0: 
         learning_rate = 0.01  #6.25e-05
     assert learning_rate > 0, "Learning rate is zero!"
@@ -725,10 +725,12 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
             optimizer = AdamW(optimizer_grouped_parameters,lr=learning_rate,eps=1e-8)
             scheduler = get_linear_schedule_with_warmup(optimizer,warm_up_steps,iterations)
         elif opt_type == "ada_no_lr":
-            optimizer = Adafactor(optimizer_grouped_parameters, scale_parameter=True, relative_step=True, warmup_init=True, lr=None)
-            # replace AdamW with Adafactor
+            optimizer = Adafactor(optimizer_grouped_parameters, 
+                    scale_parameter=True, 
+                    relative_step=True, warmup_init=True, lr=None)
             scheduler = AdafactorSchedule(optimizer)
         else:
+            # replace AdamW with Adafactor
             optimizer = Adafactor(
                 model.parameters(),
                 lr=learning_rate,
