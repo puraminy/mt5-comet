@@ -1,6 +1,7 @@
 #%% load libraries
 from comet.train.common import *
 from comet.train.eval import *
+from transformers.optimization import Adafactor, AdafactorSchedule
 from transformers import (
     T5ForConditionalGeneration, T5TokenizerFast, 
     MT5ForConditionalGeneration, MT5TokenizerFast, AdamW, AddedToken,
@@ -439,6 +440,13 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
     type=int,
     help=""
 )
+@click.option(
+    "--opt_type",
+    "-ot",
+    default="ada",
+    type=str,
+    help="optimizer type (adam, ada, ada_no_lr)"
+)
 def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, val_set, 
          val_samples, load_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks, include, exclude, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, is_record, reset_results, start, prompt_length, prompt_pos, zero_shot, sampling):
 
@@ -517,12 +525,13 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     shuffle_evaluation=False
     validation_size = 100
     validation_num_generation = 20
-    if not frozen and learning_rate == 0: learning_rate = 6.25e-05
-    if wrap and frozen and learning_rate == 0: learning_rate = 0.01
+    if not frozen and learning_rate == 0: 
+        learning_rate = 6.25e-05 if opt_type = "adam" else 1e-3
+    if frozen and learning_rate == 0: 
+        learning_rate = 0.01  #6.25e-05
     assert learning_rate > 0, "Learning rate is zero!"
-    mlog.info("learning rate %s:", learning_rate)
-    if frozen and learning_rate == 0: learning_rate = 0.01  #6.25e-05
     device = 'cuda' if not cpu else 'cpu'
+    mlog.info("learning rate %s:", learning_rate)
 
     log_dir = save_path
     set_device(device)
@@ -701,7 +710,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
         val_data = atomic_query_responses[val_set]
         eval(model, tokenizer, val_data, inter, save_path, results_info, val_records, gen_param)  
         return
-    def get_optimizer(model, learning_rate, wrap):
+    def get_optimizer(model, learning_rate, wrap, opt_type):
         if wrap:
             optimizer_grouped_parameters = [
                 {"params":[p for p in wrapped_model.parameters() if p.requires_grad]}
@@ -711,11 +720,30 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
                 {'params': [p for n, p in model.named_parameters() if p.requires_grad and not any(nd in n for nd in no_decay)], 'weight_decay': weight_decay},
                 {'params': [p for n, p in model.named_parameters() if p.requires_grad and any(nd in n for nd in no_decay)], 'weight_decay': 0.0}
             ]
-        optimizer = AdamW(optimizer_grouped_parameters,lr=learning_rate,eps=1e-8)
-        scheduler = get_linear_schedule_with_warmup(optimizer,warm_up_steps,iterations)
+        if opt_type == "adam":
+            optimizer = AdamW(optimizer_grouped_parameters,lr=learning_rate,eps=1e-8)
+            scheduler = get_linear_schedule_with_warmup(optimizer,warm_up_steps,iterations)
+        elif opt_type == "ada_no_lr":
+            optimizer = Adafactor(optimizer_grouped_parameters, scale_parameter=True, relative_step=True, warmup_init=True, lr=None)
+            # replace AdamW with Adafactor
+            scheduler = AdafactorSchedule(optimizer)
+        else:
+            optimizer = Adafactor(
+                model.parameters(),
+                lr=learning_rate,
+                eps=(1e-30, 1e-3),
+                clip_threshold=1.0,
+                decay_rate=-0.8,
+                beta1=None,
+                weight_decay=0.0,
+                relative_step=False,
+                scale_parameter=False,
+                warmup_init=False
+            )
+            scheduler = AdafactorSchedule(optimizer)
         return optimizer, scheduler
 
-    optimizer, scheduler = get_optimizer(model, learning_rate, wrap) 
+    optimizer, scheduler = get_optimizer(model, learning_rate, wrap, opt_type) 
     step = 0
     best_dev_loss = 1e10
     best_eval_step = 0
@@ -801,14 +829,14 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
                     for p in model.parameters():
                         p.requires_grad = True # Unfreezing
                     last_lr = scheduler.get_last_lr()[0]
-                    optimizer, scheduler = get_optimizer(model, last_lr, wrap)
+                    optimizer, scheduler = get_optimizer(model, last_lr, wrap, opt_type)
                 if freez_step > 0 and step > freez_step and not frozen:
                     mlog.info("freezing the model")
                     freez_step = 0
                     for p in model.parameters():
                         p.requires_grad = False # freezing
                     last_lr = scheduler.get_last_lr()[0]
-                    optimizer, scheduler = get_optimizer(model, last_lr, wrap)
+                    optimizer, scheduler = get_optimizer(model, last_lr, wrap, opt_type)
                 model.train()
                 optimizer.zero_grad()
                 batch_loss = torch.tensor(0.)
