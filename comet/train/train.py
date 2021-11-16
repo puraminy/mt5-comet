@@ -457,7 +457,7 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
 @click.option(
     "--opt_type",
     "-ot",
-    default="ada_no_lr",
+    default="adam",
     type=str,
     help="optimizer type (adam, ada, ada_no_lr)"
 )
@@ -651,6 +651,10 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     elif is_flax:
         tokenizer = AutoTokenizer.from_pretrained(underlying_model_name)
         model = T5ForConditionalGeneration.from_pretrained(underlying_model_name, from_flax=True) 
+        mlog.info("converting and saving model in %s", save_path)
+        tokenizer.save_pretrained(save_path)
+        model.save_pretrained(save_path)
+        return
     else:
         tokenizer = AutoTokenizer.from_pretrained(underlying_model_name)
         model = T5ForConditionalGeneration.from_pretrained(underlying_model_name) 
@@ -770,7 +774,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
 
     optimizer, scheduler = get_optimizer(model, learning_rate, wrap, opt_type) 
     step = 0
-    best_dev_loss = 1e10
+    best_dev_loss = 100
     best_eval_step = 0
     if checkpoint:
         mlog.info("Restoring optimizer and scheduler")
