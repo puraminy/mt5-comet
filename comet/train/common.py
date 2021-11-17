@@ -200,44 +200,6 @@ def fill_consts(template, extemp, row, rows=[]):
     rep = dict((re.escape(k), v) for k, v in rep.items()) 
     pattern = re.compile("|".join(rep.keys()))
     text = pattern.sub(lambda m: rep[re.escape(m.group(0))], template)
-    plen = atomic_relation_prompt_lengths[rel]
-    if not rel in encoder_prompts:
-        encoder_prompts[rel] = []
-    if not rel in decoder_prompts:
-        decoder_prompts[rel] = []
-    counter = 0
-    pi = 0
-    enc_prompt = ""
-    while "{enc_token}" in text:
-        enc_plen = plen[pi] if pi < len(plen) else plen[-1] 
-        prompt = ""
-        for i in range(counter, counter + enc_plen):
-            token = f"<enc_{rel}_{i}>" 
-            prompt += " " + token
-            if not token in encoder_prompts[rel]:
-                encoder_prompts[rel].append(token)
-        prompt = prompt.strip()
-        if not enc_prompt:
-            enc_prompt = prompt
-        text = text.replace("{enc_token}",prompt, 1)
-        counter += enc_plen 
-        pi += 1
-    counter = 0
-    dec_prompt = ""
-    while "{dec_token}" in text:
-        dec_plen = plen[pi] if pi < len(plen) else plen[-1] 
-        prompt=""
-        for i in range(counter, counter+dec_plen):
-            token = f"<dec_{rel}_{i}>" 
-            prompt += " " + token
-            if not token in decoder_prompts[rel]:
-                decoder_prompts[rel].append(token)
-        prompt = prompt.strip()
-        if not dec_prompt:
-            dec_prompt = prompt
-        text = text.replace("{dec_token}",prompt, 1)
-        counter += dec_plen 
-        pi += 1
     for key,value in row.items():
         val = str(value)
         text = text.replace("{" + key + "}", val)
@@ -288,6 +250,9 @@ def create_templates(method, wrapped, frozen,
            anstemp = "{event} {dec_token} {gen} {resp}"
        elif method == "unsup-nat":
            qtemp = "{enc_token} {event} {rel_natural} {gen} {ph}" 
+           anstemp = "{ph} {resp} {end}"
+       elif method == "unsup-no-gen":
+           qtemp = "{enc_token} {event} {enc_token} {ph}" 
            anstemp = "{ph} {resp} {end}"
        elif method == "sup-gen":
            qtemp = "{event} {gen}"
@@ -370,7 +335,46 @@ def fill_vars(template, rel, event, gen_token, resp, inp_lang, resp_lang):
     rep = dict((re.escape(k), v) for k, v in rep.items()) 
     pattern = re.compile("|".join(rep.keys()))
     text = pattern.sub(lambda m: rep[re.escape(m.group(0))], template)
+    lang = resp_lang
 
+    plen = atomic_relation_prompt_lengths[rel]
+    if not rel in encoder_prompts:
+        encoder_prompts[rel] = []
+    if not rel in decoder_prompts:
+        decoder_prompts[rel] = []
+    counter = 0
+    pi = 0
+    enc_prompt = ""
+    while "{enc_token}" in text:
+        enc_plen = plen[pi] if pi < len(plen) else plen[-1] 
+        prompt = ""
+        for i in range(counter, counter + enc_plen):
+            token = f"<enc_{lang}_{rel}_{i}>" 
+            prompt += " " + token
+            if not token in encoder_prompts[rel]:
+                encoder_prompts[rel].append(token)
+        prompt = prompt.strip()
+        if not enc_prompt:
+            enc_prompt = prompt
+        text = text.replace("{enc_token}",prompt, 1)
+        counter += enc_plen 
+        pi += 1
+    counter = 0
+    dec_prompt = ""
+    while "{dec_token}" in text:
+        dec_plen = plen[pi] if pi < len(plen) else plen[-1] 
+        prompt=""
+        for i in range(counter, counter+dec_plen):
+            token = f"<dec_{lang}_{rel}_{i}>" 
+            prompt += " " + token
+            if not token in decoder_prompts[rel]:
+                decoder_prompts[rel].append(token)
+        prompt = prompt.strip()
+        if not dec_prompt:
+            dec_prompt = prompt
+        text = text.replace("{dec_token}",prompt, 1)
+        counter += dec_plen 
+        pi += 1
     return text
 
 def get_input(msg):
