@@ -623,7 +623,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
         split_lang["train"] = lang
         split_lang["validation"] = lang
     for split_name,split_df in atomic_dataset.items():
-        include, exclude = filter_inputs(include, exclude, split_lang[split_name])
+        _include, _exclude = filter_inputs(include, exclude, split_lang[split_name])
         (atomic_query_responses[split_name], 
          atomic_flattened[split_name],
          num_records[split_name]
@@ -631,8 +631,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
                             qtemp, anstemp, extemp,
                             num_samples[split_name], 
                             ignore_blanks,
-                            include,
-                            exclude,
+                            _include,
+                            _exclude,
                             pred_tresh, nli_group, is_record, start, sampling,
                             samples_per_head,
                     )
