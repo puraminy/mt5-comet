@@ -489,8 +489,6 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     if method:    
         qtemp, anstemp, extemp = create_templates(method, wrap, frozen,
                 gen_pos="end", prompt_pos=prompt_pos, zero_shot=zero_shot, lang=lang)
-    if lang:
-        include, exclude = filter_inputs(include, exclude, lang)
 
     args = locals() # input parameters
 
@@ -617,7 +615,15 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     num_records = {}
     num_samples = {"train": train_samples, "validation":val_samples}
     mlog.info("Perparing data ...")
+    split_lang = {}
+    if "-" in lang:
+        split_lang["train"] = lang.split("-")[0]
+        split_lang["validation"] = lang.split("-")[1]
+    else:
+        split_lang["train"] = lang
+        split_lang["validation"] = lang
     for split_name,split_df in atomic_dataset.items():
+        include, exclude = filter_inputs(include, exclude, split_lang[split_name])
         (atomic_query_responses[split_name], 
          atomic_flattened[split_name],
          num_records[split_name]

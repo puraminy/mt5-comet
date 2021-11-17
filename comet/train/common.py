@@ -348,10 +348,10 @@ def create_templates(method, wrapped, frozen,
            qtemp = qtemp.replace("{enc_token}","{rel_token}")
        if zero_shot:
            qtemp = qtemp.replace("{rel_token}","")
-       if lang != "mix":
-           qtemp = qtemp.replace("{gen}","")
-           qtemp = qtemp.replace("{gen_en}","")
-           qtemp = qtemp.replace("{gen_fa}","")
+#       if not "mix" in lang:
+#           qtemp = qtemp.replace("{gen}","")
+#           qtemp = qtemp.replace("{gen_en}","")
+#           qtemp = qtemp.replace("{gen_fa}","")
        while "  " in qtemp:
            qtemp = qtemp.replace("  "," ")
 
