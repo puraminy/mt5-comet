@@ -252,7 +252,7 @@ def create_templates(method, wrapped, frozen,
            qtemp = "{enc_token} {event} {rel_natural} {gen} {ph}" 
            anstemp = "{ph} {resp} {end}"
        elif method == "unsup-no-gen":
-           qtemp = "{enc_token} {event} {enc_token} {ph}" 
+           qtemp = "{enc_token} {event} {enc_lang_token} {ph}" 
            anstemp = "{ph} {resp} {end}"
        elif method == "sup-gen":
            qtemp = "{event} {gen}"
@@ -346,6 +346,23 @@ def fill_vars(template, rel, event, gen_token, resp, inp_lang, resp_lang):
     pi = 0
     enc_prompt = ""
     while "{enc_token}" in text:
+        enc_plen = plen[pi] if pi < len(plen) else plen[-1] 
+        prompt = ""
+        for i in range(counter, counter + enc_plen):
+            token = f"<enc_{rel}_{i}>" 
+            prompt += " " + token
+            if not token in encoder_prompts[rel]:
+                encoder_prompts[rel].append(token)
+        prompt = prompt.strip()
+        if not enc_prompt:
+            enc_prompt = prompt
+        text = text.replace("{enc_token}",prompt, 1)
+        counter += enc_plen 
+        pi += 1
+    counter = 0
+    pi = 0
+    enc_prompt = ""
+    while "{enc_lang_token}" in text:
         enc_plen = plen[pi] if pi < len(plen) else plen[-1] 
         prompt = ""
         for i in range(counter, counter + enc_plen):
