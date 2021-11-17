@@ -373,7 +373,7 @@ def fill_vars(template, rel, event, gen_token, resp, inp_lang, resp_lang):
         prompt = prompt.strip()
         if not enc_prompt:
             enc_prompt = prompt
-        text = text.replace("{enc_token}",prompt, 1)
+        text = text.replace("{enc_lang_token}",prompt, 1)
         counter += enc_plen 
         pi += 1
     counter = 0
