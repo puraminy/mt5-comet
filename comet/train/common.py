@@ -286,8 +286,14 @@ def create_templates(method, wrapped, frozen,
        elif method == "sup-enmix":
            qtemp = "{input_text} {enc_token} {target_text} {gen}"
            anstemp = "{event} {dec_token} {gen} {resp}"
+       elif method == "unsup-nat":
+           qtemp = "{enc_token} {event} {rel_natural} {gen} {ph}" 
+           anstemp = "{ph} {resp} {end}"
        elif method == "sup-gen":
            qtemp = "{event} {gen}"
+           anstemp = "{resp}"
+       elif method == "gen":
+           qtemp = "{gen}"
            anstemp = "{resp}"
        elif method == "pred-enfa":
            qtemp = "{enc_token_start} {gen_start} {input_text} {rel_natural_en} {gen_en} {ph} {event} {rel_natural} {enc_token_end} {gen_end} <extra_id_1>"
@@ -314,9 +320,6 @@ def create_templates(method, wrapped, frozen,
            anstemp = "{ph} {resp} {end}"
        elif method == "sup":
            qtemp = "{enc_token_start} {gen_start} {event} {enc_token_end} {gen_end}"
-           anstemp = "{resp}"
-       elif method == "gen":
-           qtemp = "{gen}"
            anstemp = "{resp}"
        elif method == "unsup":
            qtemp = "{enc_token_start} {gen_start} {event} {enc_token_end} {gen_end} {ph}"
