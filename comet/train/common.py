@@ -183,7 +183,7 @@ encoder_prompts = {}
 decoder_prompts = {}
 def fill_consts(template, extemp, row, rows=[]):
     text = template
-    dlog.debug("fill const for: %s", text)
+    #dlog.debug("fill const for: %s", text)
     rel = row["prefix"]
     rel_token = atomic_relation_mappings[rel]        
 
@@ -220,7 +220,7 @@ def fill_consts(template, extemp, row, rows=[]):
 
         text = text.replace("{examples}", examples)
 
-    dlog.debug("after: %s", text)
+    #dlog.debug("after: %s", text)
     return text
 
 def filter_inputs(include, exclude, lang):
@@ -409,15 +409,17 @@ def get_input(msg):
 def fill_data(split_df, split_name, qtemp, anstemp, extemp, 
             num_samples=0, 
             ignore_blanks=False,
-            include="",
-            exclude="",
+            inp_include="",
+            inp_exclude="",
+            targ_include="",
+            targ_exclude="",
             pred_tresh=0,
             nli_group="all", is_record=False, start=0, sampling=0, samples_per_head=2): 
     dlog.info("building query responses for {}".format(split_name))
     dlog.info(f"len:{len(split_df)}")
     dlog.info(f"qtemp:{qtemp}")
     dlog.info(f"anstemp:{anstemp}")
-    natural = include == "natural"
+    natural = inp_include == "natural"
     if split_name != "train":
         start = 0
     if natural and split_name != "train": natural = False 
@@ -467,17 +469,17 @@ def fill_data(split_df, split_name, qtemp, anstemp, extemp,
         for inp in inputs:
             if not inp in d or len(d[inp]) <= 1:
                 continue
-            if include and not any(x in inp for x in include.split("|")):
+            if inp_include and not any(x in inp for x in inp_include.split("|")):
                 continue
-            if exclude and any(x in inp for x in exclude.split("|")):
+            if inp_exclude and any(x in inp for x in inp_exclude.split("|")):
                 continue
             input_lang = langs[inp]
             for targ_col in targets:
                 if not targ_col in d or len(d[targ_col]) <= 1:
                     continue
-                if include and not any(x in targ_col for x in include.split("|")):
+                if targ_include and not any(x in targ_col for x in targ_include.split("|")):
                     continue
-                if exclude and any(x in targ_col for x in exclude.split("|")):
+                if targ_exclude and any(x in targ_col for x in targ_exclude.split("|")):
                     continue
                 rel_token = atomic_relation_mappings[rel]
                 event = d[inp]
