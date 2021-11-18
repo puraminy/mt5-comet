@@ -337,14 +337,14 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
 @click.option(
     "--train_path",
     "-tp",
-    default="atomic/xIntent_en_fa_train_no_dups.tsv",
+    default="atomic/xIntent_train.tsv",
     type=str,
     help=""
 )
 @click.option(
     "--val_path",
     "-vp",
-    default="atomic/xIntent_en_fa_validation_no_dups.tsv",
+    default="atomic/xIntent_val.tsv",
     type=str,
     help=""
 )
