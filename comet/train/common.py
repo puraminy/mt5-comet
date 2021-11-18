@@ -360,7 +360,6 @@ def fill_vars(template, rel, event, gen_token, resp, inp_lang, resp_lang):
         counter += enc_plen 
         pi += 1
     counter = 0
-    pi = 0
     enc_prompt = ""
     while "{enc_lang_token}" in text:
         enc_plen = plen[pi] if pi < len(plen) else plen[-1] 
