@@ -240,7 +240,7 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
     # %%%%%%%%%%%%%%%%%%
     new_df = pd.DataFrame(rows)
     new_df = new_df[new_df["bert_score"] > 0]
-    new_df = new_df.sort_values(by="lang")
+    new_df = new_df.sort_values(by="langs")
     pbar.close()
     out1 = os.path.join(save_path,f"scored_{results_info}.tsv")
     out2 = os.path.join(resPath,f"scored_{results_info}.tsv")
