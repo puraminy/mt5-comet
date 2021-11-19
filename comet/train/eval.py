@@ -174,11 +174,7 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
                         new_tails.append(nt)
                     tails = new_tails
                     data["qid"] = qid
-                    data["input_text"] = input_text 
                     data["pred_text1"] = top_hyp
-                    data["target_text"] = "<br />".join(tails)
-                    data["prefix"] = rel
-                    data["langs"] = lang
                     #Compute embeddings
                     hi, ri, cur_score = bert_score(bert_scorer, hyps, tails)
                     best_hyp = hyps[hi]
@@ -194,6 +190,10 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
                         vlog.info("Label:"+ label)
                     data["top"] = best_ref
                     data["all_preds"] = "<br />".join(hyps) 
+                    data["input_text"] = input_text 
+                    data["target_text"] = "<br />".join(tails)
+                    data["prefix"] = rel
+                    data["langs"] = lang
                     data["top_pred"] = best_hyp
                     data["bert_score"] = float("{:.2f}".format(cur_score))
                     rows.append(data)
@@ -240,7 +240,7 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
     # %%%%%%%%%%%%%%%%%%
     new_df = pd.DataFrame(rows)
     new_df = new_df[new_df["bert_score"] > 0]
-    new_df = new_df.sort_values(by="qid")
+    new_df = new_df.sort_values(by="lang")
     pbar.close()
     out1 = os.path.join(save_path,f"scored_{results_info}.tsv")
     out2 = os.path.join(resPath,f"scored_{results_info}.tsv")
@@ -259,7 +259,7 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
     res["rouge"] = mean_rouge
     res["bert"] = mean_bert
     res["bleu"] = mean_bleu
-    res["distinct"] = len(pred_counts)
+    res["distinct"] ="{} {:.2f}".format(len(pred_counts), len(pred_counts)/len(new_df))
     res["hyps"] = hyp_counter
 
     dictPath(results_info, results, res, sep="_")
