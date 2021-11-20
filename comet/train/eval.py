@@ -189,8 +189,8 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
                         data["nli_group"] = label
                         vlog.info("Label:"+ label)
                     data["top"] = best_ref
-                    data["all_preds"] = "<br />".join(hyps) 
                     data["input_text"] = input_text 
+                    data["all_preds"] = "<br />".join(hyps) 
                     data["target_text"] = "<br />".join(tails)
                     data["prefix"] = rel
                     data["langs"] = lang
