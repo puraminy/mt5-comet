@@ -295,6 +295,12 @@ def create_templates(method, wrapped, frozen,
        elif method == "sup":
            qtemp = "{enc_token_start} {gen_start} {event} {enc_token_end} {gen_end}"
            anstemp = "{resp} {end}"
+       elif method == "gpt-wrap":
+           qtemp = "{event} {enc_token}"
+           anstemp = "{event} {enc_token} {resp} {end}"
+       elif method == "gpt":
+           qtemp = "{event} {gen}"
+           anstemp = "{event} {gen} {resp} {end}"
        elif method == "unsup":
            qtemp = "{enc_token_start} {gen_start} {event} {enc_token_end} {gen_end} {ph}"
            anstemp = "{ph} {resp} {end}"
