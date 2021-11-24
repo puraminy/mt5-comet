@@ -690,7 +690,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     mlog.info("len tokenizer %s", len(tokenizer))
     extend_tokenizer(tokenizer, "")
     if "gpt" in model_id:
-        tokenizer.add_special_tokens({'pad_token': '[PAD]'})
+        tokenizer.add_special_tokens(SPECIAL_TOKENS)
     mlog.info("len tokenizer after extending %s", len(tokenizer))
     model.resize_token_embeddings(len(tokenizer))
     #%% Prepare training data
