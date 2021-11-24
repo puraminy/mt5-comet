@@ -5,6 +5,7 @@ from transformers.optimization import Adafactor, AdafactorSchedule
 from transformers import (
     T5ForConditionalGeneration, T5TokenizerFast, 
     MT5ForConditionalGeneration, MT5TokenizerFast, AdamW, AddedToken,
+    GPT2Model, GPT2Tokenizer,
     AutoTokenizer,
     get_linear_schedule_with_warmup
 )
@@ -437,7 +438,7 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
 @click.option(
     "--prompt_pos",
     "-ppos",
-    default="start",
+    default="end",
     type=str,
     help=""
 )
@@ -659,7 +660,10 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     mlog.info("Loading model ...")
     if model_id == "test":
         return
-    if "mt5" in model_id:
+    if "gpt" in model_id:
+        model = GPT2Model.from_pretrained(underlying_model_name)
+        tokenizer = GPT2Tokenizer.from_pretrained(underlying_model_name)
+    elif "mt5" in model_id:
         tokenizer = MT5TokenizerFast.from_pretrained(underlying_model_name)
         model = MT5ForConditionalGeneration.from_pretrained(underlying_model_name)
     elif is_flax:
