@@ -733,15 +733,15 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
              responses[i] + SPECIAL_TOKENS['eos_token']
              outputs.append(out)
 
-         new_batch = tokenizer(inputs,return_tensors='pt',
+         new_batch = tokenizer(list(queries),return_tensors='pt',
                  truncation=True,
-                 max_length=90,
+                 max_length=120,
                  padding='max_length')
 
          with tokenizer.as_target_tokenizer():
-             tokenized = tokenizer(outputs,return_tensors='pt',
+             tokenized = tokenizer(list(responses),return_tensors='pt',
                          truncation=True,
-                         max_length=90, 
+                         max_length=120, 
                          padding='max_length')
              labels = tokenized['input_ids']
              labels[labels==tokenizer.pad_token_id] = -100
