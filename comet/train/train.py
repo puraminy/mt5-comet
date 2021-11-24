@@ -727,9 +727,9 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
          outputs = []
          for i in range(len(queries)):
              inp = SPECIAL_TOKENS['bos_token'] + \
-             queries[i] + SPECIAL_TOKENS['eos_token'] 
+             queries[i] + SPECIAL_TOKENS['sep_token'] 
              inputs.append(inp)
-             out = SPECIAL_TOKENS['bos_token'] + \
+             out = \
              responses[i] + SPECIAL_TOKENS['eos_token']
              outputs.append(out)
 
@@ -746,6 +746,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
              labels = tokenized['input_ids']
              labels[labels==tokenizer.pad_token_id] = -100
              new_batch['labels']=labels
+             new_batch['attention_mask']=tokenized["attention_mask"]
          return new_batch #,references
     #%% build dataloader
     if  "t5" in model_id:
