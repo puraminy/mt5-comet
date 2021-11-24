@@ -923,6 +923,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
                         result = wrapped_model(**batch)
                     else:
                         result = model(**batch)
+                    mlog.info(result.keys())
                     loss = result['loss']/accumulation_tiny_steps
                     #logits = clip_logits(result['logits'])
                     #loss = torch.nn.functional.cross_entropy(
