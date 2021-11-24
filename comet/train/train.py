@@ -720,7 +720,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
                 )
                 new_batch['decoder_attention_mask'] = tokenized['attention_mask']
         return new_batch
-
+# ggggggggg
     def collate_fn_for_generation(batch):
          queries,responses = zip(*batch)
          dlog.info("len(queries): %s", len(queries))
@@ -730,10 +730,14 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
                  truncation=True,
                  max_length=256,
                  padding='max_length')
-         labels = new_batch['input_ids']
+         tokenized = tokenizer(outputs,return_tensors='pt',
+                     truncation=True,
+                     max_length=256, 
+                     padding='max_length')
+         labels = tokenized['input_ids']
          labels[labels==tokenizer.pad_token_id] = -100
          new_batch['labels']=labels
-         new_batch['attention_mask']=new_batch["attention_mask"]
+         new_batch['attention_mask']=tokenized["attention_mask"]
          return new_batch #,references
     #%% build dataloader
     if  "t5" in model_id:
