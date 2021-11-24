@@ -6,6 +6,7 @@ from transformers import (
     T5ForConditionalGeneration, T5TokenizerFast, 
     MT5ForConditionalGeneration, MT5TokenizerFast, AdamW, AddedToken,
     GPT2Model, GPT2Tokenizer,
+    DataCollatorForLanguageModeling,
     AutoTokenizer,
     get_linear_schedule_with_warmup
 )
@@ -662,7 +663,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
         return
     if "gpt" in model_id:
         model = GPT2Model.from_pretrained(underlying_model_name)
-        tokenizer = GPT2Tokenizer.from_pretrained(underlying_model_name)
+        tokenizer = AutoTokenizer.from_pretrained(underlying_model_name)
     elif "mt5" in model_id:
         tokenizer = MT5TokenizerFast.from_pretrained(underlying_model_name)
         model = MT5ForConditionalGeneration.from_pretrained(underlying_model_name)
@@ -707,26 +708,33 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
         queries,responses = zip(*batch)
         new_batch = tokenizer(list(queries),return_tensors='pt',padding='longest')
         with tokenizer.as_target_tokenizer():
-            outputs = tokenizer(list(responses),return_tensors='pt',padding='longest')
-            labels = outputs['input_ids']
+            tokenized = tokenizer(list(responses),return_tensors='pt',padding='longest')
+            labels = tokenized['input_ids']
             labels[labels==tokenizer.pad_token_id] = -100
             new_batch['labels']=labels
             if "t5" in model_id:
                 new_batch['decoder_input_ids'] = model.prepare_decoder_input_ids_from_labels(
-                    outputs['input_ids']
+                    tokenized['input_ids']
                 )
-                new_batch['decoder_attention_mask'] = outputs['attention_mask']
+                new_batch['decoder_attention_mask'] = tokenized['attention_mask']
         return new_batch
 
-    # def collate_fn_for_generation(batch):
-    #     queries,references = zip(*batch)
-    #     new_batch = tokenizer(queries,return_tensors='pt',padding='longest')
-    #     return new_batch,references
+    def collate_fn_for_generation(batch):
+         queries,references = zip(*batch)
+         new_batch = tokenizer(queries,return_tensors='pt',padding='longest')
+         return new_batch,references
     #%% build dataloader
+    if "t5" in model_id:
+        data_collator = collate_fn_for_flattened
+    elif "gpt" in model_id: 
+        data_collator = collate_fn_for_generation
+    else:
+        raise ValueError("No data collator specified for model " + model_id)
+
     train_dataloader = torch.utils.data.DataLoader(atomic_flattened['train'],
-        batch_size=node_batch_size,shuffle=shuffle,collate_fn=collate_fn_for_flattened)
+        batch_size=node_batch_size,shuffle=shuffle,collate_fn=data_collator)
     dev_dataloader = torch.utils.data.DataLoader(atomic_flattened['validation'],
-        batch_size=node_batch_size,shuffle=shuffle,collate_fn=collate_fn_for_flattened)
+        batch_size=node_batch_size,shuffle=shuffle,collate_fn=data_collator)
     # %% prepare for training
     sw = SummaryWriter(save_path, flush_secs=1)
     tokenizer.save_pretrained(save_path)
