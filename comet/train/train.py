@@ -652,6 +652,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
         logger.info("Train records:"  + str(train_records))
         logger.info("Val Records:"  + str(val_records))
     accumulation_tiny_steps = 2 
+    if "gpt" in model_id:
+        accumulation_tiny_steps = 1
     node_batch_size = batch_size//accumulation_tiny_steps
     iterations = train_records//batch_size
     for logger in [mlog, tlog]:
@@ -931,7 +933,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
                             batch['labels'].reshape(-1,),
                             reduction='none'
                         ).reshape(result['logits'].size(0),-1)
-                        loss /= accumulation_tiny_steps
+                        #loss /= accumulation_tiny_steps
                     loss.backward()
                     batch_loss += loss.item()
                 optimizer.step()
