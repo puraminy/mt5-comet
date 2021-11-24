@@ -906,9 +906,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
                         tlog.info("Stop Iteration occured at %s", step)
                         train_iter = iter(train_dataloader)
                         batch = next(train_iter)
-                    if "t5" in model_id:
-                        batch = {k:v.to(device=device) for k,v in batch.items()}
-
+                    batch = {k:v.to(device=device) for k,v in batch.items()}
                     if wrap:
                         result = wrapped_model(**batch)
                     else:
