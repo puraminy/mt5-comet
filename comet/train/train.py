@@ -722,8 +722,9 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     def collate_fn_for_generation(batch):
          queries,responses = zip(*batch)
 
+         dlog.info("len(queries): %s", len(queries))
          inputs = []
-         for i in range(queries):
+         for i in range(len(queries)):
              inp = SPECIAL_TOKENS['bos_token'] + \
              + queriesi[i] + SPECIAL_TOKENS['sep_token'] + \
              responses[i] + SPECIAL_TOKENS['eos_token']
