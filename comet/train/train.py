@@ -724,7 +724,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
          new_batch = tokenizer(list(queries),return_tensors='pt',padding='longest')
          return new_batch #,references
     #%% build dataloader
-    if  True: #"t5" in model_id:
+    if  "t5" in model_id:
         data_collator = collate_fn_for_flattened
     elif "gpt" in model_id: 
         data_collator = collate_fn_for_generation
