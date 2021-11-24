@@ -721,11 +721,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
 
     def collate_fn_for_generation(batch):
          queries,references = zip(*batch)
-         dlog.info("=========batch")
-         dlog.info(queries)
-
          new_batch = tokenizer(list(queries),return_tensors='pt',padding='longest')
-         return new_batch,references
+         return new_batch #,references
     #%% build dataloader
     if "t5" in model_id:
         data_collator = collate_fn_for_flattened
@@ -911,6 +908,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
                         batch = next(train_iter)
                     if "t5" in model_id:
                         batch = {k:v.to(device=device) for k,v in batch.items()}
+
                     if wrap:
                         result = wrapped_model(**batch)
                     else:
