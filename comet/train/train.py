@@ -727,7 +727,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
          outputs = []
          for i in range(len(queries)):
              inp = SPECIAL_TOKENS['bos_token'] + \
-             queries[i] + SPECIAL_TOKENS['sep_token'] 
+             queries[i] + SPECIAL_TOKENS['eos_token'] 
              inputs.append(inp)
              out = SPECIAL_TOKENS['bos_token'] + \
              responses[i] + SPECIAL_TOKENS['eos_token']
