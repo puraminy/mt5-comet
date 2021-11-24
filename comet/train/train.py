@@ -724,11 +724,11 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
          outputs =list(responses)
          new_batch = tokenizer(outputs,return_tensors='pt',
                  truncation=True,
-                 max_length=512,
+                 max_length=256,
                  padding='max_length')
          tokenized = tokenizer(outputs,return_tensors='pt',
                      truncation=True,
-                     max_length=512, 
+                     max_length=256, 
                      padding='max_length')
          labels = tokenized['input_ids']
          #labels[labels==tokenizer.pad_token_id] = -100
