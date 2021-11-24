@@ -719,12 +719,12 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
                 new_batch['decoder_attention_mask'] = tokenized['attention_mask']
         return new_batch
 
-    def collate_fn_for_generation(batch):
-         queries,references = zip(*batch)
-         new_batch = tokenizer(list(queries),return_tensors='pt',padding='longest')
-         return new_batch #,references
+    #def collate_fn_for_generation(batch):
+    #     queries,references = zip(*batch)
+    #     new_batch = tokenizer(list(queries),return_tensors='pt',padding='longest')
+    #     return new_batch #,references
     #%% build dataloader
-    if "t5" in model_id:
+    if  True: #"t5" in model_id:
         data_collator = collate_fn_for_flattened
     elif "gpt" in model_id: 
         data_collator = collate_fn_for_generation
