@@ -52,7 +52,6 @@ SPECIAL_TOKENS  = { "bos_token": "<|BOS|>",
                     "eos_token": "<|EOS|>",
                     "unk_token": "<|UNK|>",
                     "pad_token": "<|PAD|>",
-                    "gen_token": "<|GEN|>",
                     "sep_token": "<|SEP|>"}
 nli_map = ['contradiction', 'entailment', 'neutral']
 atomic_relation_mappings = {
