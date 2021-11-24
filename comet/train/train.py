@@ -727,19 +727,22 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
          outputs = []
          for i in range(len(queries)):
              inp = SPECIAL_TOKENS['bos_token'] + \
-             queries[i] + SPECIAL_TOKENS['sep_token'] 
+             queries[i] #+ SPECIAL_TOKENS['sep_token'] 
              inputs.append(inp)
              out = \
              responses[i] + SPECIAL_TOKENS['eos_token']
              outputs.append(out)
 
-         new_batch = tokenizer(list(queries),return_tensors='pt',
+         #inputs = list(queries)
+         #outputs =list(responses)
+         new_batch = tokenizer(inputs,return_tensors='pt',
                  truncation=True,
                  max_length=120,
                  padding='max_length')
 
+
          with tokenizer.as_target_tokenizer():
-             tokenized = tokenizer(list(responses),return_tensors='pt',
+             tokenized = tokenizer(outputs,return_tensors='pt',
                          truncation=True,
                          max_length=120, 
                          padding='max_length')
