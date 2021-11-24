@@ -934,7 +934,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
                             reduction='none'
                         ).reshape(result['logits'].size(0),-1)
                         #loss /= accumulation_tiny_steps
-                        loss = loss.sum()
+                        loss = loss.mean()
                     loss.backward()
                     batch_loss += loss.item()
                 optimizer.step()
