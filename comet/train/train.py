@@ -721,7 +721,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
 
     def collate_fn_for_generation(batch):
          queries,references = zip(*batch)
-         new_batch = tokenizer(queries,return_tensors='pt',padding='longest')
+         new_batch = tokenizer(list(queries),return_tensors='pt',padding='longest')
          return new_batch,references
     #%% build dataloader
     if "t5" in model_id:
