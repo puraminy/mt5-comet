@@ -48,6 +48,11 @@ for logger, fname in zip([mlog,dlog,clog,vlog,tlog], ["all_main","all_data","all
     handler = logging.FileHandler(logFilename, mode="w")
     logger.addHandler(handler)
 
+SPECIAL_TOKENS  = { "bos_token": "<|BOS|>",
+                    "eos_token": "<|EOS|>",
+                    "unk_token": "<|UNK|>",
+                    "pad_token": "<|PAD|>",
+                    "sep_token": "<|SEP|>"}
 nli_map = ['contradiction', 'entailment', 'neutral']
 atomic_relation_mappings = {
     "oEffect":"<oEffect>",

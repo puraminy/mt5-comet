@@ -721,20 +721,29 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
 
     def collate_fn_for_generation(batch):
          queries,responses = zip(*batch)
-         new_batch = tokenizer(list(queries),return_tensors='pt',
+
+         inputs = []
+         for i in range(queries):
+             inp = SPECIAL_TOKENS['bos_token'] + \
+             + queriesi[i] + SPECIAL_TOKENS['sep_token'] + \
+             responses[i] + SPECIAL_TOKENS['eos_token']
+             inputs.append(inp)
+
+         new_batch = tokenizer(inputs,return_tensors='pt',
                  truncation=True,
                  max_length=90,
                  padding='max_length')
+         return new_batch
 
-         with tokenizer.as_target_tokenizer():
-             tokenized = tokenizer(list(responses),return_tensors='pt',
-                         truncation=True,
-                         max_length=90, 
-                         padding='max_length')
-             labels = tokenized['input_ids']
-             labels[labels==tokenizer.pad_token_id] = -100
-             new_batch['labels']=labels
-         return new_batch #,references
+        # with tokenizer.as_target_tokenizer():
+        #     tokenized = tokenizer(list(responses),return_tensors='pt',
+        #                 truncation=True,
+        #                 max_length=90, 
+        #                 padding='max_length')
+        #     labels = tokenized['input_ids']
+        #     labels[labels==tokenizer.pad_token_id] = -100
+        #     new_batch['labels']=labels
+        # return new_batch #,references
     #%% build dataloader
     if  "t5" in model_id:
         data_collator = collate_fn_for_flattened
