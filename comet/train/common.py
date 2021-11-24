@@ -49,7 +49,7 @@ for logger, fname in zip([mlog,dlog,clog,vlog,tlog], ["all_main","all_data","all
     logger.addHandler(handler)
 
 SPECIAL_TOKENS  = { "bos_token": "<|BOS|>",
-                    "eos_token": "<|EOS|>",
+                    "eos_token": "</s>",
                     "unk_token": "<|UNK|>",
                     "pad_token": "<|PAD|>",
                     "sep_token": "<|SEP|>"}
