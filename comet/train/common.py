@@ -294,7 +294,7 @@ def create_templates(method, wrapped, frozen,
            anstemp = "{ph} {resp} {end}"
        elif method == "sup":
            qtemp = "{enc_token_start} {gen_start} {event} {enc_token_end} {gen_end}"
-           anstemp = "{resp}"
+           anstemp = "{resp} {end}"
        elif method == "unsup":
            qtemp = "{enc_token_start} {gen_start} {event} {enc_token_end} {gen_end} {ph}"
            anstemp = "{ph} {resp} {end}"
