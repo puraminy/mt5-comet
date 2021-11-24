@@ -5,7 +5,7 @@ from transformers.optimization import Adafactor, AdafactorSchedule
 from transformers import (
     T5ForConditionalGeneration, T5TokenizerFast, 
     MT5ForConditionalGeneration, MT5TokenizerFast, AdamW, AddedToken,
-    GPT2Model, GPT2Tokenizer,
+    GPT2LMHeadModel, GPT2Tokenizer,
     DataCollatorForLanguageModeling,
     AutoTokenizer,
     get_linear_schedule_with_warmup
@@ -662,7 +662,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     if model_id == "test":
         return
     if "gpt" in model_id:
-        model = GPT2Model.from_pretrained(underlying_model_name)
+        model = GPT2LMHeadModel.from_pretrained(underlying_model_name)
         tokenizer = AutoTokenizer.from_pretrained(underlying_model_name)
     elif "mt5" in model_id:
         tokenizer = MT5TokenizerFast.from_pretrained(underlying_model_name)
@@ -711,10 +711,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
             tokenized = tokenizer(list(responses),return_tensors='pt',padding='longest')
             labels = tokenized['input_ids']
             labels[labels==tokenizer.pad_token_id] = -100
-            if "gpt"in model_id:
-                new_batch['label']=labels
+            new_batch['labels']=labels
             if "t5" in model_id:
-                new_batch['labels']=labels
                 new_batch['decoder_input_ids'] = model.prepare_decoder_input_ids_from_labels(
                     tokenized['input_ids']
                 )
