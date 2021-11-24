@@ -52,6 +52,7 @@ SPECIAL_TOKENS  = { "bos_token": "<|BOS|>",
                     "eos_token": "<|EOS|>",
                     "unk_token": "<|UNK|>",
                     "pad_token": "<|PAD|>",
+                    "gen_token": "<|GEN|>",
                     "sep_token": "<|SEP|>"}
 nli_map = ['contradiction', 'entailment', 'neutral']
 atomic_relation_mappings = {
@@ -261,10 +262,10 @@ def create_templates(method, wrapped, frozen,
            anstemp = "{ph} {resp} {end}"
        elif method == "sup-gen":
            qtemp = "{event} {gen}"
-           anstemp = "{resp}"
+           anstemp = "{resp} {end}"
        elif method == "sup-no-gen":
            qtemp = "{event}"
-           anstemp = "{resp}"
+           anstemp = "{resp} {end}"
        elif method == "gen":
            qtemp = "{gen}"
            anstemp = "{resp}"

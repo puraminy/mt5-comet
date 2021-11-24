@@ -689,8 +689,6 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     # added_tokens = list(atomic_relation_mappings.values()) + [gen_token]
     mlog.info("len tokenizer %s", len(tokenizer))
     extend_tokenizer(tokenizer, "")
-    if "gpt" in model_id:
-        tokenizer.add_special_tokens(SPECIAL_TOKENS)
     mlog.info("len tokenizer after extending %s", len(tokenizer))
     model.resize_token_embeddings(len(tokenizer))
     #%% Prepare training data
@@ -721,26 +719,13 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
 
     def collate_fn_for_generation(batch):
          queries,responses = zip(*batch)
-
          dlog.info("len(queries): %s", len(queries))
-         inputs = []
-         outputs = []
-         for i in range(len(queries)):
-             inp = \
-             queries[i] + SPECIAL_TOKENS['eos_token'] 
-             inputs.append(inp)
-             out = \
-             responses[i] + SPECIAL_TOKENS['eos_token']
-             outputs.append(out)
-
-         #inputs = list(queries)
-         #outputs =list(responses)
+         inputs = list(queries)
+         outputs =list(responses)
          new_batch = tokenizer(inputs,return_tensors='pt',
                  truncation=True,
                  max_length=120,
                  padding='max_length')
-
-
          tokenized = tokenizer(outputs,return_tensors='pt',
                      truncation=True,
                      max_length=120, 
