@@ -711,10 +711,11 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
             labels = outputs['input_ids']
             labels[labels==tokenizer.pad_token_id] = -100
             new_batch['labels']=labels
-            new_batch['decoder_input_ids'] = model.prepare_decoder_input_ids_from_labels(
-                outputs['input_ids']
-            )
-            new_batch['decoder_attention_mask'] = outputs['attention_mask']
+            if "t5" in model_id:
+                new_batch['decoder_input_ids'] = model.prepare_decoder_input_ids_from_labels(
+                    outputs['input_ids']
+                )
+                new_batch['decoder_attention_mask'] = outputs['attention_mask']
         return new_batch
 
     # def collate_fn_for_generation(batch):
