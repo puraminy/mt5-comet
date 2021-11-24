@@ -257,6 +257,9 @@ def create_templates(method, wrapped, frozen,
        elif method == "sup-gen":
            qtemp = "{event} {gen}"
            anstemp = "{resp}"
+       elif method == "sup-no-gen":
+           qtemp = "{event}"
+           anstemp = "{resp}"
        elif method == "gen":
            qtemp = "{gen}"
            anstemp = "{resp}"
