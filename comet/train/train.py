@@ -926,11 +926,12 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
                     if "loss" in result:
                         loss = result['loss']/accumulation_tiny_steps
                     else:
-                        logits = clip_logits(result['logits'])
                         loss = torch.nn.functional.cross_entropy(
-                          logits.reshape(-1,logits.size(2)),
-                          batch['labels'].reshape(-1,),
-                        )/accumulation_tiny_steps
+                            result['logits'].reshape(-1,result['logits'].size(2)),
+                            batch['labels'].reshape(-1,),
+                            reduction='none'
+                        ).reshape(result['logits'].size(0),-1)
+                        loss /= accumulation_tiny_steps
                     loss.backward()
                     batch_loss += loss.item()
                 optimizer.step()
