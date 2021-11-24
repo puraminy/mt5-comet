@@ -711,7 +711,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
             tokenized = tokenizer(list(responses),return_tensors='pt',padding='longest')
             labels = tokenized['input_ids']
             labels[labels==tokenizer.pad_token_id] = -100
-            new_batch['labels']=labels
+            new_batch['labels']=labels.copy()
             if "t5" in model_id:
                 new_batch['decoder_input_ids'] = model.prepare_decoder_input_ids_from_labels(
                     tokenized['input_ids']
