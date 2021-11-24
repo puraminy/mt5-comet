@@ -680,9 +680,10 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     allowed_out_token_length = len(tokenizer)
     def clip_logits(logits):
         return logits[:,:,:allowed_out_token_length]
-    clip_logits_hook = model.get_output_embeddings().register_forward_hook(
-        lambda m,i,o:clip_logits(o)
-    )
+    if "t5" in model_id:
+        clip_logits_hook = model.get_output_embeddings().register_forward_hook(
+            lambda m,i,o:clip_logits(o)
+        )
     # add new tokens
     # added_tokens = list(atomic_relation_mappings.values()) + [gen_token]
     mlog.info("len tokenizer %s", len(tokenizer))
