@@ -688,6 +688,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     # added_tokens = list(atomic_relation_mappings.values()) + [gen_token]
     mlog.info("len tokenizer %s", len(tokenizer))
     extend_tokenizer(tokenizer, "")
+    if "gpt" in model_id:
+        tokenizer.add_special_tokens({'pad_token': '[PAD]'})
     mlog.info("len tokenizer after extending %s", len(tokenizer))
     model.resize_token_embeddings(len(tokenizer))
     #%% Prepare training data
