@@ -721,7 +721,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
 
     def collate_fn_for_generation(batch):
          queries,references = zip(*batch)
-         dlog.inf("=========batch")
+         dlog.info("=========batch")
          dlog.info(queries)
 
          new_batch = tokenizer(list(queries),return_tensors='pt',padding='longest')
