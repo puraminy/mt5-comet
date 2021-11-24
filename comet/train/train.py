@@ -711,18 +711,20 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
             tokenized = tokenizer(list(responses),return_tensors='pt',padding='longest')
             labels = tokenized['input_ids']
             labels[labels==tokenizer.pad_token_id] = -100
-            new_batch['labels']=labels.copy()
+            if "gpt"in model_id:
+                new_batch['label']=labels
             if "t5" in model_id:
+                new_batch['labels']=labels
                 new_batch['decoder_input_ids'] = model.prepare_decoder_input_ids_from_labels(
                     tokenized['input_ids']
                 )
                 new_batch['decoder_attention_mask'] = tokenized['attention_mask']
         return new_batch
 
-    #def collate_fn_for_generation(batch):
-    #     queries,references = zip(*batch)
-    #     new_batch = tokenizer(list(queries),return_tensors='pt',padding='longest')
-    #     return new_batch #,references
+    def collate_fn_for_generation(batch):
+         queries,references = zip(*batch)
+         new_batch = tokenizer(list(queries),return_tensors='pt',padding='longest')
+         return new_batch #,references
     #%% build dataloader
     if  True: #"t5" in model_id:
         data_collator = collate_fn_for_flattened
