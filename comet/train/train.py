@@ -548,6 +548,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     validation_num_generation = 20
     if not frozen and learning_rate == 0: 
         learning_rate = 6.25e-05 if opt_type == "adam" else 1e-3
+        if "gpt" in model_id:
+            learning_rate = 1e-5
     if frozen and learning_rate == 0: 
         learning_rate = 0.01  #6.25e-05
     assert learning_rate > 0, "Learning rate is zero!"

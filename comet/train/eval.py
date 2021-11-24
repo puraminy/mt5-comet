@@ -31,18 +31,21 @@ def set_device(dev):
 def gen_resp(model, tokenizer, query, gen_token = "", gen_param = "greedy"):
     if gen_param == "greedy":
         generation_params = {
-            "early_stopping":True,
+            "max_length":250,
             "num_beams":5,
-            "repetition_penalty":2.5,
+            "repetition_penalty":1.0,
             "num_return_sequences":3,
         }
     elif gen_param == "top_p":
         generation_params = {
+            "max_length":250,
             "do_sample":True, 
-            "top_p":0.95, 
+            "top_p":0.9, 
+            "top_k":10,
+            "num_beams":5,
             "temperature": 1.0,
             "num_return_sequences":3, 
-            "repetition_penalty":2.5,
+            "repetition_penalty":1.0,
         }
     inputs = tokenizer(query,return_tensors='pt').to(device=device)
     if False: #gen_token != "":
@@ -52,7 +55,7 @@ def gen_resp(model, tokenizer, query, gen_token = "", gen_param = "greedy"):
         hyps = tokenizer.batch_decode(hyps,skip_special_tokens=True)
     else:
         hyps = model.generate(**inputs,**generation_params)
-        hyps = tokenizer.batch_decode(hyps,skip_special_tokens=True)
+        hyps = tokenizer.batch_decode(hyps,skip_special_tokens=False)
     return hyps
 
 def bert_score(bert_scorer, hyps, refs):
