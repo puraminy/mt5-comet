@@ -139,6 +139,7 @@ def extend_tokenizer(tokenizer, rel=""):
                 list(atomic_relation_mappings.values())+
                 list(gen_tokens.values())
         ]
+        tokenizer.add_special_tokens(SPECIAL_TOKENS)
         tokenizer.add_special_tokens({"additional_special_tokens":added_tokens}) 
     if rel:
         added_tokens = [ 
