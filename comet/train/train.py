@@ -724,27 +724,29 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
 
          dlog.info("len(queries): %s", len(queries))
          inputs = []
+         outputs = []
          for i in range(len(queries)):
              inp = SPECIAL_TOKENS['bos_token'] + \
              queries[i] + SPECIAL_TOKENS['sep_token'] + \
-             responses[i] + SPECIAL_TOKENS['eos_token']
              inputs.append(inp)
+             out = SPECIAL_TOKENS['bos_token'] + \
+             responses[i] + SPECIAL_TOKENS['eos_token']
+             outputs.append(out)
 
          new_batch = tokenizer(inputs,return_tensors='pt',
                  truncation=True,
                  max_length=90,
                  padding='max_length')
-         return new_batch
 
-        # with tokenizer.as_target_tokenizer():
-        #     tokenized = tokenizer(list(responses),return_tensors='pt',
-        #                 truncation=True,
-        #                 max_length=90, 
-        #                 padding='max_length')
-        #     labels = tokenized['input_ids']
-        #     labels[labels==tokenizer.pad_token_id] = -100
-        #     new_batch['labels']=labels
-        # return new_batch #,references
+         with tokenizer.as_target_tokenizer():
+             tokenized = tokenizer(outputs,return_tensors='pt',
+                         truncation=True,
+                         max_length=90, 
+                         padding='max_length')
+             labels = tokenized['input_ids']
+             labels[labels==tokenizer.pad_token_id] = -100
+             new_batch['labels']=labels
+         return new_batch #,references
     #%% build dataloader
     if  "t5" in model_id:
         data_collator = collate_fn_for_flattened
