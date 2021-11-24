@@ -296,8 +296,8 @@ def create_templates(method, wrapped, frozen,
            qtemp = "{enc_token_start} {gen_start} {event} {enc_token_end} {gen_end}"
            anstemp = "{resp} {end}"
        elif method == "gpt-wrap":
-           qtemp = "{event} {enc_token}"
-           anstemp = "{event} {enc_token} {resp} {end}"
+           qtemp = "{enc_token} {event} {gen}"
+           anstemp = "{enc_token} {event} {gen} {resp} {end}"
        elif method == "gpt":
            qtemp = "{event} {gen}"
            anstemp = "{event} {gen} {resp} {end}"
