@@ -1098,7 +1098,7 @@ def translate(model, tokenizer, df, trans_col, path, logger=None, start=0):
                 logger.info("Saving at %s", p)
             new_df = df.truncate(after=ii)
             new_df[newcol] = trans
-            new_df.to_csv(path, sep="\t")
+            new_df.to_csv(path, sep="\t", index=False)
         ii += 1
 
 
