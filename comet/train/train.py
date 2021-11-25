@@ -454,7 +454,7 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
     "-sample",
     default=5,
     type=int,
-    help=""
+    help="number of sampels for in context learning"
 )
 @click.option(
     "--opt_type",
