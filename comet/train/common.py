@@ -212,6 +212,7 @@ def fill_consts(template, extemp, row, rows=[]):
 
     if "{examples}" in text:
         examples = ""
+        ii = 1
         for idx, _row in rows.iterrows():
             example = extemp
             if "{enc_token}" in extemp:
@@ -222,7 +223,8 @@ def fill_consts(template, extemp, row, rows=[]):
             for key,value in _row.items():
                 val = str(value)
                 example = example.replace("{" + key + "}", val)
-            examples += " " + example
+            examples += " " + str(ii) + ") " + example
+            ii += 1
 
         text = text.replace("{examples}", examples)
 
@@ -282,6 +284,14 @@ def create_templates(method, wrapped, frozen,
            qtemp = "{examples} {event} {enc_token} {gen} {ph}"
            extemp = "{input_text} {enc_token} {target_text} {end}"
            anstemp = "{ph} {resp} {end}"
+       elif method == "gpt-n":
+           qtemp = "{examples} {event} {gen}"
+           extemp = "{input_text} {gen} {target_text} {end}"
+           anstemp = "{resp} {end}"
+       elif method == "gpt-n-wrap":
+           qtemp = "{examples} {event} {enc_token}"
+           extemp = "{input_text} {enc_token} {target_text} {end}"
+           anstemp = "{resp} {end}"
        elif method == "context-n-dec":
            qtemp = "{event} {enc_token} {gen} {ph}"
            extemp = "{input_text} {target_text} {end}"
