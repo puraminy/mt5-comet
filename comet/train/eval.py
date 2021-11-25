@@ -204,8 +204,10 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
                     mean_bert[scope] = "{:.4f}".format(sum_bert[scope] / counter[scope])
                     #tqdm.write(f"Mean score:{mean_bert}")
                     vlog.info("")
-                    vlog.info(str(counter["all"])+ ":"+query)
-                    vlog.info("Prediction:"+ top_hyp)
+                    vlog.info(str(counter["all"])+ "        :"+query)
+                    vlog.info("----------------------------------------------------")
+                    vlog.info("Prediction  :"+ top_hyp)
+                    vlog.info("----------------------------------------------------")
                     vlog.info("Closest tail:"+ best_ref)
                     
 
@@ -234,7 +236,7 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
                     vlog.info("Bert Score:{:.4f}--{}".format(cur_score, mean_bert[scope]))
                     vlog.info("Rouge Score:{:.4f}--{}".format(rouge_score, mean_rouge[scope]))
                     vlog.info("BLEU Score:{:.4f}--{}".format(bleu_score, mean_bleu[scope]))
-                    vlog.info("------------------------------------------------------")
+                    vlog.info("======================================================")
                     pbar.set_description(f"{scope} :Bert:{mean_bert[scope]} Rouge {mean_rouge[scope]} Bleu {mean_bleu[scope]} ")
                     pbar.update(1)
 
