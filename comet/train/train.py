@@ -479,7 +479,7 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
 @click.option(
     "--trans",
     "-trans",
-    default="target_text@fa",
+    default="",
     type=str,
     help=""
 )
