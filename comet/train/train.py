@@ -1103,7 +1103,8 @@ def translate(model, tokenizer, df, trans_col, path, logger=None, start=0):
 
 
     df[newcol] = trans
-    df.to_csv(path, sep="\t")
+    p = path.replace(".tsv", str(ii).replace("000", "k") + ".tsv")
+    df.to_csv(p, sep="\t")
 
 
 
