@@ -209,6 +209,10 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
                     vlog.info("Prediction  :"+ top_hyp)
                     vlog.info("----------------------------------------------------")
                     vlog.info("Closest tail:"+ best_ref)
+                    vlog.info("All preds: ''''''''''''''''''''''''''''''''''''''''''")
+                    for h in hyps: 
+                        vlog.info(h)
+                    vlog.info("All preds: ''''''''''''''''''''''''''''''''''''''''''")
                     
 
                     mlog.debug(f"TOP hyp:{top_hyp}")
