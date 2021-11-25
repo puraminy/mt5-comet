@@ -308,8 +308,8 @@ def create_templates(method, wrapped, frozen,
            extemp = "{input_text} {enc_token} {target_text} {end}"
            anstemp = "{ph} {resp} {end}"
        elif method == "gpt-n":
-           qtemp = "{examples} {event} {gen}"
-           extemp = "{input_text} {gen} {target_text} {end}"
+           qtemp = "{examples} {event} {rel_natural}"
+           extemp = "{input_text} {rel_natural} {target_text} {end}"
            anstemp = "{resp} {end}"
        elif method == "gpt-n-wrap":
            qtemp = "{examples} {event} {enc_token}"
@@ -332,7 +332,7 @@ def create_templates(method, wrapped, frozen,
            qtemp = "{event} {enc_token}"
            anstemp = "{resp} {end}"
        elif method == "gpt":
-           qtemp = "{event} {gen}"
+           qtemp = "{event} {rel_natural}"
            anstemp = "{resp} {end}"
        elif method == "unsup":
            qtemp = "{enc_token_start} {gen_start} {event} {enc_token_end} {gen_end} {ph}"
