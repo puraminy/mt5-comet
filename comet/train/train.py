@@ -725,6 +725,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
          queries,responses = zip(*batch)
          inputs = list(queries)
          outputs =list(responses)
+         new_batch = {}
          tokenized = tokenizer(outputs,return_tensors="pt",
                  truncation=True,
                  max_length=256,
