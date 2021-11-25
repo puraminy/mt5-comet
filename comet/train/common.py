@@ -218,6 +218,7 @@ def fill_consts(template, extemp, row, rows=[]):
     counter = 0
     pi = 0
     enc_prompt = ""
+    dec_prompt = ""
     while "{enc_token}" in text:
         enc_plen = plen[pi] if pi < len(plen) else plen[-1] 
         prompt = ""
