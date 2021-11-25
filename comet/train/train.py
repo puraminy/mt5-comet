@@ -233,7 +233,7 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
 @click.option(
     "--method",
     "-mt",
-    default="",
+    default="unsup",
     type=str,
     help="Based on the method (sup, unsup, context-en, ... ) templates for query and answer are created."
 )
@@ -339,14 +339,14 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
 @click.option(
     "--train_path",
     "-tp",
-    default="atomic/xIntent_train.tsv",
+    default="atomic/train.tsv",
     type=str,
     help=""
 )
 @click.option(
     "--val_path",
     "-vp",
-    default="atomic/xIntent_val.tsv",
+    default="atomic/val.tsv",
     type=str,
     help=""
 )
@@ -470,8 +470,14 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
     type=int,
     help=""
 )
+@click.option(
+    "--deep_log",
+    "-dl",
+    is_flag=True,
+    help="print more information"
+)
 def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, val_set, 
-         val_samples, load_path, train_path, val_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks, include, exclude, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, is_record, reset_results, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head):
+         val_samples, load_path, train_path, val_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks, include, exclude, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, is_record, reset_results, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log):
 
     #%% some hyper-parameters
 
@@ -650,6 +656,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
                     )
     train_records = num_records["train"]
     val_records = num_records["validation"]
+    if deep_log:
+        dlog.info(atomic_query_responses["train"])
     for logger in [mlog, clog, vlog]:
         logger.info("Train records:"  + str(train_records))
         logger.info("Val Records:"  + str(val_records))

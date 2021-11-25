@@ -66,18 +66,42 @@ atomic_relation_mappings = {
     "xWant":"<xWant>"
 }
 relation_natural_mappings = {
-    "oEffect":"<oEffect>",
-    "oReact":"<oReact>",
-    "oWant":"<oWant>",
-    "xAttr":"<xAttr>",
-    "xEffect":"<xEffect>",
+    "oReact":{ 
+        "en":"as a result others feel ",
+        "fa":"در نتیجه دیگران حس می کنند"
+    },
+    "xReact":{ 
+        "en":"as a result PersonX feels ",
+        "fa":"در نتیجه PersonX حس می کند", 
+    },
+    "xWant":{ 
+        "en":"Then PersonX wants ",
+        "fa":"بعد از آن PersonX می خواهد"
+    },
+    "oWant":{ 
+        "en":"Then others want ",
+        "fa":"بعد از آن دیگران می خواهند"
+    },
+    "xEffect":{ 
+        "en":"as a result PersonX  ",
+        "fa":"در نتیجه PersonX "
+    },
+    "oEffect":{ 
+        "en":"as a result others  ",
+        "fa":"در نتیجه دیگران "
+    },
+    "xAttr":{ 
+        "en":"PersonX is seen as",
+        "fa":"مردم فکر می کنند PersonX "
+    },
     "xIntent":{ 
         "en":"because PersonX intended ",
         "fa":"زیرا PersonX می خواست"
     },
-    "xNeed":"<xNeed>",
-    "xReact":"<xReact>",
-    "xWant":"<xWant>"
+    "xNeed":{ 
+        "en":"Before that, PersonX needs ",
+        "fa":"قبل از آن PersonX نیاز دارد"
+    },
 }
 gen_token_en = "<gen_en>"
 gen_token_fa = "<gen_fa>"
@@ -115,7 +139,15 @@ placeholder_token = "<extra_id_0>"
 end_token = SPECIAL_TOKENS['eos_token']  #"</s>"
 # %%
 atomic_relation_prompt_lengths = {
+    "xAttr":[5,3],
+    "xEffect":[5,3],
+    "oEffect":[5,3],
+    "xReact":[5,3],
+    "oReact":[5,3],
+    "xWant":[5,3],
+    "oWant":[5,3],
     "xIntent":[5,3],
+    "xNeed":[5,3],
 }
 
 def get_prompt_token_fn(id_offset,length):
@@ -192,7 +224,6 @@ def fill_consts(template, extemp, row, rows=[]):
     #dlog.debug("fill const for: %s", text)
     rel = row["prefix"]
     rel_token = atomic_relation_mappings[rel]        
-
     rel_natural_en = relation_natural_mappings[rel]["en"]        
     rel_natural_fa = relation_natural_mappings[rel]["fa"]        
     rep  = {"{rel}":rel, 
@@ -376,6 +407,7 @@ def create_templates(method, wrapped, frozen,
            qtemp = qtemp.replace(" {enc_token_end} ","")
            qtemp = qtemp.replace("{enc_token_start}","{enc_token}")
        if not wrapped:
+           mlog.info("Not Wrapped")
            qtemp = qtemp.replace("{enc_token}","{rel_token}")
        if zero_shot:
            qtemp = qtemp.replace("{rel_token}","")
@@ -510,7 +542,7 @@ def fill_data(split_df, split_name, qtemp, anstemp, extemp,
         _qtemp = fill_consts(qtemp, extemp,d, context_rows)
         _anstemp = fill_consts(anstemp, extemp,d, context_rows)
         if not rel in data_split:
-            data_split = {rel:{}}
+            data_split[rel] = {}
         for inp in inputs:
             if not inp in d or len(d[inp]) <= 1:
                 continue
