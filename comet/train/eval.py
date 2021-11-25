@@ -33,7 +33,7 @@ def gen_resp(model, tokenizer, query, gen_token = "", gen_param = "greedy"):
         generation_params = {
             "max_length":250,
             "num_beams":5,
-            "repetition_penalty":1.0,
+            "repetition_penalty":2.5,
             "num_return_sequences":3,
         }
     elif gen_param == "top_p":
@@ -45,7 +45,7 @@ def gen_resp(model, tokenizer, query, gen_token = "", gen_param = "greedy"):
             "num_beams":5,
             "temperature": 1.0,
             "num_return_sequences":3, 
-            "repetition_penalty":1.0,
+            "repetition_penalty":2.5,
         }
     inputs = tokenizer(query,return_tensors='pt').to(device=device)
     if False: #gen_token != "":
