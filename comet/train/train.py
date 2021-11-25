@@ -619,8 +619,29 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     mlog.info(f"LOAD Path:{underlying_model_name}")
     Path(save_path).mkdir(exist_ok=True, parents=True)
     Path(os.path.join(save_path, "best_model")).mkdir(exist_ok=True, parents=True)
+    #%% load model
+
+    mlog.info("Loading model ...")
+    if model_id == "test":
+        return
+    if "gpt" in model_id:
+        model = GPT2LMHeadModel.from_pretrained(underlying_model_name)
+        tokenizer = AutoTokenizer.from_pretrained(underlying_model_name)
+    elif "mt5" in model_id:
+        tokenizer = MT5TokenizerFast.from_pretrained(underlying_model_name)
+        model = MT5ForConditionalGeneration.from_pretrained(underlying_model_name)
+    elif is_flax:
+        tokenizer = AutoTokenizer.from_pretrained(underlying_model_name)
+        model = T5ForConditionalGeneration.from_pretrained(underlying_model_name, from_flax=True) 
+        mlog.info("converting and saving model in %s", save_path)
+        tokenizer.save_pretrained(save_path)
+        model.save_pretrained(save_path)
+        return
+    else:
+        tokenizer = AutoTokenizer.from_pretrained(underlying_model_name)
+        model = T5ForConditionalGeneration.from_pretrained(underlying_model_name) 
+
     #%% load atomic data
-    import pandas as pd
     atomic_dataset = {}
     atomic_dataset["train"] = pd.read_table(train_path)
     atomic_dataset["validation"] = pd.read_table(val_path)
@@ -683,26 +704,6 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
         logger.info("Iterations:"  + str(iterations))
     warm_up_steps = 0.002*iterations
     #%% tokenizer & model
-    mlog.info("Loading model ...")
-    if model_id == "test":
-        return
-    if "gpt" in model_id:
-        model = GPT2LMHeadModel.from_pretrained(underlying_model_name)
-        tokenizer = AutoTokenizer.from_pretrained(underlying_model_name)
-    elif "mt5" in model_id:
-        tokenizer = MT5TokenizerFast.from_pretrained(underlying_model_name)
-        model = MT5ForConditionalGeneration.from_pretrained(underlying_model_name)
-    elif is_flax:
-        tokenizer = AutoTokenizer.from_pretrained(underlying_model_name)
-        model = T5ForConditionalGeneration.from_pretrained(underlying_model_name, from_flax=True) 
-        mlog.info("converting and saving model in %s", save_path)
-        tokenizer.save_pretrained(save_path)
-        model.save_pretrained(save_path)
-        return
-    else:
-        tokenizer = AutoTokenizer.from_pretrained(underlying_model_name)
-        model = T5ForConditionalGeneration.from_pretrained(underlying_model_name) 
-
     allowed_out_token_length = len(tokenizer)
     def clip_logits(logits):
         return logits[:,:,:allowed_out_token_length]
