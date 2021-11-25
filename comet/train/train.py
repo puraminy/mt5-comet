@@ -1078,8 +1078,9 @@ def create_confs(experiment, models_dir):
 
 def translate(model, tokenizer, df, trans_col, path, logger=None, start=0):
     pbar = tqdm(total= len(df))
-    oldcol, newcol = trans_col.split("@")
+    oldcol, newcol,save_step = trans_col.split("@")
     newcol = oldcol + newcol
+    save_step = int(save_step)
     trans = []
     ii = 0
     for idx, row in df.iterrows():
@@ -1091,12 +1092,12 @@ def translate(model, tokenizer, df, trans_col, path, logger=None, start=0):
             logger.info("%s -> %s", row[oldcol], _t)
         trans.append(_t)
         pbar.update()
-        ii += 1
-        if ii % 10_000 == 0:
+        if ii % save_step == 0:
             p = path.replace(".tsv", str(ii).replace("000", "k") + ".tsv")
             new_df = df.truncate(after=ii)
             new_df[newcol] = trans
             new_df.to_csv(path, sep="\t")
+        ii += 1
 
 
     df[newcol] = trans
