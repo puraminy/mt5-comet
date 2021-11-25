@@ -1079,7 +1079,7 @@ def create_confs(experiment, models_dir):
 def translate(model, tokenizer, df, trans_col, path, logger=None, start=0):
     pbar = tqdm(total= len(df))
     oldcol, newcol,save_step = trans_col.split("@")
-    newcol = oldcol + newcol
+    newcol = oldcol + "_" + newcol
     save_step = int(save_step)
     trans = []
     ii = 0
