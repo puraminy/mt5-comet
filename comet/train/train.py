@@ -651,7 +651,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
             path = train_path if split_name == "train" else val_path
             model.to(device=device)
             logger = vlog if print_log == "vlog" else None
-            translate(model, tokenizer, df, trans, path, logger) 
+            translate(model, tokenizer, df, trans, path, logger, start) 
         return
 
     length = [int(s) for s in prompt_length.split("-")]
@@ -1076,18 +1076,29 @@ def create_confs(experiment, models_dir):
                                 json.dump(args, outfile, indent=4)
 
 
-def translate(model, tokenizer, df, trans_col, path, logger=None):
+def translate(model, tokenizer, df, trans_col, path, logger=None, start=0):
     pbar = tqdm(total= len(df))
     oldcol, newcol = trans_col.split("@")
     newcol = oldcol + newcol
     trans = []
+    ii = 0
     for idx, row in df.iterrows():
+        if ii < start:
+            continue
         hyps = gen_resp(model, tokenizer, row[oldcol])
         _t = hyps[0]
         if logger:
             logger.info("%s -> %s", row[oldcol], _t)
         trans.append(_t)
         pbar.update()
+        ii += 1
+        if ii % 10_000 == 0:
+            p = path.replace(".tsv", str(ii).replace("000", "k") + ".tsv")
+            new_df = df.truncate(after=ii)
+            new_df[newcol] = trans
+            new_df.to_csv(path, sep="\t")
+
+
     df[newcol] = trans
     df.to_csv(path, sep="\t")
 
