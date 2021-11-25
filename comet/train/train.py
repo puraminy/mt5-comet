@@ -392,7 +392,7 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
 @click.option(
     "--print_log",
     "-print",
-    default="mlog",
+    default="",
     type=str,
     help=""
 )
@@ -650,7 +650,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
             mlog.info("Translating ...%s ", split_name)
             path = train_path if split_name == "train" else val_path
             model.to(device=device)
-            logger = vlog if print_log == "vlog" else None
+            logger = mlog if print_log == "mlog" else None
             translate(model, tokenizer, df, trans, path, logger, start) 
         return
 
