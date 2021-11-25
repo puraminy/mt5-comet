@@ -1081,6 +1081,7 @@ def translate(model, tokenizer, df, trans_col, path):
     for idx, row in df.iterrows():
         hyps = gen_resp(model, tokenizer, row[oldcol])
         trans.append(hyps[0])
+        pbar.update()
     df[newcol] = trans
     df.to_csv(path, sep="\t")
 
