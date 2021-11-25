@@ -624,6 +624,12 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     atomic_dataset = {}
     atomic_dataset["train"] = pd.read_table(train_path)
     atomic_dataset["validation"] = pd.read_table(val_path)
+    if trans:
+        for split_name, df in atomic_dataset.items():
+            mlog.info("Translating ...%s ", split_name)
+            path = train_path if split_name == "train" else val_path
+            translate(model, tokenizer, df, trans, path) 
+        return
 
     length = [int(s) for s in prompt_length.split("-")]
     set_prompt_lengths(wrap, length)
@@ -789,12 +795,6 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     else:
         model.to(device=device)
 
-    if trans:
-        for split_name, df in atomic_dataset.items():
-            mlog.info("Translating ...%s ", split_name)
-            path = train_path if split_name == "train" else val_path
-            translate(model, tokenizer, df, trans, path) 
-        return
 
     if do_eval or (not wrap and frozen):
         mlog.info("Evaluating the model...")
