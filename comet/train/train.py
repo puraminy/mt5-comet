@@ -649,6 +649,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
         for split_name, df in atomic_dataset.items():
             mlog.info("Translating ...%s ", split_name)
             path = train_path if split_name == "train" else val_path
+            model.to(device=device)
             translate(model, tokenizer, df, trans, path) 
         return
 
