@@ -452,7 +452,7 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
 @click.option(
     "--sampling",
     "-sample",
-    default=0,
+    default=5,
     type=int,
     help=""
 )
