@@ -308,6 +308,10 @@ def create_templates(method, wrapped, frozen,
            extemp = "{input_text} {enc_token} {target_text} {end}"
            anstemp = "{ph} {resp} {end}"
        elif method == "event-n":
+           qtemp = "{examples} {gen} {ph}"
+           extemp = "{gen} {input_text} {end}"
+           anstemp = "{ph} {event} {end}"
+       elif method == "event-n-wrap":
            qtemp = "{examples} {enc_token} {ph}"
            extemp = "{enc_token} {input_text} {end}"
            anstemp = "{ph} {event} {end}"
