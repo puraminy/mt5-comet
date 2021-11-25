@@ -210,6 +210,28 @@ def fill_consts(template, extemp, row, rows=[]):
         val = str(value)
         text = text.replace("{" + key + "}", val)
 
+    plen = atomic_relation_prompt_lengths[rel]
+    if not rel in encoder_prompts:
+        encoder_prompts[rel] = []
+    if not rel in decoder_prompts:
+        decoder_prompts[rel] = []
+    counter = 0
+    pi = 0
+    enc_prompt = ""
+    while "{enc_token}" in text:
+        enc_plen = plen[pi] if pi < len(plen) else plen[-1] 
+        prompt = ""
+        for i in range(counter, counter + enc_plen):
+            token = f"<enc_{rel}_{i}>" 
+            prompt += " " + token
+            if not token in encoder_prompts[rel]:
+                encoder_prompts[rel].append(token)
+        prompt = prompt.strip()
+        if not enc_prompt:
+            enc_prompt = prompt
+        text = text.replace("{enc_token}",prompt, 1)
+        counter += enc_plen 
+        pi += 1
     if "{examples}" in text:
         examples = ""
         ii = 1
@@ -361,31 +383,14 @@ def fill_vars(template, rel, event, gen_token, resp, inp_lang, resp_lang):
     pattern = re.compile("|".join(rep.keys()))
     text = pattern.sub(lambda m: rep[re.escape(m.group(0))], template)
     lang = resp_lang
-
     plen = atomic_relation_prompt_lengths[rel]
     if not rel in encoder_prompts:
         encoder_prompts[rel] = []
     if not rel in decoder_prompts:
         decoder_prompts[rel] = []
     counter = 0
+    enc_prompt = ""
     pi = 0
-    enc_prompt = ""
-    while "{enc_token}" in text:
-        enc_plen = plen[pi] if pi < len(plen) else plen[-1] 
-        prompt = ""
-        for i in range(counter, counter + enc_plen):
-            token = f"<enc_{rel}_{i}>" 
-            prompt += " " + token
-            if not token in encoder_prompts[rel]:
-                encoder_prompts[rel].append(token)
-        prompt = prompt.strip()
-        if not enc_prompt:
-            enc_prompt = prompt
-        text = text.replace("{enc_token}",prompt, 1)
-        counter += enc_plen 
-        pi += 1
-    counter = 0
-    enc_prompt = ""
     while "{enc_lang_token}" in text:
         enc_plen = plen[pi] if pi < len(plen) else plen[-1] 
         prompt = ""
@@ -402,7 +407,7 @@ def fill_vars(template, rel, event, gen_token, resp, inp_lang, resp_lang):
         pi += 1
     counter = 0
     dec_prompt = ""
-    while "{dec_token}" in text:
+    while "{dec_lang_token}" in text:
         dec_plen = plen[pi] if pi < len(plen) else plen[-1] 
         prompt=""
         for i in range(counter, counter+dec_plen):
@@ -413,7 +418,7 @@ def fill_vars(template, rel, event, gen_token, resp, inp_lang, resp_lang):
         prompt = prompt.strip()
         if not dec_prompt:
             dec_prompt = prompt
-        text = text.replace("{dec_token}",prompt, 1)
+        text = text.replace("{dec_lang_token}",prompt, 1)
         counter += dec_plen 
         pi += 1
     return text
