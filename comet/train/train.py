@@ -730,7 +730,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
                  truncation=True,
                  max_length=256,
                  padding='max_length')
-         labels = tokenized['input_ids']
+         labels = tokenized['input_ids'].detach().clone()
          labels[labels==tokenizer.pad_token_id] = -100
          new_batch['input_ids']=tokenized['input_ids']
          new_batch['attention_mask']=tokenized['attention_mask']
