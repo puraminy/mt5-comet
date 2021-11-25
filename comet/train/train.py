@@ -476,8 +476,15 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
     is_flag=True,
     help="print more information"
 )
+@click.option(
+    "--trans",
+    "-trans",
+    default="target_text@fa",
+    type=str,
+    help=""
+)
 def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, val_set, 
-         val_samples, load_path, train_path, val_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks, include, exclude, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, is_record, reset_results, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log):
+         val_samples, load_path, train_path, val_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks, include, exclude, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, is_record, reset_results, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans):
 
     #%% some hyper-parameters
 
@@ -782,6 +789,13 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     else:
         model.to(device=device)
 
+    if trans:
+        for split_name, df in atomic_dataset.items():
+            mlog.info("Translating ...%s ", split_name)
+            path = train_path if split_name == "train" else val_path
+            translate(model, tokenizer, df, trans, path) 
+        return
+
     if do_eval or (not wrap and frozen):
         mlog.info("Evaluating the model...")
         if wrapped_model:
@@ -1057,6 +1071,20 @@ def create_confs(experiment, models_dir):
                        print(str(ii) + ":" + name)
                        with open(os.path.join(conf_path, f'{name}.json'), 'w') as outfile:
                                 json.dump(args, outfile, indent=4)
+
+
+def translate(model, tokenizer, df, trans_col, path):
+    pbar = tqdm(total= len(df))
+    oldcol, newcol = trans_col.split("@")
+    newcol = oldcol + newcol
+    trans = []
+    for idx, row in df.iterrows():
+        hyps = gen_resp(model, tokenizer, row[oldcol])
+        trans.append(hyps[0])
+    df[newcol] = trans
+    df.to_csv(path, sep="\t")
+
+
 
 @run.command()
 @click.option(
