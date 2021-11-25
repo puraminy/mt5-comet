@@ -55,7 +55,7 @@ def gen_resp(model, tokenizer, query, gen_token = "", gen_param = "greedy"):
         hyps = tokenizer.batch_decode(hyps,skip_special_tokens=True)
     else:
         hyps = model.generate(**inputs,**generation_params)
-        hyps = tokenizer.batch_decode(hyps,skip_special_tokens=False)
+        hyps = tokenizer.batch_decode(hyps,skip_special_tokens=True)
     return hyps
 
 def bert_score(bert_scorer, hyps, refs):
