@@ -249,7 +249,7 @@ def fill_consts(template, extemp, row, rows=[]):
             examples += " " + str(ii) + ") " + example
             ii += 1
 
-        text = text.replace("{examples}", examples)
+        text = text.replace("{examples}", examples + " " + str(ii) + ")")
 
     #dlog.debug("after: %s", text)
     return text
