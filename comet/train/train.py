@@ -1094,6 +1094,8 @@ def translate(model, tokenizer, df, trans_col, path, logger=None, start=0):
         pbar.update()
         if ii % save_step == 0:
             p = path.replace(".tsv", str(ii).replace("000", "k") + ".tsv")
+            if logger:
+                logger.info("Saving at %s", p)
             new_df = df.truncate(after=ii)
             new_df[newcol] = trans
             new_df.to_csv(path, sep="\t")
