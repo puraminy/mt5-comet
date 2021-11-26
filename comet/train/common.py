@@ -193,9 +193,12 @@ def wrap_model(model, tokenizer, rel, encoder_type="lstm", prompt_path=""):
     dec_offset = id_offset + enc_plen
     prompt_encoder = None
     decoder_prompt_encoder = None
+    mlog.info("wrap rel %s", rel)
     mlog.info("id_offset: %s", id_offset)
     mlog.info("enc_plan: %s", enc_plen)
+    mlog.info("enc prompts: %s", encoder_prompts[rel])
     mlog.info("dec_plan: %s", dec_plen)
+    mlog.info("dec prompts: %s", decoder_prompts[rel])
     mlog.info("decoder offset: %s", dec_offset)
     if encoder_type == "emb":
         if enc_plen > 0:
