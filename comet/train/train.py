@@ -483,8 +483,15 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
     type=str,
     help=""
 )
+@click.option(
+    "--encoder_type",
+    "-et",
+    default="lstm",
+    type=str,
+    help=""
+)
 def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, val_set, 
-         val_samples, load_path, train_path, val_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks, include, exclude, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, is_record, reset_results, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans):
+         val_samples, load_path, train_path, val_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks, include, exclude, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, is_record, reset_results, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type):
 
     #%% some hyper-parameters
 
@@ -501,9 +508,6 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     if "clog" in print_log: # config logger
         clog.addHandler(consoleHandler)
         clog.setLevel(logging.DEBUG)
-    if method:    
-        qtemp, anstemp, extemp = create_templates(method, wrap, frozen,
-                gen_pos="end", prompt_pos=prompt_pos, zero_shot=zero_shot, lang=lang)
 
     args = locals() # input parameters
 
@@ -623,8 +627,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
 
     mlog.info("Loading model ...")
     if model_id == "test":
-        return
-    if "gpt" in model_id:
+        pass
+    elif "gpt" in model_id:
         model = GPT2LMHeadModel.from_pretrained(underlying_model_name)
         tokenizer = AutoTokenizer.from_pretrained(underlying_model_name)
     elif "mt5" in model_id:
@@ -654,6 +658,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
             translate(model, tokenizer, df, trans, path, logger, start) 
         return
 
+    if not wrap:
+        prompt_length = "1"
     length = [int(s) for s in prompt_length.split("-")]
     set_prompt_lengths(wrap, length)
     atomic_query_responses = {}
@@ -680,7 +686,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
          atomic_flattened[split_name],
          num_records[split_name]
         )= fill_data(split_df, split_name,
-                            qtemp, anstemp, extemp,
+                            method, prompt_pos,
                             num_samples[split_name], 
                             ignore_blanks,
                             inp_include,
@@ -688,7 +694,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
                             targ_include,
                             targ_exclude,
                             pred_tresh, nli_group, is_record, start, sampling,
-                            samples_per_head,
+                            samples_per_head
                     )
     train_records = num_records["train"]
     val_records = num_records["validation"]
@@ -697,6 +703,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     for logger in [mlog, clog, vlog]:
         logger.info("Train records:"  + str(train_records))
         logger.info("Val Records:"  + str(val_records))
+    if model_id == "test":
+        return
     accumulation_tiny_steps = 2 
     if "gpt" in model_id:
         accumulation_tiny_steps = 1
@@ -713,6 +721,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
         clip_logits_hook = model.get_output_embeddings().register_forward_hook(
             lambda m,i,o:clip_logits(o)
         )
+
     # add new tokens
     # added_tokens = list(atomic_relation_mappings.values()) + [gen_token]
     mlog.info("len tokenizer %s", len(tokenizer))
@@ -793,7 +802,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
             load_prompt_path = os.path.join(load_path, model_id, "prompt")
             mlog.info("prompt path:%s ", load_prompt_path)
         mlog.info("Wrapping the model ...")
-        wrapped_model = wrap_model(model, tokenizer, wrap, False, load_prompt_path) 
+        wrapped_model = wrap_model(model, tokenizer, wrap, encoder_type, load_prompt_path) 
         wrapped_model.to(device=device)
     else:
         model.to(device=device)

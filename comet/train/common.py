@@ -156,9 +156,12 @@ def get_prompt_token_fn(id_offset,length):
 encoder_relation_mappings = {}
 decoder_relation_mappings = {}
 def set_prompt_lengths(rel, length):
-    if rel == "":
-        return
-    atomic_relation_prompt_lengths[rel] = length
+    if rel != "":
+        atomic_relation_prompt_lengths[rel] = length
+    else:
+        for rel in atomic_relation_prompt_lengths.keys():
+            atomic_relation_prompt_lengths[rel] = length
+
 
 
 def extend_tokenizer(tokenizer, rel=""):
@@ -180,7 +183,7 @@ def extend_tokenizer(tokenizer, rel=""):
         ]
         tokenizer.add_special_tokens({"additional_special_tokens":added_tokens})
 
-def wrap_model(model, tokenizer, rel, emb=False, prompt_path=""):
+def wrap_model(model, tokenizer, rel, encoder_type="lstm", prompt_path=""):
     id_offset = len(tokenizer)
     embedding_dim = model.config.hidden_size
     enc_plen = len(encoder_prompts[rel])
@@ -193,7 +196,7 @@ def wrap_model(model, tokenizer, rel, emb=False, prompt_path=""):
     mlog.info("enc_plan: %s", enc_plen)
     mlog.info("dec_plan: %s", dec_plen)
     mlog.info("decoder offset: %s", dec_offset)
-    if emb:
+    if encoder_type == "emb":
         if enc_plen > 0:
             prompt_encoder = EmbeddingPromptEncoder(enc_plen,embedding_dim,id_offset)
         if dec_plen > 0:
@@ -203,10 +206,14 @@ def wrap_model(model, tokenizer, rel, emb=False, prompt_path=""):
             prompt_encoder = LSTMEmbeddingPromptEncoder(enc_plen,embedding_dim,id_offset)
         if dec_plen > 0:
             decoder_prompt_encoder = LSTMEmbeddingPromptEncoder(dec_plen,embedding_dim,dec_offset)
+    if "joint" in encoder_type:
+        decoder_prompt_encoder = prompt_encoder
 
     extend_tokenizer(tokenizer, rel)
     model.resize_token_embeddings(len(tokenizer))
-    wrapped_model = PTuningWrapper(model,prompt_encoder,decoder_prompt_encoder,prompt_token_fn=get_prompt_token_fn(id_offset,enc_plen + dec_plen))
+    wrapped_model = PTuningWrapper(model,prompt_encoder,
+            decoder_prompt_encoder,
+            prompt_token_fn=get_prompt_token_fn(id_offset,enc_plen + dec_plen))
     if prompt_path:
         if Path(os.path.join(prompt_path, "encoder")).exists():
             mlog.info("Loading saved encoder prompt...")
@@ -298,8 +305,7 @@ def filter_inputs(include, exclude, lang):
    return include, exclude
 
 #tttttttttt
-def create_templates(method, wrapped, frozen, 
-        gen_pos="end", prompt_pos="start", zero_shot=False, lang="mix"):
+def create_templates(method, gen_pos="end", prompt_pos="start"):
        extemp = ""
        if method == "sup-pred-enfa":
            qtemp = "{input_text} {enc_token} {gen_fa}"
@@ -385,7 +391,7 @@ def create_templates(method, wrapped, frozen,
            anstemp = "{ph} {resp} {end}"
        elif method == "unsup-dec":
            qtemp = "{enc_token_start} {gen_start} {event} {enc_token_end} {gen_end} {ph}"
-           anstemp = "{ph} {dec_token}{resp} {end}"
+           anstemp = "{ph} {dec_token} {resp} {end}"
        elif method == "unsup-2":
            qtemp = "{enc_token} {gen_start} {event} {enc_token} {gen_end} {ph}"
            anstemp = "{ph} {resp} {end}"
@@ -406,15 +412,6 @@ def create_templates(method, wrapped, frozen,
        else:
            qtemp = qtemp.replace(" {enc_token_end} ","")
            qtemp = qtemp.replace("{enc_token_start}","{enc_token}")
-       if not wrapped:
-           mlog.info("Not Wrapped")
-           qtemp = qtemp.replace("{enc_token}","{rel_token}")
-       if zero_shot:
-           qtemp = qtemp.replace("{rel_token}","")
-#       if not "mix" in lang:
-#           qtemp = qtemp.replace("{gen}","")
-#           qtemp = qtemp.replace("{gen_en}","")
-#           qtemp = qtemp.replace("{gen_fa}","")
        while "  " in qtemp:
            qtemp = qtemp.replace("  "," ")
 
@@ -483,7 +480,7 @@ def get_input(msg):
             continue
 # fill a dataset or generate based on a model
 # mmmmmmmmmmmmmm
-def fill_data(split_df, split_name, qtemp, anstemp, extemp, 
+def fill_data(split_df, split_name, method, prompt_pos, 
             num_samples=0, 
             ignore_blanks=False,
             inp_include="",
@@ -494,8 +491,6 @@ def fill_data(split_df, split_name, qtemp, anstemp, extemp,
             nli_group="all", is_record=False, start=0, sampling=0, samples_per_head=2): 
     dlog.info("building query responses for {}".format(split_name))
     dlog.info(f"len:{len(split_df)}")
-    dlog.info(f"qtemp:{qtemp}")
-    dlog.info(f"anstemp:{anstemp}")
     natural = inp_include == "natural"
     if split_name != "train":
         start = 0
@@ -539,8 +534,6 @@ def fill_data(split_df, split_name, qtemp, anstemp, extemp,
         context_rows=[]
         if sampling > 0:
             context_rows = split_df.sample(n=sampling)
-        _qtemp = fill_consts(qtemp, extemp,d, context_rows)
-        _anstemp = fill_consts(anstemp, extemp,d, context_rows)
         if not rel in data_split:
             data_split[rel] = {}
         for inp in inputs:
@@ -567,33 +560,39 @@ def fill_data(split_df, split_name, qtemp, anstemp, extemp,
                 resp = resp.strip()
                 gen_token = gen_tokens[targ_col]
                 target_lang = langs[targ_col]
-                _query = fill_vars(_qtemp, rel, event, gen_token, resp, 
-                        input_lang, target_lang) 
-                query = (index, _query)
-                response = fill_vars(_anstemp, rel, event, gen_token, resp, 
-                        input_lang, target_lang)
-                lang = input_lang + "2" + target_lang
-                if not lang in cat_counter:
-                    cat_counter[lang] = 1
-                else:
-                    cat_counter[lang] += 1
-                if cat_counter[lang] < 3:
-                    dlog.info(f"%%%%%%%%%%%%%%%%%% {lang} %%%%%%%%%%%%%%%%%%%")
-                    dlog.info(inp + "====>" + targ_col)
-                    dlog.info(input_lang + ":"+ _query)
-                    dlog.info(target_lang + ":" + response)
-                if cat_counter[lang] > num_samples:
-                    return data_split, flat_data, kk
-                if not lang in data_split[rel]:
-                    data_split[rel][lang] = []
-                if query not in data_split[rel][lang]:
-                    data_split[rel][lang].append({query:[response]})
-                else:
-                    data_split[rel][lang][query].append(response)
-                flat_data.append((_query, response))
-                kk += 1
-                if is_record and kk > num_samples:
-                    return data_split, flat_data, kk
+
+                for mt in method.split("-"):
+                    qtemp, anstemp, extemp = create_templates(mt, 
+                            gen_pos="end", prompt_pos=prompt_pos)
+                    _qtemp = fill_consts(qtemp, extemp,d, context_rows)
+                    _anstemp = fill_consts(anstemp, extemp,d, context_rows)
+                    _query = fill_vars(_qtemp, rel, event, gen_token, resp, 
+                            input_lang, target_lang) 
+                    query = (index, _query)
+                    response = fill_vars(_anstemp, rel, event, gen_token, resp, 
+                            input_lang, target_lang)
+                    lang = input_lang + "2" + target_lang
+                    if not lang in cat_counter:
+                        cat_counter[lang] = 1
+                    else:
+                        cat_counter[lang] += 1
+                    if cat_counter[lang] < 3:
+                        dlog.info(f"%%%%%%%%%%%%%%%%%% {lang} {mt} %%%%%%%%%%%%%%%%%%%")
+                        dlog.info(inp + "====>" + targ_col)
+                        dlog.info(input_lang + ":"+ _query)
+                        dlog.info(target_lang + ":" + response)
+                    if cat_counter[lang] > num_samples:
+                        return data_split, flat_data, kk
+                    if not lang in data_split[rel]:
+                        data_split[rel][lang] = []
+                    if query not in data_split[rel][lang]:
+                        data_split[rel][lang].append({query:[response]})
+                    else:
+                        data_split[rel][lang][query].append(response)
+                    flat_data.append((_query, response))
+                    kk += 1
+                    if is_record and kk > num_samples:
+                        return data_split, flat_data, kk
             #didn't convert ___ to <blank>
             #didn't normalize to lowercase
     return data_split, flat_data, kk
