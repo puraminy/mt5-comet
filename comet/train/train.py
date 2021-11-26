@@ -625,31 +625,34 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     Path(os.path.join(save_path, "best_model")).mkdir(exist_ok=True, parents=True)
     #%% load model
 
-    mlog.info("Loading model ...")
-    if model_id == "test":
-        pass
-    elif "gpt" in model_id:
-        model = GPT2LMHeadModel.from_pretrained(underlying_model_name)
-        tokenizer = AutoTokenizer.from_pretrained(underlying_model_name)
-    elif "mt5" in model_id:
-        tokenizer = MT5TokenizerFast.from_pretrained(underlying_model_name)
-        model = MT5ForConditionalGeneration.from_pretrained(underlying_model_name)
-    elif is_flax:
-        tokenizer = AutoTokenizer.from_pretrained(underlying_model_name)
-        model = T5ForConditionalGeneration.from_pretrained(underlying_model_name, from_flax=True) 
-        mlog.info("converting and saving model in %s", save_path)
-        tokenizer.save_pretrained(save_path)
-        model.save_pretrained(save_path)
-        return
-    else:
-        tokenizer = AutoTokenizer.from_pretrained(underlying_model_name)
-        model = T5ForConditionalGeneration.from_pretrained(underlying_model_name) 
+    def load_model(model_id, underlying_model_name):
+        mlog.info("Loading model ...")
+        if model_id == "test":
+            return None, None
+        elif "gpt" in model_id:
+            model = GPT2LMHeadModel.from_pretrained(underlying_model_name)
+            tokenizer = AutoTokenizer.from_pretrained(underlying_model_name)
+        elif "mt5" in model_id:
+            tokenizer = MT5TokenizerFast.from_pretrained(underlying_model_name)
+            model = MT5ForConditionalGeneration.from_pretrained(underlying_model_name)
+        elif is_flax:
+            tokenizer = AutoTokenizer.from_pretrained(underlying_model_name)
+            model = T5ForConditionalGeneration.from_pretrained(underlying_model_name, from_flax=True) 
+            mlog.info("converting and saving model in %s", save_path)
+            tokenizer.save_pretrained(save_path)
+            model.save_pretrained(save_path)
+        else:
+            tokenizer = AutoTokenizer.from_pretrained(underlying_model_name)
+            model = T5ForConditionalGeneration.from_pretrained(underlying_model_name) 
+
+        return model, tokenizer
 
     #%% load atomic data
     atomic_dataset = {}
     atomic_dataset["train"] = pd.read_table(train_path)
     atomic_dataset["validation"] = pd.read_table(val_path)
     if trans:
+        model, tokenizer = load_model(model_id, underlying_model_name)
         for split_name, df in atomic_dataset.items():
             mlog.info("Translating ...%s ", split_name)
             path = train_path if split_name == "train" else val_path
@@ -705,6 +708,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
         logger.info("Val Records:"  + str(val_records))
     if model_id == "test":
         return
+    model, tokenizer = load_model(model_id, underlying_model_name)
     accumulation_tiny_steps = 2 
     if "gpt" in model_id:
         accumulation_tiny_steps = 1
