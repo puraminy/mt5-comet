@@ -207,6 +207,7 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
                     mean_bert[scope] = "{:.4f}".format(sum_bert[scope] / counter[scope])
                     #tqdm.write(f"Mean score:{mean_bert}")
                     vlog.info("")
+                    vlog.info(f"============={lang}==={rel}==========================")
                     vlog.info(str(counter["all"])+ "        :"+query)
                     vlog.info("----------------------------------------------------")
                     vlog.info("Prediction  :"+ top_hyp)

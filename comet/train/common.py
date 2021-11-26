@@ -316,6 +316,9 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
        elif method == "rel-mask":
            qtemp = "{event} {ph} {resp}"
            anstemp = "{ph} {rel_natural}"
+       elif method == "rel-mask-wrap":
+           qtemp = "{enc_token} {event} {ph} {resp}"
+           anstemp = "{ph} {rel_natural}"
        elif method == "rel-unsup":
            qtemp = "{event} {rel_natural} {ph} "
            anstemp = "{ph} {resp}"
@@ -511,9 +514,9 @@ def fill_data(split_df, split_name, method, prompt_pos, wrap,
         dlog.info("natural is ON")
     data_split = {}
     if num_samples == 0: num_samples = len(split_df)
-    if wrap:
-        split_df = split_df[split_df["prefix"] == wrap]
-        dlog.info("len after wrap: %s", len(split_df))
+    #if wrap:
+    #    split_df = split_df[split_df["prefix"] == wrap]
+    #    dlog.info("len after wrap: %s", len(split_df))
     split_df = split_df.groupby("prefix").sample(n=num_samples)
     dlog.info("len after sample: %s", len(split_df))
     split_df = split_df.sort_values(by="input_text")
