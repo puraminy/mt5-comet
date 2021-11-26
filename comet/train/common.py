@@ -351,8 +351,8 @@ def filter_inputs(include, exclude, lang):
 def create_templates(method, gen_pos="end", prompt_pos="end"):
        extemp = ""
        if method == "pred-emb":
-           qtemp = "For the sequence {enc_token_rest}"
-           anstemp = "{ph} It is {enc_token_mask}"
+           qtemp = "{enc_token_rest}"
+           anstemp = "{ph} {enc_token_mask}"
        elif method == "rel-enc":
            qtemp = "{event} {enc_token} {ph}"
            anstemp = "{ph} {resp} {end}"
