@@ -237,7 +237,9 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
                     rouge_score = rouge_scorer.get_scores(top_hyp, ".".join(tails), 
                                                         avg=True, ignore_empty=True)
                     rouge_score = rouge_score["rouge-l"]["f"]
+                    match_score = 0
                     if rouge_score > 0.9:
+                        match_score = 1
                         sum_match[scope] += 1
                     mean_match[scope] = "{:.4f}".format(sum_match[scope] / counter[scope])
 
@@ -246,7 +248,7 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
                     mean_rouge[scope] = "{:.4f}".format(sum_rouge[scope] / counter[scope])
                     vlog.info("Bert Score:{:.4f}--{}".format(cur_score, mean_bert[scope]))
                     vlog.info("Rouge Score:{:.4f}--{}".format(rouge_score, mean_rouge[scope]))
-                    vlog.info("Match Score:{}".format(mean_match[scope]))
+                    vlog.info("Match Score:{}--{}".format(match_score, mean_match[scope]))
                     vlog.info("BLEU Score:{:.4f}--{}".format(bleu_score, mean_bleu[scope]))
                     vlog.info("======================================================")
                     pbar.set_description(f"{scope} :Bert:{mean_bert[scope]} Rouge {mean_rouge[scope]} Bleu {mean_bleu[scope]} Match {mean_match[scope]}")
