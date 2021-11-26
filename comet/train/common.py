@@ -254,7 +254,7 @@ def fill_consts(template, extemp, row, rows=[], mask=-1):
         encoder_prompts[rel] = []
     if not rel in decoder_prompts:
         decoder_prompts[rel] = []
-    if mask > 0 and "{enc_token_mask}" in text:
+    if mask >= 0 and "{enc_token_mask}" in text:
         prompt = f"<enc_mask_{mask}>" 
         text = text.replace("{enc_token_mask}",prompt, 1)
     counter = 0
