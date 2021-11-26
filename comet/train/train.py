@@ -466,7 +466,7 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
 @click.option(
     "--samples_per_head",
     "-sph",
-    default=2,
+    default=0,
     type=int,
     help=""
 )

@@ -491,7 +491,7 @@ def fill_data(split_df, split_name, method, prompt_pos,
             targ_include="",
             targ_exclude="",
             pred_tresh=0,
-            nli_group="all", is_record=False, start=0, sampling=0, samples_per_head=2): 
+            nli_group="all", is_record=False, start=0, sampling=0, samples_per_head=0): 
     dlog.info("building query responses for {}".format(split_name))
     dlog.info(f"len:{len(split_df)}")
     natural = inp_include == "natural"
@@ -517,7 +517,7 @@ def fill_data(split_df, split_name, method, prompt_pos,
         split_df = split_df[split_df["nli_group"] == nli_group]
         dlog.info("*** Filtered based on nli_group "+ nli_group)
 
-    cats_num = split_df["prefix"].unique()
+    cats_num = len(split_df["prefix"].unique())
     dlog.info("Cats Num: %s", cats_num)
     num_per_cat = num_samples // cats_num
     dlog.info("Numi per cat: %s", num_per_cat)
@@ -544,7 +544,7 @@ def fill_data(split_df, split_name, method, prompt_pos,
         if eng_inp != old_input:
             old_input = eng_inp
             si = 0
-        elif si > samples_per_head:
+        elif samples_per_head > 0 and si > samples_per_head:
             continue
         if ii < start:
             continue
