@@ -249,7 +249,7 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
                     vlog.info("Match Score:{}".format(mean_match[scope]))
                     vlog.info("BLEU Score:{:.4f}--{}".format(bleu_score, mean_bleu[scope]))
                     vlog.info("======================================================")
-                    pbar.set_description(f"{scope} :Bert:{mean_bert[scope]} Rouge {mean_rouge[scope]} Bleu {mean_bleu[scope]} Match {mean_batch[scope]}")
+                    pbar.set_description(f"{scope} :Bert:{mean_bert[scope]} Rouge {mean_rouge[scope]} Bleu {mean_bleu[scope]} Match {mean_match[scope]}")
                     pbar.update(1)
 
     # %%%%%%%%%%%%%%%%%%
