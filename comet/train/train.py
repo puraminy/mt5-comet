@@ -339,7 +339,7 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
 @click.option(
     "--train_path",
     "-tp",
-    default="atomic/train.tsv",
+    default="atomic/train10k.tsv",
     type=str,
     help=""
 )
