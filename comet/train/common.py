@@ -257,8 +257,9 @@ def fill_consts(template, extemp, row, rows=[], mask=-1):
         encoder_prompts[rel] = []
     if not rel in decoder_prompts:
         decoder_prompts[rel] = []
+    sent = "This is a good apple".split(" ")
     if mask >= 0 and "{enc_token_mask}" in text:
-        prompt = f"<enc_mask_{mask}>" 
+        prompt = sent[mask] #f"<enc_mask_{mask}>" 
         text = text.replace("{enc_token_mask}",prompt, 1)
     counter = 0
     pi = 0
@@ -271,7 +272,7 @@ def fill_consts(template, extemp, row, rows=[], mask=-1):
             if i == mask:
                token = "<extra_id_0>"
             else:
-                token = f"<enc_mask_{i}>" 
+                token = sent[i] #f"<enc_mask_{i}>" 
             prompt += " " + token
             if not token in encoder_prompts[rel]:
                 encoder_prompts[rel].append(token)
