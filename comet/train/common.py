@@ -6,6 +6,7 @@ from comet.transformers_ptuning import PTuningWrapper
 from comet.transformers_ptuning.ptuning_wrapper import LSTMEmbeddingPromptEncoder, EmbeddingPromptEncoder
 from tqdm import tqdm
 import logging, sys
+import random
 import re
 import os
 import torch
@@ -226,7 +227,7 @@ def wrap_model(model, tokenizer, rel, encoder_type="lstm", prompt_path=""):
 
 encoder_prompts = {} 
 decoder_prompts = {}
-def fill_consts(template, extemp, row, rows=[]):
+def fill_consts(template, extemp, row, rows=[], mask=-1):
     text = template
     #dlog.debug("fill const for: %s", text)
     rel = row["prefix"]
@@ -253,6 +254,30 @@ def fill_consts(template, extemp, row, rows=[]):
         encoder_prompts[rel] = []
     if not rel in decoder_prompts:
         decoder_prompts[rel] = []
+    if mask > 0 and "{enc_token_mask}" in text:
+        prompt = f"<enc_mask_{mask}>" 
+        text = text.replace("{enc_token_mask}",prompt, 1)
+    counter = 0
+    pi = 0
+    enc_prompt = ""
+    dec_prompt = ""
+    while "{enc_token_rest}" in text:
+        enc_plen = plen[pi] if pi < len(plen) else plen[-1] 
+        prompt = ""
+        for i in range(counter, counter + enc_plen):
+            if i == mask:
+               token = "<extra_id_0>"
+            else:
+                token = f"<enc_mask_{i}>" 
+            prompt += " " + token
+            if not token in encoder_prompts[rel]:
+                encoder_prompts[rel].append(token)
+        prompt = prompt.strip()
+        if not enc_prompt:
+            enc_prompt = prompt
+        text = text.replace("{enc_token_rest}",prompt, 1)
+        counter += enc_plen 
+        pi += 1
     counter = 0
     pi = 0
     enc_prompt = ""
@@ -325,7 +350,10 @@ def filter_inputs(include, exclude, lang):
 #tttttttttt
 def create_templates(method, gen_pos="end", prompt_pos="end"):
        extemp = ""
-       if method == "rel-enc":
+       if method == "pred-emb":
+           qtemp = "{enc_token_rest}"
+           anstemp = "{ph} {enc_token_mask}"
+       elif method == "rel-enc":
            qtemp = "{event} {enc_token} {ph}"
            anstemp = "{ph} {resp} {end}"
        elif method == "rel-dec":
@@ -616,8 +644,10 @@ def fill_data(split_df, split_name, method, prompt_pos, wrap,
                 for mt in method.split("+"):
                     qtemp, anstemp, extemp = create_templates(mt, 
                             gen_pos="end", prompt_pos=prompt_pos)
-                    _qtemp = fill_consts(qtemp, extemp,d, context_rows)
-                    _anstemp = fill_consts(anstemp, extemp,d, context_rows)
+                    plen = atomic_relation_prompt_lengths[rel][0]
+                    mask = random.randint(0, plen-1)
+                    _qtemp = fill_consts(qtemp, extemp,d, context_rows, mask=mask)
+                    _anstemp = fill_consts(anstemp, extemp,d, context_rows, mask=mask)
                     _query = fill_vars(_qtemp, rel, event, gen_token, resp, 
                             input_lang, target_lang) 
                     query = (index, _query)
