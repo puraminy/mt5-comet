@@ -237,7 +237,7 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
                     rouge_score = rouge_scorer.get_scores(top_hyp, ".".join(tails), 
                                                         avg=True, ignore_empty=True)
                     rouge_score = rouge_score["rouge-l"]["f"]
-                    if top_hyp.strip() in tails:
+                    if rouge_score > 0.9:
                         sum_match[scope] += 1
                     mean_match[scope] = "{:.4f}".format(sum_match[scope] / counter[scope])
 

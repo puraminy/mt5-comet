@@ -689,7 +689,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
          atomic_flattened[split_name],
          num_records[split_name]
         )= fill_data(split_df, split_name,
-                            method, prompt_pos,
+                            method, prompt_pos, wrap,
                             num_samples[split_name], 
                             ignore_blanks,
                             inp_include,

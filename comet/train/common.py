@@ -486,7 +486,7 @@ def get_input(msg):
             continue
 # fill a dataset or generate based on a model
 # mmmmmmmmmmmmmm
-def fill_data(split_df, split_name, method, prompt_pos, 
+def fill_data(split_df, split_name, method, prompt_pos, wrap, 
             num_samples=0, 
             ignore_blanks=False,
             inp_include="",
@@ -505,6 +505,8 @@ def fill_data(split_df, split_name, method, prompt_pos,
         dlog.info("natural is ON")
     data_split = {}
     if num_samples == 0: num_samples = len(split_df)
+    if wrap:
+        split_df = split_df[split_df["prefix"] == wrap]
     split_df = split_df.groupby("prefix").sample(n=num_samples)
     dlog.info("len after sample: %s", len(split_df))
     split_df = split_df.sort_values(by="input_text")
