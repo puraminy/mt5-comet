@@ -29,6 +29,9 @@ def set_device(dev):
     device = dev
 
 def gen_resp(model, tokenizer, query, gen_token = "", gen_param = "greedy"):
+    skip_special = "True"
+    if "@" in gen_param:
+        gen_param, skip_special = gen_param.split("@")
     if gen_param == "greedy":
         generation_params = {
             "max_length":250,
@@ -55,7 +58,7 @@ def gen_resp(model, tokenizer, query, gen_token = "", gen_param = "greedy"):
         hyps = tokenizer.batch_decode(hyps,skip_special_tokens=True)
     else:
         hyps = model.generate(**inputs,**generation_params)
-        hyps = tokenizer.batch_decode(hyps,skip_special_tokens=False)
+        hyps = tokenizer.batch_decode(hyps,skip_special_tokens=skip_special == "True")
     return hyps
 
 def bert_score(bert_scorer, hyps, refs):
@@ -207,7 +210,7 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
                     mean_bert[scope] = "{:.4f}".format(sum_bert[scope] / counter[scope])
                     #tqdm.write(f"Mean score:{mean_bert}")
                     vlog.info("")
-                    vlog.info(f"============={lang}==={rel}==========================")
+                    vlog.info(f"=============   {lang}  ===  {rel}   =====================")
                     vlog.info(str(counter["all"])+ "        :"+query)
                     vlog.info("----------------------------------------------------")
                     vlog.info("Prediction  :"+ top_hyp)
