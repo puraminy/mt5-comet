@@ -257,26 +257,6 @@ def fill_consts(template, extemp, row, rows=[]):
     pi = 0
     enc_prompt = ""
     dec_prompt = ""
-    while "{enc_dec_token}" in text:
-        enc_plen = plen[pi] if pi < len(plen) else plen[-1] 
-        prompt = ""
-        for i in range(counter, counter + enc_plen):
-            token = f"<enc_dec_{rel}_{i}>" 
-            prompt += " " + token
-            if not token in encoder_prompts[rel]:
-                encoder_prompts[rel].append(token)
-            if not token in decoder_prompts[rel]:
-                decoder_prompts[rel].append(token)
-        prompt = prompt.strip()
-        if not enc_prompt:
-            enc_prompt = prompt
-        text = text.replace("{enc_dec_token}",prompt, 1)
-        counter += enc_plen 
-        pi += 1
-    counter = 0
-    pi = 0
-    enc_prompt = ""
-    dec_prompt = ""
     while "{enc_token}" in text:
         enc_plen = plen[pi] if pi < len(plen) else plen[-1] 
         prompt = ""
@@ -328,14 +308,17 @@ def filter_inputs(include, exclude, lang):
 def create_templates(method, gen_pos="end", prompt_pos="end"):
        extemp = ""
        if method == "rel-enc":
-           qtemp = "{event} {enc_dec_token} {ph}"
+           qtemp = "{event} {enc_token} {ph}"
            anstemp = "{ph} {resp} {end}"
        elif method == "rel-dec":
            qtemp = "{event} {ph} {resp}"
-           anstemp = "{ph} {enc_dec_token}"
+           anstemp = "{ph} {enc_token}"
        elif method == "rel-mask":
            qtemp = "{event} {ph} {resp}"
            anstemp = "{ph} {rel_natural}"
+       elif method == "rel-unsup":
+           qtemp = "{event} {rel_natural} {ph} "
+           anstemp = "{ph} {resp}"
        elif method == "sup-pred-enfa":
            qtemp = "{input_text} {enc_token} {gen_fa}"
            anstemp = "{input_text_fa} {dec_token} {target_text_fa}"
