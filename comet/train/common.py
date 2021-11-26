@@ -309,7 +309,7 @@ def create_templates(method, gen_pos="end", prompt_pos="start"):
        extemp = ""
        if method == "rel":
            qtemp = "{event} {ph} {resp}"
-           anstemp = "{ph}"
+           anstemp = "{ph} {rel_natural}"
        elif method == "sup-pred-enfa":
            qtemp = "{input_text} {enc_token} {gen_fa}"
            anstemp = "{input_text_fa} {dec_token} {target_text_fa}"
