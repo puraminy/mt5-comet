@@ -289,8 +289,8 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
 
     for logger in [mlog, vlog, clog]:
         logger.info("Len data frame: {}".format(len(new_df)))
-        logger.info("Rouge:{} BERT: {} BLEU: {}".format(mean_rouge_str, 
-                mean_bert_str, mean_bleu_str))
+        logger.info("Rouge:{} Match: {} BERT: {} BLEU: {}".format(mean_rouge_str, 
+            mean_match_str, mean_bert_str, mean_bleu_str))
         logger.info("DF mean Bert Score: {}".format(new_df["bert_score"].mean()))
         logger.info("DF mean Rouge Score: {}".format(new_df["rouge_score"].mean()))
         logger.info("nli_counter: {}".format(nli_counter))
