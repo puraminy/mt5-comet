@@ -307,7 +307,10 @@ def filter_inputs(include, exclude, lang):
 #tttttttttt
 def create_templates(method, gen_pos="end", prompt_pos="start"):
        extemp = ""
-       if method == "rel":
+       if method == "rel-wrapper":
+           qtemp = "{event} {ph} {enc_dec_token} {resp}"
+           anstemp = "{ph} {rel_natural}"
+       elif method == "rel":
            qtemp = "{event} {ph} {resp}"
            anstemp = "{ph} {rel_natural}"
        elif method == "sup-pred-enfa":
@@ -535,8 +538,9 @@ def fill_data(split_df, split_name, method, prompt_pos,
             rel_counter[rel] = 1
         else:
             rel_counter[rel] += 1
-        if rel_counter[rel] > num_per_cat:
-            dlog.info("Ignoring rest for %s", rel)
+        if rel_counter[rel] >= num_per_cat:
+            if rel_counter[rel] == num_per_cat:
+                dlog.info("Ignoring rest for %s at %s", rel, rel_counter[rel])
             continue 
         ii += 1
         eng_inp = d["input_text"]

@@ -123,6 +123,8 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
     pbar = tqdm(total = val_records)
     rows = []
     counter = {"all":0}
+    sum_match = {} 
+    mean_match = {}
     sum_bert = {} 
     mean_bert = {}
     sum_rouge = {}
@@ -145,6 +147,7 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
                         sum_bert[scope] = 0
                         sum_rouge[scope] = 0
                         sum_bleu[scope] = 0
+                        sum_match[scope] = 0
                         counter[scope] = 0
                     vlog.debug("&&&&&&&&&&&&&&&&& All Targets &&&&&&&&&&&&&&")
                     for _tail in tails:
@@ -234,14 +237,19 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
                     rouge_score = rouge_scorer.get_scores(top_hyp, ".".join(tails), 
                                                         avg=True, ignore_empty=True)
                     rouge_score = rouge_score["rouge-l"]["f"]
+                    if top_hyp.strip() in tails:
+                        sum_match[scope] += 1
+                    mean_match[scope] = "{:.4f}".format(sum_match[scope] / counter[scope])
+
                     data["rouge_score"] = rouge_score
                     sum_rouge[scope] += rouge_score
                     mean_rouge[scope] = "{:.4f}".format(sum_rouge[scope] / counter[scope])
                     vlog.info("Bert Score:{:.4f}--{}".format(cur_score, mean_bert[scope]))
                     vlog.info("Rouge Score:{:.4f}--{}".format(rouge_score, mean_rouge[scope]))
+                    vlog.info("Match Score:{}".format(mean_match[scope]))
                     vlog.info("BLEU Score:{:.4f}--{}".format(bleu_score, mean_bleu[scope]))
                     vlog.info("======================================================")
-                    pbar.set_description(f"{scope} :Bert:{mean_bert[scope]} Rouge {mean_rouge[scope]} Bleu {mean_bleu[scope]} ")
+                    pbar.set_description(f"{scope} :Bert:{mean_bert[scope]} Rouge {mean_rouge[scope]} Bleu {mean_bleu[scope]} Match {mean_batch[scope]}")
                     pbar.update(1)
 
     # %%%%%%%%%%%%%%%%%%
@@ -262,10 +270,12 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
     mean_bert_str = json.dumps(mean_bert, indent=2)
     mean_rouge_str = json.dumps(mean_rouge, indent=2)
     mean_bleu_str = json.dumps(mean_bleu, indent=2)
+    mean_match_str = json.dumps(mean_match, indent=2)
     res = {}
     res["rouge"] = mean_rouge
     res["bert"] = mean_bert
     res["bleu"] = mean_bleu
+    res["match"] = mean_match
     res["distinct"] ="{} {:.2f}".format(len(pred_counts), len(pred_counts)/len(new_df))
     res["hyps"] = hyp_counter
 
