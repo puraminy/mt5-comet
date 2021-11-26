@@ -257,6 +257,24 @@ def fill_consts(template, extemp, row, rows=[]):
     pi = 0
     enc_prompt = ""
     dec_prompt = ""
+    while "{enc_com_token}" in text:
+        enc_plen = plen[pi] if pi < len(plen) else plen[-1] 
+        prompt = ""
+        for i in range(counter, counter + enc_plen):
+            token = f"<enc_com_{i}>" 
+            prompt += " " + token
+            if not token in encoder_prompts[rel]:
+                encoder_prompts[rel].append(token)
+        prompt = prompt.strip()
+        if not enc_prompt:
+            enc_prompt = prompt
+        text = text.replace("{enc_com_token}",prompt, 1)
+        counter += enc_plen 
+        pi += 1
+    counter = 0
+    pi = 0
+    enc_prompt = ""
+    dec_prompt = ""
     while "{enc_token}" in text:
         enc_plen = plen[pi] if pi < len(plen) else plen[-1] 
         prompt = ""
@@ -317,7 +335,7 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            qtemp = "{event} {ph} {resp}"
            anstemp = "{ph} {rel_natural}"
        elif method == "rel-mask-wrap":
-           qtemp = "{enc_token} {event} {ph} {resp}"
+           qtemp = "{enc_com_token} {event} {ph} {resp}"
            anstemp = "{ph} {rel_natural}"
        elif method == "rel-unsup":
            qtemp = "{event} {rel_natural} {ph} "
