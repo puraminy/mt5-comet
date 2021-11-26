@@ -257,6 +257,26 @@ def fill_consts(template, extemp, row, rows=[]):
     pi = 0
     enc_prompt = ""
     dec_prompt = ""
+    while "{enc_dec_token}" in text:
+        enc_plen = plen[pi] if pi < len(plen) else plen[-1] 
+        prompt = ""
+        for i in range(counter, counter + enc_plen):
+            token = f"<enc_dec_{rel}_{i}>" 
+            prompt += " " + token
+            if not token in encoder_prompts[rel]:
+                encoder_prompts[rel].append(token)
+            if not token in decoder_prompts[rel]:
+                decoder_prompts[rel].append(token)
+        prompt = prompt.strip()
+        if not enc_prompt:
+            enc_prompt = prompt
+        text = text.replace("{enc_dec_token}",prompt, 1)
+        counter += enc_plen 
+        pi += 1
+    counter = 0
+    pi = 0
+    enc_prompt = ""
+    dec_prompt = ""
     while "{enc_token}" in text:
         enc_plen = plen[pi] if pi < len(plen) else plen[-1] 
         prompt = ""
@@ -305,12 +325,15 @@ def filter_inputs(include, exclude, lang):
    return include, exclude
 
 #tttttttttt
-def create_templates(method, gen_pos="end", prompt_pos="start"):
+def create_templates(method, gen_pos="end", prompt_pos="end"):
        extemp = ""
-       if method == "rel-wrapper":
-           qtemp = "{event} {ph} {enc_dec_token} {resp}"
-           anstemp = "{ph} {rel_natural}"
-       elif method == "rel":
+       if method == "rel-enc":
+           qtemp = "{event} {enc_dec_token} {ph}"
+           anstemp = "{ph} {resp} {end}"
+       elif method == "rel-dec":
+           qtemp = "{event} {ph} {resp}"
+           anstemp = "{ph} {enc_dec_token}"
+       elif method == "rel-mask":
            qtemp = "{event} {ph} {resp}"
            anstemp = "{ph} {rel_natural}"
        elif method == "sup-pred-enfa":
@@ -507,6 +530,7 @@ def fill_data(split_df, split_name, method, prompt_pos, wrap,
     if num_samples == 0: num_samples = len(split_df)
     if wrap:
         split_df = split_df[split_df["prefix"] == wrap]
+        dlog.info("len after wrap: %s", len(split_df))
     split_df = split_df.groupby("prefix").sample(n=num_samples)
     dlog.info("len after sample: %s", len(split_df))
     split_df = split_df.sort_values(by="input_text")
@@ -584,7 +608,7 @@ def fill_data(split_df, split_name, method, prompt_pos, wrap,
                 gen_token = gen_tokens[targ_col]
                 target_lang = langs[targ_col]
 
-                for mt in method.split("-"):
+                for mt in method.split("+"):
                     qtemp, anstemp, extemp = create_templates(mt, 
                             gen_pos="end", prompt_pos=prompt_pos)
                     _qtemp = fill_consts(qtemp, extemp,d, context_rows)
