@@ -502,6 +502,8 @@ def fill_data(split_df, split_name, method, prompt_pos,
         dlog.info("natural is ON")
     data_split = {}
     if num_samples == 0: num_samples = len(split_df)
+    split_df = split_df.groupby("prefix").sample(n=num_samples)
+    dlog.info("len after sample: %s", len(split_df))
     split_df = split_df.sort_values(by="input_text")
     for col in targets:
         if col in split_df:
@@ -515,7 +517,12 @@ def fill_data(split_df, split_name, method, prompt_pos,
         split_df = split_df[split_df["nli_group"] == nli_group]
         dlog.info("*** Filtered based on nli_group "+ nli_group)
 
-    cat_counter = {}
+    cats_num = split_df["prefix"].unique()
+    dlog.info("Cats Num: %s", cats_num)
+    num_per_cat = num_samples // cats_num
+    dlog.info("Numi per cat: %s", num_per_cat)
+    rel_counter = {}
+    lang_counter = {}
     ii = 0
     kk = 0
     dlog.info(f"len after filtering:{len(split_df)}")
@@ -524,6 +531,13 @@ def fill_data(split_df, split_name, method, prompt_pos,
     si = 0
     for index, d in split_df.iterrows():
         rel = d["prefix"]
+        if not rel in rel_counter:
+            rel_counter[rel] = 1
+        else:
+            rel_counter[rel] += 1
+        if rel_counter[rel] > num_per_cat:
+            dlog.info("Ignoring rest for %s", rel)
+            continue 
         ii += 1
         eng_inp = d["input_text"]
         si += 1
@@ -575,16 +589,16 @@ def fill_data(split_df, split_name, method, prompt_pos,
                     response = fill_vars(_anstemp, rel, event, gen_token, resp, 
                             input_lang, target_lang)
                     lang = input_lang + "2" + target_lang
-                    if not lang in cat_counter:
-                        cat_counter[lang] = 1
+                    if not lang in lang_counter:
+                        lang_counter[lang] = 1
                     else:
-                        cat_counter[lang] += 1
-                    if cat_counter[lang] < 3:
+                        lang_counter[lang] += 1
+                    if lang_counter[lang] < 3:
                         dlog.info(f"%%%%%%%%%%%%%%%%%% {lang} {mt} %%%%%%%%%%%%%%%%%%%")
                         dlog.info(inp + "====>" + targ_col)
                         dlog.info(input_lang + ":"+ _query)
                         dlog.info(target_lang + ":" + response)
-                    if cat_counter[lang] > num_samples:
+                    if lang_counter[lang] > num_samples:
                         return data_split, flat_data, kk
                     if not lang in data_split[rel]:
                         data_split[rel][lang] = []
