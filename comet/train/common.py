@@ -522,6 +522,7 @@ def fill_data(split_df, split_name, method, prompt_pos, wrap,
             split_df[col] = split_df[col].astype(str)
     if ignore_blanks: # and len(split_df) > num_rows:
         split_df = split_df[split_df["input_text"].str.contains('___')==False]
+        split_df = split_df[split_df["target_text"] != "none"]
     if pred_tresh > 0 and "bert_score" in split_df:
         split_df = split_df[split_df["bert_score"] > pred_tresh]
         dlog.info("*** Filtered based on pred1 score higher than "+ pred_tresh)
