@@ -217,13 +217,17 @@ def wrap_model(model, tokenizer, rel, encoder_type="lstm", prompt_path="", from_
     if encoder_type.startswith("emb"):
         mlog.info("in Emb %s", encoder_type)
         if enc_plen > 0:
+            mlog.info("Prompt Encoder defined : %s", enc_plen)
             prompt_encoder = EmbeddingPromptEncoder(enc_plen,embedding_dim,id_offset,rel_embs)
         if dec_plen > 0:
+            mlog.info("decoder prompt defined: %s", dec_offset)
             decoder_prompt_encoder = EmbeddingPromptEncoder(dec_plen,embedding_dim,dec_offset, rel_embs)
     else:
         if enc_plen > 0:
+            mlog.info("Prompt Encoder defined : %s", enc_plen)
             prompt_encoder = LSTMEmbeddingPromptEncoder(enc_plen,embedding_dim,id_offset)
         if dec_plen > 0:
+            mlog.info("decoder prompt defined: %s", dec_offset)
             decoder_prompt_encoder = LSTMEmbeddingPromptEncoder(dec_plen,embedding_dim,dec_offset)
     if "joint" in encoder_type:
         decoder_prompt_encoder = prompt_encoder
