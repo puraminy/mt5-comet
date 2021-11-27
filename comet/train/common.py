@@ -205,6 +205,7 @@ def wrap_model(model, tokenizer, rel, encoder_type="lstm", prompt_path="", from_
     dec_offset = id_offset + enc_plen
     prompt_encoder = None
     decoder_prompt_encoder = None
+    mlog.info("Encoder Type %s", encoder_type)
     mlog.info("wrap rel %s", rel)
     mlog.info("id_offset: %s", id_offset)
     mlog.info("enc_plan: %s", enc_plen)
@@ -213,6 +214,7 @@ def wrap_model(model, tokenizer, rel, encoder_type="lstm", prompt_path="", from_
     mlog.info("dec prompts: %s", decoder_prompts[rel])
     mlog.info("decoder offset: %s", dec_offset)
     if encoder_type == "emb":
+        mlog.info("in Emb %s", encoder_type)
         if enc_plen > 0:
             prompt_encoder = EmbeddingPromptEncoder(enc_plen,embedding_dim,id_offset,rel_embs)
         if dec_plen > 0:
@@ -278,7 +280,6 @@ def fill_consts(template, extemp, row, rows=[], mask=-1):
     pi = 0
     enc_prompt = ""
     dec_prompt = ""
-    dlog.info("Mask %s, len %s", mask, plen)
     while "{enc_token_rest}" in text:
         enc_plen = plen[pi] if pi < len(plen) else plen[-1] 
         prompt = ""
@@ -295,7 +296,7 @@ def fill_consts(template, extemp, row, rows=[], mask=-1):
         text = text.replace("{enc_token_rest}",prompt, 1)
         counter += enc_plen 
         pi += 1
-    dlog.info("encoder prompt %s ", encoder_prompts[rel])
+    #dlog.info("encoder prompt %s ", encoder_prompts[rel])
     counter = 0
     pi = 0
     enc_prompt = ""
