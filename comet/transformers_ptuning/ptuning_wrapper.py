@@ -20,10 +20,10 @@ def getFname(name):
     else:
         logFilename = f"/content/{name}.log"
     return logFilename
-wHandler = logging.FileHandler(getFname("wrapper"))
+wHandler = logging.FileHandler(getFname("wrapper"), mode='w')
 wHandler.setFormatter(FORMAT)
 wlog.addHandler(wHandler)
-eHandler = logging.FileHandler(getFname("embedding"))
+eHandler = logging.FileHandler(getFname("embedding"), mode='w')
 eHandler.setFormatter(FORMAT)
 emblog.addHandler(eHandler)
 emblog.info("Embedding log")
