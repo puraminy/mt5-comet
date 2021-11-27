@@ -267,6 +267,7 @@ def fill_consts(template, extemp, row, rows=[], mask=-1):
     enc_prompt = ""
     dec_prompt = ""
     plen = [len(sent)]
+    dlog.info("Mask %s, len %s", mask, plen)
     while "{enc_token_rest}" in text:
         enc_plen = plen[pi] if pi < len(plen) else plen[-1] 
         prompt = ""
@@ -648,7 +649,7 @@ def fill_data(split_df, split_name, method, prompt_pos, wrap,
                 for mt in method.split("+"):
                     qtemp, anstemp, extemp = create_templates(mt, 
                             gen_pos="end", prompt_pos=prompt_pos)
-                    plen = atomic_relation_prompt_lengths[rel][0]
+                    plen = 5 #atomic_relation_prompt_lengths[rel][0]
                     mask = random.randint(0, plen-1)
                     _qtemp = fill_consts(qtemp, extemp,d, context_rows, mask=mask)
                     _anstemp = fill_consts(anstemp, extemp,d, context_rows, mask=mask)
