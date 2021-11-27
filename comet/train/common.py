@@ -192,7 +192,7 @@ def wrap_model(model, tokenizer, rel, encoder_type="lstm", prompt_path="", from_
     enc_plen = len(encoder_prompts[rel])
     dec_plen = len(decoder_prompts[rel])
     assert rel in encoder_prompts and enc_plen > 0, "No encoder prompt defined!"
-    if from_word:
+    if from_words:
         natural_rel = relation_natural_mappings[rel]["en"]
         rel_ids = tokenizer(natural_rel)["input_ids"]
         rel_ids_tensor = torch.LongTensor(rel_ids)
