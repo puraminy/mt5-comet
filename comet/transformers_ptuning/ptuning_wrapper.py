@@ -181,38 +181,43 @@ class PTuningWrapper(torch.nn.Module):
             return self.underlying_model(inputs_embeds=inputs_embeds,**kwargs)
     
     def update_model_weight(self):
+        wlog.info(f"Updating model weights")
         if self.prompt_encoder:
+            wlog.info(f"the wrapper has prompt encoder")
             new_num_tokens = self.prompt_encoder.id_offset+self.prompt_encoder.length
             if (self.model_embeddings.num_embeddings < new_num_tokens):
-                wlog.debug(f"Resizing encoder {new_num_tokens}")
+                wlog.info(f"Resizing encoder {new_num_tokens}")
                 self.underlying_model.resize_token_embeddings(
                    new_num_tokens 
                 )
                 self.cur_embeddings = self.underlying_model.get_input_embeddings()
-                wlog.debug("before update")
+                wlog.info("before update")
                 # fill the current embeddings with weights of encoder
                 self.prompt_encoder.dump_embedding(self.cur_embeddings.weight)
             else:
                 self.cur_embeddings = self.underlying_model.get_input_embeddings()
                 # fill the current embeddings with weights of encoder
                 self.prompt_encoder.dump_embedding(self.cur_embeddings.weight)
-                wlog.debug("dump_embeddings")
+                wlog.info("dump_embeddings")
                 #self.prompt_encoder.dump_embedding(self.model_embeddings.weight)
-
-        if self.decoder_prompt_encoder:
+        if self.decoder_prompt_encoder == self.prompt_encoder:
+            wlog.info(f"Encoder and Decoder are the same")
+            pass
+        elif self.decoder_prompt_encoder:
+            wlog.info(f"the wrapper has prompt decoder")
             if (self.model_decoder_embeddings.num_embeddings < 
                 self.decoder_prompt_encoder.id_offset + 
                 self.decoder_prompt_encoder.length):
-                wlog.debug("Resizing decoder")
+                wlog.info("Resizing decoder")
                 self.underlying_model.resize_token_embeddings(
                     self.decoder_prompt_encoder.id_offset+
                     self.decoder_prompt_encoder.length
                 )
                 self.cur_decoder_embedding = self.underlying_model.decoder.embed_tokens
-                wlog.debug("before updating decoder")
+                wlog.info("before updating decoder")
                 self.decoder_prompt_encoder.dump_embedding(
                     self.cur_decoder_embedding.weight)
-                wlog.debug("after updating decoder")
+                wlog.info("after updating decoder")
             else:
                 self.decoder_prompt_encoder.dump_embedding(
                     self.model_decoder_embeddings.weight)
@@ -422,6 +427,7 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
         return F.embedding(prompt_token_ids,running_weight)
     def dump_embedding(self, weight):
         # get embedding weights as the output of forward pass
+        wlog.info("Dump embeddings")
         with torch.no_grad():
             embeddings = self.forward(self.input_ids+self.id_offset)
         weight[self.id_offset:self.id_offset+self.length,:]=embeddings.detach()
