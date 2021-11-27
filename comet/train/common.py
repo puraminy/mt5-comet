@@ -30,8 +30,8 @@ Path(resPath).mkdir(exist_ok=True, parents=True)
 Path(logPath).mkdir(exist_ok=True, parents=True)
 
 logFilename = os.path.join(logPath, "all.log") #app_path + '/log_file.log'
-# log only important messages
-logging.basicConfig(filename=logFilename)
+FORMAT = "[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
+logging.basicConfig(filename=logFilename, format=FORMAT)
 consoleHandler = logging.StreamHandler()
 mlog = logging.getLogger("comet.main")
 mlog.setLevel(logging.INFO)

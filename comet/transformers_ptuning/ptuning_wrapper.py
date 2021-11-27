@@ -13,6 +13,8 @@ from os.path import expanduser
 home = expanduser("~")
 wlog = logging.getLogger("comet.wrapper")
 emblog = logging.getLogger("comet.embedding")
+FORMAT = "[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
+logging.basicConfig(format=FORMAT)
 def getFname(name):
     if "ahmad" in home or "pouramini" in home:
         logFilename = os.path.join(home, f"logs/{name}.log")
@@ -112,9 +114,9 @@ class PTuningWrapper(torch.nn.Module):
                 input_ids_[prompt_masks]=self.replacing_token_id
             # find the model embeddings of input ids except for prompt tokens  
             inputs_embeds = self.model_embeddings(input_ids_)
-            wlog.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+            wlog.info(">>>>>>>>>>>>>Input Embeds>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
             wlog.info(inputs_embeds)
-            wlog.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+            wlog.info(">>>>>>>>>>>>>>>End of imput embeds >>>>>>>>>>>>>>>>>>")
             if self.prompt_encoder:
                 #find input ids for prompt tokens
                 prompt_input_ids = input_ids[prompt_masks]
