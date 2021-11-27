@@ -274,7 +274,7 @@ def fill_consts(template, extemp, row, rows=[], mask=-1):
         decoder_prompts[rel] = []
     #sent = "This is a good apple".split(" ")
     if mask >= 0 and "{enc_token_mask}" in text:
-        prompt = f"[{mask}]" 
+        prompt = f"<enc_mask_{mask}>" 
         text = text.replace("{enc_token_mask}",prompt)
     counter = 0
     pi = 0
