@@ -185,12 +185,22 @@ def extend_tokenizer(tokenizer, rel=""):
         ]
         tokenizer.add_special_tokens({"additional_special_tokens":added_tokens})
 
-def wrap_model(model, tokenizer, rel, encoder_type="lstm", prompt_path=""):
+def wrap_model(model, tokenizer, rel, encoder_type="lstm", prompt_path="", from_words=False):
     id_offset = len(tokenizer)
     embedding_dim = model.config.hidden_size
+    rel_embs = None
+    assert rel in encoder_prompts and enc_plen > 0, "No encoder prompt defined!"
     enc_plen = len(encoder_prompts[rel])
     dec_plen = len(decoder_prompts[rel])
-    assert rel in encoder_prompts and enc_plen > 0, "No encoder prompt defined!"
+    if from_word:
+        natural_rel = relation_natural_mappings[rel]["en"]
+        rel_ids = tokenizer(natural_rel)["input_ids"]
+        rel_ids_tensor = torch.LongTensor(rel_ids)
+        embs = model.get_input_embeddings()
+        rel_embs = embs(rel_ids_tensor)
+        enc_plen = rel_embs.num_embeddings
+        mlog.info("rel ids %s", rel_ids)
+
     dec_offset = id_offset + enc_plen
     prompt_encoder = None
     decoder_prompt_encoder = None
@@ -203,9 +213,9 @@ def wrap_model(model, tokenizer, rel, encoder_type="lstm", prompt_path=""):
     mlog.info("decoder offset: %s", dec_offset)
     if encoder_type == "emb":
         if enc_plen > 0:
-            prompt_encoder = EmbeddingPromptEncoder(enc_plen,embedding_dim,id_offset)
+            prompt_encoder = EmbeddingPromptEncoder(enc_plen,embedding_dim,id_offset,rel_embs)
         if dec_plen > 0:
-            decoder_prompt_encoder = EmbeddingPromptEncoder(dec_plen,embedding_dim,dec_offset)
+            decoder_prompt_encoder = EmbeddingPromptEncoder(dec_plen,embedding_dim,dec_offset, rel_embs)
     else:
         if enc_plen > 0:
             prompt_encoder = LSTMEmbeddingPromptEncoder(enc_plen,embedding_dim,id_offset)

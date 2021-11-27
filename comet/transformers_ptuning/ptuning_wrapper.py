@@ -358,9 +358,14 @@ class PromptEncoder(torch.nn.Module):
 
 
 class EmbeddingPromptEncoder(PromptEncoder):
-    def __init__(self,length,embedding_dim,id_offset) -> None:
+    def __init__(self,length,embedding_dim,id_offset,init_embs=None) -> None:
         super().__init__(length,embedding_dim,id_offset)
-        self.embedding = torch.nn.Embedding(length,embedding_dim)
+        if init_embs:
+            self.embedding = torch.nn.Embedding.from_pretrained(inps_embs)
+            length = self.embedding.num_embeddings
+        else:
+            self.embedding = torch.nn.Embedding(length,embedding_dim)
+
         self.input_ids = torch.nn.parameter.Parameter(torch.arange(length),
              requires_grad=False)
         self.mlp = torch.nn.Sequential(
@@ -381,7 +386,7 @@ class EmbeddingPromptEncoder(PromptEncoder):
             weight.detach()
 
 class LSTMEmbeddingPromptEncoder(PromptEncoder):
-    def __init__(self,length,embedding_dim,id_offset) -> None:
+    def __init__(self,length,embedding_dim,id_offset, init_embs) -> None:
         super().__init__(length,embedding_dim,id_offset)
         self.embedding = torch.nn.Embedding(length,embedding_dim)
         # weights to be updated
@@ -422,8 +427,8 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
         running_weight = self.mlp(x[0]).squeeze(0)
         # find zero based ids 
         prompt_token_ids = prompt_token_ids - self.id_offset
-        wlog.critical("self id offset:%s", self.id_offset)
-        wlog.critical("prompt token ids:%s", prompt_token_ids)
+        emblog.info("self id offset:%s", self.id_offset)
+        emblog.info("prompt token ids:%s", prompt_token_ids)
         # return weights for prompt_token_ids 
         return F.embedding(prompt_token_ids,running_weight)
     def dump_embedding(self, weight):
