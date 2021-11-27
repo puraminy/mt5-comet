@@ -296,6 +296,24 @@ def fill_consts(template, extemp, row, rows=[], mask=-1):
         text = text.replace("{enc_token_rest}",prompt, 1)
         counter += enc_plen 
         pi += 1
+    counter = mask
+    pi = 0
+    enc_prompt = ""
+    dec_prompt = ""
+    while "{enc_token_cont}" in text:
+        enc_plen = plen[pi] if pi < len(plen) else plen[-1] 
+        prompt = ""
+        for i in range(counter, enc_plen):
+            token = f"<enc_mask_{i}>" 
+            if not token in encoder_prompts[rel]:
+                encoder_prompts[rel].append(token)
+            prompt += " " + token
+        prompt = prompt.strip()
+        if not enc_prompt:
+            enc_prompt = prompt
+        text = text.replace("{enc_token_cont}",prompt, 1)
+        counter += enc_plen 
+        pi += 1
     #dlog.info("encoder prompt %s ", encoder_prompts[rel])
     counter = 0
     pi = 0
@@ -372,6 +390,9 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
        if method == "pred-emb":
            qtemp = "{enc_token_rest}"
            anstemp = "{ph} {enc_token_mask}"
+       elif method == "pred-emb-rev":
+           qtemp = "{enc_token_mask} {ph}"
+           anstemp = "{ph} {enc_token_cont}"
        elif method == "rel-enc":
            qtemp = "{event} {enc_token} {ph}"
            anstemp = "{ph} {resp} {end}"

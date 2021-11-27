@@ -667,8 +667,6 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
             translate(model, tokenizer, df, trans, path, logger, start) 
         return
 
-    if not wrap:
-        prompt_length = "1"
     length = [int(s) for s in prompt_length.split("-")]
     set_prompt_lengths(wrap, length)
     atomic_query_responses = {}
