@@ -12,12 +12,18 @@ import os
 from os.path import expanduser
 home = expanduser("~")
 wlog = logging.getLogger("comet.wrapper")
-if "ahmad" in home or "pouramini" in home:
-    logFilename = os.path.join(home, "logs/wrapper.log")
-else:
-    logFilename = "/content/wrapper.log"
-wHandler = logging.FileHandler(logFilename)
+emblog = logging.getLogger("comet.embedding")
+def getFname(name):
+    if "ahmad" in home or "pouramini" in home:
+        logFilename = os.path.join(home, f"logs/{name}.log")
+    else:
+        logFilename = f"/content/{name}.log"
+    return logFilename
+wHandler = logging.FileHandler(getFname("wrapper"))
 wlog.addHandler(wHandler)
+eHandler = logging.FileHandler(getFname("embedding"))
+emblog.addHandler(eHandler)
+
 wlog.setLevel(logging.INFO)
 wlog.disabled = True
 
@@ -345,11 +351,12 @@ class EmbeddingPromptEncoder(PromptEncoder):
     def __init__(self,length,embedding_dim,id_offset) -> None:
         super().__init__(length,embedding_dim,id_offset)
         self.embedding = torch.nn.Embedding(length,embedding_dim)
-        # self.input_ids = torch.nn.parameter.Parameter(torch.arange(length),
-        #     requires_grad=False)
+        self.input_ids = torch.nn.parameter.Parameter(torch.arange(length),
+             requires_grad=False)
     
     def forward(self,prompt_token_ids,prompt_ids=None):
         prompt_token_ids = prompt_token_ids - self.id_offset
+        emblog.info(self.embedding)
         return self.embedding(prompt_token_ids)
 
     def dump_embedding(self, weight):
