@@ -14,8 +14,6 @@ home = expanduser("~")
 wlog = logging.getLogger("comet.wrapper")
 emblog = logging.getLogger("comet.embedding")
 FORMAT = logging.Formatter("[%(filename)s:%(lineno)s - %(funcName)10s() ] %(message)s")
-wlog.setFormatter(FORMAT)
-emblog.setFormatter(FORMAT)
 def getFname(name):
     if "ahmad" in home or "pouramini" in home:
         logFilename = os.path.join(home, f"logs/{name}.log")
@@ -23,8 +21,10 @@ def getFname(name):
         logFilename = f"/content/{name}.log"
     return logFilename
 wHandler = logging.FileHandler(getFname("wrapper"))
+wHandler.setFormatter(FORMAT)
 wlog.addHandler(wHandler)
 eHandler = logging.FileHandler(getFname("embedding"))
+eHandler.setFormatter(FORMAT)
 emblog.addHandler(eHandler)
 emblog.info("Embedding log")
 wlog.info("Wrapper log")

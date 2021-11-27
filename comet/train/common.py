@@ -44,10 +44,10 @@ tlog = logging.getLogger("comet.train")
 mlog.info(now)
 
 for logger, fname in zip([mlog,dlog,clog,vlog,tlog], ["all_main","all_data","all_cfg","all_eval","all_train"]):
-    logger.setFormatter(FORMAT)
     logger.setLevel(logging.INFO)
     logFilename = os.path.join(logPath, fname + ".log")
     handler = logging.FileHandler(logFilename, mode="w")
+    handler.setFormatter(FORMAT)
     logger.addHandler(handler)
 
 SPECIAL_TOKENS  = { "bos_token": "<|BOS|>",
