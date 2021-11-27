@@ -258,15 +258,14 @@ def fill_consts(template, extemp, row, rows=[], mask=-1):
         encoder_prompts[rel] = []
     if not rel in decoder_prompts:
         decoder_prompts[rel] = []
-    sent = "This is a good apple".split(" ")
+    #sent = "This is a good apple".split(" ")
     if mask >= 0 and "{enc_token_mask}" in text:
-        prompt = sent[mask] #f"<enc_mask_{mask}>" 
+        prompt = f"<enc_mask_{mask}>" 
         text = text.replace("{enc_token_mask}",prompt)
     counter = 0
     pi = 0
     enc_prompt = ""
     dec_prompt = ""
-    plen = [len(sent)]
     dlog.info("Mask %s, len %s", mask, plen)
     while "{enc_token_rest}" in text:
         enc_plen = plen[pi] if pi < len(plen) else plen[-1] 
@@ -275,7 +274,7 @@ def fill_consts(template, extemp, row, rows=[], mask=-1):
             if i == mask:
                token = "<extra_id_0>"
             else:
-                token = sent[i] #f"<enc_mask_{i}>" 
+                token = f"<enc_mask_{i}>" 
             prompt += " " + token
             if token != "<extra_id_0>" and not token in encoder_prompts[rel]:
                 encoder_prompts[rel].append(token)
@@ -649,7 +648,7 @@ def fill_data(split_df, split_name, method, prompt_pos, wrap,
                 for mt in method.split("+"):
                     qtemp, anstemp, extemp = create_templates(mt, 
                             gen_pos="end", prompt_pos=prompt_pos)
-                    plen = 5 #atomic_relation_prompt_lengths[rel][0]
+                    plen = atomic_relation_prompt_lengths[rel][0]
                     mask = random.randint(0, plen-1)
                     _qtemp = fill_consts(qtemp, extemp,d, context_rows, mask=mask)
                     _anstemp = fill_consts(anstemp, extemp,d, context_rows, mask=mask)
