@@ -25,6 +25,7 @@ eHandler = logging.FileHandler(getFname("embedding"))
 emblog.addHandler(eHandler)
 
 wlog.setLevel(logging.INFO)
+emblog.setLevel(logging.INFO)
 wlog.disabled = True
 
 class PTuningWrapper(torch.nn.Module):
