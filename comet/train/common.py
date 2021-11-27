@@ -157,6 +157,17 @@ def get_prompt_token_fn(id_offset,length):
 
 encoder_relation_mappings = {}
 decoder_relation_mappings = {}
+
+def tokenize_relations(tokenizer):
+    for rel,phrase in relation_natural_mappings.items():
+        natural_rel = phrase["en"]
+        dlog.info("rel ids ***: %s", natural_rel)
+        rel_tokens = tokenizer.tokenize(natural_rel)
+        dlog.info("rel ids ***: %s", rel_tokens)
+        rel_ids = tokenizer.convert_tokens_to_ids(rel_tokens)
+        dlog.info("rel ids ***: %s", rel_ids)
+        relation_natural_mappings[rel]["ids"] = rel_ids
+
 def set_prompt_lengths(rel, length):
     if rel != "":
         atomic_relation_prompt_lengths[rel] = length
@@ -281,6 +292,16 @@ def fill_consts(template, extemp, row, rows=[], mask=-1):
     if mask >= 0 and "{enc_token_mask}" in text:
         prompt = f"<enc_mask_{mask}>" 
         text = text.replace("{enc_token_mask}",prompt)
+    rel_ids = relation_natural_mappings[rel]["ids"]
+    while "{enc_token_fw}" in text:
+        prompt = ""
+        for i in rel_ids:
+            token = f"<enc_mask_{i}>" 
+            if not token in encoder_prompts[rel]:
+                encoder_prompts[rel].append(token)
+            prompt += " " + token
+        prompt = prompt.strip()
+        text = text.replace("{enc_token_fw}",prompt, 1)
     counter = 0
     pi = 0
     enc_prompt = ""
@@ -291,7 +312,7 @@ def fill_consts(template, extemp, row, rows=[], mask=-1):
         for i in range(counter, counter + enc_plen):
             token = f"<enc_mask_{i}>" 
             if not token in encoder_prompts[rel]:
-                decoder_prompts[rel].append(token)
+                encoder_prompts[rel].append(token)
             if i == mask:
                token = "<extra_id_0>"
             prompt += " " + token
@@ -311,7 +332,7 @@ def fill_consts(template, extemp, row, rows=[], mask=-1):
         for i in range(counter, enc_plen):
             token = f"<enc_mask_{i}>" 
             if not token in encoder_prompts[rel]:
-                decoder_prompts[rel].append(token)
+                encoder_prompts[rel].append(token)
             prompt += " " + token
         prompt = prompt.strip()
         if not enc_prompt:
@@ -492,6 +513,9 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
        elif method == "gpt":
            qtemp = "{event} {rel_natural}"
            anstemp = "{resp} {end}"
+       elif method == "unsup-fw":
+           qtemp = "{event} {enc_token_fw} {ph}"
+           anstemp = "{ph} {resp} {end}"
        elif method == "unsup":
            qtemp = "{enc_token_start} {gen_start} {event} {enc_token_end} {gen_end} {ph}"
            anstemp = "{ph} {resp} {end}"

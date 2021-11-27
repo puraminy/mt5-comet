@@ -669,6 +669,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
 
     length = [int(s) for s in prompt_length.split("-")]
     set_prompt_lengths(wrap, length)
+    model, tokenizer = load_model(model_id, underlying_model_name)
+    tokenize_relations(tokenizer)
     atomic_query_responses = {}
     atomic_flattened = {}
     num_records = {}
@@ -712,7 +714,6 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
         logger.info("Val Records:"  + str(val_records))
     if model_id == "test":
         return
-    model, tokenizer = load_model(model_id, underlying_model_name)
     accumulation_tiny_steps = 2 
     if "gpt" in model_id:
         accumulation_tiny_steps = 1
