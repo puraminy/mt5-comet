@@ -213,7 +213,7 @@ def wrap_model(model, tokenizer, rel, encoder_type="lstm", prompt_path="", from_
     mlog.info("dec_plan: %s", dec_plen)
     mlog.info("dec prompts: %s", decoder_prompts[rel])
     mlog.info("decoder offset: %s", dec_offset)
-    if encoder_type.startswidth("emb"):
+    if encoder_type.startswith("emb"):
         mlog.info("in Emb %s", encoder_type)
         if enc_plen > 0:
             prompt_encoder = EmbeddingPromptEncoder(enc_plen,embedding_dim,id_offset,rel_embs)
