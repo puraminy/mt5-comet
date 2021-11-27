@@ -357,9 +357,16 @@ class EmbeddingPromptEncoder(PromptEncoder):
         self.embedding = torch.nn.Embedding(length,embedding_dim)
         self.input_ids = torch.nn.parameter.Parameter(torch.arange(length),
              requires_grad=False)
+        self.mlp = torch.nn.Sequential(
+            torch.nn.Linear(embedding_dim, embedding_dim),
+            torch.nn.ReLU(),
+            torch.nn.Linear(embedding_dim, embedding_dim)
+        )
     
     def forward(self,prompt_token_ids,prompt_ids=None):
+        emblog.info(prompt_token_ids)
         prompt_token_ids = prompt_token_ids - self.id_offset
+        emblog.info(prompt_token_ids)
         emblog.info(self.embedding)
         return self.embedding(prompt_token_ids)
 
