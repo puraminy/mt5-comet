@@ -28,7 +28,7 @@ def set_device(dev):
     global device
     device = dev
 # ggggggggg
-def gen_resp(model, tokenizer, query, gen_token = "", gen_param = "greedy"):
+def gen_resp(model, tokenizer, query, gen_token = "", gen_param = "greedy", at_mask=None):
     skip_special = "True"
     if "@" in gen_param:
         gen_param, skip_special = gen_param.split("@")
@@ -90,7 +90,7 @@ def bert_score(bert_scorer, hyps, refs):
         return best_hyp_index, best_ref_index, top["score"] 
 # vvvvvvvvvvvvvvv
 # ################################### Evaluation #########################
-def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_records, gen_param="greedy"):  
+def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_records, gen_param="greedy", at_mask = None):  
 
     try:
         nltk_path = str(nltk.data.find("tokenizers/punkt"))
@@ -164,7 +164,7 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
                         if query == "c":
                             interactive = False
                     gen_token = gen_tokens[lang]
-                    hyps = gen_resp(model, tokenizer, query, gen_token, gen_param)
+                    hyps = gen_resp(model, tokenizer, query, gen_token, gen_param, at_mask)
                     input_text = re.sub(r'<.*?>','',query)
                     top_hyp = hyps[0]
                     for const in resp_const_parts:
