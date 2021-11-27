@@ -385,6 +385,12 @@ class EmbeddingPromptEncoder(PromptEncoder):
         weight[self.id_offset:self.id_offset+self.length,:]=self.embedding.\
             weight.detach()
 
+    def save(self, path):
+        torch.save(self.embedding.state_dict(), path + "/emb")
+    def load(self, path):
+        if Path(path + "/emb").exists():
+            self.embedding.load_state_dict(torch.load(path + "/emb"))
+
 class LSTMEmbeddingPromptEncoder(PromptEncoder):
     def __init__(self,length,embedding_dim,id_offset, init_embs=None) -> None:
         super().__init__(length,embedding_dim,id_offset)
