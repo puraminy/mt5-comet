@@ -30,8 +30,8 @@ Path(resPath).mkdir(exist_ok=True, parents=True)
 Path(logPath).mkdir(exist_ok=True, parents=True)
 
 logFilename = os.path.join(logPath, "all.log") #app_path + '/log_file.log'
-FORMAT = "[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
-logging.basicConfig(filename=logFilename, format=FORMAT)
+FORMAT = "[%(filename)s:%(lineno)s - %(funcName)10s() ] %(message)s"
+logging.basicConfig(filename=logFilename)
 consoleHandler = logging.StreamHandler()
 mlog = logging.getLogger("comet.main")
 mlog.setLevel(logging.INFO)
@@ -44,6 +44,7 @@ tlog = logging.getLogger("comet.train")
 mlog.info(now)
 
 for logger, fname in zip([mlog,dlog,clog,vlog,tlog], ["all_main","all_data","all_cfg","all_eval","all_train"]):
+    logger.setFormat(FORMAT)
     logger.setLevel(logging.INFO)
     logFilename = os.path.join(logPath, fname + ".log")
     handler = logging.FileHandler(logFilename, mode="w")
