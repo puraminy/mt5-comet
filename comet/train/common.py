@@ -253,6 +253,7 @@ def fill_consts(template, extemp, row, rows=[], mask=-1):
         text = text.replace("{" + key + "}", val)
 
     plen = atomic_relation_prompt_lengths[rel]
+    #dlog.info("fill consts, rel %s, plen %s", rel, plen)
     if not rel in encoder_prompts:
         encoder_prompts[rel] = []
     if not rel in decoder_prompts:
@@ -260,11 +261,12 @@ def fill_consts(template, extemp, row, rows=[], mask=-1):
     sent = "This is a good apple".split(" ")
     if mask >= 0 and "{enc_token_mask}" in text:
         prompt = sent[mask] #f"<enc_mask_{mask}>" 
-        text = text.replace("{enc_token_mask}",prompt, 1)
+        text = text.replace("{enc_token_mask}",prompt)
     counter = 0
     pi = 0
     enc_prompt = ""
     dec_prompt = ""
+    plen = [len(sent)]
     while "{enc_token_rest}" in text:
         enc_plen = plen[pi] if pi < len(plen) else plen[-1] 
         prompt = ""
@@ -274,7 +276,7 @@ def fill_consts(template, extemp, row, rows=[], mask=-1):
             else:
                 token = sent[i] #f"<enc_mask_{i}>" 
             prompt += " " + token
-            if not token in encoder_prompts[rel]:
+            if token != "<extra_id_0>" and not token in encoder_prompts[rel]:
                 encoder_prompts[rel].append(token)
         prompt = prompt.strip()
         if not enc_prompt:
@@ -602,8 +604,6 @@ def fill_data(split_df, split_name, method, prompt_pos, wrap,
         else:
             rel_counter[rel] += 1
         if rel_counter[rel] >= num_per_cat:
-            if rel_counter[rel] == num_per_cat:
-                dlog.info("Ignoring rest for %s at %s", rel, rel_counter[rel])
             continue 
         ii += 1
         eng_inp = d["input_text"]
