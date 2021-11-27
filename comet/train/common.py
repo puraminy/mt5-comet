@@ -287,7 +287,7 @@ def fill_consts(template, extemp, row, rows=[], mask=-1):
         for i in range(counter, counter + enc_plen):
             token = f"<enc_mask_{i}>" 
             if not token in encoder_prompts[rel]:
-                encoder_prompts[rel].append(token)
+                decoder_prompts[rel].append(token)
             if i == mask:
                token = "<extra_id_0>"
             prompt += " " + token
@@ -307,7 +307,7 @@ def fill_consts(template, extemp, row, rows=[], mask=-1):
         for i in range(counter, enc_plen):
             token = f"<enc_mask_{i}>" 
             if not token in encoder_prompts[rel]:
-                encoder_prompts[rel].append(token)
+                decoder_prompts[rel].append(token)
             prompt += " " + token
         prompt = prompt.strip()
         if not enc_prompt:
