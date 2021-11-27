@@ -198,6 +198,7 @@ def wrap_model(model, tokenizer, rel, encoder_type="lstm", prompt_path="", from_
         rel_ids_tensor = torch.LongTensor(rel_ids)
         embs = model.get_input_embeddings()
         rel_embs = embs(rel_ids_tensor)
+        rel_embs = torch.nn.Embedding.from_pretrained(rel_embs)
         enc_plen = rel_embs.num_embeddings
         mlog.info("rel ids %s", rel_ids)
 

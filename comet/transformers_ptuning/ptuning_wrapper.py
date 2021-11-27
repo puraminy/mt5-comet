@@ -361,7 +361,7 @@ class EmbeddingPromptEncoder(PromptEncoder):
     def __init__(self,length,embedding_dim,id_offset,init_embs=None) -> None:
         super().__init__(length,embedding_dim,id_offset)
         if init_embs:
-            self.embedding = torch.nn.Embedding.from_pretrained(inps_embs)
+            self.embedding = init_embs
             length = self.embedding.num_embeddings
         else:
             self.embedding = torch.nn.Embedding(length,embedding_dim)
@@ -386,7 +386,7 @@ class EmbeddingPromptEncoder(PromptEncoder):
             weight.detach()
 
 class LSTMEmbeddingPromptEncoder(PromptEncoder):
-    def __init__(self,length,embedding_dim,id_offset, init_embs) -> None:
+    def __init__(self,length,embedding_dim,id_offset, init_embs=None) -> None:
         super().__init__(length,embedding_dim,id_offset)
         self.embedding = torch.nn.Embedding(length,embedding_dim)
         # weights to be updated
