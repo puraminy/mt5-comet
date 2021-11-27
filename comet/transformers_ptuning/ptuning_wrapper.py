@@ -23,10 +23,11 @@ wHandler = logging.FileHandler(getFname("wrapper"))
 wlog.addHandler(wHandler)
 eHandler = logging.FileHandler(getFname("embedding"))
 emblog.addHandler(eHandler)
-
+emblog.info("Embedding log")
+wlog.info("Wrapper log")
 wlog.setLevel(logging.INFO)
 emblog.setLevel(logging.INFO)
-wlog.disabled = True
+#wlog.disabled = True
 
 class PTuningWrapper(torch.nn.Module):
     def __init__(self,model,prompt_encoder,decoder_prompt_encoder=None,
@@ -395,12 +396,13 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
 
 
     def forward(self,prompt_token_ids,prompt_ids=None):
-        wlog.debug(f"Here is prompt encoder forward: prompt_token_ids:{prompt_token_ids}, prompt ids: {prompt_ids}")
-        wlog.debug("input ids:{}".format(self.input_ids))
+        emblog.debug(f"Here is prompt encoder forward: prompt_token_ids:{prompt_token_ids}, prompt ids: {prompt_ids}")
+        emblog.debug("input ids:{}".format(self.input_ids))
         # create embedding vectors for input ids
         embeds = self.embedding(self.input_ids)
         # do forward calculations
         x = self.lstm(embeds.unsqueeze(0))
+        emblog.info(embeds)
 
         running_weight = self.mlp(x[0]).squeeze(0)
         # find zero based ids 
