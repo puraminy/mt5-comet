@@ -13,9 +13,9 @@ from os.path import expanduser
 home = expanduser("~")
 wlog = logging.getLogger("comet.wrapper")
 emblog = logging.getLogger("comet.embedding")
-FORMAT = "[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
-wlog.setFormat(FORMAT)
-emblog.setFormat(FORMAT)
+FORMAT = logging.Formatter("[%(filename)s:%(lineno)s - %(funcName)10s() ] %(message)s")
+wlog.setFormatter(FORMAT)
+emblog.setFormatter(FORMAT)
 def getFname(name):
     if "ahmad" in home or "pouramini" in home:
         logFilename = os.path.join(home, f"logs/{name}.log")
