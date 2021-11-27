@@ -283,6 +283,7 @@ def fill_consts(template, extemp, row, rows=[], mask=-1):
         text = text.replace("{enc_token_rest}",prompt, 1)
         counter += enc_plen 
         pi += 1
+    dlog.info("encoder prompt %s ", encoder_prompts[rel])
     counter = 0
     pi = 0
     enc_prompt = ""
