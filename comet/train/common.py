@@ -550,6 +550,9 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            qtemp = "{enc_token_start} {gen_start} {input_text_fa} {rel_natural_fa} {gen_fa} {target_text_fa} {enc_token_start} {event} {rel_natural} {enc_token_end} {gen_end} {ph}"
            anstemp = "{ph} {resp} {end}"
        elif method == "sup":
+           qtemp = "{rel_token} {event}"
+           anstemp = "{resp} {end}"
+       elif method == "wrap-sup-gen":
            qtemp = "{enc_token_start} {gen_start} {event} {enc_token_end} {gen_end}"
            anstemp = "{resp} {end}"
        elif method == "gpt-wrap":
@@ -658,7 +661,7 @@ def get_input(msg):
             continue
 # fill a dataset or generate based on a model
 # mmmmmmmmmmmmmm
-def fill_data(split_df, split_name, method, prompt_pos, wrap, 
+def fill_data(split_df, split_name, method, prompt_pos, rel_filter, 
             num_samples=0, 
             ignore_blanks=False,
             inp_include="",
@@ -692,9 +695,9 @@ def fill_data(split_df, split_name, method, prompt_pos, wrap,
         dlog.info("*** Filtered based on nli_group "+ nli_group)
 
     dlog.info(f"len after filtering:{len(split_df)}")
-    if wrap and not "rel" in method:
-        split_df = split_df[split_df["prefix"] == wrap]
-        dlog.info("len after wrap: %s", len(split_df))
+    if rel_filter:
+        split_df = split_df[split_df["prefix"] == rel_filter]
+        dlog.info("len after relation filter: %s", len(split_df))
     else:
         split_df = split_df.groupby("prefix").sample(n=num_samples)
         dlog.info(f"len after sampling:{len(split_df)}")
