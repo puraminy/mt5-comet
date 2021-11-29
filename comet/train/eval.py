@@ -269,7 +269,7 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
         for ans in a:
             mlog.info("{:>100}:".format(ans))
 
-    out = os.path.join(save_path,f"__{results_info}.tsv")
+    out = os.path.join(logPath,f"__{results_info}.tsv")
     with open(out, "w") as f: 
         for i, (a,q) in enumerate(zip(answers,questions)):
             f.write("{:<2} {:<40}:".format(i,q))
