@@ -422,7 +422,7 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            qtemp = qtemp.replace("{enc_token_start} ","")
            qtemp = qtemp.replace("{enc_token_end}","{enc_token}")
        else:
-           qtemp = qtemp.replace(" {enc_token_end} ","")
+           qtemp = qtemp.replace(" {enc_token_end}","")
            qtemp = qtemp.replace("{enc_token_start}","{enc_token}")
        while "  " in qtemp:
            qtemp = qtemp.replace("  "," ")

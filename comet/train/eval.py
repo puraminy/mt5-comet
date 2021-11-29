@@ -27,18 +27,21 @@ device = "cpu"
 def set_device(dev):
     global device
     device = dev
-
-def gen_resp(model, tokenizer, query, gen_token = "", gen_param = "greedy"):
+# ggggggggg
+def gen_resp(model, tokenizer, query, gen_token = "", gen_param = "greedy", at_mask=None):
+    skip_special = "True"
+    if "@" in gen_param:
+        gen_param, skip_special = gen_param.split("@")
     if gen_param == "greedy":
         generation_params = {
-            "max_length":250,
+            "max_length":150,
             "num_beams":5,
             "repetition_penalty":2.5,
             "num_return_sequences":3,
         }
     elif gen_param == "top_p":
         generation_params = {
-            "max_length":250,
+            "max_length":150,
             "do_sample":True, 
             "top_p":0.9, 
             "top_k":10,
@@ -55,7 +58,7 @@ def gen_resp(model, tokenizer, query, gen_token = "", gen_param = "greedy"):
         hyps = tokenizer.batch_decode(hyps,skip_special_tokens=True)
     else:
         hyps = model.generate(**inputs,**generation_params)
-        hyps = tokenizer.batch_decode(hyps,skip_special_tokens=False)
+        hyps = tokenizer.batch_decode(hyps,skip_special_tokens=skip_special == "True")
     return hyps
 
 def bert_score(bert_scorer, hyps, refs):
@@ -87,7 +90,7 @@ def bert_score(bert_scorer, hyps, refs):
         return best_hyp_index, best_ref_index, top["score"] 
 # vvvvvvvvvvvvvvv
 # ################################### Evaluation #########################
-def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_records, gen_param="greedy"):  
+def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_records, gen_param="greedy", at_mask = None):  
 
     try:
         nltk_path = str(nltk.data.find("tokenizers/punkt"))
@@ -133,6 +136,8 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
     mean_bleu = {}
     smoothie = SmoothingFunction().method4 # a function for smooth
     hyp_counter = [0]*5
+    answers = []
+    questions = []
     for rel in val_data.keys():
         vlog.info(f"%%%%%%%%%%%%%%%%%%%%%%%%% {rel} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
         for lang in val_data[rel].keys():
@@ -149,9 +154,6 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
                         sum_bleu[scope] = 0
                         sum_match[scope] = 0
                         counter[scope] = 0
-                    vlog.debug("&&&&&&&&&&&&&&&&& All Targets &&&&&&&&&&&&&&")
-                    for _tail in tails:
-                        vlog.debug(_tail)
                     vlog.debug("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
                     if interactive: #interactive mode
                         query = get_input("Enter an even or Enter) skip, c) continue, e) exit.")
@@ -161,7 +163,7 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
                         if query == "c":
                             interactive = False
                     gen_token = gen_tokens[lang]
-                    hyps = gen_resp(model, tokenizer, query, gen_token, gen_param)
+                    hyps = gen_resp(model, tokenizer, query, gen_token, gen_param, at_mask)
                     input_text = re.sub(r'<.*?>','',query)
                     top_hyp = hyps[0]
                     for const in resp_const_parts:
@@ -207,17 +209,24 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
                     mean_bert[scope] = "{:.4f}".format(sum_bert[scope] / counter[scope])
                     #tqdm.write(f"Mean score:{mean_bert}")
                     vlog.info("")
-                    vlog.info(str(counter["all"])+ "        :"+query)
-                    vlog.info("----------------------------------------------------")
-                    vlog.info("Prediction  :"+ top_hyp)
-                    vlog.info("----------------------------------------------------")
-                    vlog.info("Closest tail:"+ best_ref)
-                    vlog.info("All preds: ''''''''''''''''''''''''''''''''''''''''''")
+                    vlog.info(f"=============   {lang}  ===  {rel}   =====================")
+                    _q = query.replace("<", "\n<", 1)
+                    _q = _q.replace(">", ">\n")
+                    questions.append(query)
+                    answers.append(hyps)
+                    vlog.info(str(counter["all"])+ ":" + _q)
+                    vlog.info("'''''''''''''''''''''''''''''''''''''''''' Preds:")
                     for h in hyps: 
+                        if h == best_hyp:
+                            h += " (***) " 
                         vlog.info(h)
-                    vlog.info("All preds: ''''''''''''''''''''''''''''''''''''''''''")
-                    
+                    vlog.debug('"""""""""""""""""""""""""""""""""""""""" Targets:')
+                    for _tail in tails:
+                        if _tail == best_ref:
+                            _tail += "(*)" 
+                        vlog.debug(_tail)
 
+                    vlog.info("'''''''''''''''''''''''''''''''''''''''''''''''''''''")
                     mlog.debug(f"TOP hyp:{top_hyp}")
                     mlog.debug(f"Tails: {tails}")
                     #### BLUE score
@@ -255,6 +264,11 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
                     pbar.update(1)
 
     # %%%%%%%%%%%%%%%%%%
+    for i, a in enumerate(answers):
+        mlog.info("{:<2}:{}".format(i,a))
+    mlog.info("-----------------------------------------------------")
+    for i, q in enumerate(questions):
+        mlog.info("{:<2}:{}".format(i,q))
     new_df = pd.DataFrame(rows)
     new_df = new_df[new_df["bert_score"] > 0]
     new_df = new_df.sort_values(by="langs")
