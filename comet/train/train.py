@@ -517,7 +517,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
 
     args = locals() # input parameters
 
-    mlog.info("========================= Version 7 ========================")
+    mlog.info("========================= Version older ========================")
     if save_path == "":
         if "ahmad" or "pouramini" in home:
             save_path = os.path.join(home, "logs")
