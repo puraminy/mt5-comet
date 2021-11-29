@@ -500,6 +500,9 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
        elif method == "sup-gen":
            qtemp = "{event} {gen}"
            anstemp = "{resp} {end}"
+       elif method == "sup-wrap":
+           qtemp = "{enc_token_start} {event} {enc_token_end} {gen}"
+           anstemp = "{resp} {end}"
        elif method == "sup-no-gen":
            qtemp = "{event}"
            anstemp = "{resp} {end}"
