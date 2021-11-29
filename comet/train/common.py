@@ -7,6 +7,7 @@ from comet.transformers_ptuning.ptuning_wrapper import LSTMEmbeddingPromptEncode
 from tqdm import tqdm
 import logging, sys
 import random
+import tokens
 import re
 import os
 import torch
@@ -179,7 +180,9 @@ def set_prompt_lengths(rel, length):
 
 def extend_tokenizer(tokenizer, rel=""):
     cur_list = tokenizer.additional_special_tokens
-    new_tokens = list(atomic_relation_mappings.values())+ list(gen_tokens.values()) 
+    new_tokens = tokens.t5_tokens + \
+                 list(atomic_relation_mappings.values())+ \
+                 list(gen_tokens.values())
     if rel:
         new_tokens += encoder_prompts[rel] + decoder_prompts[rel]  
 
