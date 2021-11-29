@@ -282,7 +282,7 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
 
         print("{:<40}:".format(mean_rouge_str), file = f)
         print("{:<40}:".format(mean_bert_str), file = f)
-        print("{:<40}:".format(mean_blue_str), file = f)
+        print("{:<40}:".format(mean_bleu_str), file = f)
         print("{:<40}:".format(mean_match_str), file = f)
     mlog.info("-----------------------------------------------------")
     #for i, q in enumerate(questions):
