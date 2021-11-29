@@ -264,11 +264,12 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
                     pbar.update(1)
 
     # %%%%%%%%%%%%%%%%%%
-    for i, a in enumerate(answers):
-        mlog.info("{:<2}:{}".format(i,a))
-    mlog.info("-----------------------------------------------------")
-    for i, q in enumerate(questions):
+    for i, (a,q) in enumerate(zip(answers,questions)):
         mlog.info("{:<2}:{}".format(i,q))
+        mlog.info("{:<2}:{}".format(i,a))
+        mlog.info("-----------------------------------------------------")
+    #for i, q in enumerate(questions):
+    #    mlog.info("{:<2}:{}".format(i,q))
     new_df = pd.DataFrame(rows)
     new_df = new_df[new_df["bert_score"] > 0]
     new_df = new_df.sort_values(by="langs")

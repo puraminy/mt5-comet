@@ -399,7 +399,7 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            qtemp = "{event} {rel_natural}"
            anstemp = "{resp} {end}"
        elif method == "unsup":
-           qtemp = "{enc_token_start} {gen_start} {event} {enc_token_end} {gen_end} {ph}"
+           qtemp = "{enc_token_start} {gen_start} {event} {enc_token_end} {ph}"
            anstemp = "{ph} {resp} {end}"
        elif method == "unsup-dec":
            qtemp = "{enc_token_start} {gen_start} {event} {enc_token_end} {gen_end} {ph}"
