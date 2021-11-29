@@ -269,6 +269,10 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
         for ans in a:
             mlog.info("{:>100}:".format(ans))
 
+    mean_bert_str = json.dumps(mean_bert, indent=2)
+    mean_rouge_str = json.dumps(mean_rouge, indent=2)
+    mean_bleu_str = json.dumps(mean_bleu, indent=2)
+    mean_match_str = json.dumps(mean_match, indent=2)
     out = os.path.join(logPath,f"__{results_info}.txt")
     with open(out, "w") as f: 
         for i, (a,q) in enumerate(zip(answers,questions)):
@@ -276,6 +280,10 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
             for ans in a:
                 print("{:>100}:".format(ans), file = f)
 
+        print("{:<40}:".format(mean_rouge_str), file = f)
+        print("{:<40}:".format(mean_bert_str), file = f)
+        print("{:<40}:".format(mean_blue_str), file = f)
+        print("{:<40}:".format(mean_match_str), file = f)
     mlog.info("-----------------------------------------------------")
     #for i, q in enumerate(questions):
     #    mlog.info("{:<2}:{}".format(i,q))
@@ -293,10 +301,6 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
        new_df.to_csv(out3, sep="\t", index=False)
     pred_counts = new_df['pred_text1'].unique()
 
-    mean_bert_str = json.dumps(mean_bert, indent=2)
-    mean_rouge_str = json.dumps(mean_rouge, indent=2)
-    mean_bleu_str = json.dumps(mean_bleu, indent=2)
-    mean_match_str = json.dumps(mean_match, indent=2)
     res = {}
     res["rouge"] = mean_rouge
     res["bert"] = mean_bert
