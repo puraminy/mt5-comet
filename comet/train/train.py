@@ -490,8 +490,15 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
     type=str,
     help=""
 )
+@click.option(
+    "--from_words",
+    "-fw",
+    default="",
+    type=str,
+    help="initialize encoder embeddings from words"
+)
 def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, val_set, 
-         val_samples, load_path, train_path, val_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks, include, exclude, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, is_record, reset_results, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type):
+         val_samples, load_path, train_path, val_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks, include, exclude, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, is_record, reset_results, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words):
 
     #%% some hyper-parameters
 
@@ -594,14 +601,14 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
            mlog.info("Qtemp: %s", args['qtemp'])
            mlog.info("Anstemp: %s", args['anstemp'])
 
-    for logger in [mlog, vlog, clog, dlog, tlog]:
+    for logger in [mlog, clog, dlog, tlog]:
         logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
         logger.info(f"%%%%%%%%%%%%%%%%%% { model_id } ")
         logger.info(f"%%%%%%%%%%%%%%%%%% { output_name } ")
         logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
 
     args_str = json.dumps(args, indent=4)
-    for logger in [clog, vlog]:
+    for logger in [clog]:
         logger.info(args_str)
         logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
 
@@ -660,16 +667,26 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
             logger = mlog if print_log == "mlog" else None
             translate(model, tokenizer, df, trans, path, logger, start) 
         return
+    
+    model, tokenizer = load_model(model_id, underlying_model_name)
+    if from_words and from_words != "rel" and from_words != "none":
+        fw_tokens = tokenizer.tokenize(from_words)
+        mlog.info("from words ids ***: %s", fw_tokens)
+        length = [len(fw_tokens)]
+        mlog.info("length got from words ids ***: %s", length)
+        set_prompt_lengths(wrap, length)
+    else:
+        length = [int(s) for s in prompt_length.split("-")]
+        set_prompt_lengths(wrap, length)
 
-    if not wrap:
-        prompt_length = "1"
-    length = [int(s) for s in prompt_length.split("-")]
-    set_prompt_lengths(wrap, length)
+    tokenize_relations(tokenizer)
     atomic_query_responses = {}
     atomic_flattened = {}
     num_records = {}
     num_samples = {"train": train_samples, "validation":val_samples}
     mlog.info("Perparing data ...")
+    if model_id in ["t5-large","t5-small", "t5-base", "gpt2"]:
+        lang = "en"
     split_lang = {}
     if "-" in lang:
         split_lang["train"] = lang.split("-")[0]
@@ -678,6 +695,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
         split_lang["train"] = lang
         split_lang["validation"] = lang
     for split_name,split_df in atomic_dataset.items():
+        dlog.info("Columns of %s  %s", split_name, "\n".join(list(split_df.columns)))
+        dlog.info(split_df.head())
         slang = split_lang[split_name]
         if "2" in slang:
             inp_lang, targ_lang = slang.split("2")
@@ -685,6 +704,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
             inp_lang = targ_lang = slang
         inp_include, inp_exclude = filter_inputs(include, exclude, inp_lang)
         targ_include, targ_exclude = filter_inputs(include, exclude, targ_lang)
+        if split_name == "validation":
+            samples_per_head = 2
         (atomic_query_responses[split_name], 
          atomic_flattened[split_name],
          num_records[split_name]
@@ -708,7 +729,19 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
         logger.info("Val Records:"  + str(val_records))
     if model_id == "test":
         return
-    model, tokenizer = load_model(model_id, underlying_model_name)
+    mlog.info("len tokenizer %s", len(tokenizer))
+    mlog.info("list of spcial tokens: %s", tokenizer.additional_special_tokens)
+    extra = "_" + now
+    if experiment == "custom":
+        experiment = now
+        extra = ""
+    results_info = f"{experiment}_{model_id}_{lang}_{method}_{w_str}_{f_str}_tr:{training_round}-ep:{epochs_num}-({start}-{train_records})-{val_records}{extra}"
+    if do_eval or (not wrap and frozen):
+        mlog.info("Evaluating the model...")
+        val_data = atomic_query_responses[val_set]
+        model.to(device=device)
+        eval(model, tokenizer, val_data, inter, save_path, results_info, val_records, gen_param)  
+        return
     accumulation_tiny_steps = 2 
     if "gpt" in model_id:
         accumulation_tiny_steps = 1
@@ -721,29 +754,23 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     allowed_out_token_length = len(tokenizer)
     def clip_logits(logits):
         return logits[:,:,:allowed_out_token_length]
-    if "t5" in model_id:
+    if not "gpt" in model_id:
         clip_logits_hook = model.get_output_embeddings().register_forward_hook(
             lambda m,i,o:clip_logits(o)
         )
 
     # add new tokens
     # added_tokens = list(atomic_relation_mappings.values()) + [gen_token]
-    mlog.info("len tokenizer %s", len(tokenizer))
-    extend_tokenizer(tokenizer, "")
-    mlog.info("len tokenizer after extending %s", len(tokenizer))
-    model.resize_token_embeddings(len(tokenizer))
     #%% Prepare training data
     if start > 0 and training_round == 1:
         training_round += 1
-    extra = "_" + now
-    if experiment == "custom":
-        experiment = now
-        extra = ""
-    results_info = f"{experiment}_{model_id}_{lang}_{method}_{w_str}_{f_str}_tr:{training_round}-ep:{epochs_num}-({start}-{train_records})-{val_records}{extra}"
 
 
 
+# ggggggggg
+    attention_mask = None
     def collate_fn_for_flattened(batch):
+        global attention_mask
         queries,responses = zip(*batch)
         new_batch = tokenizer(list(queries),return_tensors='pt',padding='longest')
         with tokenizer.as_target_tokenizer():
@@ -751,14 +778,15 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
             labels = tokenized['input_ids']
             labels[labels==tokenizer.pad_token_id] = -100
             new_batch['labels']=labels
-            if "t5" in model_id:
-                new_batch['decoder_input_ids'] = model.prepare_decoder_input_ids_from_labels(
-                    tokenized['input_ids']
-                )
-                new_batch['decoder_attention_mask'] = tokenized['attention_mask']
+            attention_mask = new_batch['attention_mask']
+            tlog.info("att mask %s", attention_mask)
+            new_batch['decoder_input_ids'] = model.prepare_decoder_input_ids_from_labels(
+                tokenized['input_ids']
+            )
+            new_batch['decoder_attention_mask'] = tokenized['attention_mask']
         return new_batch
-# ggggggggg
     def collate_fn_for_generation(batch):
+         global attention_mask
          queries,responses = zip(*batch)
          inputs = list(queries)
          outputs =list(responses)
@@ -776,15 +804,14 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
          labels[labels==tokenizer.pad_token_id] = -100
          new_batch['input_ids']=tokenized['input_ids']
          new_batch['attention_mask']=tokenized['attention_mask']
+         attention_mask = new_batch['attention_mask']
          new_batch['labels']=labels
          return new_batch #,references
     #%% build dataloader
-    if  "t5" in model_id:
-        data_collator = collate_fn_for_flattened
-    elif "gpt" in model_id: 
+    if "gpt" in model_id: 
         data_collator = collate_fn_for_generation
     else:
-        raise ValueError("No data collator specified for model " + model_id)
+        data_collator = collate_fn_for_flattened
 
     train_dataloader = torch.utils.data.DataLoader(atomic_flattened['train'],
         batch_size=node_batch_size,shuffle=shuffle,collate_fn=data_collator)
@@ -792,7 +819,6 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
         batch_size=node_batch_size,shuffle=shuffle,collate_fn=data_collator)
     # %% prepare for training
     sw = SummaryWriter(save_path, flush_secs=1)
-    tokenizer.save_pretrained(save_path)
     no_decay = ['bias', 'LayerNorm.weight']
     if frozen:
         for p in model.parameters():
@@ -806,21 +832,19 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
             load_prompt_path = os.path.join(load_path, model_id, "prompt")
             mlog.info("prompt path:%s ", load_prompt_path)
         mlog.info("Wrapping the model ...")
-        wrapped_model = wrap_model(model, tokenizer, wrap, encoder_type, load_prompt_path) 
+        wrapped_model = wrap_model(model, tokenizer, wrap, encoder_type, load_prompt_path, from_words = from_words) 
+    if wrapped_model:
         wrapped_model.to(device=device)
+        mlog.info("len tokenizer after wrapping %s", len(tokenizer))
     else:
+        wrap = ""
+        extend_tokenizer(tokenizer, "")
+        mlog.info("len tokenizer after extending %s", len(tokenizer))
+        model.resize_token_embeddings(len(tokenizer))
         model.to(device=device)
 
 
-    if do_eval or (not wrap and frozen):
-        mlog.info("Evaluating the model...")
-        if wrapped_model:
-            with torch.no_grad():
-                mlog.info("Updating the model weights before evaluaton...")
-                wrapped_model.update_model_weight()
-        val_data = atomic_query_responses[val_set]
-        eval(model, tokenizer, val_data, inter, save_path, results_info, val_records, gen_param)  
-        return
+    tokenizer.save_pretrained(save_path)
     def get_optimizer(model, learning_rate, wrap, opt_type):
         if wrap:
             optimizer_grouped_parameters = [
@@ -873,10 +897,12 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     #%% tttttt
     mlog.info("batch size: %s", batch_size)
     mlog.info("node batch size: %s", node_batch_size)
-    if step <= iterations and (wrap or not frozen):
+    if epochs_num == 0 or not wrap and frozen:
+        mlog.info("Skip training...")
+    elif step <= iterations and (wrap or not frozen):
         mlog.info("Training...")
+    pbar = tqdm(total=iterations, position=0, leave=True) #,dynamic_ncols=True)
     for epoch in range(epochs_num):
-        pbar = tqdm(total=iterations, position=0, leave=True) #,dynamic_ncols=True)
         mlog.info(f"============== epoch {epoch}\n")
         tlog.info(f"============== epoch {epoch}\n")
         tot_loss = 0
@@ -1002,12 +1028,12 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
             prompt_path = os.path.join(save_path, "prompt", "encoder")
             Path(prompt_path).mkdir(exist_ok=True, parents=True)
             mlog.info("Saving encoder prompt at %s", prompt_path)
-            #wrapped_model.prompt_encoder.save(prompt_path)
+            wrapped_model.prompt_encoder.save(prompt_path)
         if wrapped_model.decoder_prompt_encoder:
             prompt_path = os.path.join(save_path, "prompt", "decoder")
             Path(prompt_path).mkdir(exist_ok=True, parents=True)
             mlog.info("Saving decoder prompt at %s", prompt_path)
-            #wrapped_model.decoder_prompt_encoder.save(prompt_path)
+            wrapped_model.decoder_prompt_encoder.save(prompt_path)
         with torch.no_grad():
             mlog.info("Updating the model weights before evaluaton...")
             wrapped_model.update_model_weight()
@@ -1015,7 +1041,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
                     best_eval_step, best_dev_loss,
                     save_path)
 
-    eval(model, tokenizer, atomic_query_responses[val_set], inter, save_path, results_info, val_records, gen_param)  
+    eval(model, tokenizer, atomic_query_responses[val_set], inter, save_path, results_info, val_records, gen_param, attention_mask)  
 
 #ettt
 
@@ -1099,7 +1125,10 @@ def translate(model, tokenizer, df, trans_col, path, logger=None, start=0):
     for idx, row in df.iterrows():
         if ii < start:
             continue
-        hyps = gen_resp(model, tokenizer, row[oldcol])
+        try:
+            hyps = gen_resp(model, tokenizer, row[oldcol])
+        except:
+            continue
         _t = hyps[0]
         if logger:
             logger.info("%s -> %s", row[oldcol], _t)
@@ -1113,7 +1142,6 @@ def translate(model, tokenizer, df, trans_col, path, logger=None, start=0):
             new_df[newcol] = trans
             new_df.to_csv(p, sep="\t", index=False)
         ii += 1
-
 
     df[newcol] = trans
     p = path.replace(".tsv", str(ii).replace("000", "k") + ".tsv")

@@ -6,6 +6,7 @@ from comet.transformers_ptuning import PTuningWrapper
 from comet.transformers_ptuning.ptuning_wrapper import LSTMEmbeddingPromptEncoder, EmbeddingPromptEncoder
 from tqdm import tqdm
 import logging, sys
+import random
 import re
 import os
 import torch
@@ -29,7 +30,7 @@ Path(resPath).mkdir(exist_ok=True, parents=True)
 Path(logPath).mkdir(exist_ok=True, parents=True)
 
 logFilename = os.path.join(logPath, "all.log") #app_path + '/log_file.log'
-# log only important messages
+FORMAT = logging.Formatter("[%(filename)s:%(lineno)s - %(funcName)10s() ] %(message)s")
 logging.basicConfig(filename=logFilename)
 consoleHandler = logging.StreamHandler()
 mlog = logging.getLogger("comet.main")
@@ -46,6 +47,7 @@ for logger, fname in zip([mlog,dlog,clog,vlog,tlog], ["all_main","all_data","all
     logger.setLevel(logging.INFO)
     logFilename = os.path.join(logPath, fname + ".log")
     handler = logging.FileHandler(logFilename, mode="w")
+    handler.setFormatter(FORMAT)
     logger.addHandler(handler)
 
 SPECIAL_TOKENS  = { "bos_token": "<|BOS|>",
@@ -138,16 +140,16 @@ inputs = ["input_text", "input_text_fa", "natural_input_text", "natural_input_te
 placeholder_token = "<extra_id_0>"
 end_token = SPECIAL_TOKENS['eos_token']  #"</s>"
 # %%
-atomic_relation_prompt_lengths = {
-    "xAttr":[5,3],
-    "xEffect":[5,3],
-    "oEffect":[5,3],
-    "xReact":[5,3],
-    "oReact":[5,3],
-    "xWant":[5,3],
-    "oWant":[5,3],
-    "xIntent":[5,3],
-    "xNeed":[5,3],
+relation_prompt_lengths = {
+    "xAttr":[5],
+    "xEffect":[5],
+    "oEffect":[5],
+    "xReact":[5],
+    "oReact":[5],
+    "xWant":[5],
+    "oWant":[5],
+    "xIntent":[5],
+    "xNeed":[5],
 }
 
 def get_prompt_token_fn(id_offset,length):
@@ -155,66 +157,131 @@ def get_prompt_token_fn(id_offset,length):
 
 encoder_relation_mappings = {}
 decoder_relation_mappings = {}
+
+def tokenize_relations(tokenizer, map_lengths=False):
+    for rel,phrase in relation_natural_mappings.items():
+        natural_rel = phrase["en"]
+        dlog.info("rel ids ***: %s", natural_rel)
+        rel_tokens = tokenizer.tokenize(natural_rel)
+        dlog.info("rel ids ***: %s", rel_tokens)
+        rel_ids = tokenizer.convert_tokens_to_ids(rel_tokens)
+        dlog.info("rel ids ***: %s", rel_ids)
+        relation_natural_mappings[rel]["ids"] = rel_ids
+        if map_lengths:
+            relation_prompt_lengths[rel] = [len(rel_tokens)]
+
 def set_prompt_lengths(rel, length):
     if rel != "":
-        atomic_relation_prompt_lengths[rel] = length
+        relation_prompt_lengths[rel] = length
     else:
-        for rel in atomic_relation_prompt_lengths.keys():
-            atomic_relation_prompt_lengths[rel] = length
-
-
+        for rel in relation_prompt_lengths.keys():
+            relation_prompt_lengths[rel] = length
 
 def extend_tokenizer(tokenizer, rel=""):
-    if not rel:
-        added_tokens = [ 
-            AddedToken(token,lstrip=True,
-                rstrip=False)
-            for token in 
-                list(atomic_relation_mappings.values())+
-                list(gen_tokens.values())
-        ]
-        tokenizer.add_special_tokens(SPECIAL_TOKENS)
-        tokenizer.add_special_tokens({"additional_special_tokens":added_tokens}) 
+    cur_list = tokenizer.additional_special_tokens
+    new_tokens = list(atomic_relation_mappings.values())+ list(gen_tokens.values()) 
     if rel:
-        added_tokens = [ 
-                AddedToken(prompt,lstrip=True,
-                    rstrip=False)
-                for prompt in encoder_prompts[rel] + decoder_prompts[rel]
-        ]
-        tokenizer.add_special_tokens({"additional_special_tokens":added_tokens})
+        new_tokens += encoder_prompts[rel] + decoder_prompts[rel]  
 
-def wrap_model(model, tokenizer, rel, encoder_type="lstm", prompt_path=""):
-    id_offset = len(tokenizer)
+    dlog.info(cur_list)
+    added_tokens = [ 
+            AddedToken(tok,lstrip=True,
+                rstrip=False)
+            for tok in new_tokens if not tok in cur_list
+    ]
+    if added_tokens:
+        tokenizer.add_special_tokens({"additional_special_tokens":added_tokens})
+    else:
+        mlog.info("No new token was added")
+
+def wrap_model(model, tokenizer, rel, encoder_type="lstm", prompt_path="", from_words=False):
     embedding_dim = model.config.hidden_size
     enc_plen = len(encoder_prompts[rel])
     dec_plen = len(decoder_prompts[rel])
-    assert rel in encoder_prompts and enc_plen > 0, "No encoder prompt defined!"
+    if not rel in encoder_prompts or enc_plen == 0:
+        mlog.info("No encoder prompt defined in input!")
+        return None
+    init_embs = {} 
+    if from_words and from_words != "none":
+        if from_words == "rel":
+            from_words = relation_natural_mappings[rel]["en"]
+        new_tokens = tokenizer.tokenize(from_words)
+        mlog.info("** loading from words : %s", new_tokens)
+        _ids = tokenizer.convert_tokens_to_ids(new_tokens)
+        rel_ids_tensor = torch.LongTensor(_ids)
+        embs = model.get_input_embeddings()
+        rel_embs = embs(rel_ids_tensor)
+        with torch.no_grad():
+           for i, e in zip(range(len(new_tokens)), rel_embs):
+               init_embs[i] = e.detach()
+
+    rel_tokens = encoder_prompts[rel] + decoder_prompts[rel] 
+    mlog.info("** rel tokens : %s", rel_tokens)
+    cur_list = tokenizer.additional_special_tokens
+    mlog.info("** cur tokens : %s", cur_list)
+    rel_existing_tokens = []
+    for tok in rel_tokens:
+        if tok in cur_list:
+            rel_existing_tokens.append(tok)
+
+    if rel_existing_tokens and not from_words and not from_words == "none":
+        mlog.info("** loading existing rel tokens: %s", rel_existing_tokens)
+        _ids = tokenizer.convert_tokens_to_ids(rel_existing_tokens)
+        _offset = min(_ids)
+        mlog.info("** existing rel ids: %s", _ids)
+        rel_ids_tensor = torch.LongTensor(_ids)
+        embs = model.get_input_embeddings()
+        rel_embs = embs(rel_ids_tensor)
+        with torch.no_grad():
+           for i, e in zip(_ids, rel_embs):
+               j = i - _offset
+               init_embs[j] = e.detach()
+
+    enc_plen =len(rel_tokens) 
+    mlog.info("** len tokenizer before extend: %s", len(tokenizer))
+    extend_tokenizer(tokenizer, rel)
+    rel_ids = tokenizer.convert_tokens_to_ids(rel_tokens)
+    mlog.info("** final rel ids: %s", rel_ids)
+    id_offset = min(rel_ids) 
     dec_offset = id_offset + enc_plen
     prompt_encoder = None
     decoder_prompt_encoder = None
+    #mlog.info("Init Embs %s", init_embs)
+    mlog.info("Encoder Type %s", encoder_type)
+    mlog.info("wrap rel %s", rel)
     mlog.info("id_offset: %s", id_offset)
     mlog.info("enc_plan: %s", enc_plen)
+    mlog.info("enc prompts: %s", encoder_prompts[rel])
     mlog.info("dec_plan: %s", dec_plen)
+    mlog.info("dec prompts: %s", decoder_prompts[rel])
     mlog.info("decoder offset: %s", dec_offset)
-    if encoder_type == "emb":
+    if encoder_type.startswith("emb"):
+        mlog.info("in Emb %s", encoder_type)
         if enc_plen > 0:
-            prompt_encoder = EmbeddingPromptEncoder(enc_plen,embedding_dim,id_offset)
+            mlog.info("Prompt Encoder defined : %s", enc_plen)
+            prompt_encoder = EmbeddingPromptEncoder(enc_plen,
+                    embedding_dim,id_offset,init_embs)
         if dec_plen > 0:
-            decoder_prompt_encoder = EmbeddingPromptEncoder(dec_plen,embedding_dim,dec_offset)
+            mlog.info("decoder prompt defined: %s", dec_offset)
+            decoder_prompt_encoder = EmbeddingPromptEncoder(dec_plen,
+                    embedding_dim,dec_offset, init_embs)
     else:
         if enc_plen > 0:
-            prompt_encoder = LSTMEmbeddingPromptEncoder(enc_plen,embedding_dim,id_offset)
+            mlog.info("Prompt Encoder defined : %s", enc_plen)
+            prompt_encoder = LSTMEmbeddingPromptEncoder(enc_plen,embedding_dim,
+                    id_offset, init_embs)
         if dec_plen > 0:
-            decoder_prompt_encoder = LSTMEmbeddingPromptEncoder(dec_plen,embedding_dim,dec_offset)
+            mlog.info("decoder prompt defined: %s", dec_offset)
+            decoder_prompt_encoder = LSTMEmbeddingPromptEncoder(dec_plen,
+                    embedding_dim,dec_offset,init_embs)
     if "joint" in encoder_type:
         decoder_prompt_encoder = prompt_encoder
 
-    extend_tokenizer(tokenizer, rel)
     model.resize_token_embeddings(len(tokenizer))
     wrapped_model = PTuningWrapper(model,prompt_encoder,
             decoder_prompt_encoder,
             prompt_token_fn=get_prompt_token_fn(id_offset,enc_plen + dec_plen))
-    if prompt_path:
+    if False: #prompt_path:
         if Path(os.path.join(prompt_path, "encoder")).exists():
             mlog.info("Loading saved encoder prompt...")
             wrapped_model.prompt_encoder.load(prompt_path)
@@ -226,7 +293,7 @@ def wrap_model(model, tokenizer, rel, encoder_type="lstm", prompt_path=""):
 
 encoder_prompts = {} 
 decoder_prompts = {}
-def fill_consts(template, extemp, row, rows=[]):
+def fill_consts(template, extemp, row, rows=[], mask=-1):
     text = template
     #dlog.debug("fill const for: %s", text)
     rel = row["prefix"]
@@ -248,11 +315,83 @@ def fill_consts(template, extemp, row, rows=[]):
         val = str(value)
         text = text.replace("{" + key + "}", val)
 
-    plen = atomic_relation_prompt_lengths[rel]
+    plen = relation_prompt_lengths[rel]
+    #dlog.info("fill consts, rel %s, plen %s", rel, plen)
     if not rel in encoder_prompts:
         encoder_prompts[rel] = []
     if not rel in decoder_prompts:
         decoder_prompts[rel] = []
+    #sent = "This is a good apple".split(" ")
+    if mask >= 0 and "{enc_token_mask}" in text:
+        prompt = f"<enc_mask_{mask}>" 
+        text = text.replace("{enc_token_mask}",prompt)
+    rel_ids = relation_natural_mappings[rel]["ids"]
+    while "{enc_token_fw}" in text:
+        prompt = ""
+        for i in rel_ids:
+            token = f"<enc_mask_{i}>" 
+            if not token in encoder_prompts[rel]:
+                encoder_prompts[rel].append(token)
+            prompt += " " + token
+        prompt = prompt.strip()
+        text = text.replace("{enc_token_fw}",prompt, 1)
+    counter = 0
+    pi = 0
+    enc_prompt = ""
+    dec_prompt = ""
+    while "{enc_token_rest}" in text:
+        enc_plen = plen[pi] if pi < len(plen) else plen[-1] 
+        prompt = ""
+        for i in range(counter, counter + enc_plen):
+            token = f"<enc_mask_{i}>" 
+            if not token in encoder_prompts[rel]:
+                encoder_prompts[rel].append(token)
+            if i == mask:
+               token = "<extra_id_0>"
+            prompt += " " + token
+        prompt = prompt.strip()
+        if not enc_prompt:
+            enc_prompt = prompt
+        text = text.replace("{enc_token_rest}",prompt, 1)
+        counter += enc_plen 
+        pi += 1
+    counter = mask
+    pi = 0
+    enc_prompt = ""
+    dec_prompt = ""
+    while "{enc_token_cont}" in text:
+        enc_plen = plen[pi] if pi < len(plen) else plen[-1] 
+        prompt = ""
+        for i in range(counter, enc_plen):
+            token = f"<enc_mask_{i}>" 
+            if not token in encoder_prompts[rel]:
+                encoder_prompts[rel].append(token)
+            prompt += " " + token
+        prompt = prompt.strip()
+        if not enc_prompt:
+            enc_prompt = prompt
+        text = text.replace("{enc_token_cont}",prompt, 1)
+        counter += enc_plen 
+        pi += 1
+    #dlog.info("encoder prompt %s ", encoder_prompts[rel])
+    counter = 0
+    pi = 0
+    enc_prompt = ""
+    dec_prompt = ""
+    while "{enc_com_token}" in text:
+        enc_plen = plen[pi] if pi < len(plen) else plen[-1] 
+        prompt = ""
+        for i in range(counter, counter + enc_plen):
+            token = f"<enc_com_{i}>" 
+            prompt += " " + token
+            if not token in encoder_prompts[rel]:
+                encoder_prompts[rel].append(token)
+        prompt = prompt.strip()
+        if not enc_prompt:
+            enc_prompt = prompt
+        text = text.replace("{enc_com_token}",prompt, 1)
+        counter += enc_plen 
+        pi += 1
     counter = 0
     pi = 0
     enc_prompt = ""
@@ -307,7 +446,13 @@ def filter_inputs(include, exclude, lang):
 #tttttttttt
 def create_templates(method, gen_pos="end", prompt_pos="end"):
        extemp = ""
-       if method == "rel-enc":
+       if method == "pred-emb":
+           qtemp = "{enc_token_rest}"
+           anstemp = "{ph} {enc_token_mask}"
+       elif method == "pred-emb-rev":
+           qtemp = "{enc_token_mask} {ph}"
+           anstemp = "{ph} {enc_token_cont}"
+       elif method == "rel-enc":
            qtemp = "{event} {enc_token} {ph}"
            anstemp = "{ph} {resp} {end}"
        elif method == "rel-dec":
@@ -315,6 +460,9 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            anstemp = "{ph} {enc_token}"
        elif method == "rel-mask":
            qtemp = "{event} {ph} {resp}"
+           anstemp = "{ph} {rel_natural}"
+       elif method == "rel-mask-wrap":
+           qtemp = "{enc_com_token} {event} {ph} {resp}"
            anstemp = "{ph} {rel_natural}"
        elif method == "rel-unsup":
            qtemp = "{event} {rel_natural} {ph} "
@@ -328,10 +476,22 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
        elif method == "sup-enmix":
            qtemp = "{input_text} {enc_token} {target_text} {gen}"
            anstemp = "{event} {dec_token} {gen} {resp}"
-       elif method == "unsup-nat":
+       elif method == "unsup-nat-gen":
            qtemp = "{enc_token} {event} {rel_natural} {gen} {ph}" 
            anstemp = "{ph} {resp} {end}"
-       elif method == "unsup-no-gen":
+       elif method == "unsup-nat":
+           qtemp = "{event} {rel_natural} {ph}" 
+           anstemp = "{ph} {resp} {end}"
+       elif method == "enc-unsup-nat":
+           qtemp = "{enc_token} {event} {rel_natural} {ph}" 
+           anstemp = "{ph} {resp} {end}"
+       elif method == "unsup-nat-fa":
+           qtemp = "{event} {rel_natural_fa} {ph}" 
+           anstemp = "{ph} {resp} {end}"
+       elif method == "unsup-nat-wrap":
+           qtemp = "{enc_token} {event} {rel_natural} {ph}" 
+           anstemp = "{ph} {resp} {end}"
+       elif method == "unsup-lang":
            qtemp = "{enc_token} {event} {enc_lang_token} {ph}" 
            anstemp = "{ph} {resp} {end}"
        elif method == "sup-gen":
@@ -398,8 +558,14 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
        elif method == "gpt":
            qtemp = "{event} {rel_natural}"
            anstemp = "{resp} {end}"
+       elif method == "unsup-fw":
+           qtemp = "{event} {enc_token_fw} {ph}"
+           anstemp = "{ph} {resp} {end}"
        elif method == "unsup":
            qtemp = "{enc_token_start} {gen_start} {event} {enc_token_end} {ph}"
+           anstemp = "{ph} {resp} {end}"
+       elif method == "unsup-gen":
+           qtemp = "{enc_token_start} {gen_start} {event} {enc_token_end} {gen_end} {ph}"
            anstemp = "{ph} {resp} {end}"
        elif method == "unsup-dec":
            qtemp = "{enc_token_start} {gen_start} {event} {enc_token_end} {gen_end} {ph}"
@@ -440,7 +606,7 @@ def fill_vars(template, rel, event, gen_token, resp, inp_lang, resp_lang):
     pattern = re.compile("|".join(rep.keys()))
     text = pattern.sub(lambda m: rep[re.escape(m.group(0))], template)
     lang = resp_lang
-    plen = atomic_relation_prompt_lengths[rel]
+    plen = relation_prompt_lengths[rel]
     if not rel in encoder_prompts:
         encoder_prompts[rel] = []
     if not rel in decoder_prompts:
@@ -511,18 +677,13 @@ def fill_data(split_df, split_name, method, prompt_pos, wrap,
         dlog.info("natural is ON")
     data_split = {}
     if num_samples == 0: num_samples = len(split_df)
-    if wrap:
-        split_df = split_df[split_df["prefix"] == wrap]
-        dlog.info("len after wrap: %s", len(split_df))
-    split_df = split_df.groupby("prefix").sample(n=num_samples)
-    dlog.info("len after sample: %s", len(split_df))
-    split_df = split_df.sort_values(by="input_text")
     for col in targets:
         if col in split_df:
             split_df[col] = split_df[col].astype(str)
     if ignore_blanks: # and len(split_df) > num_rows:
         split_df = split_df[split_df["input_text"].str.contains('___')==False]
-        split_df = split_df[split_df["target_text"] != "none"]
+        #split_df = split_df[split_df["target_text"] != "none"]
+        dlog.info("*** Filtered for ignoring blanks ")
     if pred_tresh > 0 and "bert_score" in split_df:
         split_df = split_df[split_df["bert_score"] > pred_tresh]
         dlog.info("*** Filtered based on pred1 score higher than "+ pred_tresh)
@@ -530,15 +691,22 @@ def fill_data(split_df, split_name, method, prompt_pos, wrap,
         split_df = split_df[split_df["nli_group"] == nli_group]
         dlog.info("*** Filtered based on nli_group "+ nli_group)
 
+    dlog.info(f"len after filtering:{len(split_df)}")
+    if wrap and not "rel" in method:
+        split_df = split_df[split_df["prefix"] == wrap]
+        dlog.info("len after wrap: %s", len(split_df))
+    else:
+        split_df = split_df.groupby("prefix").sample(n=num_samples)
+        dlog.info(f"len after sampling:{len(split_df)}")
+    split_df = split_df.sort_values(by="input_text")
     cats_num = len(split_df["prefix"].unique())
     dlog.info("Cats Num: %s", cats_num)
-    num_per_cat = num_samples // cats_num
-    dlog.info("Numi per cat: %s", num_per_cat)
+    num_per_cat = num_samples // cats_num if cats_num > 1 else num_samples
+    dlog.info("Num per cat: %s", num_per_cat)
     rel_counter = {}
     lang_counter = {}
     ii = 0
     kk = 0
-    dlog.info(f"len after filtering:{len(split_df)}")
     flat_data = []
     old_input = ""
     si = 0
@@ -549,8 +717,6 @@ def fill_data(split_df, split_name, method, prompt_pos, wrap,
         else:
             rel_counter[rel] += 1
         if rel_counter[rel] >= num_per_cat:
-            if rel_counter[rel] == num_per_cat:
-                dlog.info("Ignoring rest for %s at %s", rel, rel_counter[rel])
             continue 
         ii += 1
         eng_inp = d["input_text"]
@@ -563,7 +729,7 @@ def fill_data(split_df, split_name, method, prompt_pos, wrap,
         if ii < start:
             continue
         context_rows=[]
-        if sampling > 0:
+        if sampling > 0 and sampling < len(split_df):
             context_rows = split_df.sample(n=sampling)
         if not rel in data_split:
             data_split[rel] = {}
@@ -591,12 +757,16 @@ def fill_data(split_df, split_name, method, prompt_pos, wrap,
                 resp = resp.strip()
                 gen_token = gen_tokens[targ_col]
                 target_lang = langs[targ_col]
-
-                for mt in method.split("+"):
+                methods = method.split("+")
+                if len(methods) > 1 and split_name == "validation":
+                    methods = methods[0]
+                for mt in methods:
                     qtemp, anstemp, extemp = create_templates(mt, 
                             gen_pos="end", prompt_pos=prompt_pos)
-                    _qtemp = fill_consts(qtemp, extemp,d, context_rows)
-                    _anstemp = fill_consts(anstemp, extemp,d, context_rows)
+                    plen = relation_prompt_lengths[rel][0]
+                    mask = random.randint(0, plen-1)
+                    _qtemp = fill_consts(qtemp, extemp,d, context_rows, mask=mask)
+                    _anstemp = fill_consts(anstemp, extemp,d, context_rows, mask=mask)
                     _query = fill_vars(_qtemp, rel, event, gen_token, resp, 
                             input_lang, target_lang) 
                     query = (index, _query)
@@ -610,7 +780,8 @@ def fill_data(split_df, split_name, method, prompt_pos, wrap,
                     if lang_counter[lang] < 3:
                         dlog.info(f"%%%%%%%%%%%%%%%%%% {lang} {mt} %%%%%%%%%%%%%%%%%%%")
                         dlog.info(inp + "====>" + targ_col)
-                        dlog.info(input_lang + ":"+ _query)
+                        _q = _query.replace(">",">\n") 
+                        dlog.info(input_lang + ":"+ _q)
                         dlog.info(target_lang + ":" + response)
                     if lang_counter[lang] > num_samples:
                         return data_split, flat_data, kk
