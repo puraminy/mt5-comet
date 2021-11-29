@@ -272,7 +272,7 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
     out = os.path.join(logPath,f"__{results_info}.txt")
     with open(out, "w") as f: 
         for i, (a,q) in enumerate(zip(answers,questions)):
-            print("{:<2} {:<40}:".format(i,q)), file =f
+            print("{:<2} {:<40}:".format(i,q), file =f)
             for ans in a:
                 print("{:>100}:".format(ans), file = f)
 
