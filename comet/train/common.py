@@ -567,8 +567,11 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
        elif method == "unsup":
            qtemp = "{rel_token} {event} {ph}"
            anstemp = "{ph} {resp} {end}"
+       elif method == "unsup-gen":
+           qtemp = "{rel_token} {event} {gen} {ph}"
+           anstemp = "{ph} {resp} {end}"
        elif method == "unsup-wrap":
-           qtemp = "{enc_token_start} {gen_start} {event} {enc_token_end} {gen_end} {ph}"
+           qtemp = "{enc_token_start} {gen_start} {event} {enc_token_end} {ph}"
            anstemp = "{ph} {resp} {end}"
        elif method == "unsup-gen-wrap":
            qtemp = "{enc_token_start} {gen_start} {event} {enc_token_end} {gen_end} {ph}"
