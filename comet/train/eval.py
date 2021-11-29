@@ -265,7 +265,11 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
 
     # %%%%%%%%%%%%%%%%%%
     for i, (a,q) in enumerate(zip(answers,questions)):
-        mlog.info("{:<2} {:<40}:{}".format(i,q, "\n".join(a)))
+        mlog.info("{:<2} {:<40}:".format(i,q))
+        for ans in a:
+            mlog.info("{:>40}:".format(ans))
+
+
     mlog.info("-----------------------------------------------------")
     #for i, q in enumerate(questions):
     #    mlog.info("{:<2}:{}".format(i,q))
