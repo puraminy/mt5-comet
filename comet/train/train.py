@@ -754,6 +754,9 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     if "gpt" in model_id:
         accumulation_tiny_steps = 1
     node_batch_size = batch_size//accumulation_tiny_steps
+    if iterations == 0:
+        mlog.info("Ther is no data to train!!!!!!!!")
+        return
     iterations = train_records//batch_size
     for logger in [mlog, tlog]:
         logger.info("Iterations:"  + str(iterations))
