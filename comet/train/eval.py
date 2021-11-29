@@ -212,7 +212,7 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
                     vlog.info(f"=============   {lang}  ===  {rel}   =====================")
                     _q = query.replace("<", "\n<", 1)
                     _q = _q.replace(">", ">\n")
-                    questions.append(query)
+                    questions.append(input_text)
                     answers.append(hyps)
                     vlog.info(str(counter["all"])+ ":" + _q)
                     vlog.info("'''''''''''''''''''''''''''''''''''''''''' Preds:")
@@ -265,9 +265,8 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
 
     # %%%%%%%%%%%%%%%%%%
     for i, (a,q) in enumerate(zip(answers,questions)):
-        mlog.info("{:<2}:{}".format(i,q))
-        mlog.info("{:<2}:{}".format(i,a))
-        mlog.info("-----------------------------------------------------")
+        mlog.info("{:<2} {}:{}".format(i,q, a))
+    mlog.info("-----------------------------------------------------")
     #for i, q in enumerate(questions):
     #    mlog.info("{:<2}:{}".format(i,q))
     new_df = pd.DataFrame(rows)
