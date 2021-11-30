@@ -110,6 +110,7 @@ class PTuningWrapper(torch.nn.Module):
         if prompt_masks.any():
             wlog.log(ll, "promp masks:{}".format(prompt_masks))
             input_ids_ = input_ids.clone()
+            wlog.info("inpu ids :{}".format(input_ids))
             if self.replacing_token_id is not None:
                 # replace prompt ids in input_ids with replacing token
                 input_ids_[prompt_masks]=self.replacing_token_id
