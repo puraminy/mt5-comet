@@ -853,10 +853,14 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
         wrapped_model = wrap_model(model, tokenizer, wrap, encoder_type, load_prompt_path, from_words = from_words) 
     if wrapped_model:
         wrapped_model.to(device=device)
+        if "gpt" in model_id:
+            tokenizer.add_special_tokens(pad_token)
         mlog.info("len tokenizer after wrapping %s", len(tokenizer))
     else:
         wrap = ""
         extend_tokenizer(tokenizer, "")
+        if "gpt" in model_id:
+            tokenizer.add_special_tokens(pad_token)
         mlog.info("len tokenizer after extending %s", len(tokenizer))
         model.resize_token_embeddings(len(tokenizer))
         model.to(device=device)

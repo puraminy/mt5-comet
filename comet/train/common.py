@@ -57,6 +57,7 @@ SPECIAL_TOKENS  = { "bos_token": "<|BOS|>",
                     "unk_token": "<|UNK|>",
                     "pad_token": "<|PAD|>",
                     "sep_token": "<|SEP|>"}
+pad_token = {"pad_token": "<|PAD|>"}
 nli_map = ['contradiction', 'entailment', 'neutral']
 atomic_relation_mappings = {
     "oEffect":"<oEffect>",
@@ -184,7 +185,7 @@ def extend_tokenizer(tokenizer, rel=""):
     cur_list = tokenizer.additional_special_tokens
     new_tokens = tokens.t5_tokens + \
                  list(atomic_relation_mappings.values())+ \
-                 list(gen_tokens.values())
+                 list(gen_tokens.values()) + \
     if rel:
         new_tokens += encoder_prompts[rel] + decoder_prompts[rel]  
 
