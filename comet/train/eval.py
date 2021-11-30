@@ -169,7 +169,7 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
                             interactive = False
                     gen_token = gen_tokens[lang]
                     hyps = gen_resp(model, tokenizer, query, gen_token, gen_param, at_mask)
-                    input_text = re.sub(r'<.*?>','',query)
+                    input_text = re.sub(r'<.*?>','##',query)
                     top_hyp = hyps[0]
                     for const in resp_const_parts:
                         top_hyp = top_hyp.replace(const, "")
