@@ -756,7 +756,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     node_batch_size = batch_size//accumulation_tiny_steps
     iterations = train_records//batch_size
     if iterations == 0:
-        mlog.info("Ther is no data to train!!!!!!!!")
+        mlog.info("There is no data to train!!!!!!!!")
         return
     for logger in [mlog, tlog]:
         logger.info("Iterations:"  + str(iterations))
@@ -1135,6 +1135,7 @@ def translate(model, tokenizer, df, trans_col, path, logger=None, start=0):
     ii = 0
     for idx, row in df.iterrows():
         if ii < start:
+            ii += 1
             continue
         try:
             hyps = gen_resp(model, tokenizer, row[oldcol])
@@ -1145,11 +1146,11 @@ def translate(model, tokenizer, df, trans_col, path, logger=None, start=0):
             logger.info("%s -> %s", row[oldcol], _t)
         trans.append(_t)
         pbar.update()
-        if ii % save_step == 0:
+        if len(trans) % save_step == 0:
             p = path.replace(".tsv", str(ii).replace("000", "k") + ".tsv")
             if logger:
                 logger.info("Saving at %s", p)
-            new_df = df.truncate(after=ii)
+            new_df = df.truncate(after=ii, before=start)
             new_df[newcol] = trans
             new_df.to_csv(p, sep="\t", index=False)
         ii += 1
