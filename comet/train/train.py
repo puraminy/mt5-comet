@@ -692,7 +692,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
         length = [int(s) for s in prompt_length.split("-")]
         set_prompt_lengths(wrap, length)
 
-    tokenize_relations(tokenizer)
+    #tokenize_relations(tokenizer)
     atomic_query_responses = {}
     atomic_flattened = {}
     num_records = {}

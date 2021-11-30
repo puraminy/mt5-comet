@@ -298,7 +298,7 @@ def wrap_model(model, tokenizer, rel, encoder_type="lstm", prompt_path="", from_
 
 encoder_prompts = {} 
 decoder_prompts = {}
-def fill_consts(template, extemp, row, rows=[], mask=-1, ph=""):
+def fill_consts(template, extemp, row, rows=[], mask=-1, ph="", method=""):
     text = template
     #dlog.debug("fill const for: %s", text)
     rel = row["prefix"]
@@ -330,8 +330,8 @@ def fill_consts(template, extemp, row, rows=[], mask=-1, ph=""):
     if mask >= 0 and "{enc_token_mask}" in text:
         prompt = f"<enc_mask_{mask}>" 
         text = text.replace("{enc_token_mask}",prompt)
-    rel_ids = relation_natural_mappings[rel]["ids"]
     while "{enc_token_fw}" in text:
+        rel_ids = relation_natural_mappings[rel]["ids"]
         prompt = ""
         for i in rel_ids:
             token = f"<enc_mask_{i}>" 
@@ -427,6 +427,8 @@ def fill_consts(template, extemp, row, rows=[], mask=-1, ph=""):
             example = example.replace("{dec_token}", dec_prompt)
             for key,value in _row.items():
                 val = str(value)
+                if "-fa" in method and "_fa" in key:
+                    val = toPers(val)
                 example = example.replace("{" + key + "}", val)
             examples += " " + str(ii) + ") " + example
             ii += 1
@@ -804,8 +806,8 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
                         event = event.replace("___", ph)
                         ph = "<extra_id_1>"
                     mask = random.randint(0, plen-1)
-                    _qtemp = fill_consts(qtemp, extemp,d, context_rows, mask=mask,ph=ph)
-                    _anstemp = fill_consts(anstemp, extemp,d, context_rows, mask=mask,ph=ph)
+                    _qtemp = fill_consts(qtemp, extemp,d, context_rows, mask=mask,ph=ph,method = mt)
+                    _anstemp = fill_consts(anstemp, extemp,d, context_rows, mask=mask,ph=ph, method = mt)
                     _query = fill_vars(_qtemp, rel, event, gen_token, resp, 
                             input_lang, target_lang) 
                     query = (index, _query)

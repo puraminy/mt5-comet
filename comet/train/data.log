@@ -158,3 +158,361 @@ fa: <extra_id_0> برای فارغ التحصیلی از دبیرستان <extra
 %%%%%%%%%%%%%%%%%% test 
 %%%%%%%%%%%%%%%%%% test 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%% test 
+%%%%%%%%%%%%%%%%%% test 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Columns of train  Unnamed: 0
+prefix
+input_text
+target_text
+target_text_fa
+   Unnamed: 0   prefix  ...           target_text                target_text_fa
+0           0   oReact  ...               annoyed                    آزرده خاطر
+1           1   oReact  ...                 angry                        عصبانی
+2           2   oReact  ...               worried                   نگران بودم.
+3           3  xIntent  ...  to have an advantage  برای اینکه برتری داشته باشیم
+4           4  xIntent  ...   to fulfill a desire          برای برآوردن یک آرزو
+
+[5 rows x 5 columns]
+building query responses for train
+len:10001
+len after filtering:10001
+len after sampling:900
+Cats Num: 9
+Num per cat: 11
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%% test 
+%%%%%%%%%%%%%%%%%% test 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Columns of train  Unnamed: 0
+prefix
+input_text
+target_text
+target_text_fa
+   Unnamed: 0   prefix  ...           target_text                target_text_fa
+0           0   oReact  ...               annoyed                    آزرده خاطر
+1           1   oReact  ...                 angry                        عصبانی
+2           2   oReact  ...               worried                   نگران بودم.
+3           3  xIntent  ...  to have an advantage  برای اینکه برتری داشته باشیم
+4           4  xIntent  ...   to fulfill a desire          برای برآوردن یک آرزو
+
+[5 rows x 5 columns]
+building query responses for train
+len:10001
+len after filtering:10001
+len after sampling:900
+Cats Num: 9
+Num per cat: 11
+%%%%%%%%%%%%%%%%%% en2en gpt-fa-event-n %%%%%%%%%%%%%%%%%%%
+input_text====>target_text
+en: 1) <gen_en>
+ {input_text_fa} </s>
+ 
+ 2) <gen_en>
+ {input_text_fa} </s>
+ 
+ 3) <gen_en>
+ {input_text_fa} </s>
+ 
+ 4) <gen_en>
+ {input_text_fa} </s>
+ 
+ 5) <gen_en>
+ {input_text_fa} </s>
+ 
+ 6) <gen_en>
+
+en:PersonX abandons <extra_id_0> altogether </s>
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%% test 
+%%%%%%%%%%%%%%%%%% test 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Columns of train  Unnamed: 0
+prefix
+input_text
+target_text
+target_text_fa
+   Unnamed: 0   prefix  ...           target_text                target_text_fa
+0           0   oReact  ...               annoyed                    آزرده خاطر
+1           1   oReact  ...                 angry                        عصبانی
+2           2   oReact  ...               worried                   نگران بودم.
+3           3  xIntent  ...  to have an advantage  برای اینکه برتری داشته باشیم
+4           4  xIntent  ...   to fulfill a desire          برای برآوردن یک آرزو
+
+[5 rows x 5 columns]
+building query responses for train
+len:10001
+len after filtering:10001
+len after sampling:900
+Cats Num: 9
+Num per cat: 11
+%%%%%%%%%%%%%%%%%% en2en gpt-fa-event-n %%%%%%%%%%%%%%%%%%%
+input_text====>target_text
+en: 1) <gen_en>
+ {input_text_fa} </s>
+ 
+ 2) <gen_en>
+ {input_text_fa} </s>
+ 
+ 3) <gen_en>
+ {input_text_fa} </s>
+ 
+ 4) <gen_en>
+ {input_text_fa} </s>
+ 
+ 5) <gen_en>
+ {input_text_fa} </s>
+ 
+ 6) <gen_en>
+
+en:PersonX abandons <extra_id_0> altogether </s>
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%% test 
+%%%%%%%%%%%%%%%%%% test 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Columns of train  Unnamed: 0
+prefix
+input_text
+target_text
+target_text_fa
+   Unnamed: 0   prefix  ...           target_text                target_text_fa
+0           0   oReact  ...               annoyed                    آزرده خاطر
+1           1   oReact  ...                 angry                        عصبانی
+2           2   oReact  ...               worried                   نگران بودم.
+3           3  xIntent  ...  to have an advantage  برای اینکه برتری داشته باشیم
+4           4  xIntent  ...   to fulfill a desire          برای برآوردن یک آرزو
+
+[5 rows x 5 columns]
+building query responses for train
+len:10001
+len after filtering:10001
+len after sampling:900
+Cats Num: 9
+Num per cat: 11
+%%%%%%%%%%%%%%%%%% en2en gpt-fa-event-n %%%%%%%%%%%%%%%%%%%
+input_text====>target_text
+en: 1) <gen_en>
+ {input_text_fa} </s>
+ 
+ 2) <gen_en>
+ {input_text_fa} </s>
+ 
+ 3) <gen_en>
+ {input_text_fa} </s>
+ 
+ 4) <gen_en>
+ {input_text_fa} </s>
+ 
+ 5) <gen_en>
+ {input_text_fa} </s>
+ 
+ 6) <gen_en>
+
+en:PersonX accepts one 's <extra_id_0> </s>
+To Pers
+%%%%%%%%%%%%%%%%%% en2fa gpt-fa-event-n %%%%%%%%%%%%%%%%%%%
+input_text====>target_text_fa
+en: 1) <gen_fa>
+ {input_text_fa} </s>
+ 
+ 2) <gen_fa>
+ {input_text_fa} </s>
+ 
+ 3) <gen_fa>
+ {input_text_fa} </s>
+ 
+ 4) <gen_fa>
+ {input_text_fa} </s>
+ 
+ 5) <gen_fa>
+ {input_text_fa} </s>
+ 
+ 6) <gen_fa>
+
+fa:PersonX accepts one 's <extra_id_0> </s>
+%%%%%%%%%%%%%%%%%% en2en gpt-fa-event-n %%%%%%%%%%%%%%%%%%%
+input_text====>target_text
+en: 1) <gen_en>
+ {input_text_fa} </s>
+ 
+ 2) <gen_en>
+ {input_text_fa} </s>
+ 
+ 3) <gen_en>
+ {input_text_fa} </s>
+ 
+ 4) <gen_en>
+ {input_text_fa} </s>
+ 
+ 5) <gen_en>
+ {input_text_fa} </s>
+ 
+ 6) <gen_en>
+
+en:PersonX accepts one 's <extra_id_0> </s>
+To Pers
+%%%%%%%%%%%%%%%%%% en2fa gpt-fa-event-n %%%%%%%%%%%%%%%%%%%
+input_text====>target_text_fa
+en: 1) <gen_fa>
+ {input_text_fa} </s>
+ 
+ 2) <gen_fa>
+ {input_text_fa} </s>
+ 
+ 3) <gen_fa>
+ {input_text_fa} </s>
+ 
+ 4) <gen_fa>
+ {input_text_fa} </s>
+ 
+ 5) <gen_fa>
+ {input_text_fa} </s>
+ 
+ 6) <gen_fa>
+
+fa:PersonX accepts one 's <extra_id_0> </s>
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+To Pers
+Columns of validation  Unnamed: 0
+prefix
+input_text
+target_text
+   Unnamed: 0   prefix                      input_text     target_text
+0           0   oReact  PersonX plays a ___ in the war            none
+1           1  xIntent  PersonX plays a ___ in the war  to participate
+2           2   xReact  PersonX plays a ___ in the war           tired
+3           3   oReact  PersonX plays a ___ in the war             sad
+4           4  xIntent  PersonX plays a ___ in the war     to help out
+building query responses for validation
+len:79600
+len after filtering:79600
+len after sampling:360
+Cats Num: 9
+Num per cat: 4
+%%%%%%%%%%%%%%%%%% en2en gpt-fa-event-n %%%%%%%%%%%%%%%%%%%
+input_text====>target_text
+en: 1) <gen_en>
+ {input_text_fa} </s>
+ 
+ 2) <gen_en>
+ {input_text_fa} </s>
+ 
+ 3) <gen_en>
+ {input_text_fa} </s>
+ 
+ 4) <gen_en>
+ {input_text_fa} </s>
+ 
+ 5) <gen_en>
+ {input_text_fa} </s>
+ 
+ 6) <gen_en>
+
+en:PersonX 'd better go </s>
+%%%%%%%%%%%%%%%%%% en2en gpt-fa-event-n %%%%%%%%%%%%%%%%%%%
+input_text====>target_text
+en: 1) <gen_en>
+ {input_text_fa} </s>
+ 
+ 2) <gen_en>
+ {input_text_fa} </s>
+ 
+ 3) <gen_en>
+ {input_text_fa} </s>
+ 
+ 4) <gen_en>
+ {input_text_fa} </s>
+ 
+ 5) <gen_en>
+ {input_text_fa} </s>
+ 
+ 6) <gen_en>
+
+en:PersonX achieves PersonX's dream </s>
