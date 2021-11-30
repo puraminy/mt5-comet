@@ -427,7 +427,7 @@ def fill_consts(template, extemp, row, rows=[], mask=-1, ph="", method=""):
             example = example.replace("{dec_token}", dec_prompt)
             for key,value in _row.items():
                 val = str(value)
-                if "-fa" in method and "_fa" in key:
+                if "fa" in method and "_fa" in key:
                     val = toPers(val)
                 example = example.replace("{" + key + "}", val)
             examples += " " + str(ii) + ") " + example
