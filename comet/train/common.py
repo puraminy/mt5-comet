@@ -162,11 +162,11 @@ decoder_relation_mappings = {}
 def tokenize_relations(tokenizer, map_lengths=False):
     for rel,phrase in relation_natural_mappings.items():
         natural_rel = phrase["en"]
-        dlog.info("rel ids ***: %s", natural_rel)
+        #dlog.info("rel ids ***: %s", natural_rel)
         rel_tokens = tokenizer.tokenize(natural_rel)
-        dlog.info("rel ids ***: %s", rel_tokens)
+        #dlog.info("rel ids ***: %s", rel_tokens)
         rel_ids = tokenizer.convert_tokens_to_ids(rel_tokens)
-        dlog.info("rel ids ***: %s", rel_ids)
+        #dlog.info("rel ids ***: %s", rel_ids)
         relation_natural_mappings[rel]["ids"] = rel_ids
         if map_lengths:
             relation_prompt_lengths[rel] = [len(rel_tokens)]
