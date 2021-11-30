@@ -855,6 +855,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
         wrapped_model.to(device=device)
         if "gpt" in model_id:
             tokenizer.add_special_tokens(pad_token)
+            mlog.info("pad token id:", tokenizer.pad_token_id)
         mlog.info("len tokenizer after wrapping %s", len(tokenizer))
     else:
         wrap = ""
