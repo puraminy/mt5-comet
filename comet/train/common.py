@@ -2,6 +2,7 @@ from pathlib import Path
 import datetime
 from transformers import AddedToken 
 import pandas as pd
+from comet.utils.myutils import *
 from comet.transformers_ptuning import PTuningWrapper
 from comet.transformers_ptuning.ptuning_wrapper import LSTMEmbeddingPromptEncoder, EmbeddingPromptEncoder
 from tqdm import tqdm
@@ -789,6 +790,11 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
                 if len(methods) > 1 and split_name == "validation":
                     methods = methods[0]
                 for mt in methods:
+                    if "-fa" in mt and inp_lang == "fa":
+                        query = toPers(query)
+                    if "-fa" in mt and target_lang == "fa":
+                        resp = toPers(resp)
+
                     qtemp, anstemp, extemp = create_templates(mt, 
                             gen_pos="end", prompt_pos=prompt_pos)
                     plen = relation_prompt_lengths[rel][0]

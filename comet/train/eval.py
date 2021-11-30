@@ -6,7 +6,6 @@ from nltk.translate.bleu_score import SmoothingFunction, sentence_bleu
 from sentence_transformers import SentenceTransformer, util
 from sentence_transformers import CrossEncoder
 from rouge import Rouge
-from comet.utils.myutils import *
 #%% Aggregate instances of queries and corresponding responses
 # (str)split_name -> (dict) query -> (list) response 
 

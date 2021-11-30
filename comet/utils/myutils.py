@@ -6,6 +6,13 @@ def superitems(obj):
     else:
         yield (obj,)
 
+def toPers(per):
+    per = per.replace("PersonX's", "خود")
+    per = per.replace("PersonX", "او")
+    per = per.replace("PersonY", "شخص دیگر")
+    per = per.replace("PersonZ", "کس دیگری")
+    return per
+
 def dictPath(path, dictionary, val, sep="_"):
     "set a value in a nested dictionary"
     while path.startswith(sep):
