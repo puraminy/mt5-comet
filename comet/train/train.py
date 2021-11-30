@@ -672,7 +672,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
             path = train_path if split_name == "train" else val_path
             model.to(device=device)
             logger = mlog if print_log == "mlog" else None
-            translate(model, tokenizer, df, trans, path, logger, start) 
+            translate(model, tokenizer, df, trans, path, logger, start, load_path) 
         return
     
     model, tokenizer = load_model(model_id, underlying_model_name)
@@ -1126,12 +1126,13 @@ def create_confs(experiment, models_dir):
                                 json.dump(args, outfile, indent=4)
 
 
-def translate(model, tokenizer, df, trans_col, path, logger=None, start=0):
+def translate(model, tokenizer, df, trans_col, path, logger=None, start=0, save_path=""):
     pbar = tqdm(total= len(df))
     oldcol, newcol,save_step = trans_col.split("@")
     newcol = oldcol + "_" + newcol
     save_step = int(save_step)
     trans = []
+    fname = Path(path).stem
     ii = 0
     for idx, row in df.iterrows():
         if ii < start:
@@ -1147,7 +1148,7 @@ def translate(model, tokenizer, df, trans_col, path, logger=None, start=0):
         trans.append(_t)
         pbar.update()
         if len(trans) % save_step == 0:
-            p = path.replace(".tsv", str(ii).replace("000", "k") + ".tsv")
+            p = os.path.join(save_path, fname + str(ii).replace("000","k_") + ".tsv")
             if logger:
                 logger.info("Saving at %s", p)
             new_df = df.truncate(after=ii, before=start)
@@ -1156,7 +1157,7 @@ def translate(model, tokenizer, df, trans_col, path, logger=None, start=0):
         ii += 1
 
     df[newcol] = trans
-    p = path.replace(".tsv", str(ii).replace("000", "k") + ".tsv")
+    p = os.path.join(save_path, fname + str(ii).replace("000","k_") + ".tsv")
     df.to_csv(p, sep="\t")
 
 

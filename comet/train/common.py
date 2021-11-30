@@ -296,9 +296,12 @@ def wrap_model(model, tokenizer, rel, encoder_type="lstm", prompt_path="", from_
 
 encoder_prompts = {} 
 decoder_prompts = {}
-def fill_consts(template, extemp, row, rows=[], mask=-1):
+def fill_consts(template, extemp, row, rows=[], mask=-1, ph=""):
     text = template
     #dlog.debug("fill const for: %s", text)
+    ph = placeholder_token
+    if "___" in template:
+        ph = "<extra_id_1>"
     rel = row["prefix"]
     rel_token = atomic_relation_mappings[rel]        
     rel_natural_en = relation_natural_mappings[rel]["en"]        
@@ -309,7 +312,8 @@ def fill_consts(template, extemp, row, rows=[], mask=-1):
             "{rel_natural_fa}":rel_natural_fa,
             "{gen_fa}":gen_token_fa,
             "{gen_en}":gen_token_en,
-            "{ph}":placeholder_token,
+            "___":placeholder_token,
+            "{ph}":ph,
             "{end}":end_token}
     rep = dict((re.escape(k), v) for k, v in rep.items()) 
     pattern = re.compile("|".join(rep.keys()))
