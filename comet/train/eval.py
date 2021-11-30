@@ -30,6 +30,11 @@ def set_device(dev):
 # ggggggggg
 def gen_resp(model, tokenizer, query, gen_token = "", gen_param = "greedy", at_mask=None):
     skip_special = "True"
+    verb = get_verb(query)
+    vlog.info("Ignoring verb %s", verb)
+    bad_words_ids = []
+    if verb:
+        bad_words_ids = tokenizer(verb, add_prefix_space=True).input_ids
     if "@" in gen_param:
         gen_param, skip_special = gen_param.split("@")
     if gen_param == "greedy":
@@ -38,6 +43,7 @@ def gen_resp(model, tokenizer, query, gen_token = "", gen_param = "greedy", at_m
             "num_beams":5,
             "repetition_penalty":5.5,
             "num_return_sequences":3,
+            "bad_words_ids": bad_words_ids
         }
     elif gen_param == "top_p":
         generation_params = {
@@ -49,6 +55,7 @@ def gen_resp(model, tokenizer, query, gen_token = "", gen_param = "greedy", at_m
             "temperature": 1.0,
             "num_return_sequences":3, 
             "repetition_penalty":3.5,
+            "bad_words_ids": bad_words_ids
         }
     inputs = tokenizer(query,return_tensors='pt').to(device=device)
     if False: #gen_token != "":

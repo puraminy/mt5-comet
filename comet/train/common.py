@@ -153,6 +153,23 @@ relation_prompt_lengths = {
     "xNeed":[5],
 }
 
+
+from nltk import word_tokenize, pos_tag
+from nltk.corpus import wordnet
+
+lemmatizer = nltk.WordNetLemmatizer()
+#nltk.download('averaged_perceptron_tagger')
+
+#word tokenizeing and part-of-speech tagger
+def get_verb(document):
+    tokens = [nltk.word_tokenize(sent) for sent in [document]]
+    postag = [nltk.pos_tag(sent) for sent in tokens][0]
+    for item in postag:
+        w,t = item
+        if t in ["V","VB", "VBD"]:
+            return w
+    return ""
+
 def get_prompt_token_fn(id_offset,length):
     return lambda x: (x>=id_offset)&(x<=id_offset+length+1)
 
