@@ -453,7 +453,10 @@ def filter_inputs(include, exclude, lang):
 #tttttttttt
 def create_templates(method, gen_pos="end", prompt_pos="end"):
        extemp = ""
-       if method == "pred-emb":
+       if method == "blank":
+           qtemp = "{event}"
+           anstemp = ""
+       elif method == "pred-emb":
            qtemp = "{enc_token_rest}"
            anstemp = "{ph} {enc_token_mask}"
        elif method == "pred-emb-rev":
