@@ -50,7 +50,7 @@ def gen_resp(model, tokenizer, query, gen_token = "", gen_param = "greedy", at_m
     skip_special = "True"
     verb = get_verb(query)
     vlog.info("Ignoring verb %s", verb)
-    bad_words_ids = []
+    bad_words_ids = None
     if verb:
         bad_words_ids = tokenizer(verb, add_prefix_space=True).input_ids
     if "@" in gen_param:
