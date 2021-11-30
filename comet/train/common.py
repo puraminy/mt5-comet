@@ -831,7 +831,7 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
                         lang_counter[lang] = 1
                     else:
                         lang_counter[lang] += 1
-                    if lang_counter[lang] < 3:
+                    if lang_counter[lang] < 10:
                         dlog.info(f"%%%%%%%%%%%%%%%%%% {lang} {mt} %%%%%%%%%%%%%%%%%%%")
                         dlog.info(inp + "====>" + targ_col)
                         _q = _query.replace(">",">\n") 
