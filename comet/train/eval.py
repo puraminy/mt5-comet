@@ -27,6 +27,24 @@ device = "cpu"
 def set_device(dev):
     global device
     device = dev
+
+
+from nltk import word_tokenize, pos_tag
+from nltk.corpus import wordnet
+
+lemmatizer = nltk.WordNetLemmatizer()
+#nltk.download('averaged_perceptron_tagger')
+
+#word tokenizeing and part-of-speech tagger
+def get_verb(document):
+    tokens = [nltk.word_tokenize(sent) for sent in [document]]
+    postag = [nltk.pos_tag(sent) for sent in tokens][0]
+    for item in postag:
+        w,t = item
+        if t in ["V","VB", "VBD"]:
+            return w
+    return ""
+
 # ggggggggg
 def gen_resp(model, tokenizer, query, gen_token = "", gen_param = "greedy", at_mask=None):
     skip_special = "True"
