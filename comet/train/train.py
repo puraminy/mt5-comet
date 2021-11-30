@@ -677,7 +677,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
             mlog.info("Translating ...%s ", split_name)
             path = train_path if split_name == "train" else val_path
             model.to(device=device)
-            logger = mlog if print_log == "mlog" else None
+            logger = tlog 
             translate(model, tokenizer, df, trans, path, logger, start, load_path) 
         return
     
@@ -1154,22 +1154,22 @@ def translate(model, tokenizer, df, trans_col, path, logger=None, start=0, save_
         except:
             continue
         _t = hyps[0]
-        if logger:
-            logger.info("%s -> %s", row[oldcol], _t)
-        trans.append(_t)
+        tans_row = {newcol:_t, oldcol:row[oldcol], "prefix":row["prefix"], "input_text":row["input_text"]}
+        trans.append(trans_row)
         pbar.update()
         if len(trans) % save_step == 0:
             p = os.path.join(save_path, fname + str(ii).replace("000","k_") + ".tsv")
             if logger:
                 logger.info("Saving at %s", p)
-            new_df = df.truncate(after=ii, before=start)
-            new_df[newcol] = trans
+                logger.info("Len trans: %s", len(trans))
+            new_df = pd.DataFrame(data=trans) 
+            trans = []
             new_df.to_csv(p, sep="\t", index=False)
         ii += 1
 
-    df[newcol] = trans
+    new_df = pd.DataFrame(data=trans) 
     p = os.path.join(save_path, fname + str(ii).replace("000","k_") + ".tsv")
-    df.to_csv(p, sep="\t")
+    df.to_csv(p, sep="\t", index=False)
 
 
 

@@ -185,7 +185,7 @@ def extend_tokenizer(tokenizer, rel=""):
     cur_list = tokenizer.additional_special_tokens
     new_tokens = tokens.t5_tokens + \
                  list(atomic_relation_mappings.values())+ \
-                 list(gen_tokens.values()) + \
+                 list(gen_tokens.values()) 
     if rel:
         new_tokens += encoder_prompts[rel] + decoder_prompts[rel]  
 
