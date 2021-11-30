@@ -680,6 +680,7 @@ def get_input(msg):
 def fill_data(split_df, split_name, method, prompt_pos, rel_filter, 
             num_samples=0, 
             ignore_blanks=False,
+            only_blanks=False,
             inp_include="",
             inp_exclude="",
             targ_include="",
@@ -703,6 +704,10 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
         split_df = split_df[split_df["input_text"].str.contains('___')==False]
         #split_df = split_df[split_df["target_text"] != "none"]
         dlog.info("*** Filtered for ignoring blanks ")
+    elif only_blanks:
+        split_df = split_df[split_df["input_text"].str.contains('___')==True]
+        #split_df = split_df[split_df["target_text"] != "none"]
+        dlog.info("*** Filtered for including only with blanks ")
     if pred_tresh > 0 and "bert_score" in split_df:
         split_df = split_df[split_df["bert_score"] > pred_tresh]
         dlog.info("*** Filtered based on pred1 score higher than "+ pred_tresh)
