@@ -230,7 +230,7 @@ class EmbeddingPromptEncoder(PromptEncoder):
         )
     
     def forward(self,prompt_token_ids,prompt_ids=None):
-        #emblog.info(prompt_token_ids)
+        emblog.info("prompt token ids: %s", prompt_token_ids)
         prompt_token_ids = prompt_token_ids - self.id_offset
         #emblog.info(prompt_token_ids)
         emblog.info(self.embedding.weight)
