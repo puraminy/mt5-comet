@@ -181,7 +181,7 @@ def set_prompt_lengths(rel, length):
         for rel in relation_prompt_lengths.keys():
             relation_prompt_lengths[rel] = length
 
-def extend_tokenizer(tokenizer, rel=""):
+def extend_tokenizer(tokenizer, rel="", model_id=""):
     cur_list = tokenizer.additional_special_tokens
     new_tokens = tokens.t5_tokens + \
                  list(atomic_relation_mappings.values())+ \
