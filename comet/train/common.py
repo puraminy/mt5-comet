@@ -536,6 +536,10 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            qtemp = "{examples} {gen} {ph}"
            extemp = "{gen} {input_text} {end} \n"
            anstemp = "{ph} {event} {end}"
+       elif method == "event-resp-n":
+           qtemp = "{examples} {gen} {ph}"
+           extemp = "{gen} {input_text} {rel_natural_en} {target_text} {end} \n"
+           anstemp = "{ph} {event} {rel_natural} {resp} {end}"
        elif method == "fa-event-n":
            qtemp = "{examples} {gen} {ph}"
            extemp = "{gen} {input_text_fa} {end} \n"
