@@ -299,10 +299,6 @@ decoder_prompts = {}
 def fill_consts(template, extemp, row, rows=[], mask=-1, ph=""):
     text = template
     #dlog.debug("fill const for: %s", text)
-    ph = placeholder_token
-    if "___" in template:
-        dlog.info("Blank found")
-        ph = "<extra_id_1>"
     rel = row["prefix"]
     rel_token = atomic_relation_mappings[rel]        
     rel_natural_en = relation_natural_mappings[rel]["en"]        
@@ -313,7 +309,6 @@ def fill_consts(template, extemp, row, rows=[], mask=-1, ph=""):
             "{rel_natural_fa}":rel_natural_fa,
             "{gen_fa}":gen_token_fa,
             "{gen_en}":gen_token_en,
-            "_+":placeholder_token,
             "{ph}":ph,
             "{end}":end_token}
     rep = dict((re.escape(k), v) for k, v in rep.items()) 
@@ -792,9 +787,14 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
                     qtemp, anstemp, extemp = create_templates(mt, 
                             gen_pos="end", prompt_pos=prompt_pos)
                     plen = relation_prompt_lengths[rel][0]
+                    ph = placeholder_token
+                    if "___" in event:
+                        #dlog.info("Blank found")
+                        event = event.replace("___", ph)
+                        ph = "<extra_id_1>"
                     mask = random.randint(0, plen-1)
-                    _qtemp = fill_consts(qtemp, extemp,d, context_rows, mask=mask)
-                    _anstemp = fill_consts(anstemp, extemp,d, context_rows, mask=mask)
+                    _qtemp = fill_consts(qtemp, extemp,d, context_rows, mask=mask,ph=ph)
+                    _anstemp = fill_consts(anstemp, extemp,d, context_rows, mask=mask,ph=ph)
                     _query = fill_vars(_qtemp, rel, event, gen_token, resp, 
                             input_lang, target_lang) 
                     query = (index, _query)
