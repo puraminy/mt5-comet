@@ -553,6 +553,10 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            qtemp = "{examples} {gen}"
            extemp = "{gen} {input_text} {end} \n"
            anstemp = "{event} {end}"
+       elif method == "gpt-fa-event-n":
+           qtemp = "{examples} {gen}"
+           extemp = "{gen} {input_text_fa} {end} \n"
+           anstemp = "{event} {end}"
        elif method == "event-n-wrap":
            qtemp = "{examples} {enc_token} {ph}"
            extemp = "{enc_token} {input_text} {end} \n"
