@@ -791,7 +791,7 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
                     methods = methods[0]
                 for mt in methods:
                     if "-fa" in mt and input_lang == "fa":
-                        query = toPers(query)
+                        event = toPers(event)
                     if "-fa" in mt and target_lang == "fa":
                         resp = toPers(resp)
 
