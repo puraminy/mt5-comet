@@ -301,6 +301,7 @@ def fill_consts(template, extemp, row, rows=[], mask=-1, ph=""):
     #dlog.debug("fill const for: %s", text)
     ph = placeholder_token
     if "___" in template:
+        dlog.info("Blank found")
         ph = "<extra_id_1>"
     rel = row["prefix"]
     rel_token = atomic_relation_mappings[rel]        
@@ -312,7 +313,7 @@ def fill_consts(template, extemp, row, rows=[], mask=-1, ph=""):
             "{rel_natural_fa}":rel_natural_fa,
             "{gen_fa}":gen_token_fa,
             "{gen_en}":gen_token_en,
-            "___":placeholder_token,
+            "_+":placeholder_token,
             "{ph}":ph,
             "{end}":end_token}
     rep = dict((re.escape(k), v) for k, v in rep.items()) 
@@ -455,7 +456,7 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
        extemp = ""
        if method == "blank":
            qtemp = "{event}"
-           anstemp = ""
+           anstemp = "blank"
        elif method == "pred-emb":
            qtemp = "{enc_token_rest}"
            anstemp = "{ph} {enc_token_mask}"
