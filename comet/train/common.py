@@ -157,7 +157,7 @@ relation_prompt_lengths = {
 
 
 def get_prompt_token_fn(id_offset,length):
-    return lambda x: (x>=id_offset)&(x<=id_offset+length)
+    return lambda x: (x>=id_offset)&(x<id_offset+length)
 
 encoder_relation_mappings = {}
 decoder_relation_mappings = {}
