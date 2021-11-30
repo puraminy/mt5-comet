@@ -790,7 +790,7 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
                 if len(methods) > 1 and split_name == "validation":
                     methods = methods[0]
                 for mt in methods:
-                    if "-fa" in mt and inp_lang == "fa":
+                    if "-fa" in mt and input_lang == "fa":
                         query = toPers(query)
                     if "-fa" in mt and target_lang == "fa":
                         resp = toPers(resp)
