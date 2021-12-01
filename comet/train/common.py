@@ -57,7 +57,10 @@ SPECIAL_TOKENS  = { "bos_token": "<|BOS|>",
                     "unk_token": "<|UNK|>",
                     "pad_token": "<|PAD|>",
                     "sep_token": "<|SEP|>"}
+
+sep = "<|SEP|>"
 pad_token = {"pad_token": "<|PAD|>"}
+sep_token = {"sep_token": sep}
 nli_map = ['contradiction', 'entailment', 'neutral']
 atomic_relation_mappings = {
     "oEffect":"<oEffect>",
@@ -311,6 +314,7 @@ def fill_consts(template, extemp, row, rows=[], mask=-1, ph="", method=""):
             "{rel_natural_en}":rel_natural_en,
             "{rel_natural_fa}":rel_natural_fa,
             "{gen_fa}":gen_token_fa,
+            "{sep}":sep,
             "{gen_en}":gen_token_en,
             "{ph}":ph,
             "{end}":end_token}
@@ -537,13 +541,13 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            qtemp = "{examples} {gen} {ph}"
            extemp = "{gen} {input_text} {end} \n"
            anstemp = "{ph} {event} {end}"
-       elif method == "event-resp-n":
-           qtemp = "{examples} {ph}"
-           extemp = "{input_text} {rel_natural_en} {target_text} {end} \n"
-           anstemp = "{ph} {event} {rel_natural} {resp} {end}"
-       elif method == "gpt-event-resp-n":
-           qtemp = "{examples} {enc_token}"
+       elif method == "event-resp-n-wrap":
+           qtemp = "{examples} {enc_token} {ph}"
            extemp = "{enc_token} {input_text} {rel_natural_en} {target_text} {end} \n"
+           anstemp = "{ph} {event} {rel_natural} {resp} {end}"
+       elif method == "gpt-event-resp-n-wrap":
+           qtemp = "{examples} {enc_token}"
+           extemp = "{enc_token} {input_text} {rel_natural_en} {target_text} {sep} \n"
            anstemp = "{event} {rel_natural} {resp} {end}"
        elif method == "fa-event-n":
            qtemp = "{examples} {gen} {ph}"

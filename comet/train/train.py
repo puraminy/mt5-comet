@@ -828,6 +828,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     #%% build dataloader
     if "gpt" in model_id: 
         tokenizer.add_special_tokens(pad_token)
+        tokenizer.add_special_tokens(sep_token)
         mlog.info("pad token id: %s", tokenizer.pad_token_id)
         data_collator = collate_fn_for_generation
     else:
