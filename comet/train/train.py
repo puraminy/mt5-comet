@@ -770,6 +770,12 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     iterations = train_records//batch_size
     assert iterations != 0, "There is no data to train!!!!!!!!"
     assert val_records != 0, "There is no data for validation!!!!!!!!"
+    for split, df in atomic_dataset.items():
+        _p = train_path if split == "train" else val_path
+        _p = _p.replace(".tsv", "_last.tsv")
+        mlog.info("Saving last dataframes")
+        df.to_csv(_p, index=False, sep="\t")
+    
     for logger in [mlog, tlog]:
         logger.info("Iterations:"  + str(iterations))
     warm_up_steps = 0.002*iterations
