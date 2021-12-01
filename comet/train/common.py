@@ -714,10 +714,12 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
             targ_include="",
             targ_exclude="",
             pred_tresh=0,
-            nli_group="all", is_record=False, start=0, sampling=0, samples_per_head=0): 
+            nli_group="all", is_record=False, start=0, 
+            sampling=0, ex_type="same_rel",  samples_per_head=0): 
     dlog.info("building query responses for {}".format(split_name))
     dlog.info(f"len:{len(split_df)}")
     natural = inp_include == "natural"
+    main_df = split_df
     if split_name != "train":
         start = 0
     if natural and split_name != "train": natural = False 
@@ -782,7 +784,13 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
             continue
         context_rows=[]
         if sampling > 0 and sampling < len(split_df):
-            context_rows = split_df.sample(n=sampling)
+            if ex_type == "other_rel":
+                context_rows = main_df[(split_df["input_text"] == eng_inp) &
+                                         (split_df["prefix"] != rel)]
+            elif ex_type == "same_rel":
+                context_rows = split_df.sample(n=sampling)
+            else:
+                raise ValueError("Ex_type is invalid:" + ex_type)
         if not rel in data_split:
             data_split[rel] = {}
         for inp in inputs:
