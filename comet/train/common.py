@@ -425,6 +425,36 @@ def fill_consts(template, extemp, row, rows=[], mask=-1, ph="", method=""):
         text = text.replace("{enc_token}",prompt, 1)
         counter += enc_plen 
         pi += 1
+    ii = 1
+    ## storyyyy
+    for idx, _row in rows.iterrows():
+        example = extemp
+        relation = _row["prefix"]
+        numbered = False
+        if "{num}" in extemp:
+            numbered = True
+            example = example.replace("{num}", "")
+        #dlog.info("example: %s", _row)
+        if "{enc_token}" in extemp:
+            assert enc_prompt != "", "Prompt was not set!"
+        example = fill_const_for_rel(example, _row, ph)
+        example = example.replace("{enc_token}", enc_prompt)
+        example = example.replace("{dec_token}", dec_prompt)
+        for key,value in _row.items():
+            val = str(value)
+            if "fa" in method and "_fa" in key:
+                val = toPers(val)
+            example = example.replace("{" + key + "}", val)
+        if numbered: 
+            example = " " + str(ii) + ") " + example
+        text = text.replace("{" + relation + "}", example)
+        ii += 1
+    for relation in all_rels:
+        if relation == rel:
+            text = text.replace("{" + relation + "}", "{event} {rel_natural} {ph}")
+        else:
+            text = text.replace("{" + relation + "}", "")
+
     if "{examples}" in text:
         examples = ""
         assert len(rows) > 0, "Since there are examples in template, rows must be provided"
@@ -555,6 +585,10 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            qtemp = "{examples} {gen} {ph}"
            extemp = "{gen} {input_text} {end} \n"
            anstemp = "{ph} {event} {end}"
+       elif method == "story-wrap":
+           qtemp = "{xAttr} {xIntent} {xNeed} {xReact} {oReact} {xWant} {oWant} {xEffect} {oEffect}"
+           extemp = "{rel_natural_en} {target_text}."
+           anstemp = "{ph} {resp} {end}"
        elif method == "event-resp-n-wrap":
            qtemp = "{event} {examples} {enc_token} {event} {rel_natural} {ph}"
            extemp = "{rel_natural_en} {target_text} {end} \n"
@@ -657,10 +691,11 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
 
        return qtemp, anstemp, extemp
 
-def fill_vars(template, rel, event, gen_token, resp, inp_lang, resp_lang):
+def fill_vars(template, rel, event, gen_token, resp, inp_lang, resp_lang, ph):
     rel_natural = relation_natural_mappings[rel][inp_lang]        
     rep  = {"{event}":event, 
             "{resp}":resp,
+            "{ph}":ph,
             "{rel_natural}":rel_natural,
             "{gen}":gen_token}
     rep = dict((re.escape(k), v) for k, v in rep.items()) 
@@ -859,7 +894,7 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
                             gen_pos="end", prompt_pos=prompt_pos)
                     plen = relation_prompt_lengths[rel][0]
                     ph = placeholder_token
-                    if "___" in event:
+                    if only_blanks and "___" in event:
                         #dlog.info("Blank found")
                         event = event.replace("___", ph)
                         ph = "<extra_id_1>"
@@ -867,10 +902,10 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
                     _qtemp = fill_consts(qtemp, extemp,d, context_rows, mask=mask,ph=ph,method = mt)
                     _anstemp = fill_consts(anstemp, extemp,d, context_rows, mask=mask,ph=ph, method = mt)
                     _query = fill_vars(_qtemp, rel, event, gen_token, resp, 
-                            input_lang, target_lang) 
+                            input_lang, target_lang, ph=ph) 
                     query = (index, _query)
                     response = fill_vars(_anstemp, rel, event, gen_token, resp, 
-                            input_lang, target_lang)
+                            input_lang, target_lang, ph=ph)
                     lang = input_lang + "2" + target_lang
                     if not lang in lang_counter:
                         lang_counter[lang] = 1
