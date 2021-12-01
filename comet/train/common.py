@@ -431,6 +431,9 @@ def fill_consts(template, extemp, row, rows=[], mask=-1, ph="", method=""):
         ii = 1
         for idx, _row in rows.iterrows():
             example = extemp
+            if "{num}" in extemp:
+                numbered = True
+                example = example.replace("{num}", "")
             #dlog.info("example: %s", _row)
             if "{enc_token}" in extemp:
                 assert enc_prompt != "", "Prompt was not set!"
@@ -442,7 +445,10 @@ def fill_consts(template, extemp, row, rows=[], mask=-1, ph="", method=""):
                 if "fa" in method and "_fa" in key:
                     val = toPers(val)
                 example = example.replace("{" + key + "}", val)
-            examples += " " + str(ii) + ") " + example
+            if numbered: 
+                examples += " " + str(ii) + ") " + example
+            else:
+                examples += example
             ii += 1
 
         text = text.replace("{examples}", examples + " " + str(ii) + ")")
