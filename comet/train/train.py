@@ -12,6 +12,7 @@ from transformers import (
 )
 import torch
 import re
+import pickle
 import json
 import glob
 from torch.utils.tensorboard import SummaryWriter
@@ -717,6 +718,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     if model_id in ["t5-large","t5-small", "t5-base", "gpt2"]:
         lang = "en"
     split_lang = {}
+    split_path = {"train":train_path, "validation":val_path}
     if "-" in lang:
         split_lang["train"] = lang.split("-")[0]
         split_lang["validation"] = lang.split("-")[1]
@@ -735,22 +737,37 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
         targ_include, targ_exclude = filter_inputs(include, exclude, targ_lang)
         if split_name == "validation":
             samples_per_head = 2
-        (atomic_query_responses[split_name], 
-         atomic_flattened[split_name],
-         num_records[split_name]
-        )= fill_data(split_df, split_name,
-                            method, prompt_pos, rel_filter,
-                            num_samples[split_name], 
-                            ignore_blanks,
-                            only_blanks,
-                            inp_include,
-                            inp_exclude,
-                            targ_include,
-                            targ_exclude,
-                            pred_tresh, nli_group, is_record, start, 
-                            sampling, ex_type,
-                            samples_per_head
-                    )
+        if last_data:
+            mlog.info("Reading saved pickle")
+            with open(split_path[split_name] + ".pickle", 'rb') as handle:
+                (atomic_query_responses[split_name], 
+                 atomic_flattened[split_name],
+                 num_records[split_name]
+                ) = pickle.load(handle)
+
+        else:
+            (atomic_query_responses[split_name], 
+             atomic_flattened[split_name],
+             num_records[split_name]
+            ) = fill_data(split_df, split_name,
+                                method, prompt_pos, rel_filter,
+                                num_samples[split_name], 
+                                ignore_blanks,
+                                only_blanks,
+                                inp_include,
+                                inp_exclude,
+                                targ_include,
+                                targ_exclude,
+                                pred_tresh, nli_group, is_record, start, 
+                                sampling, ex_type,
+                                samples_per_head
+                        )
+            data = (atomic_query_responses[split_name], 
+                    atomic_flattened[split_name],
+                    num_records[split_name])
+            with open(split_path[split_name] + ".pickle", 'wb') as handle:
+                pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
     train_records = num_records["train"]
     val_records = num_records["validation"]
     if deep_log:
