@@ -305,8 +305,7 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
 @click.option(
     "--wrap",
     "-w",
-    default="",
-    type=str,
+    is_flag=True,
     help=""
 )
 @click.option(
@@ -687,10 +686,10 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
         mlog.info("from words ids ***: %s", fw_tokens)
         length = [len(fw_tokens)]
         mlog.info("length got from words ids ***: %s", length)
-        set_prompt_lengths(wrap, length)
+        set_prompt_lengths(rel_filter, length)
     else:
         length = [int(s) for s in prompt_length.split("-")]
-        set_prompt_lengths(wrap, length)
+        set_prompt_lengths(rel_filter, length)
 
     #tokenize_relations(tokenizer)
     atomic_query_responses = {}
@@ -719,7 +718,6 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
         targ_include, targ_exclude = filter_inputs(include, exclude, targ_lang)
         if split_name == "validation":
             samples_per_head = 2
-        rel_filter = wrap if wrap else rel_filter
         (atomic_query_responses[split_name], 
          atomic_flattened[split_name],
          num_records[split_name]
@@ -853,12 +851,12 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
             load_prompt_path = os.path.join(load_path, model_id, "prompt")
             mlog.info("prompt path:%s ", load_prompt_path)
         mlog.info("Wrapping the model ...")
-        wrapped_model = wrap_model(model, tokenizer, wrap, encoder_type, load_prompt_path, from_words = from_words) 
+        wrapped_model = wrap_model(model, tokenizer, rel_filter, encoder_type, load_prompt_path, from_words = from_words) 
     if wrapped_model:
         wrapped_model.to(device=device)
         mlog.info("len tokenizer after wrapping %s", len(tokenizer))
     else:
-        wrap = ""
+        wrap = False
         extend_tokenizer(tokenizer, "")
         mlog.info("len tokenizer after extending %s", len(tokenizer))
         model.resize_token_embeddings(len(tokenizer))
