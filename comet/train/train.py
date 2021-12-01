@@ -1161,7 +1161,7 @@ def translate(model, tokenizer, df, trans_col, path, logger=None, start=0, save_
             mlog.info("len(trans): %s", len(trans))
             mlog.info("row: %s", trans_row)
         pbar.update()
-        if len(trans) > 3 and len(trans) % save_step == 0 or (len(trans) == 5 amd first):
+        if len(trans) > 3 and len(trans) % save_step == 0 or (len(trans) == 5 and first):
             p = os.path.join(save_path, fname + str(ii).replace("000","k_") + ".tsv")
             mlog.info("Saving at %s", p)
             mlog.info("Len trans: %s", len(trans))
