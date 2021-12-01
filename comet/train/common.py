@@ -431,6 +431,7 @@ def fill_consts(template, extemp, row, rows=[], mask=-1, ph="", method=""):
         ii = 1
         for idx, _row in rows.iterrows():
             example = extemp
+            numbered = False
             if "{num}" in extemp:
                 numbered = True
                 example = example.replace("{num}", "")
