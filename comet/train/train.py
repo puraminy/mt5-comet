@@ -1156,8 +1156,10 @@ def translate(model, tokenizer, df, trans_col, path, logger=None, start=0, save_
         _t = hyps[0]
         trans_row = {newcol:_t, oldcol:row[oldcol], "prefix":row["prefix"], "input_text":row["input_text"]}
         trans.append(trans_row)
+        if len(trans) < 5:
+            mlog.inf("row: %s", trans_row)
         pbar.update()
-        if len(trans) % save_step == 0:
+        if len(trans) % save_step == 0 or len(trans) == 5:
             p = os.path.join(save_path, fname + str(ii).replace("000","k_") + ".tsv")
             if logger:
                 logger.info("Saving at %s", p)
