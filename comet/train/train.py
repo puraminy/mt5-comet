@@ -523,8 +523,14 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
     is_flag=True,
     help=""
 )
+@click.option(
+    "--last_df",
+    "-ldf",
+    is_flag=True,
+    help=""
+)
 def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, val_set, 
-         val_samples, load_path, train_path, val_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, is_record, reset_results, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data):
+         val_samples, load_path, train_path, val_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, is_record, reset_results, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, last_df):
 
     #%% some hyper-parameters
 
@@ -682,7 +688,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
 
     #%% load atomic data
     atomic_dataset = {}
-    if last_data:
+    if last_df:
         train_path = train_path.replace(".tsv", "_last.tsv")
         val_path = val_path.replace(".tsv", "_last.tsv")
         mlog.info("Load last data...")
