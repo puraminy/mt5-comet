@@ -524,13 +524,14 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
     help=""
 )
 @click.option(
-    "--last_df",
-    "-ldf",
-    is_flag=True,
+    "--save_df",
+    "-sdf",
+    default="",
+    type=str,
     help=""
 )
 def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, val_set, 
-         val_samples, load_path, train_path, val_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, is_record, reset_results, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, last_df):
+         val_samples, load_path, train_path, val_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, is_record, reset_results, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df):
 
     #%% some hyper-parameters
 
@@ -688,9 +689,9 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
 
     #%% load atomic data
     atomic_dataset = {}
-    if last_df:
-        train_path = train_path.replace(".tsv", "_last.tsv")
-        val_path = val_path.replace(".tsv", "_last.tsv")
+    if save_df:
+        train_path = train_path.replace(".tsv", "_" + save_df + ".tsv")
+        val_path = val_path.replace(".tsv",  "_" + save_df + ".tsv")
         mlog.info("Load last data...")
     atomic_dataset["train"] = pd.read_table(train_path)
     atomic_dataset["validation"] = pd.read_table(val_path)
@@ -804,8 +805,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     assert iterations != 0, "There is no data to train!!!!!!!!"
     assert val_records != 0, "There is no data for validation!!!!!!!!"
     for split, df in atomic_dataset.items():
-        _p = train_path if split == "train" else val_path
-        _p = _p.replace(".tsv", "_last.tsv")
+        _p = split_path[split]
+        _p = _p.replace(".tsv","_" + save_df + ".tsv")
         mlog.info("Saving last dataframes")
         df.to_csv(_p, index=False, sep="\t")
     
