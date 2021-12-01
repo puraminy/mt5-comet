@@ -1140,8 +1140,8 @@ def translate(model, tokenizer, df, trans_col, path, logger=None, start=0, save_
     newcol = oldcol + "_" + newcol
     save_step = int(save_step)
     trans = []
-    mlog.info("len(df): ", len(df))
-    mlog.info("save_path: ", save_path)
+    mlog.info("len(df): %s", len(df))
+    mlog.info("save_path: %s", save_path)
     fname = Path(path).stem
     ii = 0
     for idx, row in df.iterrows():
@@ -1154,7 +1154,7 @@ def translate(model, tokenizer, df, trans_col, path, logger=None, start=0, save_
             mlog.info("Error: %s:", e)
             continue
         _t = hyps[0]
-        tans_row = {newcol:_t, oldcol:row[oldcol], "prefix":row["prefix"], "input_text":row["input_text"]}
+        trans_row = {newcol:_t, oldcol:row[oldcol], "prefix":row["prefix"], "input_text":row["input_text"]}
         trans.append(trans_row)
         pbar.update()
         if len(trans) % save_step == 0:
