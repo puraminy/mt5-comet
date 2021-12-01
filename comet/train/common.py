@@ -303,7 +303,7 @@ def wrap_model(model, tokenizer, rel, encoder_type="lstm", prompt_path="", from_
 
 encoder_prompts = {} 
 decoder_prompts = {}
-def fill_consts(template, extemp, row, rows=[], mask=-1, ph="", method=""):
+def fill_const_for_rel(template, row, ph):
     text = template
     #dlog.debug("fill const for: %s", text)
     rel = row["prefix"]
@@ -325,7 +325,11 @@ def fill_consts(template, extemp, row, rows=[], mask=-1, ph="", method=""):
     for key,value in row.items():
         val = str(value)
         text = text.replace("{" + key + "}", val)
+    return text
 
+def fill_consts(template, extemp, row, rows=[], mask=-1, ph="", method=""):
+    text = fill_const_for_rel(template, row, ph)
+    rel = row["prefix"]
     plen = relation_prompt_lengths[rel]
     #dlog.info("fill consts, rel %s, plen %s", rel, plen)
     if not rel in encoder_prompts:
@@ -430,7 +434,7 @@ def fill_consts(template, extemp, row, rows=[], mask=-1, ph="", method=""):
             #dlog.info("example: %s", _row)
             if "{enc_token}" in extemp:
                 assert enc_prompt != "", "Prompt was not set!"
-            example = pattern.sub(lambda m: rep[re.escape(m.group(0))], example)
+            example = fill_const_for_rel(example, _row, ph)
             example = example.replace("{enc_token}", enc_prompt)
             example = example.replace("{dec_token}", dec_prompt)
             for key,value in _row.items():
@@ -798,7 +802,8 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
                 context_rows = main_df[(main_df["input_text"] == d["input_text"])   
                                         & (main_df["prefix"] != rel)  
                                         & (main_df["prefix"].isin(sel_rels))]
-                context_rows = context_rows.groupby(["prefix"]).agg({"target_text":"first",
+                context_rows = context_rows.groupby(["prefix"]).agg({"prefix":"first",
+                                                                     "target_text":"first",
                                                                      "input_text":"first"})
                 #dlog.info("context rows: %s", context_rows)
                 if len(context_rows) == 0:
