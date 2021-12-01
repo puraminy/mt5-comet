@@ -62,6 +62,7 @@ sep = "<|SEP|>"
 pad_token = {"pad_token": "<|PAD|>"}
 sep_token = {"sep_token": sep}
 nli_map = ['contradiction', 'entailment', 'neutral']
+all_rels = ["oEffect","oReact", "oWant", "xAttr", "xEffect","xIntent","xNeed","xReact","xWant"]
 atomic_relation_mappings = {
     "oEffect":"<oEffect>",
     "oReact":"<oReact>",
@@ -422,9 +423,11 @@ def fill_consts(template, extemp, row, rows=[], mask=-1, ph="", method=""):
         pi += 1
     if "{examples}" in text:
         examples = ""
+        assert len(rows) > 0, "Since there are examples in template, rows must be provided"
         ii = 1
         for idx, _row in rows.iterrows():
             example = extemp
+            #dlog.info("example: %s", _row)
             if "{enc_token}" in extemp:
                 assert enc_prompt != "", "Prompt was not set!"
             example = pattern.sub(lambda m: rep[re.escape(m.group(0))], example)
@@ -784,9 +787,23 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
             continue
         context_rows=[]
         if sampling > 0 and sampling < len(split_df):
-            if ex_type == "other_rel":
-                context_rows = main_df[(split_df["input_text"] == eng_inp) &
-                                         (split_df["prefix"] != rel)]
+            if "other_rel" in ex_type:
+                #dlog.info("main df rows: %s", len(main_df))
+                #dlog.info("rel: %s", rel)
+                #dlog.info("eng_input: %s", d["input_text"])
+                sel_rels = all_rels
+                if "@" in ex_type:
+                    _rels = ex_type.split("@")[1]
+                    sel_rels = _rels.split("-")
+                context_rows = main_df[(main_df["input_text"] == d["input_text"])   
+                                        & (main_df["prefix"] != rel)  
+                                        & (main_df["prefix"].isin(sel_rels))]
+                context_rows = context_rows.groupby(["prefix"]).agg({"target_text":"first",
+                                                                     "input_text":"first"})
+                #dlog.info("context rows: %s", context_rows)
+                if len(context_rows) == 0:
+                    dlog.info("No row was selected for other rel")
+                    continue
             elif ex_type == "same_rel":
                 context_rows = split_df.sample(n=sampling)
             else:

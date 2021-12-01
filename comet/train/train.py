@@ -344,7 +344,7 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
 @click.option(
     "--train_path",
     "-tp",
-    default="atomic/train10k.tsv",
+    default="atomic/train.tsv",
     type=str,
     help=""
 )
@@ -768,9 +768,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
         accumulation_tiny_steps = 1
     node_batch_size = batch_size//accumulation_tiny_steps
     iterations = train_records//batch_size
-    if iterations == 0:
-        mlog.info("There is no data to train!!!!!!!!")
-        return
+    assert iterations != 0, "There is no data to train!!!!!!!!"
+    assert val_records != 0, "There is no data for validation!!!!!!!!"
     for logger in [mlog, tlog]:
         logger.info("Iterations:"  + str(iterations))
     warm_up_steps = 0.002*iterations
