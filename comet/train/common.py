@@ -549,8 +549,8 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            extemp = "{gen} {input_text} {end} \n"
            anstemp = "{ph} {event} {end}"
        elif method == "event-resp-n-wrap":
-           qtemp = "{examples} {enc_token} {event} {rel_natural} {ph}"
-           extemp = "{input_text} {rel_natural_en} {target_text} {end} \n"
+           qtemp = "{event} {examples} {enc_token} {event} {rel_natural} {ph}"
+           extemp = "{rel_natural_en} {target_text} {end} \n"
            anstemp = "{ph} {resp} {end}"
        elif method == "gpt-event-resp-n-wrap":
            qtemp = "{examples} {enc_token}"
