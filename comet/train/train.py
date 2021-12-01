@@ -690,9 +690,14 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     #%% load atomic data
     atomic_dataset = {}
     if save_df:
-        train_path = train_path.replace(".tsv", "_" + save_df + ".tsv")
-        val_path = val_path.replace(".tsv",  "_" + save_df + ".tsv")
-        mlog.info("Load last data...")
+        _train_path = train_path.replace(".tsv", "_" + save_df + ".tsv")
+        _val_path = val_path.replace(".tsv",  "_" + save_df + ".tsv")
+        if Path(_train_path).exists():
+            train_path = _train_path
+            mlog.info("Loading train data...")
+        if Path(_val_path).exists():
+            val_path = _val_path
+            mlog.info("Loading val data...")
     atomic_dataset["train"] = pd.read_table(train_path)
     atomic_dataset["validation"] = pd.read_table(val_path)
     if trans:
