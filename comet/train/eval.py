@@ -56,15 +56,15 @@ def gen_resp(model, tokenizer, query, gen_token = "", gen_param = "greedy", at_m
         gen_param, skip_special = gen_param.split("@")
     if gen_param == "greedy":
         generation_params = {
-            "max_length":220,
-            "num_beams":5,
+            "max_length":260,
+            "num_beams":4,
             "repetition_penalty":5.5,
             "num_return_sequences":3,
             "bad_words_ids": bad_words_ids
         }
     elif gen_param == "top_p":
         generation_params = {
-            "max_length":220,
+            "max_length":260,
             "do_sample":True, 
             "top_p":0.9, 
             "top_k":10,
