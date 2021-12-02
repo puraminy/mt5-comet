@@ -160,8 +160,8 @@ relation_prompt_lengths = {
 }
 
 
-def get_prompt_token_fn(id_offset,length):
-    return lambda x: (x>=id_offset)&(x<id_offset+length)
+def get_prompt_token_fn(id_offset):
+    return lambda x: (x>=id_offset) #&(x<id_offset+length)
 
 encoder_relation_mappings = {}
 decoder_relation_mappings = {}
@@ -278,7 +278,7 @@ def wrap_rel_model(model, tokenizer, prompt_tokens, encoder_type="lstm",
 
     model.resize_token_embeddings(len(tokenizer))
     if not wrapped_model:
-        wrapped_model = PTuningWrapper(model,prompt_encoder)
+        wrapped_model = PTuningWrapper(model,prompt_encoder, prompt_token_fn=get_prompt_token_fn(id_offset))
     else:
         wrapped_model.add_prompt_encoder(prompt_encoder)
 
