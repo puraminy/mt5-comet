@@ -124,15 +124,27 @@ class PTuningWrapper(torch.nn.Module):
             wlog.info(">>>>>>>>>>>>>>>End of imput embeds >>>>>>>>>>>>>>>>>>")
             if self.prompt_encoders:
                 #find input ids for prompt tokens
-                encoder = self.prompt_encoders[0]
-                encoder_masks = encoder.get_prompt_token_fn()(input_ids)
-                prompt_input_ids = input_ids[encoder_masks]
+                encoder = prompt_encoders[0]
+                prompt_input_ids = input_ids[prompt_masks]
                 wlog.log(ll, "promp encoder exists")
                 wlog.log(ll, "promp input ids:{}".format(prompt_input_ids))
                 # call forwards on prompt encoder whose outputs are prompt embeddings
                 prompt_embeds = encoder(prompt_input_ids,\
                     prompt_ids).to(device=inputs_embeds.device)
-                inputs_embeds[encoder_masks]=prompt_embeds
+            #不能用masked_select，这个是创建新的tensor，修改它不会改原先的变量
+            #应该用masked_scatter，或者indexput
+            # inputs_embeds.masked_scatter_(prompt_masks.unsqueeze(-1),
+            #     prompt_embeds.expand(inputs_embeds.shape[0],-1,-1))
+            #使用index_put,后面的expand其实可以换成repeat，反正reshape也会导致copy
+            # inputs_embeds[prompt_masks]=prompt_embeds.expand(inputs_embeds.\
+            #     shape[0],-1,-1).reshape(-1,inputs_embeds.shape[-1])
+            #使用repeat
+            # inputs_embeds[prompt_masks]=prompt_embeds.repeat(inputs_embeds.\
+            #     shape[0],1)
+            #把repeat交给prompt_encoder进行处理
+                 # replace prompt_embeddings calculated by prompt encoder in input embeddings
+                # in input embeds replace embeddings for prompt token with output of encoder
+                inputs_embeds[prompt_masks]=prompt_embeds
         else:
             inputs_embeds = self.model_embeddings(input_ids)
 
