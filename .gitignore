@@ -1,6 +1,7 @@
 *.pickle
 .idea
 *.iml
+*.tsv
 *.pyc
 *.ipynb
 *.bin
