@@ -208,17 +208,18 @@ def extend_tokenizer(tokenizer, prompt_tokens = [], model_id=""):
 def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words=False):
     wrapped_model = None
     id_offset = len(tokenizer)
+    mlog.info("ID OFFSET: %s", id_offset)
     prompt_encoders = []
     for rel, prompt_tokens in encoder_prompts.items():
         mlog.info("******************* Wrapping model for %s", rel)
         if from_words == "rel":
             from_words = relation_natural_mappings[rel]["en"]
-        encoder = wrap_rel_model(model, tokenizer, prompt_tokens, encoder_type, from_words, wrapped_model)
+        encoder = create_encoder(model, tokenizer, prompt_tokens, encoder_type, from_words, wrapped_model)
         prompt_encoders.append(encoder)
     wrapped_model = PTuningWrapper(model,prompt_encoders, prompt_token_fn=get_prompt_token_fn(id_offset))
     return wrapped_model
 
-def wrap_rel_model(model, tokenizer, prompt_tokens, encoder_type="lstm", 
+def create_encoder(model, tokenizer, prompt_tokens, encoder_type="lstm", 
         from_words=False, wrapped_model = None):
     embedding_dim = model.config.hidden_size
     enc_plen = len(prompt_tokens)
