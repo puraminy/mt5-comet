@@ -769,7 +769,7 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
             targ_exclude="",
             pred_tresh=0,
             nli_group="all", is_record=False, start=0, 
-            sampling=0, ex_type="same_rel",  samples_per_head=0): 
+            sampling=0, ex_type="same_rel",  samples_per_head=0, save_df_path=""): 
     dlog.info("building query responses for {}".format(split_name))
     dlog.info(f"len:{len(split_df)}")
     natural = inp_include == "natural"
@@ -818,6 +818,8 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
     flat_data = []
     old_input = ""
     si = 0
+    ignored = 0
+    ex_df = split_df
     for index, d in split_df.iterrows():
         rel = d["prefix"]
         if not rel in rel_counter:
@@ -848,13 +850,16 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
                     sel_rels = _rels.split("-")
                 context_rows = main_df[(main_df["input_text"] == d["input_text"])   
                                         & (main_df["prefix"] != rel)  
-                                        & (main_df["prefix"].isin(sel_rels))]
+                                        & (main_df["prefix"].isin(sel_rels))
+                                        & (main_df["target_text"] != "none")]
                 context_rows = context_rows.groupby(["prefix"]).agg({"prefix":"first",
                                                                      "target_text":"first",
                                                                      "input_text":"first"})
+                ex_df = ex_df.append(context_rows, ignore_index= True)
                 #dlog.info("context rows: %s", context_rows)
-                if len(context_rows) == 0:
-                    dlog.info("No row was selected for other rel")
+                if len(context_rows) < len(sel_rels):
+                    dlog.info("%s) No row was selected for other rel", ignored)
+                    ignored += 1
                     continue
             elif ex_type == "same_rel":
                 context_rows = split_df.sample(n=sampling)
@@ -933,6 +938,15 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
                         return data_split, flat_data, kk
             #didn't convert ___ to <blank>
             #didn't normalize to lowercase
+    if save_df_path:
+        ex_df = ex_df.sort_values(by=["input_text","prefix"])
+        ex_df.to_csv(save_df_path, index=False, sep="\t")
+        mlog.info("For %s", split_name)
+        mlog.info("ignored rows: %s", ignored)
+        mlog.info("len ex_df: %s", len(ex_df))
+        mlog.info("len main_df: %s", len(main_df))
+        mlog.info("len split_df: %s", len(split_df))
+        
     return data_split, flat_data, kk
 
 def save_checkpoint(model, optimizer, scheduler, step, 

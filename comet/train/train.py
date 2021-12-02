@@ -721,6 +721,12 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
         length = [int(s) for s in prompt_length.split("-")]
         set_prompt_lengths(rel_filter, length)
 
+    split_path = {"train":train_path, "validation":val_path}
+    save_df_path = {}
+    for split, _p in split_path.items():
+        if not _p.endswith("_" + save_df + ".tsv"):
+            _p = _p.replace(".tsv","_" + save_df + ".tsv")
+        save_df_path[split] = _p
     #tokenize_relations(tokenizer)
     atomic_query_responses = {}
     atomic_flattened = {}
@@ -730,7 +736,6 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     if model_id in ["t5-large","t5-small", "t5-base", "gpt2"]:
         lang = "en"
     split_lang = {}
-    split_path = {"train":train_path, "validation":val_path}
     if "-" in lang:
         split_lang["train"] = lang.split("-")[0]
         split_lang["validation"] = lang.split("-")[1]
@@ -772,7 +777,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
                                 targ_exclude,
                                 pred_tresh, nli_group, is_record, start, 
                                 sampling, ex_type,
-                                samples_per_head
+                                samples_per_head, save_df_path[split_name]
                         )
             data = (atomic_query_responses[split_name], 
                     atomic_flattened[split_name],
@@ -789,11 +794,6 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
         logger.info("Val Records:"  + str(val_records))
     assert train_records != 0, "There is no data to train!!!!!!!!"
     assert val_records != 0, "There is no data for validation!!!!!!!!"
-    for split, df in atomic_dataset.items():
-        _p = split_path[split]
-        _p = _p.replace(".tsv","_" + save_df + ".tsv")
-        mlog.info("Saving last dataframes")
-        df.to_csv(_p, index=False, sep="\t")
     if model_id == "test":
         return
     mlog.info("len tokenizer %s", len(tokenizer))
