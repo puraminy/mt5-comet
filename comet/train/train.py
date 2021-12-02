@@ -1100,16 +1100,6 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     pbar.close()
     sw.close()
     if wrap:
-        if wrapped_model.prompt_encoder:
-            prompt_path = os.path.join(save_path, "prompt", "encoder")
-            Path(prompt_path).mkdir(exist_ok=True, parents=True)
-            mlog.info("Saving encoder prompt at %s", prompt_path)
-            wrapped_model.prompt_encoder.save(prompt_path)
-        if wrapped_model.decoder_prompt_encoder:
-            prompt_path = os.path.join(save_path, "prompt", "decoder")
-            Path(prompt_path).mkdir(exist_ok=True, parents=True)
-            mlog.info("Saving decoder prompt at %s", prompt_path)
-            wrapped_model.decoder_prompt_encoder.save(prompt_path)
         with torch.no_grad():
             mlog.info("Updating the model weights before evaluaton...")
             wrapped_model.update_model_weight()
