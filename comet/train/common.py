@@ -467,6 +467,13 @@ def fill_consts(template, ex_temp, context, row, rows=[], mask=-1, method=""):
         example = fill_const_for_rel(example, _row)
         example = example.replace("{enc_token}", enc_prompt)
         example = example.replace("{dec_token}", dec_prompt)
+        rel_enc_token = [f"<{relation}_enc_token_1>",f"<{relation}_enc_token_2>"]
+        prompt = " ".join(rel_enc_token)
+        for token in rel_enc_token:
+            if not token in encoder_prompts[rel]:
+                encoder_prompts[rel].append(token)
+
+        example = example.replace("{rel_enc_token}", prompt)
         for key,value in _row.items():
             val = str(value)
             if "fa" in method and "_fa" in key:
@@ -593,7 +600,7 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
        elif method == "story-wrap":
            qtemp = "{enc_token} {event} {rel_natural} {ph}"
            context = "{xAttr} {xIntent} {xReact}"
-           ex_qtemp = "{enc_token} {target_text} {end}"
+           ex_qtemp = "{rel_enc_token} {target_text} {end}"
            anstemp = "{ph} {resp} {end}"
        elif method == "event-resp-n-wrap":
            qtemp = "{event} {examples} {enc_token} {event} {rel_natural} {ph}"
