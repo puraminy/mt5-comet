@@ -787,6 +787,13 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     for logger in [mlog, clog, vlog]:
         logger.info("Train records:"  + str(train_records))
         logger.info("Val Records:"  + str(val_records))
+    assert train_records != 0, "There is no data to train!!!!!!!!"
+    assert val_records != 0, "There is no data for validation!!!!!!!!"
+    for split, df in atomic_dataset.items():
+        _p = split_path[split]
+        _p = _p.replace(".tsv","_" + save_df + ".tsv")
+        mlog.info("Saving last dataframes")
+        df.to_csv(_p, index=False, sep="\t")
     if model_id == "test":
         return
     mlog.info("len tokenizer %s", len(tokenizer))
@@ -807,13 +814,6 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
         accumulation_tiny_steps = 1
     node_batch_size = batch_size//accumulation_tiny_steps
     iterations = train_records//batch_size
-    assert iterations != 0, "There is no data to train!!!!!!!!"
-    assert val_records != 0, "There is no data for validation!!!!!!!!"
-    for split, df in atomic_dataset.items():
-        _p = split_path[split]
-        _p = _p.replace(".tsv","_" + save_df + ".tsv")
-        mlog.info("Saving last dataframes")
-        df.to_csv(_p, index=False, sep="\t")
     
     for logger in [mlog, tlog]:
         logger.info("Iterations:"  + str(iterations))

@@ -506,7 +506,7 @@ def filter_inputs(include, exclude, lang):
 def create_templates(method, gen_pos="end", prompt_pos="end"):
        ex_qtemp = ""
        ex_anstemp = ""
-       context = "{xAttr} {xIntent} {xNeed} {xReact} {oReact} {xWant} {oWant} {xEffect} {oEffect}"
+       context = "{xIntent} {xAttr} {xNeed} {xReact} {oReact} {xWant} {oWant} {xEffect} {oEffect}"
        if method == "blank":
            qtemp = "{event} {rel_natural} {resp}"
            anstemp = "blank"
