@@ -122,13 +122,13 @@ class PTuningWrapper(torch.nn.Module):
             for encoder in self.prompt_encoders:
                 prompt_token_fn = encoder.get_prompt_token_fn()
                 encoder_masks = prompt_token_fn(input_ids)
-                wlog.info("Prompt masks: %s", prompt_masks)
+                wlog.info("Encoder masks: %s", encoder_masks)
                 if encoder_masks.any():
                     #find input ids for prompt tokens
                     prompt_input_ids = input_ids[encoder_masks]
                     wlog.info("Prompt Input ids: %s", prompt_input_ids)
                     # call forwards on prompt encoder whose outputs are prompt embeddings
-                    prompt_embeds = encoder(prompt_input_ids,\
+                    prompt_embeds = self.prompt_encoders[0](prompt_input_ids,\
                         prompt_ids).to(device=input_embeds.device)
                     # replace prompt_embeddings calculated by prompt encoder in input embeddings
                     # in input embeds replace embeddings for prompt token with output of encoder
