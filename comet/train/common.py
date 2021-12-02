@@ -212,6 +212,7 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words
         if from_words == "rel":
             from_words = relation_natural_mappings[rel]["en"]
         wrapped_model = wrap_rel_model(model, tokenizer, prompt_tokens, encoder_type, from_words, wrapped_model)
+    return wrapped_model
 
 def wrap_rel_model(model, tokenizer, prompt_tokens, encoder_type="lstm", 
         from_words=False, wrapped_model = None):
