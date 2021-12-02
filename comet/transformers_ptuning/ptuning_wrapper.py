@@ -97,11 +97,11 @@ class PTuningWrapper(torch.nn.Module):
             wlog.debug("ITTTTTTTTTT doesn't come here")
             # self.model_embeddings_size = self.model.get_input_embeddings()\
             #     .num_embeddings
-            self.model_embeddings_size = self.model.config.vocab_size
+            self.model_embeddings_size = self.underlying_model.config.vocab_size
             self.prompt_token_fn = lambda t:(t>=self.model_embeddings_size)
             
             #Default: All token ids beyond num_embeddings are seen as prompt token
-    def add_prompt_encoder(encoder):
+    def add_prompt_encoder(self, encoder):
         self.prompt_encoders.append(encoder)
 
     def forward(self,input_ids, labels, decoder_input_ids=None,prompt_ids=None,**kwargs):

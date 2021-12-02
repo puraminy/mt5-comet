@@ -260,7 +260,6 @@ def wrap_rel_model(model, tokenizer, prompt_tokens, encoder_type="lstm",
     prompt_encoder = None
     #mlog.info("Init Embs %s", init_embs)
     mlog.info("Encoder Type %s", encoder_type)
-    mlog.info("wrap rel %s", rel)
     mlog.info("id_offset: %s", id_offset)
     mlog.info("enc_plan: %s", enc_plen)
     mlog.info("enc prompts: %s", prompt_tokens)
