@@ -110,9 +110,7 @@ class PTuningWrapper(torch.nn.Module):
         # find masks based on the range of prompt ids (offset_id < X < offset_id + prompt_length)
         #Because this wrapper only deals with a single prompt, the length should be the same, you can use masked_select to reshape 
         prompt_masks = self.prompt_token_fn(input_ids)
-        if not prompt_masks.any():
-            inputs_embeds = self.model_embeddings(input_ids)
-        else:
+        if prompt_masks.any():
             wlog.log(ll, "promp masks:{}".format(prompt_masks))
             input_ids_ = input_ids.clone()
             wlog.info("inpu ids :{}".format(input_ids))
@@ -121,23 +119,22 @@ class PTuningWrapper(torch.nn.Module):
                 input_ids_[prompt_masks]=self.replacing_token_id
             # find the model embeddings of input ids except for prompt tokens
             inputs_embeds = self.model_embeddings(input_ids_)
-            device = inputs_embeds.device
-            wlog.info("Device: %s", device)
-            p_embeds = []
             for encoder in self.prompt_encoders:
                 prompt_token_fn = encoder.get_prompt_token_fn()
-                prompt_masks = prompt_token_fn(input_ids)
+                encoder_masks = prompt_token_fn(input_ids)
                 wlog.info("Prompt masks: %s", prompt_masks)
-                if prompt_masks.any():
+                if encoder_masks.any():
                     #find input ids for prompt tokens
-                    prompt_input_ids = input_ids[prompt_masks]
+                    prompt_input_ids = input_ids[encoder_masks]
                     wlog.info("Prompt Input ids: %s", prompt_input_ids)
                     # call forwards on prompt encoder whose outputs are prompt embeddings
                     prompt_embeds = encoder(prompt_input_ids,\
-                        prompt_ids).to(device=device)
-                    p_embeds.append(prompt_embeds)
-            for emb in p_embeds:
-                inputs_embeds[prompt_masks]=emb
+                        prompt_ids).to(device=input_embeds.device)
+                    # replace prompt_embeddings calculated by prompt encoder in input embeddings
+                    # in input embeds replace embeddings for prompt token with output of encoder
+                    inputs_embeds[encoder_masks]=prompt_embeds
+        else:
+            inputs_embeds = self.model_embeddings(input_ids)
         
         if decoder_input_ids is not None:
             if self.decoder_prompt_encoder is not None:
