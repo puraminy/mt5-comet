@@ -229,7 +229,7 @@ def wrap_rel_model(model, tokenizer, prompt_tokens, encoder_type="lstm",
            for i, e in zip(range(len(new_tokens)), rel_embs):
                init_embs[i] = e.detach()
 
-    rel_tokens = prompt_token
+    rel_tokens = prompt_tokens
     mlog.info("** rel tokens : %s", rel_tokens)
     cur_list = tokenizer.additional_special_tokens
     mlog.info("** cur tokens : %s", cur_list)
