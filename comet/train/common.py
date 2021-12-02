@@ -185,13 +185,13 @@ def set_prompt_lengths(rel, length):
         for rel in relation_prompt_lengths.keys():
             relation_prompt_lengths[rel] = length
 
-def extend_tokenizer(tokenizer, rel="", model_id=""):
+def extend_tokenizer(tokenizer, prompt_tokens = [], model_id=""):
     cur_list = tokenizer.additional_special_tokens
     new_tokens = tokens.t5_tokens + \
                  list(atomic_relation_mappings.values())+ \
                  list(gen_tokens.values()) 
-    if rel:
-        new_tokens += encoder_prompts[rel] + decoder_prompts[rel]  
+    if prompt_tokens:
+        new_tokens += prompt_tokens
 
     dlog.info(cur_list)
     added_tokens = [ 
@@ -200,21 +200,25 @@ def extend_tokenizer(tokenizer, rel="", model_id=""):
             for tok in new_tokens if not tok in cur_list
     ]
     if added_tokens:
+        added_tokens = cur_list + added_tokens
         tokenizer.add_special_tokens({"additional_special_tokens":added_tokens})
     else:
         mlog.info("No new token was added")
 
-def wrap_model(model, tokenizer, rel, encoder_type="lstm", prompt_path="", from_words=False):
-    embedding_dim = model.config.hidden_size
-    enc_plen = len(encoder_prompts[rel])
-    dec_plen = len(decoder_prompts[rel])
-    if not rel in encoder_prompts or enc_plen == 0:
-        mlog.info("No encoder prompt defined in input!")
-        return None
-    init_embs = {} 
-    if from_words and from_words != "none":
+def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words=False):
+    wrapped_model = None
+    for rel, prompt_tokens in encoder_prompts.items():
+        mlog.info("******************* Wrapping model for %s", rel)
         if from_words == "rel":
             from_words = relation_natural_mappings[rel]["en"]
+        wrapped_model = wrap_rel_model(model, tokenizer, prompt_tokens, encoder_type, from_words, wrapped_model)
+
+def wrap_rel_model(model, tokenizer, prompt_tokens, encoder_type="lstm", 
+        from_words=False, wrapped_model = None):
+    embedding_dim = model.config.hidden_size
+    enc_plen = len(prompt_tokens)
+    init_embs = {} 
+    if from_words and from_words != "none":
         new_tokens = tokenizer.tokenize(from_words)
         mlog.info("** loading from words : %s", new_tokens)
         _ids = tokenizer.convert_tokens_to_ids(new_tokens)
@@ -225,7 +229,7 @@ def wrap_model(model, tokenizer, rel, encoder_type="lstm", prompt_path="", from_
            for i, e in zip(range(len(new_tokens)), rel_embs):
                init_embs[i] = e.detach()
 
-    rel_tokens = encoder_prompts[rel] + decoder_prompts[rel] 
+    rel_tokens = prompt_token
     mlog.info("** rel tokens : %s", rel_tokens)
     cur_list = tokenizer.additional_special_tokens
     mlog.info("** cur tokens : %s", cur_list)
@@ -249,55 +253,34 @@ def wrap_model(model, tokenizer, rel, encoder_type="lstm", prompt_path="", from_
 
     enc_plen =len(rel_tokens) 
     mlog.info("** len tokenizer before extend: %s", len(tokenizer))
-    extend_tokenizer(tokenizer, rel)
+    extend_tokenizer(tokenizer, prompt_tokens)
     rel_ids = tokenizer.convert_tokens_to_ids(rel_tokens)
     mlog.info("** final rel ids: %s", rel_ids)
     id_offset = min(rel_ids) 
-    dec_offset = id_offset + enc_plen
     prompt_encoder = None
-    decoder_prompt_encoder = None
     #mlog.info("Init Embs %s", init_embs)
     mlog.info("Encoder Type %s", encoder_type)
     mlog.info("wrap rel %s", rel)
     mlog.info("id_offset: %s", id_offset)
     mlog.info("enc_plan: %s", enc_plen)
-    mlog.info("enc prompts: %s", encoder_prompts[rel])
-    mlog.info("dec_plan: %s", dec_plen)
-    mlog.info("dec prompts: %s", decoder_prompts[rel])
-    mlog.info("decoder offset: %s", dec_offset)
+    mlog.info("enc prompts: %s", prompt_tokens)
     if encoder_type.startswith("emb"):
         mlog.info("in Emb %s", encoder_type)
         if enc_plen > 0:
             mlog.info("Prompt Encoder defined : %s", enc_plen)
             prompt_encoder = EmbeddingPromptEncoder(enc_plen,
                     embedding_dim,id_offset,init_embs)
-        if dec_plen > 0:
-            mlog.info("decoder prompt defined: %s", dec_offset)
-            decoder_prompt_encoder = EmbeddingPromptEncoder(dec_plen,
-                    embedding_dim,dec_offset, init_embs)
     else:
         if enc_plen > 0:
             mlog.info("Prompt Encoder defined : %s", enc_plen)
             prompt_encoder = LSTMEmbeddingPromptEncoder(enc_plen,embedding_dim,
                     id_offset, init_embs)
-        if dec_plen > 0:
-            mlog.info("decoder prompt defined: %s", dec_offset)
-            decoder_prompt_encoder = LSTMEmbeddingPromptEncoder(dec_plen,
-                    embedding_dim,dec_offset,init_embs)
-    if "joint" in encoder_type:
-        decoder_prompt_encoder = prompt_encoder
 
     model.resize_token_embeddings(len(tokenizer))
-    wrapped_model = PTuningWrapper(model,prompt_encoder,
-            decoder_prompt_encoder,
-            prompt_token_fn=get_prompt_token_fn(id_offset,enc_plen + dec_plen))
-    if False: #prompt_path:
-        if Path(os.path.join(prompt_path, "encoder")).exists():
-            mlog.info("Loading saved encoder prompt...")
-            wrapped_model.prompt_encoder.load(prompt_path)
-        if Path(os.path.join(prompt_path, "decoder")).exists():
-            mlog.info("Loading saved decoder prompt...")
-            wrapped_model.decoder_prompt_encoder.load(prompt_path)
+    if not wrapped_model:
+        wrapped_model = PTuningWrapper(model,prompt_encoder)
+    else:
+        wrapped_model.add_prompt_encoder(prompt_encoder)
 
     return wrapped_model
 
@@ -470,8 +453,10 @@ def fill_consts(template, ex_temp, context, row, rows=[], mask=-1, method=""):
         rel_enc_token = [f"<{relation}_enc_token_1>",f"<{relation}_enc_token_2>"]
         prompt = " ".join(rel_enc_token)
         for token in rel_enc_token:
-            if not token in encoder_prompts[rel]:
-                encoder_prompts[rel].append(token)
+            if not relation in encoder_prompts:
+                encoder_prompts[relation] = []
+            if not token in encoder_prompts[relation]:
+                encoder_prompts[relation].append(token)
 
         example = example.replace("{rel_enc_token}", prompt)
         for key,value in _row.items():

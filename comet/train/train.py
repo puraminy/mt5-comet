@@ -914,7 +914,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
         mlog.info("len tokenizer after wrapping %s", len(tokenizer))
     else:
         wrap = False
-        extend_tokenizer(tokenizer, "")
+        extend_tokenizer(tokenizer)
         mlog.info("len tokenizer after extending %s", len(tokenizer))
         model.resize_token_embeddings(len(tokenizer))
         model.to(device=device)

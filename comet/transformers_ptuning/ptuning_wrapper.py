@@ -72,6 +72,8 @@ class PTuningWrapper(torch.nn.Module):
         model_embeddings_size = model.get_input_embeddings().num_embeddings
         wlog.debug("model embedding_size:{}".format(model_embeddings_size))
         self.prompt_encoder = prompt_encoder
+        if prompt_encoder:
+            self.prompt_encoders = [prompt_encoder]
         self.decoder_prompt_encoder = decoder_prompt_encoder
         self.replacing_token_id = replacing_token_id
         wlog.debug("REP id:{}".format(replacing_token_id))
@@ -99,50 +101,29 @@ class PTuningWrapper(torch.nn.Module):
             self.prompt_token_fn = lambda t:(t>=self.model_embeddings_size)
             
             #Default: All token ids beyond num_embeddings are seen as prompt token
+    def add_prompt_encoder(encoder):
+        self.prompt_encoders.append(encoder)
 
     def forward(self,input_ids, labels, decoder_input_ids=None,prompt_ids=None,**kwargs):
         ll = self.ll # log level
         wlog.log(ll, "wrapper forward was called")
         wlog.log(ll, "Prompt ids:{}".format(prompt_ids))
         # find masks based on the range of prompt ids (offset_id < X < offset_id + prompt_length)
-        prompt_masks = self.prompt_token_fn(input_ids)
         #Because this wrapper only deals with a single prompt, the length should be the same, you can use masked_select to reshape 
-        if prompt_masks.any():
-            wlog.log(ll, "promp masks:{}".format(prompt_masks))
-            input_ids_ = input_ids.clone()
-            wlog.info("inpu ids :{}".format(input_ids))
-            if self.replacing_token_id is not None:
-                # replace prompt ids in input_ids with replacing token
-                input_ids_[prompt_masks]=self.replacing_token_id
-            # find the model embeddings of input ids except for prompt tokens  
-            inputs_embeds = self.model_embeddings(input_ids_)
-            wlog.info(">>>>>>>>>>>>>Input Embeds>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-            wlog.info(inputs_embeds)
-            wlog.info(">>>>>>>>>>>>>>>End of imput embeds >>>>>>>>>>>>>>>>>>")
-            if self.prompt_encoder:
+        inputs_embeds = self.model_embeddings(input_ids)
+        for encoder in self.prompt_encoders:
+            prompt_token_fn = encoder.get_prompt_token_fn()
+            prompt_masks = prompt_token_fn(input_ids)
+            if prompt_masks.any():
                 #find input ids for prompt tokens
                 prompt_input_ids = input_ids[prompt_masks]
-                wlog.log(ll, "promp encoder exists")
-                wlog.log(ll, "promp input ids:{}".format(prompt_input_ids))
+                wlog.info("Prompt Input ids: %s", prompt_input_ids)
                 # call forwards on prompt encoder whose outputs are prompt embeddings
-                prompt_embeds = self.prompt_encoder(prompt_input_ids,\
+                prompt_embeds = encoder(prompt_input_ids,\
                     prompt_ids).to(device=inputs_embeds.device)
-            #不能用masked_select，这个是创建新的tensor，修改它不会改原先的变量
-            #应该用masked_scatter，或者indexput
-            # inputs_embeds.masked_scatter_(prompt_masks.unsqueeze(-1),
-            #     prompt_embeds.expand(inputs_embeds.shape[0],-1,-1))
-            #使用index_put,后面的expand其实可以换成repeat，反正reshape也会导致copy
-            # inputs_embeds[prompt_masks]=prompt_embeds.expand(inputs_embeds.\
-            #     shape[0],-1,-1).reshape(-1,inputs_embeds.shape[-1])
-            #使用repeat
-            # inputs_embeds[prompt_masks]=prompt_embeds.repeat(inputs_embeds.\
-            #     shape[0],1)
-            #把repeat交给prompt_encoder进行处理
-                 # replace prompt_embeddings calculated by prompt encoder in input embeddings
+                # replace prompt_embeddings calculated by prompt encoder in input embeddings
                 # in input embeds replace embeddings for prompt token with output of encoder
                 inputs_embeds[prompt_masks]=prompt_embeds
-        else:
-            inputs_embeds = self.model_embeddings(input_ids)
         
         if decoder_input_ids is not None:
             if self.decoder_prompt_encoder is not None:
@@ -184,11 +165,11 @@ class PTuningWrapper(torch.nn.Module):
     
     def update_model_weight(self):
         wlog.info(f"Updating model weights")
-        if self.prompt_encoder:
+        self.cur_embeddings = self.underlying_model.get_input_embeddings()
+        for encoder in self.prompt_encoders:
             wlog.info(f"the wrapper has prompt encoder")
-            self.cur_embeddings = self.underlying_model.get_input_embeddings()
             # fill the current embeddings with weights of encoder
-            self.prompt_encoder.dump_embedding(self.cur_embeddings.weight)
+            encoder.dump_embedding(self.cur_embeddings.weight)
             #self.prompt_encoder.dump_embedding(self.model_embeddings.weight)
         if self.decoder_prompt_encoder == self.prompt_encoder:
             wlog.info(f"Encoder and Decoder are the same")
@@ -211,6 +192,8 @@ class PromptEncoder(torch.nn.Module):
                     self.embedding.weight[_id] = emb
                     emblog.info("%s : %s", _id, emb)
 
+    def get_prompt_token_fn():
+        return lambda x: (x>=self.id_offset)&(x<self.id_offset+self.length)
     def dump_embedding(self,weight):
         raise NotImplementedError
     def save(self, path):
