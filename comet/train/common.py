@@ -591,7 +591,8 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            ex_qtemp = "{gen} {input_text} {end} \n"
            anstemp = "{ph} {event} {end}"
        elif method == "story-wrap":
-           qtemp = "{event} {rel_natural} {enc_token} {ph}"
+           qtemp = "{event} {enc_token} {ph}"
+           context = "{xAttr} {xIntent} {xReact}"
            ex_qtemp = "{rel_natural_en} {target_text}"
            anstemp = "{ph} {resp} {end}"
        elif method == "event-resp-n-wrap":
