@@ -315,7 +315,7 @@ def fill_consts(template, ex_temp, context, row, rows=[], mask=-1, method=""):
     rel = row["prefix"]
     plen = relation_prompt_lengths[rel]
     text = text.replace("{ph}", placeholder_token)
-    #dlog.info("fill consts, input text: %s", text)
+    #dlog.info("fill consts, input text: %s", context)
     if not rel in encoder_prompts:
         encoder_prompts[rel] = []
     if not rel in decoder_prompts:
@@ -442,6 +442,8 @@ def fill_consts(template, ex_temp, context, row, rows=[], mask=-1, method=""):
     for idx, _row in rows.iterrows():
         example = ex_temp
         relation = _row["prefix"]
+        if relation == rel:
+            continue
         numbered = False
         if "{num}" in ex_temp:
             numbered = True

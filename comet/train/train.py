@@ -694,7 +694,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
             save_df = "all_rels"
         else:
             _, save_df = ex_type.split("@")
-    if save_df:
+    if False: #save_df:
         _train_path = train_path.replace(".tsv", "_" + save_df + ".tsv")
         _val_path = val_path.replace(".tsv",  "_" + save_df + ".tsv")
         if Path(_train_path).exists():
