@@ -65,15 +65,16 @@ class PTuningWrapper(torch.nn.Module):
         """
         super().__init__()
         self.ll = logging.INFO
-        wlog.debug("%%%%%%%%%%%%%%%%%%%%%%%% New version %%%%%%%%%%%%%%%%%%")
+        wlog.info("%%%%%%%%%%%%%%%%%%%%%%%% New version %%%%%%%%%%%%%%%%%%")
         self.underlying_model = model
         self.model_embeddings = model.get_input_embeddings()
-        wlog.debug("self.model embedding:{}".format(self.model_embeddings))
+        wlog.info("self.model embedding:{}".format(self.model_embeddings))
         model_embeddings_size = model.get_input_embeddings().num_embeddings
-        wlog.debug("model embedding_size:{}".format(model_embeddings_size))
+        wlog.info("model embedding_size:{}".format(model_embeddings_size))
         self.prompt_encoder = prompt_encoder
         if prompt_encoder:
             self.prompt_encoders = [prompt_encoder]
+            wlog.info(self.prompt_encoders)
         self.decoder_prompt_encoder = decoder_prompt_encoder
         self.replacing_token_id = replacing_token_id
         wlog.debug("REP id:{}".format(replacing_token_id))
