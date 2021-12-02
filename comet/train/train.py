@@ -908,7 +908,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
             load_prompt_path = os.path.join(load_path, model_id, "prompt")
             mlog.info("prompt path:%s ", load_prompt_path)
         mlog.info("Wrapping the model ...")
-        wrapped_model = wrap_model(model, tokenizer, rel_filter, encoder_type, load_prompt_path, from_words = from_words) 
+        wrapped_model = wrap_model(model, tokenizer, encoder_type, load_prompt_path, from_words = from_words) 
     if wrapped_model:
         wrapped_model.to(device=device)
         mlog.info("len tokenizer after wrapping %s", len(tokenizer))
