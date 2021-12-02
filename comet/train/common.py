@@ -939,6 +939,7 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
             #didn't convert ___ to <blank>
             #didn't normalize to lowercase
     if save_df_path:
+        ex_df = ex_df.drop_duplicates()
         ex_df = ex_df.sort_values(by=["input_text","prefix"])
         ex_df.to_csv(save_df_path, index=False, sep="\t")
         mlog.info("For %s", split_name)
