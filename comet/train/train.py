@@ -689,6 +689,11 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
 
     #%% load atomic data
     atomic_dataset = {}
+    if not save_df:
+        if not "@" in ex_type:
+            save_df = "all_rels"
+        else:
+            _, save_df = ex_type.split("@")
     if save_df:
         _train_path = train_path.replace(".tsv", "_" + save_df + ".tsv")
         _val_path = val_path.replace(".tsv",  "_" + save_df + ".tsv")

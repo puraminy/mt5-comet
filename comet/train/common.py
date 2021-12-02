@@ -591,9 +591,8 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            ex_qtemp = "{gen} {input_text} {end} \n"
            anstemp = "{ph} {event} {end}"
        elif method == "story-wrap":
-           qtemp = "{event} {rel_natural} {ph}"
+           qtemp = "{event} {rel_natural} {enc_token} {ph}"
            ex_qtemp = "{rel_natural_en} {ph}"
-           ex_anstemp = "{ph} {target_text} {end}"
            anstemp = "{ph} {resp} {end}"
        elif method == "event-resp-n-wrap":
            qtemp = "{event} {examples} {enc_token} {event} {rel_natural} {ph}"
@@ -786,6 +785,7 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
             split_df[col] = split_df[col].astype(str)
     if ignore_blanks: # and len(split_df) > num_rows:
         split_df = split_df[split_df["input_text"].str.contains('___')==False]
+        main_df = main_df[main_df["input_text"].str.contains('___')==False]
         #split_df = split_df[split_df["target_text"] != "none"]
         dlog.info("*** Filtered for ignoring blanks ")
     elif only_blanks:
@@ -819,7 +819,7 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
     old_input = ""
     si = 0
     ignored = 0
-    ex_df = split_df
+    ex_df = pd.DataFrame(columns=["input_text","prefix", "target_text"])
     for index, d in split_df.iterrows():
         rel = d["prefix"]
         if not rel in rel_counter:
@@ -855,12 +855,14 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
                 context_rows = context_rows.groupby(["prefix"]).agg({"prefix":"first",
                                                                      "target_text":"first",
                                                                      "input_text":"first"})
-                ex_df = ex_df.append(context_rows, ignore_index= True)
                 #dlog.info("context rows: %s", context_rows)
                 if len(context_rows) < len(sel_rels):
                     dlog.info("%s) No row was selected for other rel", ignored)
                     ignored += 1
                     continue
+                else:
+                    ex_df = ex_df.append(context_rows, ignore_index= True)
+                    ex_df = ex_df.append(d, ignore_index= True)
             elif ex_type == "same_rel":
                 context_rows = split_df.sample(n=sampling)
             else:
@@ -939,7 +941,7 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
             #didn't convert ___ to <blank>
             #didn't normalize to lowercase
     if save_df_path:
-        ex_df = ex_df.drop_duplicates()
+        ex_df = ex_df.drop_duplicates(["input_text","prefix"])
         ex_df = ex_df.sort_values(by=["input_text","prefix"])
         ex_df.to_csv(save_df_path, index=False, sep="\t")
         mlog.info("For %s", split_name)
