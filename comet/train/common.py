@@ -793,12 +793,13 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
         dlog.info("*** Filtered based on nli_group "+ nli_group)
 
     dlog.info(f"len after filtering:{len(split_df)}")
-    if rel_filter and not "other_rel" in ex_type:
-        split_df = split_df[split_df["prefix"] == rel_filter]
-        dlog.info("len after relation filter: %s", len(split_df))
-    elif not rel_filter:
-        split_df = split_df.groupby("prefix").sample(n=num_samples)
-        dlog.info(f"len after sampling:{len(split_df)}")
+    if not "other_rel" in ex_type:
+        if rel_filter:
+            split_df = split_df[split_df["prefix"] == rel_filter]
+            dlog.info("len after relation filter: %s", len(split_df))
+        else: 
+            split_df = split_df.groupby("prefix").sample(n=num_samples)
+            dlog.info(f"len after sampling:{len(split_df)}")
     split_df = split_df.sort_values(by="input_text")
     cats_num = len(split_df["prefix"].unique())
     dlog.info("Cats Num: %s", cats_num)

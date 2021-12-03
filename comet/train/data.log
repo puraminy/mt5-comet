@@ -516,3 +516,20 @@ en: 1) <gen_en>
  6) <gen_en>
 
 en:PersonX achieves PersonX's dream </s>
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%% test 
+%%%%%%%%%%%%%%%%%% test 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Columns of train  Unnamed: 0
+prefix
+input_text
+target_text
+   Unnamed: 0   prefix                            input_text           target_text
+0           0   oReact  PersonX uses PersonX's ___ to obtain               annoyed
+1           1   oReact  PersonX uses PersonX's ___ to obtain                 angry
+2           2   oReact  PersonX uses PersonX's ___ to obtain               worried
+3           3  xIntent  PersonX uses PersonX's ___ to obtain  to have an advantage
+4           4  xIntent  PersonX uses PersonX's ___ to obtain   to fulfill a desire
+building query responses for train
+len:709996
+len after filtering:709996
