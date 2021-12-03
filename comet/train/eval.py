@@ -299,7 +299,11 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
     for i, (a,q) in enumerate(zip(answers,questions)):
         mlog.info("{:<2} {:<40}:".format(i,q))
         for ans in a:
-            mlog.info("{:>100}:".format(ans))
+            mlog.info("{:>60}:".format(ans))
+
+    for metric in [mean_rouge, mean_bert, mean_match, mean_bleu]:
+        for key,val in metric.items():
+            metric[key] = str(val) + "--" + str(counter[key])
 
     mean_bert_str = json.dumps(mean_bert, indent=2)
     mean_rouge_str = json.dumps(mean_rouge, indent=2)
@@ -310,7 +314,7 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
         for i, (a,q) in enumerate(zip(answers,questions)):
             print("{:<2} {:<40}:".format(i,q), file =f)
             for ans in a:
-                print("{:>100}:".format(ans), file = f)
+                print("{:^}:".format(ans), file = f)
 
         print("{:<40}:".format(mean_rouge_str), file = f)
         print("{:<40}:".format(mean_bert_str), file = f)
