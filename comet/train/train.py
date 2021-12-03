@@ -345,14 +345,14 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
 @click.option(
     "--train_path",
     "-tp",
-    default="atomic/train.tsv",
+    default="atomic/train_all_rels.tsv",
     type=str,
     help=""
 )
 @click.option(
     "--val_path",
     "-vp",
-    default="atomic/val.tsv",
+    default="atomic/val_all_rels.tsv",
     type=str,
     help=""
 )
