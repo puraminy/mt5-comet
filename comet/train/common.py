@@ -312,6 +312,29 @@ def fill_const_for_rel(template, row):
         text = text.replace("{" + key + "}", val)
     return text
 
+def fill_prompt(text, rel, place_holder, counter = 0):
+    pi = 0
+    plen = relation_prompt_lengths[rel]
+    place_holder = place_holder.replace("{", "<")  
+    place_holder = place_holder.replace("}", ">")  
+    place_holder = place_holder.replace("rel", rel)  
+    while place_holder in text:
+        enc_plen = plen[pi] if pi < len(plen) else plen[-1] 
+        prompt = ""
+        for i in range(counter, counter + enc_plen):
+            token = place_holder
+            token = token.replace("_i", str(i))  
+            prompt += " " + token
+            if not rel in encoder_prompts:
+                encoder_prompts[rel] = []
+            if not token in encoder_prompts[rel]:
+                encoder_prompts[rel].append(token)
+        prompt = prompt.strip()
+        text = text.replace("{rel_i}",prompt, 1)
+        counter += enc_plen 
+        pi += 1
+    return text
+
 def fill_consts(template, ex_temp, context, row, rows=[], mask=-1, method=""):
     text = fill_const_for_rel(template, row)
     rel = row["prefix"]
@@ -393,24 +416,7 @@ def fill_consts(template, ex_temp, context, row, rows=[], mask=-1, method=""):
         text = text.replace("{enc_com_token}",prompt, 1)
         counter += enc_plen 
         pi += 1
-    counter = 0
-    pi = 0
-    enc_prompt = ""
-    dec_prompt = ""
-    while "{enc_token}" in text:
-        enc_plen = plen[pi] if pi < len(plen) else plen[-1] 
-        prompt = ""
-        for i in range(counter, counter + enc_plen):
-            token = f"<enc_{rel}_{i}>" 
-            prompt += " " + token
-            if not token in encoder_prompts[rel]:
-                encoder_prompts[rel].append(token)
-        prompt = prompt.strip()
-        if not enc_prompt:
-            enc_prompt = prompt
-        text = text.replace("{enc_token}",prompt, 1)
-        counter += enc_plen 
-        pi += 1
+    text = fill_prompt(text, rel, "{rel_i}")
     if "{examples}" in text:
         examples = ""
         assert len(rows) > 0, "Since there are examples in template, rows must be provided"
@@ -422,11 +428,10 @@ def fill_consts(template, ex_temp, context, row, rows=[], mask=-1, method=""):
                 numbered = True
                 example = example.replace("{num}", "")
             #dlog.info("example: %s", _row)
-            if "{enc_token}" in ex_temp:
+            if "{rel_i}" in ex_temp:
                 assert enc_prompt != "", "Prompt was not set!"
-            example = fill_const_for_rel(example, _row, ph)
-            example = example.replace("{enc_token}", enc_prompt)
-            example = example.replace("{dec_token}", dec_prompt)
+            example = fill_const_for_rel(example, _row)
+            example = fill_prompt(example, rel, "{rel_i}")
             for key,value in _row.items():
                 val = str(value)
                 if "fa" in method and "_fa" in key:
@@ -450,20 +455,10 @@ def fill_consts(template, ex_temp, context, row, rows=[], mask=-1, method=""):
         if "{num}" in ex_temp:
             numbered = True
             example = example.replace("{num}", "")
-        if "{enc_token}" in ex_temp:
+        if "{rel_i}" in ex_temp:
             assert enc_prompt != "", "Prompt was not set!"
         example = fill_const_for_rel(example, _row)
-        example = example.replace("{enc_token}", enc_prompt)
-        example = example.replace("{dec_token}", dec_prompt)
-        rel_enc_token = [f"<{relation}_enc_token_1>",f"<{relation}_enc_token_2>"]
-        prompt = " ".join(rel_enc_token)
-        for token in rel_enc_token:
-            if not relation in encoder_prompts:
-                encoder_prompts[relation] = []
-            if not token in encoder_prompts[relation]:
-                encoder_prompts[relation].append(token)
-
-        example = example.replace("{rel_enc_token}", prompt)
+        example = fill_prompt(example, relation, "{rel_i}")
         for key,value in _row.items():
             val = str(value)
             if "fa" in method and "_fa" in key:
@@ -514,11 +509,11 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            qtemp = "{enc_token_mask} {ph}"
            anstemp = "{ph} {enc_token_cont}"
        elif method == "rel-enc":
-           qtemp = "{event} {enc_token} {ph}"
+           qtemp = "{event} {rel_i} {ph}"
            anstemp = "{ph} {resp} {end}"
        elif method == "rel-dec":
            qtemp = "{event} {ph} {resp}"
-           anstemp = "{ph} {enc_token}"
+           anstemp = "{ph} {rel_i}"
        elif method == "rel-mask":
            qtemp = "{event} {ph} {resp}"
            anstemp = "{ph} {rel_natural}"
@@ -529,37 +524,37 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            qtemp = "{event} {rel_natural} {ph} "
            anstemp = "{ph} {resp}"
        elif method == "sup-pred-enfa":
-           qtemp = "{input_text} {enc_token} {gen_fa}"
+           qtemp = "{input_text} {rel_i} {gen_fa}"
            anstemp = "{input_text_fa} {dec_token} {target_text_fa}"
        elif method == "sup-enfa":
-           qtemp = "{input_text} {enc_token} {target_text} {gen_fa}"
+           qtemp = "{input_text} {rel_i} {target_text} {gen_fa}"
            anstemp = "{input_text_fa} {dec_token} {target_text_fa}"
        elif method == "sup-enmix":
-           qtemp = "{input_text} {enc_token} {target_text} {gen}"
+           qtemp = "{input_text} {rel_i} {target_text} {gen}"
            anstemp = "{event} {dec_token} {gen} {resp}"
        elif method == "unsup-nat-gen":
-           qtemp = "{enc_token} {event} {rel_natural} {gen} {ph}" 
+           qtemp = "{rel_i} {event} {rel_natural} {gen} {ph}" 
            anstemp = "{ph} {resp} {end}"
        elif method == "unsup-nat":
            qtemp = "{event} {rel_natural} {ph}" 
            anstemp = "{ph} {resp} {end}"
        elif method == "enc-unsup-nat":
-           qtemp = "{enc_token} {event} {rel_natural} {ph}" 
+           qtemp = "{rel_i} {event} {rel_natural} {ph}" 
            anstemp = "{ph} {resp} {end}"
        elif method == "unsup-nat-fa":
            qtemp = "{event} {rel_natural_fa} {ph}" 
            anstemp = "{ph} {resp} {end}"
        elif method == "unsup-nat-wrap":
-           qtemp = "{enc_token} {event} {rel_natural} {ph}" 
+           qtemp = "{rel_i} {event} {rel_natural} {ph}" 
            anstemp = "{ph} {resp} {end}"
        elif method == "unsup-lang":
-           qtemp = "{enc_token} {event} {enc_lang_token} {ph}" 
+           qtemp = "{rel_i} {event} {enc_lang_token} {ph}" 
            anstemp = "{ph} {resp} {end}"
        elif method == "sup-gen":
            qtemp = "{event} {gen}"
            anstemp = "{resp} {end}"
        elif method == "sup-wrap":
-           qtemp = "{enc_token_start} {event} {enc_token_end} {gen}"
+           qtemp = "{rel_i_start} {event} {rel_i_end} {gen}"
            anstemp = "{resp} {end}"
        elif method == "sup-no-gen":
            qtemp = "{event}"
@@ -568,17 +563,17 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            qtemp = "{gen}"
            anstemp = "{resp}"
        elif method == "pred-enfa":
-           qtemp = "{enc_token_start} {gen_start} {input_text} {rel_natural_en} {gen_en} {ph} {event} {rel_natural} {enc_token_end} {gen_end} <extra_id_1>"
+           qtemp = "{rel_i_start} {gen_start} {input_text} {rel_natural_en} {gen_en} {ph} {event} {rel_natural} {rel_i_end} {gen_end} <extra_id_1>"
            anstemp = "{ph} {target_text} <extra_id_1> {resp} <extra_id_2>"
        elif method == "context-en":
-           qtemp = "{enc_token_start} {gen_start} {input_text} {rel_natural_en} {gen_en} {target_text} {enc_token_start} {event} {rel_natural} {enc_token_end} {gen_end} {ph}"
+           qtemp = "{rel_i_start} {gen_start} {input_text} {rel_natural_en} {gen_en} {target_text} {rel_i_start} {event} {rel_natural} {rel_i_end} {gen_end} {ph}"
            anstemp = "{ph} {resp} {end}"
        elif method == "context-faen":
-           qtemp = "{enc_token_start} {gen_start} {input_text_fa} {rel_natural_fa} {gen_en} {target_text} {event} {rel_natural} {enc_token_end} {gen_end} {ph}"
+           qtemp = "{rel_i_start} {gen_start} {input_text_fa} {rel_natural_fa} {gen_en} {target_text} {event} {rel_natural} {rel_i_end} {gen_end} {ph}"
            anstemp = "{ph} {resp} {end}"
        elif method == "context-n":
-           qtemp = "{examples} {event} {enc_token} {gen} {ph}"
-           ex_qtemp = "{input_text} {enc_token} {target_text} {end}"
+           qtemp = "{examples} {event} {rel_i} {gen} {ph}"
+           ex_qtemp = "{input_text} {rel_i} {target_text} {end}"
            anstemp = "{ph} {resp} {end}"
        elif method == "trans":
            qtemp = "{target_text} en2fa"
@@ -588,21 +583,21 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            ex_qtemp = "{gen} {input_text} {end} \n"
            anstemp = "{ph} {event} {end}"
        elif method == "story-wrap":
-           qtemp = "{enc_token} {event} {rel_natural} {ph}"
+           qtemp = "{rel_i} {event} {rel_natural} {ph}"
            context = "{xAttr} {xIntent} {xReact}"
            ex_qtemp = "{rel_enc_token} {rel_natural_en} {target_text} {end}"
            anstemp = "{ph} {resp} {end}"
        elif method == "event-resp-n-wrap":
-           qtemp = "{event} {examples} {enc_token} {event} {rel_natural} {ph}"
+           qtemp = "{event} {examples} {rel_i} {event} {rel_natural} {ph}"
            ex_qtemp = "{rel_natural_en} {target_text} {end} \n"
            anstemp = "{ph} {resp} {end}"
        elif method == "gpt-event-resp-n-wrap":
-           qtemp = "{examples} {enc_token}"
-           ex_qtemp = "{enc_token} {input_text} {rel_natural_en} {target_text} {sep} \n"
+           qtemp = "{examples} {rel_i}"
+           ex_qtemp = "{rel_i} {input_text} {rel_natural_en} {target_text} {sep} \n"
            anstemp = "{event} {rel_natural} {resp} {end}"
        elif method == "fa-gpt-event-resp-n-wrap":
-           qtemp = "{examples} {enc_token}"
-           ex_qtemp = "{enc_token} {input_text_fa} {rel_natural_fa} {target_text_fa} {sep} \n"
+           qtemp = "{examples} {rel_i}"
+           ex_qtemp = "{rel_i} {input_text_fa} {rel_natural_fa} {target_text_fa} {sep} \n"
            anstemp = "{event} {rel_natural} {resp} {end}"
        elif method == "fa-event-n":
            qtemp = "{examples} {gen} {ph}"
@@ -617,35 +612,35 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            ex_qtemp = "{gen} {input_text_fa} {end} \n"
            anstemp = "{event} {end}"
        elif method == "event-n-wrap":
-           qtemp = "{examples} {enc_token} {ph}"
-           ex_qtemp = "{enc_token} {input_text} {end} \n"
+           qtemp = "{examples} {rel_i} {ph}"
+           ex_qtemp = "{rel_i} {input_text} {end} \n"
            anstemp = "{ph} {event} {end}"
        elif method == "gpt-n":
            qtemp = "{examples} {event} {rel_natural}"
            ex_qtemp = "{input_text} {rel_natural} {target_text} {end}"
            anstemp = "{resp} {end}"
        elif method == "gpt-n-wrap":
-           qtemp = "{examples} {event} {enc_token}"
-           ex_qtemp = "{input_text} {enc_token} {target_text} {end}"
+           qtemp = "{examples} {event} {rel_i}"
+           ex_qtemp = "{input_text} {rel_i} {target_text} {end}"
            anstemp = "{resp} {end}"
        elif method == "context-n-dec":
-           qtemp = "{event} {enc_token} {gen} {ph}"
+           qtemp = "{event} {rel_i} {gen} {ph}"
            ex_qtemp = "{input_text} {target_text} {end}"
            anstemp = "{examples} {ph} {resp} {end}"
        elif method == "context-enfa":
-           qtemp = "{enc_token_start} {gen_start} {input_text} {rel_natural_en} {gen_fa} {target_text_fa} {enc_token_start} {event} {rel_natural} {enc_token_end} {gen_end} {ph}"
+           qtemp = "{rel_i_start} {gen_start} {input_text} {rel_natural_en} {gen_fa} {target_text_fa} {rel_i_start} {event} {rel_natural} {rel_i_end} {gen_end} {ph}"
            anstemp = "{ph} {resp} {end}"
        elif method == "context-fa":
-           qtemp = "{enc_token_start} {gen_start} {input_text_fa} {rel_natural_fa} {gen_fa} {target_text_fa} {enc_token_start} {event} {rel_natural} {enc_token_end} {gen_end} {ph}"
+           qtemp = "{rel_i_start} {gen_start} {input_text_fa} {rel_natural_fa} {gen_fa} {target_text_fa} {rel_i_start} {event} {rel_natural} {rel_i_end} {gen_end} {ph}"
            anstemp = "{ph} {resp} {end}"
        elif method == "sup":
            qtemp = "{rel_token} {event}"
            anstemp = "{resp} {end}"
        elif method == "sup-gen-wrap":
-           qtemp = "{enc_token_start} {gen_start} {event} {enc_token_end} {gen_end}"
+           qtemp = "{rel_i_start} {gen_start} {event} {rel_i_end} {gen_end}"
            anstemp = "{resp} {end}"
        elif method == "gpt-wrap":
-           qtemp = "{event} {enc_token}"
+           qtemp = "{event} {rel_i}"
            anstemp = "{resp} {end}"
        elif method == "gpt":
            qtemp = "{event} {rel_natural}"
@@ -660,19 +655,19 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            qtemp = "{rel_token} {event} {gen} {ph}"
            anstemp = "{ph} {resp} {end}"
        elif method == "unsup-wrap":
-           qtemp = "{enc_token_start} {gen_start} {event} {enc_token_end} {ph}"
+           qtemp = "{rel_i_start} {gen_start} {event} {rel_i_end} {ph}"
            anstemp = "{ph} {resp} {end}"
        elif method == "unsup-gen-wrap":
-           qtemp = "{enc_token_start} {gen_start} {event} {enc_token_end} {gen_end} {ph}"
+           qtemp = "{rel_i_start} {gen_start} {event} {rel_i_end} {gen_end} {ph}"
            anstemp = "{ph} {resp} {end}"
        elif method == "unsup-dec":
-           qtemp = "{enc_token_start} {gen_start} {event} {enc_token_end} {gen_end} {ph}"
+           qtemp = "{rel_i_start} {gen_start} {event} {rel_i_end} {gen_end} {ph}"
            anstemp = "{ph} {dec_token} {resp} {end}"
        elif method == "unsup-2":
-           qtemp = "{enc_token} {gen_start} {event} {enc_token} {gen_end} {ph}"
+           qtemp = "{rel_i} {gen_start} {event} {rel_i} {gen_end} {ph}"
            anstemp = "{ph} {resp} {end}"
        elif method == "unsup-3":
-           qtemp = "{enc_token} {gen_start} {event} {enc_token} {gen_end} {ph}"
+           qtemp = "{rel_i} {gen_start} {event} {rel_i} {gen_end} {ph}"
            anstemp = "{ph} {dec_token} {resp} {end}"
        else:
            raise ValueError("not supprted method: " + method)
@@ -683,11 +678,11 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            qtemp = qtemp.replace(" {gen_end}","")
            qtemp = qtemp.replace("{gen_start}","{gen}")
        if prompt_pos == "end":
-           qtemp = qtemp.replace("{enc_token_start} ","")
-           qtemp = qtemp.replace("{enc_token_end}","{enc_token}")
+           qtemp = qtemp.replace("{rel_i_start} ","")
+           qtemp = qtemp.replace("{rel_i_end}","{rel_i}")
        else:
-           qtemp = qtemp.replace(" {enc_token_end}","")
-           qtemp = qtemp.replace("{enc_token_start}","{enc_token}")
+           qtemp = qtemp.replace(" {rel_i_end}","")
+           qtemp = qtemp.replace("{rel_i_start}","{rel_i}")
        while "  " in qtemp:
            qtemp = qtemp.replace("  "," ")
 
@@ -798,10 +793,10 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
         dlog.info("*** Filtered based on nli_group "+ nli_group)
 
     dlog.info(f"len after filtering:{len(split_df)}")
-    if rel_filter:
+    if rel_filter and not "other_rel" in ex_type:
         split_df = split_df[split_df["prefix"] == rel_filter]
         dlog.info("len after relation filter: %s", len(split_df))
-    else:
+    elif not rel_filter:
         split_df = split_df.groupby("prefix").sample(n=num_samples)
         dlog.info(f"len after sampling:{len(split_df)}")
     split_df = split_df.sort_values(by="input_text")
@@ -811,60 +806,69 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
     dlog.info("Num per cat: %s", num_per_cat)
     rel_counter = {}
     lang_counter = {}
+    sel_rels = []
+    if "other_rel" in ex_type:
+        samples_per_head = 0
+        num_per_cat = 0
+        sel_rels = all_rels
+        if "@" in ex_type:
+            _rels = ex_type.split("@")[1]
+            sel_rels = _rels.split("-")
+    if rel_filter and not rel_filter in sel_rels:
+        sel_rels.append(rel_filter)
     ii = 0
     kk = 0
     flat_data = []
     old_input = ""
     si = 0
     ignored = 0
-    ex_df = pd.DataFrame(columns=["input_text","prefix", "target_text"])
+    samples = sampling
+    context_rows=[]
+    context_df = None
+    ex_df = pd.DataFrame()
+    _sels = sel_rels.copy()
     for index, d in split_df.iterrows():
         rel = d["prefix"]
         if not rel in rel_counter:
             rel_counter[rel] = 1
         else:
             rel_counter[rel] += 1
-        if rel_counter[rel] >= num_per_cat:
+        if num_per_cat > 0 and rel_counter[rel] >= num_per_cat:
             continue 
         ii += 1
         eng_inp = d["input_text"]
         si += 1
         if eng_inp != old_input:
+            context_rows = []
+            _sels = sel_rels.copy()
+            dlog.info("input was changed %s", samples_per_head)
             old_input = eng_inp
             si = 0
         elif samples_per_head > 0 and si > samples_per_head:
             continue
         if ii < start:
             continue
-        context_rows=[]
-        if sampling > 0 and sampling < len(split_df):
-            if "other_rel" in ex_type:
-                #dlog.info("main df rows: %s", len(main_df))
-                #dlog.info("rel: %s", rel)
-                #dlog.info("eng_input: %s", d["input_text"])
-                sel_rels = all_rels
-                if "@" in ex_type:
-                    _rels = ex_type.split("@")[1]
-                    sel_rels = _rels.split("-")
-                context_rows = main_df[(main_df["input_text"] == d["input_text"])   
-                                        & (main_df["prefix"] != rel)  
-                                        & (main_df["prefix"].isin(sel_rels))
-                                        & (main_df["target_text"] != "none")]
-                context_rows = context_rows.groupby(["prefix"]).agg({"prefix":"first",
-                                                                     "target_text":"first",
-                                                                     "input_text":"first"})
-                #dlog.info("context rows: %s", context_rows)
-                if len(context_rows) < len(sel_rels):
-                    dlog.info("%s) No row was selected for other rel", ignored)
-                    ignored += 1
-                    continue
-                else:
-                    ex_df = ex_df.append(context_rows, ignore_index= True)
-                    ex_df = ex_df.append(d, ignore_index= True)
-            elif ex_type == "same_rel":
-                context_rows = split_df.sample(n=sampling)
+        if "other_rel" in ex_type:
+            if len(context_rows) == len(sel_rels):
+                context_df = pd.DataFrame(data=context_rows)
+                ex_df = ex_df.append(context_df)
+                dlog.info("================= has condition")
+                if rel_filter:
+                    for item in context_rows:
+                        if item["prefix"] == rel_filter:
+                            d = item
+                context_rows = []
+                _sels = sel_rels.copy()
             else:
-                raise ValueError("Ex_type is invalid:" + ex_type)
+                if (rel in _sels and d["target_text"] != "none"): 
+                    context_rows.append(d)
+                    _sels.remove(rel)
+                dlog.info("%s of %s) len context_rows %s, sel_rels %s for %s",ii, len(split_df), len(context_rows), len(sel_rels), rel)
+                continue
+        elif ex_type == "same_rel":
+            context_df = split_df[split_df["prefix"] == rel].sample(n=sampling)
+        else:
+            raise ValueError("Ex_type is invalid:" + ex_type)
         if not rel in data_split:
             data_split[rel] = {}
         for inp in inputs:
@@ -906,8 +910,8 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
                     if only_blanks and "___" in event:
                         event = event.replace("___", "{ph}")
                     mask = random.randint(0, plen-1)
-                    _qtemp = fill_consts(qtemp, ex_qtemp, context,d, context_rows, mask=mask,method = mt)
-                    _anstemp = fill_consts(anstemp, ex_anstemp, context,d, context_rows, mask=mask,method = mt)
+                    _qtemp = fill_consts(qtemp, ex_qtemp, context,d, context_df, mask=mask,method = mt)
+                    _anstemp = fill_consts(anstemp, ex_anstemp, context,d, context_df, mask=mask,method = mt)
                     _query = fill_vars(_qtemp, rel, event, gen_token, resp, 
                             input_lang, target_lang) 
                     query = (index, _query)
@@ -925,6 +929,7 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
                         dlog.info(input_lang + ":"+ _q)
                         dlog.info(target_lang + ":" + response)
                     if lang_counter[lang] > num_samples:
+                        save_data(ex_df, save_df_path)
                         return data_split, flat_data, kk
                     if not lang in data_split[rel]:
                         data_split[rel][lang] = []
@@ -935,20 +940,25 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
                     flat_data.append((_query, response))
                     kk += 1
                     if is_record and kk > num_samples:
+                        save_data(ex_df, save_df_path)
                         return data_split, flat_data, kk
             #didn't convert ___ to <blank>
             #didn't normalize to lowercase
-    if save_df_path:
-        ex_df = ex_df.drop_duplicates(["input_text","prefix"])
-        ex_df = ex_df.sort_values(by=["input_text","prefix"])
-        ex_df.to_csv(save_df_path, index=False, sep="\t")
-        mlog.info("For %s", split_name)
-        mlog.info("ignored rows: %s", ignored)
-        mlog.info("len ex_df: %s", len(ex_df))
-        mlog.info("len main_df: %s", len(main_df))
-        mlog.info("len split_df: %s", len(split_df))
+    save_data(ex_df, save_df_path)
+    mlog.info("For %s", split_name)
+    mlog.info("ignored rows: %s", ignored)
+    mlog.info("len ex_df: %s", len(ex_df))
+    mlog.info("len main_df: %s", len(main_df))
+    mlog.info("len split_df: %s", len(split_df))
         
     return data_split, flat_data, kk
+
+def save_data(ex_df, save_df_path):
+    if save_df_path and len(ex_df) > 0:
+        ex_df = ex_df.drop_duplicates(["input_text","prefix"])
+        ex_df = ex_df.sort_values(by=["input_text","prefix"])
+        mlog.info("DF saved as %s", save_df_path)
+        ex_df.to_csv(save_df_path, index=False, sep="\t")
 
 def save_checkpoint(model, optimizer, scheduler, step, 
                    best_eval_step, best_dev_loss, save_path):
