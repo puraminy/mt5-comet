@@ -33,7 +33,7 @@ emblog.setLevel(logging.INFO)
 #wlog.disabled = True
 
 class PTuningWrapper(torch.nn.Module):
-    def __init__(self,model,prompt_encoders,decoder_prompt_encoder=None,
+    def __init__(self,model,prompt_encoder, prompt_encoders,decoder_prompt_encoder=None,
         prompt_token_fn=None, prompt_token_id=None, prompt_token_ids=None,
         replacing_token_id=0):
         """
@@ -72,10 +72,11 @@ class PTuningWrapper(torch.nn.Module):
         model_embeddings_size = model.get_input_embeddings().num_embeddings
         wlog.info("model embedding_size:{}".format(model_embeddings_size))
         self.prompt_encoders = prompt_encoders
+        self.prompt_encoder = prompt_encoder
         wlog.info("num of encoders %s:", len(self.prompt_encoders))
         self.decoder_prompt_encoder = decoder_prompt_encoder
         self.replacing_token_id = replacing_token_id
-        wlog.debug("REP id:{}".format(replacing_token_id))
+        wlog.info("REP id:{}".format(replacing_token_id))
         if self.decoder_prompt_encoder:
             self.model_decoder_embeddings = model.decoder.embed_tokens
             wlog.debug("DECODER model embd:{}".format(self.model_decoder_embeddings))
@@ -119,7 +120,10 @@ class PTuningWrapper(torch.nn.Module):
                 input_ids_[prompt_masks]=self.replacing_token_id
             # find the model embeddings of input ids except for prompt tokens
             inputs_embeds = self.model_embeddings(input_ids_)
+            device=inputs_embeds.device
             for encoder in self.prompt_encoders:
+                #encoder = self.prompt_encoders[0]
+                wlog.info("********** offset: %s, length: %s", encoder.id_offset, encoder.length)
                 prompt_token_fn = encoder.get_prompt_token_fn()
                 encoder_masks = prompt_token_fn(input_ids)
                 wlog.info("Encoder masks: %s", encoder_masks)
@@ -129,7 +133,7 @@ class PTuningWrapper(torch.nn.Module):
                     wlog.info("Prompt Input ids: %s", prompt_input_ids)
                     # call forwards on prompt encoder whose outputs are prompt embeddings
                     prompt_embeds = encoder(prompt_input_ids,\
-                        prompt_ids).to(device=input_embeds.device)
+                        prompt_ids).to(device)
                     # replace prompt_embeddings calculated by prompt encoder in input embeddings
                     # in input embeds replace embeddings for prompt token with output of encoder
                     inputs_embeds[encoder_masks]=prompt_embeds
@@ -225,10 +229,12 @@ class EmbeddingPromptEncoder(PromptEncoder):
         )
     
     def forward(self,prompt_token_ids,prompt_ids=None):
-        emblog.info("prompt token ids: %s", prompt_token_ids)
+        emblog.info("before prompt token ids: %s", prompt_token_ids)
+        emblog.info("id offset: %s", self.id_offset)
+        emblog.info("id offset: %s", self.length)
         prompt_token_ids = prompt_token_ids - self.id_offset
-        #emblog.info(prompt_token_ids)
-        emblog.info(self.embedding.weight)
+        emblog.info("after prompt token ids: %s", prompt_token_ids)
+        #emblog.info(self.embedding.weight)
         return self.embedding(prompt_token_ids)
 
     def dump_embedding(self, weight):

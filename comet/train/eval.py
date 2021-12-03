@@ -47,8 +47,8 @@ def get_verb(document):
 # ggggggggg
 def gen_resp(model, tokenizer, query, gen_token = "", gen_param = "greedy", at_mask=None):
     skip_special = "True"
-    verb = get_verb(query)
-    vlog.info("Ignoring verb %s", verb)
+    #verb = get_verb(query)
+    #vlog.info("Ignoring verb %s", verb)
     bad_words_ids = None
     #if verb:
     #    bad_words_ids = tokenizer(verb).input_ids

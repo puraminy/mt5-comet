@@ -207,16 +207,18 @@ def extend_tokenizer(tokenizer, prompt_tokens = [], model_id=""):
 
 def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words=False):
     wrapped_model = None
-    id_offset = len(tokenizer)
-    mlog.info("ID OFFSET: %s", id_offset)
     prompt_encoders = []
+    offsets = []
     for rel, prompt_tokens in encoder_prompts.items():
         mlog.info("******************* Wrapping model for %s", rel)
         if from_words == "rel":
             from_words = relation_natural_mappings[rel]["en"]
-        encoder = create_encoder(model, tokenizer, prompt_tokens, encoder_type, from_words, wrapped_model)
+        encoder, offset = create_encoder(model, tokenizer, prompt_tokens, encoder_type, from_words, wrapped_model)
         prompt_encoders.append(encoder)
-    wrapped_model = PTuningWrapper(model,prompt_encoders, prompt_token_fn=get_prompt_token_fn(id_offset))
+        offsets.append(offset)
+    id_offset = min(offsets)
+    mlog.info("ID OFFSET: %s", id_offset)
+    wrapped_model = PTuningWrapper(model,encoder, prompt_encoders, prompt_token_fn=get_prompt_token_fn(id_offset))
     return wrapped_model
 
 def create_encoder(model, tokenizer, prompt_tokens, encoder_type="lstm", 
@@ -283,7 +285,7 @@ def create_encoder(model, tokenizer, prompt_tokens, encoder_type="lstm",
 
     model.resize_token_embeddings(len(tokenizer))
 
-    return prompt_encoder
+    return prompt_encoder, id_offset
 
 encoder_prompts = {} 
 decoder_prompts = {}
@@ -588,7 +590,7 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
        elif method == "story-wrap":
            qtemp = "{enc_token} {event} {rel_natural} {ph}"
            context = "{xAttr} {xIntent} {xReact}"
-           ex_qtemp = "{rel_enc_token} {target_text} {end}"
+           ex_qtemp = "{rel_enc_token} {rel_natural_en} {target_text} {end}"
            anstemp = "{ph} {resp} {end}"
        elif method == "event-resp-n-wrap":
            qtemp = "{event} {examples} {enc_token} {event} {rel_natural} {ph}"
