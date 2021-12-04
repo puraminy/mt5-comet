@@ -305,7 +305,7 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
     for metric in [mean_rouge, mean_bert, mean_match, mean_bleu]:
         for key,val in metric.items():
             metric[key] = str(val) + "--" + str(counter[key])
-            s += val
+            s += float(val)
             ii += 1
     mlog.info("average all:", s/ii)
 
