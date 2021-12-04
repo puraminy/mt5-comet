@@ -195,9 +195,11 @@ class PTuningWrapper(torch.nn.Module):
 
 
 class PromptEncoder(torch.nn.Module):
-    def __init__(self,length,embedding_dim,id_offset, init_embs,**kwargs) -> None:
+    def __init__(self,length,embedding_dim,id_offset, init_embs, common_ids,**kwargs) -> None:
         super().__init__()
         self.length = length
+        self.common = common_ids
+        emblog.info("common: %s", common_ids)
         self.embedding_dim = embedding_dim
         self.id_offset = id_offset
         self.embedding = torch.nn.Embedding(length,embedding_dim)
@@ -208,7 +210,7 @@ class PromptEncoder(torch.nn.Module):
                     emblog.info("%s : %s", _id, emb)
 
     def get_prompt_token_fn(self):
-        return lambda x: (x>=self.id_offset)&(x<self.id_offset+self.length)
+        return lambda x: ((x>=self.id_offset)&(x<self.id_offset+self.length))|(x in self.common)
     def dump_embedding(self,weight):
         raise NotImplementedError
     def save(self, path):
@@ -218,8 +220,8 @@ class PromptEncoder(torch.nn.Module):
 
 
 class EmbeddingPromptEncoder(PromptEncoder):
-    def __init__(self,length,embedding_dim,id_offset,init_embs=None) -> None:
-        super().__init__(length,embedding_dim,id_offset, init_embs)
+    def __init__(self,length,embedding_dim,id_offset,init_embs=None, common_ids=[]) -> None:
+        super().__init__(length,embedding_dim,id_offset, init_embs, common_ids)
         self.input_ids = torch.nn.parameter.Parameter(torch.arange(length),
              requires_grad=False)
         self.mlp = torch.nn.Sequential(
@@ -250,8 +252,8 @@ class EmbeddingPromptEncoder(PromptEncoder):
             self.embedding.load_state_dict(torch.load(path + "/emb"))
 
 class LSTMEmbeddingPromptEncoder(PromptEncoder):
-    def __init__(self,length,embedding_dim,id_offset, init_embs=None) -> None:
-        super().__init__(length,embedding_dim,id_offset, init_embs)
+    def __init__(self,length,embedding_dim,id_offset, init_embs=None, common_ids=[]) -> None:
+        super().__init__(length,embedding_dim,id_offset, init_embs, common_ids)
         self.input_ids = torch.nn.parameter.Parameter(torch.arange(length),
             requires_grad=False)
         self.lstm = torch.nn.LSTM(

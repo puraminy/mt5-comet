@@ -157,6 +157,7 @@ relation_prompt_lengths = {
     "oWant":[5],
     "xIntent":[5],
     "xNeed":[5],
+    "com":[5],
 }
 
 
@@ -312,13 +313,14 @@ def fill_const_for_rel(template, row):
         text = text.replace("{" + key + "}", val)
     return text
 
-def fill_prompt(text, rel, place_holder, counter = 0):
+def fill_prompt(text, rel, place_holder, counter = 0, lang=""):
     pi = 0
     plen = relation_prompt_lengths[rel]
     _pholder = place_holder
     place_holder = place_holder.replace("{", "<")  
     place_holder = place_holder.replace("}", ">")  
     place_holder = place_holder.replace("rel", rel)  
+    place_holder = place_holder.replace("lang", lang)  
     #dlog.info("text: %s", text)
     while _pholder in text:
         enc_plen = plen[pi] if pi < len(plen) else plen[-1] 
@@ -553,7 +555,7 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            qtemp = "{rel_i} {event} {rel_natural} {ph}" 
            anstemp = "{ph} {resp} {end}"
        elif method == "unsup-lang":
-           qtemp = "{rel_i} {event} {enc_lang_token} {ph}" 
+           qtemp = "{rel_i} {event} {rel_lang_i} {ph}" 
            anstemp = "{ph} {resp} {end}"
        elif method == "sup-gen":
            qtemp = "{event} {gen}"
@@ -659,8 +661,11 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
        elif method == "unsup-gen":
            qtemp = "{rel_token} {event} {gen} {ph}"
            anstemp = "{ph} {resp} {end}"
+       elif method == "unsup-wrap-com":
+           qtemp = "{com_i} {event} {rel_i} {ph}"
+           anstemp = "{ph} {resp} {end}"
        elif method == "unsup-wrap":
-           qtemp = "{rel_i_start} {gen_start} {event} {rel_i_end} {ph}"
+           qtemp = "{rel_i_start} {event} {rel_i_end} {ph}"
            anstemp = "{ph} {resp} {end}"
        elif method == "unsup-gen-wrap":
            qtemp = "{rel_i_start} {gen_start} {event} {rel_i_end} {gen_end} {ph}"
@@ -709,39 +714,7 @@ def fill_vars(template, rel, event, gen_token, resp, inp_lang, resp_lang):
         encoder_prompts[rel] = []
     if not rel in decoder_prompts:
         decoder_prompts[rel] = []
-    counter = 0
-    enc_prompt = ""
-    pi = 0
-    while "{enc_lang_token}" in text:
-        enc_plen = plen[pi] if pi < len(plen) else plen[-1] 
-        prompt = ""
-        for i in range(counter, counter + enc_plen):
-            token = f"<enc_{lang}_{rel}_{i}>" 
-            prompt += " " + token
-            if not token in encoder_prompts[rel]:
-                encoder_prompts[rel].append(token)
-        prompt = prompt.strip()
-        if not enc_prompt:
-            enc_prompt = prompt
-        text = text.replace("{enc_lang_token}",prompt, 1)
-        counter += enc_plen 
-        pi += 1
-    counter = 0
-    dec_prompt = ""
-    while "{dec_lang_token}" in text:
-        dec_plen = plen[pi] if pi < len(plen) else plen[-1] 
-        prompt=""
-        for i in range(counter, counter+dec_plen):
-            token = f"<dec_{lang}_{rel}_{i}>" 
-            prompt += " " + token
-            if not token in decoder_prompts[rel]:
-                decoder_prompts[rel].append(token)
-        prompt = prompt.strip()
-        if not dec_prompt:
-            dec_prompt = prompt
-        text = text.replace("{dec_lang_token}",prompt, 1)
-        counter += dec_plen 
-        pi += 1
+    text = fill_prompt(text, rel, "{rel_lang_i}", lang=lang)
     return text
 
 def get_input(msg):
