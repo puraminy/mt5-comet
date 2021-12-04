@@ -761,7 +761,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
             samples_per_head = 2
         if last_data:
             mlog.info("Reading saved pickle")
-            with open(split_path[split_name] + ".pickle", 'rb') as handle:
+            with open(split_name + ".pickle", 'rb') as handle:
                 (atomic_query_responses[split_name], 
                  atomic_flattened[split_name],
                  num_records[split_name]
@@ -787,7 +787,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
             data = (atomic_query_responses[split_name], 
                     atomic_flattened[split_name],
                     num_records[split_name])
-            with open(split_path[split_name] + ".pickle", 'wb') as handle:
+            with open(split_name + ".pickle", 'wb') as handle:
                 pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     train_records = num_records["train"]

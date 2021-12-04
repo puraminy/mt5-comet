@@ -775,7 +775,7 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
         if rel_filter:
             split_df = split_df[split_df["prefix"] == rel_filter]
             dlog.info("len after relation filter: %s", len(split_df))
-        else: 
+        elif num_samples < len(split_df): 
             split_df = split_df.groupby("prefix").sample(n=num_samples)
             dlog.info(f"len after sampling:{len(split_df)}")
     split_df = split_df.sort_values(by="input_text")
@@ -806,8 +806,10 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
     context_df = None
     ex_df = pd.DataFrame()
     _sels = sel_rels.copy()
+    pbar = tqdm(total = len(split_df))
     for index, d in split_df.iterrows():
         rel = d["prefix"]
+        pbar.update(1)
         if not rel in rel_counter:
             rel_counter[rel] = 1
         else:
