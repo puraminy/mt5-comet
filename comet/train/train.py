@@ -352,7 +352,7 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
 @click.option(
     "--val_path",
     "-vp",
-    default="atomic/val_5k.tsv",
+    default="atomic/val_all_rels.tsv",
     type=str,
     help=""
 )
@@ -711,7 +711,10 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
             mlog.info("Translating ...%s ", split_name)
             path = train_path if split_name == "train" else val_path
             model.to(device=device)
+            if do_eval and split_name == "train":
+                continue
             logger = tlog 
+            mlog.info("Translating %", pth)
             translate(model, tokenizer, df, trans, path, logger, start, load_path) 
         return
     
