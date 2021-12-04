@@ -151,7 +151,7 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
 @click.option(
     "--train_samples",
     "-n",
-    default=100,
+    default=0,
     type=int,
     help=""
 )
@@ -165,7 +165,7 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
 @click.option(
     "--val_samples",
     "-ng",
-    default=40,
+    default=0,
     type=int,
     help=""
 )
@@ -345,14 +345,14 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
 @click.option(
     "--train_path",
     "-tp",
-    default="atomic/train_all_rels.tsv",
+    default="atomic/train_45k.tsv",
     type=str,
     help=""
 )
 @click.option(
     "--val_path",
     "-vp",
-    default="atomic/val_all_rels.tsv",
+    default="atomic/val_5k.tsv",
     type=str,
     help=""
 )
