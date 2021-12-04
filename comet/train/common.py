@@ -837,20 +837,8 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
         if num_per_cat > 0 and rel_counter[rel] >= num_per_cat:
             continue 
         ii += 1
-        eng_inp = d["input_text"]
-        si += 1
-        if eng_inp != old_input:
-            context_rows = []
-            _sels = sel_rels.copy()
-            dlog.info("input was changed %s", samples_per_head)
-            old_input = eng_inp
-            si = 0
-        elif samples_per_head > 0 and si > samples_per_head:
-            continue
-        if ii < start:
-            continue
         if "other_rel" in ex_type:
-            if len(context_rows) == len(sel_rels):
+            if len(context_rows) >= len(sel_rels):
                 context_df = pd.DataFrame(data=context_rows)
                 ex_df = ex_df.append(context_df)
                 dlog.info("================= has condition")
@@ -858,6 +846,7 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
                     for item in context_rows:
                         if item["prefix"] == rel_filter:
                             d = item
+                            rel = d["prefix"]
                 context_rows = []
                 _sels = sel_rels.copy()
             else:
@@ -870,6 +859,18 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
             context_df = split_df[split_df["prefix"] == rel].sample(n=sampling)
         else:
             raise ValueError("Ex_type is invalid:" + ex_type)
+        eng_inp = d["input_text"]
+        si += 1
+        if eng_inp != old_input:
+            context_rows = []
+            _sels = sel_rels.copy()
+            dlog.info("input was changed %s", samples_per_head)
+            old_input = eng_inp
+            si = 0
+        elif samples_per_head > 0 and si > samples_per_head:
+            continue
+        if ii < start:
+            continue
         if not rel in data_split:
             data_split[rel] = {}
         for inp in inputs:
