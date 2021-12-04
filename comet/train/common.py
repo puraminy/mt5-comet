@@ -315,15 +315,17 @@ def fill_const_for_rel(template, row):
 def fill_prompt(text, rel, place_holder, counter = 0):
     pi = 0
     plen = relation_prompt_lengths[rel]
+    _pholder = place_holder
     place_holder = place_holder.replace("{", "<")  
     place_holder = place_holder.replace("}", ">")  
     place_holder = place_holder.replace("rel", rel)  
-    while place_holder in text:
+    #dlog.info("text: %s", text)
+    while _pholder in text:
         enc_plen = plen[pi] if pi < len(plen) else plen[-1] 
         prompt = ""
         for i in range(counter, counter + enc_plen):
             token = place_holder
-            token = token.replace("_i", str(i))  
+            token = token.replace("_i", "_" + str(i))  
             prompt += " " + token
             if not rel in encoder_prompts:
                 encoder_prompts[rel] = []
@@ -333,10 +335,13 @@ def fill_prompt(text, rel, place_holder, counter = 0):
         text = text.replace("{rel_i}",prompt, 1)
         counter += enc_plen 
         pi += 1
+    #dlog.info("text: %s", text)
     return text
 
 def fill_consts(template, ex_temp, context, row, rows=[], mask=-1, method=""):
+    #dlog.info("fill consts, input text: %s", template)
     text = fill_const_for_rel(template, row)
+    #dlog.info("fill consts, input text: %s", text)
     rel = row["prefix"]
     plen = relation_prompt_lengths[rel]
     text = text.replace("{ph}", placeholder_token)
@@ -349,16 +354,16 @@ def fill_consts(template, ex_temp, context, row, rows=[], mask=-1, method=""):
     if mask >= 0 and "{enc_token_mask}" in text:
         prompt = f"<enc_mask_{mask}>" 
         text = text.replace("{enc_token_mask}",prompt)
-    while "{enc_token_fw}" in text:
+    while "{rel_fw}" in text:
         rel_ids = relation_natural_mappings[rel]["ids"]
         prompt = ""
-        for i in rel_ids:
-            token = f"<enc_mask_{i}>" 
+        for i in range(len(rel_ids)):
+            token = f"<{rel}_{i}>" 
             if not token in encoder_prompts[rel]:
                 encoder_prompts[rel].append(token)
             prompt += " " + token
         prompt = prompt.strip()
-        text = text.replace("{enc_token_fw}",prompt, 1)
+        text = text.replace("{rel_fw}",prompt, 1)
     counter = 0
     pi = 0
     enc_prompt = ""
@@ -646,7 +651,7 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            qtemp = "{event} {rel_natural}"
            anstemp = "{resp} {end}"
        elif method == "unsup-fw":
-           qtemp = "{event} {enc_token_fw} {ph}"
+           qtemp = "{event} {rel_fw} {ph}"
            anstemp = "{ph} {resp} {end}"
        elif method == "unsup":
            qtemp = "{rel_token} {event} {ph}"
@@ -841,7 +846,6 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
             if len(context_rows) >= len(sel_rels):
                 context_df = pd.DataFrame(data=context_rows)
                 ex_df = ex_df.append(context_df)
-                dlog.info("================= has condition")
                 if rel_filter:
                     for item in context_rows:
                         if item["prefix"] == rel_filter:
@@ -853,7 +857,6 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
                 if (rel in _sels and d["target_text"] != "none"): 
                     context_rows.append(d)
                     _sels.remove(rel)
-                dlog.info("%s of %s) len context_rows %s, sel_rels %s for %s",ii, len(split_df), len(context_rows), len(sel_rels), rel)
                 continue
         elif ex_type == "same_rel":
             context_df = split_df[split_df["prefix"] == rel].sample(n=sampling)
@@ -864,7 +867,6 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
         if eng_inp != old_input:
             context_rows = []
             _sels = sel_rels.copy()
-            dlog.info("input was changed %s", samples_per_head)
             old_input = eng_inp
             si = 0
         elif samples_per_head > 0 and si > samples_per_head:
