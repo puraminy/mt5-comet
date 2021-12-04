@@ -1,3 +1,4 @@
+target_text_fa	target_text	prefix	input_text
 این کار را به روش خودش انجام دهد	to do it his way	xIntent	PersonX abolishes the ___ altogether
 وکیلی پیدا کنید	find a lawyer	xNeed	PersonX abolishes the ___ altogether
 مثل اینکه او رئیس است.	like he's the boss	xReact	PersonX abolishes the ___ altogether

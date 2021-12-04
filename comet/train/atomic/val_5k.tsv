@@ -1,3 +1,4 @@
+target_text_fa	target_text	prefix	input_text
 مثبت	positive	oReact	PersonX tells PersonY did not want
 برای درک اخبار	to understand news	oWant	PersonX tells PersonY did not want
 ارتباطی	communicative	xAttr	PersonX tells PersonY did not want
