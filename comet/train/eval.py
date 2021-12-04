@@ -242,9 +242,9 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
                     _q = query.replace("<", "\n<", 1)
                     _q = _q.replace(">", ">\n")
                     if ignore_special_tokens:
-                        questions.append(input_text)
+                        questions.append(rel + ":" + input_text)
                     else:
-                        questions.append(query)
+                        questions.append(rel + ":" + query)
                     answers.append(hyps)
                     vlog.info(str(counter["all"])+ ":" + _q)
                     vlog.info("'''''''''''''''''''''''''''''''''''''''''' Preds:")
