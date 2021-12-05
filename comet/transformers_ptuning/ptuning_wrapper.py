@@ -307,18 +307,11 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
         return F.embedding(prompt_token_ids,running_weight)
     def dump_embedding(self, weight):
         # get embedding weights as the output of forward pass
-        emblog.info("Dump embeddings")
-        if not self.prompt_ids:
-            _range = range(self.id_offset, self.id_offset+self.length)
-            ids = self.input_ids+self.id_offset 
-        else:
-            _range = ids = self.prompt_ids
-
-        emblog.info("range %s", _range)
-        emblog.info("ids %s", ids)
+        emblog.info("Dump embeddings: %s", weight)
+        emblog.info("Input ids: %s", self.input_ids)
         with torch.no_grad():
-            embeddings = self.forward(ids)
-        weight[_range,:]=embeddings.detach()
+            embeddings = self.forward(self.input_ids)
+        weight[self.prompt_ids,:]=embeddings.detach()
 
 
 if __name__ == "__main__":
