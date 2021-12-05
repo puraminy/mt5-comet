@@ -201,7 +201,7 @@ class PromptEncoder(torch.nn.Module):
     def __init__(self,length,embedding_dim,id_offset, init_embs, prompt_ids,**kwargs) -> None:
         super().__init__()
         self.length = length
-        self.prompt_ids = torch.tensor(prompt_ids)
+        self.prompt_ids_tensor = torch.tensor(prompt_ids)
         emblog.info("prompt ids: %s", prompt_ids)
         self.id_map = {}
         if prompt_ids:
@@ -219,7 +219,7 @@ class PromptEncoder(torch.nn.Module):
                     emblog.info("%s : %s", _id, emb)
 
     def isin_ids(self, ar1):
-        return (ar1[..., None] == self.prompt_ids).any(-1)
+        return (ar1[..., None] == self.prompt_ids_tensor).any(-1)
     def get_prompt_token_fn(self):
         return lambda x: (x>=self.id_offset)&(x<self.id_offset+self.length)
     def dump_embedding(self,weight):
