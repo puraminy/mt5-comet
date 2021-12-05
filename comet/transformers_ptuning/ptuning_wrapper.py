@@ -217,15 +217,13 @@ class PromptEncoder(torch.nn.Module):
                     self.embedding.weight[_id] = emb
                     emblog.info("%s : %s", _id, emb)
 
-    def isin_ids(self, ar1):
-        emblog.info("device ar1 %s", ar1.device)
-        emblog.info("device pid %s", ar1.device)
-        prompt_ids_tensor = torch.tensor(self.prompt_ids)
-        prompt_ids_tensor.to(device=ar1.device)
-        emblog.info("device pid %s", ar1.device)
-        return (ar1[..., None] == prompt_ids_tensor).any(-1)
+    def isin(self, ar1, ar2):
+        return (ar1[..., None] == ar2).any(-1)
     def get_prompt_token_fn(self):
-        return lambda x: (x>=self.id_offset)&(x<self.id_offset+self.length)
+        if self.prompt_ids:
+            return lambda x: self.isin(x, torch.tensor(self.prompt_ids))
+        else:
+            return lambda x: (x>=self.id_offset)&(x<self.id_offset+self.length)
     def dump_embedding(self,weight):
         raise NotImplementedError
     def save(self, path):
