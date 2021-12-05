@@ -277,12 +277,12 @@ def create_encoder(model, tokenizer, prompt_tokens, encoder_type="lstm",
         if enc_plen > 0:
             mlog.info("Prompt Encoder defined : %s", enc_plen)
             prompt_encoder = EmbeddingPromptEncoder(enc_plen,
-                    embedding_dim,id_offset,init_embs)
+                    embedding_dim,id_offset,init_embs, prompt_ids=rel_ids)
     else:
         if enc_plen > 0:
             mlog.info("Prompt Encoder defined : %s", enc_plen)
             prompt_encoder = LSTMEmbeddingPromptEncoder(enc_plen,embedding_dim,
-                    id_offset, init_embs)
+                    id_offset, init_embs, prompt_ids=rel_ids)
 
     model.resize_token_embeddings(len(tokenizer))
 
