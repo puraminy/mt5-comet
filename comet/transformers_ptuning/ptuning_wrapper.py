@@ -242,12 +242,12 @@ class EmbeddingPromptEncoder(PromptEncoder):
     
     def forward(self,prompt_token_ids,pids=None):
         emblog.info("before prompt token ids: %s", prompt_token_ids)
-        emblog.info("id offset: %s", self.id_offset)
-        emblog.info("id offset: %s", self.length)
-        if not self.prompt_ids:
+        #emblog.info("id offset: %s", self.id_offset)
+        #emblog.info("id length: %s", self.length)
+        if not self.id_map:
             prompt_token_ids = prompt_token_ids - self.id_offset
         else:
-            prompt_token_ids = (self.input_ids.view(-1,1) == prompt_token_ids).int().argmax(dim=1)
+            prompt_token_ids = torch.tensor([self.id_map[x] for x in prompt_token_ids])
         emblog.info("after prompt token ids: %s", prompt_token_ids)
         #emblog.info(self.embedding.weight)
         return self.embedding(prompt_token_ids)
@@ -306,10 +306,10 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
 
         running_weight = self.mlp(x[0]).squeeze(0)
         # find zero based ids 
-        if not self.prompt_ids:
+        if not self.id_map:
             prompt_token_ids = prompt_token_ids - self.id_offset
         else:
-            prompt_token_ids = (self.input_ids.view(-1,1) == prompt_token_ids).int().argmax(dim=1)
+            prompt_token_ids = torch.tensor([self.id_map[x] for x in prompt_token_ids])
         emblog.info("self.id_offset, prompt token ids:%s   %s", 
                 self.id_offset, prompt_token_ids)
         emblog.info("prompt token ids:%s", running_weight)
