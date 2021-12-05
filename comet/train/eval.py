@@ -303,7 +303,7 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
 
     s =0 
     ii = 0
-    try
+    try:
         forٰ metric in [mean_rouge, mean_bert, mean_match, mean_bleu]:
             for key,val in metric.items():
                 metric[key] = str(val) + "--" + str(counter[key])
