@@ -751,7 +751,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
         split_lang["train"] = lang
         split_lang["validation"] = lang
     for split_name,split_df in atomic_dataset.items():
-        dlog.info("Columns of %s  %s", split_name, "\n".join(list(split_df.columns)))
+        mlog.info("Path of dataset for %s %s", split_name, split_path[split_name])
+        dlog.info("Columns of %s\n  %s", split_name, "\n".join(list(split_df.columns)))
         if do_eval and split_name != "validation":
             num_records[split_name] = 0
             mlog.info("Skipping data for %s ", split_name)

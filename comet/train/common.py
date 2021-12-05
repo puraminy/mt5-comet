@@ -741,7 +741,7 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
             nli_group="all", is_record=False, start=0, 
             sampling=0, ex_type="same_rel",  samples_per_head=0, save_df_path=""): 
     dlog.info("building query responses for {}".format(split_name))
-    dlog.info(f"len:{len(split_df)}")
+    dlog.info(f"fill data input dataset len:{len(split_df)}")
     natural = inp_include == "natural"
     main_df = split_df
     if split_name != "train":
