@@ -295,13 +295,13 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
         emblog.info(embeds)
 
         running_weight = self.mlp(x[0]).squeeze(0)
+        emblog.info("before prompt token ids:  %s", prompt_token_ids)
         # find zero based ids 
         if not self.prompt_ids:
             prompt_token_ids = prompt_token_ids - self.id_offset
         else:
             prompt_token_ids = (prompt_token_ids.view(-1,1) == self.input_ids).int().argmax(dim=1)
-        emblog.info("self.id_offset, prompt token ids:%s   %s", 
-                self.id_offset, prompt_token_ids)
+        emblog.info("after prompt token ids:  %s", prompt_token_ids)
         emblog.info("prompt token ids:%s", running_weight)
         # return weights for prompt_token_ids 
         return F.embedding(prompt_token_ids,running_weight)
