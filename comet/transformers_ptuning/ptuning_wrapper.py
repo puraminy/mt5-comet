@@ -198,6 +198,8 @@ class PromptEncoder(torch.nn.Module):
         super().__init__()
         self.length = length
         self.prompt_ids = prompt_ids
+        self.input_ids = torch.nn.parameter.Parameter(torch.tensor(prompt_ids),
+             requires_grad=False)
         emblog.info("prompt ids: %s", prompt_ids)
         self.id_map = {}
         if prompt_ids:
@@ -218,7 +220,7 @@ class PromptEncoder(torch.nn.Module):
         return (ar1[..., None] == ar2).any(-1)
     def get_prompt_token_fn(self):
         if self.prompt_ids:
-            return lambda x: self.isin(x, torch.tensor(self.prompt_ids))
+            return lambda x: self.isin(x, self.input_ids)
         else:
             return lambda x: (x>=self.id_offset)&(x<self.id_offset+self.length)
     def dump_embedding(self,weight):
@@ -232,8 +234,6 @@ class PromptEncoder(torch.nn.Module):
 class EmbeddingPromptEncoder(PromptEncoder):
     def __init__(self,length,embedding_dim,id_offset,init_embs=None, prompt_ids=[]) -> None:
         super().__init__(length,embedding_dim,id_offset, init_embs, prompt_ids)
-        self.input_ids = torch.nn.parameter.Parameter(torch.arange(length),
-             requires_grad=False)
         self.mlp = torch.nn.Sequential(
             torch.nn.Linear(embedding_dim, embedding_dim),
             torch.nn.ReLU(),
