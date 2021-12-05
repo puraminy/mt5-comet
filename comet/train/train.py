@@ -417,10 +417,16 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
     help="If you want to retrain a model or continue trainig it on new data set it incremntally"
 )
 @click.option(
-    "--is_record",
+    "--per_record",
     "-recs",
     is_flag=True,
     help="Show if train_samples are records or unique heads"
+)
+@click.option(
+    "--is_even",
+    "-even",
+    is_flag=True,
+    help="Show if data set has equal number of records for each relation" 
 )
 @click.option(
     "--reset_results",
@@ -531,7 +537,7 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
     help=""
 )
 def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, val_set, 
-         val_samples, load_path, train_path, val_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, is_record, reset_results, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df):
+         val_samples, load_path, train_path, val_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, reset_results, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df):
 
     #%% some hyper-parameters
 
@@ -788,7 +794,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
                                 inp_exclude,
                                 targ_include,
                                 targ_exclude,
-                                pred_tresh, nli_group, is_record, start, 
+                                pred_tresh, nli_group, per_record, is_even, start, 
                                 sampling, ex_type,
                                 samples_per_head, save_df_path[split_name]
                         )

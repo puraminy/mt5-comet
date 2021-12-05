@@ -738,10 +738,10 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
             targ_include="",
             targ_exclude="",
             pred_tresh=0,
-            nli_group="all", is_record=False, start=0, 
+            nli_group="all", per_record=False, is_even=False, start=0, 
             sampling=0, ex_type="same_rel",  samples_per_head=0, save_df_path=""): 
     dlog.info("building query responses for {}".format(split_name))
-    dlog.info(f"fill data input dataset len:{len(split_df)}")
+    mlog.info(f"fill data input dataset len:{len(split_df)}")
     natural = inp_include == "natural"
     main_df = split_df
     if split_name != "train":
@@ -772,12 +772,12 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
         split_df = split_df[split_df["nli_group"] == nli_group]
         dlog.info("*** Filtered based on nli_group "+ nli_group)
 
-    dlog.info(f"len after filtering:{len(split_df)}")
+    mlog.info(f"len after filtering:{len(split_df)}")
     if not "other_rel" in ex_type:
         if rel_filter:
             split_df = split_df[split_df["prefix"] == rel_filter]
             dlog.info("len after relation filter: %s", len(split_df))
-        elif num_samples < len(split_df): 
+        elif num_samples < len(split_df) and not is_even: 
             split_df = split_df.groupby("prefix").sample(n=num_samples)
             dlog.info(f"len after sampling:{len(split_df)}")
     split_df = split_df.sort_values(by="input_text")
@@ -933,7 +933,7 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
                         data_split[rel][lang][query].append(response)
                     flat_data.append((_query, response))
                     kk += 1
-                    if is_record and kk > num_samples:
+                    if per_record and kk > num_samples:
                         dlog.info("record limit reached!")
                         save_data(ex_df, save_df_path)
                         return data_split, flat_data, kk
