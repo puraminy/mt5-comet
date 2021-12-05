@@ -813,6 +813,8 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
     pbar = tqdm(total = num_samples)
     for index, d in split_df.iterrows():
         rel = d["prefix"]
+        if not rel in rel_counter:
+            rel_counter[rel] = 0
         if num_per_cat > 0 and rel_counter[rel] > num_per_cat:
             dlog.info("!!!!!!!!! number per cat limit reached %s for %s", rel, num_per_cat)
             continue 
@@ -864,10 +866,7 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
                 dlog.info("!!!!!!!!! excluded input col %s", inp_exclude)
                 continue
             input_lang = langs[inp]
-            if not rel in rel_counter:
-                rel_counter[rel] = 1
-            else:
-                rel_counter[rel] += 1
+            rel_counter[rel] += 1
             for targ_col in targets:
                 if not targ_col in d or len(d[targ_col]) <= 1:
                     dlog.info("!!!!!!!!! not target lang %s", targ_col)
