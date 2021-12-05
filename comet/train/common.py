@@ -806,6 +806,7 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
     context_df = None
     ex_df = pd.DataFrame()
     _sels = sel_rels.copy()
+    dlog.info("sels: %s", _sels)
     pbar = tqdm(total = len(split_df))
     for index, d in split_df.iterrows():
         rel = d["prefix"]
