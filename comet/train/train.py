@@ -811,11 +811,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     mlog.info("len tokenizer %s", len(tokenizer))
     mlog.info("list of spcial tokens: %s", tokenizer.additional_special_tokens)
     extra = "_" + now
-    if experiment == "custom":
-        experiment = now
-        extra = ""
     if do_eval:
-        experiment += "-EVAL"
+        extra += "-EVAL"
     results_info = f"{experiment}_{model_id}_{lang}_{method}_{w_str}_{f_str}_tr:{training_round}-ep:{epochs_num}-({start}-{train_records})-{val_records}{extra}"
     if do_eval or (not wrap and frozen):
         mlog.info("Evaluating the model...")
