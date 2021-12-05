@@ -299,7 +299,7 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
     for i, (a,q) in enumerate(zip(answers,questions)):
         mlog.info("{:<2} {:<40}:".format(i,q))
         for ans in a:
-            mlog.info("{:>60}:".format(ans))
+            mlog.info("{:<60}:".format(ans))
 
     s =0 
     ii = 0
