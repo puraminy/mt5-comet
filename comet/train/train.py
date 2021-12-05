@@ -551,6 +551,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
 
     args = locals() # input parameters
 
+    if reset_results:
+        set_results({})
     mlog.info("========================= Version 7 ========================")
     if save_path == "":
         if "ahmad" or "pouramini" in home:
