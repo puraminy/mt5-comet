@@ -104,10 +104,10 @@ class PTuningWrapper(torch.nn.Module):
     def add_prompt_encoder(self, encoder):
         self.prompt_encoders.append(encoder)
 
-    def forward(self,input_ids, labels, decoder_input_ids=None,prompt_ids=None,**kwargs):
+    def forward(self,input_ids, labels, decoder_input_ids=None,pids=None,**kwargs):
         ll = self.ll # log level
         wlog.log(ll, "wrapper forward was called")
-        wlog.log(ll, "Prompt ids:{}".format(prompt_ids))
+        wlog.log(ll, "Prompt ids:{}".format(pids))
         # find masks based on the range of prompt ids (offset_id < X < offset_id + prompt_length)
         #Because this wrapper only deals with a single prompt, the length should be the same, you can use masked_select to reshape 
         prompt_masks = self.prompt_token_fn(input_ids)
@@ -133,7 +133,7 @@ class PTuningWrapper(torch.nn.Module):
                     wlog.info("Prompt Input ids: %s", prompt_input_ids)
                     # call forwards on prompt encoder whose outputs are prompt embeddings
                     prompt_embeds = encoder(prompt_input_ids,\
-                        prompt_ids).to(device)
+                        pids).to(device)
                     # replace prompt_embeddings calculated by prompt encoder in input embeddings
                     # in input embeds replace embeddings for prompt token with output of encoder
                     inputs_embeds[encoder_masks]=prompt_embeds
@@ -156,7 +156,7 @@ class PTuningWrapper(torch.nn.Module):
                     )
                     wlog.log(ll,f"decoder input ids {decoder_input_ids}")
                     decoder_prompt_embeds = self.decoder_prompt_encoder(
-                        decoder_input_ids[decoder_prompt_masks],prompt_ids).to\
+                        decoder_input_ids[decoder_prompt_masks],pids).to\
                         (device=decoder_inputs_embeds.device)
                     decoder_inputs_embeds[decoder_prompt_masks] = \
                         decoder_prompt_embeds
@@ -195,11 +195,17 @@ class PTuningWrapper(torch.nn.Module):
 
 
 class PromptEncoder(torch.nn.Module):
-    def __init__(self,length,embedding_dim,id_offset, init_embs, common_ids,**kwargs) -> None:
+    def __init__(self,length,embedding_dim,id_offset, init_embs, prompt_ids,**kwargs) -> None:
         super().__init__()
         self.length = length
-        self.common = common_ids
-        emblog.info("common: %s", common_ids)
+        self.prompt_ids = prompt_ids
+        emblog.info("prompt ids: %s", prompt_ids)
+        self.id_map = {}
+        if prompt_ids:
+            self.length = len(prompt_ids)
+            for i in range(self.length):
+                self.id_map[prompt_ids[i]] = i
+
         self.embedding_dim = embedding_dim
         self.id_offset = id_offset
         self.embedding = torch.nn.Embedding(length,embedding_dim)
@@ -210,7 +216,10 @@ class PromptEncoder(torch.nn.Module):
                     emblog.info("%s : %s", _id, emb)
 
     def get_prompt_token_fn(self):
-        return lambda x: ((x>=self.id_offset)&(x<self.id_offset+self.length))|(x in self.common)
+        if self.prompt_ids:
+            return lambda x: x in self.prompt_ids
+        else:
+            return lambda x: (x>=self.id_offset)&(x<self.id_offset+self.length)
     def dump_embedding(self,weight):
         raise NotImplementedError
     def save(self, path):
@@ -220,8 +229,8 @@ class PromptEncoder(torch.nn.Module):
 
 
 class EmbeddingPromptEncoder(PromptEncoder):
-    def __init__(self,length,embedding_dim,id_offset,init_embs=None, common_ids=[]) -> None:
-        super().__init__(length,embedding_dim,id_offset, init_embs, common_ids)
+    def __init__(self,length,embedding_dim,id_offset,init_embs=None, prompt_ids=[]) -> None:
+        super().__init__(length,embedding_dim,id_offset, init_embs, prompt_ids)
         self.input_ids = torch.nn.parameter.Parameter(torch.arange(length),
              requires_grad=False)
         self.mlp = torch.nn.Sequential(
@@ -230,11 +239,14 @@ class EmbeddingPromptEncoder(PromptEncoder):
             torch.nn.Linear(embedding_dim, embedding_dim)
         )
     
-    def forward(self,prompt_token_ids,prompt_ids=None):
+    def forward(self,prompt_token_ids,pids=None):
         emblog.info("before prompt token ids: %s", prompt_token_ids)
         emblog.info("id offset: %s", self.id_offset)
         emblog.info("id offset: %s", self.length)
-        prompt_token_ids = prompt_token_ids - self.id_offset
+        if not self.id_map:
+            prompt_token_ids = prompt_token_ids - self.id_offset
+        else:
+            prompt_token_ids = [self.id_map[x] for x in prompt_token_ids]
         emblog.info("after prompt token ids: %s", prompt_token_ids)
         #emblog.info(self.embedding.weight)
         return self.embedding(prompt_token_ids)
@@ -242,7 +254,11 @@ class EmbeddingPromptEncoder(PromptEncoder):
     def dump_embedding(self, weight):
         wlog.info("Dump embeddings")
         emblog.info("Dump embeddings")
-        weight[self.id_offset:self.id_offset+self.length,:]=self.embedding.\
+        if not self.id_map:
+            ids = range(self.id_offset, self.id_offset+self.length)
+        else:
+            ids = self.prompt_ids
+        weight[ids,:]=self.embedding.\
             weight.detach()
 
     def save(self, path):
@@ -252,8 +268,8 @@ class EmbeddingPromptEncoder(PromptEncoder):
             self.embedding.load_state_dict(torch.load(path + "/emb"))
 
 class LSTMEmbeddingPromptEncoder(PromptEncoder):
-    def __init__(self,length,embedding_dim,id_offset, init_embs=None, common_ids=[]) -> None:
-        super().__init__(length,embedding_dim,id_offset, init_embs, common_ids)
+    def __init__(self,length,embedding_dim,id_offset, init_embs=None, prompt_ids=[]) -> None:
+        super().__init__(length,embedding_dim,id_offset, init_embs, prompt_ids)
         self.input_ids = torch.nn.parameter.Parameter(torch.arange(length),
             requires_grad=False)
         self.lstm = torch.nn.LSTM(
@@ -279,7 +295,7 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
             self.mlp.load_state_dict(torch.load(path + "/mlp"))
 
 
-    def forward(self,prompt_token_ids,prompt_ids=None):
+    def forward(self,prompt_token_ids,pids=None):
         emblog.debug("prompt token ids:{}".format(prompt_token_ids))
         # create embedding vectors for input ids
         embeds = self.embedding(self.input_ids)
@@ -289,8 +305,10 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
 
         running_weight = self.mlp(x[0]).squeeze(0)
         # find zero based ids 
-        prompt_token_ids = prompt_token_ids - self.id_offset
-        #emblog.info("self id offset:%s", self.id_offset)
+        if not self.id_map:
+            prompt_token_ids = prompt_token_ids - self.id_offset
+        else:
+            prompt_token_ids = [self.id_map[x] for x in prompt_token_ids]
         emblog.info("self.id_offset, prompt token ids:%s   %s", 
                 self.id_offset, prompt_token_ids)
         emblog.info("prompt token ids:%s", running_weight)
@@ -298,10 +316,18 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
         return F.embedding(prompt_token_ids,running_weight)
     def dump_embedding(self, weight):
         # get embedding weights as the output of forward pass
-        wlog.info("Dump embeddings")
+        emblog.info("Dump embeddings")
+        if not self.id_map:
+            _range = range(self.id_offset, self.id_offset+self.length)
+            ids = self.input_ids+self.id_offset 
+        else:
+            _range = ids = self.prompt_ids
+
+        emblog.info("range %s", _range)
+        emblog.info("ids %s", ids)
         with torch.no_grad():
-            embeddings = self.forward(self.input_ids+self.id_offset)
-        weight[self.id_offset:self.id_offset+self.length,:]=embeddings.detach()
+            embeddings = self.forward(ids)
+        weight[_range,:]=embeddings.detach()
 
 
 if __name__ == "__main__":

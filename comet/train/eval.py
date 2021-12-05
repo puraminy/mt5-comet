@@ -309,7 +309,7 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
                 metric[key] = str(val) + "--" + str(counter[key])
                 s += float(val)
                 ii += 1
-        mlog.info("average all:", s/ii)
+        mlog.info("average all: %s", s/ii)
     except Exception as e:
         mlog.info(e)
 
