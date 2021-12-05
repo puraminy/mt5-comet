@@ -201,12 +201,6 @@ class PromptEncoder(torch.nn.Module):
         self.input_ids = torch.nn.parameter.Parameter(torch.tensor(prompt_ids),
              requires_grad=False)
         emblog.info("prompt ids: %s", prompt_ids)
-        self.id_map = {}
-        if prompt_ids:
-            self.length = len(prompt_ids)
-            for i in range(self.length):
-                self.id_map[prompt_ids[i]] = i
-
         self.embedding_dim = embedding_dim
         self.id_offset = id_offset
         self.embedding = torch.nn.Embedding(length,embedding_dim)
@@ -254,12 +248,8 @@ class EmbeddingPromptEncoder(PromptEncoder):
 
     def dump_embedding(self, weight):
         wlog.info("Dump embeddings")
-        emblog.info("Dump embeddings")
-        if not self.id_map:
-            ids = range(self.id_offset, self.id_offset+self.length)
-        else:
-            ids = self.prompt_ids
-        weight[ids,:]=self.embedding.\
+        emblog.info("Dump embeddings %s", weight)
+        weight[self.prompt_ids,:]=self.embedding.\
             weight.detach()
 
     def save(self, path):
@@ -306,10 +296,10 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
 
         running_weight = self.mlp(x[0]).squeeze(0)
         # find zero based ids 
-        if not self.id_map:
+        if not self.prompt_ids:
             prompt_token_ids = prompt_token_ids - self.id_offset
         else:
-            prompt_token_ids = torch.tensor([self.id_map[x] for x in prompt_token_ids])
+            prompt_token_ids = (prompt_token_ids.view(-1,1) == self.input_ids).int().argmax(dim=1)
         emblog.info("self.id_offset, prompt token ids:%s   %s", 
                 self.id_offset, prompt_token_ids)
         emblog.info("prompt token ids:%s", running_weight)
@@ -318,7 +308,7 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
     def dump_embedding(self, weight):
         # get embedding weights as the output of forward pass
         emblog.info("Dump embeddings")
-        if not self.id_map:
+        if not self.prompt_ids:
             _range = range(self.id_offset, self.id_offset+self.length)
             ids = self.input_ids+self.id_offset 
         else:
