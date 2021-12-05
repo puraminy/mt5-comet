@@ -802,7 +802,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     for logger in [mlog, clog, vlog]:
         logger.info("Train records:"  + str(train_records))
         logger.info("Val Records:"  + str(val_records))
-    assert train_records != 0, "There is no data to train!!!!!!!!"
+    if not do_eval:
+        assert train_records != 0, "There is no data to train!!!!!!!!"
     assert val_records != 0, "There is no data for validation!!!!!!!!"
     if model_id == "test":
         return
