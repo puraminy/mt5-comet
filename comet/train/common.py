@@ -219,7 +219,7 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words
         offsets.append(offset)
     id_offset = min(offsets)
     mlog.info("ID OFFSET: %s", id_offset)
-    wrapped_model = PTuningWrapper(model,encoder, prompt_encoders, prompt_token_fn=get_prompt_token_fn(id_offset))
+    wrapped_model = PTuningWrapper(model, prompt_encoders, prompt_token_fn=get_prompt_token_fn(id_offset))
     return wrapped_model
 
 def create_encoder(model, tokenizer, prompt_tokens, encoder_type="lstm", 

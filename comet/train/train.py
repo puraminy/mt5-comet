@@ -925,8 +925,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
         wrapped_model = wrap_model(model, tokenizer, encoder_type, load_prompt_path, from_words = from_words) 
     if wrapped_model:
         wrapped_model.to(device=device)
-        for encoder in wrapped_model.prompt_encoders:
-            encoder.to(device=device)
+        wrapped_model.prompt_encoders.to(device=device)
         mlog.info("len tokenizer after wrapping %s", len(tokenizer))
     else:
         wrap = False

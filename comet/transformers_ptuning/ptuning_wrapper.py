@@ -34,7 +34,7 @@ emblog.setLevel(logging.INFO)
 #wlog.disabled = True
 
 class PTuningWrapper(torch.nn.Module):
-    def __init__(self,model,prompt_encoder, prompt_encoders,decoder_prompt_encoder=None,
+    def __init__(self,model,prompt_encoders,decoder_prompt_encoder=None,
         prompt_token_fn=None, prompt_token_id=None, prompt_token_ids=None,
         replacing_token_id=0):
         """
@@ -72,8 +72,7 @@ class PTuningWrapper(torch.nn.Module):
         wlog.info("self.model embedding:{}".format(self.model_embeddings))
         model_embeddings_size = model.get_input_embeddings().num_embeddings
         wlog.info("model embedding_size:{}".format(model_embeddings_size))
-        self.prompt_encoders = prompt_encoders
-        self.prompt_encoder = prompt_encoder
+        self.prompt_encoders = torch.nn.ModuleList(prompt_encoders)
         wlog.info("num of encoders %s:", len(self.prompt_encoders))
         self.decoder_prompt_encoder = decoder_prompt_encoder
         self.replacing_token_id = replacing_token_id
