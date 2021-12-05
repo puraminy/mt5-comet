@@ -261,8 +261,8 @@ class EmbeddingPromptEncoder(PromptEncoder):
 class LSTMEmbeddingPromptEncoder(PromptEncoder):
     def __init__(self,length,embedding_dim,id_offset, init_embs=None, prompt_ids=[]) -> None:
         super().__init__(length,embedding_dim,id_offset, init_embs, prompt_ids)
-        self.input_ids = torch.nn.parameter.Parameter(torch.arange(length),
-            requires_grad=False)
+        #self.input_ids = torch.nn.parameter.Parameter(torch.arange(length),
+        #    requires_grad=False)
         self.lstm = torch.nn.LSTM(
             input_size=embedding_dim,
             hidden_size=embedding_dim //2, #my code
