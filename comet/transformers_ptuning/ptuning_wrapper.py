@@ -261,8 +261,8 @@ class EmbeddingPromptEncoder(PromptEncoder):
 class LSTMEmbeddingPromptEncoder(PromptEncoder):
     def __init__(self,length,embedding_dim,id_offset, init_embs=None, prompt_ids=[]) -> None:
         super().__init__(length,embedding_dim,id_offset, init_embs, prompt_ids)
-        #self.input_ids = torch.nn.parameter.Parameter(torch.arange(length),
-        #    requires_grad=False)
+        self.net_inps = torch.nn.parameter.Parameter(torch.arange(length),
+            requires_grad=False)
         self.lstm = torch.nn.LSTM(
             input_size=embedding_dim,
             hidden_size=embedding_dim //2, #my code
@@ -287,15 +287,14 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
 
 
     def forward(self,prompt_token_ids,pids=None):
-        emblog.debug("prompt token ids:{}".format(prompt_token_ids))
+        emblog.info("before prompt token ids:{}".format(prompt_token_ids))
         # create embedding vectors for input ids
-        embeds = self.embedding(self.input_ids)
+        embeds = self.embedding(self.net_inps)
         # do forward calculations
         x = self.lstm(embeds.unsqueeze(0))
         emblog.info(embeds)
 
         running_weight = self.mlp(x[0]).squeeze(0)
-        emblog.info("before prompt token ids:  %s", prompt_token_ids)
         # find zero based ids 
         if not self.prompt_ids:
             prompt_token_ids = prompt_token_ids - self.id_offset
