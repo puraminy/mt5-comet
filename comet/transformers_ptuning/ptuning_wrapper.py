@@ -201,6 +201,7 @@ class PromptEncoder(torch.nn.Module):
     def __init__(self,length,embedding_dim,id_offset, init_embs, prompt_ids,**kwargs) -> None:
         super().__init__()
         self.length = length
+        self.prompt_ids = prompt_ids
         self.prompt_ids_tensor = torch.tensor(prompt_ids)
         emblog.info("prompt ids: %s", prompt_ids)
         self.id_map = {}
