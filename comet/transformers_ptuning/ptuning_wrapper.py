@@ -124,11 +124,8 @@ class PTuningWrapper(torch.nn.Module):
             for encoder in self.prompt_encoders:
                 #encoder = self.prompt_encoders[0]
                 wlog.info("********** offset: %s, length: %s", encoder.id_offset, encoder.length)
-                if encoder.prompt_ids:
-                    encoder_masks = encoder.isin_ids(input_ids)
-                else:
-                    prompt_token_fn = encoder.get_prompt_token_fn()
-                    encoder_masks = prompt_token_fn(input_ids)
+                prompt_token_fn = encoder.get_prompt_token_fn()
+                encoder_masks = prompt_token_fn(input_ids)
                 wlog.info("Encoder masks: %s", encoder_masks)
                 if encoder_masks.any():
                     #find input ids for prompt tokens
