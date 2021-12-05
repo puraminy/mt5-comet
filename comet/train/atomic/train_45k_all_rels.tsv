@@ -1,0 +1,910 @@
+target_text_fa	target_text	prefix	input_text
+این کار را به روش خودش انجام دهد	to do it his way	xIntent	PersonX abolishes the ___ altogether
+وکیلی پیدا کنید	find a lawyer	xNeed	PersonX abolishes the ___ altogether
+مثل اینکه او رئیس است.	like he's the boss	xReact	PersonX abolishes the ___ altogether
+برای نوشتن یک روزنامه	to write a paper	xWant	PersonX abolishes the ___ altogether
+شریکش در یک رابطه قانونی است.	their partner is in a legal relationship	oEffect	PersonX about to get married
+خوشحال	happy	oReact	PersonX about to get married
+برای رفتن به مرخصی	to go on vacation	oWant	PersonX about to get married
+هیجان زده	excited	xAttr	PersonX about to get married
+آن ها با هم رابطه قانونی دارند	they are in a legal relationship	xEffect	PersonX about to get married
+شخصی در حال انتظار به پای خود می کوبد	persony taps their foot while waiting	oEffect	PersonX accepts PersonY appointment
+خوشحال	happy	oReact	PersonX accepts PersonY appointment
+برای پیگیری شخص ایکس	to follow up with PersonX	oWant	PersonX accepts PersonY appointment
+وابسته.	dependent.	xAttr	PersonX accepts PersonY appointment
+سوگند یاد می کند	swears an oath	xEffect	PersonX accepts PersonY appointment
+تا شغلی داشته باشم	to have a job	xIntent	PersonX accepts PersonY appointment
+برای رزرو کردن محل ملاقات	to reserve appointment space	xNeed	PersonX accepts PersonY appointment
+اعتماد به نفس	confident	xReact	PersonX accepts PersonY appointment
+حتی احساس می کنم	feel even	oEffect	PersonX accepts PersonY thanks
+سپاسگزارم.	grateful	oReact	PersonX accepts PersonY thanks
+برای کمک به او	to help him	oWant	PersonX accepts PersonY thanks
+پروردگارا!	gracious	xAttr	PersonX accepts PersonY thanks
+احساس سپاسگزاری می کند	feels grateful	xEffect	PersonX accepts PersonY thanks
+برای مهربانی کردن	to be gracious	xIntent	PersonX accepts PersonY thanks
+تا با حرف زدن با آقای یی	to get talk to Y	xNeed	PersonX accepts PersonY thanks
+تا به او هدیه ای بدهد	to give him a treat	xWant	PersonX accepts PersonY thanks
+کاغذ را امضا می کند	signs the paper	oEffect	PersonX accepts PersonY's proposal
+هیجان زده	excited	oReact	PersonX accepts PersonY's proposal
+کفرآميز	cooperative	xAttr	PersonX accepts PersonY's proposal
+خوشحال	happy	xReact	PersonX accepts PersonY's proposal
+برای ازدواج	to marry	xWant	PersonX accepts PersonY's proposal
+باید بازنشسته بشوند.	get's to retire	oEffect	PersonX accepts PersonY's resignation
+نفرین شخص ایکس را بیرون کنید	curse PersonX out	oWant	PersonX accepts PersonY's resignation
+نیاز به پیدا کردن کارگری دیگر دارد.	needs to find another worker	xEffect	PersonX accepts PersonY's resignation
+برای صداقت	to be sincere	xIntent	PersonX accepts PersonY's resignation
+نفرت از شخصی	reprimand PersonY	xNeed	PersonX accepts PersonY's resignation
+نگران بودم.	worried	xReact	PersonX accepts PersonY's resignation
+دست شخصی را تکان دهد	shake PersonYs hand	xWant	PersonX accepts PersonY's resignation
+خوشحال از دیدن یک انسان مهربان	happy to see a kind person	oReact	PersonX accepts one 's ___
+برای انتقاد از کار شخص ایکس	to critique person X's work	oWant	PersonX accepts one 's ___
+انگیزه دار	motivated	xAttr	PersonX accepts one 's ___
+انسجام آن ها را حفظ می کند	keeps their integrity	xEffect	PersonX accepts one 's ___
+همراه خوبی برای زندگی است.	good life partner	xIntent	PersonX accepts one 's ___
+برای ارزیابی خود و او	to evaluate himself/herself	xNeed	PersonX accepts one 's ___
+خوشحال	happy	xReact	PersonX accepts one 's ___
+برای گرفتن پول	to get paid	xWant	PersonX accepts one 's ___
+شخص ایکس را نگاه می کند.	watches PersonX	oEffect	PersonX accepts the dare
+لذت برده	amused	oReact	PersonX accepts the dare
+شخص ایکس را تماشا کنید که این کار را انجام می دهد.	watch PersonX do it	oWant	PersonX accepts the dare
+آدم رذل و فرومایه ای است.	Adventurous	xAttr	PersonX accepts the dare
+شهامت را به نمایش می گذارد	performs dare	xEffect	PersonX accepts the dare
+تا شجاعتش را ثابت کند	to prove his bravery	xIntent	PersonX accepts the dare
+برای اینکه به مبارزه طلبیده شود	to be challenged	xNeed	PersonX accepts the dare
+برای بدست آوردن احترام	To gain respect	xWant	PersonX accepts the dare
+شخصی راه درازی را طی کرده است.	PersonY has gone a long way.	oEffect	PersonX accompanies PersonY far
+خواسته شده	wanted	oReact	PersonX accompanies PersonY far
+برای دست دادن با شخص ایکس	to shake hands with person X	oWant	PersonX accompanies PersonY far
+سودمند	useful	xAttr	PersonX accompanies PersonY far
+شخص ایکس به جای دیگری رفته است.	PersonX has gone elsewhere.	xEffect	PersonX accompanies PersonY far
+برای حفظ شخص و همراهان	to keep person y company	xIntent	PersonX accompanies PersonY far
+خوشحال	happy	xReact	PersonX accompanies PersonY far
+صورت شخص ایکس سرخ می شود	PersonX's face blushes	oEffect	PersonX accompanies by PersonX's wife
+سپاسگزار	thankful	oReact	PersonX accompanies by PersonX's wife
+مهربان	kind	xAttr	PersonX accompanies by PersonX's wife
+تا همسرش را بگیرند	to get their wife	xNeed	PersonX accompanies by PersonX's wife
+بسیار خوب.	fine	xReact	PersonX accompanies by PersonX's wife
+برای رسیدن به مقصدشان	to get to their destination	xWant	PersonX accompanies by PersonX's wife
+برای پاداش به شخص ایکس	to reward PersonX	oWant	PersonX accomplishes PersonX's mission
+به خاطر همکاریش پاداش می گیرد	gets a reward for the contribution	xEffect	PersonX accomplishes PersonX's mission
+برای رسیدن به هدف	to reach the goal	xIntent	PersonX accomplishes PersonX's mission
+برای درک ماموریتشان	to understand their mission	xNeed	PersonX accomplishes PersonX's mission
+مغرور	proud	xReact	PersonX accomplishes PersonX's mission
+برای تبریک گفتن به خودشان	to congratulate themselves	xWant	PersonX accomplishes PersonX's mission
+به دردسر می افتد	gets in trouble	oEffect	PersonX accomplishes PersonY's objectives
+از کمکتان سپاسگزارم.	grateful for the help.	oReact	PersonX accomplishes PersonY's objectives
+تا اجازه ندهد شخص ایکس برود	to not let PersonX go	oWant	PersonX accomplishes PersonY's objectives
+سخت کوش	hard working	xAttr	PersonX accomplishes PersonY's objectives
+کارها را تمام می کند	finishes tasks	xEffect	PersonX accomplishes PersonY's objectives
+برای کمک.	to help.	xIntent	PersonX accomplishes PersonY's objectives
+برای صحبت با شخصی	to talk to PersonY	xNeed	PersonX accomplishes PersonY's objectives
+کمک کننده.	helpful.	xReact	PersonX accomplishes PersonY's objectives
+سپاسگزارم.	grateful	oEffect	PersonX accomplishes PersonY's work
+کمبود	lacking	oReact	PersonX accomplishes PersonY's work
+برای تشکر از شخص ایکس	to thank person x	oWant	PersonX accomplishes PersonY's work
+کمک کننده	helpful	xAttr	PersonX accomplishes PersonY's work
+دستگیر می شود	gets caught	xEffect	PersonX accomplishes PersonY's work
+برای اطمینان از انجام کارها	to make sure the work is done	xIntent	PersonX accomplishes PersonY's work
+برای کمک به شخصی که	to help person y	xWant	PersonX accomplishes PersonY's work
+سنگینی سر را احساس کردم	felt headweight	oEffect	PersonX accuses PersonY of cheating
+عصبانی	angry	oReact	PersonX accuses PersonY of cheating
+برای احساس تاسف	to feel sorry	oWant	PersonX accuses PersonY of cheating
+حسود	envious	xAttr	PersonX accuses PersonY of cheating
+بخشش بدهید	give forgive	xEffect	PersonX accuses PersonY of cheating
+اثبات تقلب	proof of the cheating	xNeed	PersonX accuses PersonY of cheating
+تبرئه شده	justified	xReact	PersonX accuses PersonY of cheating
+برای مجازات کردن	to punish	xWant	PersonX accuses PersonY of cheating
+فریاد می زند	cries	oEffect	PersonX accuses ___ of cheating
+ترسان	scared	oReact	PersonX accuses ___ of cheating
+برای بخشیدن	to be forgiven	oWant	PersonX accuses ___ of cheating
+حسود	jealous	xAttr	PersonX accuses ___ of cheating
+تا کسی را مجازات کند	to punish someone	xIntent	PersonX accuses ___ of cheating
+برای داشتن یک رابطه	to be in a relationship	xNeed	PersonX accuses ___ of cheating
+عصبانی	angry	xReact	PersonX accuses ___ of cheating
+برای ناامید کردن	to seperate	xWant	PersonX accuses ___ of cheating
+امیدها و رویاهای خود را از دست می دهد	loses hopes and dreams	oEffect	PersonX achieves PersonY goal
+آسیب دیده	hurt	oReact	PersonX achieves PersonY goal
+تا هدف بالاتری را برای شخص ایکس تعیین کنیم.	to set a higher goal for PersonX	oWant	PersonX achieves PersonY goal
+توسط شخصی تشکر می شود.	gets thanked by personY	xEffect	PersonX achieves PersonY goal
+برای خوشحال کردن	to make happy	xIntent	PersonX achieves PersonY goal
+برای رسیدن به هدف ها	to work towards goals	xNeed	PersonX achieves PersonY goal
+بسیار خوشحال	very happy	xReact	PersonX achieves PersonY goal
+برای موفقیت	to be a success	xWant	PersonX achieves PersonY goal
+کنجکاو	curious	xAttr	PersonX achieves PersonY understanding
+شخص ایکس اطلاعات را منتقل می کند.	PersonX imparts knowledge.	xEffect	PersonX achieves PersonY understanding
+آن ها را متقاعد کنید	convice them	xIntent	PersonX achieves PersonY understanding
+خودش همه چیز را بفهمد	to understand things himself	xNeed	PersonX achieves PersonY understanding
+دانشمند	knowledgeable	xReact	PersonX achieves PersonY understanding
+برای مطالعه بیشتر	to study more	xWant	PersonX achieves PersonY understanding
+لبخند	smiles	oEffect	PersonX acknowledges gratefully the ___
+راضی، خوشحال	satisfied,happy	oReact	PersonX acknowledges gratefully the ___
+برای شخص ایکس که از آن استفاده کند	for personX to use it	oWant	PersonX acknowledges gratefully the ___
+تلقین آمیز	Appreciative	xAttr	PersonX acknowledges gratefully the ___
+شخص ایکس از حرف زدنش فریاد می زند:	PersonX cries from his talk	xEffect	PersonX acknowledges gratefully the ___
+مهربانی به دیگران	kindness to others	xIntent	PersonX acknowledges gratefully the ___
+با کسانی که شناخته شده اند تماس بگیرید	make contact with those who are acknowledge	xNeed	PersonX acknowledges gratefully the ___
+از دستورات پیروی کنید	follow the advice	xWant	PersonX acknowledges gratefully the ___
+محصولاتشان را بفروشند	sell their product	oEffect	PersonX acts as PersonY agent
+کمک کرد	helped	oReact	PersonX acts as PersonY agent
+برای بستن یک حراج	to close a sale	oWant	PersonX acts as PersonY agent
+کمک کننده	helpful	xAttr	PersonX acts as PersonY agent
+شهرت به دست آوردن	making the fame	xEffect	PersonX acts as PersonY agent
+برای پول درآوردن	to make money	xIntent	PersonX acts as PersonY agent
+خوب است.	good	xReact	PersonX acts as PersonY agent
+پول می گیرد	gets cash	oEffect	PersonX acts as PersonY intermediary
+راحت باشم.	at ease	oReact	PersonX acts as PersonY intermediary
+گوش کردن	Listening	xAttr	PersonX acts as PersonY intermediary
+تا در موقعیتی قرار بگیرم که بتونم به شخصی کمک کنم.	to be in position to help persony	xNeed	PersonX acts as PersonY intermediary
+اعتماد به نفس	confident	xReact	PersonX acts as PersonY intermediary
+برای کمک کردن	to help	xWant	PersonX acts as PersonY intermediary
+برای تغییر مسیر	to change the path	oWant	PersonX acts in PersonY way
+مای هارترو ببینم.	MAY GET HURT	xEffect	PersonX acts in PersonY way
+بامزه است.	funny	xIntent	PersonX acts in PersonY way
+برای اینکه ببینیم شخصی چگونه عمل می کند.	to see how personY acts	xNeed	PersonX acts in PersonY way
+رضایت خاطر	satisfied	xReact	PersonX acts in PersonY way
+برای صدمه زدن به ای	to hurt Y	xWant	PersonX acts in PersonY way
+لطف و محبت را دریافت می کند	receives kindness	oEffect	PersonX acts on PersonY's behalf
+کمک کرد	helped	oReact	PersonX acts on PersonY's behalf
+برای کمک گرفتن	to have help	oWant	PersonX acts on PersonY's behalf
+آرام باش	calm	xAttr	PersonX acts on PersonY's behalf
+استرس ها	stresses	xEffect	PersonX acts on PersonY's behalf
+برای کمک به یک دوست	to help a friend	xIntent	PersonX acts on PersonY's behalf
+برای محافظت از شخصی که	to protect person y	xNeed	PersonX acts on PersonY's behalf
+خوشحال	happy	xReact	PersonX acts on PersonY's behalf
+محیط پذیرفته می شود	environment gets accepted	oEffect	PersonX adapts to PersonY's environment
+مثل اینکه آنها مسئولند.	like they're in charge	oReact	PersonX adapts to PersonY's environment
+برای کنترل کردن	to be in control	oWant	PersonX adapts to PersonY's environment
+انعطاف پذیر	flexible	xAttr	PersonX adapts to PersonY's environment
+نظر جدیدی پیدا می کند	gets a new point of view	xEffect	PersonX adapts to PersonY's environment
+برای اینکه در آن جا بگیریم	to fit in	xIntent	PersonX adapts to PersonY's environment
+برای هماهنگی با...	to accomodate y	xWant	PersonX adapts to PersonY's environment
+از آن ها دوری می کند	avoids them	oEffect	PersonX adds ___ to injury
+بد	bad	oReact	PersonX adds ___ to injury
+هرگز با شخص ایکس صحبت نکن	never speak to PersonX again	oWant	PersonX adds ___ to injury
+اشتباه است.	wrong	xAttr	PersonX adds ___ to injury
+نتایج را قبول کنید	accept consequences	xEffect	PersonX adds ___ to injury
+وضعیت را بدتر کند	make the situation worse	xNeed	PersonX adds ___ to injury
+گناهکار	guilty	xReact	PersonX adds ___ to injury
+تا بر کسی تأثیر بگذارد	to influence someone	xWant	PersonX adds ___ to injury
+او را باندپیچی می کند	bandages him	oEffect	PersonX adds fuel to the fire
+خشمگین	angered	oReact	PersonX adds fuel to the fire
+برای پیروزی در مباحثه	to win the argument	oWant	PersonX adds fuel to the fire
+بی مسئولیت	irresponsible	xAttr	PersonX adds fuel to the fire
+برای اینکه یک اندرز دهنده باشم	to be an instigator	xIntent	PersonX adds fuel to the fire
+تا با کسی روبرو شوم	to confront someone	xNeed	PersonX adds fuel to the fire
+شيطان صفت	evil	xReact	PersonX adds fuel to the fire
+برای اطمینان از اینکه سوخت درست در آتش قرار گرفته است	to make sure the fuel is correctly placed in the fire	xWant	PersonX adds fuel to the fire
+کتاب مقدس را بیشتر بخوانید	read Bible more	oEffect	PersonX administers the lord 's ___
+به آن توجه داشتند	tended to	oReact	PersonX administers the lord 's ___
+شام بخورید	eat the supper	oWant	PersonX administers the lord 's ___
+تشکر می کند	Gives thanks	xEffect	PersonX administers the lord 's ___
+شام ارباب را آماده می کند	administers the lord 's supper	xIntent	PersonX administers the lord 's ___
+شام درست کردن	fix supper	xNeed	PersonX administers the lord 's ___
+خیلی شبیه	very like	xReact	PersonX administers the lord 's ___
+بشقاب لرد را بردار	pick up lords plate	xWant	PersonX administers the lord 's ___
+تحسین کننده	admiring	xAttr	PersonX admires PersonY's work
+احساساتی مربوط به تأثیرات کار دارد	Has sensations related to impressions of work	xEffect	PersonX admires PersonY's work
+تا به آن ها نشان دهد که چقدر از این کار خوششان می آید.	to show them how much they like it	xIntent	PersonX admires PersonY's work
+تا با شخصی تماس بگیرد.	to contact PersonY	xNeed	PersonX admires PersonY's work
+حسود	envious	xReact	PersonX admires PersonY's work
+تا کارهای دیگر شخصی را ببیند.	to see PersonY's other works	xWant	PersonX admires PersonY's work
+از صداقت آن ها قدردانی می کند	appreciates their honesty	oEffect	PersonX admits PersonY was wrong
+توهین شده	insulted	oReact	PersonX admits PersonY was wrong
+اشتباهشان را جبران کنند	fix their mistake	oWant	PersonX admits PersonY was wrong
+جستجوگر	Seeker	xAttr	PersonX admits PersonY was wrong
+به خاطر صداقتش محترم است	is respected for honesty	xEffect	PersonX admits PersonY was wrong
+برای راستگو بودن	to be truthful	xIntent	PersonX admits PersonY was wrong
+مخالفت با چیزی.	to disagree about something.	xNeed	PersonX admits PersonY was wrong
+عصبانی	angry	xWant	PersonX admits PersonY was wrong
+نهاد پذیرفته شده وارد اتحادیه می شود	Admitted entity enters the union	oEffect	PersonX admits ___ into the union
+متحد شده اند	united	oReact	PersonX admits ___ into the union
+رای دادن	to vote	oWant	PersonX admits ___ into the union
+وابسته به جودی	judicial	xAttr	PersonX admits ___ into the union
+در مورد اتحادیه سختگیری می کند	stresses about the union	xEffect	PersonX admits ___ into the union
+اضافه کردن	to add	xIntent	PersonX admits ___ into the union
+قدرتمند	powerful	xReact	PersonX admits ___ into the union
+زندگی خود را می گذراند	lives their life	oEffect	PersonX adopts a baby
+دوست داشتم	loved	oReact	PersonX adopts a baby
+توسط پدر و مادر تغذیه شود	be fed by parent	oWant	PersonX adopts a baby
+ناراحت کننده	uneasy	xAttr	PersonX adopts a baby
+کاغذها را پر کنید	fill out paperwork	xNeed	PersonX adopts a baby
+مسئولیت پذیر	responsible	xReact	PersonX adopts a baby
+از بچه مراقبت کنید	take care of the baby	xWant	PersonX adopts a baby
+شخص ایکس پدر می شود	PersonX becomes a parent	xEffect	PersonX adopts a child
+بچه دار شدن	to have a child	xIntent	PersonX adopts a child
+برای مراجعه به آژانس فرزندخواندگی	to apply to adoption agency	xNeed	PersonX adopts a child
+دوست داشتم	loved	xReact	PersonX adopts a child
+تا بچه را به اتاق جدیدشان راهنمایی کنند	to show child to their new room	xWant	PersonX adopts a child
+امنیت	security	oEffect	PersonX adopts a little girl
+بخشی از یک خانواده	part of a family	oReact	PersonX adopts a little girl
+برای پدر و مادر شدن	to be parented	oWant	PersonX adopts a little girl
+گرم	warm	xAttr	PersonX adopts a little girl
+هیجان زده می شود	gets excited	xEffect	PersonX adopts a little girl
+بخشی از یک خانواده بودن	to be part of a family	xIntent	PersonX adopts a little girl
+برای دیدار از خانه	to do a home visit	xNeed	PersonX adopts a little girl
+شگفت انگیز است.	amazing	xReact	PersonX adopts a little girl
+جیغ ها	screams	oEffect	PersonX advances towards PersonY
+خوشحال	happy	oReact	PersonX advances towards PersonY
+تا منتظر شخص ایکس بمانیم.	to wait for person X	oWant	PersonX advances towards PersonY
+تهدیدآمیز	threatening	xAttr	PersonX advances towards PersonY
+مورد اصابت گل و لای قرار گرفته است.	is aroused	xEffect	PersonX advances towards PersonY
+برای نزدیک تر شدن	to get closer	xIntent	PersonX advances towards PersonY
+برای تبریک گفتن به شخصی که	to congratulate person y	xWant	PersonX advances towards PersonY
+عرق می ریزند و می لرزند چون شخص ایکس یک قاتل زنجیره ای شناخته شده است.	are sweating and shaking because PersonX is a well-known serial killer	oEffect	PersonX advances upon PersonY
+نگران عصبی	worried nervous	oReact	PersonX advances upon PersonY
+از خودشان دفاع کنند	too defend themselves	oWant	PersonX advances upon PersonY
+ترسناک	scary	xAttr	PersonX advances upon PersonY
+ترفیع می یابد	gets promoted	xEffect	PersonX advances upon PersonY
+به صفحه شخصی بروید.	go to PersonY	xNeed	PersonX advances upon PersonY
+علاقمند و خوشحال	interested happy	xReact	PersonX advances upon PersonY
+برای روبرو شدن با شخصی	to confront PersonY	xWant	PersonX advances upon PersonY
+گوش کن	listen	oEffect	PersonX advises PersonY to take
+باهوش تر	smarter	oReact	PersonX advises PersonY to take
+برای گرفتن یک درجه آب	to get a class of water	oWant	PersonX advises PersonY to take
+بالغ شدن	mature	xAttr	PersonX advises PersonY to take
+برای اطلاع رسانی به دیگران	to inform another	xIntent	PersonX advises PersonY to take
+برای فکر کردن به خرد	to think of wisdom	xNeed	PersonX advises PersonY to take
+کمک کننده	helpful	xReact	PersonX advises PersonY to take
+به زی هم توصیه کند که	to advice Z also to take	xWant	PersonX advises PersonY to take
+تحسین آمیز	appreciative	oEffect	PersonX advises the ___ on all matters
+بر آن ها تسلط یافته است.	dominated	oReact	PersonX advises the ___ on all matters
+درس دادن به شخص ایکس	to lesson to PersonX	oWant	PersonX advises the ___ on all matters
+سرباز خدمتکار	servant	xEffect	PersonX advises the ___ on all matters
+تا تأثیرگذار باشد	to be influential	xIntent	PersonX advises the ___ on all matters
+برای نابود کردن همه مسائل	TO KNOW ABOUT ALL THE MATTERS	xNeed	PersonX advises the ___ on all matters
+قدرتمند	powerful	xReact	PersonX advises the ___ on all matters
+برای سرکوب کردن متخلفین	TO OBSERVE THE OPPONENT	xWant	PersonX advises the ___ on all matters
+متفکرانه	thoughtful	xAttr	PersonX advises the ___ on matters
+باید در جریان بماند	has to stay informed	xEffect	PersonX advises the ___ on matters
+برای کمک کردن.	to be helpful.	xIntent	PersonX advises the ___ on matters
+با آن ها حرف بزن	speak to them	xNeed	PersonX advises the ___ on matters
+دارای نفوذ.	influential.	xReact	PersonX advises the ___ on matters
+بگو من این را به تو گفتم	say I told you so	xWant	PersonX advises the ___ on matters
+سپاسگزار است	is grateful	oEffect	PersonX affects PersonY's lives
+کنترل شده	controlled	oReact	PersonX affects PersonY's lives
+برای پرداخت قبض ها.	to pay bills.	oWant	PersonX affects PersonY's lives
+طاقت فرسا	overwhelming	xAttr	PersonX affects PersonY's lives
+متشکر است.	is thanked	xEffect	PersonX affects PersonY's lives
+برای کنترل کردن	to be in control	xIntent	PersonX affects PersonY's lives
+برای انجام یک کار خوب.	to do a good deed.	xNeed	PersonX affects PersonY's lives
+برای جشن گرفتن.	to celebrate.	xWant	PersonX affects PersonY's lives
+ضدیت با ایکس	Rebel against X	oEffect	PersonX affects ___ in ways
+ناراحت	upset	oReact	PersonX affects ___ in ways
+شکایت کردن	complain	oWant	PersonX affects ___ in ways
+بامزه است.	funny	xAttr	PersonX affects ___ in ways
+واکنش آن ها را می بیند	watches their affects	xEffect	PersonX affects ___ in ways
+برای جستجو	to search	xIntent	PersonX affects ___ in ways
+مسئولیت پذیر	responsible	xReact	PersonX affects ___ in ways
+سپاسگزار می شود	becomes grateful	oEffect	PersonX affects a person 's ___
+تحت تاثیر قرار گرفته است.	influenced	oReact	PersonX affects a person 's ___
+برای آموختن درس ها	to take in lessons	oWant	PersonX affects a person 's ___
+برتر از همه	dominant	xAttr	PersonX affects a person 's ___
+کف زدن	claps	xEffect	PersonX affects a person 's ___
+برای برقراری ارتباط	to have an interaction	xNeed	PersonX affects a person 's ___
+دارای نفوذ	influential	xReact	PersonX affects a person 's ___
+برای فراهم کردن راهنمایی	to provide guidance	xWant	PersonX affects a person 's ___
+ثروتش را از دست بدهد	lose wealth	oEffect	PersonX affects adversely the ___
+بد، آزاردهنده	bad, irritaiting	oReact	PersonX affects adversely the ___
+برای دوری از شخص ایکس	to stay away from PersonX	oWant	PersonX affects adversely the ___
+خطرناک	harmful	xAttr	PersonX affects adversely the ___
+یک نفر را پایین بیاورید	bring someone down	xIntent	PersonX affects adversely the ___
+برای صحبت کردن در کلاس	to talk in class	xNeed	PersonX affects adversely the ___
+سرنگون شده	dejected	xReact	PersonX affects adversely the ___
+برای بدست آوردن قدرت	to gain power	xWant	PersonX affects adversely the ___
+نظرش عوض می شود.	Changes opinion	oEffect	PersonX affects one 's ___
+بدبخت و منزجر	unhappy,dissatified	oReact	PersonX affects one 's ___
+برای رهایی از شر او	to get rid of him	oWant	PersonX affects one 's ___
+مهارت جدیدی یاد می گیرد	learns a new skill	xEffect	PersonX affects one 's ___
+یک تأثیر مثبت مادی باشد که بتواند زندگی دیگران را تسکین دهد و آرامش بخشد.	be a materially positive influence able to bring relief & comfort to other people's lives.	xIntent	PersonX affects one 's ___
+تا آن ها را آشفته کند.	to disturb them	xNeed	PersonX affects one 's ___
+ناشاد و نگران	unhappy,worried	xReact	PersonX affects one 's ___
+برای صدمه زدن به آنها	to hurt them	xWant	PersonX affects one 's ___
+مردم لبخند می زنند	People smile	oEffect	PersonX affects people 's ___
+تحت تأثیر قرار گرفته، تغییر یافته و کنترل شده	influenced, changed, controlled	oReact	PersonX affects people 's ___
+تأثیرگذار	influencial	xAttr	PersonX affects people 's ___
+شخص ایکس جایزه می گیرد.	PersonX is awarded	xEffect	PersonX affects people 's ___
+تا تاثیر گذارد	to influence	xIntent	PersonX affects people 's ___
+تا توجه آن ها را به خود جلب کند.	to get their attention	xNeed	PersonX affects people 's ___
+تحت کنترل	in control	xReact	PersonX affects people 's ___
+به رسمیت شناخته شود	be acknowledged	xWant	PersonX affects people 's ___
+تا از این فرصت استفاده کنیم	to make the most of the chance	oWant	PersonX affords PersonY opportunity
+علاقه مند شدن به	caring	xAttr	PersonX affords PersonY opportunity
+اطلاعات را از شخص ی می آموزد.	learns information from Person Y.	xEffect	PersonX affords PersonY opportunity
+برای اینکه به شخصیت فرصتی بدیم	to give persony a chance	xIntent	PersonX affords PersonY opportunity
+کاوندز برای غلتیدن در طوفان با تنگ نظری	KNOWLEDGE TO FOLLOW THROUGH WITH OPPPORTUNITY	xNeed	PersonX affords PersonY opportunity
+خوشحال	happy	xReact	PersonX affords PersonY opportunity
+برای رسیدن به موفقیت	to see PersonY reach success	xWant	PersonX affords PersonY opportunity
+از چیزی که می گیرد لذت می برد	Enjoys what he gets	oEffect	PersonX affords PersonY pleasure
+مخصوص.	special.	oReact	PersonX affords PersonY pleasure
+برای پیدا کردن چیزی که شخص ایکس می خواهد	to find what PersonX wants	oWant	PersonX affords PersonY pleasure
+بدون خودپرست	Selfless	xAttr	PersonX affords PersonY pleasure
+از شما تشکر می کند	gets a thank you	xEffect	PersonX affords PersonY pleasure
+تا کاری برای یک دوست انجام دهد.	to do something pleasant for a friend.	xIntent	PersonX affords PersonY pleasure
+برای درک شخصیت	to understand PersonY	xNeed	PersonX affords PersonY pleasure
+رضایت خاطر	satisfied	xReact	PersonX affords PersonY pleasure
+می گوید نه	says no	oEffect	PersonX affords PersonY the opportunity
+سپاسگزارم.	grateful	oReact	PersonX affords PersonY the opportunity
+پروردگارا!	gracious	xAttr	PersonX affords PersonY the opportunity
+تا از شخصی پیروی کنند.	to follow up with PersonY	xWant	PersonX affords PersonY the opportunity
+پروانه ها در شکمشان	butterflies in their stomach	oEffect	PersonX agrees to a date
+برای آماده شدن برای تاریخ ملاقات	to get ready for the date	oWant	PersonX agrees to a date
+علاقه مند	interested	xAttr	PersonX agrees to a date
+گل ها را دریافت می کند	receives flowers	xEffect	PersonX agrees to a date
+برای آغاز یک رابطه	to start a relationship	xIntent	PersonX agrees to a date
+برای فکر کردن درباره تاریخ	to think about the date	xNeed	PersonX agrees to a date
+عصبی	nervous	xReact	PersonX agrees to a date
+برای دوش گرفتن	to take a shower	xWant	PersonX agrees to a date
+پشتیبان کننده	supportive	oReact	PersonX agrees to go with PersonY
+برای گذراندن زمان با ایکس	To spend time with X	oWant	PersonX agrees to go with PersonY
+قابل پذیرش	agreeable	xAttr	PersonX agrees to go with PersonY
+شخص ایکس همه چیز را درست می کند	PersonX smoothes things over	xEffect	PersonX agrees to go with PersonY
+برای رفتن به یک قرار ملاقات	to go on a date	xIntent	PersonX agrees to go with PersonY
+تا بدانند به کجا می روند.	to know where they are going	xNeed	PersonX agrees to go with PersonY
+هیجان زده	excited	xReact	PersonX agrees to go with PersonY
+تا برای رفتن با شخصی ها لباس بپوشند.	to dress up to go with PersonY	xWant	PersonX agrees to go with PersonY
+متشکرم.	thanked  x	oEffect	PersonX agrees to help PersonY
+سپاسگزارم.	grateful	oReact	PersonX agrees to help PersonY
+برای آسان کردن کار	to make a jobeasier	oWant	PersonX agrees to help PersonY
+سرش را به سمت موضوع برمی گرداند.	turns head towards the issue	xEffect	PersonX agrees to help PersonY
+برای کمک	to of assistance	xIntent	PersonX agrees to help PersonY
+برای صحبت با شخصی	to talk to PersonY	xNeed	PersonX agrees to help PersonY
+مثل یک آدم خوب	like a good person	xReact	PersonX agrees to help PersonY
+تا ببینیم چه نیازی داری	to see what y needs	xWant	PersonX agrees to help PersonY
+هیجان زده	excited	oReact	PersonX agrees to try it
+برای پرسیدن درباره روال جدید	to ask about new routine	oWant	PersonX agrees to try it
+قابل پذیرش	agreeable	xAttr	PersonX agrees to try it
+تجربه جدید	new experience	xEffect	PersonX agrees to try it
+برای اینکه بدانم مزه اش چگونه است	to know how it tastes	xIntent	PersonX agrees to try it
+برای صحبت کردن با یک آدم فهیم	to talk with someone knowlegeable	xNeed	PersonX agrees to try it
+ماجراجو	adventurous	xReact	PersonX agrees to try it
+قدم هایی را که برای امتحان آن لازم است در نظر بگیرید	think about the steps to try it	xWant	PersonX agrees to try it
+به توافق می رسد	comes to an agreement	oEffect	PersonX agrees upon by the parties
+با پلیس ها ملاقات می کنند تا وضعیت را مورد بحث قرار دهند.	are met with cops to discuss the situation	oEffect	PersonX airs PersonX's dirty laundry in public
+خجالت زده	embarrassed	oReact	PersonX airs PersonX's dirty laundry in public
+برای فکر کردن به آن	to think about it	oWant	PersonX airs PersonX's dirty laundry in public
+غیرقابل اعتماد	Untrustworthy	xAttr	PersonX airs PersonX's dirty laundry in public
+در اخبار مورد حمله قرار می گیرد	gets attacked in the news	xEffect	PersonX airs PersonX's dirty laundry in public
+برای اینکه دنیا مشکل های ایکس را بداند	for the world to know x's problems	xIntent	PersonX airs PersonX's dirty laundry in public
+نیازی به گفتن آن نیست.	to need to say it	xNeed	PersonX airs PersonX's dirty laundry in public
+خجالت زده	embarrassed	xReact	PersonX airs PersonX's dirty laundry in public
+در جستجوی مراقبت پزشکی باشند	seek medical attention	xWant	PersonX airs PersonX's dirty laundry in public
+سپاسگزاری	thankfulness	oEffect	PersonX allays PersonY's fears
+امن.	safe.	oReact	PersonX allays PersonY's fears
+برای اینکه مطمئن شوم آن ها در امان هستند	to know they are safe	oWant	PersonX allays PersonY's fears
+کمک کننده	helpful	xAttr	PersonX allays PersonY's fears
+فضل و کمالات	accomplishment	xEffect	PersonX allays PersonY's fears
+تا آن ها را آرام کند.	to soothe y	xIntent	PersonX allays PersonY's fears
+برای اثبات اینکه هیچ خطری در کار نیست	to show PersonY there is no danger	xNeed	PersonX allays PersonY's fears
+مغرور	proud	xReact	PersonX allays PersonY's fears
+می نشیند	sits	oEffect	PersonX allows PersonY access
+خوشحال	happy	oReact	PersonX allows PersonY access
+برای وارد شدن به این مجموعه	to enter the complex	oWant	PersonX allows PersonY access
+محتاط	wary	xAttr	PersonX allows PersonY access
+برای ادامه کار	to continue to work	xWant	PersonX allows PersonY access
+در ماموریتشان تغییر می کند	turns in their assignment	oEffect	PersonX allows PersonY time
+سپاسگزارم.	grateful	oReact	PersonX allows PersonY time
+برای تشکر از آن ها	to thank them for it	oWant	PersonX allows PersonY time
+شخصی را صدا می زند.	calls person y	xEffect	PersonX allows PersonY time
+برای مهربانی کردن	to be kind	xIntent	PersonX allows PersonY time
+تا بدانند به آن نیاز دارند	to know they need it	xNeed	PersonX allows PersonY time
+خوب است.	good	xReact	PersonX allows PersonY time
+با افرادی که آماده هستند صحبت کنید	talk to person y when they are ready	xWant	PersonX allows PersonY time
+قابل لکه دار شدن	malleable	xAttr	PersonX allows PersonY to keep the dog
+سگ ها را راهنمایی کنید که چه می خورند	guide what the dog eat	xEffect	PersonX allows PersonY to keep the dog
+شخصیتی برای خوشحال بودن	persony to be happy	xIntent	PersonX allows PersonY to keep the dog
+سگی داشته باشم که به کس دیگری اجازه نگهداریش را بدهم	have a dog to allow someone else to keep	xNeed	PersonX allows PersonY to keep the dog
+عالی است.	great	xReact	PersonX allows PersonY to keep the dog
+برای رهایی از مسئولیت	to relieved of responsibility	xWant	PersonX allows PersonY to keep the dog
+نادیده گرفته می شود	gets ignored	oEffect	PersonX allows ___ to enter
+سپاسگزارم.	grateful	oReact	PersonX allows ___ to enter
+تا وقت بگذرانیم	to hang out	oWant	PersonX allows ___ to enter
+بخشنده	indulgent	xAttr	PersonX allows ___ to enter
+شخص ایکس خوش آمد می گوید.	PersonX is welcoming	xEffect	PersonX allows ___ to enter
+برای احترام گذاشتن	to be respectful	xIntent	PersonX allows ___ to enter
+برای پاسخ به درخواستی	to respond to a request	xNeed	PersonX allows ___ to enter
+برای گفتگو با شخص ایکس	to converse with PersonX	xWant	PersonX allows ___ to enter
+گوش می دهد	listens	oEffect	PersonX also asked PersonY
+خوشحال بودند که توسط ایکس دعوت شدند، آن ها به ایکس علاقه مند شده بودند.	glad that they got asked out by x, they had a crush on x	oReact	PersonX also asked PersonY
+بله گفتن به شخص ایکس	to say yes to PersonX	oWant	PersonX also asked PersonY
+کنجکاو	curious	xAttr	PersonX also asked PersonY
+حرف زدن	talks	xEffect	PersonX also asked PersonY
+برای رفتن به مسابقه با شخصی	to go to the prom with person	xIntent	PersonX also asked PersonY
+آزاردهنده	curoious	xReact	PersonX also asked PersonY
+صورت غذا را دریافت می کند	receives menu	oEffect	PersonX also asked ___
+دانستن اینکه	knowing	oReact	PersonX also asked ___
+کنجکاو	curious	xAttr	PersonX also asked ___
+تا با پدرشان تماس بگیرند	to call their dad on the phone	xNeed	PersonX also asked ___
+باهوش تر	smarter	xReact	PersonX also asked ___
+تا بفهمم چه اتفاقی دارد می افتد.	to find out what's going on	xWant	PersonX also asked ___
+برای تشکر کردن	to give thanks	oWant	PersonX also gave
+تعریف و تمجید می شود	gets complimented	xEffect	PersonX also gave
+برای کمک کردن	to be helpful	xIntent	PersonX also gave
+چیزی برای بخشیدن داشته باشید	have something to give	xNeed	PersonX also gave
+خوشحال	happy	xReact	PersonX also gave
+برای بخشیدن به همه چیز	to give to all charities	xWant	PersonX also gave
+تعدادی هم دارد	has some too	oEffect	PersonX also gave PersonY ___
+اطمینان یافته	reassured	oReact	PersonX also gave PersonY ___
+در عوض چیز دیگری را به اشتراک بگذارد	to share something else in return	oWant	PersonX also gave PersonY ___
+یک هدیه	a gift	xAttr	PersonX also gave PersonY ___
+لبخندی که از انجام کاری خوب ناشی می شود	smiles from doing something good	xEffect	PersonX also gave PersonY ___
+تا مطمئن شود خونریزی متوقف شده است.	to make sure the bleeding stopped	xIntent	PersonX also gave PersonY ___
+یک بیمار را می بیند.	Sees a patient.	xNeed	PersonX also gave PersonY ___
+خوب است.	good	xReact	PersonX also gave PersonY ___
+لبخند می زنند	they smile	oEffect	PersonX also gave ___
+خوشحالم.	pleased	oReact	PersonX also gave ___
+تا برای آن ها کار خوبی انجام دهد	to try and do something nice for them	oWant	PersonX also gave ___
+دوستانه	friendly	xAttr	PersonX also gave ___
+آن ها می خندند	they laugh	xEffect	PersonX also gave ___
+می خواهد چیزی به شخص دیگری بدهد	wants to give something to another person	xIntent	PersonX also gave ___
+تا به مردم بفهمانند که خوشحالند	to let persony know they are happy	xWant	PersonX also gave ___
+سرش را به طرف X برمی گرداند.	turns head towards x	oEffect	PersonX also told PersonY
+آگهی شده است	informed	oReact	PersonX also told PersonY
+گوش کردن به شخص ایکس	to listen to PersonX	oWant	PersonX also told PersonY
+بی دقت	careless	xAttr	PersonX also told PersonY
+دستشان را تکان می دهند	get shakes their hand	xEffect	PersonX also told PersonY
+با شخصی حرف بزن.	Talk to PersonY	xNeed	PersonX also told PersonY
+گوسپي	gossipy	xReact	PersonX also told PersonY
+به شخص دیگری بگو	Tell another person	xWant	PersonX also told PersonY
+شخصی از اتومبیل شخص ایکس پیاده شد	PersonY got out of PersonX's car	oEffect	PersonX also took PersonY
+خوشحال از اینکه کسی آن ها را برداشت	happy someone cared to take them	oReact	PersonX also took PersonY
+برای ترک کردن هر کس دیگری	to quit eveyone else	oWant	PersonX also took PersonY
+کمک کننده	helpful	xAttr	PersonX also took PersonY
+برای کمک کردن به یک نفر به جایی	to be helpful taking someone someplace	xIntent	PersonX also took PersonY
+برای نزدیک شدن به شخصی	to get next to personY	xNeed	PersonX also took PersonY
+هیجان زده	excited	xReact	PersonX also took PersonY
+آن ها را با کس دیگری درمیان نگذارید	not share them with someone else	xWant	PersonX also took PersonY
+از آن ها دوری می کند	avoids them	oEffect	PersonX always bragged
+آزرده خاطر	annoyed	oReact	PersonX always bragged
+همچنین برای عرعر کردن	to brag also	oWant	PersonX always bragged
+کمتر دوست دارد	has less friends	xEffect	PersonX always bragged
+قابل تحسین.	to be admired.	xIntent	PersonX always bragged
+برای رسیدن به موفقیت	to have an accomplishment	xNeed	PersonX always bragged
+خوب است.	good.	xReact	PersonX always bragged
+برای اینکه با دوست های تازه ای آشنا شوم	to brag to more friends	xWant	PersonX always bragged
+مقابله آمیز	confrontational	xAttr	PersonX always fought
+تنها است.	is alone	xEffect	PersonX always fought
+برای اینکه یک قلدر باشم	to be a bully	xIntent	PersonX always fought
+تا حریف خود را تحت فشار قرار دهند	to push their opponent	xNeed	PersonX always fought
+عصبانی	angry	xReact	PersonX always fought
+برای بازگرداندن	to retaliate	xWant	PersonX always fought
+به دیگران دانش می دهد	gives knowledge to others	oEffect	PersonX always listened
+دوست داشتم	loved	oReact	PersonX always listened
+گوش کردن به شخص ایکس.	to listen to Person X.	oWant	PersonX always listened
+مهربان	kind	xAttr	PersonX always listened
+اطلاعات جدید می آموزد	learns new information	xEffect	PersonX always listened
+تا دوست خوبی باشم	to be a good friend	xIntent	PersonX always listened
+برای احترام به مردم.	to respect people.	xNeed	PersonX always listened
+تا آنچه را که از مردم آموخته استفاده کند.	to use what he has learned from people.	xWant	PersonX always listened
+بالاخره یاد می گیرد	learns finally	oEffect	PersonX always told PersonY
+کمک کرد	helped	oReact	PersonX always told PersonY
+برای پرسیدن سوالات	to ask questions	oWant	PersonX always told PersonY
+؟	?	xAttr	PersonX always told PersonY
+از آن دوری می کنند	gets avoided	xEffect	PersonX always told PersonY
+برای کمک کردن	to be helpful	xIntent	PersonX always told PersonY
+سودمند	useful	xReact	PersonX always told PersonY
+آسیب نمی بیند	doesn't get hurt	oEffect	PersonX always told ___
+تحسین آمیز	appreciative	oReact	PersonX always told ___
+آن ها را از حرف زدن باز دارد	them to stop talking	oWant	PersonX always told ___
+پشتیبان کننده	supportive	xAttr	PersonX always told ___
+معیارهای بالاتری دارند	have high standard	xNeed	PersonX always told ___
+دانشمند	knowledgeable	xReact	PersonX always told ___
+برای انجام آن	to do it	xWant	PersonX always told ___
+به او هشدار می دهند	gets a warning	xEffect	PersonX always took ___
+از وسایل نقلیه عمومی استفاده کنید	use public transport	xIntent	PersonX always took ___
+جیب ها	pockets	xNeed	PersonX always took ___
+مثل اینکه همیشه دیر می کنند	like they're always late	xReact	PersonX always took ___
+برای عذرخواهی.	to apologize.	xWant	PersonX always took ___
+مورد بی مهری قرار گرفته است.	is ostracized	oEffect	PersonX announces PersonY's intention
+دستگیر شده	caught	oReact	PersonX announces PersonY's intention
+انتقاد از انگیزه های برنامه ریزی شده	GIVE FEEDBACK ON THE PLANNED INTENTION	oWant	PersonX announces PersonY's intention
+آدم رذل!	snakey	xAttr	PersonX announces PersonY's intention
+فریاد می زنند	is yelled at	xEffect	PersonX announces PersonY's intention
+شخصیتی برای راستگو بودن	persony to be honest	xIntent	PersonX announces PersonY's intention
+بلند حرف زدن	to speak aloud	xNeed	PersonX announces PersonY's intention
+رضایت خاطر	satisfied	xReact	PersonX announces PersonY's intention
+تبریک می گوید به شخص ایکس	congratulates person x	oEffect	PersonX announces to everyone
+تحت تاثیر قرار گرفته	intrigued	oReact	PersonX announces to everyone
+تا به شخص ایکس بگوید که آنها چه فکر می کنند	to tell PersonX what they think	oWant	PersonX announces to everyone
+مشتاقانه	enthusiastic	xAttr	PersonX announces to everyone
+تعریف و تمجید می شود	gets complimented	xEffect	PersonX announces to everyone
+همه بفهمند	everyone to know	xIntent	PersonX announces to everyone
+همه چیز را واضح کنید	make things clear	xWant	PersonX announces to everyone
+شخصی مورد احترام است.	PersonY is honored	oEffect	PersonX anoints PersonY with oil
+افتخارآمیز	honored	oReact	PersonX anoints PersonY with oil
+چشمانشان را ببندند	close their eyes	oWant	PersonX anoints PersonY with oil
+پرهیزگار	pious	xAttr	PersonX anoints PersonY with oil
+به خداوند وفادار می شود	becomes committed to God	xEffect	PersonX anoints PersonY with oil
+وارد یک مراسم مذهبی شوید	enter a religious ceremony	xNeed	PersonX anoints PersonY with oil
+دوست داشتن	loving	xReact	PersonX anoints PersonY with oil
+برای باز کردن پارلور ماساژ	to open massage parlour	xWant	PersonX anoints PersonY with oil
+اطلاعات جدید یاد بگیرید	learn new information	oEffect	PersonX answers PersonY questions
+کمک کرد	helped	oReact	PersonX answers PersonY questions
+به جواب گوش کن	listen to the answer	oWant	PersonX answers PersonY questions
+توضیحی	explanatory	xAttr	PersonX answers PersonY questions
+برای تحسین شدن	to be admired	xIntent	PersonX answers PersonY questions
+برای اینکه زیردست شخصی به نام Y باشم	to be a subordinate to person Y	xNeed	PersonX answers PersonY questions
+باهوش	clever	xReact	PersonX answers PersonY questions
+برای گفتن حقیقت	To tell the truth	xWant	PersonX answers PersonY questions
+خیلی چیزها یاد می گیرند	learns a lot	oEffect	PersonX answers PersonY's ___ well
+به آن اهمیت می دادند	cared about	oReact	PersonX answers PersonY's ___ well
+برای اینکه به آنها چیزهای بیشتری بیاموزم	to teach them more	oWant	PersonX answers PersonY's ___ well
+آن ها ضبط شده اند	they are recorded	xEffect	PersonX answers PersonY's ___ well
+کمک به شخصی که اطلاعات داده شده را پردازش می کند.	help person y process the information that was given.	xIntent	PersonX answers PersonY's ___ well
+برای درک اینکه شخصی چه می خواهد	to understand what PersonY wants	xNeed	PersonX answers PersonY's ___ well
+رضایت خاطر	satisfied	xReact	PersonX answers PersonY's ___ well
+تا بپرسد آیا شخصی از این پاسخ راضی است؟	to ask if PersonY is satisfied with the answer	xWant	PersonX answers PersonY's ___ well
+کمک کننده	helpful	xAttr	PersonX answers PersonY's phone
+سوال می پرسد	asks questions	xEffect	PersonX answers PersonY's phone
+تا بفهمم چه کسی زنگ می زند.	to know who is calling.	xIntent	PersonX answers PersonY's phone
+برای گرفتن تلفن	to take the phone	xNeed	PersonX answers PersonY's phone
+علاقمند و راضي.	interested and satisfied.	xReact	PersonX answers PersonY's phone
+با شخصی حرف بزن	talk to person y	xWant	PersonX answers PersonY's phone
+اطلاعات به مردم منتقل می شود	Information is conveyed to people	oEffect	PersonX answers another ___
+خوشحال از اینکه به او فکر می کنند	happy to be thought of	oReact	PersonX answers another ___
+تا به پایان برسد.	to end	oWant	PersonX answers another ___
+هم آهنگ	consistent	xAttr	PersonX answers another ___
+شخص ایکس سوال دیگری می پرسد	person x askes another question	xEffect	PersonX answers another ___
+تا با او در تماس باشم.	to stay in touch	xIntent	PersonX answers another ___
+برای آگاه شدن	to be informed	xNeed	PersonX answers another ___
+تا به پایان برسد.	to end	xWant	PersonX answers another ___
+کفاره را می پذیرد	accepts the appology	oEffect	PersonX apologizes profusely
+ناراحت	upset	oReact	PersonX apologizes profusely
+۱۰ برای از بین بردن آن ها	X TO UNDERSTAND THEY ARE UPSET	oWant	PersonX apologizes profusely
+ترسان	scared	xAttr	PersonX apologizes profusely
+آرام می گیرد	gets relaxed	xEffect	PersonX apologizes profusely
+برای بخشیدن	to be forgiven	xIntent	PersonX apologizes profusely
+ناراحت	upset	xReact	PersonX apologizes profusely
+تعجب می کند اگر عذرخواهی صمیمانه باشد	wonders if apology is sincere	oEffect	PersonX apologizes to PersonX's boss
+بهتر شدند	re leaved better	oReact	PersonX apologizes to PersonX's boss
+متواضع	humble	xAttr	PersonX apologizes to PersonX's boss
+برای انجام کار اشتباه.	to do something wrong at work.	xNeed	PersonX apologizes to PersonX's boss
+نگران این هستند که آیا بخشوده خواهند شد یا نه.	anxious about whether they'll be forgiven	xReact	PersonX apologizes to PersonX's boss
+تا هرگز اشتباه مشابهی را تکرار نکند.	to never make the same mistake again.	xWant	PersonX apologizes to PersonX's boss
+اعلامیه های ایکس	notices X	oEffect	PersonX appears among PersonY
+برای دیدن شخص ایکس	to se PersonX	oWant	PersonX appears among PersonY
+متوجه می شود	is noticed	xEffect	PersonX appears among PersonY
+تا خود را نشان دهند	to show up their	xIntent	PersonX appears among PersonY
+برای عبور از میان مردم	to go through the people	xNeed	PersonX appears among PersonY
+مثل اینکه خودشان آن را ساخته اند.	like they made it their	xReact	PersonX appears among PersonY
+برای غافلگیر کردن شخصیت ها	to surprise persony	xWant	PersonX appears among PersonY
+میترسید؟	afraid	oReact	PersonX appears out of nowhere
+تا سربه سرش بگذارد	to tease him	oWant	PersonX appears out of nowhere
+گربه مانند	catlike	xAttr	PersonX appears out of nowhere
+مسابقه را می برد	wins the race	xEffect	PersonX appears out of nowhere
+دزدکی رفتار کردن	to be sneaky	xIntent	PersonX appears out of nowhere
+دزدکی به این طرف و آن طرف رفتن	to sneak around	xNeed	PersonX appears out of nowhere
+بطور خشک و رسمی	wily	xReact	PersonX appears out of nowhere
+تا آن ها را غافلگیر کند.	to surprise them	xWant	PersonX appears out of nowhere
+خوب است.	cool	oEffect	PersonX applies PersonX's ___ unto PersonY
+گوشه دار	akward	oReact	PersonX applies PersonX's ___ unto PersonY
+به آنها توجه کنید.	Give them attention.	oWant	PersonX applies PersonX's ___ unto PersonY
+بخشیدن	giving	xAttr	PersonX applies PersonX's ___ unto PersonY
+دعا می کند	prays	xEffect	PersonX applies PersonX's ___ unto PersonY
+احساس عشق کردن	to feel loved	xIntent	PersonX applies PersonX's ___ unto PersonY
+برای اینکه ببینیم شخصی موفق می شود	to want to see PersonY succeed	xNeed	PersonX applies PersonX's ___ unto PersonY
+خجالت زده	ashamed	xReact	PersonX applies PersonX's ___ unto PersonY
+با هم قرار بگذارید.	Go on a date.	xWant	PersonX applies PersonX's ___ unto PersonY
+اگر انتخابی به عمل آید	choice provided	oEffect	PersonX appoints another ___
+فشار داده شده	pressured	oReact	PersonX appoints another ___
+تا به سخنان جدید گوش دهند	to listen to the new appointy	oWant	PersonX appoints another ___
+حکمفرما	authoritative	xAttr	PersonX appoints another ___
+پیدا کردن فرد مناسب برای کار	getting right person for work	xEffect	PersonX appoints another ___
+آدم درستکاری برای این کار	the right person on th job	xIntent	PersonX appoints another ___
+برای آتش زدن یک شخص	to fire a person	xNeed	PersonX appoints another ___
+تا با آنچه به همراه دارد سر و کار داشته باشیم.	to deal with what it brings	xWant	PersonX appoints another ___
+لبخند	smiles	oEffect	PersonX appreciates PersonY's effort
+قابل تحسین	appreciated	oReact	PersonX appreciates PersonY's effort
+تا از او حمایت کنند	to keep supporting him	oWant	PersonX appreciates PersonY's effort
+تحسین آمیز	appreciative	xAttr	PersonX appreciates PersonY's effort
+الهام گرفته شده است	is inspired	xEffect	PersonX appreciates PersonY's effort
+سپاسگزارم.	grateful	xIntent	PersonX appreciates PersonY's effort
+دوستانه	friendly	xReact	PersonX appreciates PersonY's effort
+عصبی می شود	gets nervous	oEffect	PersonX approaches PersonX's crush
+شاد و خندان	flattered	oReact	PersonX approaches PersonX's crush
+خوش بین	optimistic	xAttr	PersonX approaches PersonX's crush
+تا کسی را ملاقات کند	to meet someone	xNeed	PersonX approaches PersonX's crush
+خجالت زده	shy	xReact	PersonX approaches PersonX's crush
+تا به آنها بگوید چه احساسی دارند	to tell them how they feel	xWant	PersonX approaches PersonX's crush
+آن ها بد به نظر می رسند	they look bad	oEffect	PersonX approaches PersonY's crush
+برای پخش شایعات در شبکه های اجتماعی	to go on social media to dispel rumors	oWant	PersonX approaches PersonY's crush
+امیدوار کننده	hopeful	xAttr	PersonX approaches PersonY's crush
+تحت فشار قرار می گیرد و رد می شود.	gets rejected by the crush	xEffect	PersonX approaches PersonY's crush
+آن ها می خواهند ارتباط برقرار کنند	they want to communicate	xIntent	PersonX approaches PersonY's crush
+برای اینکه مطمئن شوم او می تواند خودش را در معرض حمله ی یو قرار دهد.	to make sure she is presentable to Y's crush	xNeed	PersonX approaches PersonY's crush
+پرحرف	talkative	xReact	PersonX approaches PersonY's crush
+برای پست یادداشتی در شبکه های اجتماعی	to post a note on social media	xWant	PersonX approaches PersonY's crush
+امن تر	safer	oReact	PersonX argues PersonY's case
+تا مجرمین را شناسایی کند.	to identify the guilty party	oWant	PersonX argues PersonY's case
+انگیزه دار	motivated	xAttr	PersonX argues PersonY's case
+قدردانی را به دست می آورد	gains appreciation	xEffect	PersonX argues PersonY's case
+برای این کار پول می گیرند	is paid to do so	xIntent	PersonX argues PersonY's case
+برای آماده شدن	to prepare	xNeed	PersonX argues PersonY's case
+ناقلا	dutiful	xReact	PersonX argues PersonY's case
+تا شاهد دیگری را احضار کند	to call another witness	xWant	PersonX argues PersonY's case
+عصبانی شدن	getting angry	oEffect	PersonX arouses PersonY interest
+علاقه مند	interested	oReact	PersonX arouses PersonY interest
+برای یادگیری بیشتر	to learn more	oWant	PersonX arouses PersonY interest
+آرنالین شخص ایکس افزایش می یابد	PersonX's adrenaline increases	xEffect	PersonX arouses PersonY interest
+برای اینکه تو را بشناسم	to get to know y	xIntent	PersonX arouses PersonY interest
+برای صحبت با شخصی	to talk to PersonY	xNeed	PersonX arouses PersonY interest
+امیدوار کننده	hopeful	xReact	PersonX arouses PersonY interest
+تا بفهمم چرا شخصی به آنها نگاه می کند.	to find out why PersonY is looking at them	xWant	PersonX arouses PersonY interest
+تحت تاثیر قرار گرفته	intrigued	oReact	PersonX arouses PersonY's interest
+برای رد کردن ایکس	to reject x	oWant	PersonX arouses PersonY's interest
+جذاب	attractive	xAttr	PersonX arouses PersonY's interest
+در نظر گرفته شده است	Is considered	xEffect	PersonX arouses PersonY's interest
+در رفتارهای رمانتیک و عاطفی دو جانبه مشارکت کنید.	participate in mutual romantic & sensual  behaviors.	xIntent	PersonX arouses PersonY's interest
+تجربه کافی در مورد اتومبیل های قدیمی دارند	have an expertise in antique cars	xNeed	PersonX arouses PersonY's interest
+تمرکز یافته	focused	xReact	PersonX arouses PersonY's interest
+برای فروش	to make a sale	xWant	PersonX arouses PersonY's interest
+غافلگیر می شود	becomes surprised	oEffect	PersonX asks PersonX's crush
+سوال را پاسخ می دهد:	answers question	oEffect	PersonX asks PersonX's friend PersonY
+کمک کننده	helpful	oReact	PersonX asks PersonX's friend PersonY
+تلفن را قطع کند	to hang up the phone	oWant	PersonX asks PersonX's friend PersonY
+کنجکاو	curious	xAttr	PersonX asks PersonX's friend PersonY
+پاسخ به سوال	replies to answer	xEffect	PersonX asks PersonX's friend PersonY
+برای آگاه شدن	to be informed	xIntent	PersonX asks PersonX's friend PersonY
+برای اینکه بدانم چگونه بپرسم	to know how to ask	xNeed	PersonX asks PersonX's friend PersonY
+رضایت خاطر	satisfied	xReact	PersonX asks PersonX's friend PersonY
+تا پاسخ را پردازش کند.	to process the answer	xWant	PersonX asks PersonX's friend PersonY
+پشتیبانی کنید	provide support	oEffect	PersonX asks PersonX's friend for advice
+خوب است.	good.	oReact	PersonX asks PersonX's friend for advice
+برای کمک به یک دوست	to help a friend	oWant	PersonX asks PersonX's friend for advice
+دوستانه	friendly	xAttr	PersonX asks PersonX's friend for advice
+پشتیبانی را دریافت کنید	receive support	xEffect	PersonX asks PersonX's friend for advice
+برای کسب اطلاعات.	to get some information.	xIntent	PersonX asks PersonX's friend for advice
+کمک	help	xNeed	PersonX asks PersonX's friend for advice
+آسوده خاطر	relieved	xReact	PersonX asks PersonX's friend for advice
+مراتب تشکر را دریافت می کند	receives thanks	oEffect	PersonX asks PersonX's friend for help
+خوشحالم که کمک می کنم.	happy to help.	oReact	PersonX asks PersonX's friend for help
+آن را انجام دهید	get it done	oWant	PersonX asks PersonX's friend for help
+به آن اهمیت می دادند	cared for	xAttr	PersonX asks PersonX's friend for help
+تا حدی پیشرفت کند	make some progress	xWant	PersonX asks PersonX's friend for help
+باید در مورد برخی از پاسخ هایی که می توانیم بدهیم تفکر کنیم.	must reflect on some responses to give	oEffect	PersonX asks PersonX's friends for advice
+کمک کننده	helpful	oReact	PersonX asks PersonX's friends for advice
+برای پاسخ	to answer	oWant	PersonX asks PersonX's friends for advice
+واکنش ها را دریافت می کند	gets responses	xEffect	PersonX asks PersonX's friends for advice
+برای کمک گرفتن	to get help	xIntent	PersonX asks PersonX's friends for advice
+فکر کردن به اینکه از چه کسی بپرسم	to think of who to ask	xNeed	PersonX asks PersonX's friends for advice
+عصبی	nervous	xReact	PersonX asks PersonX's friends for advice
+تا بر اساس نصیحت هایی که داده شده کار کند.	to work on the advice given	xWant	PersonX asks PersonX's friends for advice
+بدون کمک	helpless	xAttr	PersonX asks PersonX's friends for help
+نادیده گرفته شده	ignored	xEffect	PersonX asks PersonX's friends for help
+برای اینکه احساس بهتری داشته باشم	to feel better	xIntent	PersonX asks PersonX's friends for help
+تا تلفنشان را بردارد	to pick up their phone	xNeed	PersonX asks PersonX's friends for help
+مثل اینکه او مردمی را دارد که به آنها مراجعه کند.	like he has people to turn to	xReact	PersonX asks PersonX's friends for help
+تا از دیگران بپرسد	to ask others	xWant	PersonX asks PersonX's friends for help
+جواب منفی به ایکس	Refuses X	oEffect	PersonX asks PersonX's husband
+دیوانه	crazt	oReact	PersonX asks PersonX's husband
+تا تفریح کنند.	to have fun.	oWant	PersonX asks PersonX's husband
+متفکرانه	thoughtful	xAttr	PersonX asks PersonX's husband
+دوباره پوشیده می شود	Gets rebuffed	xEffect	PersonX asks PersonX's husband
+توصیه کمک	advice help	xIntent	PersonX asks PersonX's husband
+یک تلفن	a phone	xNeed	PersonX asks PersonX's husband
+برای بیرون رفتن با شوهر.	to go out with the husband.	xWant	PersonX asks PersonX's husband
+به شخص X پاسخ می دهد.	answers to Person X	oEffect	PersonX asks PersonX's kids
+قابل اعتماد نبود	not trusted	oReact	PersonX asks PersonX's kids
+برای پیاده رفتن به سمت اتومبیل	to walk to the car	oWant	PersonX asks PersonX's kids
+کنجکاو	inquisitive	xAttr	PersonX asks PersonX's kids
+به بچه ها نگاه می کند	looks at kids	xEffect	PersonX asks PersonX's kids
+برای اینکه بفهمیم	to find out	xIntent	PersonX asks PersonX's kids
+خوب است.	good	xReact	PersonX asks PersonX's kids
+گاین یک کارمند وفادار است	Gains a loyal worker	oEffect	PersonX asks PersonX's manager
+عصبانی	angry	oReact	PersonX asks PersonX's manager
+کنجکاو	curious	xAttr	PersonX asks PersonX's manager
+برای رفتن پیش مدیر	to go to the manager	xNeed	PersonX asks PersonX's manager
+نا امید	disappointed	xReact	PersonX asks PersonX's manager
+تا زودتر به خانه برگردد	to go home early	xWant	PersonX asks PersonX's manager
+برای کمک به پسرشان	to help their son	oWant	PersonX asks PersonX's mom for help
+صبر می کند	waits	xEffect	PersonX asks PersonX's mom for help
+کمک اضافی	extra assistance	xIntent	PersonX asks PersonX's mom for help
+تا به مادرشان زنگ بزنند	to call their mom	xNeed	PersonX asks PersonX's mom for help
+تحسین آمیز	appreciative	xReact	PersonX asks PersonX's mom for help
+برای غلبه بر نگرانی هایش	to overcome his worries	xWant	PersonX asks PersonX's mom for help
+با هم حرف بزنیم	have a conversation	oEffect	PersonX asks PersonX's neighbor
+آسوده خاطر	relieved	oReact	PersonX asks PersonX's neighbor
+به شخص ایکس توصیه کنید	give advice to PersonX	oWant	PersonX asks PersonX's neighbor
+اظهار کننده	assertive	xAttr	PersonX asks PersonX's neighbor
+پاسخی دریافت کنید	receive an answer	xEffect	PersonX asks PersonX's neighbor
+با هم حرف بزنیم	have  conversation	xIntent	PersonX asks PersonX's neighbor
+با یک مشکل روبرو شوید	face a problem	xNeed	PersonX asks PersonX's neighbor
+آسوده خاطر	relieved	xReact	PersonX asks PersonX's neighbor
+هم اتاقی اش تمایل دارد به این سوال پاسخ دهد	The roommate becomes inclined to answer the question	oEffect	PersonX asks PersonX's roommate
+خوشحال و خوب	happy and good	oReact	PersonX asks PersonX's roommate
+تا ببینیم شخص ایکس چه می گوید.	to consider what PersonX is saying	oWant	PersonX asks PersonX's roommate
+کنجکاو	curious	xAttr	PersonX asks PersonX's roommate
+پاسخی داد	told an answer	xEffect	PersonX asks PersonX's roommate
+تا از هم اتاقی خود چیزی بخواهد و با او دوست شود.	to ask something to the roommate and get friendship	xIntent	PersonX asks PersonX's roommate
+تا به هم اتاقی خود بگوید که اوضاع روبراه است آنها متوجه شدند	to tell Roommate it is okay they understood	xWant	PersonX asks PersonX's roommate
+خودشان را توضیح می دهند	explains themselves	oEffect	PersonX asks PersonY a question
+سوال شده.	questioned.	oReact	PersonX asks PersonY a question
+برای پاسخ به این سوال	to answer the question	oWant	PersonX asks PersonY a question
+بدون اطمینان	unsure	xAttr	PersonX asks PersonY a question
+به پاسخ گوش می دهد	listens to the response	xEffect	PersonX asks PersonY a question
+برای نزدیک شدن به شخصی	to approach PersonY	xNeed	PersonX asks PersonY a question
+خوب است.	good	xReact	PersonX asks PersonY a question
+تا سوال دیگری بپرسد	to ask another question	xWant	PersonX asks PersonY a question
+سوال های بعدی او را شکنجه می دهد	gets tortured by subsequent questions	oEffect	PersonX asks PersonY a questions
+کمک کننده	helpful	oReact	PersonX asks PersonY a questions
+برای عدم پذیرش تاریخ	to decline the date	oWant	PersonX asks PersonY a questions
+صدای سکسکه ای می آید.	nosy	xAttr	PersonX asks PersonY a questions
+برای دانستن پاسخ	to know the answer	xIntent	PersonX asks PersonY a questions
+به شخصی زنگ بزنم.	to call PersonY	xNeed	PersonX asks PersonY a questions
+دانشمندتر	more knowledgeable	xReact	PersonX asks PersonY a questions
+برای دانستن پاسخ تکالیف ریاضی	to know the answers to the math homework	xWant	PersonX asks PersonY a questions
+دانششان را به اشتراک بگذارند	share knowledge	oEffect	PersonX asks PersonY advice
+رضایت خاطر	satisfied	oReact	PersonX asks PersonY advice
+برای حمایت کردن	to give support	oWant	PersonX asks PersonY advice
+ممکن است بر اساس توصیه شخصی از فرد خاصی خواسته شود که با او قرار ملاقات بگذارد.	might ask a particular person out on a date based on PersonY's advice	xEffect	PersonX asks PersonY advice
+دانستن اینکه چگونه کاری را انجام دهیم	to know how to do something	xIntent	PersonX asks PersonY advice
+دور و بر شخصی بودن	be around PersonY	xNeed	PersonX asks PersonY advice
+آسایش	comfort	xReact	PersonX asks PersonY advice
+تا بدانم چگونه باید پیش بروم	to know how to proceed	xWant	PersonX asks PersonY advice
+خجالت زده	shy	xAttr	PersonX asks PersonY for a date
+رد می شود	gets rejected	xEffect	PersonX asks PersonY for a date
+برای داشتن یک رابطه	to have a relationship	xIntent	PersonX asks PersonY for a date
+برای شناسایی شخصی	to know PersonY	xNeed	PersonX asks PersonY for a date
+غمگین	sad	xReact	PersonX asks PersonY for a date
+از شادی بپرم	to jump for joy	xWant	PersonX asks PersonY for a date
+مداد به ایکس می دهد	Gives X a pencil	oEffect	PersonX asks PersonY for a pencil
+کمک کننده	helpful	oReact	PersonX asks PersonY for a pencil
+دادن مداد به X	To give a pencil to X	oWant	PersonX asks PersonY for a pencil
+ناآماده	unprepared	xAttr	PersonX asks PersonY for a pencil
+قلم را پس می دهد	Gives the Pencil back	xEffect	PersonX asks PersonY for a pencil
+تا بتوانند آنچه را که نوشته اند پاک کنند.	to be able to erase what they have written	xIntent	PersonX asks PersonY for a pencil
+برای دیدن شخصی که مداد دارد.	to see that Person Y has a pencil.	xNeed	PersonX asks PersonY for a pencil
+برای نوشتن	To write	xWant	PersonX asks PersonY for a pencil
+درخواست را بررسی می کند	contemplates the request	oEffect	PersonX asks PersonY for help
+خوشحال از اینکه می توانند به ما کمک کنند	happy that they could assist	oReact	PersonX asks PersonY for help
+کمکی را که خواسته اند به آنها می دهد	gives them the help they asked for	oWant	PersonX asks PersonY for help
+خواستار	wanting	xAttr	PersonX asks PersonY for help
+توسط شخصی رد می شود	gets rejected by persony	xEffect	PersonX asks PersonY for help
+برای کمک گرفتن	to get some help	xIntent	PersonX asks PersonY for help
+کمک کرد	helped	xReact	PersonX asks PersonY for help
+نمی دانم کجا می تواند باشد.	wonder where it could be	oEffect	PersonX asks PersonY if had seen
+درک نشده	ineterested	oReact	PersonX asks PersonY if had seen
+که با صدای بلند از نام سگ بخواهد	to call loudly using the dog's name	oWant	PersonX asks PersonY if had seen
+صدای سکسکه ای می آید.	nosy	xAttr	PersonX asks PersonY if had seen
+برای نزدیک شدن به شخصی	to approach PersonY	xNeed	PersonX asks PersonY if had seen
+آگهی شده است	informed	xReact	PersonX asks PersonY if had seen
+برای کسب اطلاعات از دیگران	to get information from others	xWant	PersonX asks PersonY if had seen
+اعتماد شخص ای را به خود جلب می کند.	gains the trust of person Y	xEffect	PersonX asks PersonY liked
+تا ببینند آیا آن ها از این کار خوششان می آید یا نه.	to know if they liked it	xIntent	PersonX asks PersonY liked
+شخصی را صدا کنید.	call person y	xNeed	PersonX asks PersonY liked
+همانطور که آن ها به دوستی و عدم تمایلشان اهمیت می دهند	like they care about there likes and dislikes	xReact	PersonX asks PersonY liked
+چیزی از شخص ایکس بخواهید	to do ask for something to PersonX	xWant	PersonX asks PersonY liked
+بچه شان بیرون بازی می کند	their kid plays outside	oEffect	PersonX asks PersonY mom
+کمک کننده	helpful	oReact	PersonX asks PersonY mom
+برای گفتن اینکه اشکالی نداره	to say it's ok	oWant	PersonX asks PersonY mom
+محترمانه	respectful	xAttr	PersonX asks PersonY mom
+آن ها می توانند تفریح کنند	they get to have fun	xEffect	PersonX asks PersonY mom
+برای پرسیدن یک سوال	to ask a question	xIntent	PersonX asks PersonY mom
+دلیلی برای پرسیدن	a reason to ask	xNeed	PersonX asks PersonY mom
+خوب است که آنها پاسخی دارند	good that they have an answer	xReact	PersonX asks PersonY mom
+از شخص ایکس ناراحت می شود.	gets annoyed by PersonX	oEffect	PersonX asks PersonY on a date
+موافقت کرد	contended	oReact	PersonX asks PersonY on a date
+برای یک قرار ملاقات دیگر بروید.	go on another date	oWant	PersonX asks PersonY on a date
+شجاعانه	bold	xAttr	PersonX asks PersonY on a date
+رد می شود	gets rejected	xEffect	PersonX asks PersonY on a date
+برای مصاحبت کردن	to be companionable	xIntent	PersonX asks PersonY on a date
+برای یک قرار ملاقات دیگر بروید.	go on another date	xWant	PersonX asks PersonY on a date
+سرش داد می زنند	gets yelled at	oEffect	PersonX asks PersonY opinion
+خوشحال از این که نظرش را بدهد	happy to give opinion	oReact	PersonX asks PersonY opinion
+تا از شخص ایکس بپرسد که آنها چه فکر می کنند	to ask PersonX what they think	oWant	PersonX asks PersonY opinion
+علاقمند	Interested	xAttr	PersonX asks PersonY opinion
+دانش بیشتری کسب می کند	gains knowledge	xEffect	PersonX asks PersonY opinion
+به شخصی در مورد این موضوع بگو	tell PersonY about the issue	xNeed	PersonX asks PersonY opinion
+بیشتر می دانند	more knowing	xReact	PersonX asks PersonY opinion
+برای سبک سنگین کردن گزینه ها	to weigh the options	xWant	PersonX asks PersonY opinion
+هیچ کس	NONE	oEffect	PersonX asks PersonY out on a date
+خوشحال	happy	oReact	PersonX asks PersonY out on a date
+برای گرفتن پیتزا	to get pizza	oWant	PersonX asks PersonY out on a date
+احساساتي	passionate	xAttr	PersonX asks PersonY out on a date
+تا با کسی که خودش انتخاب کرده باشد	to be with someone of his choice	xIntent	PersonX asks PersonY out on a date
+برای گرفتن شماره شخصی	to get PersonY's number	xNeed	PersonX asks PersonY out on a date
+رضایت خاطر	satisfied	xReact	PersonX asks PersonY out on a date
+برای برداشتن شخصی	to pick up PersonY	xWant	PersonX asks PersonY out on a date
+از سوال هایی که می پرسد جا خورده است.	Is taken aback by questions	oEffect	PersonX asks PersonY question
+تشویق شده بود	encouraged	oReact	PersonX asks PersonY question
+تعجب از اینکه شخص ایکس به چه چیزی فکر می کند	to wonder what PersonX is thinking	oWant	PersonX asks PersonY question
+جواب رکیک می دهد.	Gets sarcastic answer	xEffect	PersonX asks PersonY question
+برای اینکه بفهمیم	to find out	xIntent	PersonX asks PersonY question
+برای پیدا کردن شخصی	to find PersonY	xNeed	PersonX asks PersonY question
+دانشمند	knowledgeable	xReact	PersonX asks PersonY question
+تا چیزی را کشف کند	to find out something	xWant	PersonX asks PersonY question
+کنجکاو	curious	xAttr	PersonX asks PersonY questions
+تحت فشار قرار می گیرند	gets interogated	xEffect	PersonX asks PersonY questions
+تا بیشتر بدانم	to know more	xIntent	PersonX asks PersonY questions
+برای نزدیک شدن به شخصی	to approach PersonY	xNeed	PersonX asks PersonY questions
+بی طرف	neutral	xReact	PersonX asks PersonY questions
+برای شنیدن پاسخ	to listen to the answer	xWant	PersonX asks PersonY questions
+به اطراف نگاه می کند تا افراد دیگری را ببیند.	looks around for other people	oEffect	PersonX asks PersonY some questions
+فشار برای پاسخ	pressured to answer	oReact	PersonX asks PersonY some questions
+تا به سوال های شخص ایکس پاسخ دهد.	to answer PersonX's questions	oWant	PersonX asks PersonY some questions
+تحريک شده	stimulated	xAttr	PersonX asks PersonY some questions
+عصبی می شود	gets nervous	xEffect	PersonX asks PersonY some questions
+اطلاعات از شخصی	information from person	xIntent	PersonX asks PersonY some questions
+که قلم و کاغذ را به مردم تعارف کند	to offer person y pen and paper	xNeed	PersonX asks PersonY some questions
+معلمش بداند که او دارد سعی می کند	his teacher to know he is trying	xWant	PersonX asks PersonY some questions
+فکر می کند	thinks	oEffect	PersonX asks PersonY something
+کمک کننده.	helpful.	oReact	PersonX asks PersonY something
+تا به شخص ایکس بگوید نگران این موضوع نباشد.	to tell PersonX not to worry about it.	oWant	PersonX asks PersonY something
+پرس و جو کنان	inquisitve	xAttr	PersonX asks PersonY something
+دانش بیشتری کسب می کند	gains knowledge	xEffect	PersonX asks PersonY something
+برای کسب اطلاعات.	to gain information.	xIntent	PersonX asks PersonY something
+کمک کرد.	helped.	xReact	PersonX asks PersonY something
+نتوانست پاسخ دهد	not able to answer	oEffect	PersonX asks PersonY the question
+خوب است.	good	oReact	PersonX asks PersonY the question
+مشتاق	Eager	xAttr	PersonX asks PersonY the question
+دهانش را باز کند و سوال کند.	to open his mouth to ask the question.	xNeed	PersonX asks PersonY the question
+رضایت خاطر	satisfied	xReact	PersonX asks PersonY the question
+تا درستی پاسخ را تایید کند.	to verify the veracity of the answer	xWant	PersonX asks PersonY the question
+آدم ایکس چیزی را می خورد	Teaches person X something	oWant	PersonX asks PersonY the reason
+توضیح می دهد	Gets an explanation	xEffect	PersonX asks PersonY the reason
+برای آگاه شدن	to be informed	xIntent	PersonX asks PersonY the reason
+که توسط شخصی به اشتباه افتاده است.	to have been wronged by PersonY	xNeed	PersonX asks PersonY the reason
+درک کردن	understanding	xReact	PersonX asks PersonY the reason
+تا عدم تأیید خود را نشان دهند	to express their disapprovement	xWant	PersonX asks PersonY the reason
+انرژی بیشتری بدست بیاورید	get more energy	oEffect	PersonX asks PersonY thought
+خوب است.	good	oReact	PersonX asks PersonY thought
+برای همکاری با شخص ایکس	to cooperate with PersonX	oWant	PersonX asks PersonY thought
+کنجکاو	curious	xAttr	PersonX asks PersonY thought
+سر تکان می دهد	nods head	xEffect	PersonX asks PersonY thought
+تا چیزی را کشف کند	to find out something	xIntent	PersonX asks PersonY thought
+برای نزدیک شدن به شخصی	to approach PersonY	xNeed	PersonX asks PersonY thought
+خوشحال	happy	xReact	PersonX asks PersonY thought
+تحت فشار است تا پاسخ دهد	is pressured to answer	oEffect	PersonX asks PersonY to accept
+سپاسگزارم.	grateful	oReact	PersonX asks PersonY to accept
+برای پذیرفتن	to accept	oWant	PersonX asks PersonY to accept
+تحسین آمیز	appreciative	xAttr	PersonX asks PersonY to accept
+عرق از پیش بینی	sweats in anticipation	xEffect	PersonX asks PersonY to accept
+برای تقسیم کردن	to share	xIntent	PersonX asks PersonY to accept
+تا مسئولیت را به او واگذار کند	to hand over the responsibility	xWant	PersonX asks PersonY to accept
+رئیس فریاد می زند:	Y gets yelled at by boss	oEffect	PersonX asks PersonY to accompany
+سپاسگزار	thankful	oReact	PersonX asks PersonY to accompany
+دعوت او را بپذیرد	to accept his invitation	oWant	PersonX asks PersonY to accompany
+دوستانه	friendly	xAttr	PersonX asks PersonY to accompany
+برنده جایزه در ورودی می شود	wins a doorprize	xEffect	PersonX asks PersonY to accompany
+برای متقاعد کردن او	to convince him	xNeed	PersonX asks PersonY to accompany
+رضایت خاطر	satisfied	xReact	PersonX asks PersonY to accompany
+برای تهیه برنامه های سفر	to make plans for travel	xWant	PersonX asks PersonY to accompany
+می گوید بله	says yes	oEffect	PersonX asks PersonY to be PersonX's wife
+بسیار خوشحال	extremely happy	oReact	PersonX asks PersonY to be PersonX's wife
+نامزد شده است.	engaged	xAttr	PersonX asks PersonY to be PersonX's wife
+تا زندگی خود را با کسی بگذرانند	to spend their life with someone	xIntent	PersonX asks PersonY to be PersonX's wife
+یک حلقه بخرد	buy a ring	xNeed	PersonX asks PersonY to be PersonX's wife
+بسیار خوشحال	extremely happy	xReact	PersonX asks PersonY to be PersonX's wife
+تاریخ عروسی را تعیین کنید	decide a wedding date	xWant	PersonX asks PersonY to be PersonX's wife
+برای تلفن زدن	to make the call	oWant	PersonX asks PersonY to call
+تلفن هایشان را نگاه می کند	watches their phone	xEffect	PersonX asks PersonY to call
+برای فراخوانده شدن	to be called	xIntent	PersonX asks PersonY to call
+تا جایی برای تلفن زدن داشته باشم	to have some place to call	xNeed	PersonX asks PersonY to call
+خوشحال	happy	xReact	PersonX asks PersonY to call
+برای آن ها که زنگ بزنند	for them to call	xWant	PersonX asks PersonY to call
+یک ناهار مجانی بگیرید	get a free lunch	oEffect	PersonX asks PersonY to come
+محتاط	wary	oReact	PersonX asks PersonY to come
+برای نادیده گرفتن شخص ایکس.	to ignore Person X.	oWant	PersonX asks PersonY to come
+امیدوار کننده	hopeful	xAttr	PersonX asks PersonY to come
+با شخصی به نام Y تماس می گیرد	makes a phone call to person Y	xEffect	PersonX asks PersonY to come
+تا با شخص ارتباط برقرار کند	to interact with the person	xIntent	PersonX asks PersonY to come
+خوشحال	happy	xReact	PersonX asks PersonY to come
+تا لذت ببریم	to have fun	xWant	PersonX asks PersonY to come
+سرخ می شود	blushes	oEffect	PersonX asks PersonY to dance
+خوشحال	happy	oReact	PersonX asks PersonY to dance
+برای رد کردن شخص ایکس	to reject personX	oWant	PersonX asks PersonY to dance
+رمانتیک	romantic	xAttr	PersonX asks PersonY to dance
+پذیرفته شده	accepted	xEffect	PersonX asks PersonY to dance
+با شخصی آشنا شوید.	meet up with personY	xNeed	PersonX asks PersonY to dance
+خوب است.	good	xReact	PersonX asks PersonY to dance
+برای اینکه شرایط را بهتر ببینیم	to better visual the situation	xIntent	PersonX asks PersonY to describe
+برای اطلاع از خبر جدیدی آمده است.	comes to know about a news	xNeed	PersonX asks PersonY to describe
+این رویداد را مستقیما ببینید	view the event directly	xWant	PersonX asks PersonY to describe
+متهم به شبح سازی	accused of ghosting	oEffect	PersonX asks PersonY to dine
+خوشحال	happy	oReact	PersonX asks PersonY to dine
+تا کسی را بهتر بشناسید	to get to know someone better	oWant	PersonX asks PersonY to dine
+جامعه ای	social	xAttr	PersonX asks PersonY to dine
+از او کمی وقت خواست	asked for a little more time	xEffect	PersonX asks PersonY to dine
+برای لذت بردن از مصاحبت شخصی خود	to go enjoy person y's company	xIntent	PersonX asks PersonY to dine
+اشتیاق به ارتباط با دیگران	a desire to interact	xNeed	PersonX asks PersonY to dine
+خوشحال	happy	xReact	PersonX asks PersonY to dine
+برای معاشرت کردن	to socialize	xWant	PersonX asks PersonY to dine

@@ -1,0 +1,109 @@
+Unnamed: 0	prefix	input_text	target_text
+31775	xAttr	PersonX accepts PersonX's diploma	acquiring
+31742	xIntent	PersonX accepts PersonX's diploma	to graduate
+31757	xNeed	PersonX accepts PersonX's diploma	take final exams
+9659	xAttr	PersonX accepts PersonY invitation	polite
+9624	xIntent	PersonX accepts PersonY invitation	to gain person's friendship
+9640	xNeed	PersonX accepts PersonY invitation	be invited by PersonY
+11746	xAttr	PersonX accepts PersonY offer	resourceful
+11718	xIntent	PersonX accepts PersonY offer	job
+11742	xNeed	PersonX accepts PersonY offer	to find the good offer
+10636	xAttr	PersonX accepts PersonY's invitation	Outgoing
+10612	xIntent	PersonX accepts PersonY's invitation	they want to attend the event
+10631	xNeed	PersonX accepts PersonY's invitation	reply the card
+17148	xAttr	PersonX accepts PersonY's offer	concilliatory
+17108	xIntent	PersonX accepts PersonY's offer	to obtain something.
+17135	xNeed	PersonX accepts PersonY's offer	to meet with person Y
+2333	xAttr	PersonX accepts ___ in exchange	agreeable
+2312	xIntent	PersonX accepts ___ in exchange	accepts the dress in exchange
+2324	xNeed	PersonX accepts ___ in exchange	to be a trader
+48042	xAttr	PersonX accepts happily	humble
+48013	xIntent	PersonX accepts happily	to take the opportunity
+48025	xNeed	PersonX accepts happily	to be invited
+70962	xAttr	PersonX accepts the invitation	responsive
+70924	xIntent	PersonX accepts the invitation	to go
+70958	xNeed	PersonX accepts the invitation	to be important
+53714	xAttr	PersonX accepts the job	confident
+53689	xIntent	PersonX accepts the job	to make money
+53711	xNeed	PersonX accepts the job	To research the company
+44799	xAttr	PersonX accepts the offer	content
+44765	xIntent	PersonX accepts the offer	the job
+44796	xNeed	PersonX accepts the offer	to determine whether the offer is good
+6471	xAttr	PersonX achieves PersonX's ___ by means	capable
+6445	xIntent	PersonX achieves PersonX's ___ by means	to achieve goal
+6457	xNeed	PersonX achieves PersonX's ___ by means	to make a plan
+34260	xAttr	PersonX achieves PersonX's dream	Hardworking
+34234	xIntent	PersonX achieves PersonX's dream	to be an astronaut
+34247	xNeed	PersonX achieves PersonX's dream	to make a plan
+66199	xAttr	PersonX achieves PersonX's objective	reliable
+66167	xIntent	PersonX achieves PersonX's objective	to complete something
+66186	xNeed	PersonX achieves PersonX's objective	to make a plan for the objective
+29912	xAttr	PersonX achieves PersonY effect	Hardworking
+29886	xIntent	PersonX achieves PersonY effect	make person y stronger
+29898	xNeed	PersonX achieves PersonY effect	contact personY
+30102	xAttr	PersonX achieves PersonY objective	diligent
+30070	xIntent	PersonX achieves PersonY objective	to succeed for their boss
+30086	xNeed	PersonX achieves PersonY objective	to get his permission
+3259	xAttr	PersonX achieves ___ by means	Dreamer
+3233	xIntent	PersonX achieves ___ by means	to be in control
+3247	xNeed	PersonX achieves ___ by means	to work hard
+28565	xAttr	PersonX adjusts spacing as well as minimizing	Creative
+28546	xIntent	PersonX adjusts spacing as well as minimizing	to have a perfect document
+28558	xNeed	PersonX adjusts spacing as well as minimizing	to survey the space
+9334	xAttr	PersonX adopts PersonY attitude	rude
+9306	xIntent	PersonX adopts PersonY attitude	change
+9325	xNeed	PersonX adopts PersonY attitude	to keep an open mind
+66163	xAttr	PersonX affects PersonY's interests	well-known
+66136	xIntent	PersonX affects PersonY's interests	to motivate more
+66157	xNeed	PersonX affects PersonY's interests	to decide the fate of persony
+466	xAttr	PersonX affects children 's ___	guilty
+431	xIntent	PersonX affects children 's ___	i like to very satisfied
+463	xNeed	PersonX affects children 's ___	to teach well
+6254	xAttr	PersonX affects every ___	skilled
+6224	xIntent	PersonX affects every ___	personal object
+6242	xNeed	PersonX affects every ___	to be mad
+4095	xAttr	PersonX affords PersonY every ___	generous
+4066	xIntent	PersonX affords PersonY every ___	job facility in good
+4080	xNeed	PersonX affords PersonY every ___	to get money for it
+30820	xAttr	PersonX affords PersonY protection	helpful
+30792	xIntent	PersonX affords PersonY protection	to help person y
+30817	xNeed	PersonX affords PersonY protection	to research for PersonY
+65798	xAttr	PersonX affords another ___	affluent
+65770	xIntent	PersonX affords another ___	to clearly explain the concept
+65789	xNeed	PersonX affords another ___	to get moeny
+6289	xAttr	PersonX affords every ___	affluent
+6259	xIntent	PersonX affords every ___	to be secure in the home
+6274	xNeed	PersonX affords every ___	make money
+70782	xAttr	PersonX agrees to the challenge	eager
+70750	xIntent	PersonX agrees to the challenge	to conquer something
+70776	xNeed	PersonX agrees to the challenge	to determine the correct response
+63063	xAttr	PersonX also loved ___	agreeable
+63040	xIntent	PersonX also loved ___	to be entertained
+63059	xNeed	PersonX also loved ___	find passion
+72203	xAttr	PersonX also ordered ___	greedy
+72178	xIntent	PersonX also ordered ___	to drive away hunger
+72188	xNeed	PersonX also ordered ___	to decide the hotel
+61504	xAttr	PersonX always ate ___	cowardly
+61480	xIntent	PersonX always ate ___	to not gain weight
+61493	xNeed	PersonX always ate ___	food
+64740	xAttr	PersonX always watch ___	vigilant
+64708	xIntent	PersonX always watch ___	to cheer for his team
+64729	xNeed	PersonX always watch ___	money
+45482	xAttr	PersonX always wore	loyal
+45454	xIntent	PersonX always wore	to be consistent.
+45469	xNeed	PersonX always wore	to reuse the same clothing
+63442	xAttr	PersonX always wore ___	silly
+63413	xIntent	PersonX always wore ___	to be consistent
+63425	xNeed	PersonX always wore ___	Go to the store.
+31308	xAttr	PersonX amends PersonY act	Smart
+31274	xIntent	PersonX amends PersonY act	to fix the act.
+31301	xNeed	PersonX amends PersonY act	to get a pen
+10601	xAttr	PersonX answers PersonX's purpose	motivated
+10577	xIntent	PersonX answers PersonX's purpose	to have meaning.
+10587	xNeed	PersonX answers PersonX's purpose	to know their purpose
+8806	xAttr	PersonX answers PersonY question	Articulate
+8762	xIntent	PersonX answers PersonY question	share knowledge
+8793	xNeed	PersonX answers PersonY question	to listen to a question
+73510	xAttr	PersonX answers PersonY's letter	kind
+73477	xIntent	PersonX answers PersonY's letter	to reply
+73492	xNeed	PersonX answers PersonY's letter	to of read it

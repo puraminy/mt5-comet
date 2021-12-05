@@ -1,0 +1,256 @@
+Unnamed: 0	prefix	input_text	target_text
+9684	xAttr	PersonX abandons ___ altogether	undependable
+9659	xIntent	PersonX abandons ___ altogether	put a stop
+9679	xNeed	PersonX abandons ___ altogether	to get permission from his parents
+15459	xAttr	PersonX abandons the ___ altogether	frustrated
+15429	xIntent	PersonX abandons the ___ altogether	to appear not interested
+15446	xNeed	PersonX abandons the ___ altogether	to get frustrated
+69790	xAttr	PersonX abolishes ___ altogether	joyful
+69761	xIntent	PersonX abolishes ___ altogether	give a punishment in person
+69776	xNeed	PersonX abolishes ___ altogether	to have a reason
+41184	xAttr	PersonX abolishes ___ in the states	bold
+41165	xIntent	PersonX abolishes ___ in the states	this is unhappiness for people
+41172	xNeed	PersonX abolishes ___ in the states	to know how the legal system works
+42196	xAttr	PersonX abolishes the ___ altogether	influencial
+42172	xIntent	PersonX abolishes the ___ altogether	to do it his way
+42183	xNeed	PersonX abolishes the ___ altogether	find a lawyer
+472062	xAttr	PersonX about to get married	excited
+472037	xIntent	PersonX about to get married	to share his life with someone
+472059	xNeed	PersonX about to get married	to really like them
+559424	xAttr	PersonX absolutely loved ___	enthusiastic
+559402	xIntent	PersonX absolutely loved ___	to read
+559409	xNeed	PersonX absolutely loved ___	to try it out
+49956	xAttr	PersonX absorbs every ___	smart
+49932	xIntent	PersonX absorbs every ___	to completely understand his position and the alternatives
+49941	xNeed	PersonX absorbs every ___	to walk around and take notes
+271865	xAttr	PersonX accepts PersonY appointment	dependent.
+271833	xIntent	PersonX accepts PersonY appointment	to have a job
+271856	xNeed	PersonX accepts PersonY appointment	to reserve appointment space
+116912	xAttr	PersonX accepts PersonY thanks	gracious
+116877	xIntent	PersonX accepts PersonY thanks	to be gracious
+116897	xNeed	PersonX accepts PersonY thanks	to get talk to Y
+570775	xAttr	PersonX accepts PersonY's proposal	cooperative
+570737	xIntent	PersonX accepts PersonY's proposal	wants to get married
+570756	xNeed	PersonX accepts PersonY's proposal	to date
+82636	xAttr	PersonX accepts PersonY's resignation	Understanding
+82613	xIntent	PersonX accepts PersonY's resignation	to be sincere
+82627	xNeed	PersonX accepts PersonY's resignation	reprimand PersonY
+581211	xAttr	PersonX accepts ___ as PersonX's savior	thankful
+581180	xIntent	PersonX accepts ___ as PersonX's savior	to put personx's faith in christ
+581203	xNeed	PersonX accepts ___ as PersonX's savior	to frequent church
+24317	xAttr	PersonX accepts every ___	accepting
+24287	xIntent	PersonX accepts every ___	to be agreeable
+24305	xNeed	PersonX accepts every ___	to be alright with doing it
+530051	xAttr	PersonX accepts into college	smart
+530019	xIntent	PersonX accepts into college	to going college
+530036	xNeed	PersonX accepts into college	to get good grades in high school
+2598	xAttr	PersonX accepts one 's ___	motivated
+2568	xIntent	PersonX accepts one 's ___	good life partner
+2587	xNeed	PersonX accepts one 's ___	to evaluate himself/herself
+623838	xAttr	PersonX accepts the challenge	apprehensive
+623806	xIntent	PersonX accepts the challenge	to win
+623829	xNeed	PersonX accepts the challenge	to think about it
+449697	xAttr	PersonX accepts the dare	Adventurous
+449661	xIntent	PersonX accepts the dare	to prove his bravery
+449691	xNeed	PersonX accepts the dare	to be challenged
+438744	xAttr	PersonX accepts the fact	understanding
+438719	xIntent	PersonX accepts the fact	to learn something new
+438739	xNeed	PersonX accepts the fact	to make up his mind
+255973	xAttr	PersonX accepts without question	naive
+255948	xIntent	PersonX accepts without question	to be generous
+255959	xNeed	PersonX accepts without question	to be told something
+560853	xAttr	PersonX accidentally knocked ___	careless
+560828	xIntent	PersonX accidentally knocked ___	also happy satisfied
+560841	xNeed	PersonX accidentally knocked ___	lose balance
+565264	xAttr	PersonX accidentally threw ___	have fun
+565234	xIntent	PersonX accidentally threw ___	to be interested
+565249	xNeed	PersonX accidentally threw ___	to pick up the ball
+252932	xAttr	PersonX accompanies PersonY far	useful
+252897	xIntent	PersonX accompanies PersonY far	to keep person y company
+252921	xNeed	PersonX accompanies PersonY far	to walk with PersonY
+115773	xAttr	PersonX accompanies by PersonX's wife	kind
+115753	xIntent	PersonX accompanies by PersonX's wife	to be with wife
+115769	xNeed	PersonX accompanies by PersonX's wife	to get their wife
+105124	xAttr	PersonX accomplishes PersonX's goal	determined
+105087	xIntent	PersonX accomplishes PersonX's goal	to do something good for themselves
+105104	xNeed	PersonX accomplishes PersonX's goal	to come up with a plan to succeed
+109313	xAttr	PersonX accomplishes PersonX's goals	determined
+109278	xIntent	PersonX accomplishes PersonX's goals	to be successful
+109294	xNeed	PersonX accomplishes PersonX's goals	to work hard towards their goals
+105642	xAttr	PersonX accomplishes PersonX's mission	pleased
+105604	xIntent	PersonX accomplishes PersonX's mission	to reach the goal
+105632	xNeed	PersonX accomplishes PersonX's mission	to understand their mission
+107929	xAttr	PersonX accomplishes PersonX's object	successful
+107907	xIntent	PersonX accomplishes PersonX's object	to be done.
+107920	xNeed	PersonX accomplishes PersonX's object	set goal
+128583	xAttr	PersonX accomplishes PersonX's objectives	industrious
+128556	xIntent	PersonX accomplishes PersonX's objectives	to be at peace
+128573	xNeed	PersonX accomplishes PersonX's objectives	work hard
+108450	xAttr	PersonX accomplishes PersonX's purpose	satisfied
+108417	xIntent	PersonX accomplishes PersonX's purpose	to be successful
+108436	xNeed	PersonX accomplishes PersonX's purpose	think about what they want to achieve
+128029	xAttr	PersonX accomplishes PersonX's purposes	dedicated
+128001	xIntent	PersonX accomplishes PersonX's purposes	to finish projects
+128026	xNeed	PersonX accomplishes PersonX's purposes	to ask for guidance from someone
+109734	xAttr	PersonX accomplishes PersonX's task	motivated
+109703	xIntent	PersonX accomplishes PersonX's task	to accomplish a goal
+109718	xNeed	PersonX accomplishes PersonX's task	to work hard
+97766	xAttr	PersonX accomplishes PersonX's work	successful
+97728	xIntent	PersonX accomplishes PersonX's work	to excel in his career
+97756	xNeed	PersonX accomplishes PersonX's work	to do all that he was assigned
+128951	xAttr	PersonX accomplishes PersonY's objectives	hard working
+128918	xIntent	PersonX accomplishes PersonY's objectives	to help.
+128943	xNeed	PersonX accomplishes PersonY's objectives	to talk to PersonY
+651201	xAttr	PersonX accomplishes PersonY's work	helpful
+651161	xIntent	PersonX accomplishes PersonY's work	to make sure the work is done
+651197	xNeed	PersonX accomplishes PersonY's work	to understand PersonY
+54905	xAttr	PersonX accomplishes the ___ at hand	reliable
+54870	xIntent	PersonX accomplishes the ___ at hand	good job
+54886	xNeed	PersonX accomplishes the ___ at hand	to work hard
+582565	xAttr	PersonX accomplishes the ___ in view	steadfast
+582536	xIntent	PersonX accomplishes the ___ in view	to complete
+582552	xNeed	PersonX accomplishes the ___ in view	to work hard
+326339	xAttr	PersonX accuses PersonY of cheating	envious
+326309	xIntent	PersonX accuses PersonY of cheating	make sure things are fair
+326328	xNeed	PersonX accuses PersonY of cheating	proof of the cheating
+564030	xAttr	PersonX accuses ___ of cheating	jealous
+564002	xIntent	PersonX accuses ___ of cheating	to punish someone
+564025	xNeed	PersonX accuses ___ of cheating	to be in a relationship
+289037	xAttr	PersonX aces PersonX's exam	responsible
+289003	xIntent	PersonX aces PersonX's exam	to do well in school
+289024	xNeed	PersonX aces PersonX's exam	to go to the school.
+610984	xAttr	PersonX aces PersonX's interview	ecstatic
+610959	xIntent	PersonX aces PersonX's interview	to get hired.
+610971	xNeed	PersonX aces PersonX's interview	prepare resume of similar papers
+638570	xAttr	PersonX aces the exam	educated
+638549	xIntent	PersonX aces the exam	to get an a in the class
+638558	xNeed	PersonX aces the exam	Study
+465455	xAttr	PersonX aces the test	proud
+465425	xIntent	PersonX aces the test	to get a degree
+465445	xNeed	PersonX aces the test	attend classes
+125032	xAttr	PersonX achieves PersonX's aim	Focused
+125001	xIntent	PersonX achieves PersonX's aim	to achieve a goal
+125019	xNeed	PersonX achieves PersonX's aim	to work hard
+586169	xAttr	PersonX achieves PersonX's aims	accomplished
+586138	xIntent	PersonX achieves PersonX's aims	to be the best in his field
+586160	xNeed	PersonX achieves PersonX's aims	to get ready to do actions.
+95598	xAttr	PersonX achieves PersonX's ends	accomplished
+95572	xIntent	PersonX achieves PersonX's ends	finish his plan
+95590	xNeed	PersonX achieves PersonX's ends	to stick with it
+87199	xAttr	PersonX achieves PersonX's goal	content
+87178	xIntent	PersonX achieves PersonX's goal	to feel accomplished
+87194	xNeed	PersonX achieves PersonX's goal	to try to do it
+83998	xAttr	PersonX achieves PersonX's goals	driven
+83960	xIntent	PersonX achieves PersonX's goals	to be fulfilled in life
+83992	xNeed	PersonX achieves PersonX's goals	to write their goals down
+83648	xAttr	PersonX achieves PersonX's objectives	smart
+83624	xIntent	PersonX achieves PersonX's objectives	to show off skills
+83644	xNeed	PersonX achieves PersonX's objectives	to make a plan
+81952	xAttr	PersonX achieves PersonX's potential	determined
+81922	xIntent	PersonX achieves PersonX's potential	to be the best he can be
+81948	xNeed	PersonX achieves PersonX's potential	to work really hard
+272745	xAttr	PersonX achieves PersonY end	proud
+272714	xIntent	PersonX achieves PersonY end	to end persony
+272732	xNeed	PersonX achieves PersonY end	to be able to do it themselfs
+604166	xAttr	PersonX achieves PersonY goal	caring
+604137	xIntent	PersonX achieves PersonY goal	to make happy
+604158	xNeed	PersonX achieves PersonY goal	to work towards goals
+266275	xAttr	PersonX achieves PersonY understanding	curious
+266251	xIntent	PersonX achieves PersonY understanding	convice them
+266268	xNeed	PersonX achieves PersonY understanding	to understand things himself
+45283	xAttr	PersonX achieves ___ in life	hardwork
+45255	xIntent	PersonX achieves ___ in life	anything in life goal
+45266	xNeed	PersonX achieves ___ in life	work hard
+579392	xAttr	PersonX achieves one 's ___	dedicated
+579366	xIntent	PersonX achieves one 's ___	to be fulfilled
+579378	xNeed	PersonX achieves one 's ___	to train consistently
+32340	xAttr	PersonX achieves the organization 's ___	dedicated
+32319	xIntent	PersonX achieves the organization 's ___	to contribute
+32334	xNeed	PersonX achieves the organization 's ___	to increase profits
+8670	xAttr	PersonX acknowledges gratefully the ___	Appreciative
+8630	xIntent	PersonX acknowledges gratefully the ___	kindness to others
+8654	xNeed	PersonX acknowledges gratefully the ___	make contact with those who are acknowledge
+56093	xAttr	PersonX acknowledges with gratitude the ___	thankful
+56067	xIntent	PersonX acknowledges with gratitude the ___	gratitude the encouragement
+56086	xNeed	PersonX acknowledges with gratitude the ___	listen to suggestions
+17983	xAttr	PersonX acknowledges with thanks the ___	thankful
+17951	xIntent	PersonX acknowledges with thanks the ___	team
+17971	xNeed	PersonX acknowledges with thanks the ___	to observe PersonX
+259907	xAttr	PersonX acquires PersonY knowledge	curious
+259879	xIntent	PersonX acquires PersonY knowledge	to do a better job
+259888	xNeed	PersonX acquires PersonY knowledge	to talk to PersonY
+119626	xAttr	PersonX acts as PersonY agent	helpful
+119597	xIntent	PersonX acts as PersonY agent	to make money
+119610	xNeed	PersonX acts as PersonY agent	to offer to help person Y
+241973	xAttr	PersonX acts as PersonY intermediary	Listening
+241942	xIntent	PersonX acts as PersonY intermediary	to be responsible
+241966	xNeed	PersonX acts as PersonY intermediary	to be in position to help persony
+531256	xAttr	PersonX acts funny	high on drugs
+531232	xIntent	PersonX acts funny	to be a comedian
+531241	xNeed	PersonX acts funny	tell a joke
+253950	xAttr	PersonX acts in PersonY capacity	accepting
+253915	xIntent	PersonX acts in PersonY capacity	to keep his army unit safe
+253941	xNeed	PersonX acts in PersonY capacity	action point
+250209	xAttr	PersonX acts in PersonY way	similar
+250179	xIntent	PersonX acts in PersonY way	funny
+250196	xNeed	PersonX acts in PersonY way	to see how personY acts
+177412	xAttr	PersonX acts like PersonY	copycating
+177390	xIntent	PersonX acts like PersonY	to be like person.
+177403	xNeed	PersonX acts like PersonY	adopt the person's behaviors
+121920	xAttr	PersonX acts like a PersonY	goofy
+121902	xIntent	PersonX acts like a PersonY	to be viewed as normal in society.
+121911	xNeed	PersonX acts like a PersonY	to observe
+654000	xAttr	PersonX acts like a man	aggressive
+653969	xIntent	PersonX acts like a man	to be mature
+653986	xNeed	PersonX acts like a man	to do things right
+263635	xAttr	PersonX acts like men	masculine
+263610	xIntent	PersonX acts like men	to be manly
+263620	xNeed	PersonX acts like men	paste on a male moustache.
+111079	xAttr	PersonX acts on PersonX's behalf	proud
+111057	xIntent	PersonX acts on PersonX's behalf	considerate.
+111069	xNeed	PersonX acts on PersonX's behalf	to decide how to act
+88052	xAttr	PersonX acts on PersonY's behalf	calm
+88021	xIntent	PersonX acts on PersonY's behalf	to help a friend
+88047	xNeed	PersonX acts on PersonY's behalf	to protect person y
+532251	xAttr	PersonX acts quickly	aware
+532220	xIntent	PersonX acts quickly	to do something fast
+532242	xNeed	PersonX acts quickly	to know about it
+26749	xAttr	PersonX adapts the ___ to the needs	talented
+26722	xIntent	PersonX adapts the ___ to the needs	to keep safe
+26740	xNeed	PersonX adapts the ___ to the needs	to know the process
+89370	xAttr	PersonX adapts to PersonX's environment	Adapting
+89338	xIntent	PersonX adapts to PersonX's environment	to be comfortable
+89363	xNeed	PersonX adapts to PersonX's environment	to know their environment
+104555	xAttr	PersonX adapts to PersonY's environment	flexible
+104528	xIntent	PersonX adapts to PersonY's environment	to fit in
+104546	xNeed	PersonX adapts to PersonY's environment	to find PersonY
+60305	xAttr	PersonX addresses the ___ directly	direct
+60274	xIntent	PersonX addresses the ___ directly	to face up to __
+60295	xNeed	PersonX addresses the ___ directly	to have a mic
+3575	xAttr	PersonX addresses women 's ___	informed
+3545	xIntent	PersonX addresses women 's ___	nervous
+3567	xNeed	PersonX addresses women 's ___	to be informed
+380125	xAttr	PersonX adds ___ to PersonX's collection	meticulous
+380097	xIntent	PersonX adds ___ to PersonX's collection	to expand the collection
+380121	xNeed	PersonX adds ___ to PersonX's collection	to go to the thrift shop
+101339	xAttr	PersonX adds ___ to injury	wrong
+101306	xIntent	PersonX adds ___ to injury	to add more problems
+101327	xNeed	PersonX adds ___ to injury	make the situation worse
+29811	xAttr	PersonX adds ___ to the fire	useful
+29781	xIntent	PersonX adds ___ to the fire	to keep the fire going
+29803	xNeed	PersonX adds ___ to the fire	to pour more coal from the bag
+4765	xAttr	PersonX adds ___ to the flame	malicious
+4744	xIntent	PersonX adds ___ to the flame	to create problems
+4760	xNeed	PersonX adds ___ to the flame	to be around people who are arguing
+581091	xAttr	PersonX adds ___ to the flames	interested
+581068	xIntent	PersonX adds ___ to the flames	to be warm during the night
+581079	xNeed	PersonX adds ___ to the flames	to start a fire
+5303	xAttr	PersonX adds ___ to the list	organized
+5270	xIntent	PersonX adds ___ to the list	more
+5296	xNeed	PersonX adds ___ to the list	to take a pen
+652139	xAttr	PersonX adds another ___	leader
+652110	xIntent	PersonX adds another ___	to create a new team
+652122	xNeed	PersonX adds another ___	to find another thing
+527995	xAttr	PersonX adds butter	informed
+527970	xIntent	PersonX adds butter	it to taste good
+527991	xNeed	PersonX adds butter	Get utensils to scoop butter
