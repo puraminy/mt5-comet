@@ -149,13 +149,13 @@ end_token = SPECIAL_TOKENS['eos_token']  #"</s>"
 # %%
 relation_prompt_lengths = {
     "xAttr":[5],
-    "xEffect":[5],
-    "oEffect":[5],
+    "xEffect":[8],
+    "oEffect":[8],
     "xReact":[5],
     "oReact":[5],
     "xWant":[5],
     "oWant":[5],
-    "xIntent":[5],
+    "xIntent":[8],
     "xNeed":[5],
     "com":[5],
 }

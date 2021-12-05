@@ -3,6 +3,7 @@
 import re
 from pathlib import Path
 import transformers
+import numpy as np
 import torch
 import torch.nn.functional as F
 def _isin(tensor:torch.Tensor,values:torch.Tensor):
@@ -177,7 +178,6 @@ class PTuningWrapper(torch.nn.Module):
         else:
             self.ll = logging.DEBUG
             return self.underlying_model(inputs_embeds=inputs_embeds,**kwargs)
-    
     def update_model_weight(self):
         wlog.info(f"Updating model weights")
         self.cur_embeddings = self.underlying_model.get_input_embeddings()
@@ -217,7 +217,7 @@ class PromptEncoder(torch.nn.Module):
 
     def get_prompt_token_fn(self):
         if self.prompt_ids:
-            return lambda x: x in self.prompt_ids
+            return lambda x: np.isin(x, self.prompt_ids)
         else:
             return lambda x: (x>=self.id_offset)&(x<self.id_offset+self.length)
     def dump_embedding(self,weight):
