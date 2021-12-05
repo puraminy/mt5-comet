@@ -349,7 +349,7 @@ Unnamed: 0	prefix	input_text	target_text
 12584	xIntent	PersonX becomes PersonY's wife	get married
 12603	xNeed	PersonX becomes PersonY's wife	To accept a proposal
 12585	xReact	PersonX becomes PersonY's wife	happy, overjoyed
-12605	xWant	PersonX becomes PersonY's wife	A life partner
+12605	xWant	PersonX becomes PersonY's wife	A life partner forever
 59607	oEffect	PersonX begs for food	smiles compassionately at PersonX
 59597	oReact	PersonX begs for food	irritated
 59611	oWant	PersonX begs for food	to be generous
