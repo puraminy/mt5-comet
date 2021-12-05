@@ -736,8 +736,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
             _p = _p.replace(".tsv","_" + save_df + ".tsv")
         save_df_path[split] = _p
     #tokenize_relations(tokenizer)
-    atomic_query_responses = {}
-    atomic_flattened = {}
+    atomic_query_responses = {"train":[], "validation":[]}
+    atomic_flattened = {"train":[], "validation":[]}
     num_records = {}
     num_samples = {"train": train_samples, "validation":val_samples}
     mlog.info("Perparing data ...")
@@ -752,6 +752,10 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
         split_lang["validation"] = lang
     for split_name,split_df in atomic_dataset.items():
         dlog.info("Columns of %s  %s", split_name, "\n".join(list(split_df.columns)))
+        if do_eval and split_name != "validation":
+            num_records[split_name] = 0
+            mlog.info("Skipping data for %s ", split_name)
+            continue
         dlog.info(split_df.head())
         slang = split_lang[split_name]
         if "2" in slang:
@@ -760,8 +764,6 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
             inp_lang = targ_lang = slang
         inp_include, inp_exclude = filter_inputs(include, exclude, inp_lang)
         targ_include, targ_exclude = filter_inputs(include, exclude, targ_lang)
-        if split_name == "validation":
-            samples_per_head = 2
         if last_data:
             mlog.info("Reading saved pickle")
             with open(split_name + ".pickle", 'rb') as handle:

@@ -750,7 +750,9 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
     if natural:
         dlog.info("natural is ON")
     data_split = {}
-    if num_samples == 0: num_samples = len(split_df)
+    if num_samples == 0: 
+        num_samples = len(split_df)
+        samples_per_head = 0
     for col in targets:
         if col in split_df:
             split_df[col] = split_df[col].astype(str)
@@ -780,6 +782,7 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
             dlog.info(f"len after sampling:{len(split_df)}")
     split_df = split_df.sort_values(by="input_text")
     cats_num = len(split_df["prefix"].unique())
+    dlog.info("Num Samples: %s", num_samples)
     dlog.info("Cats Num: %s", cats_num)
     num_per_cat = num_samples // cats_num if cats_num > 1 else num_samples
     dlog.info("Num per cat: %s", num_per_cat)
@@ -815,7 +818,8 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
             rel_counter[rel] = 1
         else:
             rel_counter[rel] += 1
-        if num_per_cat > 0 and rel_counter[rel] >= num_per_cat:
+        if num_per_cat > 0 and rel_counter[rel] > num_per_cat:
+            dlog.info("!!!!!!!!! number per cat limit reached %s for %s", rel, num_per_cat)
             continue 
         ii += 1
         if "other_rel" in ex_type:
@@ -833,6 +837,7 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
                 if (rel in _sels and d["target_text"] != "none"): 
                     context_rows.append(d)
                     _sels.remove(rel)
+                dlog.info("!!!!!!!!! just for including in conext rows %s", len(context_rows))
                 continue
         elif ex_type == "same_rel":
             context_df = split_df[split_df["prefix"] == rel].sample(n=sampling)
@@ -846,25 +851,33 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
             old_input = eng_inp
             si = 0
         elif samples_per_head > 0 and si > samples_per_head:
+            dlog.info("!!!!!!!!! samples per head limit %s", samples_per_head)
             continue
         if ii < start:
+            dlog.info("!!!!!!!!! before start %s", start)
             continue
         if not rel in data_split:
             data_split[rel] = {}
         for inp in inputs:
             if not inp in d or len(d[inp]) <= 1:
+                dlog.info("!!!!!!!!! not in dataset %s", inp)
                 continue
             if inp_include and not any(x in inp for x in inp_include.split("|")):
+                dlog.info("!!!!!!!!! not included input col %s", inp_include)
                 continue
             if inp_exclude and any(x in inp for x in inp_exclude.split("|")):
+                dlog.info("!!!!!!!!! excluded input col %s", inp_exclude)
                 continue
             input_lang = langs[inp]
             for targ_col in targets:
                 if not targ_col in d or len(d[targ_col]) <= 1:
+                    dlog.info("!!!!!!!!! not target lang %s", targ_col)
                     continue
                 if targ_include and not any(x in targ_col for x in targ_include.split("|")):
+                    dlog.info("!!!!!!!!! not included target col %s", targ_include)
                     continue
                 if targ_exclude and any(x in targ_col for x in targ_exclude.split("|")):
+                    dlog.info("!!!!!!!!!  target exclude %s", targ_exclude)
                     continue
                 rel_token = atomic_relation_mappings[rel]
                 event = d[inp]
@@ -910,6 +923,7 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
                         dlog.info(target_lang + ":" + response)
                     if lang_counter[lang] > num_samples:
                         save_data(ex_df, save_df_path)
+                        dlog.info("Lang limit reached! %s %s", lang, lang_counter[lang])
                         return data_split, flat_data, kk
                     if not lang in data_split[rel]:
                         data_split[rel][lang] = []
@@ -920,6 +934,7 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
                     flat_data.append((_query, response))
                     kk += 1
                     if is_record and kk > num_samples:
+                        dlog.info("record limit reached!")
                         save_data(ex_df, save_df_path)
                         return data_split, flat_data, kk
             #didn't convert ___ to <blank>
@@ -930,6 +945,7 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
     mlog.info("len ex_df: %s", len(ex_df))
     mlog.info("len main_df: %s", len(main_df))
     mlog.info("len split_df: %s", len(split_df))
+    mlog.info("kk: %s", kk)
         
     return data_split, flat_data, kk
 
