@@ -810,10 +810,9 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
     ex_df = pd.DataFrame()
     _sels = sel_rels.copy()
     dlog.info("sels: %s", _sels)
-    pbar = tqdm(total = len(split_df))
+    pbar = tqdm(total = num_samples)
     for index, d in split_df.iterrows():
         rel = d["prefix"]
-        pbar.update(1)
         if not rel in rel_counter:
             rel_counter[rel] = 1
         else:
@@ -932,6 +931,7 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
                     else:
                         data_split[rel][lang][query].append(response)
                     flat_data.append((_query, response))
+                    pbar.update(1)
                     kk += 1
                     if per_record and kk > num_samples:
                         dlog.info("record limit reached!")
