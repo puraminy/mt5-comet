@@ -219,6 +219,7 @@ class PromptEncoder(torch.nn.Module):
 
     def isin_ids(self, ar1):
         prompt_ids_tensor = torch.tensor(self.prompt_ids)
+        prompt_ids_tensor.to(device=ar1.device)
         return (ar1[..., None] == prompt_ids_tensor).any(-1)
     def get_prompt_token_fn(self):
         return lambda x: (x>=self.id_offset)&(x<self.id_offset+self.length)
