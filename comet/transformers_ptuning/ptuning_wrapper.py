@@ -241,14 +241,14 @@ class EmbeddingPromptEncoder(PromptEncoder):
         )
     
     def forward(self,prompt_token_ids,pids=None):
-        emblog.info("before prompt token ids: %s", prompt_token_ids)
+        emblog.info("Before prompt token ids: %s", prompt_token_ids)
         #emblog.info("id offset: %s", self.id_offset)
         #emblog.info("id length: %s", self.length)
-        if not self.id_map:
+        if not self.prompt_ids:
             prompt_token_ids = prompt_token_ids - self.id_offset
         else:
-            prompt_token_ids = torch.tensor([self.id_map[x] for x in prompt_token_ids])
-        emblog.info("after prompt token ids: %s", prompt_token_ids)
+            prompt_token_ids = (prompt_token_ids.view(-1,1) == self.input_ids).int().argmax(dim=1)
+        emblog.info("After prompt token ids: %s", prompt_token_ids)
         #emblog.info(self.embedding.weight)
         return self.embedding(prompt_token_ids)
 
