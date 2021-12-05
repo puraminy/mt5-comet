@@ -125,8 +125,11 @@ class PTuningWrapper(torch.nn.Module):
             for encoder in self.prompt_encoders:
                 #encoder = self.prompt_encoders[0]
                 wlog.info("********** offset: %s, length: %s", encoder.id_offset, encoder.length)
-                prompt_token_fn = encoder.get_prompt_token_fn()
-                encoder_masks = prompt_token_fn(input_ids)
+                if encoder.prompt_ids:
+                    encoder_masks = encoder.isin_ids(input_ids)
+                else:
+                    prompt_token_fn = encoder.get_prompt_token_fn()
+                    encoder_masks = prompt_token_fn(input_ids)
                 wlog.info("Encoder masks: %s", encoder_masks)
                 if encoder_masks.any():
                     #find input ids for prompt tokens
@@ -198,7 +201,7 @@ class PromptEncoder(torch.nn.Module):
     def __init__(self,length,embedding_dim,id_offset, init_embs, prompt_ids,**kwargs) -> None:
         super().__init__()
         self.length = length
-        self.prompt_ids = prompt_ids
+        self.prompt_ids = torch.tensor(prompt_ids)
         emblog.info("prompt ids: %s", prompt_ids)
         self.id_map = {}
         if prompt_ids:
@@ -215,11 +218,10 @@ class PromptEncoder(torch.nn.Module):
                     self.embedding.weight[_id] = emb
                     emblog.info("%s : %s", _id, emb)
 
+    def isin_ids(self, ar1):
+        return (ar1[..., None] == self.prompt_ids).any(-1)
     def get_prompt_token_fn(self):
-        if self.prompt_ids:
-            return lambda x: np.isin(x, self.prompt_ids)
-        else:
-            return lambda x: (x>=self.id_offset)&(x<self.id_offset+self.length)
+        return lambda x: (x>=self.id_offset)&(x<self.id_offset+self.length)
     def dump_embedding(self,weight):
         raise NotImplementedError
     def save(self, path):
