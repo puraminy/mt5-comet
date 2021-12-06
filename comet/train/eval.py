@@ -16,11 +16,21 @@ if Path(resFile).exists():
         mlog.info("Reading stored results...")
         results = json.load(f)
 
-def set_results(res):
-    global results
+results_full = {}
+resFile = os.path.join(resPath, "results_full.json")
+if Path(resFile).exists():
+    with open(resFile, "r") as f:
+        mlog.info("Reading stored results full...")
+        results_full = json.load(f)
+
+def reset_results():
+    global results, results_full
     with open(os.path.join(resPath, f"results_{now}.json"), "w") as f:
         json.dump(results, f, indent=2)
-    results = res
+    with open(os.path.join(resPath, f"results_full_{now}.json"), "w") as f:
+        json.dump(results_full, f, indent=2)
+    results = {}
+    results_full = {}
 
 device = "cpu"
 def set_device(dev):
@@ -212,6 +222,7 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
                     hi, ri, cur_score = bert_score(bert_scorer, hyps, tails)
                     best_hyp = hyps[hi]
                     best_ref = tails[ri]
+                    res = {}
                     hyp_counter[hi] += 1
                     if nli_model:
                         pair = (best_hyp, best_ref)
@@ -229,7 +240,6 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
                     data["langs"] = lang
                     data["top_pred"] = best_hyp
                     data["bert_score"] = float("{:.2f}".format(cur_score))
-                    rows.append(data)
                     sum_bert[scope] += cur_score
                     counter[scope] += 1
                     counter["all"] += 1
@@ -288,6 +298,8 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
                     vlog.info("======================================================")
                     pbar.set_description(f"{scope} :Bert:{mean_bert[scope]} Rouge {mean_rouge[scope]} Bleu {mean_bleu[scope]} Match {mean_match[scope]}")
                     pbar.update(1)
+                    dictPath(results_info, results_full, data, sep="_")
+                    rows.append(data)
 
     # %%%%%%%%%%%%%%%%%%
     out = os.path.join(logPath,f"__{results_info}.txt")
@@ -358,9 +370,13 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
     dictPath(results_info, results, res, sep="_")
     with open(os.path.join(resPath, "results.json"), "w") as f:
         json.dump(results, f, indent=2)
-    with open(os.path.join(resPath, f"results_{results_info}.json"), "w") as f:
-        json.dump(results, f, indent=2)
     with open(os.path.join(logPath, "results.json"), "w") as f:
+        json.dump(results, f, indent=2)
+
+
+    with open(os.path.join(resPath, "results_full.json"), "w") as f:
+        json.dump(results, f, indent=2)
+    with open(os.path.join(logPath, "results_full.json"), "w") as f:
         json.dump(results, f, indent=2)
 
     for logger in [mlog, vlog, clog]:
