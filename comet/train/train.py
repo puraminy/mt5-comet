@@ -821,7 +821,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     extra = "_" + now
     if do_eval:
         extra += "-EVAL"
-    results_info = f"{experiment}_{model_id}_{lang}_{method}_{w_str}_{f_str}_tr:{training_round}-ep:{epochs_num}-({start}-{train_records})-{val_records}{extra}"
+    results_info = f"{experiment}_{model_id}_{lang}_{method}_{w_str}-{encoder_type}_{f_str}_tr:{training_round}-ep:{epochs_num}-({start}-{train_records})-{val_records}{extra}"
     if do_eval or (not wrap and frozen):
         mlog.info("Evaluating the model...")
         val_data = atomic_query_responses[val_set]
