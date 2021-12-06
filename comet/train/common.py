@@ -157,7 +157,6 @@ relation_prompt_lengths = {
     "oWant":[5],
     "xIntent":[8],
     "xNeed":[5],
-    "com":[5],
 }
 
 
@@ -238,7 +237,7 @@ def create_encoder(model, tokenizer, prompt_tokens, encoder_type="lstm",
            for i, e in zip(range(len(new_tokens)), rel_embs):
                init_embs[i] = e.detach()
 
-    rel_tokens = prompt_tokens
+    rel_tokens = prompt_tokens + common_tokens
     mlog.info("** rel tokens : %s", rel_tokens)
     cur_list = tokenizer.additional_special_tokens
     mlog.info("** cur tokens : %s", cur_list)
@@ -312,7 +311,7 @@ def fill_const_for_rel(template, row):
         val = str(value)
         text = text.replace("{" + key + "}", val)
     return text
-
+common_tokens = []
 def fill_prompt(text, rel, place_holder, counter = 0, lang=""):
     pi = 0
     plen = relation_prompt_lengths[rel]
@@ -329,7 +328,9 @@ def fill_prompt(text, rel, place_holder, counter = 0, lang=""):
             token = place_holder
             token = token.replace("_i", "_" + str(i))  
             prompt += " " + token
-            if not rel in encoder_prompts:
+            if rel == "com":
+                common_tokens.append(token)
+            elif not rel in encoder_prompts:
                 encoder_prompts[rel] = []
             if not token in encoder_prompts[rel]:
                 encoder_prompts[rel].append(token)
@@ -424,6 +425,7 @@ def fill_consts(template, ex_temp, context, row, rows=[], mask=-1, method=""):
         counter += enc_plen 
         pi += 1
     text = fill_prompt(text, rel, "{rel_i}")
+    text = fill_prompt(text, "com", "{com_i}")
     if "{examples}" in text:
         examples = ""
         assert len(rows) > 0, "Since there are examples in template, rows must be provided"
@@ -466,6 +468,7 @@ def fill_consts(template, ex_temp, context, row, rows=[], mask=-1, method=""):
             assert enc_prompt != "", "Prompt was not set!"
         example = fill_const_for_rel(example, _row)
         example = fill_prompt(example, relation, "{rel_i}")
+        example = fill_prompt(example, "com", "{com_i}")
         for key,value in _row.items():
             val = str(value)
             if "fa" in method and "_fa" in key:
