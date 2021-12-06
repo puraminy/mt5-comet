@@ -305,7 +305,7 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
         preds = row["all_preds"]
         answers = row["target_text"]
         for pred in preds.split("<br />"):
-            mlog.info("{:<60}:".format(ans))
+            mlog.info("{:<60}:".format(pred))
         mlog.info("''''''''''''''''''''''''''''''''''''''''''''''''''")
         for ans in answers.split("<br />"):
             mlog.info("{:<60}:".format(ans))
