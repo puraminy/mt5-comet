@@ -374,9 +374,9 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
 
 
     with open(os.path.join(resPath, "results_full.json"), "w") as f:
-        json.dump(results, f, indent=2)
+        json.dump(results_full, f, indent=2)
     with open(os.path.join(logPath, "results_full.json"), "w") as f:
-        json.dump(results, f, indent=2)
+        json.dump(results_full, f, indent=2)
 
     for logger in [mlog, vlog, clog]:
         logger.info("Len data frame: {}".format(len(new_df)))
