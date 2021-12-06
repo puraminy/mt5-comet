@@ -29,7 +29,7 @@ def reset_results():
         json.dump(results, f, indent=2)
     with open(os.path.join(resPath, f"results_full_{now}.json"), "w") as f:
         json.dump(results_full, f, indent=2)
-    results = {}
+    #results = {}
     results_full = {}
 
 device = "cpu"
