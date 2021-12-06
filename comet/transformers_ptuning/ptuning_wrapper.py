@@ -31,7 +31,7 @@ emblog.info("Embedding log")
 wlog.info("Wrapper log")
 wlog.setLevel(logging.INFO)
 emblog.setLevel(logging.INFO)
-#wlog.disabled = True
+wlog.disabled = True
 
 class PTuningWrapper(torch.nn.Module):
     def __init__(self,model,prompt_encoders,decoder_prompt_encoder=None,
