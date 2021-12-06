@@ -329,7 +329,7 @@ def fill_prompt(text, rel, place_holder, counter = 0, lang=""):
             token = place_holder
             token = token.replace("_i", "_" + str(i))  
             prompt += " " + token
-            if rel == "com":
+            if rel == "com" and not token in common_tokens:
                 common_tokens.append(token)
             else:
                 if not rel in encoder_prompts:
