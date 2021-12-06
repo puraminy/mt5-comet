@@ -305,13 +305,13 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
             old_input = q
             mlog.info("\n\n")
         mlog.info("\n")
-        mlog.info("{:<2}-------------------------------------------preds:", i)
+        mlog.info("{:<2}-------------------------------------------preds:".format(i))
         mlog.info("{:<40} {:<60}:".format(i,q, p))
         preds = row["all_preds"]
         answers = row["target_text"]
         for pred in preds.split("<br />"):
             mlog.info("{:<60}:".format(pred))
-        mlog.info("{:<2}'''''''''''''''''''''''''''''''''''''''''targets:", i)
+        mlog.info("{:<2}'''''''''''''''''''''''''''''''''''''''''targets:".format(i))
         for ans in answers.split("<br />"):
             mlog.info("{:<60}:".format(ans))
 
