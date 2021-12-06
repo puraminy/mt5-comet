@@ -331,10 +331,11 @@ def fill_prompt(text, rel, place_holder, counter = 0, lang=""):
             prompt += " " + token
             if rel == "com":
                 common_tokens.append(token)
-            elif not rel in encoder_prompts:
-                encoder_prompts[rel] = []
-            if not token in encoder_prompts[rel]:
-                encoder_prompts[rel].append(token)
+            else:
+                if not rel in encoder_prompts:
+                    encoder_prompts[rel] = []
+                if not token in encoder_prompts[rel]:
+                    encoder_prompts[rel].append(token)
         prompt = prompt.strip()
         text = text.replace("{rel_i}",prompt, 1)
         counter += enc_plen 
