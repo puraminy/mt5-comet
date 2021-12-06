@@ -296,9 +296,24 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
                     pbar.update(1)
 
     # %%%%%%%%%%%%%%%%%%
-    for i, (a,q) in enumerate(zip(answers,questions)):
-        mlog.info("{:<2} {:<40}:".format(i,q))
-        for ans in a:
+    out = os.path.join(logPath,f"__{results_info}.txt")
+
+    handler = logging.FileHandler(out, mode="w")
+    mlog.addHandler(handler)
+
+    new_df = pd.DataFrame(rows)
+    new_df = new_df[new_df["bert_score"] > 0]
+    new_df = new_df.sort_values(by="input_text")
+    for i, row in new_df.iterrows(): 
+        q = row["input_text"] 
+        p = row["prefix"]
+        mlog.info("{:<2} {:<40} {:<60}:".format(i,q, p))
+        preds = row["all_preds"]
+        answers = row["target_text"]
+        for pred in preds.split("<br />"):
+            mlog.info("{:<60}:".format(ans))
+        mlog.info("''''''''''''''''''''''''''''''''''''''''''''''''''")
+        for ans in answers.split("<br />"):
             mlog.info("{:<60}:".format(ans))
 
     s =0 
@@ -317,13 +332,7 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
     mean_rouge_str = json.dumps(mean_rouge, indent=2)
     mean_bleu_str = json.dumps(mean_bleu, indent=2)
     mean_match_str = json.dumps(mean_match, indent=2)
-    out = os.path.join(logPath,f"__{results_info}.txt")
-    with open(out, "w") as f: 
-        for i, (a,q) in enumerate(zip(answers,questions)):
-            print("{:<2} {:<40}:".format(i,q), file =f)
-            for ans in a:
-                print("{:^}:".format(ans), file = f)
-
+    with open(out, "a") as f: 
         print("{:<40}:".format(mean_rouge_str), file = f)
         print("{:<40}:".format(mean_bert_str), file = f)
         print("{:<40}:".format(mean_bleu_str), file = f)
@@ -331,9 +340,6 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
     mlog.info("-----------------------------------------------------")
     #for i, q in enumerate(questions):
     #    mlog.info("{:<2}:{}".format(i,q))
-    new_df = pd.DataFrame(rows)
-    new_df = new_df[new_df["bert_score"] > 0]
-    new_df = new_df.sort_values(by="langs")
     pbar.close()
     out1 = os.path.join(save_path,f"scored_{results_info}.tsv")
     out2 = os.path.join(resPath,f"scored_{results_info}.tsv")

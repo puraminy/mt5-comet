@@ -444,7 +444,7 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
 @click.option(
     "--prompt_length",
     "-pl",
-    default="5-2",
+    default="",
     type=str,
     help="Encoder-decoder prompt length"
 )
@@ -733,7 +733,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
         length = [len(fw_tokens)]
         mlog.info("length got from words ids ***: %s", length)
         set_prompt_lengths(rel_filter, length)
-    else:
+    elif prompt_length:
         length = [int(s) for s in prompt_length.split("-")]
         set_prompt_lengths(rel_filter, length)
 
