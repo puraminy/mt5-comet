@@ -157,7 +157,7 @@ relation_prompt_lengths = {
     "oWant":[5],
     "xIntent":[5],
     "xNeed":[5],
-    "com":[7],
+    "com":[3],
 }
 
 
