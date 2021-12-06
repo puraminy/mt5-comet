@@ -194,9 +194,10 @@ class PTuningWrapper(torch.nn.Module):
 
 
 class PromptEncoder(torch.nn.Module):
-    def __init__(self,length,embedding_dim,id_offset, init_embs, prompt_ids,**kwargs) -> None:
+    def __init__(self,name, length,embedding_dim,id_offset, init_embs, prompt_ids,**kwargs) -> None:
         super().__init__()
         self.length = length
+        self.name = name
         self.prompt_ids = prompt_ids
         self.input_ids = torch.nn.parameter.Parameter(torch.tensor(prompt_ids),
              requires_grad=False)
@@ -226,8 +227,8 @@ class PromptEncoder(torch.nn.Module):
 
 
 class EmbeddingPromptEncoder(PromptEncoder):
-    def __init__(self,length,embedding_dim,id_offset,init_embs=None, prompt_ids=[]) -> None:
-        super().__init__(length,embedding_dim,id_offset, init_embs, prompt_ids)
+    def __init__(self,name,length,embedding_dim,id_offset,init_embs=None, prompt_ids=[]) -> None:
+        super().__init__(name, length,embedding_dim,id_offset, init_embs, prompt_ids)
         self.mlp = torch.nn.Sequential(
             torch.nn.Linear(embedding_dim, embedding_dim),
             torch.nn.ReLU(),
@@ -235,6 +236,7 @@ class EmbeddingPromptEncoder(PromptEncoder):
         )
     
     def forward(self,prompt_token_ids,pids=None):
+        emblog.info("Name %s", self.name)
         emblog.info("Before prompt token ids: %s", prompt_token_ids)
         #emblog.info("id offset: %s", self.id_offset)
         #emblog.info("id length: %s", self.length)
@@ -259,8 +261,8 @@ class EmbeddingPromptEncoder(PromptEncoder):
             self.embedding.load_state_dict(torch.load(path + "/emb"))
 
 class LSTMEmbeddingPromptEncoder(PromptEncoder):
-    def __init__(self,length,embedding_dim,id_offset, init_embs=None, prompt_ids=[]) -> None:
-        super().__init__(length,embedding_dim,id_offset, init_embs, prompt_ids)
+    def __init__(self,name, length,embedding_dim,id_offset, init_embs=None, prompt_ids=[]) -> None:
+        super().__init__(name, length,embedding_dim,id_offset, init_embs, prompt_ids)
         self.net_inps = torch.nn.parameter.Parameter(torch.arange(length),
             requires_grad=False)
         self.lstm = torch.nn.LSTM(

@@ -214,7 +214,7 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words
         mlog.info("******************* Wrapping model for %s", rel)
         if from_words == "rel":
             from_words = relation_natural_mappings[rel]["en"]
-        encoder, offset = create_encoder(model, tokenizer, prompt_tokens, encoder_type, from_words, wrapped_model)
+        encoder, offset = create_encoder(rel, model, tokenizer, prompt_tokens, encoder_type, from_words, wrapped_model)
         prompt_encoders.append(encoder)
         offsets.append(offset)
     id_offset = min(offsets)
@@ -222,7 +222,7 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words
     wrapped_model = PTuningWrapper(model, prompt_encoders, prompt_token_fn=get_prompt_token_fn(id_offset))
     return wrapped_model
 
-def create_encoder(model, tokenizer, prompt_tokens, encoder_type="lstm", 
+def create_encoder(name, model, tokenizer, prompt_tokens, encoder_type="lstm", 
         from_words=False, wrapped_model = None):
     embedding_dim = model.config.hidden_size
     enc_plen = len(prompt_tokens)
@@ -276,12 +276,12 @@ def create_encoder(model, tokenizer, prompt_tokens, encoder_type="lstm",
         mlog.info("in Emb %s", encoder_type)
         if enc_plen > 0:
             mlog.info("Prompt Encoder defined : %s", enc_plen)
-            prompt_encoder = EmbeddingPromptEncoder(enc_plen,
+            prompt_encoder = EmbeddingPromptEncoder(name, enc_plen,
                     embedding_dim,id_offset,init_embs, prompt_ids=rel_ids)
     else:
         if enc_plen > 0:
             mlog.info("Prompt Encoder defined : %s", enc_plen)
-            prompt_encoder = LSTMEmbeddingPromptEncoder(enc_plen,embedding_dim,
+            prompt_encoder = LSTMEmbeddingPromptEncoder(name, enc_plen,embedding_dim,
                     id_offset, init_embs, prompt_ids=rel_ids)
 
     model.resize_token_embeddings(len(tokenizer))
