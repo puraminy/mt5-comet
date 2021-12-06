@@ -306,8 +306,7 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
                     vlog.info("======================================================")
                     pbar.set_description(f"{scope} :Bert:{mean_bert[scope]} Rouge {mean_rouge[scope]} Bleu {mean_bleu[scope]} Match {mean_match[scope]}")
                     pbar.update(1)
-                    res = {qid: data}
-                    dictPath(results_info, results_full, res, sep="_")
+                    dictPath(results_info + "_" + str(qid), results_full, data, sep="_")
                     dictPath(str(qid) + "_" + results_info, full_results, data, sep="_")
                     rows.append(data)
 
