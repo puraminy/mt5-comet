@@ -160,8 +160,6 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
     mean_bleu = {}
     smoothie = SmoothingFunction().method4 # a function for smooth
     hyp_counter = [0]*5
-    answers = []
-    questions = []
     ignore_special_tokens = False
     if "@" in gen_param:
         _, ist = gen_param.split("@")
@@ -241,11 +239,7 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
                     vlog.info(f"=============   {lang}  ===  {rel}   =====================")
                     _q = query.replace("<", "\n<", 1)
                     _q = _q.replace(">", ">\n")
-                    if ignore_special_tokens:
-                        questions.append(rel + ":" + input_text)
-                    else:
-                        questions.append(rel + ":" + query)
-                    answers.append(hyps)
+                    data["prompt"] = _q
                     vlog.info(str(counter["all"])+ ":" + _q)
                     vlog.info("'''''''''''''''''''''''''''''''''''''''''' Preds:")
                     for h in hyps: 
@@ -338,8 +332,6 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
         print("{:<40}:".format(mean_bleu_str), file = f)
         print("{:<40}:".format(mean_match_str), file = f)
     mlog.info("-----------------------------------------------------")
-    #for i, q in enumerate(questions):
-    #    mlog.info("{:<2}:{}".format(i,q))
     pbar.close()
     out1 = os.path.join(save_path,f"scored_{results_info}.tsv")
     out2 = os.path.join(resPath,f"scored_{results_info}.tsv")
