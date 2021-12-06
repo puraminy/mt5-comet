@@ -303,7 +303,7 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
         else:
             prompt_token_ids = (prompt_token_ids.view(-1,1) == self.input_ids).int().argmax(dim=1)
         emblog.info("after prompt token ids:  %s", prompt_token_ids)
-        emblog.info("prompt token ids:%s", running_weight)
+        wlog.info("prompt token ids:%s", running_weight)
         # return weights for prompt_token_ids 
         return F.embedding(prompt_token_ids,running_weight)
     def dump_embedding(self, weight):

@@ -920,11 +920,11 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
                     else:
                         lang_counter[lang] += 1
                     if lang_counter[lang] < 10:
-                        dlog.info(f"%%%%%%%%%%%%%%%%%% {lang} {mt} %%%%%%%%%%%%%%%%%%%")
-                        dlog.info(inp + "====>" + targ_col)
+                        clog.info(f"%%%%%%%%%%%%%%%%%% {lang} {mt} %%%%%%%%%%%%%%%%%%%")
+                        clog.info(inp + "====>" + targ_col)
                         _q = _query.replace(">",">\n") 
-                        dlog.info(input_lang + ":"+ _q)
-                        dlog.info(target_lang + ":" + response)
+                        clog.info(input_lang + ":"+ _q)
+                        clog.info(target_lang + ":" + response)
                     if lang_counter[lang] > num_samples:
                         save_data(ex_df, save_df_path)
                         dlog.info("Lang limit reached! %s %s", lang, lang_counter[lang])
