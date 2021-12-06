@@ -23,7 +23,7 @@ if Path(resFile).exists():
         mlog.info("Reading stored results full...")
         results_full = json.load(f)
 
-def reset_results():
+def reset_all_results():
     global results, results_full
     with open(os.path.join(resPath, f"results_{now}.json"), "w") as f:
         json.dump(results, f, indent=2)
