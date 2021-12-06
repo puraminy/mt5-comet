@@ -310,17 +310,14 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
         for ans in answers.split("<br />"):
             mlog.info("{:<60}:".format(ans))
 
-    s =0 
-    ii = 0
-    try:
-        for metric in [mean_rouge, mean_bert, mean_match, mean_bleu]:
-            for key,val in metric.items():
-                metric[key] = str(val) + "--" + str(counter[key])
-                s += float(val)
-                ii += 1
-        mlog.info("average all: %s", s/ii)
-    except Exception as e:
-        mlog.info(e)
+    for metric in [mean_rouge, mean_bert, mean_match, mean_bleu]:
+        s =0 
+        ii = 0
+        for key,val in metric.items():
+            metric[key] = str(val) + "--" + str(counter[key])
+            s += float(val)
+            ii += 1
+        metric["AVG"] = "{:.2f}--{}".format(s/ii, ii)
 
     mean_bert_str = json.dumps(mean_bert, indent=2)
     mean_rouge_str = json.dumps(mean_rouge, indent=2)
