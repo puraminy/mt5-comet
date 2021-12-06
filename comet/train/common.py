@@ -262,7 +262,7 @@ def create_encoder(name, model, tokenizer, prompt_tokens, encoder_type="lstm",
 
     enc_plen =len(rel_tokens) 
     mlog.info("** len tokenizer before extend: %s", len(tokenizer))
-    extend_tokenizer(tokenizer, prompt_tokens)
+    extend_tokenizer(tokenizer, rel_tokens)
     rel_ids = tokenizer.convert_tokens_to_ids(rel_tokens)
     mlog.info("** final rel ids: %s", rel_ids)
     id_offset = min(rel_ids) 
@@ -271,7 +271,7 @@ def create_encoder(name, model, tokenizer, prompt_tokens, encoder_type="lstm",
     mlog.info("Encoder Type %s", encoder_type)
     mlog.info("id_offset: %s", id_offset)
     mlog.info("enc_plan: %s", enc_plen)
-    mlog.info("enc prompts: %s", prompt_tokens)
+    mlog.info("enc prompts: %s", rel_tokens)
     if encoder_type.startswith("emb"):
         mlog.info("in Emb %s", encoder_type)
         if enc_plen > 0:
