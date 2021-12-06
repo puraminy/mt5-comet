@@ -752,6 +752,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     if model_id in ["t5-large","t5-small", "t5-base", "gpt2"]:
         lang = "en"
     split_lang = {}
+    global encoder_prompts
     if "-" in lang:
         split_lang["train"] = lang.split("-")[0]
         split_lang["validation"] = lang.split("-")[1]
