@@ -779,7 +779,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
                 (atomic_query_responses[split_name], 
                  atomic_flattened[split_name],
                  num_records[split_name]
-                 encoder_prompts,
+                 encoder_prompts
                 ) = pickle.load(handle)
 
         else:
