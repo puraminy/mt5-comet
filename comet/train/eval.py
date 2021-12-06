@@ -23,14 +23,23 @@ if Path(resFile).exists():
         mlog.info("Reading stored results full...")
         results_full = json.load(f)
 
+full_results = {}
+resFile = os.path.join(resPath, "full_results.json")
+if Path(resFile).exists():
+    with open(resFile, "r") as f:
+        mlog.info("Reading stored full_results ...")
+        full_results = json.load(f)
 def reset_all_results():
-    global results, results_full
+    global results, results_full, full_results
     with open(os.path.join(resPath, f"results_{now}.json"), "w") as f:
         json.dump(results, f, indent=2)
     with open(os.path.join(resPath, f"results_full_{now}.json"), "w") as f:
         json.dump(results_full, f, indent=2)
-    #results = {}
+    with open(os.path.join(resPath, f"full_results_{now}.json"), "w") as f:
+        json.dump(full_results, f, indent=2)
+    results = {}
     results_full = {}
+    full_results = {}
 
 device = "cpu"
 def set_device(dev):
@@ -297,7 +306,9 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
                     vlog.info("======================================================")
                     pbar.set_description(f"{scope} :Bert:{mean_bert[scope]} Rouge {mean_rouge[scope]} Bleu {mean_bleu[scope]} Match {mean_match[scope]}")
                     pbar.update(1)
-                    dictPath(results_info, results_full, data, sep="_")
+                    res = {qid: data}
+                    dictPath(results_info, results_full, res, sep="_")
+                    dictPath(str(qid) + "_" + results_info, full_results, data, sep="_")
                     rows.append(data)
 
     # %%%%%%%%%%%%%%%%%%
@@ -377,6 +388,11 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
         json.dump(results_full, f, indent=2)
     with open(os.path.join(logPath, "results_full.json"), "w") as f:
         json.dump(results_full, f, indent=2)
+
+    with open(os.path.join(resPath, "full_results.json"), "w") as f:
+        json.dump(full_results, f, indent=2)
+    with open(os.path.join(logPath, "full_results.json"), "w") as f:
+        json.dump(full_results, f, indent=2)
 
     for logger in [mlog, vlog, clog]:
         logger.info("Len data frame: {}".format(len(new_df)))
