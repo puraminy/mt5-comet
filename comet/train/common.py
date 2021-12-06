@@ -337,7 +337,7 @@ def fill_prompt(text, rel, place_holder, counter = 0, lang=""):
                 if not token in encoder_prompts[rel]:
                     encoder_prompts[rel].append(token)
         prompt = prompt.strip()
-        text = text.replace("{rel_i}",prompt, 1)
+        text = text.replace(_pholder,prompt, 1)
         counter += enc_plen 
         pi += 1
     #dlog.info("text: %s", text)
