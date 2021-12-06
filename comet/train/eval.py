@@ -298,15 +298,21 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
     new_df = pd.DataFrame(rows)
     new_df = new_df[new_df["bert_score"] > 0]
     new_df = new_df.sort_values(by="input_text")
+    old_input = ""
     for i, row in new_df.iterrows(): 
         q = row["input_text"] 
         p = row["prefix"]
+        if q != old_input:
+            old_input = q
+            mlog.info("\n\n")
+        mlog.info("\n")
+        mlog.info("--------------------------------------------------preds:")
         mlog.info("{:<2} {:<40} {:<60}:".format(i,q, p))
         preds = row["all_preds"]
         answers = row["target_text"]
         for pred in preds.split("<br />"):
             mlog.info("{:<60}:".format(pred))
-        mlog.info("''''''''''''''''''''''''''''''''''''''''''''''''''")
+        mlog.info("''''''''''''''''''''''''''''''''''''''''''''''''targets:")
         for ans in answers.split("<br />"):
             mlog.info("{:<60}:".format(ans))
 
