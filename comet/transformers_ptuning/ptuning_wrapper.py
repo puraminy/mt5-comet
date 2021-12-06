@@ -297,7 +297,7 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
         embeds = self.embedding(self.net_inps)
         # do forward calculations
         x = self.lstm(embeds.unsqueeze(0))
-        wblog.info("lstml embeds: %s",embeds)
+        wlog.info("lstml embeds: %s",embeds)
 
         running_weight = self.mlp(x[0]).squeeze(0)
         # find zero based ids 
