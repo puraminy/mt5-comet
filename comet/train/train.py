@@ -1274,7 +1274,7 @@ def res(stype, model, method, sort):
         data = json.load(f)
     
     sd = superitems(data)
-    df = pd.DataFrame(sd, columns=["exp","model","lang", "method","wrap","frozen","epochs","stype", "dir", "score"])
+    df = pd.DataFrame(sd, columns=["exp","model","lang", "method","wrap","frozen","epochs","stype", "date", "dir", "score"])
     df.to_csv(os.path.join(resPath, "table_all.tsv"), sep="\t", index = False)
     if stype == "all":
         print(df)
