@@ -558,10 +558,10 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
        elif method == "unsup-nat-fa":
            qtemp = "{event} {rel_natural_fa} {ph}" 
            anstemp = "{ph} {resp} {end}"
-       elif method == "unsup-nat-wrap":
+       elif method == "unsup-wrap-nat":
            qtemp = "{rel_i} {event} {rel_natural} {ph}" 
            anstemp = "{ph} {resp} {end}"
-       elif method == "unsup-lang":
+       elif method == "unsup-wrap-lang":
            qtemp = "{rel_i} {event} {rel_lang_i} {ph}" 
            anstemp = "{ph} {resp} {end}"
        elif method == "sup-gen":
@@ -585,14 +585,14 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
        elif method == "context-faen":
            qtemp = "{rel_i_start} {gen_start} {input_text_fa} {rel_natural_fa} {gen_en} {target_text} {event} {rel_natural} {rel_i_end} {gen_end} {ph}"
            anstemp = "{ph} {resp} {end}"
-       elif method == "context-n":
+       elif method == "unsup-wrap-n-example":
            qtemp = "{examples} {event} {rel_i} {gen} {ph}"
            ex_qtemp = "{input_text} {rel_i} {target_text} {end}"
            anstemp = "{ph} {resp} {end}"
        elif method == "trans":
            qtemp = "{target_text} en2fa"
            anstemp = "{target_text_fa}"
-       elif method == "event-n":
+       elif method == "unsup-n-example":
            qtemp = "{examples} {gen} {ph}"
            ex_qtemp = "{gen} {input_text} {end} \n"
            anstemp = "{ph} {event} {end}"
@@ -613,7 +613,7 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            qtemp = "{examples} {rel_i}"
            ex_qtemp = "{rel_i} {input_text_fa} {rel_natural_fa} {target_text_fa} {sep} \n"
            anstemp = "{event} {rel_natural} {resp} {end}"
-       elif method == "fa-event-n":
+       elif method == "unsup-wrap-n-example-fa":
            qtemp = "{examples} {gen} {ph}"
            ex_qtemp = "{gen} {input_text_fa} {end} \n"
            anstemp = "{ph} {event} {end}"
@@ -625,32 +625,32 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            qtemp = "{examples} {gen}"
            ex_qtemp = "{gen} {input_text_fa} {end} \n"
            anstemp = "{event} {end}"
-       elif method == "event-n-wrap":
+       elif method == "unsup-wrap-n-example":
            qtemp = "{examples} {rel_i} {ph}"
            ex_qtemp = "{rel_i} {input_text} {end} \n"
            anstemp = "{ph} {event} {end}"
-       elif method == "gpt-n":
+       elif method == "gpt-n-example":
            qtemp = "{examples} {event} {rel_natural}"
            ex_qtemp = "{input_text} {rel_natural} {target_text} {end}"
            anstemp = "{resp} {end}"
-       elif method == "gpt-n-wrap":
+       elif method == "gpt-wrap-n-example":
            qtemp = "{examples} {event} {rel_i}"
            ex_qtemp = "{input_text} {rel_i} {target_text} {end}"
            anstemp = "{resp} {end}"
-       elif method == "context-n-dec":
+       elif method == "unsup-wrap-context-n-dec":
            qtemp = "{event} {rel_i} {gen} {ph}"
            ex_qtemp = "{input_text} {target_text} {end}"
            anstemp = "{examples} {ph} {resp} {end}"
-       elif method == "context-enfa":
+       elif method == "unsup-wrap-context-enfa":
            qtemp = "{rel_i_start} {gen_start} {input_text} {rel_natural_en} {gen_fa} {target_text_fa} {rel_i_start} {event} {rel_natural} {rel_i_end} {gen_end} {ph}"
            anstemp = "{ph} {resp} {end}"
-       elif method == "context-fa":
+       elif method == "unsup-wrap-context-fa":
            qtemp = "{rel_i_start} {gen_start} {input_text_fa} {rel_natural_fa} {gen_fa} {target_text_fa} {rel_i_start} {event} {rel_natural} {rel_i_end} {gen_end} {ph}"
            anstemp = "{ph} {resp} {end}"
        elif method == "sup":
            qtemp = "{rel_token} {event}"
            anstemp = "{resp} {end}"
-       elif method == "sup-gen-wrap":
+       elif method == "sup-wrap-gen":
            qtemp = "{rel_i_start} {gen_start} {event} {rel_i_end} {gen_end}"
            anstemp = "{resp} {end}"
        elif method == "gpt-wrap":
@@ -659,7 +659,7 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
        elif method == "gpt":
            qtemp = "{event} {rel_natural}"
            anstemp = "{resp} {end}"
-       elif method == "unsup-fw":
+       elif method == "unsup-wrap-fw":
            qtemp = "{event} {rel_fw} {ph}"
            anstemp = "{ph} {resp} {end}"
        elif method == "unsup":
@@ -674,16 +674,16 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
        elif method == "unsup-wrap":
            qtemp = "{rel_i_start} {event} {rel_i_end} {ph}"
            anstemp = "{ph} {resp} {end}"
-       elif method == "unsup-gen-wrap":
+       elif method == "unsup-wrap-gen":
            qtemp = "{rel_i_start} {gen_start} {event} {rel_i_end} {gen_end} {ph}"
            anstemp = "{ph} {resp} {end}"
-       elif method == "unsup-dec":
+       elif method == "unsup-wrap-dec":
            qtemp = "{rel_i_start} {gen_start} {event} {rel_i_end} {gen_end} {ph}"
            anstemp = "{ph} {dec_token} {resp} {end}"
-       elif method == "unsup-2":
+       elif method == "unsup-wrap-2":
            qtemp = "{rel_i} {gen_start} {event} {rel_i} {gen_end} {ph}"
            anstemp = "{ph} {resp} {end}"
-       elif method == "unsup-3":
+       elif method == "unsup-wrap-3":
            qtemp = "{rel_i} {gen_start} {event} {rel_i} {gen_end} {ph}"
            anstemp = "{ph} {dec_token} {resp} {end}"
        else:
