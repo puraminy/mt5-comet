@@ -779,6 +779,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
                 (atomic_query_responses[split_name], 
                  atomic_flattened[split_name],
                  num_records[split_name]
+                 encoder_prompts,
                 ) = pickle.load(handle)
 
         else:
@@ -800,7 +801,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
                         )
             data = (atomic_query_responses[split_name], 
                     atomic_flattened[split_name],
-                    num_records[split_name])
+                    num_records[split_name], encoder_prompts)
             with open(split_name + ".pickle", 'wb') as handle:
                 pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
