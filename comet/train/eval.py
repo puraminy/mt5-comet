@@ -222,7 +222,6 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
                     hi, ri, cur_score = bert_score(bert_scorer, hyps, tails)
                     best_hyp = hyps[hi]
                     best_ref = tails[ri]
-                    res = {}
                     hyp_counter[hi] += 1
                     if nli_model:
                         pair = (best_hyp, best_ref)
@@ -362,8 +361,8 @@ def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_r
     res = {}
     res["rouge"] = mean_rouge
     res["bert"] = mean_bert
-    res["bleu"] = mean_bleu
-    res["match"] = mean_match
+    #res["bleu"] = mean_bleu
+    #res["match"] = mean_match
     res["distinct"] ="{} {:.2f}".format(len(pred_counts), len(pred_counts)/len(new_df))
     res["hyps"] = hyp_counter
 
