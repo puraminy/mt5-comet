@@ -133,7 +133,7 @@ def bert_score(bert_scorer, hyps, refs):
         return best_hyp_index, best_ref_index, top["score"] 
 # vvvvvvvvvvvvvvv
 # ################################### Evaluation #########################
-def eval(model, tokenizer, val_data, interactive, save_path, results_info, val_records, gen_param="greedy", at_mask = None):  
+def evaluate(model, tokenizer, val_data, interactive, save_path, results_info, val_records, gen_param="greedy", at_mask = None):  
 
     try:
         nltk_path = str(nltk.data.find("tokenizers/punkt"))

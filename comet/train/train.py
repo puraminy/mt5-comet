@@ -4,6 +4,7 @@ from comet.train.eval import *
 from transformers.optimization import Adafactor, AdafactorSchedule
 from transformers import (
     T5ForConditionalGeneration, T5TokenizerFast, 
+    AutoModelForSeq2SeqLM, 
     MT5ForConditionalGeneration, MT5TokenizerFast, AdamW, AddedToken,
     GPT2LMHeadModel, GPT2Tokenizer,
     DataCollatorForLanguageModeling,
@@ -689,6 +690,9 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
             mlog.info("converting and saving model in %s", save_path)
             tokenizer.save_pretrained(save_path)
             model.save_pretrained(save_path)
+        elif "bart" in model_id.lower():
+            model = AutoModelForSeq2SeqLM.from_pretrained(underlying_model_name)
+            tokenizer = AutoTokenizer.from_pretrained(underlying_model_name)
         else:
             tokenizer = AutoTokenizer.from_pretrained(underlying_model_name)
             model = T5ForConditionalGeneration.from_pretrained(underlying_model_name) 
@@ -828,7 +832,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
         mlog.info("Evaluating the model...")
         val_data = atomic_query_responses[val_set]
         model.to(device=device)
-        eval(model, tokenizer, val_data, inter, save_path, results_info, val_records, gen_param)  
+        evaluate(model, tokenizer, val_data, inter, save_path, results_info, val_records, gen_param)  
         return
     accumulation_tiny_steps = 2 
     if "gpt" in model_id:
@@ -1124,7 +1128,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
                     best_eval_step, best_dev_loss,
                     save_path)
 
-    eval(model, tokenizer, atomic_query_responses[val_set], inter, save_path, results_info, val_records, gen_param, attention_mask)  
+    evaluate(model, tokenizer, atomic_query_responses[val_set], inter, save_path, results_info, val_records, gen_param, attention_mask)  
 
 #ettt
 
@@ -1240,53 +1244,72 @@ def translate(model, tokenizer, df, trans_col, path, logger=None, start=0, save_
     df.to_csv(p, sep="\t", index=False)
 
 
+def myconv(obj):
+    return obj
+
 
 @run.command()
 @click.option(
-    "--stype",
-    "-s",
-    default="rouge",
-    type=str,
-    help="score type (rouge, bert, etc.)"
-)
-@click.option(
-    "--model",
-    "-m",
-    default="",
+    "--fname",
+    "-f",
+    default="results",
     type=str,
     help=""
 )
 @click.option(
-    "--method",
-    "-mt",
-    default="",
+    "--filt",
+    "-filt",
+    default="all",
     type=str,
-    help=""
+    help="filter"
 )
 @click.option(
     "--sort",
-    "-so",
+    "-s",
     default="score",
     type=str,
     help=""
 )
-def res(stype, model, method, sort):
+def res(fname, filt, sort):
     mlog.info("Reading results from %s", resPath)
-    with open(os.path.join(resPath, "results.json"), "r") as f:
+    with open(os.path.join(resPath, fname + ".json"), "r") as f:
         data = json.load(f)
     
     sd = superitems(data)
-    df = pd.DataFrame(sd, columns=["exp","model","lang", "method","wrap","frozen","epochs","stype", "date", "dir", "score"])
-    df.to_csv(os.path.join(resPath, "table_all.tsv"), sep="\t", index = False)
-    if stype == "all":
-        print(df)
+    if fname == "results":
+        df = pd.DataFrame(sd, columns=["exp","model","lang", "method","wrap","frozen","epochs","stype", "date", "dir", "score"])
+    elif fname == "full_results":
+        df = pd.DataFrame(sd, columns=["qid","exp","model","lang", "method","wrap","frozen","epochs","date", "field", "text"])
+
+    out = f"table_{fname}.tsv"
+    df.to_csv(os.path.join(resPath, out), sep="\t", index = False)
+    print(df.head())
+    if filt == "all":
+        print(out)
         return
-    df = df[df["stype"] == stype]
-    del df["stype"] 
-    if sort:
+    if not "=" in filt:
+        raise ValueError("Filter must have = in it")
+    sels = filt.split(";")
+    print("sels:", sels)
+    vals = []
+    cols = []
+    for sel in sels:
+        col, val = sel.split("=")
+        val = val.strip()
+        col = col.strip()
+        cols.append(col)
+        vals.append(val)
+    print("cols:", cols)
+    print("vals:", vals)
+    df = df[eval(" | ".join(["(df['{0}'] == '{1}')".format(col, val) 
+           for col, cond in zip(cols, vals)]))] 
+    del df[col] 
+    if sort and sort in df:
         df = df.sort_values(by=[sort], ascending=False)
-    df.to_csv(os.path.join(resPath, f"table_{stype}.tsv"), sep="\t", index = False)
-    print(df)
+    out = f"table_{col}_{val}.tsv"
+    df.to_csv(os.path.join(resPath, out), sep="\t", index = False)
+    print("saved at ", out)
+    print(df.head())
 
 if __name__ == "__main__":
    run()
