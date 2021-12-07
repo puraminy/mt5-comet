@@ -513,7 +513,10 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
        ex_qtemp = ""
        ex_anstemp = ""
        context = "{xIntent} {xAttr} {xNeed} {xReact} {oReact} {xWant} {oWant} {xEffect} {oEffect}"
-       if method == "blank":
+       if method == "bart":
+           qtemp = "{event} {rel} [GEN]"
+           anstemp = "{resp}"
+       elif method == "blank":
            qtemp = "{event} {rel_natural} {resp}"
            anstemp = "blank"
        elif method == "pred-emb":
