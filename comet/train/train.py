@@ -1238,7 +1238,6 @@ def translate(model, tokenizer, df, trans_col, path, logger=None, start=0, save_
             mlog.info("Saving at %s", p)
             mlog.info("Len trans: %s", len(trans))
             new_df = pd.DataFrame(data=trans) 
-            trans = []
             first = False
             new_df.to_csv(p, sep="\t", index=False)
         ii += 1
