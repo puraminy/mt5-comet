@@ -1,6 +1,7 @@
 import curses as cur
 from curses import wrapper
 import click
+import numpy as np
 import os
 from pathlib import Path
 import pandas as pd
@@ -148,6 +149,14 @@ def show_df(df):
             canceled, col = list_values(sel_cols, si=int(char))
             if not canceled:
                 sel_cols = order(sel_cols, [col],int(char))
+        elif char in ["e","E"]:
+            canceled, col = list_values(sel_cols)
+            if not canceled:
+                refresh()
+                new_val = rowinput()
+                if new_val:
+                    df.at[sel_row, col] = new_val
+                    char = "SS"
         elif char in ["a", "A"]:
             canceled, col, val = list_df_values(df, get_val=False)
             if not canceled:
@@ -164,7 +173,7 @@ def show_df(df):
         elif char == "j":
             canceled, col = list_values(info_cols)
             if not canceled:
-                pos = myinput("pos:","")
+                pos = rowinput("pos:","")
                 if pos:
                     info_cols.remove(col)
                     if int(pos) > 0:
@@ -186,7 +195,9 @@ def show_df(df):
             for col in df:
                counts[col] = df[col].nunique()
             df = pd.DataFrame(data=[counts], columns = df.columns)
-        elif char in ["u","U"]: 
+        elif char == "U":
+            df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
+        elif char == "u": 
             sel_cols = back["sel_cols"]
             canceled, col = list_values(sel_cols)
             back_df = back["df"]
@@ -212,7 +223,7 @@ def show_df(df):
                 if col in df:
                     df = df.drop(df[df[col] == val].index)
                 if char == "D":
-                    char = "S"
+                    char = "SS"
         elif char in ["m","M"]:
             cond = ""
             canceled = False
@@ -252,24 +263,45 @@ def show_df(df):
                 if cmd.isnumeric():
                     col_widths[col] = int(cmd)
                     save_obj(col_widths, "widths", dfname)
+        elif char == "/":
+            search = rowinput("/")
+            mask = np.column_stack([df[col].str.contains(search, na=False) for col in df])
+            sel_row = df.loc[mask.any(axis=1)].index[0]
+        elif char == ":":
+            cmd = rowinput()
+            if cmd.isnumeric():
+                sel_row = int(cmd)
         elif not char in ["q", "S","r"]:
             mbeep()
         if char == "S":
             cmd, _ = minput(cmd_win, 0, 1, "File Name=", default=dfname, all_chars=True)
             if cmd != "<ESC>":
                 dfname = cmd
-                df.to_csv(os.path.join(base_dir, cmd+".tsv"), sep="\t", index=False)
+                char = "SS"
+        if char == "SS":
+                df.to_csv(os.path.join(base_dir, dfname+".tsv"), sep="\t", index=False)
                 save_obj(dfname, "dfname", dfname)
-        elif char == "r":
+        if char == "r":
             df = main_df
             sel_cols = list(df.columns)
             info_cols = []
-        elif char == "b" and back:
+        if char == "b" and back:
             df = back["df"] 
             sel_cols = back["sel_cols"] 
             info_cols = back["info_cols"]
 
-def myinput(prompt=":", default=""):
+def biginput(prompt=":", default=""):
+    rows, cols = std.getmaxyx()
+    win = cur.newwin(12, cols - 10, 5, 5)
+    _default = ""
+    win.bkgd(' ', cur.color_pair(CUR_ITEM_COLOR))  # | cur.A_REVERSE)
+    _comment, ret_ch = minput(win, 0, 0, "Enter text", 
+            default=_default, mode =MULTI_LINE)
+    if _comment == "<ESC>":
+        _comment = ""
+    return _comment
+
+def rowinput(prompt=":", default=""):
     cmd, _ = minput(cmd_win, 0, 1, prompt, default=default, all_chars=True)
     if cmd == "<ESC>":
         cmd = ""
@@ -357,20 +389,30 @@ def start(stdscr):
     theme = {'preset': 'default', "sep1": "colors", 'text-color': '247', 'back-color': '233', 'item-color': '71','cur-item-color': '251', 'sel-item-color': '33', 'title-color': '28', "sep2": "reading mode",           "dim-color": '241', 'bright-color':"251", "highlight-color": '236', "hl-text-color": "250", "inverse-highlight": "True", "bold-highlight": "True", "bold-text": "False", "input-color":"234", "sep5": "Feedback Colors"}
 
     reset_colors(theme)
-    fname = load_obj("dfname","","")
-    if fname:
+    if not dfname:
+        fname = load_obj("dfname","","")
         dfname = fname
-        df = pd.read_table(os.path.join(base_dir, dfname + ".tsv"))
-        df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
+    if not dfname:
+        mlog.info("No file name provided")
     else:
-        df = load_results(dfname)
-    show_df(df)
+        path = os.path.join(base_dir, dfname + ".tsv")
+        if Path(path).exists():
+            df = pd.read_table(os.path.join(base_dir, dfname + ".tsv"))
+            df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
+            show_df(df)
+        else:
+            path = os.path.join(base_dir, dfname + ".json")
+            if Path(path).exists():
+                df = load_results(dfname)
+                show_df(df)
+            else:
+                mlog.info("No tsv or json file was found")
 
 @click.command()
 @click.option(
     "--fname",
     "-f",
-    default="full_results",
+    default="",
     type=str,
     help=""
 )
