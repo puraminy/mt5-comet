@@ -1207,6 +1207,9 @@ def translate(model, tokenizer, df, trans_col, path, logger=None, start=0, save_
     pbar = tqdm(total= len(df))
     oldcol, newcol,save_step = trans_col.split("@")
     newcol = oldcol + "_" + newcol
+    if newcol in df:
+        mlog.info("column %s already exists... skipping", newcol)
+        return
     save_step = int(save_step)
     trans = []
     mlog.info("len(df): %s", len(df))
