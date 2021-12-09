@@ -59,6 +59,8 @@ def show_df(df):
         col_widths = {"qid":5, "model":30, "pred_text1":30, "epochs":30, "date":30, "rouge_score":7, "bert_score":7, "input_text":50}
 
     store_back = False
+    edit_col = ""
+    consts = {}
     while ch != ord("q"):
         text_win.erase()
         left = min(left, max_col  - width)
@@ -107,9 +109,9 @@ def show_df(df):
                 _info = f"Mean {c}:" + "{:.2f}".format(mean)
             infos.append(_info)
         infos.append("-------------------------")
-        stats = ["> " + str(len(df))]
-        for stat in stats:
-            infos.append(stat)
+        consts["len"] = str(len(df))
+        for key,val in consts.items():
+            infos.append("{:<5}:{}".format(key,val))
         change_info(infos)
 
         if store_back:
@@ -150,12 +152,16 @@ def show_df(df):
             if not canceled:
                 sel_cols = order(sel_cols, [col],int(char))
         elif char in ["e","E"]:
-            canceled, col = list_values(sel_cols)
-            if not canceled:
-                refresh()
+            if not edit_col or char == "E":
+                canceled, col = list_values(sel_cols)
+                if not canceled:
+                    edit_col = col
+                    consts["edit col"] = edit_col
+                    refresh()
+            if edit_col:
                 new_val = rowinput()
                 if new_val:
-                    df.at[sel_row, col] = new_val
+                    df.at[sel_row, edit_col] = new_val
                     char = "SS"
         elif char in ["a", "A"]:
             canceled, col, val = list_df_values(df, get_val=False)
@@ -330,7 +336,7 @@ def list_values(vals,si=0, sels=[]):
     if si == 0:
         if key in si_hash:
             si = si_hash[key]
-    vals.insert(0,"DONE!")
+    if not "Done!" in vals: vals.insert(0,"Done!")
     opts = {"items":{"sels":sels, "range":vals}}
     is_cancled = True
     si,canceled, _ = open_submenu(tag_win, opts, "items", si, "Select a value", std)
