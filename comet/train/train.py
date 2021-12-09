@@ -727,7 +727,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
             model.to(device=device)
             logger = tlog 
             mlog.info("Translating %s", path)
-            tans_df = translate(model, tokenizer, df, "target_text@fa@5000", path, logger, start, load_path) 
+            trans_df = translate(model, tokenizer, df, "target_text@fa@5000", path, logger, start, load_path) 
             translate(model, tokenizer, trans_df, "input_text@fa@5000", path, logger, start, load_path) 
         return
     
