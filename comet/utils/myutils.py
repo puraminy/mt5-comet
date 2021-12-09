@@ -1,10 +1,15 @@
+def myconv(obj):
+    if type(obj) == str:
+        obj = obj.replace("\n"," ")
+        obj = obj.strip()
+    return obj
 def superitems(obj):
     if isinstance(obj, dict):
         for k, v in obj.items():
             for i in superitems(v):
                 yield (k,) + i
     else:
-        yield (obj,)
+        yield (myconv(obj),)
 
 def toPers(per):
     per = per.replace("PersonX's", "خود")

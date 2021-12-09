@@ -727,7 +727,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
                 continue
             logger = tlog 
             mlog.info("Translating %", pth)
-            translate(model, tokenizer, df, trans, path, logger, start, load_path) 
+            translate(model, tokenizer, df, "target_text@fa@5000", path, logger, start, load_path) 
+            translate(model, tokenizer, df, "input_text@fa@5000", path, logger, start, load_path) 
         return
     
     model, tokenizer = load_model(model_id, underlying_model_name)
@@ -1244,72 +1245,7 @@ def translate(model, tokenizer, df, trans_col, path, logger=None, start=0, save_
     df.to_csv(p, sep="\t", index=False)
 
 
-def myconv(obj):
-    return obj
 
-
-@run.command()
-@click.option(
-    "--fname",
-    "-f",
-    default="results",
-    type=str,
-    help=""
-)
-@click.option(
-    "--filt",
-    "-filt",
-    default="all",
-    type=str,
-    help="filter"
-)
-@click.option(
-    "--sort",
-    "-s",
-    default="score",
-    type=str,
-    help=""
-)
-def res(fname, filt, sort):
-    mlog.info("Reading results from %s", resPath)
-    with open(os.path.join(resPath, fname + ".json"), "r") as f:
-        data = json.load(f)
-    
-    sd = superitems(data)
-    if fname == "results":
-        df = pd.DataFrame(sd, columns=["exp","model","lang", "method","wrap","frozen","epochs","stype", "date", "dir", "score"])
-    elif fname == "full_results":
-        df = pd.DataFrame(sd, columns=["qid","exp","model","lang", "method","wrap","frozen","epochs","date", "field", "text"])
-
-    out = f"table_{fname}.tsv"
-    df.to_csv(os.path.join(resPath, out), sep="\t", index = False)
-    print(df.head())
-    if filt == "all":
-        print(out)
-        return
-    if not "=" in filt:
-        raise ValueError("Filter must have = in it")
-    sels = filt.split(";")
-    print("sels:", sels)
-    vals = []
-    cols = []
-    for sel in sels:
-        col, val = sel.split("=")
-        val = val.strip()
-        col = col.strip()
-        cols.append(col)
-        vals.append(val)
-    print("cols:", cols)
-    print("vals:", vals)
-    df = df[eval(" | ".join(["(df['{0}'] == '{1}')".format(col, val) 
-           for col, cond in zip(cols, vals)]))] 
-    del df[col] 
-    if sort and sort in df:
-        df = df.sort_values(by=[sort], ascending=False)
-    out = f"table_{col}_{val}.tsv"
-    df.to_csv(os.path.join(resPath, out), sep="\t", index = False)
-    print("saved at ", out)
-    print(df.head())
 
 if __name__ == "__main__":
    run()
