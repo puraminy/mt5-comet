@@ -726,7 +726,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
             if do_eval and split_name == "train":
                 continue
             logger = tlog 
-            mlog.info("Translating %", pth)
+            mlog.info("Translating %", path)
             translate(model, tokenizer, df, "target_text@fa@5000", path, logger, start, load_path) 
             translate(model, tokenizer, df, "input_text@fa@5000", path, logger, start, load_path) 
         return
