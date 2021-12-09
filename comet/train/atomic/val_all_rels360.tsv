@@ -1,0 +1,361 @@
+Unnamed: 0	prefix	input_text	target_text
+9627	oEffect	PersonX accepts PersonY invitation	PersonY smiles
+9622	oReact	PersonX accepts PersonY invitation	happy invitation was accepted
+9638	oWant	PersonX accepts PersonY invitation	wait for engagement
+9659	xAttr	PersonX accepts PersonY invitation	polite
+9636	xEffect	PersonX accepts PersonY invitation	goes to party
+9624	xIntent	PersonX accepts PersonY invitation	to gain person's friendship
+9640	xNeed	PersonX accepts PersonY invitation	be invited by PersonY
+9620	xReact	PersonX accepts PersonY invitation	good
+9641	xWant	PersonX accepts PersonY invitation	go to engagement
+11730	oEffect	PersonX accepts PersonY offer	get item they bought
+11714	oReact	PersonX accepts PersonY offer	giving
+11734	oWant	PersonX accepts PersonY offer	they want to congratulate PersonX
+11746	xAttr	PersonX accepts PersonY offer	resourceful
+11732	xEffect	PersonX accepts PersonY offer	gives person y item
+11718	xIntent	PersonX accepts PersonY offer	job
+11742	xNeed	PersonX accepts PersonY offer	to find the good offer
+11716	xReact	PersonX accepts PersonY offer	grateful
+11743	xWant	PersonX accepts PersonY offer	to discuss with personY
+17121	oEffect	PersonX accepts PersonY's offer	signs papers
+17107	oReact	PersonX accepts PersonY's offer	satisfied.
+17129	oWant	PersonX accepts PersonY's offer	to hand over the goods
+17148	xAttr	PersonX accepts PersonY's offer	concilliatory
+17122	xEffect	PersonX accepts PersonY's offer	shake hands
+17108	xIntent	PersonX accepts PersonY's offer	to obtain something.
+17135	xNeed	PersonX accepts PersonY's offer	to meet with person Y
+17106	xReact	PersonX accepts PersonY's offer	satisfied with the offer
+17131	xWant	PersonX accepts PersonY's offer	to pay money
+48018	oEffect	PersonX accepts happily	instructs PersonX
+48009	oReact	PersonX accepts happily	glad
+48031	oWant	PersonX accepts happily	work together
+48042	xAttr	PersonX accepts happily	humble
+48021	xEffect	PersonX accepts happily	thanks someone
+48013	xIntent	PersonX accepts happily	to take the opportunity
+48025	xNeed	PersonX accepts happily	to be invited
+48011	xReact	PersonX accepts happily	grateful
+48027	xWant	PersonX accepts happily	to enjoy themself
+44783	oEffect	PersonX accepts the offer	they get new co-worker
+44767	oReact	PersonX accepts the offer	happy that their offer has been accepted
+44787	oWant	PersonX accepts the offer	shake hands
+44799	xAttr	PersonX accepts the offer	content
+44785	xEffect	PersonX accepts the offer	gets higher salary
+44765	xIntent	PersonX accepts the offer	the job
+44796	xNeed	PersonX accepts the offer	to determine whether the offer is good
+44766	xReact	PersonX accepts the offer	happy
+44797	xWant	PersonX accepts the offer	to shake their hand
+30082	oEffect	PersonX achieves PersonY objective	inspire
+30069	oReact	PersonX achieves PersonY objective	good
+30089	oWant	PersonX achieves PersonY objective	See what personX did
+30102	xAttr	PersonX achieves PersonY objective	diligent
+30084	xEffect	PersonX achieves PersonY objective	gets rewarded
+30070	xIntent	PersonX achieves PersonY objective	to succeed for their boss
+30086	xNeed	PersonX achieves PersonY objective	to get his permission
+30071	xReact	PersonX achieves PersonY objective	strong
+30091	xWant	PersonX achieves PersonY objective	show personY how
+66142	oEffect	PersonX affects PersonY's interests	lose money
+66135	oReact	PersonX affects PersonY's interests	helped
+66155	oWant	PersonX affects PersonY's interests	to progress
+66163	xAttr	PersonX affects PersonY's interests	well-known
+66140	xEffect	PersonX affects PersonY's interests	receives reaction
+66136	xIntent	PersonX affects PersonY's interests	to motivate more
+66157	xNeed	PersonX affects PersonY's interests	to decide the fate of persony
+66137	xReact	PersonX affects PersonY's interests	happy
+66159	xWant	PersonX affects PersonY's interests	to aid persony
+436	oEffect	PersonX affects children 's ___	learns to behave
+433	oReact	PersonX affects children 's ___	unhappy
+460	oWant	PersonX affects children 's ___	to learn
+466	xAttr	PersonX affects children 's ___	guilty
+438	xEffect	PersonX affects children 's ___	gains respect
+431	xIntent	PersonX affects children 's ___	i like to very satisfied
+463	xNeed	PersonX affects children 's ___	to teach well
+435	xReact	PersonX affects children 's ___	bad
+464	xWant	PersonX affects children 's ___	to help more
+4072	oEffect	PersonX affords PersonY every ___	They are successful
+4069	oReact	PersonX affords PersonY every ___	grateful
+4079	oWant	PersonX affords PersonY every ___	to express his gratitude
+4095	xAttr	PersonX affords PersonY every ___	generous
+4077	xEffect	PersonX affords PersonY every ___	loses opportunity
+4066	xIntent	PersonX affords PersonY every ___	job facility in good
+4080	xNeed	PersonX affords PersonY every ___	to get money for it
+4067	xReact	PersonX affords PersonY every ___	happy
+4082	xWant	PersonX affords PersonY every ___	to utilise his talents
+30805	oEffect	PersonX affords PersonY protection	is safer
+30794	oReact	PersonX affords PersonY protection	like someone cares about them.
+30814	oWant	PersonX affords PersonY protection	to know they are secure
+30820	xAttr	PersonX affords PersonY protection	helpful
+30807	xEffect	PersonX affords PersonY protection	spends money
+30792	xIntent	PersonX affords PersonY protection	to help person y
+30817	xNeed	PersonX affords PersonY protection	to research for PersonY
+30793	xReact	PersonX affords PersonY protection	relieved
+30819	xWant	PersonX affords PersonY protection	to write up a contract
+70753	oEffect	PersonX agrees to the challenge	Sweats
+70741	oReact	PersonX agrees to the challenge	anxious too
+70774	oWant	PersonX agrees to the challenge	to win the challenge
+70782	xAttr	PersonX agrees to the challenge	eager
+70762	xEffect	PersonX agrees to the challenge	their muscles are sore
+70750	xIntent	PersonX agrees to the challenge	to conquer something
+70776	xNeed	PersonX agrees to the challenge	to determine the correct response
+70751	xReact	PersonX agrees to the challenge	accomplished
+70778	xWant	PersonX agrees to the challenge	to win the challenge
+31279	oEffect	PersonX amends PersonY act	person y says thank you
+31273	oReact	PersonX amends PersonY act	grateful
+31299	oWant	PersonX amends PersonY act	to talk about the amendment
+31308	xAttr	PersonX amends PersonY act	Smart
+31278	xEffect	PersonX amends PersonY act	Gets hired
+31274	xIntent	PersonX amends PersonY act	to fix the act.
+31301	xNeed	PersonX amends PersonY act	to get a pen
+31275	xReact	PersonX amends PersonY act	responsible
+31303	xWant	PersonX amends PersonY act	to mail a copy
+8777	oEffect	PersonX answers PersonY question	hear's the answer
+8765	oReact	PersonX answers PersonY question	happy that x was willing to help.
+8785	oWant	PersonX answers PersonY question	ask a question also
+8806	xAttr	PersonX answers PersonY question	Articulate
+8776	xEffect	PersonX answers PersonY question	nods head
+8762	xIntent	PersonX answers PersonY question	share knowledge
+8793	xNeed	PersonX answers PersonY question	to listen to a question
+8764	xReact	PersonX answers PersonY question	good
+8799	xWant	PersonX answers PersonY question	to explain
+73482	oEffect	PersonX answers PersonY's letter	has to open the correspondence
+73479	oReact	PersonX answers PersonY's letter	amused
+73490	oWant	PersonX answers PersonY's letter	to read it
+73510	xAttr	PersonX answers PersonY's letter	kind
+73484	xEffect	PersonX answers PersonY's letter	must send or mail it
+73477	xIntent	PersonX answers PersonY's letter	to reply
+73492	xNeed	PersonX answers PersonY's letter	to of read it
+73475	xReact	PersonX answers PersonY's letter	happy
+73493	xWant	PersonX answers PersonY's letter	to send it
+44880	oEffect	PersonX answers the door	makes eye contact
+44874	oReact	PersonX answers the door	joyful
+44901	oWant	PersonX answers the door	talk to PersonX
+44910	xAttr	PersonX answers the door	cautious
+44882	xEffect	PersonX answers the door	PersonX opens door
+44878	xIntent	PersonX answers the door	to see who is at the door
+44896	xNeed	PersonX answers the door	to peep through the peephole
+44879	xReact	PersonX answers the door	surprised
+44906	xWant	PersonX answers the door	go back inside
+53443	oEffect	PersonX arranges a date	get into a new romantic relationship
+53435	oReact	PersonX arranges a date	kinship
+53458	oWant	PersonX arranges a date	enjoy a movie.
+53475	xAttr	PersonX arranges a date	thorough
+53445	xEffect	PersonX arranges a date	establishes a new love connection
+53436	xIntent	PersonX arranges a date	to help their friend
+53457	xNeed	PersonX arranges a date	Make the appointment
+53440	xReact	PersonX arranges a date	eager
+53463	xWant	PersonX arranges a date	to get to know someone.
+32140	oEffect	PersonX asks PersonX's boyfriend	gets engaged
+32134	oReact	PersonX asks PersonX's boyfriend	good
+32145	oWant	PersonX asks PersonX's boyfriend	to assess the situation
+32160	xAttr	PersonX asks PersonX's boyfriend	courteous
+32142	xEffect	PersonX asks PersonX's boyfriend	gets engaged
+32132	xIntent	PersonX asks PersonX's boyfriend	to know the truth
+32147	xNeed	PersonX asks PersonX's boyfriend	to open their contacts file
+32133	xReact	PersonX asks PersonX's boyfriend	horrible
+32152	xWant	PersonX asks PersonX's boyfriend	go to the movies
+33762	oEffect	PersonX asks PersonX's grandma	shows love for personX
+33751	oReact	PersonX asks PersonX's grandma	happy.
+33768	oWant	PersonX asks PersonX's grandma	to call and check about whether their advice worked out
+33786	xAttr	PersonX asks PersonX's grandma	inquisitive
+33764	xEffect	PersonX asks PersonX's grandma	thanks his grandma
+33752	xIntent	PersonX asks PersonX's grandma	to visit her.
+33781	xNeed	PersonX asks PersonX's grandma	to have a question for grandma
+33753	xReact	PersonX asks PersonX's grandma	good.
+33770	xWant	PersonX asks PersonX's grandma	to try out their grandma's advice
+76323	oEffect	PersonX asks PersonX's mother for help	hugged
+76311	oReact	PersonX asks PersonX's mother for help	happy willing
+76327	oWant	PersonX asks PersonX's mother for help	to tell PersonX to do it themselves
+76344	xAttr	PersonX asks PersonX's mother for help	needy
+76321	xEffect	PersonX asks PersonX's mother for help	is told to help themselves
+76312	xIntent	PersonX asks PersonX's mother for help	help
+76328	xNeed	PersonX asks PersonX's mother for help	to spot his mother
+76313	xReact	PersonX asks PersonX's mother for help	hopeful
+76330	xWant	PersonX asks PersonX's mother for help	to wait for help
+12069	oEffect	PersonX asks PersonY to go	PersonY goes away from PersonX
+12060	oReact	PersonX asks PersonY to go	nice
+12076	oWant	PersonX asks PersonY to go	to go to dinner.
+12082	xAttr	PersonX asks PersonY to go	needy
+12071	xEffect	PersonX asks PersonY to go	feels bothered.
+12062	xIntent	PersonX asks PersonY to go	to do work
+12078	xNeed	PersonX asks PersonY to go	to know PersonY
+12064	xReact	PersonX asks PersonY to go	happy
+12080	xWant	PersonX asks PersonY to go	to drive them home.
+10653	oEffect	PersonX asks PersonY to make	gets publicity
+10640	oReact	PersonX asks PersonY to make	grateful
+10657	oWant	PersonX asks PersonY to make	to consider PersonX's request
+10678	xAttr	PersonX asks PersonY to make	money
+10654	xEffect	PersonX asks PersonY to make	waits
+10647	xIntent	PersonX asks PersonY to make	support
+10658	xNeed	PersonX asks PersonY to make	to get PersonY's attention
+10644	xReact	PersonX asks PersonY to make	grateful
+10667	xWant	PersonX asks PersonY to make	to look at what PersonY made
+29313	oEffect	PersonX asks PersonY to play	says thank you
+29306	oReact	PersonX asks PersonY to play	excited
+29325	oWant	PersonX asks PersonY to play	to play
+29338	xAttr	PersonX asks PersonY to play	active
+29318	xEffect	PersonX asks PersonY to play	talks
+29308	xIntent	PersonX asks PersonY to play	to have fun
+29327	xNeed	PersonX asks PersonY to play	go to PersonY house
+29310	xReact	PersonX asks PersonY to play	happy
+29329	xWant	PersonX asks PersonY to play	to play a video game.
+68392	oEffect	PersonX asks PersonY to say	Tremble due to nerves
+68378	oReact	PersonX asks PersonY to say	helpful
+68402	oWant	PersonX asks PersonY to say	to congratulate the married couple
+68418	xAttr	PersonX asks PersonY to say	friendly
+68394	xEffect	PersonX asks PersonY to say	Do not hear y say it
+68386	xIntent	PersonX asks PersonY to say	to be helpful
+68409	xNeed	PersonX asks PersonY to say	to be talking to him
+68389	xReact	PersonX asks PersonY to say	helpful
+68401	xWant	PersonX asks PersonY to say	to influence PersonY
+27417	oEffect	PersonX asks PersonY to show	person Y agrees
+27411	oReact	PersonX asks PersonY to show	humiliated
+27421	oWant	PersonX asks PersonY to show	to tell PersonX they will show another day.
+27439	xAttr	PersonX asks PersonY to show	interested
+27416	xEffect	PersonX asks PersonY to show	gets denied
+27412	xIntent	PersonX asks PersonY to show	to clarify his doubts
+27430	xNeed	PersonX asks PersonY to show	to approach PersonY
+27413	xReact	PersonX asks PersonY to show	relieved that his doubts are cleared
+27431	xWant	PersonX asks PersonY to show	to watch PersonY
+33800	oEffect	PersonX asks PersonY's grandma	is touched
+33791	oReact	PersonX asks PersonY's grandma	appreciated.
+33814	oWant	PersonX asks PersonY's grandma	to be happy that permission was granted
+33827	xAttr	PersonX asks PersonY's grandma	amiable
+33798	xEffect	PersonX asks PersonY's grandma	gets an answer
+33795	xIntent	PersonX asks PersonY's grandma	to ask with person y's grandmother
+33816	xNeed	PersonX asks PersonY's grandma	cllas person y's grandma on the phone
+33790	xReact	PersonX asks PersonY's grandma	happy
+33812	xWant	PersonX asks PersonY's grandma	Check how Person Y's grandma responds
+15675	oEffect	PersonX asks PersonY's mother	gives answer
+15669	oReact	PersonX asks PersonY's mother	happy too.
+15687	oWant	PersonX asks PersonY's mother	help personX
+15698	xAttr	PersonX asks PersonY's mother	polite
+15679	xEffect	PersonX asks PersonY's mother	is nervous
+15670	xIntent	PersonX asks PersonY's mother	to go shopping with person.
+15688	xNeed	PersonX asks PersonY's mother	call mother
+15671	xReact	PersonX asks PersonY's mother	happy.
+15690	xWant	PersonX asks PersonY's mother	see mother's response
+34651	oEffect	PersonX asks PersonY's mother for help	becomes agitated
+34643	oReact	PersonX asks PersonY's mother for help	wanted
+34655	oWant	PersonX asks PersonY's mother for help	to know the problem
+34674	xAttr	PersonX asks PersonY's mother for help	resourceful
+34653	xEffect	PersonX asks PersonY's mother for help	receives assitance
+34647	xIntent	PersonX asks PersonY's mother for help	to get support
+34670	xNeed	PersonX asks PersonY's mother for help	To be knowing Y’s mother
+34650	xReact	PersonX asks PersonY's mother for help	worried
+34672	xWant	PersonX asks PersonY's mother for help	To complete assignment
+73678	oEffect	PersonX asks PersonY's teacher	Teacher thinks deeply to not provide private information to PersonX
+73675	oReact	PersonX asks PersonY's teacher	helpful.
+73685	oWant	PersonX asks PersonY's teacher	answer questions
+73697	xAttr	PersonX asks PersonY's teacher	curious
+73681	xEffect	PersonX asks PersonY's teacher	PersonX thanks the teacher
+73676	xIntent	PersonX asks PersonY's teacher	to get information.
+73694	xNeed	PersonX asks PersonY's teacher	contact the teacher
+73677	xReact	PersonX asks PersonY's teacher	happy.
+73689	xWant	PersonX asks PersonY's teacher	ask the teacher questions
+41755	oEffect	PersonX asks ___ if PersonY could have one	becomes grateful to PersonX
+41742	oReact	PersonX asks ___ if PersonY could have one	annoyed
+41773	oWant	PersonX asks ___ if PersonY could have one	to determine what they deserve
+41783	xAttr	PersonX asks ___ if PersonY could have one	hesitant
+41756	xEffect	PersonX asks ___ if PersonY could have one	is thanked
+41743	xIntent	PersonX asks ___ if PersonY could have one	to help
+41775	xNeed	PersonX asks ___ if PersonY could have one	to speak for PersonY
+41744	xReact	PersonX asks ___ if PersonY could have one	helpful
+41776	xWant	PersonX asks ___ if PersonY could have one	to get an answer
+25737	oEffect	PersonX asks for the moon	look at the stars
+25731	oReact	PersonX asks for the moon	cautious
+25753	oWant	PersonX asks for the moon	to talk x to their senses
+25758	xAttr	PersonX asks for the moon	impractical
+25740	xEffect	PersonX asks for the moon	He went outside
+25732	xIntent	PersonX asks for the moon	to be greedy
+25749	xNeed	PersonX asks for the moon	to be high maintenance
+25733	xReact	PersonX asks for the moon	ashamed
+25756	xWant	PersonX asks for the moon	more than they deserve
+39970	oEffect	PersonX asks if PersonY was okay	PersonY communicates their issue to PersonX
+39960	oReact	PersonX asks if PersonY was okay	sad
+39980	oWant	PersonX asks if PersonY was okay	to call for medical help
+39987	xAttr	PersonX asks if PersonY was okay	questioning
+39972	xEffect	PersonX asks if PersonY was okay	listens to PersonY's voice
+39961	xIntent	PersonX asks if PersonY was okay	to gain knowledge
+39982	xNeed	PersonX asks if PersonY was okay	to approach PersonY
+39963	xReact	PersonX asks if PersonY was okay	worried about persony
+39984	xWant	PersonX asks if PersonY was okay	to call for medical help
+50078	oEffect	PersonX asks to go home	evaluates if they should let X go home
+50072	oReact	PersonX asks to go home	helpful
+50094	oWant	PersonX asks to go home	to give PersonX permission to leave
+50101	xAttr	PersonX asks to go home	tired
+50080	xEffect	PersonX asks to go home	waits for answer
+50073	xIntent	PersonX asks to go home	to go rest
+50087	xNeed	PersonX asks to go home	to be ill
+50074	xReact	PersonX asks to go home	satisfied
+50088	xWant	PersonX asks to go home	to take rest
+51295	oEffect	PersonX asks to play	thinks if they need to do anything else
+51288	oReact	PersonX asks to play	glad
+51299	oWant	PersonX asks to play	assign teams
+51319	xAttr	PersonX asks to play	curious
+51297	xEffect	PersonX asks to play	thinks of fun things to do
+51283	xIntent	PersonX asks to play	to relax  his mind
+51300	xNeed	PersonX asks to play	walk outside
+51287	xReact	PersonX asks to play	happy
+51302	xWant	PersonX asks to play	join game
+27681	oEffect	PersonX attends PersonY school	Person Y is happy.
+27672	oReact	PersonX attends PersonY school	prepared
+27706	oWant	PersonX attends PersonY school	to make PersonX carry their bag
+27720	xAttr	PersonX attends PersonY school	curious
+27684	xEffect	PersonX attends PersonY school	He meets Person Y.
+27673	xIntent	PersonX attends PersonY school	an education
+27695	xNeed	PersonX attends PersonY school	to get books
+27677	xReact	PersonX attends PersonY school	tired
+27708	xWant	PersonX attends PersonY school	to be friends with PersonY
+33041	oEffect	PersonX babysits PersonX's nephew	has fun
+33037	oReact	PersonX babysits PersonX's nephew	loved
+33053	oWant	PersonX babysits PersonX's nephew	to thank them
+33066	xAttr	PersonX babysits PersonX's nephew	careful
+33043	xEffect	PersonX babysits PersonX's nephew	earns money
+33038	xIntent	PersonX babysits PersonX's nephew	to help a sibling
+33061	xNeed	PersonX babysits PersonX's nephew	to be available
+33036	xReact	PersonX babysits PersonX's nephew	helpful
+33064	xWant	PersonX babysits PersonX's nephew	to ask their sibling a favor
+32796	oEffect	PersonX babysits PersonY's nephew	they do something interesting
+32789	oReact	PersonX babysits PersonY's nephew	exhausted
+32803	oWant	PersonX babysits PersonY's nephew	to get rid of him
+32819	xAttr	PersonX babysits PersonY's nephew	patient
+32798	xEffect	PersonX babysits PersonY's nephew	gets interested in parenthood
+32787	xIntent	PersonX babysits PersonY's nephew	to make extra money.
+32804	xNeed	PersonX babysits PersonY's nephew	to get babyfood ready
+32788	xReact	PersonX babysits PersonY's nephew	happy.
+32806	xWant	PersonX babysits PersonY's nephew	to quit baby sitting
+1214	oEffect	PersonX bears ___ unto the PersonY	person y runs away
+1210	oReact	PersonX bears ___ unto the PersonY	appreciative
+1234	oWant	PersonX bears ___ unto the PersonY	To be treated fairly
+1241	xAttr	PersonX bears ___ unto the PersonY	Helpful
+1220	xEffect	PersonX bears ___ unto the PersonY	they are more sympathetic to those who are struggling
+1211	xIntent	PersonX bears ___ unto the PersonY	persony to be believed
+1230	xNeed	PersonX bears ___ unto the PersonY	to see that he will not get into trouble
+1213	xReact	PersonX bears ___ unto the PersonY	hopeful
+1237	xWant	PersonX bears ___ unto the PersonY	To provide reliable testimony
+11554	oEffect	PersonX becomes PersonY wife	unite
+11540	oReact	PersonX becomes PersonY wife	also happy
+11565	oWant	PersonX becomes PersonY wife	to buy a house together
+11571	xAttr	PersonX becomes PersonY wife	committed
+11556	xEffect	PersonX becomes PersonY wife	marries
+11538	xIntent	PersonX becomes PersonY wife	to be becomes
+11568	xNeed	PersonX becomes PersonY wife	to get a ring for PersonY
+11539	xReact	PersonX becomes PersonY wife	happy
+11569	xWant	PersonX becomes PersonY wife	to go on a honeymoon
+12597	oEffect	PersonX becomes PersonY's wife	becomes closer to personX
+12586	oReact	PersonX becomes PersonY's wife	happy
+12602	oWant	PersonX becomes PersonY's wife	To live with X
+12620	xAttr	PersonX becomes PersonY's wife	proud
+12599	xEffect	PersonX becomes PersonY's wife	acquires a family
+12584	xIntent	PersonX becomes PersonY's wife	get married
+12603	xNeed	PersonX becomes PersonY's wife	To accept a proposal
+12585	xReact	PersonX becomes PersonY's wife	happy, overjoyed
+12605	xWant	PersonX becomes PersonY's wife	A life partner forever
+59607	oEffect	PersonX begs for food	smiles compassionately at PersonX
+59597	oReact	PersonX begs for food	irritated
+59611	oWant	PersonX begs for food	to be generous
+59628	xAttr	PersonX begs for food	Poor
+59610	xEffect	PersonX begs for food	is given money
+59590	xIntent	PersonX begs for food	to eat
+59622	xNeed	PersonX begs for food	to have no food.
+59591	xReact	PersonX begs for food	ashamed
+59614	xWant	PersonX begs for food	to avoid starvation

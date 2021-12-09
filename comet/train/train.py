@@ -1244,8 +1244,12 @@ def translate(model, tokenizer, df, trans_col, path, logger=None, start=0, save_
         ii += 1
 
     new_df = pd.DataFrame(data=trans) 
-    p = os.path.join(save_path, fname + str(ii).replace("000","k_") + ".tsv")
-    df.to_csv(p, sep="\t", index=False)
+    p1 = os.path.join(save_path,"trans", fname + str(ii).replace("000","k_") + ".tsv")
+    p2 = os.path.join(logPath, fname + str(ii).replace("000","k_") + ".tsv")
+    new_df.to_csv(p1, sep="\t", index=False)
+    new_df.to_csv(p2, sep="\t", index=False)
+    mlog.info("Saved at %s",p1)
+    mlog.info("Saved at %s",p2)
 
 
 
