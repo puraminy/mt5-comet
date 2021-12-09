@@ -727,8 +727,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
             model.to(device=device)
             logger = tlog 
             mlog.info("Translating %s", path)
-            translate(model, tokenizer, df, "target_text@fa@5000", path, logger, start, load_path) 
-            translate(model, tokenizer, df, "input_text@fa@5000", path, logger, start, load_path) 
+            tans_df = translate(model, tokenizer, df, "target_text@fa@5000", path, logger, start, load_path) 
+            translate(model, tokenizer, trans_df, "input_text@fa@5000", path, logger, start, load_path) 
         return
     
     model, tokenizer = load_model(model_id, underlying_model_name)
@@ -1209,7 +1209,7 @@ def translate(model, tokenizer, df, trans_col, path, logger=None, start=0, save_
     newcol = oldcol + "_" + newcol
     if newcol in df:
         mlog.info("column %s already exists... skipping", newcol)
-        return
+        return df
     save_step = int(save_step)
     trans = []
     mlog.info("len(df): %s", len(df))
@@ -1250,6 +1250,8 @@ def translate(model, tokenizer, df, trans_col, path, logger=None, start=0, save_
     mlog.info("Saved at %s",p1)
     new_df.to_csv(p3, sep="\t", index=False)
     mlog.info("Saved at %s",p3)
+
+    return new_df
 
 
 
