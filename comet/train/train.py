@@ -721,12 +721,12 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
         model, tokenizer = load_model(model_id, underlying_model_name)
         for split_name, df in atomic_dataset.items():
             mlog.info("Translating ...%s ", split_name)
-            path = train_path if split_name == "train" else val_path
-            model.to(device=device)
             if do_eval and split_name == "train":
                 continue
+            path = train_path if split_name == "train" else val_path
+            model.to(device=device)
             logger = tlog 
-            mlog.info("Translating %", path)
+            mlog.info("Translating %s", path)
             translate(model, tokenizer, df, "target_text@fa@5000", path, logger, start, load_path) 
             translate(model, tokenizer, df, "input_text@fa@5000", path, logger, start, load_path) 
         return
