@@ -8,7 +8,7 @@ import pandas as pd
 from tqdm import tqdm
 import glob
 import torch
-def bart_score(model, df, before, after, col1, col2, score_co, cpu):
+def bart_score(model, df, before, after, col1, col2, score_col, cpu):
   if after > 0:
     df = df.truncate(before=before, after=after)
   else:

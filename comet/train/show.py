@@ -322,6 +322,8 @@ def show_df(df):
             cmd = rowinput()
             if cmd.isnumeric():
                 sel_row = int(cmd)
+            elif cmd == "q":
+                ch = ord("q")
         elif not char in ["q", "S","r"]:
             mbeep()
         if char == "S":
