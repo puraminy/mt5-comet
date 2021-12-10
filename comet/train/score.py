@@ -161,7 +161,7 @@ def main(fname, model_id, path, step, col1, col2, score_col, cpu, concat):
 
     out1 = resPath + "/"+ score_col + "_" + col1 + "_" + Path(fname).stem  + ".tsv" 
     out2 = logPath + "/"+ score_col + "_" + col1 + "_" + Path(fname).stem  + ".tsv" 
-    print(out)
+    print(out1)
     print(len(df))
     df.to_csv(out1, sep="\t", index=False)
     df.to_csv(out2, sep="\t", index=False)
