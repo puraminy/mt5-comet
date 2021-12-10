@@ -8,20 +8,23 @@ import pandas as pd
 from nodcast.util.util import *
 from comet.train.common import *
 
-def load_results(fname):
-    with open(os.path.join(base_dir, fname + ".json"), "r") as f:
+def load_results(path):
+    with open(path, "r") as f:
         data = json.load(f)
     sd = superitems(data)
+    fname = Path(path).stem
     if fname == "results":
         main_df = pd.DataFrame(sd, columns=["exp","model","lang", "method","wrap","frozen","epochs","stype", "date", "dir", "score"])
-    elif fname == "full_results":
-        main_df = pd.DataFrame(sd, columns=["qid","exp","model","lang", "method","wrap","frozen","epochs","date", "field", "text"])
+    elif "full_results" in fname:
+        main_df = pd.DataFrame(sd, columns=["tid","exp","model","lang", "method","wrap","frozen","epochs","date", "field", "text"])
+    elif "results_full" in fname:
+        main_df = pd.DataFrame(sd, columns=["exp","model","lang", "method","wrap","frozen","epochs","date","tid", "field", "text"])
 
     out = f"{fname}.tsv"
     df = main_df.pivot(index=list(main_df.columns[~main_df.columns.isin(['field', 'text'])]), columns='field').reset_index()
 
     #df.columns = list(map("".join, df.columns))
-    df.columns = [('_'.join(str(s).strip() for s in col if s)).replace("text_","a_") for col in df.columns]
+    df.columns = [('_'.join(str(s).strip() for s in col if s)).replace("text_","") for col in df.columns]
     df.to_csv(os.path.join(resPath, out), sep="\t", index = False)
     return df
 
@@ -45,7 +48,7 @@ def show_df(df):
     info_cols = load_obj("info_cols", dfname, []) 
     sel_vals = []
     stats = []
-    col_widths = load_obj("widths", dfname)
+    col_widths = load_obj("widths", "")
     def refresh():
         text_win.refresh(0, left, 1, 1, ROWS-1, COLS-2)
     def fill_text_win(rows):
@@ -60,7 +63,24 @@ def show_df(df):
 
     store_back = False
     edit_col = ""
+    count_col = ""
     consts = {}
+    save_obj(dfname, "dfname", "")
+    for col in df.columns:
+        if "score" in col:
+            df[col] = pd.to_numeric(df[col])
+    fav_path = os.path.join(base_dir, dfname + "_fav.tsv")
+    if Path(fav_path).exists():
+        fav_df = pd.read_table(fav_path)
+    else:
+        fav_df = pd.DataFrame(columns = df.columns)
+    sel_path = os.path.join(base_dir, dfname + "_sel.tsv")
+    if Path(sel_path).exists():
+        sel_df = pd.read_table(sel_path)
+    else:
+        sel_df = pd.DataFrame(columns = df.columns)
+    back = {"df":df, "sel_cols":sel_cols, "info_cols":info_cols, "sel_row":0}
+    #wwwwwwwwww
     while ch != ord("q"):
         text_win.erase()
         left = min(left, max_col  - width)
@@ -72,7 +92,8 @@ def show_df(df):
             if not sel_col in df:
                 continue
             _w = col_widths[sel_col] if sel_col in col_widths else width
-            text += "{:<{x}}".format(f"{i}) {sel_col}" , x=_w) 
+            head = textwrap.shorten(f"{i}) {sel_col}" , width=_w, placeholder=".")
+            text += "{:<{x}}".format(head, x=_w) 
         mprint(text, text_win) 
         ii = 0
         top_margin = min(len(df), 5)
@@ -115,7 +136,7 @@ def show_df(df):
         change_info(infos)
 
         if store_back:
-            back = {"df":df, "sel_cols":sel_cols, "info_cols":info_cols}
+            back = {"df":df, "sel_cols":sel_cols, "info_cols":info_cols, "sel_row":sel_row}
         ch = get_key(std)
         store_back = False
         char = chr(ch)
@@ -137,12 +158,13 @@ def show_df(df):
             cmd, _ = minput(cmd_win, 0, 1, "File Name=", default=dfname, all_chars=True)
             if cmd != "<ESC>":
                 dfname = cmd
-                tsv = os.path.join(base_dir, dfname + ".tsv")
-                if not Path(tsv) or char == "L":
-                    df = load_results(dfname)
+                path = os.path.join(base_dir, dfname + ".tsv")
+                if not Path(path) or char == "L":
+                    path = os.path.join(base_dir, dfname + ".json")
+                    df = load_results(path)
                     sel_cols = list(df.columns) 
                 else:
-                    df = pd.read_table(tsv)
+                    df = pd.read_table(path)
                     sel_cols = load_obj("sel_cols", dfname, list(df.columns)) 
                 save_obj(dfname, "dfname", "")
                 info_cols = load_obj("info_cols", dfname, []) 
@@ -176,6 +198,26 @@ def show_df(df):
                 save_obj(info_cols, "info_cols", dfname)
                 if char == "I":
                     sel_cols.remove(col)
+        elif char == "x":
+            sel_df = sel_df.append(df.iloc[sel_row])
+            mbeep()
+            sel_df.to_csv(sel_path, sep="\t", index=False)
+        elif char == "X":
+            back["df"] = df
+            back["sel_cols"] = sel_cols
+            back["info_cols"] = info_cols
+            back["sel_row"] = sel_row
+            df = sel_df
+        elif char == "z":
+            fav_df = fav_df.append(df.iloc[sel_row])
+            mbeep()
+            fav_df.to_csv(fav_path, sep="\t", index=False)
+        elif char == "Z":
+            back["df"] = df
+            back["sel_cols"] = sel_cols
+            back["info_cols"] = info_cols
+            back["sel_row"] = sel_row
+            df = fav_df
         elif char == "j":
             canceled, col = list_values(info_cols)
             if not canceled:
@@ -204,18 +246,21 @@ def show_df(df):
         elif char == "U":
             df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
         elif char == "u": 
-            sel_cols = back["sel_cols"]
-            canceled, col = list_values(sel_cols)
-            back_df = back["df"]
-            if not canceled:
-                df = back_df[col].value_counts(ascending=False).reset_index()
-            sel_cols = list(df.columns)
-            col_widths["index"]=50
-            info_cols = []
+            if not count_col:
+                canceled, col = list_values(sel_cols)
+                if not canceled:
+                    count_col = col
+                    consts["count col"] = col
+            if count_col:
+                df = df[col].value_counts(ascending=False).reset_index()
+                sel_cols = list(df.columns)
+                col_widths["index"]=50
+                info_cols = []
         elif char in ["g","G"]:
             canceled, col = list_values(sel_cols)
             if not canceled:
-               g_cols = [col, "a_bert_score", "a_rouge_score"]
+               df = main_df.groupby('input_text', group_keys=False).apply(lambda x: x.loc[x.rouge_score.idxmax()])
+               g_cols = [col, "bert_score", "rouge_score"]
                df = df[g_cols]
                df = df.groupby(col).mean()
                df = df.reset_index()
@@ -239,9 +284,9 @@ def show_df(df):
             while not canceled:
                 canceled, col, val = list_df_values(main_df, col="model", get_val=True,sels=sels)
                 cond += f"| (df['{col}'] == '{val}') "
-                info_cols.append("a_input_text_"+val)
-                info_cols.append("a_prefix_"+val)
-                sel_cols.append("a_pred_text1_"+val)
+                info_cols.append("input_text_"+val)
+                info_cols.append("prefix_"+val)
+                sel_cols.append("pred_text1_"+val)
                 sels.append(val)
             cond = cond.strip("|")
             df = main_df[eval(cond)]
@@ -249,7 +294,7 @@ def show_df(df):
                 show_err("There is duplicated rows for qid and model")
                 char = "r"
             else:
-                df = df.set_index(['qid','model'])[['a_pred_text1', 'a_input_text','a_prefix']].unstack()
+                df = df.set_index(['qid','model'])[['pred_text1', 'input_text','prefix']].unstack()
                 df.columns = list(map("_".join, df.columns))
                 for s in sel_cols:
                     col_widths[s] = 35
@@ -268,7 +313,7 @@ def show_df(df):
                 cmd, _ = minput(cmd_win, 0, 1, ":width=", all_chars=True)
                 if cmd.isnumeric():
                     col_widths[col] = int(cmd)
-                    save_obj(col_widths, "widths", dfname)
+                    save_obj(col_widths, "widths", "")
         elif char == "/":
             search = rowinput("/")
             mask = np.column_stack([df[col].str.contains(search, na=False) for col in df])
@@ -290,11 +335,13 @@ def show_df(df):
         if char == "r":
             df = main_df
             sel_cols = list(df.columns)
+            save_obj(sel_cols,"sel_cols",dfname)
             info_cols = []
         if char == "b" and back:
             df = back["df"] 
             sel_cols = back["sel_cols"] 
             info_cols = back["info_cols"]
+            sel_row = back["sel_row"]
 
 def biginput(prompt=":", default=""):
     rows, cols = std.getmaxyx()
@@ -336,13 +383,12 @@ def list_values(vals,si=0, sels=[]):
     if si == 0:
         if key in si_hash:
             si = si_hash[key]
-    if not "Done!" in vals: vals.insert(0,"Done!")
-    opts = {"items":{"sels":sels, "range":vals}}
+    opts = {"items":{"sels":sels, "range":["Done!"] + vals}}
     is_cancled = True
     si,canceled, _ = open_submenu(tag_win, opts, "items", si, "Select a value", std)
     val = ""
     if not canceled and si > 0: 
-        val = vals[si]
+        val = vals[si - 1]
         si_hash[key] = si
         is_cancled = False
     return is_cancled, val
@@ -397,22 +443,22 @@ def start(stdscr):
     reset_colors(theme)
     if not dfname:
         fname = load_obj("dfname","","")
-        dfname = fname
+        dfname = fname + ".tsv"
     if not dfname:
         mlog.info("No file name provided")
     else:
-        path = os.path.join(base_dir, dfname + ".tsv")
-        if Path(path).exists():
-            df = pd.read_table(os.path.join(base_dir, dfname + ".tsv"))
-            df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
+        path = os.path.join(base_dir, dfname)
+        dfname = Path(path).stem
+        if not Path(path).exists():
+            mlog.info("File %s doesn't exists!", path)
+        if path.endswith(".tsv"):
+            df = pd.read_table(path)
+            show_df(df)
+        elif path.endswith(".json"):
+            df = load_results(path)
             show_df(df)
         else:
-            path = os.path.join(base_dir, dfname + ".json")
-            if Path(path).exists():
-                df = load_results(dfname)
-                show_df(df)
-            else:
-                mlog.info("No tsv or json file was found")
+            mlog.info("No tsv or json file was found")
 
 @click.command()
 @click.option(

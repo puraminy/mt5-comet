@@ -210,12 +210,16 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words
     wrapped_model = None
     prompt_encoders = []
     offsets = []
+    tokenize_relations(tokenizer)
     for rel, prompt_tokens in encoder_prompts.items():
         mlog.info("******************* Wrapping model for %s", rel)
         if rel == "com":
             continue
         if from_words == "rel":
             from_words = relation_natural_mappings[rel]["en"]
+        if from_words == "rel_ids":
+            prompt_tokens = relation_natural_mappings[rel]["ids"]
+
         encoder, offset = create_encoder(rel, model, tokenizer, prompt_tokens, encoder_type, from_words, wrapped_model)
         prompt_encoders.append(encoder)
         offsets.append(offset)
