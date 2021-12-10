@@ -172,6 +172,7 @@ def tokenize_relations(tokenizer, map_lengths=False):
         natural_rel = phrase["en"]
         #dlog.info("rel ids ***: %s", natural_rel)
         rel_tokens = tokenizer.tokenize(natural_rel)
+        relation_natural_mappings[rel]["tokens"] = rel_tokens
         #dlog.info("rel ids ***: %s", rel_tokens)
         rel_ids = tokenizer.convert_tokens_to_ids(rel_tokens)
         #dlog.info("rel ids ***: %s", rel_ids)
@@ -217,8 +218,8 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words
             continue
         if from_words == "rel":
             from_words = relation_natural_mappings[rel]["en"]
-        if from_words == "rel_ids":
-            prompt_tokens = relation_natural_mappings[rel]["ids"]
+        if from_words == "rel_tokens":
+            prompt_tokens = relation_natural_mappings[rel]["tokens"]
 
         encoder, offset = create_encoder(rel, model, tokenizer, prompt_tokens, encoder_type, from_words, wrapped_model)
         prompt_encoders.append(encoder)
@@ -233,7 +234,7 @@ def create_encoder(name, model, tokenizer, prompt_tokens, encoder_type="lstm",
     embedding_dim = model.config.hidden_size
     enc_plen = len(prompt_tokens)
     init_embs = {} 
-    if from_words and from_words != "none":
+    if from_words and from_words != "none" and from_words != "rel_tokens":
         new_tokens = tokenizer.tokenize(from_words)
         mlog.info("** loading from words : %s", new_tokens)
         _ids = tokenizer.convert_tokens_to_ids(new_tokens)
