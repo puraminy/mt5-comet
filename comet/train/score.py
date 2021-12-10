@@ -20,6 +20,7 @@ def bart_score(model, df, before, after, col1, col2, score_col, cpu):
   for i, row in df.iterrows(): 
       s1 = row[col1]
       s2 = row[col2]
+      pbar.update()
       score = model.score([s1], [s2], batch_size=4) # generation scores from the first list of texts to the second list of texts.
       scores.append(score)
   
@@ -105,15 +106,15 @@ import click
     help=""
 )
 @click.option(
-    "--no_concat",
-    "-nc",
+    "--concat",
+    "-c",
     is_flag=True,
     help=""
 )
-def main(fname, model_id, path, step, col1, col2, score_col, cpu, no_concat):
-    concat = not no_concat
+def main(fname, model_id, path, step, col1, col2, score_col, cpu, concat):
     pret = "/content/drive/MyDrive/pret"
-    if score_col=="bert_score":
+    score_col = model_id + "_" + score_col
+    if "bert_score" in score_col:
         if not model_id: model_id = '/paraphrase-multilingual-MiniLM-L12-v2'
         model = SentenceTransformer(os.path.join(pret, model_id))
     else:
@@ -129,7 +130,7 @@ def main(fname, model_id, path, step, col1, col2, score_col, cpu, no_concat):
     before = 0
     after = step
     if after < 0:
-        if score_col == "bert_score":
+        if "bert_score" in score_col:
             df = bert_score(model, srcdf, before, -1, col1, col2, score_col, cpu)
         else:
             df = bart_score(model, srcdf, before, -1, col1, col2, score_col, cpu)
@@ -137,7 +138,7 @@ def main(fname, model_id, path, step, col1, col2, score_col, cpu, no_concat):
         df_old = None
         while True:
           print(before, "-", after)
-          if score_col == "bert_score":
+          if "bert_score" in score_col:
              df = bert_score(model,srcdf, before, after, col1, col2, score_col, cpu)
           else:
              df = bart_score(model,srcdf, before, after, col1, col2, score_col, cpu)
