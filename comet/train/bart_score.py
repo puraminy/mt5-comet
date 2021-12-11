@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 import traceback
 from transformers import MBart50TokenizerFast, MBartForConditionalGeneration
+from transformers import BartTokenizer, BartForConditionalGeneration
 from typing import List
 import numpy as np
 import pandas as pd
@@ -21,9 +22,14 @@ class BARTScorer:
         # Set up model
         self.device = device
         self.max_length = max_length
-        print("version 1")
-        self.model = MT5ForConditionalGeneration.from_pretrained(checkpoint)
-        self.tokenizer = MT5TokenizerFast.from_pretrained(checkpoint)
+        print("version 2")
+        if "t5" in checkpoint:
+            self.model = MT5ForConditionalGeneration.from_pretrained(checkpoint)
+            self.tokenizer = MT5TokenizerFast.from_pretrained(checkpoint)
+        else:
+            self.tokenizer = BartTokenizer.from_pretrained(checkpoint)
+            self.model = BartForConditionalGeneration.from_pretrained(checkpoint)
+
         self.model.eval()
         self.model.to(device)
 
