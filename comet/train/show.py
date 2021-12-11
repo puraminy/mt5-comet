@@ -327,6 +327,13 @@ def show_df(df):
                 sel_row = int(cmd)
             elif cmd == "q":
                 ch = ord("q")
+        elif char == "q":
+            cmd = rowinput("Are you sure you want to exit? (y/n)")
+            if cmd == "y":
+                ch = ord("q")
+            else:
+                ch = 0
+
         elif not char in ["q", "S","r"]:
             pass
             #mbeep()
@@ -467,16 +474,11 @@ def start(stdscr):
             mlog.info("No tsv or json file was found")
 
 @click.command()
-@click.option(
-    "--fname",
-    "-f",
-    default="",
-    type=str,
-    help=""
-)
+@click.argument("fname", type=str)
 def main(fname):
     global dfname
-    dfname = fname
+    if fname != "last":
+        dfname = fname
     set_app("showdf")
     wrapper(start)
 
