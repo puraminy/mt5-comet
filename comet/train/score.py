@@ -23,7 +23,7 @@ def bart_score(model, df, before, after, col1, col2, score_col, cpu):
       from_, to_ = langs.split("2")
       s1 = row.input_text
       s1 = s1.replace("##","").replace("  "," ").strip()
-      s2 = row[col2]
+      s2 = row[col1]
       s2 = relation_natural_mappings[rel][to_] + " " + s2
       pbar.update()
       score = model.score([s1], [s2], batch_size=4) # generation scores from the first list of texts to the second list of texts.

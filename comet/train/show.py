@@ -80,6 +80,7 @@ def show_df(df):
     else:
         sel_df = pd.DataFrame(columns = df.columns)
     back = {"df":df, "sel_cols":sel_cols, "info_cols":info_cols, "sel_row":0}
+    filter_df = df
     #wwwwwwwwww
     while ch != ord("q"):
         text_win.erase()
@@ -132,6 +133,8 @@ def show_df(df):
         infos.append("-------------------------")
         consts["len"] = str(len(df))
         for key,val in consts.items():
+            if type(val) == list:
+                val = "-".join(val)
             infos.append("{:<5}:{}".format(key,val))
         change_info(infos)
 
@@ -268,16 +271,22 @@ def show_df(df):
                df = df.groupby(col).mean()
                df = df.reset_index()
                sel_cols = order(sel_cols, g_cols)
+        elif char == "D":
+            canceled, col,val = list_df_values(main_df)
+            if not canceled:
+                del main_df[col]
+                char = "SS"
+                if col in df:
+                    del df[col]
 
-        elif char in ["d","D"]:
-            canceled, col, val = list_df_values(main_df)
+        elif char in ["d"]:
+            canceled, col, val = list_df_values(main_df, get_val=True)
             if not canceled:
                 main_df = main_df.drop(main_df[main_df[col] == val].index)
+                char = "SS"
                 info_cols = []
                 if col in df:
                     df = df.drop(df[df[col] == val].index)
-                if char == "D":
-                    char = "SS"
         elif char in ["m","M"]:
             cond = ""
             canceled = False
@@ -305,11 +314,27 @@ def show_df(df):
         elif char in ["f","F"]:
             canceled, col, val = list_df_values(main_df)
             if not canceled:
-                df = main_df[main_df[col] == val]
+                df = filter_df[filter_df[col] == val]
                 df = df.reset_index()
+                if not "filter" in consts:
+                    consts["filter"] = []
+                consts["filter"].append(" {} == {}".format(col,val))
                 if char == "F":
                     sel_cols = order(sel_cols, [col])
                 sel_row = 0
+                filter_df = df
+        elif is_enter(ch):
+            col = sel_cols[0]
+            val = df.at[sel_row, col]
+            if not "filter" in consts:
+                consts["filter"] = []
+            consts["filter"].append("{} == {}".format(col,val))
+            df = filter_df[filter_df[col] == val]
+            df = df.reset_index()
+            if char == "F":
+                sel_cols = order(sel_cols, [col])
+            sel_row = 0
+            filter_df = df
         elif char == "w":
             canceled, col, val = list_df_values(df, get_val=False)
             if not canceled:
@@ -343,7 +368,7 @@ def show_df(df):
                 dfname = cmd
                 char = "SS"
         if char == "SS":
-                df.to_csv(os.path.join(base_dir, dfname+".tsv"), sep="\t", index=False)
+                main_df.to_csv(os.path.join(base_dir, dfname+".tsv"), sep="\t", index=False)
                 save_obj(dfname, "dfname", dfname)
         if char == "r":
             df = main_df
