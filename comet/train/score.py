@@ -124,7 +124,10 @@ import click
 def main(fname, model_name, path, step, col1, col2, score_col, cpu, concat):
     pret = "/content/drive/MyDrive/pret"
     if "bert_score" in score_col:
-        if not model_name: model_name = '/paraphrase-multilingual-MiniLM-L12-v2'
+        if not model_name: model_name = 'paraphrase-multilingual-MiniLM-L12-v2'
+        model_path = os.path.join(pret, model_name)
+        if Path(model_path).exists():
+            model_name = model_path
         model = SentenceTransformer(os.path.join(pret, model_name))
     else:
         device = "cpu" if cpu else "cuda:0"

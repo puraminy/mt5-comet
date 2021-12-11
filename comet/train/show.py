@@ -34,15 +34,11 @@ def show_df(df):
     sel_row = 0
     ROWS, COLS = std.getmaxyx()
     ch = 1
-    sel_cols = load_obj("sel_cols", dfname)
-    if not sel_cols:
-        sel_cols = list(df.columns)
     sel_row = 0
     left = 0
     max_row, max_col= text_win.getmaxyx()
     width = 15
     cond = ""
-    main_df = df
     sort = ""
     asc = False
     info_cols = load_obj("info_cols", dfname, []) 
@@ -62,10 +58,16 @@ def show_df(df):
         col_widths = {"qid":5, "model":30, "pred_text1":30, "epochs":30, "date":30, "rouge_score":7, "bert_score":7, "input_text":50}
 
     store_back = False
+    df['id']=df.index
+    df = df.reset_index(drop=True)
+    main_df = df
     edit_col = ""
     count_col = ""
     consts = {}
     save_obj(dfname, "dfname", "")
+    sel_cols = load_obj("sel_cols", dfname)
+    if not sel_cols:
+        sel_cols = list(df.columns)
     for col in df.columns:
         if "score" in col:
             df[col] = pd.to_numeric(df[col])
@@ -173,12 +175,12 @@ def show_df(df):
                 info_cols = load_obj("info_cols", dfname, []) 
                 main_df = df
         elif char in list("0123456789"):
-            canceled, col = list_values(sel_cols, si=int(char))
+            canceled, col, val = list_df_values(df, get_val=False)
             if not canceled:
                 sel_cols = order(sel_cols, [col],int(char))
         elif char in ["e","E"]:
             if not edit_col or char == "E":
-                canceled, col = list_values(sel_cols)
+                canceled, col, val = list_df_values(df, get_val=False)
                 if not canceled:
                     edit_col = col
                     consts["edit col"] = edit_col
