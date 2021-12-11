@@ -346,8 +346,11 @@ def fill_prompt(text, rel, place_holder, counter = 0, lang=""):
                 token = place_holder
                 token = token.replace("_i", "_" + str(i))  
                 prompt += " " + token
-        elif _pholder == "tokens": 
+        elif _pholder == "{tokens}": 
             prompt = relation_natural_mappings[rel]["tokens"]
+        else:
+            mlog.info("************** using tokens of pholder %s",_pholder)
+            prompt = _pholder
         prompt = prompt.strip()
         for token in prompt.split():
             if rel == "com" and not token in common_tokens:
