@@ -133,6 +133,7 @@ def main(fname, model_id, path, step, col1, col2, score_col, cpu, concat):
         model = BARTScorer(device=device, checkpoint=os.path.join(pret, model_id))
 
     score_col = model_id + "_" + col1 + "_" + score_col
+    mlog.info("score_col:", score_col)
     if fname.endswith("csv"):
         srcdf = pd.read_csv(fname)
     else:
