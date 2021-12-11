@@ -1,0 +1,202 @@
+input_text	prefix	target_text	Unnamed: 0
+PersonX accepts PersonX's diploma	xAttr	succesfull	
+PersonX accepts PersonX's diploma	xIntent	to graduate	31742.0
+PersonX accepts PersonX's diploma	xNeed	attended school	
+PersonX accepts PersonX's diploma	xReact	proud	
+PersonX accepts PersonY invitation	oEffect	PersonY smiles	9627.0
+PersonX accepts PersonY invitation	oWant	to put the date in their calendar	9644.0
+PersonX accepts PersonY invitation	xAttr	social	
+PersonX accepts PersonY invitation	xNeed	know PersonY	
+PersonX accepts PersonY invitation	xReact	included	
+PersonX accepts PersonY invitation	xWant	to invite other people	9646.0
+PersonX accepts the invitation	oReact	none	70929.0
+PersonX accepts the invitation	xAttr	responsive	
+PersonX accepts the invitation	xNeed	to open the mailbox	
+PersonX accepts the invitation	xReact	excited	
+PersonX accepts the job	oWant	none	53709.0
+PersonX accepts the job	xAttr	confident	
+PersonX accepts the job	xNeed	To buy a new wardrobe	
+PersonX accepts the job	xReact	satisfied	
+PersonX achieves PersonX's objective	xAttr	satisfied	
+PersonX achieves PersonX's objective	xNeed	to know the objective	
+PersonX achieves PersonX's objective	xReact	completed	
+PersonX achieves PersonX's objective	xWant	to celebrate	66193.0
+PersonX achieves PersonY objective	oWant	to show appreciation for person x	30093.0
+PersonX achieves PersonY objective	xAttr	commendable	
+PersonX achieves PersonY objective	xNeed	to work hard	
+PersonX achieves PersonY objective	xReact	strong	
+PersonX affords PersonY protection	xAttr	helpful	
+PersonX affords PersonY protection	xEffect	Person x has protection	30802.0
+PersonX affords PersonY protection	xNeed	a character	
+PersonX affords PersonY protection	xReact	relieved	
+PersonX always wore	xAttr	Poor	
+PersonX always wore	xNeed	puts item on	
+PersonX always wore	xReact	safe	
+PersonX always wore	xWant	to look nice	45471.0
+PersonX arranges a date	xAttr	sociable	
+PersonX arranges a date	xIntent	to have a date at that time	53433.0
+PersonX arranges a date	xNeed	ask	
+PersonX arranges a date	xReact	good the date is set	
+PersonX arrives at PersonY understanding	xAttr	curious	
+PersonX arrives at PersonY understanding	xEffect	none	14505.0
+PersonX arrives at PersonY understanding	xNeed	understand what is going on	
+PersonX arrives at PersonY understanding	xReact	friendly	
+PersonX arrives home	xAttr	motivated	
+PersonX arrives home	xNeed	to get up	
+PersonX arrives home	xReact	satisfied	
+PersonX arrives home	xWant	to go to the bathroom	77322.0
+PersonX arrives home from lunch	xAttr	late	
+PersonX arrives home from lunch	xEffect	relaxes their body muscles	20265.0
+PersonX arrives home from lunch	xNeed	to get in the car	
+PersonX arrives home from lunch	xReact	rested	
+PersonX arrives just in time	oReact	none	56638.0
+PersonX arrives just in time	xAttr	busy	
+PersonX arrives just in time	xNeed	find out what time to be there	
+PersonX arrives just in time	xReact	ready	
+PersonX asks PersonX's grandma	oWant	to go visit their grandchild	33767.0
+PersonX asks PersonX's grandma	xAttr	demanding	
+PersonX asks PersonX's grandma	xEffect	none	33766.0
+PersonX asks PersonX's grandma	xNeed	To visit grandma	
+PersonX asks PersonX's grandma	xReact	good.	
+PersonX asks PersonY to say	xAttr	adamant	
+PersonX asks PersonY to say	xIntent	persony to talk	68379.0
+PersonX asks PersonY to say	xNeed	to find PersonY	
+PersonX asks PersonY to say	xReact	inquisitive	
+PersonX bakes PersonX's own bread	oEffect	gets receipt	75847.0
+PersonX bakes PersonX's own bread	xAttr	crafty	
+PersonX bakes PersonX's own bread	xNeed	to buy the ingredients	
+PersonX bakes PersonX's own bread	xReact	useful	
+PersonX bats PersonX's eyelashes	oWant	approach Personx	22891.0
+PersonX bats PersonX's eyelashes	xAttr	flirty	
+PersonX bats PersonX's eyelashes	xNeed	to want to seduce someone	
+PersonX bats PersonX's eyelashes	xReact	flirty.	
+PersonX becomes PersonY object	xAttr	regretful	
+PersonX becomes PersonY object	xEffect	gets attention	8873.0
+PersonX becomes PersonY object	xNeed	be around PersonY	
+PersonX becomes PersonY object	xReact	done work	
+PersonX becomes flat	xAttr	deflated	
+PersonX becomes flat	xEffect	sleeps	77595.0
+PersonX becomes flat	xNeed	to eat less food	
+PersonX becomes flat	xReact	transgender	
+PersonX becomes happier	oWant	none	46164.0
+PersonX becomes happier	xAttr	Glad	
+PersonX becomes happier	xNeed	to look up local therapist	
+PersonX becomes happier	xReact	happy	
+PersonX begs for food	oWant	none	59616.0
+PersonX begs for food	xAttr	starving	
+PersonX begs for food	xNeed	to have no food.	
+PersonX begs for food	xReact	ashamed	
+PersonX blesses PersonY's heart	oEffect	they get closer to PersonX	17715.0
+PersonX blesses PersonY's heart	xAttr	patronizing	
+PersonX blesses PersonY's heart	xNeed	to pickup the phone	
+PersonX blesses PersonY's heart	xReact	gratitude	
+PersonX blows PersonY's brains out	oWant	to put PersonX in jail	15292.0
+PersonX blows PersonY's brains out	xAttr	suicidal	
+PersonX blows PersonY's brains out	xNeed	to get a gun	
+PersonX blows PersonY's brains out	xReact	guilty	
+PersonX breaks PersonX's window	oReact	none	76353.0
+PersonX breaks PersonX's window	xAttr	angry	
+PersonX breaks PersonX's window	xIntent	to escape the fire	76355.0
+PersonX breaks PersonX's window	xNeed	to go to PersonX's house	
+PersonX breaks PersonX's window	xReact	bad	
+PersonX breaks PersonX's wrist	xAttr	clumsy	
+PersonX breaks PersonX's wrist	xNeed	to trip	
+PersonX breaks PersonX's wrist	xReact	a great deal of pain	
+PersonX breaks PersonX's wrist	xWant	to call the doctor	75934.0
+PersonX breaks the window	oWant	to get their window fixed.	55988.0
+PersonX breaks the window	xAttr	careless	
+PersonX breaks the window	xNeed	Play baseball with his friends.	
+PersonX breaks the window	xReact	upset	
+PersonX brings PersonY's kids	xAttr	family-oriented	
+PersonX brings PersonY's kids	xIntent	to help someone out	35082.0
+PersonX brings PersonY's kids	xNeed	to have access to children	
+PersonX brings PersonY's kids	xReact	feels good	
+PersonX brings the kids with PersonY	xAttr	caring	
+PersonX brings the kids with PersonY	xNeed	to call the kids	
+PersonX brings the kids with PersonY	xReact	more connected	
+PersonX brings the kids with PersonY	xWant	drop the kids off	69855.0
+PersonX buys PersonX's clothes	oWant	none	65069.0
+PersonX buys PersonX's clothes	xAttr	happy	
+PersonX buys PersonX's clothes	xEffect	is admired for her fashion sense	65055.0
+PersonX buys PersonX's clothes	xNeed	go to the store	
+PersonX buys PersonX's clothes	xReact	happy	
+PersonX buys an expensive car	xAttr	wealthy	
+PersonX buys an expensive car	xIntent	to show off	40557.0
+PersonX buys an expensive car	xNeed	go to a car dealer	
+PersonX buys an expensive car	xReact	flashy	
+PersonX buys bananas	oEffect	none	49280.0
+PersonX buys bananas	xAttr	Healthy	
+PersonX buys bananas	xIntent	to eat healthy food	49262.0
+PersonX buys bananas	xNeed	to earn the money	
+PersonX buys bananas	xReact	healthy	
+PersonX buys clothes	xAttr	rich	
+PersonX buys clothes	xEffect	tries it on	52577.0
+PersonX buys clothes	xNeed	to go to the clothing store	
+PersonX buys clothes	xReact	satisfied	
+PersonX calls PersonY's boss	oEffect	questioned by boss	16403.0
+PersonX calls PersonY's boss	xAttr	curious	
+PersonX calls PersonY's boss	xNeed	To have a number	
+PersonX calls PersonY's boss	xReact	mad	
+PersonX calls the dentist	oEffect	none	71566.0
+PersonX calls the dentist	xAttr	Hurt	
+PersonX calls the dentist	xIntent	to have healthy teeth	71557.0
+PersonX calls the dentist	xNeed	to find the number	
+PersonX calls the dentist	xReact	responsible	
+PersonX calls the restaurant	oEffect	none	52535.0
+PersonX calls the restaurant	xAttr	curious	
+PersonX calls the restaurant	xEffect	gets his call answered	52543.0
+PersonX calls the restaurant	xNeed	TO FIND THE NUMBER FOR THE RESTAURANT	
+PersonX calls the restaurant	xReact	secure	
+PersonX can not find PersonY anywhere	xAttr	demoralized	
+PersonX can not find PersonY anywhere	xIntent	none	41351.0
+PersonX can not find PersonY anywhere	xNeed	look around	
+PersonX can not find PersonY anywhere	xReact	confused	
+PersonX cares much	xAttr	caring	
+PersonX cares much	xNeed	to cater to their needs	
+PersonX cares much	xReact	loving	
+PersonX cares much	xWant	to care more about themselves	61039.0
+PersonX carries PersonY into execution	oReact	dead maybe since they are being carried to their execution	29917.0
+PersonX carries PersonY into execution	xAttr	daring	
+PersonX carries PersonY into execution	xNeed	to grab personY	
+PersonX carries PersonY into execution	xReact	powerful	
+PersonX catches PersonY's eyes	oEffect	Person Y smiles	67001.0
+PersonX catches PersonY's eyes	xAttr	attractive	
+PersonX catches PersonY's eyes	xNeed	to walk past person y	
+PersonX catches PersonY's eyes	xReact	nervous	
+PersonX challenges PersonY to a game	oEffect	Person Y cannot finish the chess match.	36661.0
+PersonX challenges PersonY to a game	xAttr	brave	
+PersonX challenges PersonY to a game	xIntent	to compete	36655.0
+PersonX challenges PersonY to a game	xNeed	to know how to play	
+PersonX challenges PersonY to a game	xReact	eager	
+PersonX changes clothes	xAttr	trendy	
+PersonX changes clothes	xNeed	He spilled wine on his shirt.	
+PersonX changes clothes	xReact	refreshed	
+PersonX changes clothes	xWant	to look good	51963.0
+PersonX closes around PersonY	oReact	surrounded	31474.0
+PersonX closes around PersonY	xAttr	Happy	
+PersonX closes around PersonY	xNeed	to make PersonY feel comfortable	
+PersonX closes around PersonY	xReact	nervous	
+PersonX colors PersonX's hair	xAttr	happy	
+PersonX colors PersonX's hair	xNeed	buy product	
+PersonX colors PersonX's hair	xReact	experimental	
+PersonX colors PersonX's hair	xWant	a new look	69059.0
+PersonX commits suicide	xAttr	hopeless	
+PersonX commits suicide	xNeed	to be depressed	
+PersonX commits suicide	xReact	deceased	
+PersonX commits suicide	xWant	for it all to end	58028.0
+PersonX creates PersonY impression	oReact	involved	14178.0
+PersonX creates PersonY impression	xAttr	gallant	
+PersonX creates PersonY impression	xNeed	meet PersonY	
+PersonX creates PersonY impression	xReact	important	
+PersonX crosses the rubicon	oReact	none	24249.0
+PersonX crosses the rubicon	xAttr	determined	
+PersonX crosses the rubicon	xNeed	to get a boat	
+PersonX crosses the rubicon	xReact	committed	
+PersonX develops PersonX's talents	oReact	none	11129.0
+PersonX develops PersonX's talents	xAttr	Aspiring, dedicated	
+PersonX develops PersonX's talents	xNeed	to identify his talents	
+PersonX develops PersonX's talents	xReact	good	
+PersonX discusses PersonX's problems	oReact	none	13503.0
+PersonX discusses PersonX's problems	xAttr	open	
+PersonX discusses PersonX's problems	xNeed	to recall the details of his problem	
+PersonX discusses PersonX's problems	xReact	ok	

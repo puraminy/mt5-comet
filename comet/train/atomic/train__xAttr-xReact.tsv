@@ -1,0 +1,3211 @@
+input_text	prefix	target_text	Unnamed: 0
+PersonX about to get married	xAttr	excited	
+PersonX about to get married	xIntent	to share his life with someone	472037.0
+PersonX about to get married	xReact	like he has someone he feels that way about	
+PersonX absolutely loved	xAttr	caring	
+PersonX absolutely loved	xIntent	to marry.	459687.0
+PersonX absolutely loved	xReact	romantic.	
+PersonX absolutely loved it	xAttr	enthused	
+PersonX absolutely loved it	xIntent	none	523609.0
+PersonX absolutely loved it	xReact	ecstatic over his gift	
+PersonX accepts PersonY appointment	xAttr	Booked	
+PersonX accepts PersonY appointment	xIntent	to have a job	271833.0
+PersonX accepts PersonY appointment	xReact	confident	
+PersonX accepts PersonY thanks	xAttr	grateful	
+PersonX accepts PersonY thanks	xIntent	to be gracious	116877.0
+PersonX accepts PersonY thanks	xReact	appreciated	
+PersonX accepts PersonY's proposal	xAttr	Trusting	
+PersonX accepts PersonY's proposal	xIntent	to move on with the project	570741.0
+PersonX accepts PersonY's proposal	xReact	excited	
+PersonX accepts PersonY's resignation	xAttr	Understanding	
+PersonX accepts PersonY's resignation	xIntent	none	82610.0
+PersonX accepts PersonY's resignation	xReact	sad	
+PersonX accepts into college	xAttr	hopeful	
+PersonX accepts into college	xIntent	none	530022.0
+PersonX accepts into college	xReact	very happy	
+PersonX accepts the challenge	xAttr	brave	
+PersonX accepts the challenge	xIntent	to prove they are the best	623809.0
+PersonX accepts the challenge	xReact	nervous	
+PersonX accepts the dare	xAttr	Adventurous	
+PersonX accepts the dare	xIntent	to prove they are not afraid	449664.0
+PersonX accepts the dare	xReact	anxious	
+PersonX accepts the fact	xAttr	resigned	
+PersonX accepts the fact	xIntent	to move on with life	438715.0
+PersonX accepts the fact	xReact	rational	
+PersonX accepts without question	xAttr	naive	
+PersonX accepts without question	xIntent	to be generous	255948.0
+PersonX accepts without question	xReact	cooperative	
+PersonX accidentally bumped	xAttr	clumsy	
+PersonX accidentally bumped	xIntent	none	520274.0
+PersonX accidentally bumped	xReact	a little clumsy	
+PersonX accidentally burned	xAttr	Accident prone	
+PersonX accidentally burned	xIntent	none	697913.0
+PersonX accidentally burned	xReact	angry	
+PersonX accidentally cut	xAttr	careless	
+PersonX accidentally cut	xIntent	none	518787.0
+PersonX accidentally cut	xReact	bad	
+PersonX accidentally dropped	xAttr	clumsy	
+PersonX accidentally dropped	xIntent	none	397938.0
+PersonX accidentally dropped	xReact	bad	
+PersonX accidentally dropped it	xAttr	clumsy	
+PersonX accidentally dropped it	xIntent	none	505201.0
+PersonX accidentally dropped it	xReact	sad	
+PersonX accidentally fell	xAttr	awkward	
+PersonX accidentally fell	xIntent	none	515191.0
+PersonX accidentally fell	xReact	hurt	
+PersonX accidentally got	xAttr	careless	
+PersonX accidentally got	xIntent	none	519752.0
+PersonX accidentally got	xReact	happy	
+PersonX accidentally hit	xAttr	clumsy.	
+PersonX accidentally hit	xIntent	none	400611.0
+PersonX accidentally hit	xReact	guilty	
+PersonX accidentally knocked	xAttr	clumsy	
+PersonX accidentally knocked	xIntent	none	404479.0
+PersonX accidentally knocked	xReact	sorry	
+PersonX accidentally knocked over	xAttr	clumsy	
+PersonX accidentally knocked over	xIntent	none	447134.0
+PersonX accidentally knocked over	xReact	fearful	
+PersonX accidentally left	xAttr	careless	
+PersonX accidentally left	xIntent	none	477774.0
+PersonX accidentally left	xReact	surprised	
+PersonX accidentally put	xAttr	careless	
+PersonX accidentally put	xIntent	none	410929.0
+PersonX accidentally put	xReact	badly	
+PersonX accidentally shot	xAttr	careless	
+PersonX accidentally shot	xIntent	none	446559.0
+PersonX accidentally shot	xReact	upset	
+PersonX accidentally spilled	xAttr	upset	
+PersonX accidentally spilled	xIntent	none	459204.0
+PersonX accidentally spilled	xReact	angry at herself.	
+PersonX accidentally stepped	xAttr	clumsy	
+PersonX accidentally stepped	xIntent	none	494532.0
+PersonX accidentally stepped	xReact	sad	
+PersonX accidentally tripped	xAttr	embarrassed	
+PersonX accidentally tripped	xIntent	none	515076.0
+PersonX accidentally tripped	xReact	embarrassed	
+PersonX accidently left	xAttr	silly	
+PersonX accidently left	xIntent	none	691010.0
+PersonX accidently left	xReact	frustrated	
+PersonX accompanies PersonY far	xAttr	supportive	
+PersonX accompanies PersonY far	xIntent	to comfort him	252894.0
+PersonX accompanies PersonY far	xReact	happy	
+PersonX accompanies by PersonX's wife	xAttr	kind	
+PersonX accompanies by PersonX's wife	xIntent	to go somewhere	115754.0
+PersonX accompanies by PersonX's wife	xReact	good	
+PersonX accompanies by PersonY's wife	xAttr	companion	
+PersonX accompanies by PersonY's wife	xIntent	none	94131.0
+PersonX accompanies by PersonY's wife	xReact	happy	
+PersonX accomplishes PersonX's goal	xAttr	determined	
+PersonX accomplishes PersonX's goal	xIntent	to achieve a personal goal.	105082.0
+PersonX accomplishes PersonX's goal	xReact	excited	
+PersonX accomplishes PersonX's goals	xAttr	positive	
+PersonX accomplishes PersonX's goals	xIntent	to be successful	109281.0
+PersonX accomplishes PersonX's goals	xReact	happy	
+PersonX accomplishes PersonX's mission	xAttr	successful	
+PersonX accomplishes PersonX's mission	xIntent	to make the world better	105601.0
+PersonX accomplishes PersonX's mission	xReact	good	
+PersonX accomplishes PersonX's object	xAttr	successful	
+PersonX accomplishes PersonX's object	xIntent	to be done.	107907.0
+PersonX accomplishes PersonX's object	xReact	happy	
+PersonX accomplishes PersonX's objectives	xAttr	determined	
+PersonX accomplishes PersonX's objectives	xIntent	to be at peace	128556.0
+PersonX accomplishes PersonX's objectives	xReact	extremely fulfilled	
+PersonX accomplishes PersonX's purpose	xAttr	satisfied	
+PersonX accomplishes PersonX's purpose	xIntent	to accomplish their goals	108421.0
+PersonX accomplishes PersonX's purpose	xReact	accomplished	
+PersonX accomplishes PersonX's purposes	xAttr	dedicated	
+PersonX accomplishes PersonX's purposes	xIntent	to complete his purpose.	127998.0
+PersonX accomplishes PersonX's purposes	xReact	happy.	
+PersonX accomplishes PersonX's task	xAttr	committed	
+PersonX accomplishes PersonX's task	xIntent	to achieve his goal	109699.0
+PersonX accomplishes PersonX's task	xReact	proud	
+PersonX accomplishes PersonX's work	xAttr	skilled	
+PersonX accomplishes PersonX's work	xIntent	to gain money	97731.0
+PersonX accomplishes PersonX's work	xReact	accomplished	
+PersonX accomplishes PersonY's objectives	xAttr	Successfull	
+PersonX accomplishes PersonY's objectives	xIntent	to help.	128918.0
+PersonX accomplishes PersonY's objectives	xReact	helpful.	
+PersonX accomplishes PersonY's work	xAttr	helpful	
+PersonX accomplishes PersonY's work	xIntent	to achieve goal	651167.0
+PersonX accomplishes PersonY's work	xReact	accomplished the work was done	
+PersonX accuses PersonY of cheating	xAttr	envious	
+PersonX accuses PersonY of cheating	xIntent	to get persony in trouble	326316.0
+PersonX accuses PersonY of cheating	xReact	justified	
+PersonX aces PersonX's exam	xAttr	responsible	
+PersonX aces PersonX's exam	xIntent	to achieve high	289007.0
+PersonX aces PersonX's exam	xReact	proud	
+PersonX aces PersonX's interview	xAttr	ecstatic	
+PersonX aces PersonX's interview	xIntent	none	610949.0
+PersonX aces PersonX's interview	xReact	proud	
+PersonX aces the exam	xAttr	intelligent	
+PersonX aces the exam	xIntent	to get an a in the class	638549.0
+PersonX aces the exam	xReact	confident in their course knowledge	
+PersonX aces the test	xAttr	dependable	
+PersonX aces the test	xIntent	none	465420.0
+PersonX aces the test	xReact	accomplished	
+PersonX achieves PersonX's aim	xAttr	successful	
+PersonX achieves PersonX's aim	xIntent	to be successful.	124997.0
+PersonX achieves PersonX's aim	xReact	confident and sucessful.	
+PersonX achieves PersonX's aims	xAttr	accomplished	
+PersonX achieves PersonX's aims	xIntent	to succeed in everything	586144.0
+PersonX achieves PersonX's aims	xReact	proud of himself	
+PersonX achieves PersonX's ends	xAttr	accomplished	
+PersonX achieves PersonX's ends	xIntent	finish his plan	95572.0
+PersonX achieves PersonX's ends	xReact	productive	
+PersonX achieves PersonX's goal	xAttr	Dedicated	
+PersonX achieves PersonX's goal	xIntent	to reach his goal	87172.0
+PersonX achieves PersonX's goal	xReact	happy and achieved	
+PersonX achieves PersonX's goals	xAttr	driven	
+PersonX achieves PersonX's goals	xIntent	to be successful	83961.0
+PersonX achieves PersonX's goals	xReact	fulfilled	
+PersonX achieves PersonX's objectives	xAttr	smart	
+PersonX achieves PersonX's objectives	xIntent	to complete  the exact need	83630.0
+PersonX achieves PersonX's objectives	xReact	proud	
+PersonX achieves PersonX's potential	xAttr	hard working	
+PersonX achieves PersonX's potential	xIntent	to be capable.	81925.0
+PersonX achieves PersonX's potential	xReact	proud	
+PersonX achieves PersonY end	xAttr	accomplished	
+PersonX achieves PersonY end	xIntent	none	272707.0
+PersonX achieves PersonY end	xReact	concerned	
+PersonX achieves PersonY goal	xAttr	doesn't make sense	
+PersonX achieves PersonY goal	xIntent	to make happy	604137.0
+PersonX achieves PersonY goal	xReact	accomplished	
+PersonX achieves PersonY understanding	xAttr	peaceful	
+PersonX achieves PersonY understanding	xIntent	convice them	266251.0
+PersonX achieves PersonY understanding	xReact	re leaved happy	
+PersonX acquires PersonY interest	xAttr	Attractive	
+PersonX acquires PersonY interest	xIntent	none	276592.0
+PersonX acquires PersonY interest	xReact	great	
+PersonX acquires PersonY knowledge	xAttr	Skillful	
+PersonX acquires PersonY knowledge	xIntent	to be smarter	259876.0
+PersonX acquires PersonY knowledge	xReact	more intelligent	
+PersonX activates a shadow over everyone	xAttr	controlling	
+PersonX activates a shadow over everyone	xIntent	none	198197.0
+PersonX activates a shadow over everyone	xReact	evil	
+PersonX acts PersonX's age	xAttr	sagacious	
+PersonX acts PersonX's age	xIntent	to be seen as mature	213576.0
+PersonX acts PersonX's age	xReact	mature	
+PersonX acts as PersonY agent	xAttr	helpful	
+PersonX acts as PersonY agent	xIntent	to be act	119594.0
+PersonX acts as PersonY agent	xReact	obligated	
+PersonX acts as PersonY intermediary	xAttr	a go-between	
+PersonX acts as PersonY intermediary	xIntent	to be responsible	241942.0
+PersonX acts as PersonY intermediary	xReact	confident	
+PersonX acts funny	xAttr	high on drugs	
+PersonX acts funny	xIntent	to amuse someone.	531228.0
+PersonX acts funny	xReact	amusing	
+PersonX acts in PersonY capacity	xAttr	helpful	
+PersonX acts in PersonY capacity	xIntent	to honor his dead commander	253916.0
+PersonX acts in PersonY capacity	xReact	honorable	
+PersonX acts in PersonY manner	xAttr	observant	
+PersonX acts in PersonY manner	xIntent	to mock persony	241753.0
+PersonX acts in PersonY manner	xReact	guilty	
+PersonX acts in PersonY way	xAttr	similar	
+PersonX acts in PersonY way	xIntent	to achieve their success.	250184.0
+PersonX acts in PersonY way	xReact	satisfied	
+PersonX acts like PersonY	xAttr	understanding	
+PersonX acts like PersonY	xIntent	to be like person.	177390.0
+PersonX acts like PersonY	xReact	close to person	
+PersonX acts like a PersonY	xAttr	odd	
+PersonX acts like a PersonY	xIntent	to be viewed as normal in society.	121902.0
+PersonX acts like a PersonY	xReact	normal	
+PersonX acts like a man	xAttr	Strong	
+PersonX acts like a man	xIntent	to be mature	653969.0
+PersonX acts like a man	xReact	nervous	
+PersonX acts like men	xAttr	masculine	
+PersonX acts like men	xIntent	to be manly	263610.0
+PersonX acts like men	xReact	satisfied	
+PersonX acts on PersonX's behalf	xAttr	individualistic	
+PersonX acts on PersonX's behalf	xIntent	helpful.	111055.0
+PersonX acts on PersonX's behalf	xReact	useful.	
+PersonX acts on PersonY's behalf	xAttr	moody	
+PersonX acts on PersonY's behalf	xIntent	to help	88026.0
+PersonX acts on PersonY's behalf	xReact	like they've benefited	
+PersonX acts quickly	xAttr	nervous	
+PersonX acts quickly	xIntent	to gain an advantage	532229.0
+PersonX acts quickly	xReact	determined	
+PersonX acts strange	xAttr	odd	
+PersonX acts strange	xIntent	none	471040.0
+PersonX acts strange	xReact	like that's what's paid attention to	
+PersonX actually got	xAttr	determined	
+PersonX actually got	xIntent	none	498456.0
+PersonX actually got	xReact	surprised	
+PersonX adapts to PersonX's environment	xAttr	reliable	
+PersonX adapts to PersonX's environment	xIntent	none	89344.0
+PersonX adapts to PersonX's environment	xReact	comfortable	
+PersonX adapts to PersonY's environment	xAttr	flexible	
+PersonX adapts to PersonY's environment	xIntent	to fit in	104528.0
+PersonX adapts to PersonY's environment	xReact	at peace	
+PersonX adds PersonY excess	xAttr	friendly	
+PersonX adds PersonY excess	xIntent	none	266842.0
+PersonX adds PersonY excess	xReact	unhappy	
+PersonX adds butter	xAttr	compatent	
+PersonX adds butter	xIntent	to make the cake taste better	527964.0
+PersonX adds butter	xReact	determined	
+PersonX adds fuel to the fire	xAttr	emotional	
+PersonX adds fuel to the fire	xIntent	to create drama	220743.0
+PersonX adds fuel to the fire	xReact	evil	
+PersonX adds insult to injury	xAttr	ashamed	
+PersonX adds insult to injury	xIntent	to revenge on person	657875.0
+PersonX adds insult to injury	xReact	happy	
+PersonX adds oil	xAttr	hopeful	
+PersonX adds oil	xIntent	to cook	216989.0
+PersonX adds oil	xReact	active	
+PersonX adds salt	xAttr	content	
+PersonX adds salt	xIntent	to have a good meal	451730.0
+PersonX adds salt	xReact	hungry	
+PersonX adds to PersonX's collection	xAttr	rewarding	
+PersonX adds to PersonX's collection	xIntent	to admire it	574696.0
+PersonX adds to PersonX's collection	xReact	like it's worthy of admiration	
+PersonX adds to PersonX's knowledge	xAttr	studious	
+PersonX adds to PersonX's knowledge	xIntent	to always learn new things.	112514.0
+PersonX adds to PersonX's knowledge	xReact	ecstatic.	
+PersonX adds water	xAttr	smart	
+PersonX adds water	xIntent	to dilute their beverage	502119.0
+PersonX adds water	xReact	satisfied	
+PersonX adjusts PersonY's glasses	xAttr	assertive	
+PersonX adjusts PersonY's glasses	xIntent	to be comfortable	187305.0
+PersonX adjusts PersonY's glasses	xReact	comfortable	
+PersonX admires PersonY's work	xAttr	admirier	
+PersonX admires PersonY's work	xIntent	to be like person y	644851.0
+PersonX admires PersonY's work	xReact	envious	
+PersonX admits PersonY was wrong	xAttr	responsible	
+PersonX admits PersonY was wrong	xIntent	to be truthful	372109.0
+PersonX admits PersonY was wrong	xReact	justified	
+PersonX adopts PersonY approach	xAttr	flexible	
+PersonX adopts PersonY approach	xIntent	to be like the other person	109623.0
+PersonX adopts PersonY approach	xReact	better	
+PersonX adopts PersonY policy	xAttr	compliant	
+PersonX adopts PersonY policy	xIntent	to be more successful	267873.0
+PersonX adopts PersonY policy	xReact	determined interested	
+PersonX adopts a baby	xAttr	caring	
+PersonX adopts a baby	xIntent	to become a parent	697037.0
+PersonX adopts a baby	xReact	responsible	
+PersonX adopts a cat	xAttr	nurturing	
+PersonX adopts a cat	xIntent	to help an animal in need	404375.0
+PersonX adopts a cat	xReact	happy	
+PersonX adopts a child	xAttr	generous	
+PersonX adopts a child	xIntent	to have a child	476864.0
+PersonX adopts a child	xReact	happy	
+PersonX adopts a dog	xAttr	Caring	
+PersonX adopts a dog	xIntent	a companion	396511.0
+PersonX adopts a dog	xReact	loving	
+PersonX adopts a kitten	xAttr	caring	
+PersonX adopts a kitten	xIntent	companionship	466328.0
+PersonX adopts a kitten	xReact	alturistic	
+PersonX adopts a little girl	xAttr	compassionate	
+PersonX adopts a little girl	xIntent	to have a daughter.	366629.0
+PersonX adopts a little girl	xReact	amazing	
+PersonX adopts a new cat	xAttr	loving	
+PersonX adopts a new cat	xIntent	to have a pet	613781.0
+PersonX adopts a new cat	xReact	happy	
+PersonX adopts a pet	xAttr	caring	
+PersonX adopts a pet	xIntent	to have a friend.	407156.0
+PersonX adopts a pet	xReact	excited	
+PersonX adopts a puppy	xAttr	Loving	
+PersonX adopts a puppy	xIntent	to have a new friend	470962.0
+PersonX adopts a puppy	xReact	fulfilled	
+PersonX adopts one	xAttr	caring	
+PersonX adopts one	xIntent	to care for something	630527.0
+PersonX adopts one	xReact	caring	
+PersonX adopts the cat	xAttr	caring	
+PersonX adopts the cat	xIntent	to have a cuddle buddy at night	409928.0
+PersonX adopts the cat	xReact	happy	
+PersonX adopts the dog	xAttr	kind	
+PersonX adopts the dog	xIntent	they want the dog	403691.0
+PersonX adopts the dog	xReact	happy and maybe overwhelmed with new responsibility	
+PersonX adopts the kitten	xAttr	caring	
+PersonX adopts the kitten	xIntent	be affection	697241.0
+PersonX adopts the kitten	xReact	good for having a new friend	
+PersonX adopts the puppy	xAttr	caring	
+PersonX adopts the puppy	xIntent	to care for an animal	507696.0
+PersonX adopts the puppy	xReact	happy	
+PersonX advances PersonX's interests	xAttr	dedicated	
+PersonX advances PersonX's interests	xIntent	to get what they want	87006.0
+PersonX advances PersonX's interests	xReact	satisfied	
+PersonX advances toward PersonY	xAttr	brave	
+PersonX advances toward PersonY	xIntent	to talk	669793.0
+PersonX advances toward PersonY	xReact	frisky	
+PersonX advances towards PersonY	xAttr	threatening	
+PersonX advances towards PersonY	xIntent	to be near person	119027.0
+PersonX advances towards PersonY	xReact	affectionable	
+PersonX advances upon PersonY	xAttr	forcefull	
+PersonX advances upon PersonY	xIntent	talk	259634.0
+PersonX advances upon PersonY	xReact	interested happy	
+PersonX advises PersonY to go	xAttr	agreeable	
+PersonX advises PersonY to go	xIntent	to avoid a fight	670506.0
+PersonX advises PersonY to go	xReact	good	
+PersonX advises PersonY to take	xAttr	, scared	
+PersonX advises PersonY to take	xIntent	to inform another	270899.0
+PersonX advises PersonY to take	xReact	helpful	
+PersonX affects PersonX's health	xAttr	sickly	
+PersonX affects PersonX's health	xIntent	none	292811.0
+PersonX affects PersonX's health	xReact	unhealthy	
+PersonX affects PersonX's life	xAttr	responsible	
+PersonX affects PersonX's life	xIntent	none	107722.0
+PersonX affects PersonX's life	xReact	changed	
+PersonX affects PersonY's ability	xAttr	helpful	
+PersonX affects PersonY's ability	xIntent	none	129855.0
+PersonX affects PersonY's ability	xReact	surprised	
+PersonX affects PersonY's health	xAttr	aggravating	
+PersonX affects PersonY's health	xIntent	none	129362.0
+PersonX affects PersonY's health	xReact	nan	
+PersonX affects PersonY's life	xAttr	Careless	
+PersonX affects PersonY's life	xIntent	none	78276.0
+PersonX affects PersonY's life	xReact	nan	
+PersonX affects PersonY's lives	xAttr	influencial	
+PersonX affects PersonY's lives	xIntent	to be in control	586043.0
+PersonX affects PersonY's lives	xReact	obligated	
+PersonX affords PersonX's rent	xAttr	Spendthrift	
+PersonX affords PersonX's rent	xIntent	none	296560.0
+PersonX affords PersonX's rent	xReact	satisfied	
+PersonX affords PersonY opportunity	xAttr	caring	
+PersonX affords PersonY opportunity	xIntent	to be affords	84507.0
+PersonX affords PersonY opportunity	xReact	happy good satisfied	
+PersonX affords PersonY pleasure	xAttr	rich	
+PersonX affords PersonY pleasure	xIntent	to show affection	606382.0
+PersonX affords PersonY pleasure	xReact	helpful	
+PersonX affords PersonY the opportunity	xAttr	selfless.	
+PersonX affords PersonY the opportunity	xIntent	to be helpful	265616.0
+PersonX affords PersonY the opportunity	xReact	helpful	
+PersonX affords a car	xAttr	flashy	
+PersonX affords a car	xIntent	to get a vehicle	418411.0
+PersonX affords a car	xReact	content	
+PersonX affords a new one	xAttr	Successfull	
+PersonX affords a new one	xIntent	likes only new things	344467.0
+PersonX affords a new one	xReact	happy	
+PersonX affords anything	xAttr	well to do	
+PersonX affords anything	xIntent	to spend money	415736.0
+PersonX affords anything	xReact	affluent	
+PersonX affords braces	xAttr	wealthy	
+PersonX affords braces	xIntent	straighter teeth.	422328.0
+PersonX affords braces	xReact	lucky	
+PersonX affords college	xAttr	well off	
+PersonX affords college	xIntent	to get an education	697209.0
+PersonX affords college	xReact	successful	
+PersonX affords one	xAttr	content	
+PersonX affords one	xIntent	to enjoy something nice	387236.0
+PersonX affords one	xReact	happy	
+PersonX affords the trip	xAttr	rich	
+PersonX affords the trip	xIntent	a vacation	412159.0
+PersonX affords the trip	xReact	happy	
+PersonX affords to buy one	xAttr	succuessful	
+PersonX affords to buy one	xIntent	none	345259.0
+PersonX affords to buy one	xReact	pleased	
+PersonX affords to fix it	xAttr	rich	
+PersonX affords to fix it	xIntent	to have it running.	412561.0
+PersonX affords to fix it	xReact	relieved	
+PersonX agrees and went	xAttr	amicable	
+PersonX agrees and went	xIntent	to go experience something new.	416647.0
+PersonX agrees and went	xReact	contrite	
+PersonX agrees to a date	xAttr	happy	
+PersonX agrees to a date	xIntent	a partner	410728.0
+PersonX agrees to a date	xReact	excited	
+PersonX agrees to go	xAttr	cooperative	
+PersonX agrees to go	xIntent	to get out and do something	399275.0
+PersonX agrees to go	xReact	happy	
+PersonX agrees to go with PersonY	xAttr	brave	
+PersonX agrees to go with PersonY	xIntent	to go on a date	342337.0
+PersonX agrees to go with PersonY	xReact	happy	
+PersonX agrees to help PersonY	xAttr	friendly	
+PersonX agrees to help PersonY	xIntent	to be friendly.	363756.0
+PersonX agrees to help PersonY	xReact	like a good person	
+PersonX agrees to take PersonY	xAttr	Responsible	
+PersonX agrees to take PersonY	xIntent	to lend a hand	365504.0
+PersonX agrees to take PersonY	xReact	happy.	
+PersonX agrees to the date	xAttr	nervous	
+PersonX agrees to the date	xIntent	to get to know someone	688762.0
+PersonX agrees to the date	xReact	excited	
+PersonX agrees to try it	xAttr	agreeable	
+PersonX agrees to try it	xIntent	to have something new	431678.0
+PersonX agrees to try it	xReact	disappointed	
+PersonX agrees upon by the parties	xAttr	wise	
+PersonX agrees upon by the parties	xIntent	to be agreeable	606487.0
+PersonX agrees upon by the parties	xReact	satisfied	
+PersonX aims PersonX's gun	xAttr	fierce	
+PersonX aims PersonX's gun	xIntent	to shoot the gun	296289.0
+PersonX aims PersonX's gun	xReact	terrified	
+PersonX airs PersonX's dirty laundry in public	xAttr	Untrustworthy	
+PersonX airs PersonX's dirty laundry in public	xIntent	for the world to know x's problems	214969.0
+PersonX airs PersonX's dirty laundry in public	xReact	relieved	
+PersonX allays PersonX's fears	xAttr	scared	
+PersonX allays PersonX's fears	xIntent	to feel better	87114.0
+PersonX allays PersonX's fears	xReact	relieved	
+PersonX allays PersonY's fears	xAttr	Helpful	
+PersonX allays PersonY's fears	xIntent	to soothe y	94910.0
+PersonX allays PersonY's fears	xReact	proud	
+PersonX allergic to cats	xAttr	sneezy	
+PersonX allergic to cats	xIntent	none	494413.0
+PersonX allergic to cats	xReact	indifferent.	
+PersonX allergic to peanuts	xAttr	fragile	
+PersonX allergic to peanuts	xIntent	none	473963.0
+PersonX allergic to peanuts	xReact	sick	
+PersonX allows PersonY access	xAttr	agreeable	
+PersonX allows PersonY access	xIntent	to let someone in somewhere	241460.0
+PersonX allows PersonY access	xReact	happy about achieving his goal.	
+PersonX allows PersonY time	xAttr	accomodating	
+PersonX allows PersonY time	xIntent	to be kind	109558.0
+PersonX allows PersonY time	xReact	good	
+PersonX allows PersonY to keep the dog	xAttr	in room	
+PersonX allows PersonY to keep the dog	xIntent	to be nice	360578.0
+PersonX allows PersonY to keep the dog	xReact	warm and fuzzy	
+PersonX allows pets	xAttr	understanding	
+PersonX allows pets	xIntent	to be kind	437046.0
+PersonX allows pets	xReact	excited	
+PersonX almost gave	xAttr	reserved	
+PersonX almost gave	xIntent	none	473484.0
+PersonX almost gave	xReact	tricked	
+PersonX almost gave up	xAttr	careless	
+PersonX almost gave up	xIntent	to persevere	484780.0
+PersonX almost gave up	xReact	determined	
+PersonX almost hit	xAttr	clumsy	
+PersonX almost hit	xIntent	none	459240.0
+PersonX almost hit	xReact	angry.	
+PersonX almost hit PersonY	xAttr	careless	
+PersonX almost hit PersonY	xIntent	none	340054.0
+PersonX almost hit PersonY	xReact	sad	
+PersonX almost lost	xAttr	fortunate	
+PersonX almost lost	xIntent	none	453231.0
+PersonX almost lost	xReact	relieved	
+PersonX almost ran	xAttr	scared	
+PersonX almost ran	xIntent	to avoid consequences	443256.0
+PersonX almost ran	xReact	relived	
+PersonX also asked	xAttr	curious	
+PersonX also asked	xIntent	to know something	477677.0
+PersonX also asked	xReact	got the information	
+PersonX also asked PersonY	xAttr	curious	
+PersonX also asked PersonY	xIntent	answers	167922.0
+PersonX also asked PersonY	xReact	informed	
+PersonX also ate	xAttr	hungry	
+PersonX also ate	xIntent	food	694531.0
+PersonX also ate	xReact	full	
+PersonX also bought	xAttr	dependent	
+PersonX also bought	xIntent	to buy another item	403941.0
+PersonX also bought	xReact	satisfied	
+PersonX also found	xAttr	Focused	
+PersonX also found	xIntent	none	471275.0
+PersonX also found	xReact	like they found it too	
+PersonX also gave	xAttr	generous	
+PersonX also gave	xIntent	to be nice	700717.0
+PersonX also gave	xReact	happy	
+PersonX also gave PersonY	xAttr	Giver	
+PersonX also gave PersonY	xIntent	to be giving	592199.0
+PersonX also gave PersonY	xReact	appreciative	
+PersonX also got	xAttr	copying	
+PersonX also got	xIntent	to acquire something	389186.0
+PersonX also got	xReact	satisfied	
+PersonX also grabbed	xAttr	greedy	
+PersonX also grabbed	xIntent	to take something somewhere	533005.0
+PersonX also grabbed	xReact	obligated	
+PersonX also helped	xAttr	useful	
+PersonX also helped	xIntent	to be of service	497931.0
+PersonX also helped	xReact	contributory	
+PersonX also kept	xAttr	sentimental	
+PersonX also kept	xIntent	to save it	689814.0
+PersonX also kept	xReact	content to still have it	
+PersonX also knew	xAttr	Secretive	
+PersonX also knew	xIntent	none	689909.0
+PersonX also knew	xReact	knowing	
+PersonX also made	xAttr	dutiful	
+PersonX also made	xIntent	to make something	623925.0
+PersonX also made	xReact	determined	
+PersonX also noticed	xAttr	perceptive	
+PersonX also noticed	xIntent	none	422181.0
+PersonX also noticed	xReact	aware	
+PersonX also picked	xAttr	observant	
+PersonX also picked	xIntent	to have a certain kind	411087.0
+PersonX also picked	xReact	satisfied	
+PersonX also played	xAttr	talented	
+PersonX also played	xIntent	to play too	471806.0
+PersonX also played	xReact	good for playing as well	
+PersonX also practiced	xAttr	dedicated	
+PersonX also practiced	xIntent	to become better at playing	625400.0
+PersonX also practiced	xReact	happy	
+PersonX also read	xAttr	scholarly	
+PersonX also read	xIntent	to be informed	415989.0
+PersonX also read	xReact	informed	
+PersonX also said	xAttr	thoughtful	
+PersonX also said	xIntent	say something	500994.0
+PersonX also said	xReact	neutral	
+PersonX also set	xAttr	disciplined	
+PersonX also set	xIntent	to mount	416314.0
+PersonX also set	xReact	prepared	
+PersonX also told PersonY	xAttr	Social	
+PersonX also told PersonY	xIntent	to inform person of gossip	154973.0
+PersonX also told PersonY	xReact	gossipy	
+PersonX also took PersonY	xAttr	nice	
+PersonX also took PersonY	xIntent	person to know what's happening	190096.0
+PersonX also took PersonY	xReact	like they did a good deed	
+PersonX also tried	xAttr	Follower	
+PersonX also tried	xIntent	to get jackpot	696217.0
+PersonX also tried	xReact	disappointed	
+PersonX also turned	xAttr	apprehensive	
+PersonX also turned	xIntent	to go on his way	418890.0
+PersonX also turned	xReact	angry	
+PersonX also watched	xAttr	curious	
+PersonX also watched	xIntent	to be alert	513479.0
+PersonX also watched	xReact	prepared	
+PersonX always admired	xAttr	likeable	
+PersonX always admired	xIntent	none	510313.0
+PersonX always admired	xReact	like that persons work is highly notable	
+PersonX always beats	xAttr	disciplined	
+PersonX always beats	xIntent	to show his austerity	435481.0
+PersonX always beats	xReact	sorry for his act	
+PersonX always bragged	xAttr	annoying	
+PersonX always bragged	xIntent	to impress others	512358.0
+PersonX always bragged	xReact	better about themselves	
+PersonX always buy	xAttr	wealthy	
+PersonX always buy	xIntent	to be liked	431885.0
+PersonX always buy	xReact	content	
+PersonX always drank	xAttr	addicted	
+PersonX always drank	xIntent	to be hammered	636521.0
+PersonX always drank	xReact	bad	
+PersonX always failed	xAttr	unsuccessful	
+PersonX always failed	xIntent	none	425741.0
+PersonX always failed	xReact	bad	
+PersonX always felt	xAttr	unchanged	
+PersonX always felt	xIntent	none	622415.0
+PersonX always felt	xReact	sad	
+PersonX always forgot	xAttr	forgetful	
+PersonX always forgot	xIntent	none	503200.0
+PersonX always forgot	xReact	embarrased	
+PersonX always fought	xAttr	angry	
+PersonX always fought	xIntent	to be a bully	533411.0
+PersonX always fought	xReact	angry	
+PersonX always gave	xAttr	generous	
+PersonX always gave	xIntent	to be a giving person	635584.0
+PersonX always gave	xReact	altruistic	
+PersonX always get	xAttr	habitual	
+PersonX always get	xIntent	none	510961.0
+PersonX always get	xReact	happy about it	
+PersonX always gets	xAttr	thankful	
+PersonX always gets	xIntent	to obtain something	528619.0
+PersonX always gets	xReact	happy	
+PersonX always left	xAttr	disappointing	
+PersonX always left	xIntent	to be seperate	634276.0
+PersonX always left	xReact	sorry for his decision	
+PersonX always liked	xAttr	popular	
+PersonX always liked	xIntent	none	686020.0
+PersonX always liked	xReact	desire	
+PersonX always listened	xAttr	open	
+PersonX always listened	xIntent	to be a good friend	428921.0
+PersonX always listened	xReact	responsible	
+PersonX always looked	xAttr	attentive	
+PersonX always looked	xIntent	to check both sides of the roads	474752.0
+PersonX always looked	xReact	safe	
+PersonX always looked forward	xAttr	Dreamer	
+PersonX always looked forward	xIntent	none	369666.0
+PersonX always looked forward	xReact	happy	
+PersonX always played	xAttr	Carefree	
+PersonX always played	xIntent	to always play	401673.0
+PersonX always played	xReact	playful	
+PersonX always ran	xAttr	fitness freak	
+PersonX always ran	xIntent	to be the first one there	692093.0
+PersonX always ran	xReact	fast	
+PersonX always refused	xAttr	annoyed	
+PersonX always refused	xIntent	to be alone	429280.0
+PersonX always refused	xReact	justified	
+PersonX always slept	xAttr	lazy	
+PersonX always slept	xIntent	to be rested	426550.0
+PersonX always slept	xReact	energized	
+PersonX always stayed	xAttr	helpful	
+PersonX always stayed	xIntent	to be there	634105.0
+PersonX always stayed	xReact	happy	
+PersonX always struggled	xAttr	incompetant	
+PersonX always struggled	xIntent	none	413283.0
+PersonX always struggled	xReact	nervous	
+PersonX always teased	xAttr	naughty	
+PersonX always teased	xIntent	to be a bully	435366.0
+PersonX always teased	xReact	happy about it	
+PersonX always thought	xAttr	confident	
+PersonX always thought	xIntent	think outside the box	384759.0
+PersonX always thought	xReact	confused	
+PersonX always told	xAttr	a tattletale	
+PersonX always told	xIntent	none	390539.0
+PersonX always told	xReact	smile	
+PersonX always told PersonY	xAttr	helpful	
+PersonX always told PersonY	xIntent	to be honest	661225.0
+PersonX always told PersonY	xReact	useful	
+PersonX always took	xAttr	Mobile	
+PersonX always took	xIntent	to get them all.	405254.0
+PersonX always took	xReact	satisfied.	
+PersonX always tried	xAttr	lazy	
+PersonX always tried	xIntent	to do their best always	623961.0
+PersonX always tried	xReact	successful	
+PersonX always try	xAttr	hardworking	
+PersonX always try	xIntent	to do their best	414372.0
+PersonX always try	xReact	proud	
+PersonX always used	xAttr	responsible	
+PersonX always used	xIntent	to utilize something	403405.0
+PersonX always used	xReact	typical	
+PersonX always walked	xAttr	better	
+PersonX always walked	xIntent	to lose weight	491356.0
+PersonX always walked	xReact	relaxed	
+PersonX always wanted a dog	xAttr	needy	
+PersonX always wanted a dog	xIntent	love	364710.0
+PersonX always wanted a dog	xReact	yearning	
+PersonX always wanted a kitten	xAttr	wanting	
+PersonX always wanted a kitten	xIntent	a kitten	441904.0
+PersonX always wanted a kitten	xReact	sad	
+PersonX always wanted a puppy	xAttr	Loving	
+PersonX always wanted a puppy	xIntent	to be entertained	364908.0
+PersonX always wanted a puppy	xReact	happy	
+PersonX always wanted to go to	xAttr	Excited	
+PersonX always wanted to go to	xIntent	none	348148.0
+PersonX always wanted to go to	xReact	anxious	
+PersonX always wants	xAttr	desirous	
+PersonX always wants	xIntent	none	632350.0
+PersonX always wants	xReact	unsatisfied	
+PersonX always watched	xAttr	peeper	
+PersonX always watched	xIntent	to know the daily news	637062.0
+PersonX always watched	xReact	relaxed	
+PersonX always wear	xAttr	fashionable	
+PersonX always wear	xIntent	to establish order	697620.0
+PersonX always wear	xReact	orderly	
+PersonX always wears	xAttr	stylish	
+PersonX always wears	xIntent	to wear their favorite things	625552.0
+PersonX always wears	xReact	like they don't like change	
+PersonX always went	xAttr	dependable	
+PersonX always went	xIntent	to be a loyal fan.	623407.0
+PersonX always went	xReact	good.	
+PersonX always wished	xAttr	wishful	
+PersonX always wished	xIntent	to increase their luck	634668.0
+PersonX always wished	xReact	hopeful	
+PersonX always wondered	xAttr	curious	
+PersonX always wondered	xIntent	to know.	459669.0
+PersonX always wondered	xReact	curious.	
+PersonX announces PersonX's intention	xAttr	open minded	
+PersonX announces PersonX's intention	xIntent	to inform others.	588235.0
+PersonX announces PersonX's intention	xReact	relaxed	
+PersonX announces PersonY's arrival	xAttr	responsible	
+PersonX announces PersonY's arrival	xIntent	to say something	119827.0
+PersonX announces PersonY's arrival	xReact	like shouting.	
+PersonX announces PersonY's intention	xAttr	deceitful	
+PersonX announces PersonY's intention	xIntent	persony to be honest	654061.0
+PersonX announces PersonY's intention	xReact	satisfied	
+PersonX announces the winner	xAttr	judgmental	
+PersonX announces the winner	xIntent	to recognize the winner	700557.0
+PersonX announces the winner	xReact	grateful	
+PersonX announces the winners	xAttr	extraverted	
+PersonX announces the winners	xIntent	to recognize the best performers	626527.0
+PersonX announces the winners	xReact	content	
+PersonX announces to everyone	xAttr	excited	
+PersonX announces to everyone	xIntent	to share news	440714.0
+PersonX announces to everyone	xReact	heard	
+PersonX anoints PersonY with oil	xAttr	holy	
+PersonX anoints PersonY with oil	xIntent	to bring them into the ceremony.	263665.0
+PersonX anoints PersonY with oil	xReact	like a leader.	
+PersonX answers PersonY questions	xAttr	helpful	
+PersonX answers PersonY questions	xIntent	inform	88943.0
+PersonX answers PersonY questions	xReact	calm	
+PersonX answers PersonY's phone	xAttr	helpful	
+PersonX answers PersonY's phone	xIntent	to know who is calling	177491.0
+PersonX answers PersonY's phone	xReact	guilty	
+PersonX answers PersonY's questions	xAttr	resourceful	
+PersonX answers PersonY's questions	xIntent	to respond	189615.0
+PersonX answers PersonY's questions	xReact	responsible	
+PersonX answers all the questions	xAttr	correct	
+PersonX answers all the questions	xIntent	do their best on the test	508903.0
+PersonX answers all the questions	xReact	proud	
+PersonX answers every question	xAttr	smart	
+PersonX answers every question	xIntent	to provide knowledge	254199.0
+PersonX answers every question	xReact	happy	
+PersonX answers questions	xAttr	responsive	
+PersonX answers questions	xIntent	to be smart	503408.0
+PersonX answers questions	xReact	inspired	
+PersonX answers the call	xAttr	responsible	
+PersonX answers the call	xIntent	to talk to their friend	529983.0
+PersonX answers the call	xReact	happy	
+PersonX answers the phone	xAttr	friendly	
+PersonX answers the phone	xIntent	none	392220.0
+PersonX answers the phone	xReact	like he is communicating	
+PersonX answers the questions	xAttr	smart	
+PersonX answers the questions	xIntent	show she is smart	530660.0
+PersonX answers the questions	xReact	relieved.	
+PersonX anxiously awaited	xAttr	nervous	
+PersonX anxiously awaited	xIntent	to get result of his interview	693158.0
+PersonX anxiously awaited	xReact	anticipation	
+PersonX apologizes profusely	xAttr	remorseful	
+PersonX apologizes profusely	xIntent	to be forgiven	387367.0
+PersonX apologizes profusely	xReact	remorseful	
+PersonX apologizes to PersonX's boss	xAttr	upset	
+PersonX apologizes to PersonX's boss	xIntent	make ammends	294631.0
+PersonX apologizes to PersonX's boss	xReact	satisfied	
+PersonX appears among PersonY	xAttr	engaged	
+PersonX appears among PersonY	xIntent	to show up their	275297.0
+PersonX appears among PersonY	xReact	like they made it their	
+PersonX appears on PersonY's face	xAttr	friendly	
+PersonX appears on PersonY's face	xIntent	none	171431.0
+PersonX appears on PersonY's face	xReact	embarassed	
+PersonX appears out of nowhere	xAttr	sneaky	
+PersonX appears out of nowhere	xIntent	to be sneaky	509835.0
+PersonX appears out of nowhere	xReact	magical	
+PersonX applies for a credit card	xAttr	desperate	
+PersonX applies for a credit card	xIntent	to spend lavishly	683210.0
+PersonX applies for a credit card	xReact	happy	
+PersonX applies for a job	xAttr	hopeful	
+PersonX applies for a job	xIntent	a new career	393819.0
+PersonX applies for a job	xReact	hopeful	
+PersonX applies for a new job	xAttr	mature	
+PersonX applies for a new job	xIntent	to make money to pay bills	337110.0
+PersonX applies for a new job	xReact	happy to have gotten the job	
+PersonX applies for college	xAttr	happy	
+PersonX applies for college	xIntent	to attend college	434149.0
+PersonX applies for college	xReact	smart	
+PersonX applies for food stamps	xAttr	Needy	
+PersonX applies for food stamps	xIntent	to buy food	349822.0
+PersonX applies for food stamps	xReact	embarassed	
+PersonX applies for many jobs	xAttr	consistent	
+PersonX applies for many jobs	xIntent	to be successful	331921.0
+PersonX applies for many jobs	xReact	hopeful	
+PersonX applies for the job	xAttr	responsible	
+PersonX applies for the job	xIntent	to make more money	513085.0
+PersonX applies for the job	xReact	hopeful	
+PersonX applies lotion	xAttr	healthy	
+PersonX applies lotion	xIntent	to heal her try skin	420340.0
+PersonX applies lotion	xReact	soft	
+PersonX applies oneself	xAttr	hard working	
+PersonX applies oneself	xIntent	to be the best he can be.	211588.0
+PersonX applies oneself	xReact	more informed.	
+PersonX applies the dye	xAttr	crafty	
+PersonX applies the dye	xIntent	to look good	530234.0
+PersonX applies the dye	xReact	good	
+PersonX applies to college	xAttr	nervous	
+PersonX applies to college	xIntent	to further their education	508652.0
+PersonX applies to college	xReact	nervous	
+PersonX applies to colleges	xAttr	studious	
+PersonX applies to colleges	xIntent	to go to college	526886.0
+PersonX applies to colleges	xReact	accomplished	
+PersonX applies to many jobs	xAttr	broke	
+PersonX applies to many jobs	xIntent	to be employed	336021.0
+PersonX applies to many jobs	xReact	nervous	
+PersonX appreciates PersonY's effort	xAttr	gracious	
+PersonX appreciates PersonY's effort	xIntent	person y to know they are appreciated	319531.0
+PersonX appreciates PersonY's effort	xReact	good thankful	
+PersonX appreciates the effort	xAttr	supportive	
+PersonX appreciates the effort	xIntent	none	523575.0
+PersonX appreciates the effort	xReact	content that they at least tried	
+PersonX appreciates the gesture	xAttr	thankful	
+PersonX appreciates the gesture	xIntent	to be thankful	636286.0
+PersonX appreciates the gesture	xReact	happy	
+PersonX approaches PersonX's crush	xAttr	bold	
+PersonX approaches PersonX's crush	xIntent	to make a good impression on their crush	312022.0
+PersonX approaches PersonX's crush	xReact	shy	
+PersonX approaches PersonY's crush	xAttr	curious	
+PersonX approaches PersonY's crush	xIntent	to tell her about persony	677055.0
+PersonX approaches PersonY's crush	xReact	talkative	
+PersonX argues PersonX's case	xAttr	informed	
+PersonX argues PersonX's case	xIntent	to get approval	110244.0
+PersonX argues PersonX's case	xReact	like they helped.	
+PersonX argues PersonY's case	xAttr	passionate	
+PersonX argues PersonY's case	xIntent	to defend y	123054.0
+PersonX argues PersonY's case	xReact	responsible	
+PersonX arms to the teeth	xAttr	hostile	
+PersonX arms to the teeth	xIntent	to be prepaired	601661.0
+PersonX arms to the teeth	xReact	justified	
+PersonX army volunteers	xAttr	generous	
+PersonX army volunteers	xIntent	to give to the community	234794.0
+PersonX army volunteers	xReact	exhausted but accomplished	
+PersonX arouses PersonY interest	xAttr	captivated	
+PersonX arouses PersonY interest	xIntent	to get to know y	263873.0
+PersonX arouses PersonY interest	xReact	hopeful	
+PersonX arouses PersonY's interest	xAttr	special	
+PersonX arouses PersonY's interest	xIntent	to be intriguing	107513.0
+PersonX arouses PersonY's interest	xReact	apparently equally aroused & ready.	
+PersonX arranges PersonY in order	xAttr	helpful	
+PersonX arranges PersonY in order	xIntent	to create a line	278373.0
+PersonX arranges PersonY in order	xReact	powerful	
+PersonX arranges PersonY interview	xAttr	benevolent	
+PersonX arranges PersonY interview	xIntent	to analyze	270093.0
+PersonX arranges PersonY interview	xReact	proud	
+PersonX arrives back	xAttr	responsible	
+PersonX arrives back	xIntent	to come	524064.0
+PersonX arrives back	xReact	at home	
+PersonX arrives back home	xAttr	thankful	
+PersonX arrives back home	xIntent	to rest	189990.0
+PersonX arrives back home	xReact	well rested	
+PersonX arrives early	xAttr	punctual	
+PersonX arrives early	xIntent	not to be late,	686601.0
+PersonX arrives early	xReact	happy	
+PersonX arrives in class	xAttr	studious	
+PersonX arrives in class	xIntent	to pass the class	445402.0
+PersonX arrives in class	xReact	ready to learn	
+PersonX arrives in time	xAttr	punctual.	
+PersonX arrives in time	xIntent	to be punctual	453987.0
+PersonX arrives in time	xReact	positive	
+PersonX arrives late	xAttr	lazy	
+PersonX arrives late	xIntent	none	457449.0
+PersonX arrives late	xReact	sorry	
+PersonX arrives on time	xAttr	timely	
+PersonX arrives on time	xIntent	to work	459515.0
+PersonX arrives on time	xReact	good.	
+PersonX arrives quickly	xAttr	late	
+PersonX arrives quickly	xIntent	to get somewhere fast	531491.0
+PersonX arrives quickly	xReact	accomplished	
+PersonX arrives safely	xAttr	responsible	
+PersonX arrives safely	xIntent	none	475704.0
+PersonX arrives safely	xReact	satisfied	
+PersonX arrives the next day	xAttr	late	
+PersonX arrives the next day	xIntent	to go on vacation	361657.0
+PersonX arrives the next day	xReact	happy.	
+PersonX arrives to class	xAttr	punctual	
+PersonX arrives to class	xIntent	to learn math	702298.0
+PersonX arrives to class	xReact	determined.	
+PersonX arrives to pick PersonY up	xAttr	friendly	
+PersonX arrives to pick PersonY up	xIntent	to go some where with persony	362317.0
+PersonX arrives to pick PersonY up	xReact	like he had a great time	
+PersonX arrives to school	xAttr	prepared	
+PersonX arrives to school	xIntent	a good job.	430336.0
+PersonX arrives to school	xReact	educated	
+PersonX arrives today	xAttr	Adventurous	
+PersonX arrives today	xIntent	to attend the meeting	444717.0
+PersonX arrives today	xReact	glad they survived the journey	
+PersonX asks PersonX's brother	xAttr	curious	
+PersonX asks PersonX's brother	xIntent	to find something out	294230.0
+PersonX asks PersonX's brother	xReact	upset	
+PersonX asks PersonX's crush	xAttr	curious	
+PersonX asks PersonX's crush	xIntent	to be noticed	280952.0
+PersonX asks PersonX's crush	xReact	excited	
+PersonX asks PersonX's daughter	xAttr	curious	
+PersonX asks PersonX's daughter	xIntent	to know the answer to a question	297359.0
+PersonX asks PersonX's daughter	xReact	informed	
+PersonX asks PersonX's family	xAttr	honest	
+PersonX asks PersonX's family	xIntent	to get family blessing	675723.0
+PersonX asks PersonX's family	xReact	satisfied	
+PersonX asks PersonX's friend PersonY	xAttr	curious	
+PersonX asks PersonX's friend PersonY	xIntent	the answer to a question	289158.0
+PersonX asks PersonX's friend PersonY	xReact	satisfied	
+PersonX asks PersonX's friend for advice	xAttr	needy	
+PersonX asks PersonX's friend for advice	xIntent	to figure out something	279729.0
+PersonX asks PersonX's friend for advice	xReact	relieved	
+PersonX asks PersonX's friend for help	xAttr	cared for	
+PersonX asks PersonX's friend for help	xIntent	advice	316936.0
+PersonX asks PersonX's friend for help	xReact	relieved	
+PersonX asks PersonX's friends for advice	xAttr	uncertain	
+PersonX asks PersonX's friends for advice	xIntent	help with a dilemma	282182.0
+PersonX asks PersonX's friends for advice	xReact	concerned	
+PersonX asks PersonX's friends for help	xAttr	humble	
+PersonX asks PersonX's friends for help	xIntent	help with doing something	320537.0
+PersonX asks PersonX's friends for help	xReact	like he has people to turn to	
+PersonX asks PersonX's girlfriend	xAttr	nervous	
+PersonX asks PersonX's girlfriend	xIntent	to find out something	281772.0
+PersonX asks PersonX's girlfriend	xReact	satisfied	
+PersonX asks PersonX's husband	xAttr	helpless	
+PersonX asks PersonX's husband	xIntent	to argue	286223.0
+PersonX asks PersonX's husband	xReact	communicative	
+PersonX asks PersonX's kids	xAttr	inquisitive	
+PersonX asks PersonX's kids	xIntent	get their opinion	284372.0
+PersonX asks PersonX's kids	xReact	good	
+PersonX asks PersonX's manager	xAttr	inquisitive	
+PersonX asks PersonX's manager	xIntent	get a promotion	316531.0
+PersonX asks PersonX's manager	xReact	fine	
+PersonX asks PersonX's mom for help	xAttr	dependent	
+PersonX asks PersonX's mom for help	xIntent	to receive an advice	675525.0
+PersonX asks PersonX's mom for help	xReact	grateful	
+PersonX asks PersonX's neighbor	xAttr	curious	
+PersonX asks PersonX's neighbor	xIntent	introduce	284487.0
+PersonX asks PersonX's neighbor	xReact	relieved	
+PersonX asks PersonX's neighbors	xAttr	dependent	
+PersonX asks PersonX's neighbors	xIntent	to know something	294112.0
+PersonX asks PersonX's neighbors	xReact	curious	
+PersonX asks PersonX's parents for one	xAttr	hopeful	
+PersonX asks PersonX's parents for one	xIntent	help	315971.0
+PersonX asks PersonX's parents for one	xReact	satisfied	
+PersonX asks PersonX's roommate	xAttr	social	
+PersonX asks PersonX's roommate	xIntent	to ask something to the roommate and get friendship	307014.0
+PersonX asks PersonX's roommate	xReact	happy and good	
+PersonX asks PersonX's son	xAttr	Inquisitive	
+PersonX asks PersonX's son	xIntent	him to go get the groceries	577248.0
+PersonX asks PersonX's son	xReact	curious	
+PersonX asks PersonX's wife	xAttr	thoughtful	
+PersonX asks PersonX's wife	xIntent	to celeberate	645307.0
+PersonX asks PersonX's wife	xReact	anxious to get he help	
+PersonX asks PersonY a question	xAttr	curious	
+PersonX asks PersonY a question	xIntent	learn something new.	164062.0
+PersonX asks PersonY a question	xReact	inquisitive, because they want an answer.	
+PersonX asks PersonY a questions	xAttr	nosy	
+PersonX asks PersonY a questions	xIntent	to know the answer	107022.0
+PersonX asks PersonY a questions	xReact	more knowledgeable	
+PersonX asks PersonY advice	xAttr	curious	
+PersonX asks PersonY advice	xIntent	to know how to do something	242950.0
+PersonX asks PersonY advice	xReact	better and relieve	
+PersonX asks PersonY anything	xAttr	inquisitive	
+PersonX asks PersonY anything	xIntent	to know the truth.	241788.0
+PersonX asks PersonY anything	xReact	satisfied	
+PersonX asks PersonY for PersonZ's number	xAttr	interested	
+PersonX asks PersonY for PersonZ's number	xIntent	to ask personz on a date	307383.0
+PersonX asks PersonY for PersonZ's number	xReact	nervous	
+PersonX asks PersonY for a date	xAttr	shy	
+PersonX asks PersonY for a date	xIntent	to have a relationship	328055.0
+PersonX asks PersonY for a date	xReact	nervous	
+PersonX asks PersonY for a pencil	xAttr	friendly	
+PersonX asks PersonY for a pencil	xIntent	to take a test	360385.0
+PersonX asks PersonY for a pencil	xReact	accomplished	
+PersonX asks PersonY for help	xAttr	dependent	
+PersonX asks PersonY for help	xIntent	to do the best he can	194753.0
+PersonX asks PersonY for help	xReact	grateful for the help	
+PersonX asks PersonY had happened	xAttr	curious	
+PersonX asks PersonY had happened	xIntent	to understand	606665.0
+PersonX asks PersonY had happened	xReact	informed	
+PersonX asks PersonY if had seen	xAttr	Active	
+PersonX asks PersonY if had seen	xIntent	to know something	672638.0
+PersonX asks PersonY if had seen	xReact	informed	
+PersonX asks PersonY if wanted	xAttr	thoughtful	
+PersonX asks PersonY if wanted	xIntent	something from person	96075.0
+PersonX asks PersonY if wanted	xReact	happy	
+PersonX asks PersonY if would be	xAttr	inquisitive	
+PersonX asks PersonY if would be	xIntent	to establish a relationship	265668.0
+PersonX asks PersonY if would be	xReact	relieved	
+PersonX asks PersonY if would like	xAttr	courteous	
+PersonX asks PersonY if would like	xIntent	to be asks	105573.0
+PersonX asks PersonY if would like	xReact	happy	
+PersonX asks PersonY liked	xAttr	questioning	
+PersonX asks PersonY liked	xIntent	to know if they liked it	274964.0
+PersonX asks PersonY liked	xReact	like they care about there likes and dislikes	
+PersonX asks PersonY meant	xAttr	curious	
+PersonX asks PersonY meant	xIntent	the details	104911.0
+PersonX asks PersonY meant	xReact	to get news	
+PersonX asks PersonY mom	xAttr	submissive	
+PersonX asks PersonY mom	xIntent	to ask a question	132215.0
+PersonX asks PersonY mom	xReact	good that they have an answer	
+PersonX asks PersonY on a date	xAttr	Bold	
+PersonX asks PersonY on a date	xIntent	to go out with the person	132283.0
+PersonX asks PersonY on a date	xReact	elated	
+PersonX asks PersonY opinion	xAttr	Interested	
+PersonX asks PersonY opinion	xIntent	to know their viewpoint	584962.0
+PersonX asks PersonY opinion	xReact	more knowing	
+PersonX asks PersonY out on a date	xAttr	nervous	
+PersonX asks PersonY out on a date	xIntent	to get to know the person better	132085.0
+PersonX asks PersonY out on a date	xReact	happy	
+PersonX asks PersonY question	xAttr	curious	
+PersonX asks PersonY question	xIntent	to know something	589499.0
+PersonX asks PersonY question	xReact	curious	
+PersonX asks PersonY questions	xAttr	curious	
+PersonX asks PersonY questions	xIntent	to know what happened	241528.0
+PersonX asks PersonY questions	xReact	informed	
+PersonX asks PersonY some questions	xAttr	curious	
+PersonX asks PersonY some questions	xIntent	information from person	114337.0
+PersonX asks PersonY some questions	xReact	neutral	
+PersonX asks PersonY something	xAttr	inquisitve	
+PersonX asks PersonY something	xIntent	to gain information.	154232.0
+PersonX asks PersonY something	xReact	helped.	
+PersonX asks PersonY the question	xAttr	curious	
+PersonX asks PersonY the question	xIntent	to get an answer	75198.0
+PersonX asks PersonY the question	xReact	better	
+PersonX asks PersonY the reason	xAttr	curious	
+PersonX asks PersonY the reason	xIntent	to know things	271140.0
+PersonX asks PersonY the reason	xReact	understanding	
+PersonX asks PersonY thought	xAttr	curious	
+PersonX asks PersonY thought	xIntent	to feel close to person	83369.0
+PersonX asks PersonY thought	xReact	good	
+PersonX asks PersonY to accept	xAttr	gracious	
+PersonX asks PersonY to accept	xIntent	to share	263237.0
+PersonX asks PersonY to accept	xReact	nervous	
+PersonX asks PersonY to accompany	xAttr	friendly	
+PersonX asks PersonY to accompany	xIntent	to provide companionship	269246.0
+PersonX asks PersonY to accompany	xReact	good about themselves	
+PersonX asks PersonY to be PersonX's wife	xAttr	engaged	
+PersonX asks PersonY to be PersonX's wife	xIntent	to share their life with them	319382.0
+PersonX asks PersonY to be PersonX's wife	xReact	excited	
+PersonX asks PersonY to call	xAttr	shy	
+PersonX asks PersonY to call	xIntent	to success	92799.0
+PersonX asks PersonY to call	xReact	happy	
+PersonX asks PersonY to come	xAttr	inviting	
+PersonX asks PersonY to come	xIntent	to talk to the person	129111.0
+PersonX asks PersonY to come	xReact	curious	
+PersonX asks PersonY to dance	xAttr	interested	
+PersonX asks PersonY to dance	xIntent	to dance	198680.0
+PersonX asks PersonY to dance	xReact	happy	
+PersonX asks PersonY to describe	xAttr	curious	
+PersonX asks PersonY to describe	xIntent	to better visual the situation	256881.0
+PersonX asks PersonY to describe	xReact	like they understand	
+PersonX asks PersonY to dine	xAttr	needy	
+PersonX asks PersonY to dine	xIntent	to go enjoy person y's company	670825.0
+PersonX asks PersonY to dine	xReact	good for having someone to eat with	
+PersonX asks PersonY to dinner	xAttr	hopeful	
+PersonX asks PersonY to dinner	xIntent	to go eat	256842.0
+PersonX asks PersonY to dinner	xReact	generous	
+PersonX asks PersonY to explain	xAttr	confused	
+PersonX asks PersonY to explain	xIntent	to find out reason	84399.0
+PersonX asks PersonY to explain	xReact	angry if anything went wrong	
+PersonX asks PersonY to find	xAttr	dominant	
+PersonX asks PersonY to find	xIntent	teamwork	254383.0
+PersonX asks PersonY to find	xReact	inadequate	
+PersonX asks PersonY to forgive	xAttr	repentant	
+PersonX asks PersonY to forgive	xIntent	to seek forgiveness	252179.0
+PersonX asks PersonY to forgive	xReact	relieved	
+PersonX asks PersonY to get	xAttr	persuasive	
+PersonX asks PersonY to get	xIntent	something	122793.0
+PersonX asks PersonY to get	xReact	relaxed	
+PersonX asks PersonY to give	xAttr	inquisitive	
+PersonX asks PersonY to give	xIntent	to receive something	105247.0
+PersonX asks PersonY to give	xReact	kind	
+PersonX asks PersonY to help	xAttr	assertive	
+PersonX asks PersonY to help	xIntent	assistance on a task	120559.0
+PersonX asks PersonY to help	xReact	relieved since they felt anxious beforehand	
+PersonX asks PersonY to join	xAttr	friendly	
+PersonX asks PersonY to join	xIntent	socialable	90582.0
+PersonX asks PersonY to join	xReact	good	
+PersonX asks PersonY to join PersonZ	xAttr	friendly	
+PersonX asks PersonY to join PersonZ	xIntent	wants more cooperation	364227.0
+PersonX asks PersonY to join PersonZ	xReact	accommodating	
+PersonX asks PersonY to leave	xAttr	confrontational	
+PersonX asks PersonY to leave	xIntent	to be in a quiet area	167876.0
+PersonX asks PersonY to leave	xReact	dominant	
+PersonX asks PersonY to let	xAttr	curious	
+PersonX asks PersonY to let	xIntent	to be accepting	651211.0
+PersonX asks PersonY to let	xReact	anticipating	
+PersonX asks PersonY to look	xAttr	inquisitive	
+PersonX asks PersonY to look	xIntent	to get a second opinion	77182.0
+PersonX asks PersonY to look	xReact	informed	
+PersonX asks PersonY to marry	xAttr	bold	
+PersonX asks PersonY to marry	xIntent	to be with them forever	73494.0
+PersonX asks PersonY to marry	xReact	in love	
+PersonX asks PersonY to marry PersonY	xAttr	hopeful	
+PersonX asks PersonY to marry PersonY	xIntent	the people to be happy	143397.0
+PersonX asks PersonY to marry PersonY	xReact	good	
+PersonX asks PersonY to meet	xAttr	brave	
+PersonX asks PersonY to meet	xIntent	to tell person something	587134.0
+PersonX asks PersonY to meet	xReact	happy to have seen person	
+PersonX asks PersonY to prom	xAttr	determined	
+PersonX asks PersonY to prom	xIntent	to be with persony	341497.0
+PersonX asks PersonY to prom	xReact	nervous	
+PersonX asks PersonY to repeat	xAttr	scatter-brained	
+PersonX asks PersonY to repeat	xIntent	to understand person better	585731.0
+PersonX asks PersonY to repeat	xReact	curious	
+PersonX asks PersonY to return	xAttr	lonely	
+PersonX asks PersonY to return	xIntent	to have persony back in his life	248175.0
+PersonX asks PersonY to return	xReact	good	
+PersonX asks PersonY to see	xAttr	Unsure	
+PersonX asks PersonY to see	xIntent	them to understand	257275.0
+PersonX asks PersonY to see	xReact	unacknowledged	
+PersonX asks PersonY to send	xAttr	social	
+PersonX asks PersonY to send	xIntent	something he ordered from person.	108950.0
+PersonX asks PersonY to send	xReact	neutral	
+PersonX asks PersonY to sign	xAttr	persuasive	
+PersonX asks PersonY to sign	xIntent	to get a signature from y	255315.0
+PersonX asks PersonY to sign	xReact	accomplished	
+PersonX asks PersonY to stop	xAttr	Open	
+PersonX asks PersonY to stop	xIntent	the person to stop what it is that they are doing.	655370.0
+PersonX asks PersonY to stop	xReact	annoyed they had to say it	
+PersonX asks PersonY to take	xAttr	superior	
+PersonX asks PersonY to take	xIntent	needy	77905.0
+PersonX asks PersonY to take	xReact	happy	
+PersonX asks PersonY to tell	xAttr	nosy	
+PersonX asks PersonY to tell	xIntent	to be truthful	107409.0
+PersonX asks PersonY to tell	xReact	relieved	
+PersonX asks PersonY to the dance	xAttr	brave	
+PersonX asks PersonY to the dance	xIntent	to have a date	134900.0
+PersonX asks PersonY to the dance	xReact	in love	
+PersonX asks PersonY to the prom	xAttr	daring	
+PersonX asks PersonY to the prom	xIntent	spend time with person y	332307.0
+PersonX asks PersonY to the prom	xReact	hopeful	
+PersonX asks PersonY to turn it down	xAttr	selfish	
+PersonX asks PersonY to turn it down	xIntent	to avoid it	347698.0
+PersonX asks PersonY to turn it down	xReact	relieved	
+PersonX asks PersonY to wait	xAttr	worried	
+PersonX asks PersonY to wait	xIntent	to do something first	116447.0
+PersonX asks PersonY to wait	xReact	like the boss	
+PersonX asks PersonY to write	xAttr	creative	
+PersonX asks PersonY to write	xIntent	help	94706.0
+PersonX asks PersonY to write	xReact	greatful	
+PersonX asks PersonY was going	xAttr	curious	
+PersonX asks PersonY was going	xIntent	information about person y	273899.0
+PersonX asks PersonY was going	xReact	informed	
+PersonX asks PersonY what happened	xAttr	gossipy	
+PersonX asks PersonY what happened	xIntent	to clear the doubts	194890.0
+PersonX asks PersonY what happened	xReact	eager	
+PersonX asks PersonY what the problem was	xAttr	concerned	
+PersonX asks PersonY what the problem was	xIntent	to help out	418313.0
+PersonX asks PersonY what the problem was	xReact	interested	
+PersonX asks PersonY what was wrong	xAttr	caring	
+PersonX asks PersonY what was wrong	xIntent	to show caring.	193721.0
+PersonX asks PersonY what was wrong	xReact	helpful	
+PersonX asks PersonY where was going	xAttr	curious	
+PersonX asks PersonY where was going	xIntent	to know	271913.0
+PersonX asks PersonY where was going	xReact	informed	
+PersonX asks PersonY's advice	xAttr	curious	
+PersonX asks PersonY's advice	xIntent	to know something	75037.0
+PersonX asks PersonY's advice	xReact	relieved	
+PersonX asks PersonY's boss	xAttr	inquisitive	
+PersonX asks PersonY's boss	xIntent	to clear his doubt	143966.0
+PersonX asks PersonY's boss	xReact	relaxed	
+PersonX asks PersonY's brother	xAttr	Respectful	
+PersonX asks PersonY's brother	xIntent	to be helpful	609454.0
+PersonX asks PersonY's brother	xReact	happy to get the information	
+PersonX asks PersonY's crush	xAttr	inquisitive	
+PersonX asks PersonY's crush	xIntent	to help persony ask her out	578235.0
+PersonX asks PersonY's crush	xReact	helping	
+PersonX asks PersonY's daughter	xAttr	friendly	
+PersonX asks PersonY's daughter	xIntent	to find something out	675161.0
+PersonX asks PersonY's daughter	xReact	content	
+PersonX asks PersonY's family	xAttr	loyal	
+PersonX asks PersonY's family	xIntent	to gain approval	296366.0
+PersonX asks PersonY's family	xReact	validated	
+PersonX asks PersonY's father	xAttr	curious	
+PersonX asks PersonY's father	xIntent	an answer	655471.0
+PersonX asks PersonY's father	xReact	appreciative	
+PersonX asks PersonY's forgiveness	xAttr	humble	
+PersonX asks PersonY's forgiveness	xIntent	to be accepted by persony	90287.0
+PersonX asks PersonY's forgiveness	xReact	relieved	
+PersonX asks PersonY's friend	xAttr	inquisitive	
+PersonX asks PersonY's friend	xIntent	to obtain information.	656257.0
+PersonX asks PersonY's friend	xReact	more knowledgable.	
+PersonX asks PersonY's friend for advice	xAttr	trusting	
+PersonX asks PersonY's friend for advice	xIntent	advice	281428.0
+PersonX asks PersonY's friend for advice	xReact	better	
+PersonX asks PersonY's friend for help	xAttr	Grateful	
+PersonX asks PersonY's friend for help	xIntent	to learn	611727.0
+PersonX asks PersonY's friend for help	xReact	satisfied	
+PersonX asks PersonY's friends	xAttr	Low self-esteem	
+PersonX asks PersonY's friends	xIntent	an answer	141365.0
+PersonX asks PersonY's friends	xReact	more confident	
+PersonX asks PersonY's friends for advice	xAttr	troubled	
+PersonX asks PersonY's friends for advice	xIntent	to get advice	576467.0
+PersonX asks PersonY's friends for advice	xReact	grateful	
+PersonX asks PersonY's friends for help	xAttr	understanding	
+PersonX asks PersonY's friends for help	xIntent	help	319289.0
+PersonX asks PersonY's friends for help	xReact	hopeful	
+PersonX asks PersonY's girlfriend	xAttr	interested	
+PersonX asks PersonY's girlfriend	xIntent	to start a relationship	284992.0
+PersonX asks PersonY's girlfriend	xReact	guilty	
+PersonX asks PersonY's help	xAttr	inquisitive	
+PersonX asks PersonY's help	xIntent	assistance with something	89637.0
+PersonX asks PersonY's help	xReact	relieved	
+PersonX asks PersonY's husband	xAttr	cunning	
+PersonX asks PersonY's husband	xIntent	to ask people something	281468.0
+PersonX asks PersonY's husband	xReact	inquisitive	
+PersonX asks PersonY's kids	xAttr	questioning	
+PersonX asks PersonY's kids	xIntent	to know something	289229.0
+PersonX asks PersonY's kids	xReact	curious.	
+PersonX asks PersonY's mom	xAttr	hopeful	
+PersonX asks PersonY's mom	xIntent	to obtain information	147616.0
+PersonX asks PersonY's mom	xReact	knowledgable	
+PersonX asks PersonY's mom for help	xAttr	concerned	
+PersonX asks PersonY's mom for help	xIntent	needs something	293168.0
+PersonX asks PersonY's mom for help	xReact	he can able to fulfill his need	
+PersonX asks PersonY's name	xAttr	friendly	
+PersonX asks PersonY's name	xIntent	to get to know his new work partner	171309.0
+PersonX asks PersonY's name	xReact	informed	
+PersonX asks PersonY's neighbor	xAttr	understanding	
+PersonX asks PersonY's neighbor	xIntent	to find out something	290027.0
+PersonX asks PersonY's neighbor	xReact	satisfied	
+PersonX asks PersonY's neighbors	xAttr	considerate	
+PersonX asks PersonY's neighbors	xIntent	to know if they have seen persony.	291800.0
+PersonX asks PersonY's neighbors	xReact	less worried	
+PersonX asks PersonY's on a date	xAttr	hopeful	
+PersonX asks PersonY's on a date	xIntent	to spend time with the person	146431.0
+PersonX asks PersonY's on a date	xReact	relieved.	
+PersonX asks PersonY's opinion	xAttr	Curious	
+PersonX asks PersonY's opinion	xIntent	to know his opinion	100370.0
+PersonX asks PersonY's opinion	xReact	enlightened to have gained knowledge	
+PersonX asks PersonY's pardon	xAttr	guilty	
+PersonX asks PersonY's pardon	xIntent	to be polite	586661.0
+PersonX asks PersonY's pardon	xReact	pleased	
+PersonX asks PersonY's parents	xAttr	deferential	
+PersonX asks PersonY's parents	xIntent	his friend to come with him somewhere.	141763.0
+PersonX asks PersonY's parents	xReact	relieved	
+PersonX asks PersonY's parents for one	xAttr	demanding	
+PersonX asks PersonY's parents for one	xIntent	one for himself	319563.0
+PersonX asks PersonY's parents for one	xReact	good full	
+PersonX asks PersonY's permission	xAttr	polite	
+PersonX asks PersonY's permission	xIntent	to do something	78849.0
+PersonX asks PersonY's permission	xReact	considerate	
+PersonX asks PersonY's questions	xAttr	Nosy	
+PersonX asks PersonY's questions	xIntent	to be informed and connected.	177929.0
+PersonX asks PersonY's questions	xReact	contented.	
+PersonX asks PersonY's roommate	xAttr	persuasive	
+PersonX asks PersonY's roommate	xIntent	to know about y's roommate	307046.0
+PersonX asks PersonY's roommate	xReact	informed	
+PersonX asks PersonY's son	xAttr	curious	
+PersonX asks PersonY's son	xIntent	to find out something	574973.0
+PersonX asks PersonY's son	xReact	like they are asking a them a questioni	
+PersonX asks PersonY's wife	xAttr	social	
+PersonX asks PersonY's wife	xIntent	to know something	572598.0
+PersonX asks PersonY's wife	xReact	informed	
+PersonX asks a friend	xAttr	inquisitive	
+PersonX asks a friend	xIntent	to know if a friend wants to go somewhere	695317.0
+PersonX asks a friend	xReact	secure	
+PersonX asks a friend to teach PersonY	xAttr	kind	
+PersonX asks a friend to teach PersonY	xIntent	to help out	349345.0
+PersonX asks a friend to teach PersonY	xReact	happy	
+PersonX asks a girl	xAttr	confident	
+PersonX asks a girl	xIntent	to know the answer	461348.0
+PersonX asks a girl	xReact	relief	
+PersonX asks a girl out	xAttr	nervous	
+PersonX asks a girl out	xIntent	to go on a date	498326.0
+PersonX asks a girl out	xReact	happy	
+PersonX asks a question	xAttr	curious	
+PersonX asks a question	xIntent	to learn	476937.0
+PersonX asks a question	xReact	understood	
+PersonX asks all PersonX's friends	xAttr	curious	
+PersonX asks all PersonX's friends	xIntent	to invite them to her party.	673614.0
+PersonX asks all PersonX's friends	xReact	curious	
+PersonX asks another question	xAttr	curious	
+PersonX asks another question	xIntent	to get an answer	106673.0
+PersonX asks another question	xReact	ok	
+PersonX asks everyone	xAttr	social	
+PersonX asks everyone	xIntent	to find the lost object	404306.0
+PersonX asks everyone	xReact	stressed	
+PersonX asks for PersonY explanation	xAttr	curious	
+PersonX asks for PersonY explanation	xIntent	to gain insight	652356.0
+PersonX asks for PersonY explanation	xReact	good	
+PersonX asks for PersonY's help	xAttr	in needy	
+PersonX asks for PersonY's help	xIntent	to get help	111751.0
+PersonX asks for PersonY's help	xReact	grateful	
+PersonX asks for it	xAttr	misbehaving	
+PersonX asks for it	xIntent	to do it the right way	212465.0
+PersonX asks for it	xReact	informed.	
+PersonX asks friends	xAttr	curious	
+PersonX asks friends	xIntent	to get more information	488664.0
+PersonX asks friends	xReact	informed	
+PersonX asks god to help	xAttr	faithful	
+PersonX asks god to help	xIntent	help	270127.0
+PersonX asks god to help	xReact	faithful	
+PersonX asks if PersonY could help	xAttr	understanding	
+PersonX asks if PersonY could help	xIntent	some assistance.	336357.0
+PersonX asks if PersonY could help	xReact	like they are putting upon person y	
+PersonX asks if PersonY needed help	xAttr	concerned	
+PersonX asks if PersonY needed help	xIntent	to be friendly	338684.0
+PersonX asks if PersonY needed help	xReact	gratified	
+PersonX asks if could come	xAttr	outgoing	
+PersonX asks if could come	xIntent	to go along to a place	241908.0
+PersonX asks if could come	xReact	happy	
+PersonX asks if would like	xAttr	solicitous	
+PersonX asks if would like	xIntent	asks	91809.0
+PersonX asks if would like	xReact	likely	
+PersonX asks my friend	xAttr	curious	
+PersonX asks my friend	xIntent	to get some information	632684.0
+PersonX asks my friend	xReact	got it	
+PersonX asks my friends	xAttr	curious	
+PersonX asks my friends	xIntent	to know the answer	488242.0
+PersonX asks my friends	xReact	intrigued	
+PersonX asks my mom	xAttr	requesting	
+PersonX asks my mom	xIntent	to know something	475166.0
+PersonX asks my mom	xReact	clarity about what he asks	
+PersonX asks my neighbor	xAttr	curious	
+PersonX asks my neighbor	xIntent	to get to know their neighbor	527637.0
+PersonX asks my neighbor	xReact	anxious	
+PersonX asks my parents	xAttr	curious	
+PersonX asks my parents	xIntent	to be helpful	533117.0
+PersonX asks my parents	xReact	good	
+PersonX asks my wife	xAttr	intrigued	
+PersonX asks my wife	xIntent	to get an answer	635941.0
+PersonX asks my wife	xReact	nervous	
+PersonX asks people	xAttr	social	
+PersonX asks people	xIntent	to find out the answer to the question	476904.0
+PersonX asks people	xReact	informed	
+PersonX asks questions	xAttr	inquisitive	
+PersonX asks questions	xIntent	is curious	402604.0
+PersonX asks questions	xReact	good	
+PersonX asks questions later	xAttr	patient	
+PersonX asks questions later	xIntent	to be helpful.	267146.0
+PersonX asks questions later	xReact	satisfied	
+PersonX asks some friends	xAttr	curious	
+PersonX asks some friends	xIntent	to get all the facts	488447.0
+PersonX asks some friends	xReact	informed	
+PersonX asks someone	xAttr	confident	
+PersonX asks someone	xIntent	to know the time	632432.0
+PersonX asks someone	xReact	grateful	
+PersonX asks the boy	xAttr	inquisitive	
+PersonX asks the boy	xIntent	a question answered	497590.0
+PersonX asks the boy	xReact	concerned	
+PersonX asks the boy out	xAttr	brave	
+PersonX asks the boy out	xIntent	to date him	452729.0
+PersonX asks the boy out	xReact	happy	
+PersonX asks the cashier	xAttr	curious	
+PersonX asks the cashier	xIntent	to know the total price	450117.0
+PersonX asks the cashier	xReact	indifferent	
+PersonX asks the clerk	xAttr	inquisitive	
+PersonX asks the clerk	xIntent	to purchase something	479596.0
+PersonX asks the clerk	xReact	informed	
+PersonX asks the coach	xAttr	curious	
+PersonX asks the coach	xIntent	to learn	425704.0
+PersonX asks the coach	xReact	curious because they have a question and want an answer from their coach.	
+PersonX asks the girl	xAttr	apprehensive	
+PersonX asks the girl	xIntent	to go out.	631768.0
+PersonX asks the girl	xReact	nervous.	
+PersonX asks the girl out	xAttr	kind	
+PersonX asks the girl out	xIntent	to kiss her	529655.0
+PersonX asks the girl out	xReact	joyous	
+PersonX asks the librarian	xAttr	curious	
+PersonX asks the librarian	xIntent	to pay a fine	426678.0
+PersonX asks the librarian	xReact	empowered	
+PersonX asks the man	xAttr	Inquisitive	
+PersonX asks the man	xIntent	assistance finding someone	512751.0
+PersonX asks the man	xReact	less worried	
+PersonX asks the neighbors	xAttr	talkative	
+PersonX asks the neighbors	xIntent	to fultill his need	511459.0
+PersonX asks the neighbors	xReact	satisfied	
+PersonX asks the question	xAttr	curious	
+PersonX asks the question	xIntent	to learn something	703526.0
+PersonX asks the question	xReact	curious	
+PersonX asks the students	xAttr	curious	
+PersonX asks the students	xIntent	to understand	638834.0
+PersonX asks the students	xReact	interested	
+PersonX asks the waiter	xAttr	curious	
+PersonX asks the waiter	xIntent	to complain about the bad food	513987.0
+PersonX asks the waiter	xReact	knowledable	
+PersonX asks the waitress	xAttr	inquisitive	
+PersonX asks the waitress	xIntent	to get a question answered	440218.0
+PersonX asks the waitress	xReact	satisfied	
+PersonX asks the woman	xAttr	Questioning	
+PersonX asks the woman	xIntent	to know something	447044.0
+PersonX asks the woman	xReact	thankful	
+PersonX asks the worker	xAttr	curious	
+PersonX asks the worker	xIntent	to figure out an answer	440136.0
+PersonX asks the worker	xReact	satisfied	
+PersonX asks to leave	xAttr	homesick	
+PersonX asks to leave	xIntent	to go somewhere else	468682.0
+PersonX asks to leave	xReact	relieved	
+PersonX asks to talk	xAttr	friendly	
+PersonX asks to talk	xIntent	to be heard	452247.0
+PersonX asks to talk	xReact	they've taken the necessary steps	
+PersonX asks tom	xAttr	powerless	
+PersonX asks tom	xIntent	to know	694030.0
+PersonX asks tom	xReact	excited	
+PersonX asks what PersonY wanted	xAttr	considerate	
+PersonX asks what PersonY wanted	xIntent	to be helpful	362177.0
+PersonX asks what PersonY wanted	xReact	out of the loop	
+PersonX asks what happened	xAttr	curious	
+PersonX asks what happened	xIntent	to know	524882.0
+PersonX asks what happened	xReact	informed	
+PersonX asks what was wrong	xAttr	Confused	
+PersonX asks what was wrong	xIntent	to help	701050.0
+PersonX asks what was wrong	xReact	concerned	
+PersonX asserts PersonX's authority	xAttr	Officer	
+PersonX asserts PersonX's authority	xIntent	to get his or her way	123276.0
+PersonX asserts PersonX's authority	xReact	understand about others and learn new things	
+PersonX asserts PersonX's independence	xAttr	capable	
+PersonX asserts PersonX's independence	xIntent	strong	118364.0
+PersonX asserts PersonX's independence	xReact	excited	
+PersonX asserts PersonX's right	xAttr	dominant	
+PersonX asserts PersonX's right	xIntent	to be free	88280.0
+PersonX asserts PersonX's right	xReact	freedom	
+PersonX asserts PersonX's rights	xAttr	determined	
+PersonX asserts PersonX's rights	xIntent	to be treated fairly	588700.0
+PersonX asserts PersonX's rights	xReact	neglected	
+PersonX asserts PersonY's right	xAttr	just	
+PersonX asserts PersonY's right	xIntent	protrect	95516.0
+PersonX asserts PersonY's right	xReact	proud	
+PersonX assesses the damage	xAttr	analytical	
+PersonX assesses the damage	xIntent	to be attentive	439955.0
+PersonX assesses the damage	xReact	concerned	
+PersonX assists PersonY in making	xAttr	cruel	
+PersonX assists PersonY in making	xIntent	to be friendly	253952.0
+PersonX assists PersonY in making	xReact	helpful	
+PersonX associates with PersonY increase	xAttr	intelligent	
+PersonX associates with PersonY increase	xIntent	to be associate with person increase	93574.0
+PersonX associates with PersonY increase	xReact	happy	
+PersonX associates with PersonY's name	xAttr	mean	
+PersonX associates with PersonY's name	xIntent	to be closer to persony	104824.0
+PersonX associates with PersonY's name	xReact	content	
+PersonX assumes PersonY expression	xAttr	quick	
+PersonX assumes PersonY expression	xIntent	to make person y laugh.	260155.0
+PersonX assumes PersonY expression	xReact	happy.	
+PersonX assumes PersonY form	xAttr	sneaky	
+PersonX assumes PersonY form	xIntent	to disguise them self	274725.0
+PersonX assumes PersonY form	xReact	incognito	
+PersonX assumes PersonY position	xAttr	subservient	
+PersonX assumes PersonY position	xIntent	to replace y.	604033.0
+PersonX assumes PersonY position	xReact	proactive.	
+PersonX assumes PersonY responsibility	xAttr	similar	
+PersonX assumes PersonY responsibility	xIntent	reliable helpful	669536.0
+PersonX assumes PersonY responsibility	xReact	helfpul	
+PersonX assumes PersonY role	xAttr	Confident	
+PersonX assumes PersonY role	xIntent	to be assumes	651552.0
+PersonX assumes PersonY role	xReact	happy	
+PersonX assures PersonY would be	xAttr	empathetic	
+PersonX assures PersonY would be	xIntent	to make sure person understands	118034.0
+PersonX assures PersonY would be	xReact	helpful	
+PersonX attains PersonX's end	xAttr	successful	
+PersonX attains PersonX's end	xIntent	to achieve an accomplishment	88337.0
+PersonX attains PersonX's end	xReact	proud	
+PersonX attains PersonX's ends	xAttr	motivated	
+PersonX attains PersonX's ends	xIntent	accomplish something	120641.0
+PersonX attains PersonX's ends	xReact	like he or she succeeded	
+PersonX attains PersonX's goal	xAttr	relieved	
+PersonX attains PersonX's goal	xIntent	to complete the goal for persony	111271.0
+PersonX attains PersonX's goal	xReact	proud	
+PersonX attains PersonX's majority	xAttr	preferred	
+PersonX attains PersonX's majority	xIntent	to achieve an accomplishment	88527.0
+PersonX attains PersonX's majority	xReact	calm	
+PersonX attains PersonX's object	xAttr	strong	
+PersonX attains PersonX's object	xIntent	he wants it	72847.0
+PersonX attains PersonX's object	xReact	accomplished, satisfied	
+PersonX attains PersonY's object	xAttr	successful	
+PersonX attains PersonY's object	xIntent	something.	107660.0
+PersonX attains PersonY's object	xReact	happy to have the item.	
+PersonX attempts PersonY explanation	xAttr	motivated	
+PersonX attempts PersonY explanation	xIntent	to hear	275383.0
+PersonX attempts PersonY explanation	xReact	like it's a good idea	
+PersonX attends PersonX's meetings	xAttr	sincere in work	
+PersonX attends PersonX's meetings	xIntent	status	125081.0
+PersonX attends PersonX's meetings	xReact	okay	
+PersonX attends PersonY meeting	xAttr	conscientious	
+PersonX attends PersonY meeting	xIntent	to be informed	602528.0
+PersonX attends PersonY meeting	xReact	accomplished	
+PersonX attends PersonY's funeral	xAttr	sad	
+PersonX attends PersonY's funeral	xIntent	to show their respects.	86474.0
+PersonX attends PersonY's funeral	xReact	sad	
+PersonX attends PersonY's meetings	xAttr	attentive	
+PersonX attends PersonY's meetings	xIntent	to be supportive	118601.0
+PersonX attends PersonY's meetings	xReact	supportive	
+PersonX attends a concert	xAttr	adventurous	
+PersonX attends a concert	xIntent	to hear music.	481181.0
+PersonX attends a concert	xReact	like they were entertained.	
+PersonX attends a party	xAttr	sociable	
+PersonX attends a party	xIntent	to meet friends	492874.0
+PersonX attends a party	xReact	fun	
+PersonX attends a wine tasting	xAttr	curious	
+PersonX attends a wine tasting	xIntent	to learn about wines	362210.0
+PersonX attends a wine tasting	xReact	happy	
+PersonX attends church	xAttr	a christian	
+PersonX attends church	xIntent	to pray	509748.0
+PersonX attends church	xReact	loved	
+PersonX attends class	xAttr	in college	
+PersonX attends class	xIntent	to learn as much as he can	450491.0
+PersonX attends class	xReact	tired	
+PersonX attends the concert	xAttr	inspired	
+PersonX attends the concert	xIntent	to listen to music	636598.0
+PersonX attends the concert	xReact	great	
+PersonX attends the event	xAttr	sociable	
+PersonX attends the event	xIntent	to enjoy an evening out	426765.0
+PersonX attends the event	xReact	edified	
+PersonX attends the party	xAttr	outgoing	
+PersonX attends the party	xIntent	to meet people	523905.0
+PersonX attends the party	xReact	energized that he met someone	
+PersonX attends the wedding	xAttr	excited	
+PersonX attends the wedding	xIntent	to see his sister gets married.	518488.0
+PersonX attends the wedding	xReact	happy.	
+PersonX attends to PersonX's business	xAttr	obliging	
+PersonX attends to PersonX's business	xIntent	to achieve an accomplishment	82785.0
+PersonX attends to PersonX's business	xReact	happy	
+PersonX attends to PersonY's business	xAttr	loyal	
+PersonX attends to PersonY's business	xIntent	to buy something	116622.0
+PersonX attends to PersonY's business	xReact	neutral	
+PersonX attends to PersonY's duties	xAttr	helpful	
+PersonX attends to PersonY's duties	xIntent	to be owed a favor	98572.0
+PersonX attends to PersonY's duties	xReact	helpful	
+PersonX attends upon PersonY	xAttr	assisting	
+PersonX attends upon PersonY	xIntent	to attend function	247311.0
+PersonX attends upon PersonY	xReact	happy	
+PersonX attracts PersonY attention	xAttr	attractive	
+PersonX attracts PersonY attention	xIntent	none	105690.0
+PersonX attracts PersonY attention	xReact	happy	
+PersonX attracts PersonY audience	xAttr	invasive	
+PersonX attracts PersonY audience	xIntent	to be noticed.	268566.0
+PersonX attracts PersonY audience	xReact	heard.	
+PersonX attracts PersonY's attention	xAttr	tall	
+PersonX attracts PersonY's attention	xIntent	none	79301.0
+PersonX attracts PersonY's attention	xReact	admired and confident.	
+PersonX avenges PersonY's death	xAttr	strong	
+PersonX avenges PersonY's death	xIntent	to avenge	91212.0
+PersonX avenges PersonY's death	xReact	content	
+PersonX averts PersonY's eyes	xAttr	Wise	
+PersonX averts PersonY's eyes	xIntent	to protect the other person from seeing something.	152606.0
+PersonX averts PersonY's eyes	xReact	upset about something.	
+PersonX avoids PersonY action	xAttr	cautious	
+PersonX avoids PersonY action	xIntent	to avoid persony	671904.0
+PersonX avoids PersonY action	xReact	satisfied	
+PersonX avoids PersonY appearance	xAttr	cautious	
+PersonX avoids PersonY appearance	xIntent	to ignore y	271241.0
+PersonX avoids PersonY appearance	xReact	mean	
+PersonX avoids PersonY conflict	xAttr	nervous	
+PersonX avoids PersonY conflict	xIntent	to avoid problems	605995.0
+PersonX avoids PersonY conflict	xReact	happy	
+PersonX avoids PersonY contact	xAttr	envious	
+PersonX avoids PersonY contact	xIntent	to avoid contact with persony	671477.0
+PersonX avoids PersonY contact	xReact	satisfied	
+PersonX avoids PersonY misunderstanding	xAttr	annoyed	
+PersonX avoids PersonY misunderstanding	xIntent	to not waste time	672744.0
+PersonX avoids PersonY misunderstanding	xReact	annoyed	
+PersonX avoids PersonY possibility	xAttr	cautious	
+PersonX avoids PersonY possibility	xIntent	to not have to think about it	260085.0
+PersonX avoids PersonY possibility	xReact	like they are hiding something from themself	
+PersonX avoids PersonY's eyes	xAttr	Cowardly	
+PersonX avoids PersonY's eyes	xIntent	to avoid confrontation	182782.0
+PersonX avoids PersonY's eyes	xReact	nervous	
+PersonX avoids eye contact	xAttr	shy	
+PersonX avoids eye contact	xIntent	to be alone	193477.0
+PersonX avoids eye contact	xReact	safe	
+PersonX avoids like the plague	xAttr	intelligent	
+PersonX avoids like the plague	xIntent	no contact	233579.0
+PersonX avoids like the plague	xReact	repulsed	
+PersonX awaits PersonX's turn	xAttr	paient	
+PersonX awaits PersonX's turn	xIntent	to be competitive.	98958.0
+PersonX awaits PersonX's turn	xReact	anxious.	
+PersonX awaits PersonY answer	xAttr	hopeful	
+PersonX awaits PersonY answer	xIntent	to know whether y reached the capital	276572.0
+PersonX awaits PersonY answer	xReact	expectant	
+PersonX awaits PersonY opportunity	xAttr	curious	
+PersonX awaits PersonY opportunity	xIntent	to help person y get a good job	261260.0
+PersonX awaits PersonY opportunity	xReact	encouraging	
+PersonX awaits PersonY's arrival	xAttr	patient	
+PersonX awaits PersonY's arrival	xIntent	to see persons y	585593.0
+PersonX awaits PersonY's arrival	xReact	happy	
+PersonX awaits PersonY's return	xAttr	heartbroken	
+PersonX awaits PersonY's return	xIntent	misses persony	104742.0
+PersonX awaits PersonY's return	xReact	happy	
+PersonX awaits PersonY's turn	xAttr	patient	
+PersonX awaits PersonY's turn	xIntent	persony to come back.	127773.0
+PersonX awaits PersonY's turn	xReact	neglected and unimportant.	
+PersonX awakes the next morning	xAttr	refreshed	
+PersonX awakes the next morning	xIntent	none	344084.0
+PersonX awakes the next morning	xReact	awake	
+PersonX backs PersonX's car	xAttr	responsible	
+PersonX backs PersonX's car	xIntent	none	309872.0
+PersonX backs PersonX's car	xReact	relieve to have done correctly	
+PersonX backs PersonY's car	xAttr	careful	
+PersonX backs PersonY's car	xIntent	none	577306.0
+PersonX backs PersonY's car	xReact	careless	
+PersonX backs away from PersonY	xAttr	fearful	
+PersonX backs away from PersonY	xIntent	to be away	168346.0
+PersonX backs away from PersonY	xReact	disgusted.	
+PersonX bade PersonY farewell	xAttr	Lonely	
+PersonX bade PersonY farewell	xIntent	to be kind	101850.0
+PersonX bade PersonY farewell	xReact	warm	
+PersonX badly burned	xAttr	rash	
+PersonX badly burned	xIntent	none	532035.0
+PersonX badly burned	xReact	hurt	
+PersonX badly hurt	xAttr	clumsy	
+PersonX badly hurt	xIntent	none	508204.0
+PersonX badly hurt	xReact	pain	
+PersonX baits PersonX's hook	xAttr	calculating	
+PersonX baits PersonX's hook	xIntent	catch a fish	318917.0
+PersonX baits PersonX's hook	xReact	relaxed	
+PersonX baits PersonY's hook	xAttr	helpful	
+PersonX baits PersonY's hook	xIntent	to catch fish with persony	318956.0
+PersonX baits PersonY's hook	xReact	determined	
+PersonX bakes PersonY a cake	xAttr	skilled	
+PersonX bakes PersonY a cake	xIntent	to give him a treat.	323584.0
+PersonX bakes PersonY a cake	xReact	capable	
+PersonX bakes a cake	xAttr	talented	
+PersonX bakes a cake	xIntent	to satisfy a sweet tooth	386063.0
+PersonX bakes a cake	xReact	happy	
+PersonX bakes a cake for PersonY	xAttr	celebrating	
+PersonX bakes a cake for PersonY	xIntent	to be thoughtful	361834.0
+PersonX bakes a cake for PersonY	xReact	generous	
+PersonX bakes a chocolate cake	xAttr	hungry	
+PersonX bakes a chocolate cake	xIntent	to take the cake to a party.	362096.0
+PersonX bakes a chocolate cake	xReact	satisfied	
+PersonX bakes a pie	xAttr	skilled	
+PersonX bakes a pie	xIntent	to cook	484845.0
+PersonX bakes a pie	xReact	accomplished	
+PersonX bakes all day	xAttr	content	
+PersonX bakes all day	xIntent	to sell them	427965.0
+PersonX bakes all day	xReact	happy	
+PersonX bakes cookies	xAttr	artistic	
+PersonX bakes cookies	xIntent	to share with his family.	400447.0
+PersonX bakes cookies	xReact	happy.	
+PersonX bakes cookies for PersonY	xAttr	generous	
+PersonX bakes cookies for PersonY	xIntent	to celebrate y's party	618014.0
+PersonX bakes cookies for PersonY	xReact	happy and enjoyed	
+PersonX bakes one	xAttr	skilled	
+PersonX bakes one	xIntent	one	433000.0
+PersonX bakes one	xReact	skillful	
+PersonX bakes some cookies	xAttr	homemaker	
+PersonX bakes some cookies	xIntent	to test his cooking skill	454762.0
+PersonX bakes some cookies	xReact	hungry	
+PersonX bakes the cake	xAttr	creative	
+PersonX bakes the cake	xIntent	a cake	469105.0
+PersonX bakes the cake	xReact	accomplished	
+PersonX bakes the cookies	xAttr	skilled	
+PersonX bakes the cookies	xIntent	to give them to someone	526847.0
+PersonX bakes the cookies	xReact	full	
+PersonX balances the books	xAttr	Determined	
+PersonX balances the books	xIntent	to challenge themselves	236249.0
+PersonX balances the books	xReact	calm	
+PersonX bangs PersonY's head	xAttr	rude	
+PersonX bangs PersonY's head	xIntent	to hurt person	165779.0
+PersonX bangs PersonY's head	xReact	adrenaline	
+PersonX bangs to rights	xAttr	active	
+PersonX bangs to rights	xIntent	none	205789.0
+PersonX bangs to rights	xReact	caught	
+PersonX barely made it	xAttr	relieved	
+PersonX barely made it	xIntent	none	490202.0
+PersonX barely made it	xReact	re leaved	
+PersonX bares PersonX's soul	xAttr	open	
+PersonX bares PersonX's soul	xIntent	get closer to others	203487.0
+PersonX bares PersonX's soul	xReact	relieved	
+PersonX bares PersonX's teeth	xAttr	aggressive	
+PersonX bares PersonX's teeth	xIntent	to show aggression	654629.0
+PersonX bares PersonX's teeth	xReact	mean	
+PersonX barks up the wrong tree	xAttr	risky	
+PersonX barks up the wrong tree	xIntent	prove someone wrong	221834.0
+PersonX barks up the wrong tree	xReact	embarrassed	
+PersonX bars PersonY's way	xAttr	rude	
+PersonX bars PersonY's way	xIntent	to block persony from entering.	130107.0
+PersonX bars PersonY's way	xReact	superior and above persony.	
+PersonX bases on PersonX's experiences	xAttr	receptive	
+PersonX bases on PersonX's experiences	xIntent	to learn from his past mistakes	97019.0
+PersonX bases on PersonX's experiences	xReact	safe	
+PersonX bases on PersonY analysis	xAttr	eager	
+PersonX bases on PersonY analysis	xIntent	to be bases	94496.0
+PersonX bases on PersonY analysis	xReact	happy	
+PersonX bases on PersonY's experiences	xAttr	responsible	
+PersonX bases on PersonY's experiences	xIntent	to trust	111370.0
+PersonX bases on PersonY's experiences	xReact	smarter	
+PersonX bases upon PersonY	xAttr	deliberate	
+PersonX bases upon PersonY	xIntent	to make decision based on person	652143.0
+PersonX bases upon PersonY	xReact	dependent	
+PersonX bases upon data	xAttr	methodical	
+PersonX bases upon data	xIntent	intelligent	96787.0
+PersonX bases upon data	xReact	informed	
+PersonX bases upon principles	xAttr	religious	
+PersonX bases upon principles	xIntent	to stay true to themself	584167.0
+PersonX bases upon principles	xReact	proper	
+PersonX bases upon research	xAttr	Experimental	
+PersonX bases upon research	xIntent	to be thorough	77786.0
+PersonX bases upon research	xReact	accomplished	
+PersonX bases upon the principle	xAttr	Wise	
+PersonX bases upon the principle	xIntent	rely on his values	104705.0
+PersonX bases upon the principle	xReact	reliable	
+PersonX bashes the bishop	xAttr	offended	
+PersonX bashes the bishop	xIntent	to pleasure oneself	213058.0
+PersonX bashes the bishop	xReact	satisfied	
+PersonX basically told PersonY	xAttr	sociable	
+PersonX basically told PersonY	xIntent	to be honest	197332.0
+PersonX basically told PersonY	xReact	relieved	
+PersonX bats PersonY eye	xAttr	controlling	
+PersonX bats PersonY eye	xIntent	to disturb him	246267.0
+PersonX bats PersonY eye	xReact	guilty of his act	
+PersonX bats a thousand	xAttr	successful	
+PersonX bats a thousand	xIntent	to show his love for baseball	223061.0
+PersonX bats a thousand	xReact	accomplished	
+PersonX bats an eyelash	xAttr	interested	
+PersonX bats an eyelash	xIntent	work	231147.0
+PersonX bats an eyelash	xReact	like he has influenced	
+PersonX bats an eyelid	xAttr	flirty	
+PersonX bats an eyelid	xIntent	none	201999.0
+PersonX bats an eyelid	xReact	in charge	
+PersonX bats five hundred	xAttr	daring	
+PersonX bats five hundred	xIntent	none	208357.0
+PersonX bats five hundred	xReact	accomplished	
+PersonX bats for both sides	xAttr	nonpartisan	
+PersonX bats for both sides	xIntent	to practice on batting skills	600269.0
+PersonX bats for both sides	xReact	happy, excited to bat more than once.	
+PersonX bats for the other team	xAttr	unreliable	
+PersonX bats for the other team	xIntent	to gain more	224105.0
+PersonX bats for the other team	xReact	provocative	
+PersonX battens down the hatches	xAttr	hopeful	
+PersonX battens down the hatches	xIntent	to strenghten his position.	222388.0
+PersonX battens down the hatches	xReact	proud happy if they succeeded	
+PersonX beards the lion in his den	xAttr	honest	
+PersonX beards the lion in his den	xIntent	to prove his worth	227578.0
+PersonX beards the lion in his den	xReact	prepared	
+PersonX bears PersonX's name	xAttr	similar	
+PersonX bears PersonX's name	xIntent	none	85334.0
+PersonX bears PersonX's name	xReact	esteemed	
+PersonX bears PersonX's share	xAttr	fair	
+PersonX bears PersonX's share	xIntent	to help themself	114197.0
+PersonX bears PersonX's share	xReact	happy	
+PersonX bears PersonY away	xAttr	convincing	
+PersonX bears PersonY away	xIntent	to be alone	270701.0
+PersonX bears PersonY away	xReact	satisfied	
+PersonX bears PersonY children	xAttr	Mothering	
+PersonX bears PersonY children	xIntent	to be pregnant	253618.0
+PersonX bears PersonY children	xReact	accomplished	
+PersonX bears PersonY company	xAttr	resentful	
+PersonX bears PersonY company	xIntent	none	250812.0
+PersonX bears PersonY company	xReact	irritated	
+PersonX bears PersonY name	xAttr	special	
+PersonX bears PersonY name	xIntent	none	258748.0
+PersonX bears PersonY name	xReact	commonality with someone	
+PersonX bears PersonY resemblance	xAttr	proud	
+PersonX bears PersonY resemblance	xIntent	none	259954.0
+PersonX bears PersonY resemblance	xReact	interested	
+PersonX bears PersonY's share	xAttr	caring	
+PersonX bears PersonY's share	xIntent	to help persony	584921.0
+PersonX bears PersonY's share	xReact	like a giving person	
+PersonX bears oneself	xAttr	self-reliant	
+PersonX bears oneself	xIntent	to support themself	205582.0
+PersonX bears oneself	xReact	happy	
+PersonX bears upon PersonY	xAttr	overbearing	
+PersonX bears upon PersonY	xIntent	something from person	90326.0
+PersonX bears upon PersonY	xReact	happy	
+PersonX bears witness to the PersonY	xAttr	observant	
+PersonX bears witness to the PersonY	xIntent	to be honest	250006.0
+PersonX bears witness to the PersonY	xReact	relieved	
+PersonX beats PersonX's brother	xAttr	Bully	
+PersonX beats PersonX's brother	xIntent	to win	675758.0
+PersonX beats PersonX's brother	xReact	victorious after the win	
+PersonX beats PersonX's dad	xAttr	aggressive	
+PersonX beats PersonX's dad	xIntent	to hurt his own dad	289955.0
+PersonX beats PersonX's dad	xReact	masterful	
+PersonX beats PersonX's friend	xAttr	ambitious	
+PersonX beats PersonX's friend	xIntent	impotence	310208.0
+PersonX beats PersonX's friend	xReact	ashamed	
+PersonX beats PersonX's personal record	xAttr	skilled	
+PersonX beats PersonX's personal record	xIntent	none	310507.0
+PersonX beats PersonX's personal record	xReact	proud	
+PersonX beats PersonX's wife	xAttr	aggressive	
+PersonX beats PersonX's wife	xIntent	to be in control	99644.0
+PersonX beats PersonX's wife	xReact	satisfied	
+PersonX beats PersonY to death	xAttr	brutal	
+PersonX beats PersonY to death	xIntent	revenge	253086.0
+PersonX beats PersonY to death	xReact	regretful	
+PersonX beats PersonY's brains out	xAttr	wicked	
+PersonX beats PersonY's brains out	xIntent	to be aggressive	214024.0
+PersonX beats PersonY's brains out	xReact	angry	
+PersonX beats PersonY's brother	xAttr	Violent	
+PersonX beats PersonY's brother	xIntent	to win in the basketball game	568826.0
+PersonX beats PersonY's brother	xReact	happy	
+PersonX beats PersonY's dad	xAttr	violent	
+PersonX beats PersonY's dad	xIntent	revenge	570909.0
+PersonX beats PersonY's dad	xReact	competitive	
+PersonX beats PersonY's friend	xAttr	aggressive	
+PersonX beats PersonY's friend	xIntent	to win	310258.0
+PersonX beats PersonY's friend	xReact	powerful	
+PersonX beats PersonY's personal record	xAttr	good	
+PersonX beats PersonY's personal record	xIntent	they were driven by competition	676854.0
+PersonX beats PersonY's personal record	xReact	being a winner	
+PersonX beats a dead horse	xAttr	aggressive	
+PersonX beats a dead horse	xIntent	to win an argument	202231.0
+PersonX beats a dead horse	xReact	stressed	
+PersonX beats a retreat	xAttr	competent	
+PersonX beats a retreat	xIntent	to escape	600777.0
+PersonX beats a retreat	xReact	scared	
+PersonX beats banaghan	xAttr	a liar	
+PersonX beats banaghan	xIntent	overcome a complication using wit	213947.0
+PersonX beats banaghan	xReact	cunning and smart	
+PersonX beats feet	xAttr	rushed	
+PersonX beats feet	xIntent	none	666405.0
+PersonX beats feet	xReact	bored	
+PersonX beats the bishop	xAttr	aggressive	
+PersonX beats the bishop	xIntent	to hurt the bishop	199828.0
+PersonX beats the bishop	xReact	victorious	
+PersonX beats the cancer	xAttr	lucky	
+PersonX beats the cancer	xIntent	to be better	520583.0
+PersonX beats the cancer	xReact	like they have overcame a great obstacle	
+PersonX beats the clock	xAttr	quick	
+PersonX beats the clock	xIntent	to get things done.	205663.0
+PersonX beats the clock	xReact	relieved the task is over	
+PersonX beats the game	xAttr	competitive	
+PersonX beats the game	xIntent	to complete the game	475624.0
+PersonX beats the game	xReact	satisfied	
+PersonX beats the meat	xAttr	obsessed	
+PersonX beats the meat	xIntent	to cook	220675.0
+PersonX beats the meat	xReact	good	
+PersonX beats to the punch	xAttr	hasty	
+PersonX beats to the punch	xIntent	to be first	237755.0
+PersonX beats to the punch	xReact	like a leader	
+PersonX becomes PersonY actor	xAttr	a mimic	
+PersonX becomes PersonY actor	xIntent	to become celebrity	589369.0
+PersonX becomes PersonY actor	xReact	happy about success	
+PersonX becomes PersonY adult	xAttr	responsible	
+PersonX becomes PersonY adult	xIntent	none	112871.0
+PersonX becomes PersonY adult	xReact	happy	
+PersonX becomes PersonY advocate	xAttr	skilled	
+PersonX becomes PersonY advocate	xIntent	to be his voice	251165.0
+PersonX becomes PersonY advocate	xReact	strong	
+PersonX becomes PersonY architect	xAttr	Boss	
+PersonX becomes PersonY architect	xIntent	to be of assistance	260260.0
+PersonX becomes PersonY architect	xReact	good.	
+PersonX becomes PersonY artist	xAttr	creative	
+PersonX becomes PersonY artist	xIntent	to earn money	121410.0
+PersonX becomes PersonY artist	xReact	proud	
+PersonX becomes PersonY author	xAttr	studious	
+PersonX becomes PersonY author	xIntent	to be helpful	256639.0
+PersonX becomes PersonY author	xReact	accomplished	
+PersonX becomes PersonY element	xAttr	useful to person Y	
+PersonX becomes PersonY element	xIntent	none	266888.0
+PersonX becomes PersonY element	xReact	happy	
+PersonX becomes PersonY end	xAttr	sovereign	
+PersonX becomes PersonY end	xIntent	to see justice	275203.0
+PersonX becomes PersonY end	xReact	justified in their actions	
+PersonX becomes PersonY engineer	xAttr	qualified	
+PersonX becomes PersonY engineer	xIntent	to have a good job.	81606.0
+PersonX becomes PersonY engineer	xReact	pride	
+PersonX becomes PersonY expert	xAttr	hardworking in his job	
+PersonX becomes PersonY expert	xIntent	to get close to person	127439.0
+PersonX becomes PersonY expert	xReact	happy	
+PersonX becomes PersonY friend	xAttr	Kind	
+PersonX becomes PersonY friend	xIntent	to be social.	255245.0
+PersonX becomes PersonY friend	xReact	good	
+PersonX becomes PersonY instrument	xAttr	flexible	
+PersonX becomes PersonY instrument	xIntent	to be becomes instrument	73711.0
+PersonX becomes PersonY instrument	xReact	happy	
+PersonX becomes PersonY man	xAttr	committed	
+PersonX becomes PersonY man	xIntent	to be persony's man	243278.0
+PersonX becomes PersonY man	xReact	loved	
+PersonX becomes PersonY obsession	xAttr	attractive	
+PersonX becomes PersonY obsession	xIntent	none	262676.0
+PersonX becomes PersonY obsession	xReact	concerned	
+PersonX becomes PersonY officer	xAttr	strong	
+PersonX becomes PersonY officer	xIntent	to perform succeed	650224.0
+PersonX becomes PersonY officer	xReact	great	
+PersonX becomes PersonY's friend	xAttr	open-minded	
+PersonX becomes PersonY's friend	xIntent	to get closer to persony	94544.0
+PersonX becomes PersonY's friend	xReact	satisfied and happy about a new friendship	
+PersonX becomes PersonY's president	xAttr	smart	
+PersonX becomes PersonY's president	xIntent	none	127237.0
+PersonX becomes PersonY's president	xReact	excited by the opportunity	
+PersonX becomes a better person	xAttr	motivated	
+PersonX becomes a better person	xIntent	none	662968.0
+PersonX becomes a better person	xReact	awesome	
+PersonX becomes a chef	xAttr	accomplished	
+PersonX becomes a chef	xIntent	to share their wonderful culinary talent with others	622927.0
+PersonX becomes a chef	xReact	they feel accomlished	
+PersonX becomes a couple	xAttr	Combining	
+PersonX becomes a couple	xIntent	to be partnered	502611.0
+PersonX becomes a couple	xReact	fulfilled	
+PersonX becomes a father	xAttr	fortunate	
+PersonX becomes a father	xIntent	to start a family	522124.0
+PersonX becomes a father	xReact	elated about it	
+PersonX becomes a lifeguard	xAttr	cautious	
+PersonX becomes a lifeguard	xIntent	fulfillment	435441.0
+PersonX becomes a lifeguard	xReact	contented about it	
+PersonX becomes a millionaire	xAttr	smart	
+PersonX becomes a millionaire	xIntent	to be wealthy.	530381.0
+PersonX becomes a millionaire	xReact	rich.	
+PersonX becomes a model	xAttr	attractive	
+PersonX becomes a model	xIntent	to be in magazines.	505123.0
+PersonX becomes a model	xReact	successful	
+PersonX becomes a nurse	xAttr	accomplished	
+PersonX becomes a nurse	xIntent	to help others	509787.0
+PersonX becomes a nurse	xReact	intelligent	
+PersonX becomes a police officer	xAttr	Fearless	
+PersonX becomes a police officer	xIntent	to protect the public	328429.0
+PersonX becomes a police officer	xReact	strong	
+PersonX becomes a professional gamer	xAttr	disciplined	
+PersonX becomes a professional gamer	xIntent	to make money gaming	336094.0
+PersonX becomes a professional gamer	xReact	excited	
+PersonX becomes a star	xAttr	disciplined	
+PersonX becomes a star	xIntent	to become famous	405704.0
+PersonX becomes a star	xReact	good about themselves	
+PersonX becomes a success	xAttr	popular	
+PersonX becomes a success	xIntent	to do good work	433990.0
+PersonX becomes a success	xReact	successful	
+PersonX becomes a teacher	xAttr	talented	
+PersonX becomes a teacher	xIntent	to pass on knowledge	399110.0
+PersonX becomes a teacher	xReact	happy	
+PersonX becomes a vegan	xAttr	healthy	
+PersonX becomes a vegan	xIntent	to be healthy.	512318.0
+PersonX becomes a vegan	xReact	proud of their choice	
+PersonX becomes a vegetarian	xAttr	ethical	
+PersonX becomes a vegetarian	xIntent	to stand up against animal cruelty	462543.0
+PersonX becomes a vegetarian	xReact	healthy.	
+PersonX becomes a writer	xAttr	educated	
+PersonX becomes a writer	xIntent	to entertain	625014.0
+PersonX becomes a writer	xReact	proud	
+PersonX becomes addicted	xAttr	weak	
+PersonX becomes addicted	xIntent	none	437140.0
+PersonX becomes addicted	xReact	dependent	
+PersonX becomes afraid	xAttr	vulnerable	
+PersonX becomes afraid	xIntent	none	505658.0
+PersonX becomes afraid	xReact	scared	
+PersonX becomes an actor	xAttr	famous	
+PersonX becomes an actor	xIntent	to appear on film or stage	412352.0
+PersonX becomes an actor	xReact	excited	
+PersonX becomes an artist	xAttr	hardworking	
+PersonX becomes an artist	xIntent	to be creative	496891.0
+PersonX becomes an artist	xReact	like he has an outlet for himself	
+PersonX becomes an astronaut	xAttr	adventurous	
+PersonX becomes an astronaut	xIntent	to fly into space	471001.0
+PersonX becomes an astronaut	xReact	exhilarated.	
+PersonX becomes an expert	xAttr	masterful	
+PersonX becomes an expert	xIntent	to be successful	415100.0
+PersonX becomes an expert	xReact	accomplished	
+PersonX becomes angry	xAttr	inpatient	
+PersonX becomes angry	xIntent	none	399758.0
+PersonX becomes angry	xReact	upset mad	
+PersonX becomes annoyed	xAttr	irritable	
+PersonX becomes annoyed	xIntent	none	409569.0
+PersonX becomes annoyed	xReact	upset and annoyed	
+PersonX becomes anxious	xAttr	neurotic	
+PersonX becomes anxious	xIntent	none	412815.0
+PersonX becomes anxious	xReact	nervous	
+PersonX becomes aware	xAttr	focused	
+PersonX becomes aware	xIntent	none	434881.0
+PersonX becomes aware	xReact	he knows everything	
+PersonX becomes best friends	xAttr	sociable	
+PersonX becomes best friends	xIntent	connection	147149.0
+PersonX becomes best friends	xReact	supported	
+PersonX becomes better	xAttr	healthy	
+PersonX becomes better	xIntent	set an example	461496.0
+PersonX becomes better	xReact	better	
+PersonX becomes bored	xAttr	restless	
+PersonX becomes bored	xIntent	none	461947.0
+PersonX becomes bored	xReact	bored	
+PersonX becomes clear to PersonY	xAttr	aware	
+PersonX becomes clear to PersonY	xIntent	none	189881.0
+PersonX becomes clear to PersonY	xReact	aware	
+PersonX becomes close	xAttr	friendly	
+PersonX becomes close	xIntent	to have a friend	625436.0
+PersonX becomes close	xReact	happy	
+PersonX becomes cold	xAttr	Mean	
+PersonX becomes cold	xIntent	none	692534.0
+PersonX becomes cold	xReact	chilly	
+PersonX becomes concerned	xAttr	worried	
+PersonX becomes concerned	xIntent	to care about someone else.	491466.0
+PersonX becomes concerned	xReact	like they had concern for good reasons.	
+PersonX becomes confident	xAttr	confident	
+PersonX becomes confident	xIntent	to feel prepared	624492.0
+PersonX becomes confident	xReact	proud	
+PersonX becomes depressed	xAttr	ill	
+PersonX becomes depressed	xIntent	none	467294.0
+PersonX becomes depressed	xReact	sad	
+PersonX becomes effective on PersonY	xAttr	persistent	
+PersonX becomes effective on PersonY	xIntent	none	278141.0
+PersonX becomes effective on PersonY	xReact	exuberant	
+PersonX becomes excited	xAttr	exuberant	
+PersonX becomes excited	xIntent	to meet his lover	485181.0
+PersonX becomes excited	xReact	happy	
+PersonX becomes famous	xAttr	hard working	
+PersonX becomes famous	xIntent	to  be   popular	621559.0
+PersonX becomes famous	xReact	liked	
+PersonX becomes fit	xAttr	diligent	
+PersonX becomes fit	xIntent	to be healthy	408384.0
+PersonX becomes fit	xReact	very happy, healthy, good about himself	
+PersonX becomes friends	xAttr	Sharing	
+PersonX becomes friends	xIntent	to be friends.	388940.0
+PersonX becomes friends	xReact	good.	
+PersonX becomes friends with PersonY	xAttr	friendly	
+PersonX becomes friends with PersonY	xIntent	someone to hang out with	334760.0
+PersonX becomes friends with PersonY	xReact	happy to have a new friend	
+PersonX becomes frightened	xAttr	worried	
+PersonX becomes frightened	xIntent	none	628477.0
+PersonX becomes frightened	xReact	afraid	
+PersonX becomes furious	xAttr	emotive	
+PersonX becomes furious	xIntent	none	399616.0
+PersonX becomes furious	xReact	mad upset	
+PersonX becomes good	xAttr	successful	
+PersonX becomes good	xIntent	to impress parents	485631.0
+PersonX becomes good	xReact	satisfied	
+PersonX becomes good friends	xAttr	friendly	
+PersonX becomes good friends	xIntent	wanted as a person	147478.0
+PersonX becomes good friends	xReact	good and sociable	
+PersonX becomes healthier	xAttr	responsible	
+PersonX becomes healthier	xIntent	to live longer	413207.0
+PersonX becomes healthier	xReact	better about themselves	
+PersonX becomes homeless	xAttr	miserable	
+PersonX becomes homeless	xIntent	none	490449.0
+PersonX becomes homeless	xReact	upset	
+PersonX becomes hungry	xAttr	starving	
+PersonX becomes hungry	xIntent	none	410348.0
+PersonX becomes hungry	xReact	hungry	
+PersonX becomes impatient	xAttr	impatient	
+PersonX becomes impatient	xIntent	something very badly	498111.0
+PersonX becomes impatient	xReact	upset	
+PersonX becomes infected	xAttr	frightened	
+PersonX becomes infected	xIntent	none	633506.0
+PersonX becomes infected	xReact	scared	
+PersonX becomes like PersonY	xAttr	Follower	
+PersonX becomes like PersonY	xIntent	none	104374.0
+PersonX becomes like PersonY	xReact	surprised	
+PersonX becomes lost	xAttr	unintelligent	
+PersonX becomes lost	xIntent	none	698111.0
+PersonX becomes lost	xReact	scared	
+PersonX becomes mad	xAttr	annoyed	
+PersonX becomes mad	xIntent	none	396721.0
+PersonX becomes mad	xReact	mad	
+PersonX becomes more comfortable	xAttr	relaxed	
+PersonX becomes more comfortable	xIntent	to relax	510985.0
+PersonX becomes more comfortable	xReact	happy and satisfied	
+PersonX becomes more confident	xAttr	talented	
+PersonX becomes more confident	xIntent	to be noticed	689222.0
+PersonX becomes more confident	xReact	great	
+PersonX becomes nervous	xAttr	reactive	
+PersonX becomes nervous	xIntent	none	467219.0
+PersonX becomes nervous	xReact	nervous	
+PersonX becomes popular	xAttr	pretty	
+PersonX becomes popular	xIntent	none	463851.0
+PersonX becomes popular	xReact	well liked	
+PersonX becomes pregnant	xAttr	fertile	
+PersonX becomes pregnant	xIntent	to please their partner	400781.0
+PersonX becomes pregnant	xReact	like something is postive in their life	
+PersonX becomes president	xAttr	admirable	
+PersonX becomes president	xIntent	none	496725.0
+PersonX becomes president	xReact	successful	
+PersonX becomes really good	xAttr	proficient	
+PersonX becomes really good	xIntent	to hone their skill	408763.0
+PersonX becomes really good	xReact	good about him/herself	
+PersonX becomes rich	xAttr	talented	
+PersonX becomes rich	xIntent	none	695764.0
+PersonX becomes rich	xReact	happy.	
+PersonX becomes roommates	xAttr	lucky	
+PersonX becomes roommates	xIntent	some company	690479.0
+PersonX becomes roommates	xReact	excited	
+PersonX becomes sad	xAttr	depressed	
+PersonX becomes sad	xIntent	none	460072.0
+PersonX becomes sad	xReact	sad	
+PersonX becomes separated	xAttr	irresponsible	
+PersonX becomes separated	xIntent	none	424716.0
+PersonX becomes separated	xReact	lonely	
+PersonX becomes sick	xAttr	weak	
+PersonX becomes sick	xIntent	none	391081.0
+PersonX becomes sick	xReact	under the weather	
+PersonX becomes so good	xAttr	kind	
+PersonX becomes so good	xIntent	to master something	625526.0
+PersonX becomes so good	xReact	accomplished	
+PersonX becomes stronger	xAttr	powerful	
+PersonX becomes stronger	xIntent	to be powerful	637685.0
+PersonX becomes stronger	xReact	strength	
+PersonX becomes successful	xAttr	hardworking	
+PersonX becomes successful	xIntent	to live comfortably	462946.0
+PersonX becomes successful	xReact	proud	
+PersonX becomes suspicious	xAttr	worried	
+PersonX becomes suspicious	xIntent	none	637524.0
+PersonX becomes suspicious	xReact	suspicious	
+PersonX becomes terrified	xAttr	cautious	
+PersonX becomes terrified	xIntent	none	430916.0
+PersonX becomes terrified	xReact	scared	
+PersonX becomes the best	xAttr	skilled	
+PersonX becomes the best	xIntent	to accomplish something	688671.0
+PersonX becomes the best	xReact	excited	
+PersonX becomes the best of friends	xAttr	friendly	
+PersonX becomes the best of friends	xIntent	to be loyal to his friend.	359197.0
+PersonX becomes the best of friends	xReact	happy.	
+PersonX becomes tired	xAttr	hardworking	
+PersonX becomes tired	xIntent	to get fit	506860.0
+PersonX becomes tired	xReact	exhausted	
+PersonX becomes too much	xAttr	hyper	
+PersonX becomes too much	xIntent	none	627963.0
+PersonX becomes too much	xReact	smug	
+PersonX becomes upset	xAttr	tempermental	
+PersonX becomes upset	xIntent	none	457416.0
+PersonX becomes upset	xReact	sad	
+PersonX becomes very angry	xAttr	rude	
+PersonX becomes very angry	xIntent	none	631731.0
+PersonX becomes very angry	xReact	bad.	
+PersonX becomes very close	xAttr	open	
+PersonX becomes very close	xIntent	to have a friend	414469.0
+PersonX becomes very close	xReact	happy	
+PersonX becomes very depressed	xAttr	unstable	
+PersonX becomes very depressed	xIntent	none	689138.0
+PersonX becomes very depressed	xReact	very sad	
+PersonX becomes very famous	xAttr	successful	
+PersonX becomes very famous	xIntent	to be liked	515919.0
+PersonX becomes very famous	xReact	lonely	
+PersonX becomes very good	xAttr	experienced	
+PersonX becomes very good	xIntent	to try his best	398917.0
+PersonX becomes very good	xReact	better	
+PersonX becomes very interested	xAttr	curious	
+PersonX becomes very interested	xIntent	to learn something	451765.0
+PersonX becomes very interested	xReact	interested	
+PersonX becomes very nervous	xAttr	guilty	
+PersonX becomes very nervous	xIntent	none	498830.0
+PersonX becomes very nervous	xReact	rattled	
+PersonX becomes very popular	xAttr	friendly	
+PersonX becomes very popular	xIntent	to be the most famous	457650.0
+PersonX becomes very popular	xReact	powerful	
+PersonX becomes very sad	xAttr	disobedient	
+PersonX becomes very sad	xIntent	none	518968.0
+PersonX becomes very sad	xReact	sad	
+PersonX becomes very sick	xAttr	sleepy	
+PersonX becomes very sick	xIntent	none	454869.0
+PersonX becomes very sick	xReact	ill	
+PersonX becomes very successful	xAttr	determined	
+PersonX becomes very successful	xIntent	to be successful	447696.0
+PersonX becomes very successful	xReact	proud of their accomplishments	
+PersonX becomes very upset	xAttr	angry	
+PersonX becomes very upset	xIntent	none	702812.0
+PersonX becomes very upset	xReact	sad	
+PersonX becomes violently ill	xAttr	Disease Prone	
+PersonX becomes violently ill	xIntent	none	619066.0
+PersonX becomes violently ill	xReact	sick as a dog.	
+PersonX becomes worried	xAttr	slow	
+PersonX becomes worried	xIntent	none	460109.0
+PersonX becomes worried	xReact	worried	
+PersonX becomes worse	xAttr	needy	
+PersonX becomes worse	xIntent	none	470037.0
+PersonX becomes worse	xReact	bad.	
+PersonX becomes worse and worse	xAttr	unwell	
+PersonX becomes worse and worse	xIntent	none	374270.0
+PersonX becomes worse and worse	xReact	sick and terrible	
+PersonX begins PersonX's career	xAttr	hardworking	
+PersonX begins PersonX's career	xIntent	to be successful	104972.0
+PersonX begins PersonX's career	xReact	excited	
+PersonX begins PersonX's march	xAttr	charitable	
+PersonX begins PersonX's march	xIntent	to be an activist	99319.0
+PersonX begins PersonX's march	xReact	justified	
+PersonX begins PersonX's search	xAttr	imaginative	
+PersonX begins PersonX's search	xIntent	to discover something he or she wants	79155.0
+PersonX begins PersonX's search	xReact	hopeful	
+PersonX begins PersonX's work	xAttr	late	
+PersonX begins PersonX's work	xIntent	to finish his work early	116345.0
+PersonX begins PersonX's work	xReact	happy and have peaceful mind	
+PersonX begins PersonY program	xAttr	accepted	
+PersonX begins PersonY program	xIntent	to be proactive.	267369.0
+PersonX begins PersonY program	xReact	accomplished.	
+PersonX begins PersonY work	xAttr	easy going	
+PersonX begins PersonY work	xIntent	to help persomy	269005.0
+PersonX begins PersonY work	xReact	good about themselves	
+PersonX begins dating	xAttr	confident	
+PersonX begins dating	xIntent	to find a partner	472196.0
+PersonX begins dating	xReact	interested	
+PersonX begins digging	xAttr	hardworking	
+PersonX begins digging	xIntent	to bury something	514513.0
+PersonX begins digging	xReact	strong	
+PersonX begins eating	xAttr	ravenous	
+PersonX begins eating	xIntent	to eat	441810.0
+PersonX begins eating	xReact	satisfied with the meal and dessert.	
+PersonX begins high school	xAttr	determined	
+PersonX begins high school	xIntent	to be educated	342574.0
+PersonX begins high school	xReact	happy	
+PersonX begins playing	xAttr	engaged	
+PersonX begins playing	xIntent	to have fun	481456.0
+PersonX begins playing	xReact	enjoyment	
+PersonX begins running	xAttr	adventurous	
+PersonX begins running	xIntent	to exercise	690102.0
+PersonX begins running	xReact	tired	
+PersonX begins shopping	xAttr	eager	
+PersonX begins shopping	xIntent	to buy grocery for himself	427755.0
+PersonX begins shopping	xReact	determined	
+PersonX begins studying	xAttr	prompt	
+PersonX begins studying	xIntent	to ace the sat	418214.0
+PersonX begins studying	xReact	learned	
+PersonX begins talking	xAttr	noisy	
+PersonX begins talking	xIntent	to start the conversation going	533707.0
+PersonX begins talking	xReact	friendly	
+PersonX begins the process	xAttr	mammoth	
+PersonX begins the process	xIntent	to complete the project	626112.0
+PersonX begins the process	xReact	prepared	
+PersonX begins to cry	xAttr	emotional	
+PersonX begins to cry	xIntent	none	687004.0
+PersonX begins to cry	xReact	sad	
+PersonX begins to date	xAttr	open-minded	
+PersonX begins to date	xIntent	sex	443192.0
+PersonX begins to date	xReact	nervous	
+PersonX begins to drive	xAttr	determined	
+PersonX begins to drive	xIntent	to go somewhere	518066.0
+PersonX begins to drive	xReact	happy.	
+PersonX begins to fall	xAttr	careless	
+PersonX begins to fall	xIntent	none	462793.0
+PersonX begins to fall	xReact	embarrassed that they lost their balance,	
+PersonX begins to feel better	xAttr	healing	
+PersonX begins to feel better	xIntent	to recover	141848.0
+PersonX begins to feel better	xReact	relieved	
+PersonX begins to feel ill	xAttr	sick	
+PersonX begins to feel ill	xIntent	none	341932.0
+PersonX begins to feel ill	xReact	sick	
+PersonX begins to feel sick	xAttr	ill	
+PersonX begins to feel sick	xIntent	none	327279.0
+PersonX begins to feel sick	xReact	ill	
+PersonX begins to fight	xAttr	brave	
+PersonX begins to fight	xIntent	to get a revenge.	513263.0
+PersonX begins to fight	xReact	angry.	
+PersonX begins to grow	xAttr	mature	
+PersonX begins to grow	xIntent	none	514420.0
+PersonX begins to grow	xReact	bigger	
+PersonX begins to laugh	xAttr	funny	
+PersonX begins to laugh	xIntent	none	503833.0
+PersonX begins to laugh	xReact	happy	
+PersonX begins to look around	xAttr	curious	
+PersonX begins to look around	xIntent	to see what's going on	367049.0
+PersonX begins to look around	xReact	relieved nothing is wrong	
+PersonX begins to lose weight	xAttr	fat	
+PersonX begins to lose weight	xIntent	to be healthy	629389.0
+PersonX begins to lose weight	xReact	motivated	
+PersonX begins to make a loud noise	xAttr	noisy	
+PersonX begins to make a loud noise	xIntent	to scare the bear away	628828.0
+PersonX begins to make a loud noise	xReact	happy to get the attention	
+PersonX begins to melt	xAttr	Neglectful	
+PersonX begins to melt	xIntent	none	638380.0
+PersonX begins to melt	xReact	hot	
+PersonX begins to panic	xAttr	nervous	
+PersonX begins to panic	xIntent	none	457478.0
+PersonX begins to panic	xReact	upset	
+PersonX begins to play	xAttr	curious	
+PersonX begins to play	xIntent	to play	398511.0
+PersonX begins to play	xReact	happy	
+PersonX begins to pour	xAttr	Working	
+PersonX begins to pour	xIntent	a drink	533077.0
+PersonX begins to pour	xReact	satisfied	
+PersonX begins to rise	xAttr	Strong	
+PersonX begins to rise	xIntent	to wake up	440787.0
+PersonX begins to rise	xReact	alert	
+PersonX begins to run	xAttr	prepared	
+PersonX begins to run	xIntent	to exercise for their health	625170.0
+PersonX begins to run	xReact	scared	
+PersonX begins to sing	xAttr	Happy	
+PersonX begins to sing	xIntent	to entertain guests	520965.0
+PersonX begins to sing	xReact	light hearted	
+PersonX begins to slide	xAttr	outgoing	
+PersonX begins to slide	xIntent	to reach the bottom	442720.0
+PersonX begins to slide	xReact	scared	
+PersonX begins to smoke	xAttr	unhealthy	
+PersonX begins to smoke	xIntent	to feel relief	419163.0
+PersonX begins to smoke	xReact	relief	
+PersonX begins to snow	xAttr	powerful	
+PersonX begins to snow	xIntent	none	522642.0
+PersonX begins to snow	xReact	interested	
+PersonX begins to speak	xAttr	apprehensive	
+PersonX begins to speak	xIntent	say something	445081.0
+PersonX begins to speak	xReact	confident	
+PersonX begins to spread	xAttr	adventurous	
+PersonX begins to spread	xIntent	to prepare for the meal	443972.0
+PersonX begins to spread	xReact	hungry	
+PersonX begins to sprout	xAttr	resourceful	
+PersonX begins to sprout	xIntent	none	447994.0
+PersonX begins to sprout	xReact	excited about their body changing	
+PersonX begins to sputter	xAttr	lethargic	
+PersonX begins to sputter	xIntent	none	450820.0
+PersonX begins to sputter	xReact	bad	
+PersonX begins to swell	xAttr	Shocked	
+PersonX begins to swell	xIntent	none	422820.0
+PersonX begins to swell	xReact	scared	
+PersonX begins to work	xAttr	Dedicated	
+PersonX begins to work	xIntent	to make money	703722.0
+PersonX begins to work	xReact	satisified.	
+PersonX begins to worry	xAttr	anxious	
+PersonX begins to worry	xIntent	none	462221.0
+PersonX begins to worry	xReact	nervous	
+PersonX begins training	xAttr	motivated	
+PersonX begins training	xIntent	to achieve more than what they could do previously	638220.0
+PersonX begins training	xReact	like they are heading in the right direction	
+PersonX begins work	xAttr	prompt	
+PersonX begins work	xIntent	to start a task early	480318.0
+PersonX begins work	xReact	industrious	
+PersonX begins working	xAttr	diligent	
+PersonX begins working	xIntent	to keep their job	482697.0
+PersonX begins working	xReact	good	
+PersonX begs PersonY to come	xAttr	persuasive	
+PersonX begs PersonY to come	xIntent	to make sure he is there	129542.0
+PersonX begs PersonY to come	xReact	good	
+PersonX begs PersonY to let	xAttr	dependent	
+PersonX begs PersonY to let	xIntent	to avoid something	244371.0
+PersonX begs PersonY to let	xReact	relieved	
+PersonX begs PersonY to take	xAttr	desperate	
+PersonX begs PersonY to take	xIntent	to feed persony	264503.0
+PersonX begs PersonY to take	xReact	helpful	
+PersonX begs PersonY's forgiveness	xAttr	convinced	
+PersonX begs PersonY's forgiveness	xIntent	to right a wrong	121955.0
+PersonX begs PersonY's forgiveness	xReact	guilty	
+PersonX begs PersonY's mom	xAttr	persistant	
+PersonX begs PersonY's mom	xIntent	relief	142075.0
+PersonX begs PersonY's mom	xReact	guilty	
+PersonX begs PersonY's pardon	xAttr	Remorseful	
+PersonX begs PersonY's pardon	xIntent	to be forgiven	122962.0
+PersonX begs PersonY's pardon	xReact	attentive	
+PersonX begs and begged	xAttr	lazy	
+PersonX begs and begged	xIntent	to get what they want	438982.0
+PersonX begs and begged	xReact	ashamed	
+PersonX begs for money	xAttr	broke	
+PersonX begs for money	xIntent	to be able to buy food	462378.0
+PersonX begs for money	xReact	ashamed	
+PersonX begs to differ	xAttr	offended	
+PersonX begs to differ	xIntent	to be argumentive.	664771.0
+PersonX begs to differ	xReact	in control.	
+PersonX behaves in PersonY manner	xAttr	a schmoozer	
+PersonX behaves in PersonY manner	xIntent	to mock persony	603241.0
+PersonX behaves in PersonY manner	xReact	guilty	
+PersonX behaves in PersonY way	xAttr	adaptive	
+PersonX behaves in PersonY way	xIntent	to learn how to behave	277026.0
+PersonX behaves in PersonY way	xReact	inspired	
+PersonX believes PersonX's ears	xAttr	Trusting	
+PersonX believes PersonX's ears	xIntent	to be informed/knowledgeable	93920.0
+PersonX believes PersonX's ears	xReact	more certain.	
+PersonX believes PersonX's eyes	xAttr	observant	
+PersonX believes PersonX's eyes	xIntent	to be assured	205552.0
+PersonX believes PersonX's eyes	xReact	confident	
+PersonX believes PersonX's luck	xAttr	hopeful	
+PersonX believes PersonX's luck	xIntent	none	299011.0
+PersonX believes PersonX's luck	xReact	hopeful	
+PersonX believes PersonY eyes	xAttr	thoughtful	
+PersonX believes PersonY eyes	xIntent	to trust	243891.0
+PersonX believes PersonY eyes	xReact	tusting	
+PersonX believes PersonY when say	xAttr	trusting	
+PersonX believes PersonY when say	xIntent	none	605954.0
+PersonX believes PersonY when say	xReact	guillible	
+PersonX believes PersonY's eyes	xAttr	understanding	
+PersonX believes PersonY's eyes	xIntent	to understand	141432.0
+PersonX believes PersonY's eyes	xReact	relieved and trusting	
+PersonX believes PersonY's luck	xAttr	satisifed	
+PersonX believes PersonY's luck	xIntent	none	609218.0
+PersonX believes PersonY's luck	xReact	ordinary	
+PersonX believes my eyes	xAttr	convinced	
+PersonX believes my eyes	xIntent	to be loyal	451464.0
+PersonX believes my eyes	xReact	hopeful	
+PersonX believes what PersonY saw	xAttr	Follower	
+PersonX believes what PersonY saw	xIntent	none	348860.0
+PersonX believes what PersonY saw	xReact	secure	
+PersonX believes would lead	xAttr	amenable	
+PersonX believes would lead	xIntent	hope	607156.0
+PersonX believes would lead	xReact	happy	
+PersonX bellies up to the bar	xAttr	fat	
+PersonX bellies up to the bar	xIntent	to take up responsibility	665312.0
+PersonX bellies up to the bar	xReact	confident	
+PersonX bells the cat	xAttr	fast	
+PersonX bells the cat	xIntent	the cat's location to be apparent	240269.0
+PersonX bells the cat	xReact	safer	
+PersonX belongs to PersonY family	xAttr	loyal	
+PersonX belongs to PersonY family	xIntent	none	259359.0
+PersonX belongs to PersonY family	xReact	accepted	
+PersonX belongs to PersonY group	xAttr	suitable	
+PersonX belongs to PersonY group	xIntent	none	261880.0
+PersonX belongs to PersonY group	xReact	accepted	
+PersonX bends PersonX's elbow	xAttr	mean	
+PersonX bends PersonX's elbow	xIntent	their arm to move	230807.0
+PersonX bends PersonX's elbow	xReact	like the moved	
+PersonX bends PersonX's knees	xAttr	relaxed	
+PersonX bends PersonX's knees	xIntent	to get lower	125867.0
+PersonX bends PersonX's knees	xReact	lower	
+PersonX bends PersonY's ear	xAttr	persuasive	
+PersonX bends PersonY's ear	xIntent	to talk a lot	228762.0
+PersonX bends PersonY's ear	xReact	listened to	
+PersonX bends PersonY's head	xAttr	careful	
+PersonX bends PersonY's head	xIntent	none	174166.0
+PersonX bends PersonY's head	xReact	confused	
+PersonX bends the knee	xAttr	competent	
+PersonX bends the knee	xIntent	to be fit	239890.0
+PersonX bends the knee	xReact	relief	
+PersonX bends the truth	xAttr	deceitful	
+PersonX bends the truth	xIntent	to make someone believe something	229220.0
+PersonX bends the truth	xReact	like they are in control	
+PersonX bets PersonX's boots	xAttr	addictive	
+PersonX bets PersonX's boots	xIntent	to play a bet game.	206501.0
+PersonX bets PersonX's boots	xReact	positive if he wins the boots.	
+PersonX bets PersonX's bottom dollar	xAttr	risk-taker	
+PersonX bets PersonX's bottom dollar	xIntent	to make money	208814.0
+PersonX bets PersonX's bottom dollar	xReact	superior	
+PersonX bets the farm	xAttr	confident	
+PersonX bets the farm	xIntent	to take a risk	222968.0
+PersonX bets the farm	xReact	excited	
+PersonX bides PersonX's time	xAttr	resposible	
+PersonX bides PersonX's time	xIntent	to achieve an accomplishment	88211.0
+PersonX bides PersonX's time	xReact	cautious	
+PersonX bids PersonY farewell	xAttr	polite	
+PersonX bids PersonY farewell	xIntent	to leave	87488.0
+PersonX bids PersonY farewell	xReact	sad	
+PersonX bids PersonY's farewell	xAttr	sad	
+PersonX bids PersonY's farewell	xIntent	to be feeled	118488.0
+PersonX bids PersonY's farewell	xReact	very sad	
+PersonX binds PersonY together	xAttr	concerned	
+PersonX binds PersonY together	xIntent	control	94646.0
+PersonX binds PersonY together	xReact	powerful	
+PersonX bites PersonX's finger	xAttr	anxious	
+PersonX bites PersonX's finger	xIntent	none	607823.0
+PersonX bites PersonX's finger	xReact	angry	
+PersonX bites PersonX's tongue	xAttr	deranged	
+PersonX bites PersonX's tongue	xIntent	none	217639.0
+PersonX bites PersonX's tongue	xReact	silenced	
+PersonX bites PersonY in the arse	xAttr	overstepping	
+PersonX bites PersonY in the arse	xIntent	to fight	234256.0
+PersonX bites PersonY in the arse	xReact	happy about having taken revenge	
+PersonX bites PersonY's bottom lip	xAttr	passionate	
+PersonX bites PersonY's bottom lip	xIntent	to be sexual	169798.0
+PersonX bites PersonY's bottom lip	xReact	satisfy	
+PersonX bites PersonY's finger	xAttr	emotional	
+PersonX bites PersonY's finger	xIntent	to hurt them	278903.0
+PersonX bites PersonY's finger	xReact	playful	
+PersonX bites PersonY's head off	xAttr	sharp	
+PersonX bites PersonY's head off	xIntent	to argue.	215531.0
+PersonX bites PersonY's head off	xReact	like they are in charge.	
+PersonX bites PersonY's lip	xAttr	aroused	
+PersonX bites PersonY's lip	xIntent	to be cruel	149044.0
+PersonX bites PersonY's lip	xReact	he should feel bad	
+PersonX bites PersonY's lips	xAttr	mean	
+PersonX bites PersonY's lips	xIntent	to hurt person	592017.0
+PersonX bites PersonY's lips	xReact	aroused	
+PersonX bites PersonY's lower lip	xAttr	aggressive	
+PersonX bites PersonY's lower lip	xIntent	to act sexy	163835.0
+PersonX bites PersonY's lower lip	xReact	happy	
+PersonX bites PersonY's tongue	xAttr	passionate	
+PersonX bites PersonY's tongue	xIntent	be kinky	154108.0
+PersonX bites PersonY's tongue	xReact	angry and nervous	
+PersonX bites off more than PersonX can chew	xAttr	greedy	
+PersonX bites off more than PersonX can chew	xIntent	because they are greedy	208084.0
+PersonX bites off more than PersonX can chew	xReact	overwhelmed	
+PersonX bites the big PersonX	xAttr	aggressive	
+PersonX bites the big PersonX	xIntent	to motivate himself	226107.0
+PersonX bites the big PersonX	xReact	motivated	
+PersonX bites the biscuit	xAttr	hungry	
+PersonX bites the biscuit	xIntent	eat the biscuit.	219405.0
+PersonX bites the biscuit	xReact	happy	
+PersonX bites the bullet	xAttr	Eager	
+PersonX bites the bullet	xIntent	to keep something quiet	227342.0
+PersonX bites the bullet	xReact	pain	
+PersonX bites the hand that feeds PersonX	xAttr	unassuming	
+PersonX bites the hand that feeds PersonX	xIntent	the other person to feel threatened	666345.0
+PersonX bites the hand that feeds PersonX	xReact	ashamed	
+PersonX blames canada	xAttr	shameful	
+PersonX blames canada	xIntent	to be against it	664571.0
+PersonX blames canada	xReact	angry	
+PersonX blazes a trail	xAttr	quick	
+PersonX blazes a trail	xIntent	first	236115.0
+PersonX blazes a trail	xReact	victory	
+PersonX bleaches PersonX's hair	xAttr	kind	
+PersonX bleaches PersonX's hair	xIntent	to be blonde	294012.0
+PersonX bleaches PersonX's hair	xReact	happy.	
+PersonX bleaches PersonY's hair	xAttr	unique	
+PersonX bleaches PersonY's hair	xIntent	to be useful to person y	295325.0
+PersonX bleaches PersonY's hair	xReact	useful	
+PersonX bleeds a lot	xAttr	Injured	
+PersonX bleeds a lot	xIntent	none	453840.0
+PersonX bleeds a lot	xReact	scared	
+PersonX bleeds profusely	xAttr	hurt	
+PersonX bleeds profusely	xIntent	none	408620.0
+PersonX bleeds profusely	xReact	lightheaded	
+PersonX bleeds red ink	xAttr	committed	
+PersonX bleeds red ink	xIntent	to splurge	221405.0
+PersonX bleeds red ink	xReact	remorse	
+PersonX bleeds the lizard	xAttr	talented	
+PersonX bleeds the lizard	xIntent	i do not know	601348.0
+PersonX bleeds the lizard	xReact	unsure	
+PersonX blesses PersonY soul	xAttr	understanding	
+PersonX blesses PersonY soul	xIntent	to help them	670462.0
+PersonX blesses PersonY soul	xReact	superior	
+PersonX blinds with science	xAttr	dazzling	
+PersonX blinds with science	xIntent	none	203648.0
+PersonX blinds with science	xReact	like a showman	
+PersonX blinks PersonY eye	xAttr	weird	
+PersonX blinks PersonY eye	xIntent	none	274464.0
+PersonX blinks PersonY eye	xReact	like they caught their eye	
+PersonX blinks PersonY's eyes	xAttr	silly	
+PersonX blinks PersonY's eyes	xIntent	to blink his eyes	178693.0
+PersonX blinks PersonY's eyes	xReact	better	
+PersonX blinks several times	xAttr	hyper	
+PersonX blinks several times	xIntent	to signal to his friend	196576.0
+PersonX blinks several times	xReact	nan	
+PersonX blocks PersonY's path	xAttr	aggressive	
+PersonX blocks PersonY's path	xIntent	to stop y	95718.0
+PersonX blocks PersonY's path	xReact	aggressive	
+PersonX blots PersonX's copy book	xAttr	wreckless	
+PersonX blots PersonX's copy book	xIntent	to erase things he wrote	200392.0
+PersonX blots PersonX's copy book	xReact	motivated	
+PersonX blows PersonX's engine	xAttr	upset	
+PersonX blows PersonX's engine	xIntent	none	283042.0
+PersonX blows PersonX's engine	xReact	anxious	
+PersonX blows PersonX's horn	xAttr	skilled	
+PersonX blows PersonX's horn	xIntent	get someone's attention	77536.0
+PersonX blows PersonX's horn	xReact	irritated	
+PersonX blows PersonY away	xAttr	special	
+PersonX blows PersonY away	xIntent	to amaze person	172681.0
+PersonX blows PersonY away	xReact	amazed at what he had accomplished	
+PersonX blows PersonY out of the water	xAttr	sharp	
+PersonX blows PersonY out of the water	xIntent	to win an argument with person y	218429.0
+PersonX blows PersonY out of the water	xReact	victorious	
+PersonX blows PersonY's cover	xAttr	reckless	
+PersonX blows PersonY's cover	xIntent	talk out of turn	602332.0
+PersonX blows PersonY's cover	xReact	guilty	
+PersonX blows PersonY's engine	xAttr	irresponsible	
+PersonX blows PersonY's engine	xIntent	none	607308.0
+PersonX blows PersonY's engine	xReact	satisfied	
+PersonX blows PersonY's horn	xAttr	shameless	
+PersonX blows PersonY's horn	xIntent	to be funny.	129788.0
+PersonX blows PersonY's horn	xReact	happy.	
+PersonX blows PersonY's nose	xAttr	helpful	
+PersonX blows PersonY's nose	xIntent	to help	181188.0
+PersonX blows PersonY's nose	xReact	helpful	
+PersonX blows a bubble	xAttr	Playful	
+PersonX blows a bubble	xIntent	to be a little silly	516836.0
+PersonX blows a bubble	xReact	joyful	
+PersonX blows a kiss	xAttr	cute	
+PersonX blows a kiss	xIntent	to feel romantic	220399.0
+PersonX blows a kiss	xReact	happy	
+PersonX blows chunks	xAttr	nauseous	
+PersonX blows chunks	xIntent	none	599624.0
+PersonX blows chunks	xReact	ill.	
+PersonX blows it	xAttr	typical	
+PersonX blows it	xIntent	to turn off the fire	212342.0
+PersonX blows it	xReact	happy	
+PersonX blows off steam	xAttr	reactive	
+PersonX blows off steam	xIntent	to feel better	213796.0
+PersonX blows off steam	xReact	relief	
+PersonX blows this pop stand	xAttr	finished	
+PersonX blows this pop stand	xIntent	to move on to another location	598943.0
+PersonX blows this pop stand	xReact	like there going someplace better	
+PersonX blows to kingdom come	xAttr	annoying	
+PersonX blows to kingdom come	xIntent	to let off steam	222231.0
+PersonX blows to kingdom come	xReact	satisfied	
+PersonX boards PersonX's plane	xAttr	available	
+PersonX boards PersonX's plane	xIntent	experience flying	295951.0
+PersonX boards PersonX's plane	xReact	excited	
+PersonX boards PersonY's plane	xAttr	Adventurous	
+PersonX boards PersonY's plane	xIntent	to get to montreal.	296082.0
+PersonX boards PersonY's plane	xReact	satisfied	
+PersonX boards a plane	xAttr	hopeful	
+PersonX boards a plane	xIntent	to go abroad	433797.0
+PersonX boards a plane	xReact	exceited	
+PersonX boards the boat	xAttr	excited	
+PersonX boards the boat	xIntent	to get on the boat	519474.0
+PersonX boards the boat	xReact	happy	
+PersonX boards the bus	xAttr	thrifty	
+PersonX boards the bus	xIntent	to visit places	480670.0
+PersonX boards the bus	xReact	rested and transported	
+PersonX boards the plane	xAttr	brave	
+PersonX boards the plane	xIntent	to travel somewhere	401232.0
+PersonX boards the plane	xReact	like he is going on a trip	
+PersonX boards the train	xAttr	punctual	
+PersonX boards the train	xIntent	to get somewhere	478289.0
+PersonX boards the train	xReact	excited.	
+PersonX bobs PersonY's head	xAttr	artistic	
+PersonX bobs PersonY's head	xIntent	wants to show their interest and approval.	168839.0
+PersonX bobs PersonY's head	xReact	understood and satisfied.	
+PersonX boils some water	xAttr	ready	
+PersonX boils some water	xIntent	to have hot water	438104.0
+PersonX boils some water	xReact	satisfied	
+PersonX boils the water	xAttr	knowledgeable	
+PersonX boils the water	xIntent	to have tea	516907.0
+PersonX boils the water	xReact	helpful	
+PersonX boils water	xAttr	active	
+PersonX boils water	xIntent	to make coffee	633209.0
+PersonX boils water	xReact	ready to go	
+PersonX boils water for minutes	xAttr	patient	
+PersonX boils water for minutes	xIntent	to have clean water	97264.0
+PersonX boils water for minutes	xReact	in control	
+PersonX boldly goes where no man has gone before	xAttr	adventorous	
+PersonX boldly goes where no man has gone before	xIntent	to be pineering	223515.0
+PersonX boldly goes where no man has gone before	xReact	proud, happy, accomplished something great.	
+PersonX books PersonX's trip	xAttr	excited	
+PersonX books PersonX's trip	xIntent	vacation	278936.0
+PersonX books PersonX's trip	xReact	satisfied	
+PersonX books PersonY's trip	xAttr	a booking agent	
+PersonX books PersonY's trip	xIntent	to give persony a graduation present.	279679.0
+PersonX books PersonY's trip	xReact	happy.	
+PersonX books a flight	xAttr	competent	
+PersonX books a flight	xIntent	to go to europe	469567.0
+PersonX books a flight	xReact	excited	
+PersonX books a hotel	xAttr	proactive	
+PersonX books a hotel	xIntent	to stay during the trip	492530.0
+PersonX books a hotel	xReact	excited about it	
+PersonX books a trip	xAttr	adventerous	
+PersonX books a trip	xIntent	to travel	631454.0
+PersonX books a trip	xReact	excited	
+PersonX boos PersonY off the stage	xAttr	rude	
+PersonX boos PersonY off the stage	xIntent	to get her off the stage.	371090.0
+PersonX boos PersonY off the stage	xReact	like a bully	
+PersonX bores PersonY a son	xAttr	maternal	
+PersonX bores PersonY a son	xIntent	to have that experience with them	605408.0
+PersonX bores PersonY a son	xReact	sad	
+PersonX bores PersonY children	xAttr	boring	
+PersonX bores PersonY children	xIntent	childer expression	74653.0
+PersonX bores PersonY children	xReact	good think in child	
+PersonX bores PersonY's name	xAttr	proud	
+PersonX bores PersonY's name	xIntent	to be respectful	653281.0
+PersonX bores PersonY's name	xReact	happy	
+PersonX borrows PersonY's phone	xAttr	in need	
+PersonX borrows PersonY's phone	xIntent	to make a phone call	282345.0
+PersonX borrows PersonY's phone	xReact	grateful	
+PersonX borrows a book	xAttr	Poor	
+PersonX borrows a book	xIntent	to read something interesting	634912.0
+PersonX borrows a book	xReact	grateful	
+PersonX borrows money	xAttr	needy	
+PersonX borrows money	xIntent	money	463404.0
+PersonX borrows money	xReact	guilty	
+PersonX borrows one	xAttr	excited	
+PersonX borrows one	xIntent	to finish their dinner	474467.0
+PersonX borrows one	xReact	grateful	
+PersonX borrows some money	xAttr	poor	
+PersonX borrows some money	xIntent	to make sure they have enough for bills	499213.0
+PersonX borrows some money	xReact	ashamed	
+PersonX borrows the money	xAttr	needy	
+PersonX borrows the money	xIntent	to afford something	626480.0
+PersonX borrows the money	xReact	grateful	
+PersonX bothers PersonY much	xAttr	aggressive	
+PersonX bothers PersonY much	xIntent	none	264689.0
+PersonX bothers PersonY much	xReact	like a bother	
+PersonX bothers PersonY so much	xAttr	unethical	
+PersonX bothers PersonY so much	xIntent	to be troublesome and quarrelsome.	596284.0
+PersonX bothers PersonY so much	xReact	controlling and dominating.	
+PersonX bounces off the walls	xAttr	hyper	
+PersonX bounces off the walls	xIntent	to not hold back excitement	230221.0
+PersonX bounces off the walls	xReact	energetic	
+PersonX bounces the ball	xAttr	bored	
+PersonX bounces the ball	xIntent	to practice	481272.0
+PersonX bounces the ball	xReact	tired	
+PersonX bows PersonY's head	xAttr	controlling	
+PersonX bows PersonY's head	xIntent	to show reverence.	658870.0
+PersonX bows PersonY's head	xReact	at ease	
+PersonX boxes PersonY's ears	xAttr	mean	
+PersonX boxes PersonY's ears	xIntent	to keep talking	205232.0
+PersonX boxes PersonY's ears	xReact	happy	
+PersonX boxes oneself into a corner	xAttr	anxious	
+PersonX boxes oneself into a corner	xIntent	none	224514.0
+PersonX boxes oneself into a corner	xReact	unhappy	
+PersonX brags to all PersonX's friends	xAttr	cocky	
+PersonX brags to all PersonX's friends	xIntent	to impress people	570160.0
+PersonX brags to all PersonX's friends	xReact	excited	
+PersonX braids PersonX's hair	xAttr	helpful	
+PersonX braids PersonX's hair	xIntent	to feel confident	572280.0
+PersonX braids PersonX's hair	xReact	attractive	
+PersonX braids PersonY's hair	xAttr	skillful	
+PersonX braids PersonY's hair	xIntent	someone to look good	571595.0
+PersonX braids PersonY's hair	xReact	happy and confident	
+PersonX breaks PersonX's back	xAttr	violent	
+PersonX breaks PersonX's back	xIntent	get things done	204175.0
+PersonX breaks PersonX's back	xReact	tired	
+PersonX breaks PersonX's duck	xAttr	careless	
+PersonX breaks PersonX's duck	xIntent	none	240015.0
+PersonX breaks PersonX's duck	xReact	sad that he/she broke someone's possession.	
+PersonX breaks PersonX's fall	xAttr	thankful	
+PersonX breaks PersonX's fall	xIntent	to be safe	575121.0
+PersonX breaks PersonX's fall	xReact	like it will do less damage that way	
+PersonX breaks PersonX's fast	xAttr	happy	
+PersonX breaks PersonX's fast	xIntent	to eat	120985.0
+PersonX breaks PersonX's fast	xReact	ashamed	
+PersonX breaks PersonX's glasses	xAttr	hostile	
+PersonX breaks PersonX's glasses	xIntent	none	282893.0
+PersonX breaks PersonX's glasses	xReact	stupid	
+PersonX breaks PersonX's hand	xAttr	reckless	
+PersonX breaks PersonX's hand	xIntent	none	292263.0
+PersonX breaks PersonX's hand	xReact	pain.	
+PersonX breaks PersonX's lance	xAttr	Careless	
+PersonX breaks PersonX's lance	xIntent	to damage something	210430.0
+PersonX breaks PersonX's lance	xReact	sad to have lost	
+PersonX breaks PersonX's mother 's favorite vase	xAttr	destructive	
+PersonX breaks PersonX's mother 's favorite vase	xIntent	none	291564.0
+PersonX breaks PersonX's mother 's favorite vase	xReact	guilty	
+PersonX breaks PersonX's nose	xAttr	brutal	
+PersonX breaks PersonX's nose	xIntent	none	571055.0
+PersonX breaks PersonX's nose	xReact	hurt, sad	
+PersonX breaks PersonX's phone	xAttr	sad	
+PersonX breaks PersonX's phone	xIntent	none	297901.0
+PersonX breaks PersonX's phone	xReact	guilty	
+PersonX breaks PersonX's word	xAttr	liar	
+PersonX breaks PersonX's word	xIntent	to do something he promised not to do	589434.0
+PersonX breaks PersonX's word	xReact	ashamed	
+PersonX breaks PersonY arm	xAttr	Careless	
+PersonX breaks PersonY arm	xIntent	to cause bodily injury to persony	268956.0
+PersonX breaks PersonY arm	xReact	angry	
+PersonX breaks PersonY neck	xAttr	bad	
+PersonX breaks PersonY neck	xIntent	to hurt them bad	264469.0
+PersonX breaks PersonY neck	xReact	very happy	
+PersonX breaks PersonY word	xAttr	untrustworthy	
+PersonX breaks PersonY word	xIntent	interrupt.	267342.0
+PersonX breaks PersonY word	xReact	shameful	
+PersonX breaks PersonY's ankle	xAttr	clumsy	
+PersonX breaks PersonY's ankle	xIntent	to hurt someone.	145012.0
+PersonX breaks PersonY's ankle	xReact	bad	
+PersonX breaks PersonY's arm	xAttr	agressive	
+PersonX breaks PersonY's arm	xIntent	to hurt someone.	144006.0
+PersonX breaks PersonY's arm	xReact	remorseful.	
+PersonX breaks PersonY's fall	xAttr	helpful	
+PersonX breaks PersonY's fall	xIntent	to save her	578188.0
+PersonX breaks PersonY's fall	xReact	heroic	
+PersonX breaks PersonY's foot	xAttr	Active	
+PersonX breaks PersonY's foot	xIntent	to be mean	144864.0
+PersonX breaks PersonY's foot	xReact	spiteful	
+PersonX breaks PersonY's glasses	xAttr	irresponsible	
+PersonX breaks PersonY's glasses	xIntent	none	280073.0
+PersonX breaks PersonY's glasses	xReact	terrible	
+PersonX breaks PersonY's hand	xAttr	cruel	
+PersonX breaks PersonY's hand	xIntent	none	292299.0
+PersonX breaks PersonY's hand	xReact	excited	
+PersonX breaks PersonY's kiss	xAttr	thoughtful	
+PersonX breaks PersonY's kiss	xIntent	the person to know they are unhappy	155387.0
+PersonX breaks PersonY's kiss	xReact	confused and maybe a little angry	
+PersonX breaks PersonY's leg	xAttr	rough	
+PersonX breaks PersonY's leg	xIntent	none	135062.0
+PersonX breaks PersonY's leg	xReact	bad	
+PersonX breaks PersonY's mother 's favorite vase	xAttr	regretful	
+PersonX breaks PersonY's mother 's favorite vase	xIntent	none	300880.0
+PersonX breaks PersonY's mother 's favorite vase	xReact	bad	
+PersonX breaks PersonY's neck	xAttr	immoral	
+PersonX breaks PersonY's neck	xIntent	to kill person	171170.0
+PersonX breaks PersonY's neck	xReact	horrible	
+PersonX breaks PersonY's nose	xAttr	injured	
+PersonX breaks PersonY's nose	xIntent	to defend themselves	575683.0
+PersonX breaks PersonY's nose	xReact	guilty about it	
+PersonX breaks PersonY's phone	xAttr	unthoughtful	
+PersonX breaks PersonY's phone	xIntent	none	293480.0
+PersonX breaks PersonY's phone	xReact	guilty	
+PersonX breaks a bone	xAttr	clumsly	
+PersonX breaks a bone	xIntent	none	417244.0
+PersonX breaks a bone	xReact	hurt	
+PersonX breaks a law	xAttr	adventurous	
+PersonX breaks a law	xIntent	to cheat society	209452.0
+PersonX breaks a law	xReact	like they got away with something	
+PersonX breaks a sweat	xAttr	tired	
+PersonX breaks a sweat	xIntent	to do hardwork	236824.0
+PersonX breaks a sweat	xReact	fulfilled	
+PersonX breaks apart	xAttr	strong	
+PersonX breaks apart	xIntent	none	492593.0
+PersonX breaks apart	xReact	sad	
+PersonX breaks both of PersonX's legs	xAttr	clumsy	
+PersonX breaks both of PersonX's legs	xIntent	none	644941.0
+PersonX breaks both of PersonX's legs	xReact	pain	
+PersonX breaks both of PersonY's legs	xAttr	mean	
+PersonX breaks both of PersonY's legs	xIntent	to be abusive	573502.0
+PersonX breaks both of PersonY's legs	xReact	angry still	
+PersonX breaks eye contact	xAttr	nervous	
+PersonX breaks eye contact	xIntent	none	595083.0
+PersonX breaks eye contact	xReact	irritated	
+PersonX breaks ground	xAttr	enthusiastic	
+PersonX breaks ground	xIntent	to build a new mall	207549.0
+PersonX breaks ground	xReact	important	
+PersonX breaks my arm	xAttr	wicked	
+PersonX breaks my arm	xIntent	none	410684.0
+PersonX breaks my arm	xReact	angry	
+PersonX breaks my foot	xAttr	careless	
+PersonX breaks my foot	xIntent	none	422776.0
+PersonX breaks my foot	xReact	apologetic	
+PersonX breaks my leg	xAttr	mean	
+PersonX breaks my leg	xIntent	none	474423.0
+PersonX breaks my leg	xReact	awful	
+PersonX breaks one	xAttr	Tuff	
+PersonX breaks one	xIntent	to share the cookie.	470746.0
+PersonX breaks one	xReact	good.	
+PersonX breaks open	xAttr	forceful	
+PersonX breaks open	xIntent	to see something inside	425263.0
+PersonX breaks open	xReact	content	
+PersonX breaks ranks	xAttr	competitive	
+PersonX breaks ranks	xIntent	to go over their authority.	216269.0
+PersonX breaks ranks	xReact	like they're important.	
+PersonX breaks the camel 's back	xAttr	cruel	
+PersonX breaks the camel 's back	xIntent	to be breaks the camel	112679.0
+PersonX breaks the camel 's back	xReact	fear	
+PersonX breaks the cycle	xAttr	revolutionary	
+PersonX breaks the cycle	xIntent	be different	206981.0
+PersonX breaks the cycle	xReact	accomplished	
+PersonX breaks the deadlock	xAttr	decisive	
+PersonX breaks the deadlock	xIntent	the decision to be made	207818.0
+PersonX breaks the deadlock	xReact	relieved	
+PersonX breaks the fourth wall	xAttr	violent	
+PersonX breaks the fourth wall	xIntent	to shock	216938.0
+PersonX breaks the fourth wall	xReact	funny	
+PersonX breaks the ice	xAttr	Leader	
+PersonX breaks the ice	xIntent	talk	598249.0
+PersonX breaks the ice	xReact	good-natured	
+PersonX breaks the law	xAttr	impudent	
+PersonX breaks the law	xIntent	none	499855.0
+PersonX breaks the law	xReact	upset	
+PersonX breaks the record	xAttr	winner	
+PersonX breaks the record	xIntent	to be the best	447502.0
+PersonX breaks the record	xReact	happy	
+PersonX breaks the sabbath	xAttr	immoral	
+PersonX breaks the sabbath	xIntent	to do something they aren't suppose to	231451.0
+PersonX breaks the sabbath	xReact	ashamed	
+PersonX breaks the seal	xAttr	curious	
+PersonX breaks the seal	xIntent	to see what is inside	199059.0
+PersonX breaks the seal	xReact	satisfied	
+PersonX breaks the silence	xAttr	loud	
+PersonX breaks the silence	xIntent	to protest against wrongdoing	443885.0
+PersonX breaks the silence	xReact	glad to be done speaking	
+PersonX breaks up with PersonY's boyfriend	xAttr	rude	
+PersonX breaks up with PersonY's boyfriend	xIntent	to be out of relationship	145171.0
+PersonX breaks up with PersonY's boyfriend	xReact	relieved	
+PersonX breaks up with PersonY's girlfriend	xAttr	helpful	
+PersonX breaks up with PersonY's girlfriend	xIntent	to end a relationship	145897.0
+PersonX breaks up with PersonY's girlfriend	xReact	satisfied having helped the lovers	
+PersonX breastfeeds PersonX's baby	xAttr	caring	
+PersonX breastfeeds PersonX's baby	xIntent	to give nourishment to her child	308786.0
+PersonX breastfeeds PersonX's baby	xReact	drained	
+PersonX breathes PersonX's last	xAttr	unmotivated	
+PersonX breathes PersonX's last	xIntent	none	128106.0
+PersonX breathes PersonX's last	xReact	like they can no longer go on	
+PersonX breathes a sigh of relief	xAttr	relieved	
+PersonX breathes a sigh of relief	xIntent	none	132903.0
+PersonX breathes a sigh of relief	xReact	relieved	
+PersonX breathes a word	xAttr	unkind	
+PersonX breathes a word	xIntent	to spread rumours	206396.0
+PersonX breathes a word	xReact	regret	
+PersonX breathes down PersonY's neck	xAttr	worried	
+PersonX breathes down PersonY's neck	xIntent	is impatient	218872.0
+PersonX breathes down PersonY's neck	xReact	superior	
+PersonX breathes easy	xAttr	healthy	
+PersonX breathes easy	xIntent	none	599008.0
+PersonX breathes easy	xReact	lucky.	
+PersonX breathes hard	xAttr	anxious	
+PersonX breathes hard	xIntent	none	526272.0
+PersonX breathes hard	xReact	alive	
+PersonX bribes PersonY with candy	xAttr	sleezy	
+PersonX bribes PersonY with candy	xIntent	to get someone to do something	352517.0
+PersonX bribes PersonY with candy	xReact	smart	
+PersonX bridges the gap between PersonY and PersonY	xAttr	brave	
+PersonX bridges the gap between PersonY and PersonY	xIntent	help person and person get along	165465.0
+PersonX bridges the gap between PersonY and PersonY	xReact	proud	
+PersonX brings PersonX's arse to an anchor	xAttr	strong	
+PersonX brings PersonX's arse to an anchor	xIntent	to listen carefully	239921.0
+PersonX brings PersonX's arse to an anchor	xReact	calm and responsible	
+PersonX brings PersonX's back home	xAttr	caring	
+PersonX brings PersonX's back home	xIntent	to relax	298472.0
+PersonX brings PersonX's back home	xReact	relieved	
+PersonX brings PersonX's car	xAttr	capable	
+PersonX brings PersonX's car	xIntent	it is way too far	311206.0
+PersonX brings PersonX's car	xReact	enthusiastic	
+PersonX brings PersonX's daughter	xAttr	mature	
+PersonX brings PersonX's daughter	xIntent	to be nice	296991.0
+PersonX brings PersonX's daughter	xReact	happy	
+PersonX brings PersonX's family	xAttr	loving	
+PersonX brings PersonX's family	xIntent	spend time with them	673559.0
+PersonX brings PersonX's family	xReact	happy	
+PersonX brings PersonX's grades	xAttr	hardworking	
+PersonX brings PersonX's grades	xIntent	to show his momma	676630.0
+PersonX brings PersonX's grades	xReact	scared	
+PersonX brings PersonX's grades up	xAttr	improving	
+PersonX brings PersonX's grades up	xIntent	successful	676699.0
+PersonX brings PersonX's grades up	xReact	proud	
+PersonX brings PersonX's lunch	xAttr	kind	
+PersonX brings PersonX's lunch	xIntent	to eat	307784.0
+PersonX brings PersonX's lunch	xReact	full	
+PersonX brings PersonX's son	xAttr	considerate	
+PersonX brings PersonX's son	xIntent	to show his office.	313565.0
+PersonX brings PersonX's son	xReact	tired of the company	
+PersonX brings PersonX's umbrella	xAttr	dutiful	
+PersonX brings PersonX's umbrella	xIntent	to be dry if it rains	321812.0
+PersonX brings PersonX's umbrella	xReact	prepared	
+PersonX brings PersonY a spare key	xAttr	thoughtful	
+PersonX brings PersonY a spare key	xIntent	persony got locked out	357382.0
+PersonX brings PersonY a spare key	xReact	proud	
+PersonX brings PersonY along	xAttr	social	
+PersonX brings PersonY along	xIntent	to show them a good time	196800.0
+PersonX brings PersonY along	xReact	relaxed and fun	
+PersonX brings PersonY back	xAttr	helpful	
+PersonX brings PersonY back	xIntent	help out person	150524.0
+PersonX brings PersonY back	xReact	happy	
+PersonX brings PersonY back to PersonZ	xAttr	subordinate	
+PersonX brings PersonY back to PersonZ	xIntent	to help out person z	265696.0
+PersonX brings PersonY back to PersonZ	xReact	useful	
+PersonX brings PersonY back to life	xAttr	skilled	
+PersonX brings PersonY back to life	xIntent	to spend more time with them	256671.0
+PersonX brings PersonY back to life	xReact	happy	
+PersonX brings PersonY close	xAttr	selfless.	
+PersonX brings PersonY close	xIntent	to whisper something	110208.0
+PersonX brings PersonY close	xReact	good	
+PersonX brings PersonY closer	xAttr	romantic	
+PersonX brings PersonY closer	xIntent	to talk to person	175992.0
+PersonX brings PersonY closer	xReact	glad	
+PersonX brings PersonY fame	xAttr	loyal	
+PersonX brings PersonY fame	xIntent	to make money off of them	604529.0
+PersonX brings PersonY fame	xReact	successful	
+PersonX brings PersonY food	xAttr	kind	
+PersonX brings PersonY food	xIntent	to be brings	81986.0
+PersonX brings PersonY food	xReact	accomplished	
+PersonX brings PersonY forth	xAttr	friendly	
+PersonX brings PersonY forth	xIntent	to show off	255544.0
+PersonX brings PersonY forth	xReact	in control	
+PersonX brings PersonY forward	xAttr	Helpful	
+PersonX brings PersonY forward	xIntent	persony to be surprised	266279.0
+PersonX brings PersonY forward	xReact	excited	
+PersonX brings PersonY home	xAttr	friendly	
+PersonX brings PersonY home	xIntent	to be friendly	130680.0
+PersonX brings PersonY home	xReact	happy to be with the person	
+PersonX brings PersonY in contact	xAttr	helpful	
+PersonX brings PersonY in contact	xIntent	y to be in touch	251592.0
+PersonX brings PersonY in contact	xReact	happy.	
+PersonX brings PersonY inside	xAttr	considerate	
+PersonX brings PersonY inside	xIntent	to take persony on a tour of the house	330622.0
+PersonX brings PersonY inside	xReact	contented and grateful	
+PersonX brings PersonY into contact	xAttr	sociable	
+PersonX brings PersonY into contact	xIntent	to communicate with person	95649.0
+PersonX brings PersonY into contact	xReact	interested to talk to person	
+PersonX brings PersonY into line	xAttr	dominant	
+PersonX brings PersonY into line	xIntent	to line up with y	262707.0
+PersonX brings PersonY into line	xReact	sneaky	
+PersonX brings PersonY into the world	xAttr	nurturing	
+PersonX brings PersonY into the world	xIntent	to expand his family	250337.0
+PersonX brings PersonY into the world	xReact	proud	
+PersonX brings PersonY luck	xAttr	helpful	
+PersonX brings PersonY luck	xIntent	none	257032.0
+PersonX brings PersonY luck	xReact	special	
+PersonX brings PersonY news	xAttr	delivering	
+PersonX brings PersonY news	xIntent	to help person	99229.0
+PersonX brings PersonY news	xReact	good	
+PersonX brings PersonY something	xAttr	humble	
+PersonX brings PersonY something	xIntent	to make other person happy	265325.0
+PersonX brings PersonY something	xReact	happy	
+PersonX brings PersonY the news	xAttr	nice	
+PersonX brings PersonY the news	xIntent	to inform	247026.0
+PersonX brings PersonY the news	xReact	satisfied	
+PersonX brings PersonY to god	xAttr	Saver	
+PersonX brings PersonY to god	xIntent	to get her to believe in god	260372.0
+PersonX brings PersonY to god	xReact	enlightened	
+PersonX brings PersonY to life	xAttr	motivational	
+PersonX brings PersonY to life	xIntent	to save y	256499.0
+PersonX brings PersonY to life	xReact	successful	
+PersonX brings PersonY to school	xAttr	friendly	
+PersonX brings PersonY to school	xIntent	to be helpful	342606.0
+PersonX brings PersonY to school	xReact	happy	
+PersonX brings PersonY to tears	xAttr	Yelling	
+PersonX brings PersonY to tears	xIntent	to scold the person	198160.0
+PersonX brings PersonY to tears	xReact	angry	
+PersonX brings PersonY to the attention	xAttr	business-like.	
+PersonX brings PersonY to the attention	xIntent	to show persony's skills	267797.0
+PersonX brings PersonY to the attention	xReact	arrogant	
+PersonX brings PersonY to the doctor	xAttr	generous	
+PersonX brings PersonY to the doctor	xIntent	to be nice	334200.0
+PersonX brings PersonY to the doctor	xReact	satisfied	
+PersonX brings PersonY to the ground	xAttr	unkind	
+PersonX brings PersonY to the ground	xIntent	to fight with person y	277589.0
+PersonX brings PersonY to the ground	xReact	in control	
+PersonX brings PersonY to the hospital	xAttr	generous	
+PersonX brings PersonY to the hospital	xIntent	to keep persony safe	615308.0
+PersonX brings PersonY to the hospital	xReact	nervous because they are worried about persony	
+PersonX brings PersonY to the point	xAttr	determined	
+PersonX brings PersonY to the point	xIntent	to get them on the same page.	256254.0
+PersonX brings PersonY to the point	xReact	successful	
+PersonX brings PersonY to trial	xAttr	loyal	
+PersonX brings PersonY to trial	xIntent	to bring justice	75110.0
+PersonX brings PersonY to trial	xReact	powerful	
+PersonX brings PersonY together	xAttr	kind	
+PersonX brings PersonY together	xIntent	to pull	171207.0
+PersonX brings PersonY together	xReact	protected	
+PersonX brings PersonY's car	xAttr	responsible	
+PersonX brings PersonY's car	xIntent	to be happy	311228.0
+PersonX brings PersonY's car	xReact	very happy	
+PersonX brings PersonY's daughter	xAttr	kind	
+PersonX brings PersonY's daughter	xIntent	they are bringing y's daughter to them	609524.0
+PersonX brings PersonY's daughter	xReact	generous	
+PersonX brings PersonY's dog	xAttr	helpful	
+PersonX brings PersonY's dog	xIntent	to be helpful.	590650.0
+PersonX brings PersonY's dog	xReact	happy	
+PersonX brings PersonY's family	xAttr	caring	
+PersonX brings PersonY's family	xIntent	to feel good about themself	281805.0
+PersonX brings PersonY's family	xReact	happy	
+PersonX brings PersonY's food	xAttr	considerate	
+PersonX brings PersonY's food	xIntent	to ensure they eat	709358.0
+PersonX brings PersonY's food	xReact	helpful	
+PersonX brings PersonY's hand	xAttr	loving	
+PersonX brings PersonY's hand	xIntent	to hold the person's hand.	162030.0
+PersonX brings PersonY's hand	xReact	loved.	
+PersonX brings PersonY's hand up	xAttr	supportive	
+PersonX brings PersonY's hand up	xIntent	person to raise hand	592564.0
+PersonX brings PersonY's hand up	xReact	vindicated	
+PersonX brings PersonY's hands	xAttr	friendly	
+PersonX brings PersonY's hands	xIntent	to bring preson hand	181029.0
+PersonX brings PersonY's hands	xReact	happy	
+PersonX brings PersonY's hands up	xAttr	wild	
+PersonX brings PersonY's hands up	xIntent	to praise person for winning a match.	660234.0
+PersonX brings PersonY's hands up	xReact	noticed	
+PersonX brings PersonY's home	xAttr	dutiful	
+PersonX brings PersonY's home	xIntent	to be helpful.	142424.0
+PersonX brings PersonY's home	xReact	helpful	
+PersonX brings PersonY's lunch	xAttr	responsible	
+PersonX brings PersonY's lunch	xIntent	give away person y's lunch	570989.0
+PersonX brings PersonY's lunch	xReact	happy	
+PersonX brings PersonY's son	xAttr	thoughtful	
+PersonX brings PersonY's son	xIntent	to be nice	313644.0
+PersonX brings PersonY's son	xReact	happy	
+PersonX brings PersonY's umbrella	xAttr	wet	
+PersonX brings PersonY's umbrella	xIntent	to be helpful	568913.0
+PersonX brings PersonY's umbrella	xReact	like a friend	
+PersonX brings a dish	xAttr	helpful	
+PersonX brings a dish	xIntent	to get more food on his plate	488628.0
+PersonX brings a dish	xReact	hungry	
+PersonX brings a knife to a gunfight	xAttr	unintelligent	
+PersonX brings a knife to a gunfight	xIntent	to defend themselves	216211.0
+PersonX brings a knife to a gunfight	xReact	nervous	
+PersonX brings an umbrella	xAttr	dependable	
+PersonX brings an umbrella	xIntent	to be prepared for rain	697413.0
+PersonX brings an umbrella	xReact	satisfied with himself	
+PersonX brings children into the world	xAttr	irresponsible	
+PersonX brings children into the world	xIntent	have kids	604729.0
+PersonX brings children into the world	xReact	nervous excited	
+PersonX brings down the hammer	xAttr	Stern	
+PersonX brings down the hammer	xIntent	to nail something down	225401.0
+PersonX brings down the hammer	xReact	satisfied	
+PersonX brings everyone	xAttr	sociable	
+PersonX brings everyone	xIntent	to give something to everyone	454166.0
+PersonX brings everyone	xReact	happy	
+PersonX brings food	xAttr	generous	
+PersonX brings food	xIntent	to eat healthy	701774.0
+PersonX brings food	xReact	well, happy	
+PersonX brings forth fruit	xAttr	useful	
+PersonX brings forth fruit	xIntent	to be productive	82683.0
+PersonX brings forth fruit	xReact	satisfied	
+PersonX brings gifts	xAttr	generous	
+PersonX brings gifts	xIntent	to give something to them	503073.0
+PersonX brings gifts	xReact	like he shows his appreciation	
+PersonX brings home	xAttr	curious	
+PersonX brings home	xIntent	to have pizza for lunch	389529.0
+PersonX brings home	xReact	content	
+PersonX brings home the bacon	xAttr	glutton	
+PersonX brings home the bacon	xIntent	to be not hungry	225663.0
+PersonX brings home the bacon	xReact	proud	
+PersonX brings home to PersonY	xAttr	thoughtful	
+PersonX brings home to PersonY	xIntent	to be greatful	277721.0
+PersonX brings home to PersonY	xReact	giving	
+PersonX brings it back	xAttr	nostalgic	
+PersonX brings it back	xIntent	return something	397872.0
+PersonX brings it back	xReact	good	
+PersonX brings it inside	xAttr	Working	
+PersonX brings it inside	xIntent	doesn't want it to get wet	483301.0
+PersonX brings it inside	xReact	less worried	
+PersonX brings it to PersonY's lips	xAttr	helpful	
+PersonX brings it to PersonY's lips	xIntent	them to eat it	194858.0
+PersonX brings it to PersonY's lips	xReact	aroused	
+PersonX brings it to school	xAttr	Prepared	
+PersonX brings it to school	xIntent	to show it off	509917.0
+PersonX brings it to school	xReact	excited	
+PersonX brings out in a rash	xAttr	allergic	
+PersonX brings out in a rash	xIntent	to annoy someone.	206433.0
+PersonX brings out in a rash	xReact	bad	
+PersonX brings pressure to bear	xAttr	serious	
+PersonX brings pressure to bear	xIntent	angry	586984.0
+PersonX brings pressure to bear	xReact	powerful	
+PersonX brings snacks	xAttr	welcoming	
+PersonX brings snacks	xIntent	to feed people	693747.0
+PersonX brings snacks	xReact	pain from an empty stomach	
+PersonX brings something	xAttr	generous	
+PersonX brings something	xIntent	to help	632941.0
+PersonX brings something	xReact	helpful	
+PersonX brings tears to my eyes	xAttr	emotional	
+PersonX brings tears to my eyes	xIntent	none	181008.0
+PersonX brings tears to my eyes	xReact	concerned	
+PersonX brings the cake	xAttr	helpful	
+PersonX brings the cake	xIntent	to light it up	444133.0
+PersonX brings the cake	xReact	happy to feed everyone	
+PersonX brings the car	xAttr	responsible	
+PersonX brings the car	xIntent	to drive his friend home	698223.0
+PersonX brings the car	xReact	helpful	
+PersonX brings the dog	xAttr	loveable	
+PersonX brings the dog	xIntent	the dog to not be alone	466800.0
+PersonX brings the dog	xReact	not alone	
+PersonX brings the dog home	xAttr	responsible	
+PersonX brings the dog home	xIntent	to save the dog from the cold	359119.0
+PersonX brings the dog home	xReact	like they have done a good deed	
+PersonX brings the food	xAttr	respectful	
+PersonX brings the food	xIntent	to serve food	456297.0
+PersonX brings the food	xReact	happy	
+PersonX brings the kitten	xAttr	sweet	
+PersonX brings the kitten	xIntent	show their new pet	699617.0
+PersonX brings the kitten	xReact	warm	
+PersonX brings the kitten home	xAttr	thoughtful	
+PersonX brings the kitten home	xIntent	to adopt it	616017.0
+PersonX brings the kitten home	xReact	happy.	
+PersonX brings the war to PersonY end	xAttr	peacemaker	
+PersonX brings the war to PersonY end	xIntent	none	249014.0
+PersonX brings the war to PersonY end	xReact	defeated	
+PersonX brings to PersonY's attention	xAttr	thoughtful	
+PersonX brings to PersonY's attention	xIntent	persony to see his mistake.	122514.0
+PersonX brings to PersonY's attention	xReact	happy and proud	
+PersonX brings to light	xAttr	smart	
+PersonX brings to light	xIntent	wants some information to be known	230602.0
+PersonX brings to light	xReact	understood	
+PersonX brings two together	xAttr	helpful	
+PersonX brings two together	xIntent	to show how great the two can be	671259.0
+PersonX brings two together	xReact	responsible	
+PersonX brings up PersonX's children	xAttr	curious	
+PersonX brings up PersonX's children	xIntent	persony to share	103946.0
+PersonX brings up PersonX's children	xReact	close to persony	
+PersonX brings up PersonY's children	xAttr	protective	
+PersonX brings up PersonY's children	xIntent	to be polite	654954.0
+PersonX brings up PersonY's children	xReact	contented with himself.	
+PersonX brings up something more universal	xAttr	expressive	
+PersonX brings up something more universal	xIntent	to inform better	198140.0
+PersonX brings up something more universal	xReact	considerate	
+PersonX brings up the rear	xAttr	still	
+PersonX brings up the rear	xIntent	to finish.	602201.0
+PersonX brings up the rear	xReact	satified	
+PersonX browses PersonX's collection	xAttr	curious	
+PersonX browses PersonX's collection	xIntent	to borrow	74179.0
+PersonX browses PersonX's collection	xReact	closer to their collection	
+PersonX browses PersonY's collection	xAttr	curious	
+PersonX browses PersonY's collection	xIntent	to satisfy his curiousity	71558.0
+PersonX browses PersonY's collection	xReact	connected	
+PersonX brushes PersonY teeth	xAttr	kind	
+PersonX brushes PersonY teeth	xIntent	positive	586176.0
+PersonX brushes PersonY teeth	xReact	negative	
+PersonX brushes PersonY's fingers	xAttr	romantic	
+PersonX brushes PersonY's fingers	xIntent	none	189174.0
+PersonX brushes PersonY's fingers	xReact	embarrassed	
+PersonX brushes PersonY's hand	xAttr	Caring	
+PersonX brushes PersonY's hand	xIntent	to show affection	661846.0
+PersonX brushes PersonY's hand	xReact	happy	
+PersonX brushes PersonY's lips	xAttr	gentle	
+PersonX brushes PersonY's lips	xIntent	to show love.	167450.0
+PersonX brushes PersonY's lips	xReact	passionate.	
+PersonX brushes PersonY's teeth	xAttr	helpful	
+PersonX brushes PersonY's teeth	xIntent	to improve person's hygiene.	146360.0
+PersonX brushes PersonY's teeth	xReact	helpful	
+PersonX brushes my teeth	xAttr	responsible	
+PersonX brushes my teeth	xIntent	to be clean and have clean teeth.	398727.0
+PersonX brushes my teeth	xReact	clean	
+PersonX brushes past PersonY	xAttr	impatient	
+PersonX brushes past PersonY	xIntent	none	177771.0
+PersonX brushes past PersonY	xReact	in a hurry	
+PersonX bucks PersonY's hips	xAttr	interested	
+PersonX bucks PersonY's hips	xIntent	none	657283.0
+PersonX bucks PersonY's hips	xReact	happy and excited.	
+PersonX bucks the trend	xAttr	adventurous	
+PersonX bucks the trend	xIntent	to be unique	667534.0
+PersonX bucks the trend	xReact	like he's different.	
+PersonX builds PersonX's house	xAttr	dedicated	
+PersonX builds PersonX's house	xIntent	a new place to live	73183.0
+PersonX builds PersonX's house	xReact	accomplished	
+PersonX builds PersonX's houses	xAttr	skilled	
+PersonX builds PersonX's houses	xIntent	a successful home builder	99824.0
+PersonX builds PersonX's houses	xReact	accomplished	
+PersonX builds PersonX's nest	xAttr	determined	
+PersonX builds PersonX's nest	xIntent	secure	71936.0
+PersonX builds PersonX's nest	xReact	happy	
+PersonX builds PersonX's own computer	xAttr	Talented	
+PersonX builds PersonX's own computer	xIntent	to have the best unit made	310167.0
+PersonX builds PersonX's own computer	xReact	pride because they did it themselves	
+PersonX builds PersonY a house	xAttr	eager	
+PersonX builds PersonY a house	xIntent	to help y.	253263.0
+PersonX builds PersonY a house	xReact	happy	
+PersonX builds PersonY empire	xAttr	Working	
+PersonX builds PersonY empire	xIntent	them to be strong	250615.0
+PersonX builds PersonY empire	xReact	exhausted	
+PersonX builds PersonY house	xAttr	hardworking	
+PersonX builds PersonY house	xIntent	to help out	267573.0
+PersonX builds PersonY house	xReact	helpful	
+PersonX builds PersonY one	xAttr	skilled	
+PersonX builds PersonY one	xIntent	to be helpful	618832.0
+PersonX builds PersonY one	xReact	pleased.	
+PersonX builds PersonY organization	xAttr	Activist	
+PersonX builds PersonY organization	xIntent	to be successful	254586.0
+PersonX builds PersonY organization	xReact	like a boss	
+PersonX builds PersonY's house	xAttr	benefactor	
+PersonX builds PersonY's house	xIntent	to be helpful	651433.0
+PersonX builds PersonY's house	xReact	like he/she is helping out	
+PersonX builds PersonY's houses	xAttr	skillful	
+PersonX builds PersonY's houses	xIntent	to be helpful	101470.0
+PersonX builds PersonY's houses	xReact	proud	
+PersonX builds PersonY's nest	xAttr	helpful	
+PersonX builds PersonY's nest	xIntent	to be helpful	77684.0
+PersonX builds PersonY's nest	xReact	happy	
+PersonX builds a better mousetrap	xAttr	innovative	
+PersonX builds a better mousetrap	xIntent	to be innovative	240137.0
+PersonX builds a better mousetrap	xReact	satisfied.	
+PersonX builds a birdhouse	xAttr	Crafty	
+PersonX builds a birdhouse	xIntent	a birdhouse	530852.0
+PersonX builds a birdhouse	xReact	helpful	
+PersonX builds a cabin	xAttr	skilled	
+PersonX builds a cabin	xIntent	to have a new home	523477.0
+PersonX builds a cabin	xReact	proud of his work	
+PersonX builds a fence	xAttr	constructive.	
+PersonX builds a fence	xIntent	to have a secure perimeter	525928.0
+PersonX builds a fence	xReact	secure	
+PersonX builds a fire	xAttr	cold	
+PersonX builds a fire	xIntent	to feel warm.	470292.0
+PersonX builds a fire	xReact	content.	
+PersonX builds a fort	xAttr	contructive	
+PersonX builds a fort	xIntent	to play settler	483373.0
+PersonX builds a fort	xReact	secure	
+PersonX builds a giant snowman	xAttr	proficient	
+PersonX builds a giant snowman	xIntent	they are building something themselves.	358545.0
+PersonX builds a giant snowman	xReact	happy	
+PersonX builds a house	xAttr	proud	
+PersonX builds a house	xIntent	to live in their own self built home	455939.0
+PersonX builds a house	xReact	proud of their achievment	
+PersonX builds a sand castle	xAttr	constructive	
+PersonX builds a sand castle	xIntent	creative	132772.0
+PersonX builds a sand castle	xReact	accomplished	
+PersonX builds a snowman	xAttr	Playful	
+PersonX builds a snowman	xIntent	have fun	390086.0
+PersonX builds a snowman	xReact	content	
+PersonX builds a treehouse	xAttr	competent	
+PersonX builds a treehouse	xIntent	to satisfy his kids	482331.0
+PersonX builds a treehouse	xReact	proud about his job	
+PersonX builds sand castles	xAttr	irresponsible	
+PersonX builds sand castles	xIntent	to have fun with some friends.	617991.0
+PersonX builds sand castles	xReact	artistic	
+PersonX bumps PersonX's head	xAttr	clumsy	
+PersonX bumps PersonX's head	xIntent	none	574123.0
+PersonX bumps PersonX's head	xReact	pain	
+PersonX bumps and grind	xAttr	energetic	
+PersonX bumps and grind	xIntent	to be seen	233213.0
+PersonX bumps and grind	xReact	happy	
+PersonX buries PersonX's dead	xAttr	sad	
+PersonX buries PersonX's dead	xIntent	to be polite	82058.0
+PersonX buries PersonX's dead	xReact	sad	
+PersonX buries PersonX's head in the sand	xAttr	Stuck	
+PersonX buries PersonX's head in the sand	xIntent	none	203523.0
+PersonX buries PersonX's head in the sand	xReact	uninformed	
+PersonX buries PersonY's dead	xAttr	in mourning	
+PersonX buries PersonY's dead	xIntent	to bury persony	88144.0
+PersonX buries PersonY's dead	xReact	secretive and ashamed	
+PersonX buries PersonY's face	xAttr	helpful	
+PersonX buries PersonY's face	xIntent	to hide their feelings.	152289.0
+PersonX buries PersonY's face	xReact	embarrassed	
+PersonX buries PersonY's face in PersonY's hands	xAttr	embarrassed	
+PersonX buries PersonY's face in PersonY's hands	xIntent	to hide their tears	190444.0
+PersonX buries PersonY's face in PersonY's hands	xReact	forceful	
+PersonX buries PersonY's head	xAttr	murderous	
+PersonX buries PersonY's head	xIntent	none	169373.0
+PersonX buries PersonY's head	xReact	sad	
