@@ -1,0 +1,103 @@
+input_text	prefix	target_text	Unnamed: 0
+PersonX 'd better go	xAttr	avoidant	
+PersonX 'd better go	xIntent	none	30238.0
+PersonX 'd better go	xReact	the person feels happy since he arrived at his destination.	
+PersonX accepts PersonX's diploma	xAttr	succesfull	
+PersonX accepts PersonX's diploma	xIntent	to graduate from high school	31739.0
+PersonX accepts PersonX's diploma	xReact	proud	
+PersonX accepts PersonY invitation	xAttr	social	
+PersonX accepts PersonY invitation	xIntent	to see person	9623.0
+PersonX accepts PersonY invitation	xReact	included	
+PersonX accepts PersonY offer	xAttr	intelligent	
+PersonX accepts PersonY offer	xIntent	job	11718.0
+PersonX accepts PersonY offer	xReact	grateful	
+PersonX accepts PersonY's invitation	xAttr	excited	
+PersonX accepts PersonY's invitation	xIntent	they want to be polite	10611.0
+PersonX accepts PersonY's invitation	xReact	grateful	
+PersonX accepts PersonY's offer	xAttr	Trusting	
+PersonX accepts PersonY's offer	xIntent	to obtain something.	17108.0
+PersonX accepts PersonY's offer	xReact	happy that he saved a money	
+PersonX accepts happily	xAttr	grateful	
+PersonX accepts happily	xIntent	none	48010.0
+PersonX accepts happily	xReact	grateful	
+PersonX accepts the invitation	xAttr	responsive	
+PersonX accepts the invitation	xIntent	to be polite	70931.0
+PersonX accepts the invitation	xReact	excited	
+PersonX accepts the job	xAttr	confident	
+PersonX accepts the job	xIntent	to work	53687.0
+PersonX accepts the job	xReact	satisfied	
+PersonX accepts the offer	xAttr	content	
+PersonX accepts the offer	xIntent	the job	44765.0
+PersonX accepts the offer	xReact	happy	
+PersonX achieves PersonX's dream	xAttr	Hardworking	
+PersonX achieves PersonX's dream	xIntent	to be an astronaut	34234.0
+PersonX achieves PersonX's dream	xReact	fulfilled	
+PersonX achieves PersonX's objective	xAttr	satisfied	
+PersonX achieves PersonX's objective	xIntent	to complete something	66167.0
+PersonX achieves PersonX's objective	xReact	completed	
+PersonX achieves PersonY effect	xAttr	helpful	
+PersonX achieves PersonY effect	xIntent	make person y stronger	29886.0
+PersonX achieves PersonY effect	xReact	helping	
+PersonX achieves PersonY objective	xAttr	commendable	
+PersonX achieves PersonY objective	xIntent	to succeed for their boss	30070.0
+PersonX achieves PersonY objective	xReact	strong	
+PersonX acts weird	xAttr	unwell	
+PersonX acts weird	xIntent	to be wacky	53401.0
+PersonX acts weird	xReact	confused	
+PersonX addresses PersonY audience	xAttr	adamant	
+PersonX addresses PersonY audience	xIntent	to give speech	9661.0
+PersonX addresses PersonY audience	xReact	good	
+PersonX adjusts spacing as well as minimizing	xAttr	Creative	
+PersonX adjusts spacing as well as minimizing	xIntent	to have a perfect document	28546.0
+PersonX adjusts spacing as well as minimizing	xReact	neat	
+PersonX adopts PersonY attitude	xAttr	changeable	
+PersonX adopts PersonY attitude	xIntent	to act as the person	9303.0
+PersonX adopts PersonY attitude	xReact	ok	
+PersonX affects PersonY's interests	xAttr	influential	
+PersonX affects PersonY's interests	xIntent	to motivate more	66136.0
+PersonX affects PersonY's interests	xReact	happy	
+PersonX affords PersonY protection	xAttr	helpful	
+PersonX affords PersonY protection	xIntent	to help person y	30792.0
+PersonX affords PersonY protection	xReact	relieved	
+PersonX agrees to the challenge	xAttr	courageous	
+PersonX agrees to the challenge	xIntent	to fulfill his dream to eat as much ice cream as possible	70745.0
+PersonX agrees to the challenge	xReact	anxious about it	
+PersonX allergic to bees	xAttr	apprehensive	
+PersonX allergic to bees	xIntent	none	53919.0
+PersonX allergic to bees	xReact	bothered	
+PersonX almost fell	xAttr	Careless	
+PersonX almost fell	xIntent	none	56368.0
+PersonX almost fell	xReact	clumsy.	
+PersonX also decided	xAttr	Even handed	
+PersonX also decided	xIntent	in  charge.	53480.0
+PersonX also decided	xReact	like they made a good decision	
+PersonX always ate	xAttr	full	
+PersonX always ate	xIntent	to release stress	53831.0
+PersonX always ate	xReact	full	
+PersonX always lost	xAttr	dumb	
+PersonX always lost	xIntent	none	71590.0
+PersonX always lost	xReact	defeated	
+PersonX always tries	xAttr	hopeful	
+PersonX always tries	xIntent	to never give up	46271.0
+PersonX always tries	xReact	brave	
+PersonX always wore	xAttr	Poor	
+PersonX always wore	xIntent	to be consistent.	45454.0
+PersonX always wore	xReact	safe	
+PersonX amends PersonY act	xAttr	persuasive	
+PersonX amends PersonY act	xIntent	to make things right.	31271.0
+PersonX amends PersonY act	xReact	glad for having the opportunity to correct	
+PersonX answers PersonX's purpose	xAttr	helpful	
+PersonX answers PersonX's purpose	xIntent	to have meaning.	10577.0
+PersonX answers PersonX's purpose	xReact	satisfied.	
+PersonX answers PersonY question	xAttr	prompt	
+PersonX answers PersonY question	xIntent	to give out advice	8769.0
+PersonX answers PersonY question	xReact	good	
+PersonX answers PersonY's letter	xAttr	responsive	
+PersonX answers PersonY's letter	xIntent	to respond to y	73480.0
+PersonX answers PersonY's letter	xReact	happy	
+PersonX answers PersonY's question	xAttr	smart	
+PersonX answers PersonY's question	xIntent	let the inquirer get their answer	20051.0
+PersonX answers PersonY's question	xReact	helpful	
+PersonX answers the door	xAttr	curious	
+PersonX answers the door	xIntent	to greet his friend	44875.0
+PersonX answers the door	xReact	informed	

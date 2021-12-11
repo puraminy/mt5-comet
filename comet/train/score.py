@@ -123,8 +123,10 @@ import click
 )
 def main(fname, model_name, path, step, col1, col2, score_col, cpu, concat):
     pret = "/content/drive/MyDrive/pret"
+    if not colab:
+        pret = os.path.join(home, "pret")
     if "bert_score" in score_col:
-        if not model_name: model_name = 'paraphrase-multilingual-MiniLM-L12-v2'
+        if not model_name: model_name = 'mm/paraphrase-multilingual-MiniLM-L12-v2'
         model_path = os.path.join(pret, model_name)
         if Path(model_path).exists():
             model_name = model_path
@@ -138,7 +140,7 @@ def main(fname, model_name, path, step, col1, col2, score_col, cpu, concat):
 
         model = BARTScorer(device=device, checkpoint=model_name)
 
-    score_col = model_name.replace("/","_") + "_" + col1 + "_" + score_col
+    score_col = Path(model_name).stem.replace("/","_") + "_" + col1 + "_" + score_col
     mlog.info("score_col: %s", score_col)
     mlog.info("col1: %s", col1)
     mlog.info("col2: %s", col2)
