@@ -101,6 +101,7 @@ def show_df(df):
         ii = 0
         top_margin = min(len(df), 5)
         #fffff
+        infos = []
         for idx, row in df.iterrows():
            if ii < sel_row - top_margin:
                ii += 1
@@ -112,6 +113,9 @@ def show_df(df):
                content = str(row[sel_col])
                if "score" in sel_col:
                    content = "{:.2f}".format(float(content))
+               _info = sel_col + ":" + content
+               if sel_col in info_cols:
+                    infos.append(_info)
                _color = TEXT_COLOR
                _w = col_widths[sel_col] if sel_col in col_widths else width
                text += "{:<{x}}".format(content, x= _w)
@@ -123,15 +127,13 @@ def show_df(df):
            if ii > sel_row + ROWS - 4:
                break
         refresh()
-        infos = []
         for c in info_cols:
             if not c in df:
                 continue
-            _info = c + ":" + df.at[sel_row, c]
             if "score" in c:
                 mean = df[c].mean()
                 _info = f"Mean {c}:" + "{:.2f}".format(mean)
-            infos.append(_info)
+                infos.append(_info)
         infos.append("-------------------------")
         consts["len"] = str(len(df))
         for key,val in consts.items():
