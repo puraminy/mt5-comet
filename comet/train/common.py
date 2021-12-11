@@ -352,6 +352,7 @@ def fill_prompt(text, rel, place_holder, counter = 0, lang=""):
             mlog.info("************** using tokens of pholder %s",_pholder)
             prompt = _pholder
         prompt = prompt.strip()
+        enc_plen = len(prompt.split())
         for token in prompt.split():
             if rel == "com" and not token in common_tokens:
                 common_tokens.append(token)
