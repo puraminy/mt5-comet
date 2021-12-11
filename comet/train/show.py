@@ -114,7 +114,7 @@ def show_df(df):
                if "score" in sel_col:
                    content = "{:.2f}".format(float(content))
                _info = sel_col + ":" + content
-               if sel_col in info_cols:
+               if sel_col in info_cols and ii == sel_row:
                     infos.append(_info)
                _color = TEXT_COLOR
                _w = col_widths[sel_col] if sel_col in col_widths else width
