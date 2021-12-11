@@ -177,7 +177,7 @@ def main(fname, model_id, path, step, col1, col2, score_col, cpu, concat):
     df.to_csv(out2, sep="\t", index=False)
     print(len(df))
     out1 = out1.replace("/content/drive/MyDrive/", "")
-    print("rcopy nlp:{out1} .)
+    print(f"rcopy nlp:{out1} . ")
 
 if __name__ == "__main__":
     main()
