@@ -260,7 +260,10 @@ def show_df(df):
             canceled, col = list_values(sel_cols)
             if not canceled:
                df = main_df.groupby('input_text', group_keys=False).apply(lambda x: x.loc[x.rouge_score.idxmax()])
-               g_cols = [col, "bert_score", "rouge_score"]
+               g_cols = [col]
+               for c in df.columns:
+                   if "_score" in c:
+                       g_cols.append(c)
                df = df[g_cols]
                df = df.groupby(col).mean()
                df = df.reset_index()

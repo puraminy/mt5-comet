@@ -174,8 +174,8 @@ def main(fname, model_id, path, step, col1, col2, score_col, cpu, concat):
             rename(columns={col2:'top'}).\
               merge(df.groupby(['prefix','input_text'],as_index=False)[col2].agg('<br />'.join))
 
-    out1 = resPath + "/_" + Path(fname).stem  + ".tsv" 
-    out2 = logPath + "/_" + Path(fname).stem  + ".tsv" 
+    out1 = resPath + "/" + Path(fname).stem  + ".tsv" 
+    out2 = logPath + "/" + Path(fname).stem  + ".tsv" 
     df.to_csv(out1, sep="\t", index=False)
     df.to_csv(out2, sep="\t", index=False)
     print(len(df))
