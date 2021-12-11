@@ -21,10 +21,7 @@ def bart_score(model, df, before, after, col1, col2, score_col, cpu):
       rel = row.prefix
       langs = row.langs
       from_, to_ = langs.split("2")
-      if from_ == "en":
-          s1 = row.input_text
-      else:
-          s1 = row.input_text_fa
+      s1 = row.input_text
       s2 = row[col2]
       s2 = relation_natural_mappings[rel][to_] + " " + s2
       if i < 5:
@@ -133,7 +130,7 @@ def main(fname, model_id, path, step, col1, col2, score_col, cpu, concat):
         model = BARTScorer(device=device, checkpoint=os.path.join(pret, model_id))
 
     score_col = model_id + "_" + col1 + "_" + score_col
-    mlog.info("score_col:", score_col)
+    mlog.info("score_col: %s", score_col)
     if fname.endswith("csv"):
         srcdf = pd.read_csv(fname)
     else:
