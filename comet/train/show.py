@@ -272,7 +272,7 @@ def show_df(df):
                df = df.reset_index()
                sel_cols = order(sel_cols, g_cols)
         elif char == "D":
-            canceled, col,val = list_df_values(main_df)
+            canceled, col,val = list_df_values(main_df, get_val=False)
             if not canceled:
                 del main_df[col]
                 char = "SS"
@@ -280,7 +280,7 @@ def show_df(df):
                     del df[col]
 
         elif char in ["d"]:
-            canceled, col, val = list_df_values(main_df, get_val=True)
+            canceled, col, val = list_df_values(main_df)
             if not canceled:
                 main_df = main_df.drop(main_df[main_df[col] == val].index)
                 char = "SS"
@@ -417,7 +417,7 @@ def list_values(vals,si=0, sels=[]):
     tag_win = cur.newwin(15, 70, 3, 5)
     tag_win.bkgd(' ', cur.color_pair(TEXT_COLOR))  # | cur.A_REVERSE)
     tag_win.border()
-    key = "_".join(vals[:4])
+    key = "_".join([str(x) for x in vals[:4]])
     if si == 0:
         if key in si_hash:
             si = si_hash[key]
