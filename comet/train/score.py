@@ -130,7 +130,7 @@ def main(fname, model_name, path, step, col1, col2, score_col, cpu, concat):
         device = "cpu" if cpu else "cuda:0"
         if not model_name: model_name= "enfat5-large"
         model_path = os.path.join(pret, model_name)
-        if Path(model_path).exists(model_path):
+        if Path(model_path).exists():
             model_name = model_path
 
         model = BARTScorer(device=device, checkpoint=model_name)
