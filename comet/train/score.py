@@ -140,6 +140,8 @@ def main(fname, model_name, path, step, col1, col2, score_col, cpu, concat):
 
     score_col = model_name.replace("/","_") + "_" + col1 + "_" + score_col
     mlog.info("score_col: %s", score_col)
+    mlog.info("col1: %s", col1)
+    mlog.info("col2: %s", col2)
     if fname.endswith("csv"):
         srcdf = pd.read_csv(fname)
     else:
