@@ -77,7 +77,7 @@ import click
     help="The current path (it is set by system)"
 )
 @click.option(
-    "--model_id",
+    "--model_name",
     "-m",
     default="",
     type=str,
@@ -121,17 +121,21 @@ import click
     is_flag=True,
     help=""
 )
-def main(fname, model_id, path, step, col1, col2, score_col, cpu, concat):
+def main(fname, model_name, path, step, col1, col2, score_col, cpu, concat):
     pret = "/content/drive/MyDrive/pret"
     if "bert_score" in score_col:
-        if not model_id: model_id = '/paraphrase-multilingual-MiniLM-L12-v2'
-        model = SentenceTransformer(os.path.join(pret, model_id))
+        if not model_name: model_name = '/paraphrase-multilingual-MiniLM-L12-v2'
+        model = SentenceTransformer(os.path.join(pret, model_name))
     else:
         device = "cpu" if cpu else "cuda:0"
-        if not model_id: model_id= "enfat5-large"
-        model = BARTScorer(device=device, checkpoint=os.path.join(pret, model_id))
+        if not model_name: model_name= "enfat5-large"
+        model_path = os.path.join(pret, model_name)
+        if Path(model_path).exists(model_path):
+            model_name = model_path
 
-    score_col = model_id + "_" + col1 + "_" + score_col
+        model = BARTScorer(device=device, checkpoint=model_name)
+
+    score_col = model_name.replace("/","_") + "_" + col1 + "_" + score_col
     mlog.info("score_col: %s", score_col)
     if fname.endswith("csv"):
         srcdf = pd.read_csv(fname)

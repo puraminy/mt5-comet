@@ -125,7 +125,7 @@ def show_df(df):
         for c in info_cols:
             if not c in df:
                 continue
-            _info = df.at[sel_row, c]
+            _info = c + ":" + df.at[sel_row, c]
             if "score" in c:
                 mean = df[c].mean()
                 _info = f"Mean {c}:" + "{:.2f}".format(mean)
@@ -250,7 +250,7 @@ def show_df(df):
             df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
         elif char == "u": 
             if not count_col:
-                canceled, col = list_values(sel_cols)
+                canceled, col, _ = list_df_values(df, get_val=False)
                 if not canceled:
                     count_col = col
                     consts["count col"] = col
@@ -260,7 +260,7 @@ def show_df(df):
                 col_widths["index"]=50
                 info_cols = []
         elif char in ["g","G"]:
-            canceled, col = list_values(sel_cols)
+            canceled, col, _ = list_df_values(df, get_val=False)
             if not canceled:
                df = main_df.groupby('input_text', group_keys=False).apply(lambda x: x.loc[x.rouge_score.idxmax()])
                g_cols = [col]
