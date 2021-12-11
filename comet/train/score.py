@@ -22,7 +22,7 @@ def bart_score(model, df, before, after, col1, col2, score_col, cpu):
       s2 = row[col2]
       pbar.update()
       score = model.score([s1], [s2], batch_size=4) # generation scores from the first list of texts to the second list of texts.
-      scores.append(score)
+      scores.append(":.5f".format(score[0]))
   
   df[score_col] = scores
   return df
@@ -75,7 +75,7 @@ import click
 )
 @click.option(
     "--step",
-    default=1000,
+    default=-1,
     type=int,
     help=""
 )
@@ -113,7 +113,6 @@ import click
 )
 def main(fname, model_id, path, step, col1, col2, score_col, cpu, concat):
     pret = "/content/drive/MyDrive/pret"
-    score_col = model_id + "_" + score_col
     if "bert_score" in score_col:
         if not model_id: model_id = '/paraphrase-multilingual-MiniLM-L12-v2'
         model = SentenceTransformer(os.path.join(pret, model_id))
@@ -122,6 +121,7 @@ def main(fname, model_id, path, step, col1, col2, score_col, cpu, concat):
         if not model_id: model_id= "enfat5-large"
         model = BARTScorer(device=device, checkpoint=os.path.join(pret, model_id))
 
+    score_col = model_id + "_" + score_col
     if fname.endswith("csv"):
         srcdf = pd.read_csv(fname)
     else:
@@ -161,10 +161,11 @@ def main(fname, model_id, path, step, col1, col2, score_col, cpu, concat):
 
     out1 = resPath + "/"+ score_col + "_" + col1 + "_" + Path(fname).stem  + ".tsv" 
     out2 = logPath + "/"+ score_col + "_" + col1 + "_" + Path(fname).stem  + ".tsv" 
-    print(out1)
-    print(len(df))
     df.to_csv(out1, sep="\t", index=False)
     df.to_csv(out2, sep="\t", index=False)
+    print(len(df))
+    out1 = out1.replace("/content/drive/MyDrive/", "")
+    print("rcopy nlp:{out1} .)
 
 if __name__ == "__main__":
     main()
