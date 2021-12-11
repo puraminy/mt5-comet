@@ -77,39 +77,48 @@ atomic_relation_mappings = {
 relation_natural_mappings = {
     "oReact":{ 
         "en":"As a result others feel ",
-        "fa":"در نتیجه دیگران حس می کنند"
+        "fa":"در نتیجه دیگران حس می کنند",
+        "tokens":"<other> <state> <after>"
     },
     "xReact":{ 
         "en":"As a result PersonX feels ",
         "fa":"در نتیجه PersonX حس می کند", 
+        "tokens":"<agent> <state> <after>"
     },
     "xWant":{ 
         "en":"Then PersonX wants ",
-        "fa":"بعد از آن PersonX می خواهد"
+        "fa":"بعد از آن PersonX می خواهد",
+        "tokens":"<agent> <want> <event> <after>"
     },
     "oWant":{ 
         "en":"Then others want ",
-        "fa":"بعد از آن دیگران می خواهند"
+        "fa":"بعد از آن دیگران می خواهند",
+        "tokens":"<other> <want> <event> <after>"
     },
     "xEffect":{ 
         "en":"As a result PersonX  ",
-        "fa":"در نتیجه PersonX "
+        "fa":"در نتیجه PersonX ",
+        "tokens":"<agent> <effect> <event> <after>"
     },
     "oEffect":{ 
         "en":"As a result others  ",
-        "fa":"در نتیجه دیگران "
+        "fa":"در نتیجه دیگران ",
+        "tokens":"<other> <effect> <event> <after>"
     },
     "xAttr":{ 
         "en":"PersonX is seen as",
-        "fa":"مردم فکر می کنند PersonX "
+        "fa":"مردم فکر می کنند PersonX ",
+        "tokens":"<agent> <state> <fixed>"
     },
     "xIntent":{ 
         "en":"Because PersonX intended ",
-        "fa":"زیرا PersonX می خواست"
+        "fa":"زیرا PersonX می خواست",
+        "tokens":"<agent> <cause> <event> <before> <want>"
     },
     "xNeed":{ 
         "en":"Before that, PersonX needs ",
-        "fa":"قبل از آن PersonX نیاز دارد"
+        "fa":"قبل از آن PersonX نیاز دارد",
+        "tokens":"<agent> <cause> <event> <before>"
     },
 }
 gen_token_en = "<gen_en>"
@@ -330,12 +339,17 @@ def fill_prompt(text, rel, place_holder, counter = 0, lang=""):
     place_holder = place_holder.replace("lang", lang)  
     #dlog.info("text: %s", text)
     while _pholder in text:
-        enc_plen = plen[pi] if pi < len(plen) else plen[-1] 
-        prompt = ""
-        for i in range(counter, counter + enc_plen):
-            token = place_holder
-            token = token.replace("_i", "_" + str(i))  
-            prompt += " " + token
+        if "_i" in _pholder:
+            enc_plen = plen[pi] if pi < len(plen) else plen[-1] 
+            prompt = ""
+            for i in range(counter, counter + enc_plen):
+                token = place_holder
+                token = token.replace("_i", "_" + str(i))  
+                prompt += " " + token
+        elif _pholder == "tokens": 
+            prompt = relation_natural_mappings[rel]["tokens"]
+        prompt = prompt.strip()
+        for token in prompt.split():
             if rel == "com" and not token in common_tokens:
                 common_tokens.append(token)
             else:
@@ -343,7 +357,6 @@ def fill_prompt(text, rel, place_holder, counter = 0, lang=""):
                     encoder_prompts[rel] = []
                 if not token in encoder_prompts[rel]:
                     encoder_prompts[rel].append(token)
-        prompt = prompt.strip()
         text = text.replace(_pholder,prompt, 1)
         counter += enc_plen 
         pi += 1
@@ -435,6 +448,7 @@ def fill_consts(template, ex_temp, context, row, rows=[], mask=-1, method=""):
         pi += 1
     text = fill_prompt(text, rel, "{rel_i}")
     text = fill_prompt(text, "com", "{com_i}")
+    text = fill_prompt(text, rel, "{tokens}")
     if "{examples}" in text:
         examples = ""
         assert len(rows) > 0, "Since there are examples in template, rows must be provided"
@@ -681,6 +695,9 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            anstemp = "{ph} {resp} {end}"
        elif method == "unsup-wrap":
            qtemp = "{rel_i_start} {event} {rel_i_end} {ph}"
+           anstemp = "{ph} {resp} {end}"
+       elif method == "unsup-wrap-tokens":
+           qtemp = "{event} {tokens} {ph}"
            anstemp = "{ph} {resp} {end}"
        elif method == "unsup-wrap-gen":
            qtemp = "{rel_i_start} {gen_start} {event} {rel_i_end} {gen_end} {ph}"
