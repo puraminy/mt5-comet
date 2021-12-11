@@ -26,6 +26,9 @@ class BARTScorer:
         if "t5" in checkpoint:
             self.model = MT5ForConditionalGeneration.from_pretrained(checkpoint)
             self.tokenizer = MT5TokenizerFast.from_pretrained(checkpoint)
+        elif "mbart" in checkpoint:
+            self.tokenizer = MBart50Tokenizer.from_pretrained(checkpoint)
+            self.model = MBartForConditionalGeneration.from_pretrained(checkpoint)
         else:
             self.tokenizer = BartTokenizer.from_pretrained(checkpoint)
             self.model = BartForConditionalGeneration.from_pretrained(checkpoint)
