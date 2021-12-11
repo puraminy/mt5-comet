@@ -134,6 +134,10 @@ def main(fname, model_id, path, step, col1, col2, score_col, cpu, concat):
         srcdf = pd.read_csv(fname)
     else:
         srcdf = pd.read_table(fname)
+
+    if score_col in srcdf:
+        mlog.info("%s exits, removing it...", score_col)
+        del srcdf[score_col]
         
     before = 0
     after = step
