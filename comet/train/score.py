@@ -20,6 +20,14 @@ def bart_score(model, df, before, after, col1, col2, score_col, cpu):
   for i, row in df.iterrows(): 
       s1 = row[col1]
       s2 = row[col2]
+      rel = row.prefix
+      langs = row.langs
+      from_, to_ = langs.split("2")
+      s2 = relation_natural_mappings[rel][to_] + " " + s2
+      if i < 5:
+          print(i)
+          print(s1)
+          print(s2)
       pbar.update()
       score = model.score([s1], [s2], batch_size=4) # generation scores from the first list of texts to the second list of texts.
       scores.append(":.5f".format(score[0]))

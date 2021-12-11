@@ -76,11 +76,11 @@ atomic_relation_mappings = {
 }
 relation_natural_mappings = {
     "oReact":{ 
-        "en":"as a result others feel ",
+        "en":"As a result others feel ",
         "fa":"در نتیجه دیگران حس می کنند"
     },
     "xReact":{ 
-        "en":"as a result PersonX feels ",
+        "en":"As a result PersonX feels ",
         "fa":"در نتیجه PersonX حس می کند", 
     },
     "xWant":{ 
@@ -92,11 +92,11 @@ relation_natural_mappings = {
         "fa":"بعد از آن دیگران می خواهند"
     },
     "xEffect":{ 
-        "en":"as a result PersonX  ",
+        "en":"As a result PersonX  ",
         "fa":"در نتیجه PersonX "
     },
     "oEffect":{ 
-        "en":"as a result others  ",
+        "en":"As a result others  ",
         "fa":"در نتیجه دیگران "
     },
     "xAttr":{ 
@@ -104,7 +104,7 @@ relation_natural_mappings = {
         "fa":"مردم فکر می کنند PersonX "
     },
     "xIntent":{ 
-        "en":"because PersonX intended ",
+        "en":"Because PersonX intended ",
         "fa":"زیرا PersonX می خواست"
     },
     "xNeed":{ 

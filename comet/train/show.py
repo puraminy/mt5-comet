@@ -325,7 +325,8 @@ def show_df(df):
             elif cmd == "q":
                 ch = ord("q")
         elif not char in ["q", "S","r"]:
-            mbeep()
+            pass
+            #mbeep()
         if char == "S":
             cmd, _ = minput(cmd_win, 0, 1, "File Name=", default=dfname, all_chars=True)
             if cmd != "<ESC>":
