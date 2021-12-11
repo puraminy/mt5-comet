@@ -30,7 +30,7 @@ def bart_score(model, df, before, after, col1, col2, score_col, cpu):
           print(s2)
       pbar.update()
       score = model.score([s1], [s2], batch_size=4) # generation scores from the first list of texts to the second list of texts.
-      scores.append(":.5f".format(score[0]))
+      scores.append("{:.5f}".format(score[0]))
   
   df[score_col] = scores
   return df
@@ -172,8 +172,8 @@ def main(fname, model_id, path, step, col1, col2, score_col, cpu, concat):
             rename(columns={col2:'top'}).\
               merge(df.groupby(['prefix','input_text'],as_index=False)[col2].agg('<br />'.join))
 
-    out1 = resPath + "/"+ score_col + "_" + col1 + "_" + Path(fname).stem  + ".tsv" 
-    out2 = logPath + "/"+ score_col + "_" + col1 + "_" + Path(fname).stem  + ".tsv" 
+    out1 = resPath + "/_" + Path(fname).stem  + ".tsv" 
+    out2 = logPath + "/_" + Path(fname).stem  + ".tsv" 
     df.to_csv(out1, sep="\t", index=False)
     df.to_csv(out2, sep="\t", index=False)
     print(len(df))
