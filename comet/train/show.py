@@ -452,7 +452,7 @@ main_win = None
 text_width = 60
 std = None
 dfname = ""
-base_dir = "/home/ahmad/results"
+base_dir = resPath
 def start(stdscr):
     global info_bar, text_win, cmd_win, std, main_win, colors, dfname
     stdscr.refresh()

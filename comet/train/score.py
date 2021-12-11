@@ -55,7 +55,7 @@ def bert_score(model, df, before, after, col1, col2, score_col, cpu):
   if cpu:
       device = torch.device("cpu")
 
-  rows = []
+  data_rows = []
   for idx, row in tqdm(df.iterrows(), total=len(df)):
         data = {}
         data["s1"] = row[col1]
@@ -88,29 +88,11 @@ def bert_score(model, df, before, after, col1, col2, score_col, cpu):
         data["target"] = df.loc[idx, "best_target"] = sents2[top["index"][0]]
         data["prediction"] = df.loc[idx, "best_pred"] = sents2[top["index"][1]]
         data[score_col] = df.loc[idx, score_col] = "{:.4f}".format(top["score"])
+        data_rows.append(data)
 
-    new_df = pd.DataFrame(data=data)
+  new_df = pd.DataFrame(data=data_rows)
 
   return df,new_df
-
-  col1_val_emb = model.encode(col1_val, device=device, convert_to_tensor=True)
-  col2_val_emb = model.encode(col2_val,  device=device, convert_to_tensor=True)
-  
-  #Compute cosine-similarits
-  cosine_scores = util.pytorch_cos_sim(col1_val_emb, col2_val_emb)
-  
-  #Output the pairs with their score
-  scores = []
-  rows=[]
-  pbar = tqdm(total=len(df)
-  for i, row in df.iterrows():
-      data[col1] = 
-      pbar.update()
-      scores.append("{:.4f}".format(cosine_scores[i][i]))
-  
-  df[score_col] = scores
-  new_df = pd.DataFrame(data=rows)
-  return df, new_df
 
 
 from pathlib import Path
