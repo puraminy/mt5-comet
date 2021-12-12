@@ -328,8 +328,8 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
         emblog.info("cur embeddings: %s", cur_embeds)
         new_embeds = embeddings.detach()
         emblog.info("new embeddings: %s", new_embeds)
-        replace_embeds = torch.mean(torch.stack([cur_embeds, embeddings]))
-        emblog.info("replace embeddings: %s", new_embeds)
+        replace_embeds = (cur_embeds + new_embeds)/2
+        emblog.info("replace embeddings: %s", replace_embeds)
         weight[self.prompt_ids,:]=replace_embeds
         emblog.info("%%%%%%%%%%%%%%%%%%%%%%%%%% dump embeddings end %%%%%%%%%%%%%%%%%%")
 
