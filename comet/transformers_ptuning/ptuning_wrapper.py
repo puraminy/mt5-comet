@@ -198,6 +198,7 @@ class PromptEncoder(torch.nn.Module):
         super().__init__()
         self.length = length
         self.name = name
+        self.counter = 0
         self.prompt_ids = prompt_ids
         self.input_ids = torch.nn.parameter.Parameter(torch.tensor(prompt_ids),
              requires_grad=False)
@@ -291,35 +292,46 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
 
 
     def forward(self,prompt_token_ids,pids=None):
+        emblog.info("=========================== Forward begin ===================")
         emblog.info("=========================== %s ===================", self.name)
         emblog.info("before prompt token ids:{}".format(prompt_token_ids))
         # create embedding vectors for input ids
         embeds = self.embedding(self.net_inps)
         # do forward calculations
         x = self.lstm(embeds.unsqueeze(0))
-        wlog.info("lstml embeds: %s",embeds)
+        emblog.info("lstml embeds: %s",embeds)
 
         running_weight = self.mlp(x[0]).squeeze(0)
+        if self.counter < 5:
+            emlog.info("--------------------")
+            emblog.info("running weights: %s",running_weight)
+            self.counter += 1
+
         # find zero based ids 
         if not self.prompt_ids:
             prompt_token_ids = prompt_token_ids - self.id_offset
         else:
             prompt_token_ids = (prompt_token_ids.view(-1,1) == self.input_ids).int().argmax(dim=1)
         emblog.info("after prompt token ids:  %s", prompt_token_ids)
-        wlog.info("prompt token ids:%s", running_weight)
+        emblog.info("=========================== Forward end ===================")
         # return weights for prompt_token_ids 
         return F.embedding(prompt_token_ids,running_weight)
     def dump_embedding(self, weight):
         # get embedding weights as the output of forward pass
+        emblog.info("%%%%%%%%%%%%%%%%%%%%%%%%%% dump embeddings start %%%%%%%%%%%%%%%%")
         emblog.info("=========================== %s ===================", self.name)
         emblog.info("Dump embeddings: %s", weight)
         emblog.info("Input ids: %s", self.input_ids)
         with torch.no_grad():
             embeddings = self.forward(self.input_ids)
         cur_embeds = weight[self.prompt_ids,:].detach()
+        emblog.info("cur embeddings: %s", cur_embeds)
         new_embeds = embeddings.detach()
+        emblog.info("new embeddings: %s", new_embeds)
         replace_embeds = torch.mean(torch.stack([cur_embeds, embeddings]))
+        emblog.info("replace embeddings: %s", new_embeds)
         weight[self.prompt_ids,:]=replace_embeds
+        emblog.info("%%%%%%%%%%%%%%%%%%%%%%%%%% dump embeddings end %%%%%%%%%%%%%%%%%%")
 
 
 
