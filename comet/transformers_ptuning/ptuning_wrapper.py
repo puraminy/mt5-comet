@@ -303,7 +303,7 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
 
         running_weight = self.mlp(x[0]).squeeze(0)
         if self.counter < 5:
-            emlog.info("--------------------")
+            emblog.info("--------------------")
             emblog.info("running weights: %s",running_weight)
             self.counter += 1
 
