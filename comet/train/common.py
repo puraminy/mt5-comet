@@ -350,7 +350,7 @@ def fill_prompt(text, rel, place_holder, counter = 0, lang=""):
             prompt = relation_natural_mappings[rel]["tokens"]
         else:
             mlog.info("************** using tokens of pholder %s",_pholder)
-            prompt = _pholder
+            prompt = place_holder
         prompt = prompt.strip()
         enc_plen = len(prompt.split())
         for token in prompt.split():
@@ -703,6 +703,9 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
        elif method == "unsup-wrap-tokens":
            qtemp = "{event} {tokens} {ph}"
            anstemp = "{ph} {resp} {end}"
+       elif method == "unsup-wrap-tokens-gen":
+           qtemp = "{event} {tokens} {gen_lang} {ph}"
+           anstemp = "{ph} {resp} {end}"
        elif method == "unsup-wrap-gen":
            qtemp = "{rel_i_start} {gen_start} {event} {rel_i_end} {gen_end} {ph}"
            anstemp = "{ph} {resp} {end}"
@@ -751,6 +754,7 @@ def fill_vars(template, rel, event, gen_token, resp, inp_lang, resp_lang):
     if not rel in decoder_prompts:
         decoder_prompts[rel] = []
     text = fill_prompt(text, rel, "{rel_lang_i}", lang=lang)
+    text = fill_prompt(text, rel, "{gen_lang}", lang=lang)
     return text
 
 def get_input(msg):
