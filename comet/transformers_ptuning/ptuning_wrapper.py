@@ -316,7 +316,11 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
         emblog.info("Input ids: %s", self.input_ids)
         with torch.no_grad():
             embeddings = self.forward(self.input_ids)
-        weight[self.prompt_ids,:]=embeddings.detach()
+        cur_embeds = weight[self.prompt_ids,:].detach()
+        new_embeds = embeddings.detach()
+        replace_embeds = torch.mean(torch.stack([cur_embeds, embeddings]))
+        weight[self.prompt_ids,:]=replace_embeds
+
 
 
 if __name__ == "__main__":
