@@ -64,7 +64,7 @@ class PTuningWrapper(torch.nn.Module):
                 embedding layer of the transformer model.
         """
         super().__init__()
-        wlog.disabled = do_log
+        wlog.disabled = not do_log
         self.ll = logging.INFO
         wlog.info("%%%%%%%%%%%%%%%%%%%%%%%% New version %%%%%%%%%%%%%%%%%%")
         self.underlying_model = model
@@ -249,8 +249,10 @@ class EmbeddingPromptEncoder(PromptEncoder):
             prompt_token_ids = (prompt_token_ids.view(-1,1) == self.input_ids).int().argmax(dim=1)
         emblog.info("After prompt token ids: %s", prompt_token_ids)
         emblog.info(self.embedding.weight)
+        ret_embs = self.embedding(prompt_token_ids)
+        emblog.info("ret embs %s", ret_embs)
         emblog.info("=========================== Forward end ===================")
-        return self.embedding(prompt_token_ids)
+        return ret_embs
 
     def dump_embedding(self, weight):
         wlog.info("Dump embeddings")
