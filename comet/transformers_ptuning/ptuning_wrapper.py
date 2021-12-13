@@ -258,9 +258,11 @@ class EmbeddingPromptEncoder(PromptEncoder):
     def dump_embedding(self, weight):
         wlog.info("Dump embeddings")
         emblog.info("=========================== %s ===================", self.name)
-        emblog.info("Dump embeddings %s", weight)
-        weight[self.prompt_ids,:]=self.embedding.\
-            weight.detach()
+        emblog.info("input weights: %s", weight)
+        detached_embeddings = self.embedding.weight.detach()
+        emblog.info("Dump embeddings: %s", detached_embeddings)
+        emblog.info("on this ids: %s", self.prompt_ids)
+        weight[self.prompt_ids,:]=detached_embeddings
 
     def save(self, path):
         torch.save(self.embedding.state_dict(), path + "/emb")
