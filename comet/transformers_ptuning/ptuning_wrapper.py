@@ -83,9 +83,8 @@ class PTuningWrapper(torch.nn.Module):
             embs = self.model_embeddings
             rel_embs = embs(rel_ids_tensor)
             with torch.no_grad():
-               for i, e in zip(_ids, rel_embs):
-                   j = i - _offset
-                   encoder.embedding.weight[j] = e #.detach()
+               for i, e in enumerate(rel_embs):
+                   encoder.embedding.weight[i] = e #.detach()
 
         self.decoder_prompt_encoder = decoder_prompt_encoder
         self.replacing_token_id = replacing_token_id
