@@ -274,7 +274,7 @@ def create_encoder(name, model, tokenizer, prompt_tokens, encoder_type="lstm",
         with torch.no_grad():
            for i, e in zip(_ids, rel_embs):
                j = i - _offset
-               init_embs[j] = e.detach()
+               init_embs[j] = e #.detach()
 
     enc_plen =len(rel_tokens) 
     mlog.info("** len tokenizer before extend: %s", len(tokenizer))
