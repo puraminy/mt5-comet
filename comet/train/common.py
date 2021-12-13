@@ -198,9 +198,14 @@ def set_prompt_lengths(rel, length):
 
 def extend_tokenizer(tokenizer, prompt_tokens = [], model_id=""):
     cur_list = tokenizer.additional_special_tokens
+    rels_tokens = []
+    for x,t in relation_natural_mappings.items():
+        rels_tokens += t["tokens"].split()
+
+    mlog.info("RELS %s", rels_tokens)
     new_tokens = tokens.t5_tokens + \
                  list(atomic_relation_mappings.values())+ \
-                 list(gen_tokens.values()) 
+                 list(gen_tokens.values()) + rels_tokens
     if prompt_tokens:
         new_tokens += prompt_tokens
 
