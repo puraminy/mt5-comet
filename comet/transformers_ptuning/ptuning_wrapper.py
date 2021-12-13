@@ -247,6 +247,7 @@ class EmbeddingPromptEncoder(PromptEncoder):
             prompt_token_ids = prompt_token_ids - self.id_offset
         else:
             prompt_token_ids = (prompt_token_ids.view(-1,1) == self.input_ids).int().argmax(dim=1)
+        emblog.info("self input ids: %s", self.input_ids)
         emblog.info("After prompt token ids: %s", prompt_token_ids)
         emblog.info(self.embedding.weight)
         ret_embs = self.embedding(prompt_token_ids)
