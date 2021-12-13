@@ -135,7 +135,6 @@ class PTuningWrapper(torch.nn.Module):
                     prompt_embeds = encoder(prompt_input_ids,\
                         pids).to(device)
                     # replace prompt_embeddings calculated by prompt encoder in input embeddings
-                    # in input embeds replace embeddings for prompt token with output of encoder
                     inputs_embeds[encoder_masks]=prompt_embeds
         else:
             inputs_embeds = self.model_embeddings(input_ids)
@@ -296,7 +295,7 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
         emblog.info("=========================== %s ===================", self.name)
         emblog.info("before prompt token ids:{}".format(prompt_token_ids))
         # create embedding vectors for input ids
-        embeds = self.embedding(self.net_inps)
+        embeds = self.embedding(self.input_ids)
         # do forward calculations
         x = self.lstm(embeds.unsqueeze(0))
         emblog.info("lstml embeds: %s",embeds)
@@ -443,3 +442,4 @@ if __name__ == "__main__":
     loss.backward()
     print("Original embedding grads:",model.get_input_embeddings().weight.grad)
     print("Prompt embedding grads:", wrapped_model.prompt_encoder.embedding.weight.grad)
+
