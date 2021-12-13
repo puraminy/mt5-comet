@@ -312,10 +312,11 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
         else:
             prompt_token_ids = (prompt_token_ids.view(-1,1) == self.input_ids).int().argmax(dim=1)
         emblog.info("after prompt token ids:  %s", prompt_token_ids)
-        emblog.info("=========================== Forward end ===================")
         # return weights for prompt_token_ids 
         ret_embeds = F.embedding(prompt_token_ids,running_weight)
+        emblog.info("ret embeds size %s", ret_embeds.size)
         emblog.info("ret embeds %s", ret_embeds)
+        emblog.info("=========================== Forward end ===================")
         return ret_embeds
     def dump_embedding(self, weight):
         # get embedding weights as the output of forward pass
