@@ -74,6 +74,19 @@ class PTuningWrapper(torch.nn.Module):
         wlog.info("model embedding_size:{}".format(model_embeddings_size))
         self.prompt_encoders = torch.nn.ModuleList(prompt_encoders)
         wlog.info("num of encoders %s:", len(self.prompt_encoders))
+
+        for encoder in self.prompt_encoders:
+            _ids = encoder.prompt_ids
+            _offset = min(_ids)
+            wlog.info("** existing encoder ids for %s: %s", encoder.name, _ids)
+            rel_ids_tensor = torch.LongTensor(_ids)
+            embs = self.model_embeddings
+            rel_embs = embs(rel_ids_tensor)
+            with torch.no_grad():
+               for i, e in zip(_ids, rel_embs):
+                   j = i - _offset
+                   encoder.embedding.weight[j] = e #.detach()
+
         self.decoder_prompt_encoder = decoder_prompt_encoder
         self.replacing_token_id = replacing_token_id
         wlog.info("REP id:{}".format(replacing_token_id))
