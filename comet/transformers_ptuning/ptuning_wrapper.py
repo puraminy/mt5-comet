@@ -328,9 +328,9 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
         emblog.info("cur embeddings: %s", cur_embeds)
         new_embeds = embeddings.detach()
         emblog.info("new embeddings: %s", new_embeds)
-        replace_embeds = (cur_embeds + new_embeds)/2
-        emblog.info("replace embeddings: %s", replace_embeds)
-        weight[self.prompt_ids,:]=replace_embeds
+        mean_embeds = (cur_embeds + new_embeds)/2
+        emblog.info("replace embeddings: %s", mean_embeds)
+        weight[self.prompt_ids,:]=new_embeds # mean_embeds
         emblog.info("%%%%%%%%%%%%%%%%%%%%%%%%%% dump embeddings end %%%%%%%%%%%%%%%%%%")
 
 
