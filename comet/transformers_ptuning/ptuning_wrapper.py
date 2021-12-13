@@ -31,12 +31,11 @@ emblog.info("Embedding log")
 wlog.info("Wrapper log")
 wlog.setLevel(logging.INFO)
 emblog.setLevel(logging.INFO)
-wlog.disabled = True
 
 class PTuningWrapper(torch.nn.Module):
     def __init__(self,model,prompt_encoders,decoder_prompt_encoder=None,
         prompt_token_fn=None, prompt_token_id=None, prompt_token_ids=None,
-        replacing_token_id=0):
+        replacing_token_id=0, do_log=True):
         """
         PTuningWrapper for Huggingface transformer models (Encoder Models).
         It will replace the prompt token embeddings with ones from prompt encoder.
@@ -65,6 +64,7 @@ class PTuningWrapper(torch.nn.Module):
                 embedding layer of the transformer model.
         """
         super().__init__()
+        wlog.disabled = do_log
         self.ll = logging.INFO
         wlog.info("%%%%%%%%%%%%%%%%%%%%%%%% New version %%%%%%%%%%%%%%%%%%")
         self.underlying_model = model
@@ -135,6 +135,7 @@ class PTuningWrapper(torch.nn.Module):
                     prompt_embeds = encoder(prompt_input_ids,\
                         pids).to(device)
                     # replace prompt_embeddings calculated by prompt encoder in input embeddings
+                    wlog.info("Prompt Embeds: %s", prompt_embeds)
                     inputs_embeds[encoder_masks]=prompt_embeds
         else:
             inputs_embeds = self.model_embeddings(input_ids)
