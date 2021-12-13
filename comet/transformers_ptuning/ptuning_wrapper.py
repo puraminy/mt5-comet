@@ -314,7 +314,7 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
         emblog.info("after prompt token ids:  %s", prompt_token_ids)
         # return weights for prompt_token_ids 
         ret_embeds = F.embedding(prompt_token_ids,running_weight)
-        emblog.info("ret embeds size %s", ret_embeds.size)
+        emblog.info("ret embeds size %s", ret_embeds.size())
         emblog.info("ret embeds %s", ret_embeds)
         emblog.info("=========================== Forward end ===================")
         return ret_embeds
