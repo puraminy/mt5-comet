@@ -295,7 +295,7 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
         emblog.info("=========================== %s ===================", self.name)
         emblog.info("before prompt token ids:{}".format(prompt_token_ids))
         # create embedding vectors for input ids
-        embeds = self.embedding(self.input_ids)
+        embeds = self.embedding(self.net_inps)
         # do forward calculations
         x = self.lstm(embeds.unsqueeze(0))
         emblog.info("lstml embeds: %s",embeds)
@@ -314,7 +314,9 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
         emblog.info("after prompt token ids:  %s", prompt_token_ids)
         emblog.info("=========================== Forward end ===================")
         # return weights for prompt_token_ids 
-        return F.embedding(prompt_token_ids,running_weight)
+        ret_embeds = F.embedding(prompt_token_ids,running_weight)
+        emblog.info("ret embeds %s", ret_embeds)
+        return ret_embeds
     def dump_embedding(self, weight):
         # get embedding weights as the output of forward pass
         emblog.info("%%%%%%%%%%%%%%%%%%%%%%%%%% dump embeddings start %%%%%%%%%%%%%%%%")
