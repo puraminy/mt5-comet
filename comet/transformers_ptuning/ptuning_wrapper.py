@@ -238,6 +238,7 @@ class EmbeddingPromptEncoder(PromptEncoder):
         )
     
     def forward(self,prompt_token_ids,pids=None):
+        emblog.info("=========================== Forward ===================")
         emblog.info("=========================== %s ===================", self.name)
         emblog.info("Before prompt token ids: %s", prompt_token_ids)
         #emblog.info("id offset: %s", self.id_offset)
@@ -247,7 +248,8 @@ class EmbeddingPromptEncoder(PromptEncoder):
         else:
             prompt_token_ids = (prompt_token_ids.view(-1,1) == self.input_ids).int().argmax(dim=1)
         emblog.info("After prompt token ids: %s", prompt_token_ids)
-        #emblog.info(self.embedding.weight)
+        emblog.info(self.embedding.weight)
+        emblog.info("=========================== Forward end ===================")
         return self.embedding(prompt_token_ids)
 
     def dump_embedding(self, weight):
