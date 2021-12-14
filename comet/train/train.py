@@ -839,7 +839,12 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     accumulation_tiny_steps = 2 
     if "gpt" in model_id:
         accumulation_tiny_steps = 1
-    node_batch_size = batch_size//accumulation_tiny_steps
+    if batch_size >= 2:
+        node_batch_size = batch_size//accumulation_tiny_steps
+    else:
+        accumulation_tiny_steps = 1
+        node_batch_size = 1
+
     iterations = train_records//batch_size
     
     for logger in [mlog, tlog]:
@@ -918,12 +923,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     # %% prepare for training
     sw = SummaryWriter(save_path, flush_secs=1)
     no_decay = ['bias', 'LayerNorm.weight']
-    if frozen:
-        for p in model.parameters():
-            p.requires_grad = False 
-    else:
-        for p in model.parameters():
-            p.requires_grad = True 
+    if wrap and not frozen:
+        raise "Are you sure you want to wrap without freezing the model?"
     wrapped_model = None
     if wrap:
         if not load_prompt_path and Path(os.path.join(load_path, model_id, "prompt")).exists():
@@ -937,11 +938,39 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
         mlog.info("len tokenizer after wrapping %s", len(tokenizer))
     else:
         wrap = False
+        if learning_rate < 0.0001:
+            raise "Learning rate should be smaller"
         extend_tokenizer(tokenizer)
         mlog.info("len tokenizer after extending %s", len(tokenizer))
         model.resize_token_embeddings(len(tokenizer))
         model.to(device=device)
 
+    if frozen:
+        for p in model.parameters():
+            p.requires_grad = False 
+
+    if wrap:
+        #model.get_input_embeddings().weight.requires_grad = False
+        rgrad = [p for p in wrapped_model.parameters() if p.requires_grad]
+        nrgrad = [p for p in wrapped_model.parameters() if not p.requires_grad]
+
+        _sum = 0
+        for encoder in wrapped_model.prompt_encoders:
+            enc_rgrad = [p for p in encoder.parameters() if p.requires_grad]
+            tlog.info("Encoder require grad %s: %s",encoder.name,enc_rgrad)
+            tlog.info("len Encoder require grad %s: %s",encoder.name,len(enc_rgrad))
+            tlog.info("Encoder prompt ids: %s", encoder.prompt_ids)
+            _sum += len(encoder.prompt_ids)
+            tlog.info("len prompt ids %s: %s",encoder.name, len(encoder.prompt_ids))
+
+        tlog.info("_sum: %s", _sum)
+        model_rgrad = [p for p in model.parameters() if p.requires_grad]
+        model_nrgrad = [p for p in model.parameters() if not p.requires_grad]
+        tlog.info("Model require grad %s, ", len(model_rgrad))
+        tlog.info("Model param that requires grad %s", model_rgrad)
+        tlog.info("Model not require grad %s, ", len(model_nrgrad))
+        tlog.info("Wrapped model require grad %s, ", len(rgrad))
+        tlog.info("Wrapped model not require grad %s, ", len(nrgrad))
 
     tokenizer.save_pretrained(save_path)
     def get_optimizer(model, learning_rate, wrap, opt_type):
@@ -1078,7 +1107,11 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
                     last_lr = scheduler.get_last_lr()[0]
                     optimizer, scheduler = get_optimizer(model, last_lr, wrap, opt_type)
                 model.train()
-                optimizer.zero_grad()
+                if wrap:
+                    tlog.info("Wrap model zero grad")
+                    wrapped_model.zero_grad()
+                else:
+                    optimizer.zero_grad()
                 batch_loss = torch.tensor(0.)
                 for tiny_step in range(accumulation_tiny_steps):
                     try:
@@ -1103,6 +1136,12 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
                         #loss /= accumulation_tiny_steps
                         loss = loss.mean()
                     loss.backward()
+                    tlog.info("Original embedding grads:%s",model.get_input_embeddings().weight.grad)
+                    if wrap:
+                        for encoder in wrapped_model.prompt_encoders:
+                            tlog.info("---------------- %s ---------------", encoder.name)
+                            tlog.info("Prompt embedding grads:%s", encoder.embedding.weight.grad)
+
                     batch_loss += loss.item()
                 optimizer.step()
                 scheduler.step()

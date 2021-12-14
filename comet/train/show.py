@@ -60,6 +60,8 @@ def show_df(df):
     store_back = False
     df['id']=df.index
     df = df.reset_index(drop=True)
+    df['input_text'] = df['input_text'].str.replace('##','')
+    df['input_text'] = df['input_text'].str.strip()
     main_df = df
     edit_col = ""
     count_col = ""
@@ -84,6 +86,7 @@ def show_df(df):
     back = {"df":df, "sel_cols":sel_cols, "info_cols":info_cols, "sel_row":0}
     filter_df = df
     #wwwwwwwwww
+    prev_cahr = ""
     while ch != ord("q"):
         text_win.erase()
         left = min(left, max_col  - width)
@@ -102,6 +105,7 @@ def show_df(df):
         top_margin = min(len(df), 5)
         #fffff
         infos = []
+        sel_dict = {}
         for idx, row in df.iterrows():
            if ii < sel_row - top_margin:
                ii += 1
@@ -116,6 +120,8 @@ def show_df(df):
                _info = sel_col + ":" + content
                if sel_col in info_cols and ii == sel_row:
                     infos.append(_info)
+               if ii == sel_row:
+                   sel_dict[sel_col] = row[sel_col]
                _color = TEXT_COLOR
                _w = col_widths[sel_col] if sel_col in col_widths else width
                text += "{:<{x}}".format(content, x= _w)
@@ -144,6 +150,7 @@ def show_df(df):
 
         if store_back:
             back = {"df":df, "sel_cols":sel_cols, "info_cols":info_cols, "sel_row":sel_row}
+        prev_char = chr(ch)
         ch = get_key(std)
         store_back = False
         char = chr(ch)
@@ -244,7 +251,8 @@ def show_df(df):
                     asc = not asc
                 sort = col
                 df = df.sort_values(by=sort, ascending=asc)
-                sel_cols = order(sel_cols, [sort])
+                if not prev_char in ["g","G"]:
+                    sel_cols = order(sel_cols, [sort])
         elif char in ["c","C"]: 
             counts = {}
             for col in df:
@@ -263,10 +271,17 @@ def show_df(df):
                 sel_cols = list(df.columns)
                 col_widths["index"]=50
                 info_cols = []
-        elif char in ["g","G"]:
+        elif char == "g": 
+            score_col = "rouge_score"
+            group_col = "pred_text1"
+            df = df.sort_values(score_col, ascending=False).\
+                 drop_duplicates(['prefix','input_text']).\
+                    rename(columns={group_col:'top_target'}).\
+                      merge(df.groupby(['prefix','input_text'],as_index=False)[group_col].agg('<br />'.join))
+            if not group_col in info_cols: info_cols.append(group_col)
+        elif char == "G":
             canceled, col, _ = list_df_values(df, get_val=False)
             if not canceled:
-               df = main_df.groupby('input_text', group_keys=False).apply(lambda x: x.loc[x.rouge_score.idxmax()])
                g_cols = [col]
                for c in df.columns:
                    if "_score" in c:
@@ -286,6 +301,16 @@ def show_df(df):
         elif char in ["d"]:
             canceled, col, val = list_df_values(main_df)
             if not canceled:
+                main_df = main_df.drop(main_df[main_df[col] == val].index)
+                char = "SS"
+                info_cols = []
+                if col in df:
+                    df = df.drop(df[df[col] == val].index)
+        elif ch == cur.KEY_DC:
+            col = sel_cols[0]
+            val = sel_dict[col]
+            cmd = rowinput("Are you sure you want to delete {} == {} ".format(col,val))
+            if cmd == "y":
                 main_df = main_df.drop(main_df[main_df[col] == val].index)
                 char = "SS"
                 info_cols = []
@@ -381,6 +406,7 @@ def show_df(df):
             info_cols = []
         if char == "b" and back:
             df = back["df"] 
+            consts["filter"] = ""
             sel_cols = back["sel_cols"] 
             info_cols = back["info_cols"]
             sel_row = back["sel_row"]

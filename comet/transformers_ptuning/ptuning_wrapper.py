@@ -219,11 +219,13 @@ class PromptEncoder(torch.nn.Module):
         self.embedding_dim = embedding_dim
         self.id_offset = id_offset
         self.embedding = torch.nn.Embedding(length,embedding_dim)
-        with torch.no_grad():
-            for _id,emb in init_embs.items():
-                if _id < len(self.embedding.weight):
-                    self.embedding.weight[_id] = emb
-                    emblog.info("%s : %s", _id, emb)
+        #self.embedding.weight.requires_grad = False
+        if init_embs:
+            with torch.no_grad():
+                for _id,emb in init_embs.items():
+                    if _id < len(self.embedding.weight):
+                        self.embedding.weight[_id] = emb
+                        emblog.info("%s : %s", _id, emb)
 
     def isin(self, ar1, ar2):
         return (ar1[..., None] == ar2).any(-1)
@@ -243,11 +245,6 @@ class PromptEncoder(torch.nn.Module):
 class EmbeddingPromptEncoder(PromptEncoder):
     def __init__(self,name,length,embedding_dim,id_offset,init_embs=None, prompt_ids=[]) -> None:
         super().__init__(name, length,embedding_dim,id_offset, init_embs, prompt_ids)
-        self.mlp = torch.nn.Sequential(
-            torch.nn.Linear(embedding_dim, embedding_dim),
-            torch.nn.ReLU(),
-            torch.nn.Linear(embedding_dim, embedding_dim)
-        )
     
     def forward(self,prompt_token_ids,pids=None):
         emblog.info("=========================== Forward ===================")

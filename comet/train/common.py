@@ -181,11 +181,11 @@ def tokenize_relations(tokenizer, map_lengths=False):
         natural_rel = phrase["en"]
         #dlog.info("rel ids ***: %s", natural_rel)
         rel_tokens = tokenizer.tokenize(natural_rel.split(), is_split_into_words=True)
-        relation_natural_mappings[rel]["tokens"] = rel_tokens
+        relation_natural_mappings[rel]["rel_tokens"] = rel_tokens
         #dlog.info("rel ids ***: %s", rel_tokens)
         rel_ids = tokenizer.convert_tokens_to_ids(rel_tokens)
         #dlog.info("rel ids ***: %s", rel_ids)
-        relation_natural_mappings[rel]["ids"] = rel_ids
+        relation_natural_mappings[rel]["rel_ids"] = rel_ids
         if map_lengths:
             relation_prompt_lengths[rel] = [len(rel_tokens)]
 
@@ -201,6 +201,8 @@ def extend_tokenizer(tokenizer, prompt_tokens = [], model_id=""):
     rels_tokens = []
     for x,t in relation_natural_mappings.items():
         rels_tokens += t["tokens"].split()
+
+    rels_tokens = list(set(rels_tokens))
 
     mlog.info("RELS %s", rels_tokens)
     new_tokens = tokens.t5_tokens + \
@@ -233,7 +235,7 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words
         if from_words == "rel":
             from_words = relation_natural_mappings[rel]["en"]
         if from_words == "rel_tokens":
-            prompt_tokens = relation_natural_mappings[rel]["tokens"]
+            prompt_tokens = relation_natural_mappings[rel]["rel_tokens"]
 
         encoder, offset = create_encoder(rel, model, tokenizer, prompt_tokens, encoder_type, from_words, wrapped_model)
         prompt_encoders.append(encoder)
@@ -247,39 +249,12 @@ def create_encoder(name, model, tokenizer, prompt_tokens, encoder_type="lstm",
         from_words=False, wrapped_model = None):
     embedding_dim = model.config.hidden_size
     enc_plen = len(prompt_tokens)
-    init_embs = {} 
-    if from_words and from_words != "none" and from_words != "rel_tokens":
-        new_tokens = tokenizer.tokenize(from_words)
-        mlog.info("** loading from words : %s", new_tokens)
-        _ids = tokenizer.convert_tokens_to_ids(new_tokens)
-        rel_ids_tensor = torch.LongTensor(_ids)
-        embs = model.get_input_embeddings()
-        rel_embs = embs(rel_ids_tensor)
-        with torch.no_grad():
-           for i, e in zip(range(len(new_tokens)), rel_embs):
-               init_embs[i] = e.detach()
 
     rel_tokens = prompt_tokens + common_tokens
     mlog.info("** rel tokens : %s", rel_tokens)
     cur_list = tokenizer.additional_special_tokens
     mlog.info("** cur tokens : %s", cur_list)
-    rel_existing_tokens = []
-    for tok in rel_tokens:
-        if tok in cur_list:
-            rel_existing_tokens.append(tok)
 
-    if rel_existing_tokens and not from_words and not from_words == "none":
-        mlog.info("** loading existing rel tokens: %s", rel_existing_tokens)
-        _ids = tokenizer.convert_tokens_to_ids(rel_existing_tokens)
-        _offset = min(_ids)
-        mlog.info("** existing rel ids: %s", _ids)
-        rel_ids_tensor = torch.LongTensor(_ids)
-        embs = model.get_input_embeddings()
-        rel_embs = embs(rel_ids_tensor)
-        with torch.no_grad():
-           for i, e in zip(_ids, rel_embs):
-               j = i - _offset
-               init_embs[j] = e #.detach()
 
     enc_plen =len(rel_tokens) 
     mlog.info("** len tokenizer before extend: %s", len(tokenizer))
@@ -288,7 +263,6 @@ def create_encoder(name, model, tokenizer, prompt_tokens, encoder_type="lstm",
     mlog.info("** final rel ids: %s", rel_ids)
     id_offset = min(rel_ids) 
     prompt_encoder = None
-    #mlog.info("Init Embs %s", init_embs)
     mlog.info("Encoder Type %s", encoder_type)
     mlog.info("id_offset: %s", id_offset)
     mlog.info("enc_plan: %s", enc_plen)
@@ -298,12 +272,12 @@ def create_encoder(name, model, tokenizer, prompt_tokens, encoder_type="lstm",
         if enc_plen > 0:
             mlog.info("Prompt Encoder defined : %s", enc_plen)
             prompt_encoder = EmbeddingPromptEncoder(name, enc_plen,
-                    embedding_dim,id_offset,init_embs, prompt_ids=rel_ids)
+                    embedding_dim,id_offset, prompt_ids=rel_ids)
     else:
         if enc_plen > 0:
             mlog.info("Prompt Encoder defined : %s", enc_plen)
             prompt_encoder = LSTMEmbeddingPromptEncoder(name, enc_plen,embedding_dim,
-                    id_offset, init_embs, prompt_ids=rel_ids)
+                    id_offset, prompt_ids=rel_ids)
 
     model.resize_token_embeddings(len(tokenizer))
 
@@ -389,7 +363,7 @@ def fill_consts(template, ex_temp, context, row, rows=[], mask=-1, method=""):
         prompt = f"<enc_mask_{mask}>" 
         text = text.replace("{enc_token_mask}",prompt)
     while "{rel_fw}" in text:
-        rel_ids = relation_natural_mappings[rel]["ids"]
+        rel_ids = relation_natural_mappings[rel]["rel_ids"]
         prompt = ""
         for i in range(len(rel_ids)):
             token = f"<{rel}_{i}>" 
