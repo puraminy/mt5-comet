@@ -95,7 +95,7 @@ class PTuningWrapper(torch.nn.Module):
         wlog.info("Merge ids: %s,", merge_ids)
         wlog.info("Offset: %s,", offset)
 
-        self.merge_encoder = EmbeddingPromptEncoder("wrap_all", len(merge_ids),
+        self.merge_encoder = LSTMEmbeddingPromptEncoder("wrap_all", len(merge_ids),
                 self.embedding_dim, offset, prompt_ids=merge_ids)
 
 
@@ -348,7 +348,7 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
         x = self.lstm(embeds.unsqueeze(0))
         emblog.info("XXXXXXXXXXXXXXXXX: %s",x)
         emblog.info("XXXXXXXXXXXXXXXXX[0]: %s",x[0])
-        emblog.info("XXXXXXXXXXXXXXXXX size: %s",x.size())
+        emblog.info("XXXXXXXXXXXXXXXXX size: %s",x[0].size())
         emblog.info("lstml embeds: %s",embeds)
 
         running_weight = self.mlp(x[0]).squeeze(0)
