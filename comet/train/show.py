@@ -6,7 +6,9 @@ import os
 from pathlib import Path
 import pandas as pd
 from nodcast.util.util import *
-from comet.train.common import *
+from mylogs import * 
+import json
+from comet.utils.myutils import *
 
 def load_results(path):
     with open(path, "r") as f:
@@ -84,7 +86,7 @@ def show_df(df):
     else:
         sel_df = pd.DataFrame(columns = df.columns)
     back = {"df":df, "sel_cols":sel_cols, "info_cols":info_cols, "sel_row":0}
-    filter_df = df
+    filter_df = main_df
     #wwwwwwwwww
     prev_cahr = ""
     while ch != ord("q"):
@@ -282,12 +284,10 @@ def show_df(df):
         elif char == "G":
             canceled, col, _ = list_df_values(df, get_val=False)
             if not canceled:
-               g_cols = [col]
-               for c in df.columns:
-                   if "_score" in c:
-                       g_cols.append(c)
-               df = df[g_cols]
-               df = df.groupby(col).mean()
+               g_cols = [col, "method", "model", "rouge_score","bert_score"]
+               sel_cols = df[g_cols]
+               df = df.groupby(col).agg({"rouge_score":"mean","bert_score":"mean",
+                                         "method":"first","model":"first"})
                df = df.reset_index()
                sel_cols = order(sel_cols, g_cols)
         elif char == "D":
@@ -354,7 +354,7 @@ def show_df(df):
                 filter_df = df
         elif is_enter(ch):
             col = sel_cols[0]
-            val = df.at[sel_row, col]
+            val = sel_dict[col]
             if not "filter" in consts:
                 consts["filter"] = []
             consts["filter"].append("{} == {}".format(col,val))
@@ -406,7 +406,7 @@ def show_df(df):
             info_cols = []
         if char == "b" and back:
             df = back["df"] 
-            consts["filter"] = ""
+            consts["filter"] = []
             sel_cols = back["sel_cols"] 
             info_cols = back["info_cols"]
             sel_row = back["sel_row"]
