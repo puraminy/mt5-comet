@@ -409,6 +409,7 @@ def fill_consts(template, ex_temp, context, row, rows=[], mask=-1, method=""):
                 assert enc_prompt != "", "Prompt was not set!"
             example = fill_const_for_rel(example, _row)
             example = fill_prompt(example, rel, "{rel_i}")
+            example = fill_prompt(example, rel, "{tokens}")
             for key,value in _row.items():
                 val = str(value)
                 if "fa" in method and "_fa" in key:
