@@ -95,8 +95,8 @@ class PTuningWrapper(torch.nn.Module):
         wlog.info("Merge ids: %s,", merge_ids)
         wlog.info("Offset: %s,", offset)
 
-        self.merge_encoder = LSTMEmbeddingPromptEncoder("wrap_all", len(merge_ids),
-                self.embedding_dim, offset, prompt_ids=merge_ids)
+        self.merge_encoder = None #LSTMEmbeddingPromptEncoder("wrap_all", len(merge_ids),
+                #self.embedding_dim, offset, prompt_ids=merge_ids)
 
 
         self.decoder_prompt_encoder = decoder_prompt_encoder
@@ -147,17 +147,13 @@ class PTuningWrapper(torch.nn.Module):
             inputs_embeds = self.model_embeddings(input_ids_)
             device=inputs_embeds.device
             all_prompts_input_ids = input_ids[prompt_masks]
-            #wlog.info("All prompts input ids: %s", all_prompts_input_ids)
-            #_offset = min(all_prompts_input_ids)
-            #all_prompts_input_ids = all_prompts_input_ids - _offset 
-            #n = len(all_prompts_ids)
             wlog.info("All prompts input ids: %s", all_prompts_input_ids)
-            #wlog.info("_offset: %s", _offset)
-            prompt_embds = self.merge_encoder(all_prompts_input_ids,pids).to(device)
-            if False:
+            if self.merge_encoder:
+                prompt_embds = self.merge_encoder(all_prompts_input_ids,pids).to(device)
+                inputs_embeds[prompt_masks]=prompt_embds
+            else:
                 for encoder in self.prompt_encoders:
                     #encoder = self.prompt_encoders[0]
-                    wlog.info("==========================>: %s", encoder.name)
                     wlog.info("********** offset: %s, length: %s", encoder.id_offset, encoder.length)
                     prompt_token_fn = encoder.get_prompt_token_fn()
                     encoder_masks = prompt_token_fn(input_ids)
@@ -169,15 +165,9 @@ class PTuningWrapper(torch.nn.Module):
                         # call forwards on prompt encoder whose outputs are prompt embeddings
                         prompt_embeds = encoder(prompt_input_ids,\
                             pids).to(device)
-                        prompt_token_ids = prompt_input_ids - _offset
-                        wlog.info("Prompt Token ids: %s", prompt_token_ids)
-                        prev_embs = merge_embeds.weight[prompt_token_ids]
-
-                        wlog.info("Prev Embs: %s", prev_embs)
-                        merge_embeds.weight[prompt_token_ids] = (prev_embs + prompt_embeds)/2
                         # replace prompt_embeddings calculated by prompt encoder in input embeddings
-                        wlog.info("Merge Embeds: %s", self.merge_encoder.embedding.weight)
-            inputs_embeds[prompt_masks]=prompt_embds
+                        wlog.info("Prompt Embeds: %s", prompt_embeds)
+                        inputs_embeds[encoder_masks]=prompt_embeds
         else:
             inputs_embeds = self.model_embeddings(input_ids)
         
@@ -221,8 +211,9 @@ class PTuningWrapper(torch.nn.Module):
     def update_model_weight(self):
         wlog.info(f"Updating model weights")
         self.cur_embeddings = self.underlying_model.get_input_embeddings()
-        self.merge_encoder.dump_embedding(self.cur_embeddings.weight)
-        if False:
+        if self.merge_encoder:
+            self.merge_encoder.dump_embedding(self.cur_embeddings.weight)
+        else:
             for encoder in self.prompt_encoders:
                 wlog.info(f"the wrapper has prompt encoder")
                 # fill the current embeddings with weights of encoder
