@@ -95,8 +95,7 @@ class PTuningWrapper(torch.nn.Module):
         wlog.info("Merge ids: %s,", merge_ids)
         wlog.info("Offset: %s,", offset)
 
-        self.merge_encoder = None #LSTMEmbeddingPromptEncoder("wrap_all", len(merge_ids),
-                #self.embedding_dim, offset, prompt_ids=merge_ids)
+        self.merge_encoder = LSTMEmbeddingPromptEncoder("wrap_all", len(merge_ids), self.embedding_dim, offset, prompt_ids=merge_ids)
 
 
         self.decoder_prompt_encoder = decoder_prompt_encoder
