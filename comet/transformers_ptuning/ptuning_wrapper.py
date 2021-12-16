@@ -35,7 +35,7 @@ emblog.setLevel(logging.INFO)
 class PTuningWrapper(torch.nn.Module):
     def __init__(self,model,prompt_encoders,decoder_prompt_encoder=None,
         prompt_token_fn=None, prompt_token_id=None, prompt_token_ids=None,
-        replacing_token_id=0, do_log=True):
+        replacing_token_id=0, do_log=True, merge_prompts = False):
         """
         PTuningWrapper for Huggingface transformer models (Encoder Models).
         It will replace the prompt token embeddings with ones from prompt encoder.
@@ -95,7 +95,9 @@ class PTuningWrapper(torch.nn.Module):
         wlog.info("Merge ids: %s,", merge_ids)
         wlog.info("Offset: %s,", offset)
 
-        self.merge_encoder = LSTMEmbeddingPromptEncoder("wrap_all", len(merge_ids), self.embedding_dim, offset, prompt_ids=merge_ids)
+        self.merge_encoder = None 
+        if merge_prompts:
+            self.merge_encoder = LSTMEmbeddingPromptEncoder("wrap_all", len(merge_ids), self.embedding_dim, offset, prompt_ids=merge_ids)
 
 
         self.decoder_prompt_encoder = decoder_prompt_encoder

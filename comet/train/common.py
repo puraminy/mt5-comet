@@ -185,7 +185,7 @@ def extend_tokenizer(tokenizer, prompt_tokens = [], model_id=""):
     else:
         mlog.info("No new token was added")
 
-def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words=False):
+def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words=False, merge_prompts=False):
     wrapped_model = None
     prompt_encoders = []
     offsets = []
@@ -204,7 +204,7 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words
         offsets.append(offset)
     id_offset = min(offsets)
     mlog.info("ID OFFSET: %s", id_offset)
-    wrapped_model = PTuningWrapper(model, prompt_encoders, prompt_token_fn=get_prompt_token_fn(id_offset))
+    wrapped_model = PTuningWrapper(model, prompt_encoders, prompt_token_fn=get_prompt_token_fn(id_offset), merge_prompts=merge_prompts)
     return wrapped_model
 
 def create_encoder(name, model, tokenizer, prompt_tokens, encoder_type="lstm", 
