@@ -16,13 +16,6 @@ if Path(resFile).exists():
         mlog.info("Reading stored results...")
         results = json.load(f)
 
-results_full = {}
-resFile = os.path.join(resPath, "results_full.json")
-if Path(resFile).exists():
-    with open(resFile, "r") as f:
-        mlog.info("Reading stored results full...")
-        results_full = json.load(f)
-
 full_results = {}
 resFile = os.path.join(resPath, "full_results.json")
 if Path(resFile).exists():
@@ -30,15 +23,12 @@ if Path(resFile).exists():
         mlog.info("Reading stored full_results ...")
         full_results = json.load(f)
 def reset_all_results():
-    global results, results_full, full_results
+    global results, new_results, full_results
     with open(os.path.join(resPath, f"results_{now}.json"), "w") as f:
         json.dump(results, f, indent=2)
-    with open(os.path.join(resPath, f"results_full_{now}.json"), "w") as f:
-        json.dump(results_full, f, indent=2)
     with open(os.path.join(resPath, f"full_results_{now}.json"), "w") as f:
         json.dump(full_results, f, indent=2)
     results = {}
-    results_full = {}
     full_results = {}
 
 device = "cpu"
@@ -177,6 +167,7 @@ def evaluate(model, tokenizer, val_data, interactive, save_path, results_info, v
     mean_rouge = {}
     sum_bleu = {}
     mean_bleu = {}
+    new_results = {}
     smoothie = SmoothingFunction().method4 # a function for smooth
     hyp_counter = [0]*5
     ignore_special_tokens = False
@@ -306,8 +297,8 @@ def evaluate(model, tokenizer, val_data, interactive, save_path, results_info, v
                     vlog.info("======================================================")
                     pbar.set_description(f"{scope} :Bert:{mean_bert[scope]} Rouge {mean_rouge[scope]} Bleu {mean_bleu[scope]} Match {mean_match[scope]}")
                     pbar.update(1)
-                    dictPath(results_info + "_" + str(qid), results_full, data, sep="_")
                     dictPath(str(qid) + "_" + results_info, full_results, data, sep="_")
+                    dictPath(str(qid) + "_" + results_info, new_results, data, sep="_")
                     rows.append(data)
 
     # %%%%%%%%%%%%%%%%%%
@@ -375,30 +366,32 @@ def evaluate(model, tokenizer, val_data, interactive, save_path, results_info, v
     #res["match"] = mean_match
     res["distinct"] ="{} {:.2f}".format(len(pred_counts), len(pred_counts)/len(new_df))
     res["hyps"] = hyp_counter
+    df_mean_rouge = new_df["rouge_score"].mean()
 
-    dictPath(results_info, results, res, sep="_")
-    with open(os.path.join(resPath, "results.json"), "w") as f:
-        json.dump(results, f, indent=2)
-    with open(os.path.join(logPath, "results.json"), "w") as f:
-        json.dump(results, f, indent=2)
+    if df_mean_rouge < 10:
+        with open(os.path.join(resPath, "new_results.json"), "w") as f:
+            json.dump(new_results, f, indent=2)
+        with open(os.path.join(logPath, "new_results.json"), "w") as f:
+            json.dump(new_results, f, indent=2)
+        mlog.info("Skipping saving the results!!!!!!! df mean rouge is low %s", df_mean_rouge)
+    else:
+        dictPath(results_info, results, res, sep="_")
+        with open(os.path.join(resPath, "results.json"), "w") as f:
+            json.dump(results, f, indent=2)
+        with open(os.path.join(logPath, "results.json"), "w") as f:
+            json.dump(results, f, indent=2)
 
-
-    with open(os.path.join(resPath, "results_full.json"), "w") as f:
-        json.dump(results_full, f, indent=2)
-    with open(os.path.join(logPath, "results_full.json"), "w") as f:
-        json.dump(results_full, f, indent=2)
-
-    with open(os.path.join(resPath, "full_results.json"), "w") as f:
-        json.dump(full_results, f, indent=2)
-    with open(os.path.join(logPath, "full_results.json"), "w") as f:
-        json.dump(full_results, f, indent=2)
+        with open(os.path.join(resPath, "full_results.json"), "w") as f:
+            json.dump(full_results, f, indent=2)
+        with open(os.path.join(logPath, "full_results.json"), "w") as f:
+            json.dump(full_results, f, indent=2)
 
     for logger in [mlog, vlog, clog]:
         logger.info("Len data frame: {}".format(len(new_df)))
         logger.info("Rouge:{} Match: {} BERT: {} BLEU: {}".format(mean_rouge_str, 
             mean_match_str, mean_bert_str, mean_bleu_str))
         logger.info("DF mean Bert Score: {}".format(new_df["bert_score"].mean()))
-        logger.info("DF mean Rouge Score: {}".format(new_df["rouge_score"].mean()))
+        logger.info("DF mean Rouge Score: {}".format(df_mean_rouge))
         logger.info("nli_counter: {}".format(nli_counter))
         logger.info("hyp_counter: {}".format(hyp_counter))
         logger.info("Distinct preds:{}".format(len(pred_counts)))
