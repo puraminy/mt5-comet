@@ -621,7 +621,8 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            qtemp = "{rel_i_start} {gen_start} {event} {rel_i_end} {gen_end}"
            anstemp = "{resp} {end}"
        elif method == "gpt-wrap-tokens":
-           qtemp = "{event} {tokens}"
+           qtemp = "{examples} {event} {tokens}"
+           ex_qtemp = "{input_text} {tokens} {target_text} {end}"
            anstemp = "{resp} {end}"
        elif method == "gpt-wrap":
            qtemp = "{event} {rel_i}"
