@@ -1138,7 +1138,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
                     loss.backward()
                     tlog.info("Original embedding grads:%s",model.get_input_embeddings().weight.grad)
                     if wrap:
-                        tlog.info("Merge embedding grads:%s", wrapped_model.merge_encoder.embedding.weight.grad)
+                        #tlog.info("Merge embedding grads:%s", wrapped_model.merge_encoder.embedding.weight.grad)
                         for encoder in wrapped_model.prompt_encoders:
                             tlog.info("---------------- %s ---------------", encoder.name)
                             tlog.info("Prompt embedding grads:%s", encoder.embedding.weight.grad)
