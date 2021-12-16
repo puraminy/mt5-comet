@@ -680,7 +680,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
             return None, None
         elif "gpt" in model_id:
             model = GPT2LMHeadModel.from_pretrained(underlying_model_name)
-            tokenizer = AutoTokenizer.from_pretrained(underlying_model_name, add_prefix_space=True)
+            tokenizer = AutoTokenizer.from_pretrained(underlying_model_name)
         elif "mt5" in model_id:
             tokenizer = MT5TokenizerFast.from_pretrained(underlying_model_name)
             model = MT5ForConditionalGeneration.from_pretrained(underlying_model_name)

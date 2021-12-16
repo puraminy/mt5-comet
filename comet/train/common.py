@@ -142,7 +142,7 @@ def tokenize_relations(tokenizer, map_lengths=False):
     for rel,phrase in relation_natural_mappings.items():
         natural_rel = phrase["en"]
         #dlog.info("rel ids ***: %s", natural_rel)
-        rel_tokens = tokenizer.tokenize(natural_rel.split(), is_split_into_words=True)
+        rel_tokens = tokenizer.tokenize(natural_rel.split())
         relation_natural_mappings[rel]["rel_tokens"] = rel_tokens
         #dlog.info("rel ids ***: %s", rel_tokens)
         rel_ids = tokenizer.convert_tokens_to_ids(rel_tokens)
