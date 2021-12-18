@@ -40,47 +40,47 @@ relation_natural_mappings = {
     "oReact":{ 
         "en":"As a result others feel ",
         "fa":"در نتیجه دیگران حس می کنند",
-        "tokens":"<other> <after> <state>"
+        "tokens":"<after> <other> <state>"
     },
     "xReact":{ 
         "en":"As a result PersonX feels ",
         "fa":"در نتیجه PersonX حس می کند", 
-        "tokens":"<agent> <after> <state>"
+        "tokens":"<after> <agent> <state>"
     },
     "xWant":{ 
         "en":"Then PersonX wants ",
         "fa":"بعد از آن PersonX می خواهد",
-        "tokens":"<agent> <after> <event> <want>"
+        "tokens":"<after> <agent> <event> <want>"
     },
     "oWant":{ 
         "en":"Then others want ",
         "fa":"بعد از آن دیگران می خواهند",
-        "tokens":"<other> <after> <event> <want>"
+        "tokens":"<after> <other> <event> <want>"
     },
     "xEffect":{ 
         "en":"As a result PersonX  ",
         "fa":"در نتیجه PersonX ",
-        "tokens":"<agent> <after> <event> <effect>"
+        "tokens":"<after> <agent> <event> <effect>"
     },
     "oEffect":{ 
         "en":"As a result others  ",
         "fa":"در نتیجه دیگران ",
-        "tokens":"<other> <after> <event> <effect>"
+        "tokens":"<after> <other> <event> <effect>"
     },
     "xAttr":{ 
         "en":"PersonX is seen as",
         "fa":"مردم فکر می کنند PersonX ",
-        "tokens":"<agent> <fixed> <state> "
+        "tokens":"<static> <agent> <state> "
     },
     "xIntent":{ 
         "en":"Because PersonX intended ",
         "fa":"زیرا PersonX می خواست",
-        "tokens":"<agent> <before> <event> <cause> <want>"
+        "tokens":"<before> <agent> <event> <cause> <want>"
     },
     "xNeed":{ 
         "en":"Before that, PersonX needs ",
         "fa":"قبل از آن PersonX نیاز دارد",
-        "tokens":"<agent> <before> <event> <cause> <need>"
+        "tokens":"<before> <agent> <event> <cause> <need>"
     },
 }
 gen_token_en = "<gen_en>"
