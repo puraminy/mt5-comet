@@ -17,10 +17,8 @@ def load_results(path):
     fname = Path(path).stem
     if fname == "results":
         main_df = pd.DataFrame(sd, columns=["exp","model","lang", "method","wrap","frozen","epochs","stype", "date", "dir", "score"])
-    elif "full_results" in fname:
+    else:
         main_df = pd.DataFrame(sd, columns=["tid","exp","model","lang", "method","wrap","frozen","epochs","date", "field", "text"])
-    elif "results_full" in fname:
-        main_df = pd.DataFrame(sd, columns=["exp","model","lang", "method","wrap","frozen","epochs","date","tid", "field", "text"])
 
     out = f"{fname}.tsv"
     df = main_df.pivot(index=list(main_df.columns[~main_df.columns.isin(['field', 'text'])]), columns='field').reset_index()
@@ -273,11 +271,13 @@ def show_df(df):
                 sel_cols = list(df.columns)
                 col_widths["index"]=50
                 info_cols = []
+        elif char == "T":
+            df = df.drop_duplicates(['prefix'])
         elif char == "g": 
             score_col = "rouge_score"
             group_col = "pred_text1"
             df = df.sort_values(score_col, ascending=False).\
-                 drop_duplicates(['prefix','input_text']).\
+                 drop_duplicates(['date','prefix','input_text']).\
                     rename(columns={group_col:'top_target'}).\
                       merge(df.groupby(['prefix','input_text'],as_index=False)[group_col].agg('<br />'.join))
             if not group_col in info_cols: info_cols.append(group_col)

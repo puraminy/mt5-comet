@@ -368,8 +368,10 @@ def evaluate(model, tokenizer, val_data, interactive, save_path, results_info, v
     res["hyps"] = hyp_counter
     df_mean_rouge = new_df["rouge_score"].mean()
 
-    if df_mean_rouge < 10:
+    if df_mean_rouge < 0.10:
         with open(os.path.join(resPath, "new_results.json"), "w") as f:
+            json.dump(new_results, f, indent=2)
+        with open(os.path.join(resPath, "new_results_" + now + ".json"), "w") as f:
             json.dump(new_results, f, indent=2)
         with open(os.path.join(logPath, "new_results.json"), "w") as f:
             json.dump(new_results, f, indent=2)

@@ -75,8 +75,10 @@ class PTuningWrapper(torch.nn.Module):
         self.prompt_encoders = torch.nn.ModuleList(prompt_encoders)
         wlog.info("num of encoders %s:", len(self.prompt_encoders))
         merge_ids = []
+        sum_len = 0
         for encoder in self.prompt_encoders:
             _ids = encoder.prompt_ids
+            sum_len += len(_ids)
             for _id in _ids:
                 if not _id in merge_ids:
                     merge_ids.append(_id)
@@ -93,6 +95,8 @@ class PTuningWrapper(torch.nn.Module):
         self.embedding_dim = model.config.hidden_size
         offset = min(merge_ids)
         wlog.info("Merge ids: %s,", merge_ids)
+        wlog.info("Merge ids len: %s,", len(merge_ids))
+        wlog.info("Sum len: %s,", sum_len)
         wlog.info("Offset: %s,", offset)
 
         self.merge_encoder = None 
@@ -149,10 +153,12 @@ class PTuningWrapper(torch.nn.Module):
             device=inputs_embeds.device
             all_prompts_input_ids = input_ids[prompt_masks]
             wlog.info("All prompts input ids: %s", all_prompts_input_ids)
+            wlog.info("Len All prompts input ids: %s", len(all_prompts_input_ids))
             if self.merge_encoder:
                 prompt_embds = self.merge_encoder(all_prompts_input_ids,pids).to(device)
                 inputs_embeds[prompt_masks]=prompt_embds
             else:
+                embeds_list = []
                 for encoder in self.prompt_encoders:
                     #encoder = self.prompt_encoders[0]
                     wlog.info("********** offset: %s, length: %s", encoder.id_offset, encoder.length)
@@ -166,9 +172,13 @@ class PTuningWrapper(torch.nn.Module):
                         # call forwards on prompt encoder whose outputs are prompt embeddings
                         prompt_embeds = encoder(prompt_input_ids,\
                             pids).to(device)
+                        #embeds_list.append(prompt_embeds)
                         # replace prompt_embeddings calculated by prompt encoder in input embeddings
                         wlog.info("Prompt Embeds: %s", prompt_embeds)
                         inputs_embeds[encoder_masks]=prompt_embeds
+                #cat = torch.cat(embeds_list)
+                #wlog.info("CAT Embeds: %s", cat)
+                #wlog.info("CAT Embeds size: %s", cat.size())
         else:
             inputs_embeds = self.model_embeddings(input_ids)
         
@@ -334,8 +344,16 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
         emblog.info("=========================== Forward begin ===================")
         emblog.info("=========================== %s ===================", self.name)
         emblog.info("before prompt token ids:{}".format(prompt_token_ids))
+        emblog.info("self input ids: %s", self.input_ids)
+        emblog.info("NETTTTT inps:{}".format(self.net_inps))
+        # find zero based ids 
+        if not self.prompt_ids:
+            prompt_token_ids = prompt_token_ids - self.id_offset
+        else:
+            prompt_token_ids = (prompt_token_ids.view(-1,1) == self.input_ids).int().argmax(dim=1)
+        emblog.info("after prompt token ids:  %s", prompt_token_ids)
         # create embedding vectors for input ids
-        embeds = self.embedding(self.net_inps)
+        embeds = self.embedding(prompt_token_ids)
         # do forward calculations
         x = self.lstm(embeds.unsqueeze(0))
         emblog.info("XXXXXXXXXXXXXXXXX: %s",x)
@@ -349,14 +367,8 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
             emblog.info("running weights: %s",running_weight)
             self.counter += 1
 
-        # find zero based ids 
-        if not self.prompt_ids:
-            prompt_token_ids = prompt_token_ids - self.id_offset
-        else:
-            prompt_token_ids = (prompt_token_ids.view(-1,1) == self.input_ids).int().argmax(dim=1)
-        emblog.info("after prompt token ids:  %s", prompt_token_ids)
         # return weights for prompt_token_ids 
-        ret_embeds = F.embedding(prompt_token_ids,running_weight)
+        ret_embeds = running_weight #F.embedding(prompt_token_ids,running_weight)
         emblog.info("ret embeds size %s", ret_embeds.size())
         emblog.info("ret embeds %s", ret_embeds)
         emblog.info("=========================== Forward end ===================")
