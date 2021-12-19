@@ -100,6 +100,7 @@ class PTuningWrapper(torch.nn.Module):
         wlog.info("Offset: %s,", self.merge_offset)
 
         self.merge_encoder = None 
+        self.merge_embedding = None
         if merge_prompts:
             self.merge_encoder = None #LSTMEmbeddingPromptEncoder("wrap_all", len(self.merge_prompt_ids), self.embedding_dim, self.merge_offset, prompt_ids=self.merge_prompt_ids)
             self.merge_embedding = torch.nn.Embedding(len(self.merge_prompt_ids), self.embedding_dim)
@@ -274,7 +275,7 @@ class PromptEncoder(torch.nn.Module):
     def isin(self, ar1, ar2):
         return (ar1[..., None] == ar2).any(-1)
     def get_prompt_token_fn(self):
-        if self.input_ids:
+        if self.input_ids is not None:
             return lambda x: self.isin(x, self.input_ids)
         else:
             return lambda x: (x>=self.id_offset)&(x<self.id_offset+self.length)
@@ -296,7 +297,7 @@ class EmbeddingPromptEncoder(PromptEncoder):
         emblog.info("Before prompt token ids: %s", prompt_token_ids)
         #emblog.info("id offset: %s", self.id_offset)
         #emblog.info("id length: %s", self.length)
-        if not self.input_ids:
+        if self.input_ids is None:
             prompt_token_ids = prompt_token_ids - self.id_offset
         else:
             prompt_token_ids = (prompt_token_ids.view(-1,1) == self.input_ids).int().argmax(dim=1)
@@ -358,7 +359,7 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
         emblog.info("self input ids: %s", self.input_ids)
         emblog.info("NETTTTT inps:{}".format(self.net_inps))
         # find zero based ids 
-        if not self.input_ids:
+        if self.input_ids is None:
             prompt_token_ids = prompt_token_ids - self.id_offset
         else:
             prompt_token_ids = (prompt_token_ids.view(-1,1) == self.input_ids).int().argmax(dim=1)
