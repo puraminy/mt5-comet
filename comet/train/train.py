@@ -575,7 +575,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
 
     w_str = "wrapped" if wrap else "unwrapped"
     f_str = "freezed" if frozen else "unfreezed"
-    if not output_name:
+    if not output_name and not (cont or do_eval):
         output_name = f"{experiment}_{model_id}-{train_samples}_{lang}_{method}_{w_str}_{f_str}"
     conf_path = os.path.join(save_path,"confs")
     if model_id == "test":
@@ -632,22 +632,26 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     log_dir = save_path
     set_device(device)
     output_name = model_id if not output_name else output_name
+    mlog.info("Output name: %s", output_name)
     save_path = os.path.join(log_dir, output_name)
     model_name = f"{learning_rate}_{cycle}_{train_samples}"
     checkpoint = None
-    if Path(save_path).exists() and not model_id=="test" and (cont or do_eval):
+    if not Path(underlying_model_name).exists() and Path(save_path).exists() and not model_id=="test" and (cont or do_eval):
         mlog.info("Loading from %s", save_path)
         underlying_model_name = save_path
-        checkpoint = torch.load(os.path.join(save_path,"saved_states"))
-        if Path(conf_path).exists():
-           with open(conf_path, 'r') as f:
-               args = json.load(f) 
-           mlog.info(args)
-           mlog.info("Loading from configuration file")
-           qtemp = args['qtemp']
-           atemp = args['anstemp']
-           mlog.info("Qtemp: %s", args['qtemp'])
-           mlog.info("Anstemp: %s", args['anstemp'])
+        checkpoint_path = os.path.join(save_path,"saved_states")
+        if cont:
+            if Path(checkpoint_path).exists():
+                checkpoint = torch.load(checkpoint_path)
+            if Path(conf_path).is_file():
+               with open(conf_path, 'r') as f:
+                   args = json.load(f) 
+               mlog.info(args)
+               mlog.info("Loading from configuration file")
+               qtemp = args['qtemp']
+               atemp = args['anstemp']
+               mlog.info("Qtemp: %s", args['qtemp'])
+               mlog.info("Anstemp: %s", args['anstemp'])
 
     for logger in [mlog, clog, dlog, tlog]:
         logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
