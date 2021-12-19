@@ -132,7 +132,7 @@ def evaluate(model, tokenizer, val_data, interactive, save_path, results_info, v
         nltk.download('punkt')
     base_path = "/content/drive/MyDrive/pret"
     if not colab:
-        base_path = os.path.join(home, "pret", "mm")
+        base_path = os.path.join(home, "pret")
 
     mlog.info("Loading models for evaluation ..")
 
