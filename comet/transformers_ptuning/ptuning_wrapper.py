@@ -108,8 +108,6 @@ class PTuningWrapper(torch.nn.Module):
                 encoder.embedding = self.merge_embedding
                 encoder.id_offset= self.merge_offset
                 encoder.length= len(self.merge_prompt_ids)
-                encoder.input_ids = None
-
 
 
         self.decoder_prompt_encoder = decoder_prompt_encoder
@@ -297,7 +295,7 @@ class EmbeddingPromptEncoder(PromptEncoder):
         emblog.info("Before prompt token ids: %s", prompt_token_ids)
         #emblog.info("id offset: %s", self.id_offset)
         #emblog.info("id length: %s", self.length)
-        if self.input_ids is None:
+        if self.id_offset > 0:
             prompt_token_ids = prompt_token_ids - self.id_offset
         else:
             prompt_token_ids = (prompt_token_ids.view(-1,1) == self.input_ids).int().argmax(dim=1)
@@ -359,7 +357,7 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
         emblog.info("self input ids: %s", self.input_ids)
         emblog.info("NETTTTT inps:{}".format(self.net_inps))
         # find zero based ids 
-        if self.input_ids is None:
+        if self.id_offset > 0:
             prompt_token_ids = prompt_token_ids - self.id_offset
         else:
             prompt_token_ids = (prompt_token_ids.view(-1,1) == self.input_ids).int().argmax(dim=1)
