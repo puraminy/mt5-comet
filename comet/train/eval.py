@@ -349,14 +349,14 @@ def evaluate(model, tokenizer, val_data, interactive, save_path, results_info, v
         print("{:<40}:".format(mean_match_str), file = f)
     mlog.info("-----------------------------------------------------")
     pbar.close()
-    out1 = os.path.join(save_path,f"scored_{results_info}.tsv")
-    out2 = os.path.join(resPath,f"scored_{results_info}.tsv")
-    out3 = os.path.join(logPath,f"scored_{results_info}.tsv")
+    #out1 = os.path.join(save_path,f"scored_{results_info}.tsv")
+    #out2 = os.path.join(resPath,f"scored_{results_info}.tsv")
+    #out3 = os.path.join(logPath,f"scored_{results_info}.tsv")
 
-    new_df.to_csv(out1, sep="\t", index=False)
-    new_df.to_csv(out2, sep="\t", index=False)
-    if colab:
-       new_df.to_csv(out3, sep="\t", index=False)
+    #new_df.to_csv(out1, sep="\t", index=False)
+    #new_df.to_csv(out2, sep="\t", index=False)
+    #if colab:
+    #   new_df.to_csv(out3, sep="\t", index=False)
     pred_counts = new_df['pred_text1'].unique()
 
     res = {}

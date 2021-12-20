@@ -576,7 +576,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     w_str = "wrapped" if wrap else "unwrapped"
     f_str = "freezed" if frozen else "unfreezed"
     if not output_name and not (cont or do_eval):
-        output_name = f"{experiment}_{model_id}-{train_samples}_{lang}_{method}_{w_str}_{f_str}"
+        output_name = method
     conf_path = os.path.join(save_path,"confs")
     if model_id == "test":
         save_path = ""
