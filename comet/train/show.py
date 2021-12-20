@@ -279,7 +279,7 @@ def show_df(df):
             df = df.sort_values(score_col, ascending=False).\
                  drop_duplicates(['date','prefix','input_text']).\
                     rename(columns={group_col:'top_target'}).\
-                      merge(df.groupby(['prefix','input_text'],as_index=False)[group_col].agg('<br />'.join))
+                      merge(df.groupby(['date','prefix','input_text'],as_index=False)[group_col].agg('<br />'.join))
             if not group_col in info_cols: info_cols.append(group_col)
         elif char == "G":
             canceled, col, _ = list_df_values(df, get_val=False)
@@ -288,7 +288,7 @@ def show_df(df):
                sel_cols = df[g_cols]
                df = df.groupby(col).agg({"rouge_score":"mean","bert_score":"mean",
                                          "method":"first","model":"first"})
-               df = df.reset_index()
+               #df = df.reset_index()
                sel_cols = order(sel_cols, g_cols)
         elif char == "D":
             canceled, col,val = list_df_values(main_df, get_val=False)

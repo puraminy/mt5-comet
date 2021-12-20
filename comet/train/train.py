@@ -207,7 +207,7 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
 @click.option(
     "--lang",
     "-lang",
-    default="mix",
+    default="en",
     type=str,
     help=""
 )
@@ -665,7 +665,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
         logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
 
     do_overwrite = False
-    if overwrite:
+    if overwrite or do_eval:
         save_path = os.path.join(log_dir, overwrite)
         do_overwrite = True
     ii = 1

@@ -363,7 +363,7 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
             prompt_token_ids = (prompt_token_ids.view(-1,1) == self.input_ids).int().argmax(dim=1)
         emblog.info("after prompt token ids:  %s", prompt_token_ids)
         # create embedding vectors for input ids
-        embeds = self.embedding(prompt_token_ids)
+        embeds = self.embedding(self.net_inps)
         # do forward calculations
         x = self.lstm(embeds.unsqueeze(0))
         emblog.info("XXXXXXXXXXXXXXXXX: %s",x)
@@ -378,7 +378,7 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
             self.counter += 1
 
         # return weights for prompt_token_ids 
-        ret_embeds = running_weight #F.embedding(prompt_token_ids,running_weight)
+        ret_embeds = F.embedding(prompt_token_ids,running_weight)
         emblog.info("ret embeds size %s", ret_embeds.size())
         emblog.info("ret embeds %s", ret_embeds)
         emblog.info("=========================== Forward end ===================")
