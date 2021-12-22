@@ -342,15 +342,19 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
         # find zero based ids 
         net_inputs = self.net_inps
         if self.id_offset > 0:
+            emblog.info("------------------- case id offset > 0 ----------------")
             prompt_token_ids = prompt_token_ids - self.id_offset
             net_inputs = self.input_ids - self.id_offset
             index_list = [((net_inputs == x).nonzero(as_tuple=True)[0]) for x in prompt_token_ids]
-            index_list = torch.tensor(index_list)
+            index_list = torch.tensor(index_list).to(device=prompt_token_ids.device)
         else:
             index_list = (prompt_token_ids.view(-1,1) == self.input_ids).int().argmax(dim=1)
         emblog.info("after prompt token ids:  %s", prompt_token_ids)
+        emblog.info("after prompt token ids dev:  %s", prompt_token_ids.device)
         emblog.info("after net inputs:  %s", net_inputs)
+        emblog.info("after net inputs dev:  %s", net_inputs.device)
         emblog.info("index list:  %s", index_list)
+        emblog.info("index list dev:  %s", index_list.device)
         # create embedding vectors for input ids
         embeds = self.embedding(net_inputs)
         # do forward calculations

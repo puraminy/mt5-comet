@@ -791,13 +791,33 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
         targ_include, targ_exclude = filter_inputs(include, exclude, targ_lang)
         if last_data:
             mlog.info("Reading saved pickle")
-            with open(split_name + ".pickle", 'rb') as handle:
+            test_samples = {"train":1000, "validation":1000}
+            with open("atomic/" + method + "-" + split_name + ".pickle", 'rb') as handle:
                 (atomic_query_responses[split_name], 
                  atomic_flattened[split_name],
                  num_records[split_name],
                  encoder_prompts
                 ) = pickle.load(handle)
-
+            (test_data,
+             test_data_flat,
+             _
+            ) = fill_data(split_df, split_name,
+                                method, prompt_pos, rel_filter,
+                                test_samples[split_name], 
+                                ignore_blanks,
+                                only_blanks,
+                                inp_include,
+                                inp_exclude,
+                                targ_include,
+                                targ_exclude,
+                                pred_tresh, nli_group, per_record, is_even, start, 
+                                sampling, ex_type,
+                                samples_per_head, save_df_path[split_name]
+                        )
+            #for x,y in zip(test_data_flat[:100], atomic_flattened[split_name][:100]):
+            #    if x != y:
+            #        mlog.info("%s != %s", x,y)
+            #        raise "Mismatch"
         else:
             (atomic_query_responses[split_name], 
              atomic_flattened[split_name],
@@ -818,7 +838,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
             data = (atomic_query_responses[split_name], 
                     atomic_flattened[split_name],
                     num_records[split_name], encoder_prompts)
-            with open(split_name + ".pickle", 'wb') as handle:
+            with open("atomic/" + method + "-" + split_name + ".pickle", 'wb') as handle:
                 pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     train_records = num_records["train"]
@@ -945,6 +965,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     if wrapped_model:
         wrapped_model.to(device=device)
         wrapped_model.prompt_encoders.to(device=device)
+        if merge_prompts:
+            wrapped_model.merge_embedding.to(device=device)
         mlog.info("len tokenizer after wrapping %s", len(tokenizer))
     else:
         wrap = False
