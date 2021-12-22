@@ -948,7 +948,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
         mlog.info("len tokenizer after wrapping %s", len(tokenizer))
     else:
         wrap = False
-        if learning_rate < 0.0001:
+        if learning_rate > 0.0001:
             raise "Learning rate should be smaller"
         extend_tokenizer(tokenizer)
         mlog.info("len tokenizer after extending %s", len(tokenizer))

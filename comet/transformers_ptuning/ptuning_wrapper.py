@@ -279,10 +279,6 @@ class PromptEncoder(torch.nn.Module):
             return lambda x: (x>=self.id_offset)&(x<self.id_offset+self.length)
     def dump_embedding(self,weight):
         raise NotImplementedError
-    def save(self, path):
-        raise NotImplementedError
-    def load(self, path):
-        raise NotImplementedError
 
 
 class EmbeddingPromptEncoder(PromptEncoder):
@@ -316,11 +312,6 @@ class EmbeddingPromptEncoder(PromptEncoder):
         emblog.info("on this ids: %s", self.prompt_ids)
         weight[self.prompt_ids,:]=detached_embeddings
 
-    def save(self, path):
-        torch.save(self.embedding.state_dict(), path + "/emb")
-    def load(self, path):
-        if Path(path + "/emb").exists():
-            self.embedding.load_state_dict(torch.load(path + "/emb"))
 
 class LSTMEmbeddingPromptEncoder(PromptEncoder):
     def __init__(self,name, length,embedding_dim,id_offset, init_embs=None, prompt_ids=[]) -> None:
@@ -340,14 +331,6 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
             torch.nn.ReLU(),
             torch.nn.Linear(embedding_dim, embedding_dim)
         )
-    def save(self, path):
-        torch.save(self.lstm.state_dict(), path + "/lstm")
-        torch.save(self.mlp.state_dict(), path + "/mlp")
-    def load(self, path):
-        if Path(path + "/lstm").exists():
-            self.lstm.load_state_dict(torch.load(path + "/lstm"))
-        if Path(path + "/mlp").exists():
-            self.mlp.load_state_dict(torch.load(path + "/mlp"))
 
 
     def forward(self,prompt_token_ids,pids=None):
@@ -357,13 +340,19 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
         emblog.info("self input ids: %s", self.input_ids)
         emblog.info("NETTTTT inps:{}".format(self.net_inps))
         # find zero based ids 
+        net_inputs = self.net_inps
         if self.id_offset > 0:
             prompt_token_ids = prompt_token_ids - self.id_offset
+            net_inputs = self.input_ids - self.id_offset
+            index_list = [((net_inputs == x).nonzero(as_tuple=True)[0]) for x in prompt_token_ids]
+            index_list = torch.tensor(index_list)
         else:
-            prompt_token_ids = (prompt_token_ids.view(-1,1) == self.input_ids).int().argmax(dim=1)
+            index_list = (prompt_token_ids.view(-1,1) == self.input_ids).int().argmax(dim=1)
         emblog.info("after prompt token ids:  %s", prompt_token_ids)
+        emblog.info("after net inputs:  %s", net_inputs)
+        emblog.info("index list:  %s", index_list)
         # create embedding vectors for input ids
-        embeds = self.embedding(self.net_inps)
+        embeds = self.embedding(net_inputs)
         # do forward calculations
         x = self.lstm(embeds.unsqueeze(0))
         emblog.info("XXXXXXXXXXXXXXXXX: %s",x)
@@ -375,10 +364,11 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
         if self.counter < 5:
             emblog.info("--------------------")
             emblog.info("running weights: %s",running_weight)
+            emblog.info("running weights size: %s",running_weight.size())
             self.counter += 1
 
         # return weights for prompt_token_ids 
-        ret_embeds = F.embedding(prompt_token_ids,running_weight)
+        ret_embeds = F.embedding(index_list,running_weight)
         emblog.info("ret embeds size %s", ret_embeds.size())
         emblog.info("ret embeds %s", ret_embeds)
         emblog.info("=========================== Forward end ===================")
