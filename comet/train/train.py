@@ -791,7 +791,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
         targ_include, targ_exclude = filter_inputs(include, exclude, targ_lang)
         if last_data:
             mlog.info("Reading saved pickle")
-            test_samples = {"train":1000, "validation":1000}
+            test_samples = {"train":600, "validation":200}
             with open("atomic/" + method + "-" + split_name + ".pickle", 'rb') as handle:
                 (atomic_query_responses[split_name], 
                  atomic_flattened[split_name],
