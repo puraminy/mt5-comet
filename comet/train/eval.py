@@ -136,7 +136,8 @@ def evaluate(model, tokenizer, val_data, interactive, save_path, results_info, v
 
     mlog.info("Loading models for evaluation ..")
 
-    local_path = f"{base_path}/paraphrase-multilingual-MiniLM-L12-v2"        
+    #local_path = f"{base_path}/paraphrase-multilingual-MiniLM-L12-v2"        
+    local_path = f"{base_path}/paraphrase-MiniLM-L6-v2"
     if not Path(local_path).exists():
         local_path = 'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2'
     if "ahmad" in home:
@@ -370,9 +371,9 @@ def evaluate(model, tokenizer, val_data, interactive, save_path, results_info, v
 
     with open(os.path.join(resPath, "new_results.json"), "w") as f:
         json.dump(new_results, f, indent=2)
-    with open(os.path.join(resPath, "new_results_" + result_info + ".json"), "w") as f:
+    with open(os.path.join(resPath, "res_" + results_info + ".json"), "w") as f:
         json.dump(new_results, f, indent=2)
-    with open(os.path.join(logPath, f"new_results_{result_info}.json"), "w") as f:
+    with open(os.path.join(logPath, f"res_{results_info}.json"), "w") as f:
         json.dump(new_results, f, indent=2)
     if df_mean_rouge < 0.10:
         mlog.info("Skipping saving the results!!!!!!! df mean rouge is low %s", df_mean_rouge)

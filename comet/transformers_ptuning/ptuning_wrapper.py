@@ -230,10 +230,10 @@ class PTuningWrapper(torch.nn.Module):
         self.cur_embeddings = self.underlying_model.get_input_embeddings()
         if self.merge_encoder:
             self.merge_encoder.dump_embedding(self.cur_embeddings.weight)
-        elif self.merge_embedding:
-            detached_embeddings = self.merge_embedding.weight.detach()
-            emblog.info("Dump embeddings merge_embeddings: %s", detached_embeddings)
-            self.cur_embeddings.weight[self.merge_prompt_ids,:]=detached_embeddings
+        #elif self.merge_embedding:
+        #    detached_embeddings = self.merge_embedding.weight.detach()
+        #    emblog.info("Dump embeddings merge_embeddings: %s", detached_embeddings)
+        #    self.cur_embeddings.weight[self.merge_prompt_ids,:]=detached_embeddings
         else:
             for encoder in self.prompt_encoders:
                 wlog.info(f"the wrapper has prompt encoder")
