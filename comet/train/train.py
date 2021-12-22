@@ -767,7 +767,6 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     if model_id in ["t5-large","t5-small", "t5-base", "gpt2"]:
         lang = "en"
     split_lang = {}
-    global encoder_prompts
     if "-" in lang:
         split_lang["train"] = lang.split("-")[0]
         split_lang["validation"] = lang.split("-")[1]
@@ -792,11 +791,10 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
         if last_data:
             mlog.info("Reading saved pickle")
             test_samples = {"train":600, "validation":200}
-            with open("atomic/" + method + "-" + split_name + ".pickle", 'rb') as handle:
+            with open("atomic/" + method + "-" + split_name + "_" + str(len(split_df)) + ".pickle", 'rb') as handle:
                 (atomic_query_responses[split_name], 
                  atomic_flattened[split_name],
-                 num_records[split_name],
-                 encoder_prompts
+                 num_records[split_name]
                 ) = pickle.load(handle)
             (test_data,
              test_data_flat,
@@ -837,8 +835,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
                         )
             data = (atomic_query_responses[split_name], 
                     atomic_flattened[split_name],
-                    num_records[split_name], encoder_prompts)
-            with open("atomic/" + method + "-" + split_name + ".pickle", 'wb') as handle:
+                    num_records[split_name])
+            with open("atomic/" + method + "-" + split_name + "_" + str(len(split_df)) + ".pickle", 'wb') as handle:
                 pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     train_records = num_records["train"]
