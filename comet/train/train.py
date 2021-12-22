@@ -13,7 +13,7 @@ from transformers import (
 )
 import torch
 import re
-import pickle
+import pickle5 as pickle
 import json
 import glob
 from torch.utils.tensorboard import SummaryWriter
