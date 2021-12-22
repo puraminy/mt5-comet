@@ -370,9 +370,9 @@ def evaluate(model, tokenizer, val_data, interactive, save_path, results_info, v
 
     with open(os.path.join(resPath, "new_results.json"), "w") as f:
         json.dump(new_results, f, indent=2)
-    with open(os.path.join(resPath, "new_results_" + now + ".json"), "w") as f:
+    with open(os.path.join(resPath, "new_results_" + result_info + ".json"), "w") as f:
         json.dump(new_results, f, indent=2)
-    with open(os.path.join(logPath, "new_results.json"), "w") as f:
+    with open(os.path.join(logPath, f"new_results_{result_info}.json"), "w") as f:
         json.dump(new_results, f, indent=2)
     if df_mean_rouge < 0.10:
         mlog.info("Skipping saving the results!!!!!!! df mean rouge is low %s", df_mean_rouge)
