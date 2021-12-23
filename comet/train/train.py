@@ -13,7 +13,6 @@ from transformers import (
 )
 import torch
 import re
-import pickle5 as pickle
 import json
 import glob
 from torch.utils.tensorboard import SummaryWriter
@@ -767,17 +766,16 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
         length = [int(s) for s in prompt_length.split("-")]
         set_prompt_lengths(rel_filter, length)
 
+    num_samples = {"train": train_samples, "validation":val_samples, "sample":0}
     split_path = {"train":train_path, "validation":val_path, "sample":sample_path}
-    save_df_path = {}
-    for split, _p in split_path.items():
-        if not _p.endswith("_" + save_df + ".tsv"):
-            _p = _p.replace(".tsv","_" + save_df + ".tsv")
-        save_df_path[split] = _p
+    save_ds_path = {}
+    for split, _path in split_path.items():
+        _path = _path.replace(".tsv","_")
+        save_ds_path[split] = _path
     #tokenize_relations(tokenizer)
     atomic_query_responses = {"train":[], "validation":[]}
     atomic_flattened = {"train":[], "validation":[]}
     num_records = {}
-    num_samples = {"train": train_samples, "validation":val_samples, "sample":0}
     mlog.info("Perparing data ...")
     if model_id in ["t5-large","t5-small", "t5-base", "gpt2"]:
         lang = "en"
@@ -819,9 +817,10 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
                             targ_exclude,
                             pred_tresh, nli_group, per_record, is_even, start, 
                             sampling, ex_type,
-                            samples_per_head, save_df_path[split_name]
+                            samples_per_head, save_ds_path[split_name]
                     )
-        atomic_query_responses[split_name] = myds[split_name].data_split 
+        #atomic_query_responses[split_name] = myds[split_name].data_split 
+        #atomic_flattened[split_name] = myds[split_name].flat_data 
         num_records[split_name] = myds[split_name].num_samples
 
     myds["sample"].fill_data(0, -1, show_progress=True)
@@ -1179,6 +1178,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     # end train while
     pbar.close()
     sw.close()
+    mlog.info("Saving train data set...")
+    myds["train"].save()
     if wrap:
         with torch.no_grad():
             mlog.info("Updating the model weights before evaluaton...")

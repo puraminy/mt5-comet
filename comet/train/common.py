@@ -14,6 +14,7 @@ import os
 import torch
 import json
 from mylogs import *
+import pickle5 as pickle
 
 SPECIAL_TOKENS  = { "bos_token": "<|BOS|>",
                     "eos_token": "</s>",
@@ -732,8 +733,11 @@ class MyDataset(torch.utils.data.IterableDataset):
             targ_exclude="",
             pred_tresh=0,
             nli_group="all", per_record=False, is_even=False, start=0, 
-            sampling=0, ex_type="",  samples_per_head=0, save_df_path=""): 
+            sampling=0, ex_type="",  samples_per_head=0, save_ds_path=""): 
         super(MyDataset).__init__()
+        self.flat_data = []
+        self.data_split = {}
+
         self.only_blanks = only_blanks
         self.samples_per_head = samples_per_head
         self.start = start
@@ -755,7 +759,6 @@ class MyDataset(torch.utils.data.IterableDataset):
             self.natural = False 
         if self.natural:
             dlog.info("natural is ON")
-        self.data_split = {}
         self.num_samples = num_samples
         if self.num_samples == 0: 
             self.num_samples = len(split_df)
@@ -820,6 +823,11 @@ class MyDataset(torch.utils.data.IterableDataset):
         self.ex_df = pd.DataFrame()
         self._sels = self.sel_rels.copy()
         dlog.info("sels: %s", self._sels)
+        self.save_path = save_ds_path  + "-".join(self.methods) + \
+                "_" + str(len(split_df)) + "_" + str(self.num_samples) + ".pickle"
+        if Path(self.save_path).is_file():
+            mlog.info("Loading from saved data %s ", self.save_path)
+            self.load()
 
          
     def __iter__(self):
@@ -835,14 +843,29 @@ class MyDataset(torch.utils.data.IterableDataset):
              worker_id = worker_info.id
              iter_start = self.start + worker_id * per_worker
              iter_end = min(iter_start + per_worker, self.num_samples)
-        return iter(self.fill_data(iter_start, iter_end))
+        if self.flat_data:
+            return iter(self.flat_data)
+        else:
+            return iter(self.fill_data(iter_start, iter_end))
+
+    def save(self):
+        data = (self.flat_data, self.data_split)
+        with open(self.save_path, "wb") as f:
+            pickle.dump(data,f)
+
+    def load(self):
+        with open(self.save_path, "rb") as f:
+           data = pickle.load(f)
+        self.flat_data, self.data_split = data
+        mlog.info("Len flat data %s ", len(self.flat_data))
+        mlog.info("flat data %s ", self.flat_data)
+        raise
 
     def fill_data(self, iter_start, iter_end, show_progress=False):
         flat_data = []
         if iter_end < 0:
             iter_end = self.num_samples
-        ii = iter_start
-        kk = iter_start
+        kk = 0 
         dlog.info("========================== SPLIT: %s", self.split_name)
         dlog.info("get data from %s to %s", iter_start, iter_end)
         dlog.info("total rows: %s", len(self.split_df))
@@ -850,9 +873,9 @@ class MyDataset(torch.utils.data.IterableDataset):
             pbar = tqdm(total = self.num_samples)
 
         for index, d in self.split_df.iterrows():
-            if ii < iter_start:
+            if kk < iter_start:
                 dlog.info("!!!!!!!!! before start %s", iter_start)
-                ii += 1
+                kk += 1
                 continue
             rel = d["prefix"]
             if not rel in self.rel_counter:
@@ -860,7 +883,6 @@ class MyDataset(torch.utils.data.IterableDataset):
             if self.num_per_cat > 0 and self.rel_counter[rel] > self.num_per_cat:
                 dlog.info("!!!!!!!!! number per cat limit reached %s for %s", rel, self.num_per_cat)
                 continue 
-            ii += 1
             if "other_rel" in self.ex_type:
                 if len(self.context_rows) >= len(self.sel_rels):
                     self.context_df = pd.DataFrame(data=context_rows)
@@ -957,6 +979,7 @@ class MyDataset(torch.utils.data.IterableDataset):
                             clog.info(target_lang + ":" + response)
                         if self.lang_counter[lang] > self.num_samples or self.lang_counter[lang] > iter_end:
                             dlog.info("Lang limit reached! %s %s", lang, self.lang_counter[lang])
+                            self.flat_data.extend(flat_data)
                             return flat_data
                         if not lang in self.data_split[rel]:
                             self.data_split[rel][lang] = []
@@ -970,16 +993,18 @@ class MyDataset(torch.utils.data.IterableDataset):
                         kk += 1
                         if (self.is_even or self.per_record) and (kk > iter_end or kk > self.num_samples):
                             dlog.info("record limit reached!")
+                            self.flat_data.extend(flat_data)
                             return flat_data
             
+        self.flat_data.extend(flat_data)
         return flat_data
 
-def save_data(ex_df, save_df_path):
-    if save_df_path and len(ex_df) > 0:
+def save_data(ex_df, save_ds_path):
+    if save_ds_path and len(ex_df) > 0:
         ex_df = ex_df.drop_duplicates(["input_text","prefix"])
         ex_df = ex_df.sort_values(by=["input_text","prefix"])
-        mlog.info("DF saved as %s", save_df_path)
-        ex_df.to_csv(save_df_path, index=False, sep="\t")
+        mlog.info("DF saved as %s", save_ds_path)
+        ex_df.to_csv(save_ds_path, index=False, sep="\t")
 
 def save_checkpoint(model, optimizer, scheduler, step, 
                    best_eval_step, best_dev_loss, save_path):
