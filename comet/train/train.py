@@ -358,6 +358,13 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
     help=""
 )
 @click.option(
+    "--sample_path",
+    "-sp",
+    default="atomic/val_all_rels.tsv",
+    type=str,
+    help=""
+)
+@click.option(
     "--verbose",
     "-v",
     is_flag=True,
@@ -544,7 +551,7 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
     help=""
 )
 def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, val_set, 
-         val_samples, load_path, train_path, val_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, reset_results, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts):
+         val_samples, load_path, train_path, val_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, reset_results, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts):
 
     #%% some hyper-parameters
 
@@ -727,6 +734,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
             mlog.info("Loading val data...")
     atomic_dataset["train"] = pd.read_table(train_path)
     atomic_dataset["validation"] = pd.read_table(val_path)
+    atomic_dataset["sample"] = pd.read_table(sample_path)
     if trans:
         model, tokenizer = load_model(model_id, underlying_model_name)
         for split_name, df in atomic_dataset.items():
@@ -752,7 +760,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
         length = [int(s) for s in prompt_length.split("-")]
         set_prompt_lengths(rel_filter, length)
 
-    split_path = {"train":train_path, "validation":val_path}
+    split_path = {"train":train_path, "validation":val_path, "sample":sample_path}
     save_df_path = {}
     for split, _p in split_path.items():
         if not _p.endswith("_" + save_df + ".tsv"):
@@ -762,7 +770,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     atomic_query_responses = {"train":[], "validation":[]}
     atomic_flattened = {"train":[], "validation":[]}
     num_records = {}
-    num_samples = {"train": train_samples, "validation":val_samples}
+    num_samples = {"train": train_samples, "validation":val_samples, "sample":0}
     mlog.info("Perparing data ...")
     if model_id in ["t5-large","t5-small", "t5-base", "gpt2"]:
         lang = "en"
@@ -770,9 +778,11 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     if "-" in lang:
         split_lang["train"] = lang.split("-")[0]
         split_lang["validation"] = lang.split("-")[1]
+        split_lang["sample"] = lang.split("-")[1]
     else:
         split_lang["train"] = lang
         split_lang["validation"] = lang
+        split_lang["sample"] = lang
 
     myds = {}
     for split_name,split_df in atomic_dataset.items():
@@ -807,7 +817,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
         atomic_query_responses[split_name] = myds[split_name].data_split 
         num_records[split_name] = myds[split_name].num_samples
 
-    myds[val_set].fill_data(0, -1, show_progress=True)
+    myds["sample"].fill_data(0, -1, show_progress=True)
     train_records = myds["train"].num_samples
     val_records = myds["validation"].num_samples
     if deep_log:
@@ -830,6 +840,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     if do_eval or (not wrap and frozen):
         mlog.info("Evaluating the model...")
         val_data = myds[val_set].data_split
+        myds[val_set].fill_data(0, -1, show_progress=True)
         model.to(device=device)
         evaluate(model, tokenizer, val_data, inter, save_path, results_info, val_records, gen_param)  
         return
@@ -1170,6 +1181,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
                     save_path)
 
 
+    myds[val_set].fill_data(0, -1, show_progress=True)
     mlog.info("Validation data %s", len(myds[val_set].data_split))
     evaluate(model, tokenizer, myds[val_set].data_split, inter, save_path, results_info, val_records, gen_param, attention_mask)  
 
