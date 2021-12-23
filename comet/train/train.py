@@ -550,8 +550,15 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
     is_flag=True,
     help=""
 )
+@click.option(
+    "--num_workers",
+    "-nw",
+    default=0,
+    type=int,
+    help=""
+)
 def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, val_set, 
-         val_samples, load_path, train_path, val_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, reset_results, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts):
+         val_samples, load_path, train_path, val_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, reset_results, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers):
 
     #%% some hyper-parameters
 
@@ -925,7 +932,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
         data_collator = collate_fn_for_flattened
 
     train_dataloader = torch.utils.data.DataLoader(myds['train'],
-        batch_size=node_batch_size,shuffle=shuffle,collate_fn=data_collator)
+        batch_size=node_batch_size,shuffle=shuffle,collate_fn=data_collator, num_workers=num_workers)
     dev_dataloader = torch.utils.data.DataLoader(myds['validation'],
         batch_size=node_batch_size,shuffle=shuffle,collate_fn=data_collator)
     # %% prepare for training
