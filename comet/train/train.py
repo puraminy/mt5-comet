@@ -773,6 +773,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     else:
         split_lang["train"] = lang
         split_lang["validation"] = lang
+
+    myds = {}
     for split_name,split_df in atomic_dataset.items():
         mlog.info("Path of dataset for %s %s", split_name, split_path[split_name])
         dlog.info("Columns of %s\n  %s", split_name, "\n".join(list(split_df.columns)))
@@ -788,59 +790,25 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
             inp_lang = targ_lang = slang
         inp_include, inp_exclude = filter_inputs(include, exclude, inp_lang)
         targ_include, targ_exclude = filter_inputs(include, exclude, targ_lang)
-        if last_data:
-            mlog.info("Reading saved pickle")
-            test_samples = {"train":600, "validation":200}
-            with open("atomic/" + method + "-" + split_name + "_" + str(len(split_df)) + ".pickle", 'rb') as handle:
-                (atomic_query_responses[split_name], 
-                 atomic_flattened[split_name],
-                 num_records[split_name]
-                ) = pickle.load(handle)
-            (test_data,
-             test_data_flat,
-             _
-            ) = fill_data(split_df, split_name,
-                                method, prompt_pos, rel_filter,
-                                test_samples[split_name], 
-                                ignore_blanks,
-                                only_blanks,
-                                inp_include,
-                                inp_exclude,
-                                targ_include,
-                                targ_exclude,
-                                pred_tresh, nli_group, per_record, is_even, start, 
-                                sampling, ex_type,
-                                samples_per_head, save_df_path[split_name]
-                        )
-            #for x,y in zip(test_data_flat[:100], atomic_flattened[split_name][:100]):
-            #    if x != y:
-            #        mlog.info("%s != %s", x,y)
-            #        raise "Mismatch"
-        else:
-            (atomic_query_responses[split_name], 
-             atomic_flattened[split_name],
-             num_records[split_name]
-            ) = fill_data(split_df, split_name,
-                                method, prompt_pos, rel_filter,
-                                num_samples[split_name], 
-                                ignore_blanks,
-                                only_blanks,
-                                inp_include,
-                                inp_exclude,
-                                targ_include,
-                                targ_exclude,
-                                pred_tresh, nli_group, per_record, is_even, start, 
-                                sampling, ex_type,
-                                samples_per_head, save_df_path[split_name]
-                        )
-            data = (atomic_query_responses[split_name], 
-                    atomic_flattened[split_name],
-                    num_records[split_name])
-            with open("atomic/" + method + "-" + split_name + "_" + str(len(split_df)) + ".pickle", 'wb') as handle:
-                pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        mlog.info("Creating dataset for %s", split_name)
+        myds[split_name] = MyDataset(split_df, split_name,
+                            method, prompt_pos, rel_filter,
+                            num_samples[split_name], 
+                            ignore_blanks,
+                            only_blanks,
+                            inp_include,
+                            inp_exclude,
+                            targ_include,
+                            targ_exclude,
+                            pred_tresh, nli_group, per_record, is_even, start, 
+                            sampling, ex_type,
+                            samples_per_head, save_df_path[split_name]
+                    )
+        atomic_query_responses[split_name] = myds[split_name].data_split 
+        num_records[split_name] = myds[split_name].num_samples
 
-    train_records = num_records["train"]
-    val_records = num_records["validation"]
+    train_records = myds["train"].num_samples
+    val_records = myds["validation"].num_samples
     if deep_log:
         dlog.info(atomic_query_responses["train"])
     for logger in [mlog, clog, vlog]:
@@ -860,7 +828,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     results_info = f"{experiment}_{model_id}_{lang}_{method}_{w_str}-{encoder_type}_{f_str}_tr:{training_round}-ep:{epochs_num}-({start}-{train_records})-{val_records}{extra}"
     if do_eval or (not wrap and frozen):
         mlog.info("Evaluating the model...")
-        val_data = atomic_query_responses[val_set]
+        val_data = myds[val_set].data_split
         model.to(device=device)
         evaluate(model, tokenizer, val_data, inter, save_path, results_info, val_records, gen_param)  
         return
@@ -944,9 +912,9 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
     else:
         data_collator = collate_fn_for_flattened
 
-    train_dataloader = torch.utils.data.DataLoader(atomic_flattened['train'],
+    train_dataloader = torch.utils.data.DataLoader(myds['train'],
         batch_size=node_batch_size,shuffle=shuffle,collate_fn=data_collator)
-    dev_dataloader = torch.utils.data.DataLoader(atomic_flattened['validation'],
+    dev_dataloader = torch.utils.data.DataLoader(myds['validation'],
         batch_size=node_batch_size,shuffle=shuffle,collate_fn=data_collator)
     # %% prepare for training
     sw = SummaryWriter(save_path, flush_secs=1)
@@ -1200,7 +1168,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
                     best_eval_step, best_dev_loss,
                     save_path)
 
-    evaluate(model, tokenizer, atomic_query_responses[val_set], inter, save_path, results_info, val_records, gen_param, attention_mask)  
+    evaluate(model, tokenizer, myds[val_set].split_data, inter, save_path, results_info, val_records, gen_param, attention_mask)  
 
 #ettt
 

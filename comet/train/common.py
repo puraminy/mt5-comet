@@ -719,9 +719,9 @@ def get_input(msg):
         except:
             print("Error occured, please try again or hit e to exit")
             continue
-# fill a dataset or generate based on a model
-# mmmmmmmmmmmmmm
-def fill_data(split_df, split_name, method, prompt_pos, rel_filter, 
+
+class MyDataset(torch.utils.data.IterableDataset):
+    def __init__(self, split_df, split_name, method, prompt_pos, rel_filter, 
             num_samples=0, 
             ignore_blanks=False,
             only_blanks=False,
@@ -732,214 +732,237 @@ def fill_data(split_df, split_name, method, prompt_pos, rel_filter,
             pred_tresh=0,
             nli_group="all", per_record=False, is_even=False, start=0, 
             sampling=0, ex_type="same_rel",  samples_per_head=0, save_df_path=""): 
-    dlog.info("building query responses for {}".format(split_name))
-    mlog.info(f"fill data input dataset len:{len(split_df)}")
-    natural = inp_include == "natural"
-    main_df = split_df
-    if split_name != "train":
-        start = 0
-    if natural and split_name != "train": natural = False 
-    if natural:
-        dlog.info("natural is ON")
-    data_split = {}
-    if num_samples == 0: 
-        num_samples = len(split_df)
-        samples_per_head = 0
-    for col in targets:
-        if col in split_df:
-            split_df[col] = split_df[col].astype(str)
-    if ignore_blanks: # and len(split_df) > num_rows:
-        split_df = split_df[split_df["input_text"].str.contains('___')==False]
-        main_df = main_df[main_df["input_text"].str.contains('___')==False]
-        #split_df = split_df[split_df["target_text"] != "none"]
-        dlog.info("*** Filtered for ignoring blanks ")
-    elif only_blanks:
-        split_df = split_df[split_df["input_text"].str.contains('___')==True]
-        #split_df = split_df[split_df["target_text"] != "none"]
-        dlog.info("*** Filtered for including only with blanks ")
-    if pred_tresh > 0 and "bert_score" in split_df:
-        split_df = split_df[split_df["bert_score"] > pred_tresh]
-        dlog.info("*** Filtered based on pred1 score higher than "+ pred_tresh)
-    if nli_group != "all" and "nli_group" in split_df:
-        split_df = split_df[split_df["nli_group"] == nli_group]
-        dlog.info("*** Filtered based on nli_group "+ nli_group)
+        super(MyDataset).__init__()
+        self.only_blanks = only_blanks
+        self.samples_per_head = samples_per_head
+        self.start = start
+        self.prompt_pos = prompt_pos
+        self.inp_include = inp_include
+        self.inp_exclude = inp_exclude
+        self.targ_include = targ_include
+        self.targ_exclude = targ_exclude
+        self.ex_type = ex_type
+        self.per_record = per_record
+        self.is_even = is_even
+        dlog.info("building query responses for {}".format(split_name))
+        mlog.info(f"fill data input dataset len:{len(split_df)}")
+        self.natural = inp_include == "natural"
+        self.split_name = split_name
+        if split_name != "train":
+            self.start = 0
+        if self.natural and split_name != "train": 
+            self.natural = False 
+        if self.natural:
+            dlog.info("natural is ON")
+        self.data_split = {}
+        self.num_samples = num_samples
+        if num_samples == 0: 
+            self.num_samples = len(split_df)
+            self.samples_per_head = 0
+        for col in targets:
+            if col in split_df:
+                split_df[col] = split_df[col].astype(str)
+        if ignore_blanks: # and len(split_df) > num_rows:
+            split_df = split_df[split_df["input_text"].str.contains('___')==False]
+            #split_df = split_df[split_df["target_text"] != "none"]
+            dlog.info("*** Filtered for ignoring blanks ")
+        elif only_blanks:
+            split_df = split_df[split_df["input_text"].str.contains('___')==True]
+            #split_df = split_df[split_df["target_text"] != "none"]
+            dlog.info("*** Filtered for including only with blanks ")
+        if pred_tresh > 0 and "bert_score" in split_df:
+            split_df = split_df[split_df["bert_score"] > pred_tresh]
+            dlog.info("*** Filtered based on pred1 score higher than "+ pred_tresh)
+        if nli_group != "all" and "nli_group" in split_df:
+            split_df = split_df[split_df["nli_group"] == nli_group]
+            dlog.info("*** Filtered based on nli_group "+ nli_group)
 
-    mlog.info(f"len after filtering:{len(split_df)}")
-    if not "other_rel" in ex_type:
-        if rel_filter:
-            split_df = split_df[split_df["prefix"] == rel_filter]
-            dlog.info("len after relation filter: %s", len(split_df))
-        elif num_samples < len(split_df) and not is_even: 
-            split_df = split_df.groupby("prefix").sample(n=num_samples)
-            dlog.info(f"len after sampling:{len(split_df)}")
-    split_df = split_df.sort_values(by="input_text")
-    cats_num = len(split_df["prefix"].unique())
-    dlog.info("Num Samples: %s", num_samples)
-    dlog.info("Cats Num: %s", cats_num)
-    num_per_cat = num_samples // cats_num if cats_num > 1 else num_samples
-    dlog.info("Num per cat: %s", num_per_cat)
-    rel_counter = {}
-    lang_counter = {}
-    sel_rels = []
-    if "other_rel" in ex_type:
-        samples_per_head = 0
-        num_per_cat = 0
-        sel_rels = all_rels
-        if "@" in ex_type:
-            _rels = ex_type.split("@")[1]
-            sel_rels = _rels.split("-")
-    if rel_filter and not rel_filter in sel_rels:
-        sel_rels.append(rel_filter)
-    ii = 0
-    kk = 0
-    flat_data = []
-    old_input = ""
-    si = 0
-    ignored = 0
-    samples = sampling
-    context_rows=[]
-    context_df = None
-    ex_df = pd.DataFrame()
-    _sels = sel_rels.copy()
-    dlog.info("sels: %s", _sels)
-    pbar = tqdm(total = len(split_df))
-    for index, d in split_df.iterrows():
-        rel = d["prefix"]
-        pbar.update(1)
-        if not rel in rel_counter:
-            rel_counter[rel] = 0
-        if num_per_cat > 0 and rel_counter[rel] > num_per_cat:
-            dlog.info("!!!!!!!!! number per cat limit reached %s for %s", rel, num_per_cat)
-            continue 
-        ii += 1
+        mlog.info(f"len after filtering:{len(split_df)}")
+        if not "other_rel" in ex_type:
+            if rel_filter:
+                split_df = split_df[split_df["prefix"] == rel_filter]
+                dlog.info("len after relation filter: %s", len(split_df))
+            elif num_samples < len(split_df) and not is_even: 
+                split_df = split_df.groupby("prefix").sample(n=num_samples)
+                dlog.info(f"len after sampling:{len(split_df)}")
+        self.split_df = split_df.sort_values(by="input_text")
+        self.cats_num = cats_num = len(split_df["prefix"].unique())
+        dlog.info("Num Samples: %s", num_samples)
+        dlog.info("Cats Num: %s", cats_num)
+        self.num_per_cat = num_samples // cats_num if cats_num > 1 else num_samples
+        dlog.info("Num per cat: %s", self.num_per_cat)
+        self.rel_counter = {}
+        self.rel_filter = rel_filter
+        self.lang_counter = {}
+        self.sel_rels = []
         if "other_rel" in ex_type:
-            if len(context_rows) >= len(sel_rels):
-                context_df = pd.DataFrame(data=context_rows)
-                ex_df = ex_df.append(context_df)
-                if rel_filter:
-                    for item in context_rows:
-                        if item["prefix"] == rel_filter:
-                            d = item
-                            rel = d["prefix"]
-                context_rows = []
-                _sels = sel_rels.copy()
-            else:
-                if (rel in _sels and d["target_text"] != "none"): 
-                    context_rows.append(d)
-                    _sels.remove(rel)
-                dlog.info("!!!!!!!!! just for including in conext rows %s", len(context_rows))
-                continue
-        elif ex_type == "same_rel":
-            context_df = split_df[split_df["prefix"] == rel].sample(n=sampling)
-        else:
-            raise ValueError("Ex_type is invalid:" + ex_type)
-        eng_inp = d["input_text"]
-        si += 1
-        if eng_inp != old_input:
-            context_rows = []
-            _sels = sel_rels.copy()
-            old_input = eng_inp
-            si = 0
-        elif samples_per_head > 0 and si > samples_per_head:
-            dlog.info("!!!!!!!!! samples per head limit %s", samples_per_head)
-            continue
-        if ii < start:
-            dlog.info("!!!!!!!!! before start %s", start)
-            continue
-        if not rel in data_split:
-            data_split[rel] = {}
-        for inp in inputs:
-            if not inp in d or len(d[inp]) <= 1:
-                dlog.info("!!!!!!!!! not in dataset %s", inp)
-                continue
-            if inp_include and not any(x in inp for x in inp_include.split("|")):
-                dlog.info("!!!!!!!!! not included input col %s", inp_include)
-                continue
-            if inp_exclude and any(x in inp for x in inp_exclude.split("|")):
-                dlog.info("!!!!!!!!! excluded input col %s", inp_exclude)
-                continue
-            input_lang = langs[inp]
-            rel_counter[rel] += 1
-            for targ_col in targets:
-                if not targ_col in d or len(d[targ_col]) <= 1:
-                    dlog.info("!!!!!!!!! not target lang %s", targ_col)
-                    continue
-                if targ_include and not any(x in targ_col for x in targ_include.split("|")):
-                    dlog.info("!!!!!!!!! not included target col %s", targ_include)
-                    continue
-                if targ_exclude and any(x in targ_col for x in targ_exclude.split("|")):
-                    dlog.info("!!!!!!!!!  target exclude %s", targ_exclude)
-                    continue
-                rel_token = atomic_relation_mappings[rel]
-                event = d[inp]
-                resp = d[targ_col]
-                if natural:
-                    resp = resp.replace("PersonX intends", "")
-                    resp = resp.replace("PersonX قصد دارد", "")
-                resp = resp.strip()
-                gen_token = gen_tokens[targ_col]
-                target_lang = langs[targ_col]
-                methods = method.split("+")
-                if len(methods) > 1 and split_name == "validation":
-                    methods = methods[0]
-                for mt in methods:
-                    if "-fa" in mt and input_lang == "fa":
-                        event = toPers(event)
-                    if "-fa" in mt and target_lang == "fa":
-                        resp = toPers(resp)
+            self.samples_per_head = 0
+            self.num_per_cat = 0
+            self.sel_rels = all_rels
+            if "@" in ex_type:
+                _rels = ex_type.split("@")[1]
+                self.sel_rels = _rels.split("-")
+        if rel_filter and not rel_filter in sel_rels:
+            self.sel_rels.append(rel_filter)
+        self.methods = method.split("+")
+        self.sampling = sampling
+        if len(self.methods) > 1 and split_name == "validation":
+            self.methods = self.methods[0]
 
-                    qtemp, anstemp, ex_qtemp, ex_anstemp, context = create_templates(mt, 
-                            gen_pos="end", prompt_pos=prompt_pos)
-                    plen = relation_prompt_lengths[rel][0]
-                    if only_blanks and "___" in event:
-                        event = event.replace("___", "{ph}")
-                    mask = random.randint(0, plen-1)
-                    _qtemp = fill_consts(qtemp, ex_qtemp, context,d, context_df, mask=mask,method = mt)
-                    _anstemp = fill_consts(anstemp, ex_anstemp, context,d, context_df, mask=mask,method = mt)
-                    _query = fill_vars(_qtemp, rel, event, gen_token, resp, 
-                            input_lang, target_lang) 
-                    query = (index, _query)
-                    response = fill_vars(_anstemp, rel, event, gen_token, resp, 
-                            input_lang, target_lang)
-                    lang = input_lang + "2" + target_lang
-                    if not lang in lang_counter:
-                        lang_counter[lang] = 1
-                    else:
-                        lang_counter[lang] += 1
-                    if lang_counter[lang] < 10:
-                        clog.info(f"%%%%%%%%%%%%%%%%%% {lang} {mt} %%%%%%%%%%%%%%%%%%%")
-                        clog.info(inp + "====>" + targ_col)
-                        _q = _query.replace(">",">\n") 
-                        clog.info(input_lang + ":"+ _q)
-                        clog.info(target_lang + ":" + response)
-                    if lang_counter[lang] > num_samples:
-                        save_data(ex_df, save_df_path)
-                        dlog.info("Lang limit reached! %s %s", lang, lang_counter[lang])
-                        return data_split, flat_data, kk
-                    if not lang in data_split[rel]:
-                        data_split[rel][lang] = []
-                    if query not in data_split[rel][lang]:
-                        data_split[rel][lang].append({query:[response]})
-                    else:
-                        data_split[rel][lang][query].append(response)
-                    flat_data.append((_query, response))
-                    pbar.set_description(f"Records {kk} of {num_samples}")
-                    kk += 1
-                    if (is_even or per_record) and kk > num_samples:
-                        dlog.info("record limit reached!")
-                        save_data(ex_df, save_df_path)
-                        return data_split, flat_data, kk
-            #didn't convert ___ to <blank>
-            #didn't normalize to lowercase
-    save_data(ex_df, save_df_path)
-    mlog.info("For %s", split_name)
-    mlog.info("ignored rows: %s", ignored)
-    mlog.info("len ex_df: %s", len(ex_df))
-    mlog.info("len main_df: %s", len(main_df))
-    mlog.info("len split_df: %s", len(split_df))
-    mlog.info("kk: %s", kk)
-        
-    return data_split, flat_data, kk
+        self.old_input = ""
+        self.si = 0
+        self.context_rows=[]
+        self.context_df = None
+        self.ex_df = pd.DataFrame()
+        self._sels = self.sel_rels.copy()
+        dlog.info("sels: %s", self._sels)
+         
+    def fill_sample(self):
+        end = min(self.num_samples, len(self.split_df), 500)
+        mlog.info("Sampling %s %s", self.split_name, end)
+        self.fill_data(0, end)
+        pass
+
+    def __iter__(self):
+        iter_start = self.start
+        iter_end = self.num_samples
+        worker_info = torch.utils.data.get_worker_info()
+        if worker_info is None:  # single-process data loading, return the full iterator
+             iter_start = self.start
+             iter_end = self.num_samples
+        else:  # in a worker process
+             # split workload
+             per_worker = int(math.ceil((self.num_samples - self.start) / float(worker_info.num_workers)))
+             worker_id = worker_info.id
+             iter_start = self.start + worker_id * per_worker
+             iter_end = min(iter_start + per_worker, self.num_samples)
+
+        flat_data = []
+        ii = iter_start
+        kk = iter_start
+        tlog.info("get data from %s to %s", iter_start, iter_end)
+        for index, d in self.split_df.iterrows():
+            if ii < iter_start:
+                dlog.info("!!!!!!!!! before start %s", iter_start)
+                ii += 1
+                continue
+            rel = d["prefix"]
+            if not rel in self.rel_counter:
+                self.rel_counter[rel] = 0
+            if self.num_per_cat > 0 and self.rel_counter[rel] > self.num_per_cat:
+                dlog.info("!!!!!!!!! number per cat limit reached %s for %s", rel, self.num_per_cat)
+                continue 
+            ii += 1
+            if "other_rel" in self.ex_type:
+                if len(self.context_rows) >= len(self.sel_rels):
+                    self.context_df = pd.DataFrame(data=context_rows)
+                    self.ex_df = self.ex_df.append(self.context_df)
+                    if self.rel_filter:
+                        for item in self.context_rows:
+                            if item["prefix"] == self.rel_filter:
+                                d = item
+                                rel = d["prefix"]
+                    self.context_rows = []
+                    self._sels = self.sel_rels.copy()
+                else:
+                    if (rel in self._sels and d["target_text"] != "none"): 
+                        self.context_rows.append(d)
+                        self._sels.remove(rel)
+                    dlog.info("!!!!!!!!! just for including in conext rows %s", len(context_rows))
+                    continue
+            elif self.ex_type == "same_rel":
+                self.context_df = self.split_df[self.split_df["prefix"] == rel].sample(n=self.sampling)
+            else:
+                raise ValueError("Ex_type is invalid:" + self.ex_type)
+            eng_inp = d["input_text"]
+            self.si += 1
+            if eng_inp != self.old_input:
+                self.context_rows = []
+                self._sels = self.sel_rels.copy()
+                self.old_input = eng_inp
+                self.si = 0
+            elif self.samples_per_head > 0 and self.si > self.samples_per_head:
+                dlog.info("!!!!!!!!! samples per head limit %s", self.samples_per_head)
+                continue
+            if not rel in self.data_split:
+                self.data_split[rel] = {}
+            for inp in inputs:
+                if not inp in d or len(d[inp]) <= 1:
+                    dlog.info("!!!!!!!!! not in dataset %s", inp)
+                    continue
+                if self.inp_include and not any(x in inp for x in self.inp_include.split("|")):
+                    dlog.info("!!!!!!!!! not included input col %s", self.inp_include)
+                    continue
+                if self.inp_exclude and any(x in inp for x in self.inp_exclude.split("|")):
+                    dlog.info("!!!!!!!!! excluded input col %s", self.inp_exclude)
+                    continue
+                input_lang = langs[inp]
+                self.rel_counter[rel] += 1
+                for targ_col in targets:
+                    if not targ_col in d or len(d[targ_col]) <= 1:
+                        dlog.info("!!!!!!!!! not target lang %s", targ_col)
+                        continue
+                    if self.targ_include and not any(x in targ_col for x in self.targ_include.split("|")):
+                        dlog.info("!!!!!!!!! not included target col %s", self.targ_include)
+                        continue
+                    if self.targ_exclude and any(x in targ_col for x in self.targ_exclude.split("|")):
+                        dlog.info("!!!!!!!!!  target exclude %s", self.targ_exclude)
+                        continue
+                    rel_token = atomic_relation_mappings[rel]
+                    event = d[inp]
+                    resp = d[targ_col]
+                    if self.natural:
+                        resp = resp.replace("PersonX intends", "")
+                        resp = resp.replace("PersonX قصد دارد", "")
+                    resp = resp.strip()
+                    gen_token = gen_tokens[targ_col]
+                    target_lang = langs[targ_col]
+                    for mt in self.methods:
+                        if "-fa" in mt and input_lang == "fa":
+                            event = toPers(event)
+                        if "-fa" in mt and target_lang == "fa":
+                            resp = toPers(resp)
+
+                        qtemp, anstemp, ex_qtemp, ex_anstemp, context = create_templates(mt, 
+                                gen_pos="end", prompt_pos=self.prompt_pos)
+                        plen = relation_prompt_lengths[rel][0]
+                        if self.only_blanks and "___" in event:
+                            event = event.replace("___", "{ph}")
+                        mask = random.randint(0, plen-1)
+                        _qtemp = fill_consts(qtemp, ex_qtemp, context,d, self.context_df, mask=mask,method = mt)
+                        _anstemp = fill_consts(anstemp, ex_anstemp, context,d, self.context_df, mask=mask,method = mt)
+                        _query = fill_vars(_qtemp, rel, event, gen_token, resp, 
+                                input_lang, target_lang) 
+                        query = (index, _query)
+                        response = fill_vars(_anstemp, rel, event, gen_token, resp, 
+                                input_lang, target_lang)
+                        lang = input_lang + "2" + target_lang
+                        if not lang in self.lang_counter:
+                            self.lang_counter[lang] = 1
+                        else:
+                            self.lang_counter[lang] += 1
+                        if self.lang_counter[lang] < 10:
+                            clog.info(f"%%%%%%%%%%%%%%%%%% {lang} {mt} %%%%%%%%%%%%%%%%%%%")
+                            clog.info(inp + "====>" + targ_col)
+                            _q = _query.replace(">",">\n") 
+                            clog.info(input_lang + ":"+ _q)
+                            clog.info(target_lang + ":" + response)
+                        if self.lang_counter[lang] > self.num_samples or self.lang_counter[lang] > iter_end:
+                            dlog.info("Lang limit reached! %s %s", lang, self.lang_counter[lang])
+                            return iter(flat_data)
+                        if not lang in self.data_split[rel]:
+                            self.data_split[rel][lang] = []
+                        if query not in self.data_split[rel][lang]:
+                            self.data_split[rel][lang].append({query:[response]})
+                        else:
+                            self.data_split[rel][lang][query].append(response)
+                        flat_data.append((_query, response))
+                        kk += 1
+                        if (self.is_even or self.per_record) and (kk > iter_end or kk > self.num_samples):
+                            dlog.info("record limit reached!")
+                            return iter(flat_data)
+            
+        return iter(flat_data)
 
 def save_data(ex_df, save_df_path):
     if save_df_path and len(ex_df) > 0:
@@ -951,7 +974,7 @@ def save_data(ex_df, save_df_path):
 def save_checkpoint(model, optimizer, scheduler, step, 
                    best_eval_step, best_dev_loss, save_path):
     if save_path.endswith("temp"):
-        mlog.info("Saves in temp are skipped ...")
+        mlog.info("Saves in temp are skipped ")
         return
 
     mlog.info("Saving model ...")
