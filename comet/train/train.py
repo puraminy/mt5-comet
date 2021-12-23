@@ -807,6 +807,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
         atomic_query_responses[split_name] = myds[split_name].data_split 
         num_records[split_name] = myds[split_name].num_samples
 
+    myds[val_set].fill_data(0, -1, show_progress=True)
     train_records = myds["train"].num_samples
     val_records = myds["validation"].num_samples
     if deep_log:
@@ -1168,7 +1169,9 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, v
                     best_eval_step, best_dev_loss,
                     save_path)
 
-    evaluate(model, tokenizer, myds[val_set].split_data, inter, save_path, results_info, val_records, gen_param, attention_mask)  
+
+    mlog.info("Validation data %s", len(myds[val_set].data_split))
+    evaluate(model, tokenizer, myds[val_set].data_split, inter, save_path, results_info, val_records, gen_param, attention_mask)  
 
 #ettt
 

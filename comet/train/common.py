@@ -731,7 +731,7 @@ class MyDataset(torch.utils.data.IterableDataset):
             targ_exclude="",
             pred_tresh=0,
             nli_group="all", per_record=False, is_even=False, start=0, 
-            sampling=0, ex_type="same_rel",  samples_per_head=0, save_df_path=""): 
+            sampling=0, ex_type="",  samples_per_head=0, save_df_path=""): 
         super(MyDataset).__init__()
         self.only_blanks = only_blanks
         self.samples_per_head = samples_per_head
@@ -756,7 +756,7 @@ class MyDataset(torch.utils.data.IterableDataset):
             dlog.info("natural is ON")
         self.data_split = {}
         self.num_samples = num_samples
-        if num_samples == 0: 
+        if self.num_samples == 0: 
             self.num_samples = len(split_df)
             self.samples_per_head = 0
         for col in targets:
@@ -778,18 +778,21 @@ class MyDataset(torch.utils.data.IterableDataset):
             dlog.info("*** Filtered based on nli_group "+ nli_group)
 
         mlog.info(f"len after filtering:{len(split_df)}")
-        if not "other_rel" in ex_type:
+        assert len(split_df) > 0, "Data frame is empty " + self.split_name
+        if "same_rel" in ex_type:
             if rel_filter:
                 split_df = split_df[split_df["prefix"] == rel_filter]
                 dlog.info("len after relation filter: %s", len(split_df))
-            elif num_samples < len(split_df) and not is_even: 
-                split_df = split_df.groupby("prefix").sample(n=num_samples)
+            elif self.num_samples < len(split_df) and not is_even: 
+                split_df = split_df.groupby("prefix").sample(n=self.num_samples)
+                dlog.info(f"NUM samples %s, %s", self.num_samples, len(split_df))
                 dlog.info(f"len after sampling:{len(split_df)}")
         self.split_df = split_df.sort_values(by="input_text")
+        assert len(self.split_df) > 0, "Data frame is empty " + self.split_name + " " + str(self.num_samples)
         self.cats_num = cats_num = len(split_df["prefix"].unique())
-        dlog.info("Num Samples: %s", num_samples)
+        dlog.info("Num Samples: %s", self.num_samples)
         dlog.info("Cats Num: %s", cats_num)
-        self.num_per_cat = num_samples // cats_num if cats_num > 1 else num_samples
+        self.num_per_cat = self.num_samples // cats_num if cats_num > 1 else self.num_samples
         dlog.info("Num per cat: %s", self.num_per_cat)
         self.rel_counter = {}
         self.rel_filter = rel_filter
@@ -816,13 +819,8 @@ class MyDataset(torch.utils.data.IterableDataset):
         self.ex_df = pd.DataFrame()
         self._sels = self.sel_rels.copy()
         dlog.info("sels: %s", self._sels)
-         
-    def fill_sample(self):
-        end = min(self.num_samples, len(self.split_df), 500)
-        mlog.info("Sampling %s %s", self.split_name, end)
-        self.fill_data(0, end)
-        pass
 
+         
     def __iter__(self):
         iter_start = self.start
         iter_end = self.num_samples
@@ -836,11 +834,20 @@ class MyDataset(torch.utils.data.IterableDataset):
              worker_id = worker_info.id
              iter_start = self.start + worker_id * per_worker
              iter_end = min(iter_start + per_worker, self.num_samples)
+        return iter(self.fill_data(iter_start, iter_end))
 
+    def fill_data(self, iter_start, iter_end, show_progress=False):
         flat_data = []
+        if iter_end < 0:
+            iter_end = self.num_samples
         ii = iter_start
         kk = iter_start
-        tlog.info("get data from %s to %s", iter_start, iter_end)
+        dlog.info("========================== SPLIT: %s", self.split_name)
+        dlog.info("get data from %s to %s", iter_start, iter_end)
+        dlog.info("total rows: %s", len(self.split_df))
+        if show_progress:
+            pbar = tqdm(total = self.num_samples)
+
         for index, d in self.split_df.iterrows():
             if ii < iter_start:
                 dlog.info("!!!!!!!!! before start %s", iter_start)
@@ -949,7 +956,7 @@ class MyDataset(torch.utils.data.IterableDataset):
                             clog.info(target_lang + ":" + response)
                         if self.lang_counter[lang] > self.num_samples or self.lang_counter[lang] > iter_end:
                             dlog.info("Lang limit reached! %s %s", lang, self.lang_counter[lang])
-                            return iter(flat_data)
+                            return flat_data
                         if not lang in self.data_split[rel]:
                             self.data_split[rel][lang] = []
                         if query not in self.data_split[rel][lang]:
@@ -957,12 +964,14 @@ class MyDataset(torch.utils.data.IterableDataset):
                         else:
                             self.data_split[rel][lang][query].append(response)
                         flat_data.append((_query, response))
+                        if show_progress:
+                            pbar.update()
                         kk += 1
                         if (self.is_even or self.per_record) and (kk > iter_end or kk > self.num_samples):
                             dlog.info("record limit reached!")
-                            return iter(flat_data)
+                            return flat_data
             
-        return iter(flat_data)
+        return flat_data
 
 def save_data(ex_df, save_df_path):
     if save_df_path and len(ex_df) > 0:
