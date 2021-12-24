@@ -857,7 +857,7 @@ class MyDataset(torch.utils.data.IterableDataset):
         if self.flat_data:
             _iter = iter(self.flat_data)
         else:
-            _iter = iter(self.fill_data(iter_start, iter_end))
+            _iter = iter(self.fill_all_data(iter_start, iter_end))
         self.example_counter = 0
         return map(self.preproc, _iter)
 
@@ -915,6 +915,41 @@ class MyDataset(torch.utils.data.IterableDataset):
         #else:
         #    self.data_split[rel][lang][query].append(response)
         return (_query, response, rel, lang, index)
+
+    def fill_all_data(self, iter_start, iter_end, show_progress=True):
+        flat_data = []
+        if iter_end < 0:
+            iter_end = self.num_samples
+        kk = 0 
+        dlog.info("========================== SPLIT: %s", self.split_name)
+        dlog.info("get data from %s to %s", iter_start, iter_end)
+        dlog.info("total rows: %s", len(self.split_df))
+        context_df = None
+        if show_progress:
+            pbar = tqdm(total = self.num_samples, position=0, leave=True) #,dynamic_ncols=True)
+            pbar.set_description("Preparing iterator "+ self.split_name)
+
+        for index, d in self.split_df.iterrows():
+            if kk < iter_start:
+                dlog.info("!!!!!!!!! before start %s", iter_start)
+                kk += 1
+                continue
+            rel = d["prefix"]
+            inp = "input_text"
+            targ_col = "target_text"
+            event = d[inp]
+            resp = d[targ_col]
+            lang = "en2en"
+            if kk > iter_end:
+                self.flat_data.extend(flat_data)
+                return flat_data
+            extra = {"inp":inp, "targ_col":targ_col, "rel":rel}
+            flat_data.append((event, resp, extra, d, context_df, index))
+            kk += 1
+            if show_progress:
+                pbar.update()
+        self.flat_data.extend(flat_data)
+        return flat_data
 
     def fill_data(self, iter_start, iter_end, show_progress=True):
         flat_data = []
