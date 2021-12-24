@@ -310,7 +310,7 @@ def fill_prompt(text, rel, place_holder, counter = 0, lang=""):
     #dlog.info("text: %s", text)
     return text
 
-def fill_consts(template, ex_temp, context, row, rows=[], mask=-1, method=""):
+def fill_consts(template, ex_temp, context, row, rows=None, mask=-1, method=""):
     #dlog.info("fill consts, input text: %s", template)
     text = fill_const_for_rel(template, row)
     #dlog.info("fill consts, input text: %s", text)
@@ -398,7 +398,7 @@ def fill_consts(template, ex_temp, context, row, rows=[], mask=-1, method=""):
     text = fill_prompt(text, rel, "{tokens}")
     if "{examples}" in text:
         examples = ""
-        assert len(rows) > 0, "Since there are examples in template, rows must be provided"
+        assert rows is not None and len(rows) > 0, "Since there are examples in template, rows must be provided"
         ii = 1
         for idx, _row in rows.iterrows():
             example = ex_temp
@@ -426,29 +426,30 @@ def fill_consts(template, ex_temp, context, row, rows=[], mask=-1, method=""):
         text = text.replace("{examples}", examples + " " + str(ii) + ")")
     ## storyyyy
     ii = 1
-    for idx, _row in rows.iterrows():
-        example = ex_temp
-        relation = _row["prefix"]
-        if relation == rel:
-            continue
-        numbered = False
-        if "{num}" in ex_temp:
-            numbered = True
-            example = example.replace("{num}", "")
-        if "{rel_i}" in ex_temp:
-            assert enc_prompt != "", "Prompt was not set!"
-        example = fill_const_for_rel(example, _row)
-        example = fill_prompt(example, relation, "{rel_i}")
-        example = fill_prompt(example, "com", "{com_i}")
-        for key,value in _row.items():
-            val = str(value)
-            if "fa" in method and "_fa" in key:
-                val = toPers(val)
-            example = example.replace("{" + key + "}", val)
-        if numbered: 
-            example = " " + str(ii) + ") " + example
-        context = context.replace("{" + relation + "}", example)
-        ii += 1
+    if rows is not None:
+        for idx, _row in rows.iterrows():
+            example = ex_temp
+            relation = _row["prefix"]
+            if relation == rel:
+                continue
+            numbered = False
+            if "{num}" in ex_temp:
+                numbered = True
+                example = example.replace("{num}", "")
+            if "{rel_i}" in ex_temp:
+                assert enc_prompt != "", "Prompt was not set!"
+            example = fill_const_for_rel(example, _row)
+            example = fill_prompt(example, relation, "{rel_i}")
+            example = fill_prompt(example, "com", "{com_i}")
+            for key,value in _row.items():
+                val = str(value)
+                if "fa" in method and "_fa" in key:
+                    val = toPers(val)
+                example = example.replace("{" + key + "}", val)
+            if numbered: 
+                example = " " + str(ii) + ") " + example
+            context = context.replace("{" + relation + "}", example)
+            ii += 1
     for relation in all_rels:
         if relation == rel:
             context = context.replace("{" + relation + "}", text)
@@ -819,8 +820,7 @@ class MyDataset(torch.utils.data.IterableDataset):
 
         self.old_input = ""
         self.si = 0
-        self.context_rows=[]
-        self.context_df = None
+        self.example_counter = 0
         self.ex_df = pd.DataFrame()
         self._sels = self.sel_rels.copy()
         dlog.info("sels: %s", self._sels)
@@ -830,6 +830,16 @@ class MyDataset(torch.utils.data.IterableDataset):
             mlog.info("Loading from saved data %s ", self.save_path)
             self.load()
 
+
+    def save(self):
+        data = (self.flat_data, self.data_split)
+        with open(self.save_path, "wb") as f:
+            pickle.dump(data,f)
+
+    def load(self):
+        with open(self.save_path, "rb") as f:
+           data = pickle.load(f)
+        self.flat_data, self.data_split = data
          
     def __iter__(self):
         iter_start = self.start
@@ -845,22 +855,66 @@ class MyDataset(torch.utils.data.IterableDataset):
              iter_start = self.start + worker_id * per_worker
              iter_end = min(iter_start + per_worker, self.num_samples)
         if self.flat_data:
-            return iter(self.flat_data)
+            _iter = iter(self.flat_data)
         else:
-            return iter(self.fill_data(iter_start, iter_end))
+            _iter = iter(self.fill_data(iter_start, iter_end))
+        self.example_counter = 0
+        return map(self.preproc, _iter)
 
-    def save(self):
-        data = (self.flat_data, self.data_split)
-        with open(self.save_path, "wb") as f:
-            pickle.dump(data,f)
+    def preproc(self, data):
+        event = data[0]
+        resp = data[1]
+        extra = data[2]
+        rel = extra["rel"]
+        targ_col = extra["targ_col"]
+        inp = extra["inp"]
+        d = data[3]
+        context_df = data[4]
+        index = data[5]
+        rel_token = atomic_relation_mappings[rel]
+        if self.natural:
+            resp = resp.replace("PersonX intends", "")
+            resp = resp.replace("PersonX قصد دارد", "")
+        resp = resp.strip()
+        gen_token = gen_tokens[targ_col]
+        input_lang = langs[inp]
+        target_lang = langs[targ_col]
+        mt = self.methods[0]
+        if "-fa" in mt and input_lang == "fa":
+            event = toPers(event)
+        if "-fa" in mt and target_lang == "fa":
+            resp = toPers(resp)
 
-    def load(self):
-        with open(self.save_path, "rb") as f:
-           data = pickle.load(f)
-        self.flat_data, self.data_split = data
-        mlog.info("Len flat data %s ", len(self.flat_data))
-        mlog.info("flat data %s ", self.flat_data)
-        raise
+        qtemp, anstemp, ex_qtemp, ex_anstemp, context = create_templates(mt, 
+                gen_pos="end", prompt_pos=self.prompt_pos)
+        plen = relation_prompt_lengths[rel][0]
+        if self.only_blanks and "___" in event:
+            event = event.replace("___", "{ph}")
+        mask = random.randint(0, plen-1)
+        _qtemp = fill_consts(qtemp, ex_qtemp, context,d, context_df, mask=mask,method = mt)
+        _anstemp = fill_consts(anstemp, ex_anstemp, context,d, context_df, mask=mask,method = mt)
+        _query = fill_vars(_qtemp, rel, event, gen_token, resp, 
+                input_lang, target_lang) 
+        query = (index, _query)
+        response = fill_vars(_anstemp, rel, event, gen_token, resp, 
+                input_lang, target_lang)
+        lang = input_lang + "2" + target_lang
+        if self.example_counter < 10:
+            clog.info(f"%%%%%%%%%%%%%%%%%% {lang} {mt} %%%%%%%%%%%%%%%%%%%")
+            clog.info(inp + "====>" + targ_col)
+            _q = _query.replace(">",">\n") 
+            clog.info(input_lang + ":"+ _q)
+            clog.info(target_lang + ":" + response)
+            self.example_counter += 1
+        #if not rel in self.data_split:
+        #    self.data_split[rel] = {}
+        #if not lang in self.data_split[rel]:
+        #    self.data_split[rel][lang] = []
+        #if query not in self.data_split[rel][lang]:
+        #    self.data_split[rel][lang].append({query:[response]})
+        #else:
+        #    self.data_split[rel][lang][query].append(response)
+        return (_query, response, rel, lang, index)
 
     def fill_data(self, iter_start, iter_end, show_progress=False):
         flat_data = []
@@ -870,6 +924,8 @@ class MyDataset(torch.utils.data.IterableDataset):
         dlog.info("========================== SPLIT: %s", self.split_name)
         dlog.info("get data from %s to %s", iter_start, iter_end)
         dlog.info("total rows: %s", len(self.split_df))
+        context_rows=[]
+        context_df = None
         if show_progress:
             pbar = tqdm(total = self.num_samples)
 
@@ -885,38 +941,36 @@ class MyDataset(torch.utils.data.IterableDataset):
                 dlog.info("!!!!!!!!! number per cat limit reached %s for %s", rel, self.num_per_cat)
                 continue 
             if "other_rel" in self.ex_type:
-                if len(self.context_rows) >= len(self.sel_rels):
-                    self.context_df = pd.DataFrame(data=context_rows)
-                    self.ex_df = self.ex_df.append(self.context_df)
+                if len(context_rows) >= len(self.sel_rels):
+                    context_df = pd.DataFrame(data=context_rows)
+                    self.ex_df = self.ex_df.append(context_df)
                     if self.rel_filter:
-                        for item in self.context_rows:
+                        for item in context_rows:
                             if item["prefix"] == self.rel_filter:
                                 d = item
                                 rel = d["prefix"]
-                    self.context_rows = []
+                    context_rows = []
                     self._sels = self.sel_rels.copy()
                 else:
                     if (rel in self._sels and d["target_text"] != "none"): 
-                        self.context_rows.append(d)
+                        context_rows.append(d)
                         self._sels.remove(rel)
                     dlog.info("!!!!!!!!! just for including in conext rows %s", len(context_rows))
                     continue
             elif self.ex_type == "same_rel":
-                self.context_df = self.split_df[self.split_df["prefix"] == rel].sample(n=self.sampling)
-            else:
+                context_df = self.split_df[self.split_df["prefix"] == rel].sample(n=self.sampling)
+            elif self.ex_type:
                 raise ValueError("Ex_type is invalid:" + self.ex_type)
             eng_inp = d["input_text"]
             self.si += 1
             if eng_inp != self.old_input:
-                self.context_rows = []
+                context_rows = []
                 self._sels = self.sel_rels.copy()
                 self.old_input = eng_inp
                 self.si = 0
             elif self.samples_per_head > 0 and self.si > self.samples_per_head:
                 dlog.info("!!!!!!!!! samples per head limit %s", self.samples_per_head)
                 continue
-            if not rel in self.data_split:
-                self.data_split[rel] = {}
             for inp in inputs:
                 if not inp in d or len(d[inp]) <= 1:
                     dlog.info("!!!!!!!!! not in dataset %s", inp)
@@ -939,63 +993,27 @@ class MyDataset(torch.utils.data.IterableDataset):
                     if self.targ_exclude and any(x in targ_col for x in self.targ_exclude.split("|")):
                         dlog.info("!!!!!!!!!  target exclude %s", self.targ_exclude)
                         continue
-                    rel_token = atomic_relation_mappings[rel]
                     event = d[inp]
                     resp = d[targ_col]
-                    if self.natural:
-                        resp = resp.replace("PersonX intends", "")
-                        resp = resp.replace("PersonX قصد دارد", "")
-                    resp = resp.strip()
-                    gen_token = gen_tokens[targ_col]
                     target_lang = langs[targ_col]
-                    for mt in self.methods:
-                        if "-fa" in mt and input_lang == "fa":
-                            event = toPers(event)
-                        if "-fa" in mt and target_lang == "fa":
-                            resp = toPers(resp)
-
-                        qtemp, anstemp, ex_qtemp, ex_anstemp, context = create_templates(mt, 
-                                gen_pos="end", prompt_pos=self.prompt_pos)
-                        plen = relation_prompt_lengths[rel][0]
-                        if self.only_blanks and "___" in event:
-                            event = event.replace("___", "{ph}")
-                        mask = random.randint(0, plen-1)
-                        _qtemp = fill_consts(qtemp, ex_qtemp, context,d, self.context_df, mask=mask,method = mt)
-                        _anstemp = fill_consts(anstemp, ex_anstemp, context,d, self.context_df, mask=mask,method = mt)
-                        _query = fill_vars(_qtemp, rel, event, gen_token, resp, 
-                                input_lang, target_lang) 
-                        query = (index, _query)
-                        response = fill_vars(_anstemp, rel, event, gen_token, resp, 
-                                input_lang, target_lang)
-                        lang = input_lang + "2" + target_lang
-                        if not lang in self.lang_counter:
-                            self.lang_counter[lang] = 1
-                        else:
-                            self.lang_counter[lang] += 1
-                        if self.lang_counter[lang] < 10:
-                            clog.info(f"%%%%%%%%%%%%%%%%%% {lang} {mt} %%%%%%%%%%%%%%%%%%%")
-                            clog.info(inp + "====>" + targ_col)
-                            _q = _query.replace(">",">\n") 
-                            clog.info(input_lang + ":"+ _q)
-                            clog.info(target_lang + ":" + response)
-                        if self.lang_counter[lang] > self.num_samples or self.lang_counter[lang] > iter_end:
-                            dlog.info("Lang limit reached! %s %s", lang, self.lang_counter[lang])
-                            self.flat_data.extend(flat_data)
-                            return flat_data
-                        if not lang in self.data_split[rel]:
-                            self.data_split[rel][lang] = []
-                        if query not in self.data_split[rel][lang]:
-                            self.data_split[rel][lang].append({query:[response]})
-                        else:
-                            self.data_split[rel][lang][query].append(response)
-                        flat_data.append((_query, response))
-                        if show_progress:
-                            pbar.update()
-                        kk += 1
-                        if (self.is_even or self.per_record) and (kk > iter_end or kk > self.num_samples):
-                            dlog.info("record limit reached!")
-                            self.flat_data.extend(flat_data)
-                            return flat_data
+                    lang = input_lang + "2" + target_lang
+                    if not lang in self.lang_counter:
+                        self.lang_counter[lang] = 1
+                    else:
+                        self.lang_counter[lang] += 1
+                    if self.lang_counter[lang] > self.num_samples or self.lang_counter[lang] > iter_end:
+                        dlog.info("Lang limit reached! %s %s", lang, self.lang_counter[lang])
+                        self.flat_data.extend(flat_data)
+                        return flat_data
+                    extra = {"inp":inp, "targ_col":targ_col, "rel":rel}
+                    flat_data.append((event, resp, extra, d, context_df, index))
+                    if show_progress:
+                        pbar.update()
+                    kk += 1
+                    if (self.is_even or self.per_record) and (kk > iter_end or kk > self.num_samples):
+                        dlog.info("record limit reached!")
+                        self.flat_data.extend(flat_data)
+                        return flat_data
             
         self.flat_data.extend(flat_data)
         return flat_data
