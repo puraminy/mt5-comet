@@ -1066,7 +1066,7 @@ def save_data(ex_df, save_ds_path):
 
 def save_checkpoint(model, optimizer, scheduler, step, 
                    best_eval_step, best_dev_loss, save_path):
-    if save_path.endswith("temp"):
+    if "temp" in save_path:
         mlog.info("Saves in temp are skipped ")
         return
 
