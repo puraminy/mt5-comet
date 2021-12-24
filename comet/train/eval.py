@@ -123,7 +123,7 @@ def bert_score(bert_scorer, hyps, refs):
         return best_hyp_index, best_ref_index, top["score"] 
 # vvvvvvvvvvvvvvv
 # ################################### Evaluation #########################
-def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info, val_records, gen_param="greedy", at_mask = None):  
+def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info, val_records, gen_param="greedy", at_mask = None, do_score=True):  
 
     try:
         nltk_path = str(nltk.data.find("tokenizers/punkt"))
@@ -142,7 +142,7 @@ def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info,
         local_path = 'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2'
     if "ahmad" in home:
         bert_scorer = None
-    else:
+    elif do_score:
         bert_scorer = SentenceTransformer(local_path)
     rouge_scorer = Rouge()
     local_path = f"{base_path}/nli-roberta-base"
@@ -274,18 +274,20 @@ def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info,
         for r in tails:
             tokenized_rs.append(word_tokenize(r))
         hypo = word_tokenize(top_hyp)
-        try:
-            bleu_score = sentence_bleu(tokenized_rs, hypo, smoothing_function=smoothie)
-        except ValueError: # TODO ZeroDivisionError
-            vlog.warning("math domain error in bleu, set to 0.0. generated sentence: {}".format(hypo))
-            bleu_score = 0.0
+        bleu_score = 0.0
+        #try:
+        #    bleu_score = sentence_bleu(tokenized_rs, hypo, smoothing_function=smoothie)
+        #except ValueError: # TODO ZeroDivisionError
+        #    vlog.warning("math domain error in bleu, set to 0.0. generated sentence: {}".format(hypo))
         data["bleu_score"] = bleu_score 
         sum_bleu[scope] += bleu_score 
         mean_bleu[scope] = "{:.4f}".format(sum_bleu[scope] / counter[scope])
         #### Rouge score
-        rouge_score = rouge_scorer.get_scores(top_hyp, ".".join(tails), 
+        rouge_score = 0
+        if do_score:
+            rouge_score = rouge_scorer.get_scores(top_hyp, ".".join(tails), 
                                             avg=True, ignore_empty=True)
-        rouge_score = rouge_score["rouge-l"]["f"]
+            rouge_score = rouge_score["rouge-l"]["f"]
         match_score = 0
         if rouge_score > 0.9:
             match_score = 1
