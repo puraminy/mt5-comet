@@ -916,7 +916,7 @@ class MyDataset(torch.utils.data.IterableDataset):
         #    self.data_split[rel][lang][query].append(response)
         return (_query, response, rel, lang, index)
 
-    def fill_data(self, iter_start, iter_end, show_progress=False):
+    def fill_data(self, iter_start, iter_end, show_progress=True):
         flat_data = []
         if iter_end < 0:
             iter_end = self.num_samples
@@ -928,6 +928,7 @@ class MyDataset(torch.utils.data.IterableDataset):
         context_df = None
         if show_progress:
             pbar = tqdm(total = self.num_samples)
+            pbar.set_description("Preparing iterator "+ self.split_name)
 
         for index, d in self.split_df.iterrows():
             if kk < iter_start:

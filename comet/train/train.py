@@ -1070,11 +1070,11 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
         mlog.info("Training...")
     pbar = tqdm(total=iterations, position=0, leave=True) #,dynamic_ncols=True)
     for epoch in range(epochs_num):
+        train_iter = iter(train_dataloader)
         mlog.info(f"============== epoch {epoch}\n")
         tlog.info(f"============== epoch {epoch}\n")
         tot_loss = 0
         step = 0
-        train_iter = iter(train_dataloader)
         while step < iterations-1 and (wrap or not frozen):
             try:
                 if cycle > 0 and (step % cycle == 0 and step > 0): #validation
