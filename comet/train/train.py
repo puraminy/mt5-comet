@@ -1128,7 +1128,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
                                 if i==validation_num_generation:
                                     break
                                 results = gen_resp(model, tokenizer, key[0]) 
-                                vlog.info(results)
+                                vlog.info("%s | %s | %s", key[0], key[1], results)
                                 generation_results+=f"|`{key}`|`{str(results)}`|\n"
                             sw.add_text('dev/generation_samples',generation_results,step)
                 if unfreez_step > 0 and step > unfreez_step and froze:

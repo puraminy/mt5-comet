@@ -927,7 +927,7 @@ class MyDataset(torch.utils.data.IterableDataset):
         context_rows=[]
         context_df = None
         if show_progress:
-            pbar = tqdm(total = self.num_samples)
+            pbar = tqdm(total = self.num_samples, position=0, leave=True) #,dynamic_ncols=True)
             pbar.set_description("Preparing iterator "+ self.split_name)
 
         for index, d in self.split_df.iterrows():
