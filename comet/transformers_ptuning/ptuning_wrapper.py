@@ -65,7 +65,10 @@ class PTuningWrapper(torch.nn.Module):
                 embedding layer of the transformer model.
         """
         super().__init__()
-        wlog.disabled = not do_log
+        self.testing = True
+        if not do_log or not "ahmad" in home:
+            wlog.disabled = False
+            self.testing = False
         self.ll = logging.INFO
         wlog.info("%%%%%%%%%%%%%%%%%%%%%%%% New version %%%%%%%%%%%%%%%%%%")
         self.underlying_model = model
@@ -186,29 +189,30 @@ class PTuningWrapper(torch.nn.Module):
                         # call forwards on prompt encoder whose outputs are prompt embeddings
                         prompt_embeds = encoder(prompt_input_ids,\
                             pids).to(device)
-                        for _id,_embed in zip(prompt_input_ids.numpy(),prompt_embeds):
-                            _key = encoder.name + "_" + str(_id)
-                            if not _key in merge_dict:
-                                merge_dict[_key] = []
-                            merge_dict[_key].append(_embed)
-                            
-                        embeds_list.append(prompt_embeds)
-                        wlog.info("Size Prompt Embeds: %s", prompt_embeds.size())
+                        if self.testing:
+                            for _id,_embed in zip(prompt_input_ids.numpy(),prompt_embeds):
+                                _key = encoder.name + "_" + str(_id)
+                                if not _key in merge_dict:
+                                    merge_dict[_key] = []
+                                merge_dict[_key].append(_embed)
+                                
+                            embeds_list.append(prompt_embeds)
                         # replace prompt_embeddings calculated by prompt encoder in input embeddings
                         wlog.info("Prompt Embeds size: %s", prompt_embeds.size())
                         wlog.info("Encoder mask: %s", encoder_masks.size())
                         inputs_embeds[encoder_masks]=prompt_embeds
-                for key,val in merge_dict.items():
-                    wlog.info("Merge dict item %s, len: %s",key, len(val))
-                    if val:
-                        merge_dict[key] = self.mlp(torch.stack(val))
-                wlog.info("embeds list: %s", len(embeds_list))
-                res_embeds = self.mlp(torch.cat(embeds_list))
-                wlog.info("REES embeds: %s", res_embeds)
-                wlog.info("REES embeds size: %s", res_embeds.size())
-                wlog.info("All prompts input ids: %s", all_prompts_input_ids)
-                wlog.info("PROMPT MASKS: %s", prompt_masks)
-                wlog.info("Merge dict: %s", merge_dict)
+                if self.testing:
+                    for key,val in merge_dict.items():
+                        wlog.info("Merge dict item %s, len: %s",key, len(val))
+                        if val:
+                            merge_dict[key] = self.mlp(torch.stack(val))
+                    wlog.info("embeds list: %s", len(embeds_list))
+                    res_embeds = self.mlp(torch.cat(embeds_list))
+                    wlog.info("REES embeds: %s", res_embeds)
+                    wlog.info("REES embeds size: %s", res_embeds.size())
+                    wlog.info("All prompts input ids: %s", all_prompts_input_ids)
+                    wlog.info("PROMPT MASKS: %s", prompt_masks)
+                    wlog.info("Merge dict: %s", merge_dict)
         else:
             inputs_embeds = self.model_embeddings(input_ids)
         
