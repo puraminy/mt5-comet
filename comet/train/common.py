@@ -502,6 +502,12 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
        elif method == "rel-mask":
            qtemp = "{event} {ph} {resp}"
            anstemp = "{ph} {rel_natural}"
+       elif method == "unsup-rel":
+           qtemp = "{event} {ph} {resp}"
+           anstemp = "{ph} {prefix}"
+       elif method == "unsup-wrap-rel":
+           qtemp = "{com_i} {event} {ph} {resp}"
+           anstemp = "{prefix}"
        elif method == "rel-mask-wrap":
            qtemp = "{enc_com_token} {event} {ph} {resp}"
            anstemp = "{ph} {rel_natural}"
@@ -649,16 +655,13 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
        elif method == "unsup-wrap":
            qtemp = "{rel_i_start} {event} {rel_i_end} {ph}"
            anstemp = "{ph} {resp} {end}"
-       elif method == "unsup-wrap-tokens":
-           qtemp = "{event} {tokens} {ph}"
-           anstemp = "{ph} {resp} {end}"
-       elif method == "unsup-wrap-tokens-start":
-           qtemp = "{tokens} {event} {ph}"
-           anstemp = "{ph} {resp} {end}"
        elif method == "unsup-tokens":
            qtemp = "{event} {tokens} {ph}"
            anstemp = "{ph} {resp} {end}"
-       elif method == "unsup-wrap-tokens-gen":
+       elif method == "unsup-tokens-start":
+           qtemp = "{tokens} {event} {ph}"
+           anstemp = "{ph} {resp} {end}"
+       elif method == "unsup-tokens-gen":
            qtemp = "{event} {tokens} {gen_lang} {ph}"
            anstemp = "{ph} {resp} {end}"
        elif method == "unsup-wrap-gen":

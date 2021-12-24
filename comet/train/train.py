@@ -1126,12 +1126,13 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
                             generation_results = \
                             "|Queries|Generation Results|\n"\
                             "|-|-|\n"
-                            for i,key in enumerate(generate_samples['sample']):
+                            for i,(_q,_target) in enumerate(generate_samples['sample']):
                                 if i==validation_num_generation:
                                     break
-                                results = gen_resp(model, tokenizer, key[0]) 
-                                vlog.info("%s | %s | %s", key[0], key[1], results)
-                                generation_results+=f"|`{key}`|`{str(results)}`|\n"
+                                results = gen_resp(model, tokenizer, _q.strip()) 
+                                vlog.info("%02d) %-50s | %-50s | %-40s", i, _q.strip(), 
+                                        results, _target.strip())
+                                generation_results+=f"|`{_q},{_target}`|`{str(results)}`|\n"
                             sw.add_text('dev/generation_samples',generation_results,step)
                 if unfreez_step > 0 and step > unfreez_step and froze:
                     mlog.info("unfreezing the model")
