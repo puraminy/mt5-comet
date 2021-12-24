@@ -1071,6 +1071,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     pbar = tqdm(total=iterations, position=0, leave=True) #,dynamic_ncols=True)
     for epoch in range(epochs_num):
         train_iter = iter(train_dataloader)
+        mlog.info("Saving train data set...")
+        myds["train"].save()
         mlog.info(f"============== epoch {epoch}\n")
         tlog.info(f"============== epoch {epoch}\n")
         tot_loss = 0
@@ -1201,8 +1203,6 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     # end train while
     pbar.close()
     sw.close()
-    mlog.info("Saving train data set...")
-    myds["train"].save()
     if wrap:
         with torch.no_grad():
             mlog.info("Updating the model weights before evaluaton...")
