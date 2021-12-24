@@ -177,7 +177,7 @@ def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info,
     mlog.info("Preparing iterator ...")
     test_iter = iter(dataloader)
     mlog.info("Scoring...")
-    pbar = tqdm(total = val_records)
+    pbar = tqdm(total=val_records, position=0, leave=True) #,dynamic_ncols=True)
     step = 0
     while True:
         try:

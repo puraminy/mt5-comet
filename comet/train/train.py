@@ -1113,8 +1113,10 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
                         dev_macro_avg_loss = dev_sample_loss/dev_sample_count
                         sw.add_scalar('dev/micro_avg_loss',dev_micro_avg_loss,step)
                         vlog.info('dev/micro_avg_loss: %s-%s',dev_micro_avg_loss,step)
+                        mlog.info('dev/micro_avg_loss: %s-%s',dev_micro_avg_loss,step)
                         sw.add_scalar('dev/macro_avg_loss',dev_macro_avg_loss,step)
                         vlog.info('dev/macro_avg_loss: %s-%s',dev_macro_avg_loss,step)
+                        mlog.info('dev/macro_avg_loss: %s-%s',dev_macro_avg_loss,step)
                         if dev_micro_avg_loss < best_dev_loss:
                             best_dev_loss = dev_micro_avg_loss
                             best_eval_step = step
