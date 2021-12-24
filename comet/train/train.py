@@ -165,7 +165,7 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
 @click.option(
     "--val_samples",
     "-vn",
-    default=0,
+    default=100,
     type=int,
     help=""
 )
@@ -643,7 +643,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     weight_decay = 0.01
     shuffle = False
     shuffle_evaluation=False
-    validation_size = 100
+    validation_size = val_samples
     validation_num_generation = 20
     if not frozen and learning_rate == 0: 
         learning_rate = 6.25e-05 if opt_type == "adam" else 1e-3
@@ -777,7 +777,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
         length = [int(s) for s in prompt_length.split("-")]
         set_prompt_lengths(rel_filter, length)
 
-    num_samples = {"train": train_samples, "validation":val_samples, "sample":0, "test":test_samples}
+    num_samples = {"train": train_samples, "validation":val_samples, "sample":20, "test":test_samples}
     split_path = {"train":train_path, "validation":val_path, "sample":sample_path, "test":test_path}
     save_ds_path = {}
     for split, _path in split_path.items():
@@ -785,7 +785,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
         save_ds_path[split] = _path
     #tokenize_relations(tokenizer)
     atomic_query_responses = {"train":[], "validation":[]}
-    atomic_flattened = {"train":[], "validation":[]}
+    generate_samples = {}
     mlog.info("Perparing data ...")
     if model_id in ["t5-large","t5-small", "t5-base", "gpt2"]:
         lang = "en"
@@ -838,7 +838,17 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
         train_records = 0
     else:
         myds = load_data(["train", "validation", "sample"])
-        myds["sample"].fill_data(0, -1, show_progress=True)
+        samples_iter = iter(myds["sample"])
+        _sample = True
+        generate_samples["sample"] = []
+        dlog.info("----------- SAMPLES -------------")
+        while _sample:
+            _sample = next(samples_iter, None)
+            dlog.info(_sample)
+            if _sample:
+                generate_samples["sample"].append((_sample[0], _sample[1]))
+        dlog.info("--------------------------------")
+        mlog.info("Preparing samples: %s ", len(generate_samples["sample"]))
         train_records = myds["train"].num_samples
         val_records = myds["validation"].num_samples
 
@@ -851,7 +861,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     if model_id == "test":
         return
     mlog.info("len tokenizer %s", len(tokenizer))
-    mlog.info("list of spcial tokens: %s", tokenizer.additional_special_tokens)
+    my_spacials = [x for x in tokenizer.additional_special_tokens if not "<extra_id"  in x]
+    mlog.info("list of spcial tokens: %s", my_spacials)
     extra = "_" + now
     m_name = model_id + "-" + method
     if do_eval:
@@ -1113,7 +1124,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
                             generation_results = \
                             "|Queries|Generation Results|\n"\
                             "|-|-|\n"
-                            for i,key in enumerate(atomic_flattened['validation']):
+                            for i,key in enumerate(generate_samples['sample']):
                                 if i==validation_num_generation:
                                     break
                                 results = gen_resp(model, tokenizer, key[0]) 

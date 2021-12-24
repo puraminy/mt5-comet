@@ -4,6 +4,7 @@ import re
 from pathlib import Path
 import transformers
 import numpy as np
+from copy import deepcopy
 import torch
 import torch.nn.functional as F
 def _isin(tensor:torch.Tensor,values:torch.Tensor):
@@ -74,6 +75,12 @@ class PTuningWrapper(torch.nn.Module):
         wlog.info("model embedding_size:{}".format(model_embeddings_size))
         self.prompt_encoders = torch.nn.ModuleList(prompt_encoders)
         wlog.info("num of encoders %s:", len(self.prompt_encoders))
+        self.embedding_dim = model.config.hidden_size
+        self.mlp = torch.nn.Sequential(
+            torch.nn.Linear(self.embedding_dim, self.embedding_dim),
+            torch.nn.ReLU(),
+            torch.nn.Linear(self.embedding_dim, self.embedding_dim),
+        )
         self.merge_prompt_ids = []
         sum_len = 0
         for encoder in self.prompt_encoders:
@@ -92,7 +99,6 @@ class PTuningWrapper(torch.nn.Module):
                for i, e in enumerate(rel_embs):
                    encoder.embedding.weight[i] = e #.detach()
 
-        self.embedding_dim = model.config.hidden_size
         self.merge_offset = min(self.merge_prompt_ids)
         wlog.info("Merge ids: %s,", self.merge_prompt_ids)
         wlog.info("Merge ids len: %s,", len(self.merge_prompt_ids))
@@ -165,6 +171,7 @@ class PTuningWrapper(torch.nn.Module):
                 inputs_embeds[prompt_masks]=prompt_embds
             else:
                 embeds_list = []
+                merge_dict = {}
                 for encoder in self.prompt_encoders:
                     #encoder = self.prompt_encoders[0]
                     wlog.info("********** offset: %s, length: %s", encoder.id_offset, encoder.length)
@@ -179,14 +186,29 @@ class PTuningWrapper(torch.nn.Module):
                         # call forwards on prompt encoder whose outputs are prompt embeddings
                         prompt_embeds = encoder(prompt_input_ids,\
                             pids).to(device)
+                        for _id,_embed in zip(prompt_input_ids.numpy(),prompt_embeds):
+                            _key = encoder.name + "_" + str(_id)
+                            if not _key in merge_dict:
+                                merge_dict[_key] = []
+                            merge_dict[_key].append(_embed)
+                            
                         embeds_list.append(prompt_embeds)
                         wlog.info("Size Prompt Embeds: %s", prompt_embeds.size())
                         # replace prompt_embeddings calculated by prompt encoder in input embeddings
-                        wlog.info("Prompt Embeds: %s", prompt_embeds)
+                        wlog.info("Prompt Embeds size: %s", prompt_embeds.size())
+                        wlog.info("Encoder mask: %s", encoder_masks.size())
                         inputs_embeds[encoder_masks]=prompt_embeds
-                cat = torch.cat(embeds_list)
-                wlog.info("CAT Embeds: %s", cat)
-                wlog.info("CAT Embeds size: %s", cat.size())
+                for key,val in merge_dict.items():
+                    wlog.info("Merge dict item %s, len: %s",key, len(val))
+                    if val:
+                        merge_dict[key] = self.mlp(torch.stack(val))
+                wlog.info("embeds list: %s", len(embeds_list))
+                res_embeds = self.mlp(torch.cat(embeds_list))
+                wlog.info("REES embeds: %s", res_embeds)
+                wlog.info("REES embeds size: %s", res_embeds.size())
+                wlog.info("All prompts input ids: %s", all_prompts_input_ids)
+                wlog.info("PROMPT MASKS: %s", prompt_masks)
+                wlog.info("Merge dict: %s", merge_dict)
         else:
             inputs_embeds = self.model_embeddings(input_ids)
         
@@ -345,25 +367,19 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
         net_inputs = self.net_inps
         if self.id_offset > 0:
             emblog.info("------------------- case id offset > 0 ----------------")
-            prompt_token_ids = prompt_token_ids - self.id_offset
             net_inputs = self.input_ids - self.id_offset
-            index_list = [((net_inputs == x).nonzero(as_tuple=True)[0]) for x in prompt_token_ids]
-            index_list = torch.tensor(index_list).to(device=prompt_token_ids.device)
-        else:
-            index_list = (prompt_token_ids.view(-1,1) == self.input_ids).int().argmax(dim=1)
+            #index_list = [((net_inputs == x).nonzero(as_tuple=True)[0]) for x in prompt_token_ids_2]
+        index_list = (prompt_token_ids.view(-1,1) == self.input_ids).int().argmax(dim=1)
         emblog.info("after prompt token ids:  %s", prompt_token_ids)
-        emblog.info("after prompt token ids dev:  %s", prompt_token_ids.device)
         emblog.info("after net inputs:  %s", net_inputs)
-        emblog.info("after net inputs dev:  %s", net_inputs.device)
         emblog.info("index list:  %s", index_list)
-        emblog.info("index list dev:  %s", index_list.device)
         # create embedding vectors for input ids
         embeds = self.embedding(net_inputs)
         # do forward calculations
         x = self.lstm(embeds.unsqueeze(0))
-        emblog.info("XXXXXXXXXXXXXXXXX: %s",x)
-        emblog.info("XXXXXXXXXXXXXXXXX[0]: %s",x[0])
-        emblog.info("XXXXXXXXXXXXXXXXX size: %s",x[0].size())
+        #emblog.info("XXXXXXXXXXXXXXXXX: %s",x)
+        #emblog.info("XXXXXXXXXXXXXXXXX[0]: %s",x[0])
+        #emblog.info("XXXXXXXXXXXXXXXXX size: %s",x[0].size())
         emblog.info("lstml embeds: %s",embeds)
 
         running_weight = self.mlp(x[0]).squeeze(0)
