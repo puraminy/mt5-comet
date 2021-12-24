@@ -1064,7 +1064,7 @@ def save_data(ex_df, save_ds_path):
         mlog.info("DF saved as %s", save_ds_path)
         ex_df.to_csv(save_ds_path, index=False, sep="\t")
 
-def save_checkpoint(model, optimizer, scheduler, step, 
+def save_checkpoint(model, tokenizer, optimizer, scheduler, step, 
                    best_eval_step, best_dev_loss, save_path):
     if "temp" in save_path:
         mlog.info("Saves in temp are skipped ")
@@ -1075,6 +1075,7 @@ def save_checkpoint(model, optimizer, scheduler, step,
         print("best_step:", best_eval_step, file=f)
         print("best dev loss:", best_dev_loss, file=f)
     model.save_pretrained(save_path)
+    tokenizer.save_pretrained(save_path)
 
 #    torch.save({
 #            'step': step,

@@ -734,6 +734,10 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
             tokenizer = AutoTokenizer.from_pretrained(underlying_model_name)
             model = T5ForConditionalGeneration.from_pretrained(underlying_model_name) 
 
+        if underlying_model_name == model_id:
+            mlog.info("Saving model on local %s", load_path)
+            model.save_pretrained(os.path.join(load_path, model_id))
+            tokenizer.save_pretrained(os.path.join(load_path, model_id))
         return model, tokenizer
 
     #%% load atomic data
@@ -1121,7 +1125,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
                             best_dev_loss = dev_micro_avg_loss
                             best_eval_step = step
                             tlog.info("epoch %s, best_eval_step: %s", epoch, best_eval_step)
-                            save_checkpoint(model, optimizer, scheduler, step, 
+                            save_checkpoint(model, tokenizer, optimizer, scheduler, step, 
                                             best_eval_step, best_dev_loss,
                                             os.path.join(save_path, "best_model"))
 
@@ -1210,7 +1214,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
         with torch.no_grad():
             mlog.info("Updating the model weights before evaluaton...")
             wrapped_model.update_model_weight()
-    save_checkpoint(model, optimizer, scheduler, step, 
+    save_checkpoint(model, tokenizer, optimizer, scheduler, step, 
                     best_eval_step, best_dev_loss,
                     save_path)
 
