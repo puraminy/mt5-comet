@@ -19,9 +19,12 @@ if Path(resFile).exists():
 full_results = {}
 resFile = os.path.join(resPath, "full_results.json")
 if Path(resFile).exists():
-    with open(resFile, "r") as f:
-        mlog.info("Reading stored full_results ...")
-        full_results = json.load(f)
+    try:
+        with open(resFile, "r") as f:
+            mlog.info("Reading stored full_results ...")
+            full_results = json.load(f)
+    except:
+        full_results = {}
 def reset_all_results():
     global results, new_results, full_results
     with open(os.path.join(resPath, f"results_{now}.json"), "w") as f:
@@ -121,6 +124,15 @@ def bert_score(bert_scorer, hyps, refs):
         best_ref_index = top["index"][1]
 
         return best_hyp_index, best_ref_index, top["score"] 
+
+def save_results(results, fid, step, results_info):
+    name = fid + "_results_" + (human_format(step) if step > 0 else "full") 
+    with open(os.path.join(resPath, name + ".json"), "w") as f:
+        json.dump(new_results, f, indent=2)
+    with open(os.path.join(resPath, name + results_info + ".json"), "w") as f:
+        json.dump(new_results, f, indent=2)
+    with open(os.path.join(logPath, name + results_info + ".json"), "w") as f:
+        json.dump(new_results, f, indent=2)
 # vvvvvvvvvvvvvvv
 # ################################### Evaluation #########################
 def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info, val_records, gen_param="greedy", at_mask = None, do_score=True):  
@@ -140,6 +152,8 @@ def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info,
     local_path = f"{base_path}/paraphrase-MiniLM-L6-v2"
     if not Path(local_path).exists():
         local_path = 'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2'
+
+    bert_scorer = None
     if "ahmad" in home:
         bert_scorer = None
     elif do_score:
@@ -158,13 +172,13 @@ def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info,
     model.eval()
     rows = []
     counter = {"all":0}
-    sum_match = {} 
+    sum_match = {"all":0} 
     mean_match = {}
-    sum_bert = {} 
+    sum_bert = {"all":0} 
     mean_bert = {}
-    sum_rouge = {}
+    sum_rouge = {"all":0}
     mean_rouge = {}
-    sum_bleu = {}
+    sum_bleu = {"all":0}
     mean_bleu = {}
     new_results = {}
     smoothie = SmoothingFunction().method4 # a function for smooth
@@ -245,9 +259,11 @@ def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info,
         data["top_pred"] = best_hyp
         data["bert_score"] = float("{:.2f}".format(cur_score))
         sum_bert[scope] += cur_score
+        sum_bert["all"] += cur_score
         counter[scope] += 1
         counter["all"] += 1
         mean_bert[scope] = "{:.4f}".format(sum_bert[scope] / counter[scope])
+        mean_bert["all"] = "{:.4f}".format(sum_bert["all"] / counter["all"])
         #tqdm.write(f"Mean score:{mean_bert}")
         vlog.info("")
         vlog.info(f"=============   {lang}  ===  {rel}   =====================")
@@ -296,16 +312,21 @@ def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info,
 
         data["rouge_score"] = rouge_score
         sum_rouge[scope] += rouge_score
+        sum_rouge["all"] += rouge_score
         mean_rouge[scope] = "{:.4f}".format(sum_rouge[scope] / counter[scope])
+        mean_rouge["all"] = "{:.4f}".format(sum_rouge["all"] / counter["all"])
         vlog.info("Bert Score:{:.4f}--{}".format(cur_score, mean_bert[scope]))
         vlog.info("Rouge Score:{:.4f}--{}".format(rouge_score, mean_rouge[scope]))
         vlog.info("Match Score:{}--{}".format(match_score, mean_match[scope]))
-        vlog.info("BLEU Score:{:.4f}--{}".format(bleu_score, mean_bleu[scope]))
+        #vlog.info("BLEU Score:{:.4f}--{}".format(bleu_score, mean_bleu[scope]))
         vlog.info("======================================================")
-        pbar.set_description(f"{scope} :Bert:{mean_bert[scope]} Rouge {mean_rouge[scope]} Bleu {mean_bleu[scope]} Match {mean_match[scope]}")
+        pbar.set_description(f"{scope} :Bert:{mean_bert[scope]} | {mean_bert['all']} Rouge {mean_rouge[scope]}|{mean_rouge['all']} ")
         pbar.update(1)
         dictPath(str(qid) + "_" + results_info, full_results, data, sep="_")
         dictPath(str(qid) + "_" + results_info, new_results, data, sep="_")
+        if step % 2500 == 0:
+            save_results(full_results, "full", step, results_info)
+            save_results(new_results, "new", step, results_info)
         rows.append(data)
 
     # %%%%%%%%%%%%%%%%%%
@@ -375,12 +396,7 @@ def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info,
     res["hyps"] = hyp_counter
     df_mean_rouge = new_df["rouge_score"].mean()
 
-    with open(os.path.join(resPath, "new_results.json"), "w") as f:
-        json.dump(new_results, f, indent=2)
-    with open(os.path.join(resPath, "res_" + results_info + ".json"), "w") as f:
-        json.dump(new_results, f, indent=2)
-    with open(os.path.join(logPath, f"res_{results_info}.json"), "w") as f:
-        json.dump(new_results, f, indent=2)
+    save_results(new_results, "new", -1, results_info)
     if df_mean_rouge < 0.10:
         mlog.info("Skipping saving the results!!!!!!! df mean rouge is low %s", df_mean_rouge)
     else:
