@@ -15,6 +15,7 @@ from os.path import expanduser
 home = expanduser("~")
 wlog = logging.getLogger("comet.wrapper")
 emblog = logging.getLogger("comet.embedding")
+tlog = logging.getLogger("comet.time")
 FORMAT = logging.Formatter("[%(filename)s:%(lineno)s - %(funcName)10s() ] %(message)s")
 def getFname(name):
     if "ahmad" in home or "pouramini" in home:
@@ -28,10 +29,14 @@ wlog.addHandler(wHandler)
 eHandler = logging.FileHandler(getFname("embedding"), mode='w')
 eHandler.setFormatter(FORMAT)
 emblog.addHandler(eHandler)
+tHandler = logging.FileHandler(getFname("time"), mode='w')
+tHandler.setFormatter(FORMAT)
+tlog.addHandler(tHandler)
 emblog.info("Embedding log")
 wlog.info("Wrapper log")
 wlog.setLevel(logging.INFO)
 emblog.setLevel(logging.INFO)
+tlog.setLevel(logging.INFO)
 
 class PTuningWrapper(torch.nn.Module):
     def __init__(self,model,prompt_encoders,decoder_prompt_encoder=None,
@@ -70,7 +75,10 @@ class PTuningWrapper(torch.nn.Module):
             wlog.disabled = False
             self.testing = False
         self.ll = logging.INFO
-        wlog.info("%%%%%%%%%%%%%%%%%%%%%%%% New version %%%%%%%%%%%%%%%%%%")
+        if self.testing:
+            wlog.info("%%%%%%%%%%%%%%%%%%% testing is ON %%%%%%%%%%%%%%%%%%")
+        wlog.info("%%%%%%%%%%%%%%%%%%%%%%%% Wrapper log %%%%%%%%%%%%%%%%%%")
+        tlog.info("%%%%%%%%%%%%%%%%%%%%%%%% Time log %%%%%%%%%%%%%%%%%%")
         self.underlying_model = model
         self.model_embeddings = model.get_input_embeddings()
         wlog.info("self.model embedding:{}".format(self.model_embeddings))
@@ -112,11 +120,11 @@ class PTuningWrapper(torch.nn.Module):
         self.merge_embedding = None
         if merge_prompts:
             self.merge_encoder = None #LSTMEmbeddingPromptEncoder("wrap_all", len(self.merge_prompt_ids), self.embedding_dim, self.merge_offset, prompt_ids=self.merge_prompt_ids)
-            self.merge_embedding = torch.nn.Embedding(len(self.merge_prompt_ids), self.embedding_dim)
-            for encoder in self.prompt_encoders:
-                encoder.embedding = self.merge_embedding
-                encoder.id_offset= self.merge_offset
-                encoder.length= len(self.merge_prompt_ids)
+           # self.merge_embedding = torch.nn.Embedding(len(self.merge_prompt_ids), self.embedding_dim)
+           # for encoder in self.prompt_encoders:
+           #     encoder.embedding = self.merge_embedding
+           #     encoder.id_offset= self.merge_offset
+           #     encoder.length= len(self.merge_prompt_ids)
 
 
         self.decoder_prompt_encoder = decoder_prompt_encoder
@@ -360,7 +368,7 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
             torch.nn.Linear(embedding_dim, embedding_dim)
         )
 
-
+ #### llllllf
     def forward(self,prompt_token_ids,pids=None):
         emblog.info("=========================== Forward begin ===================")
         emblog.info("=========================== %s ===================", self.name)
@@ -380,6 +388,12 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
         # create embedding vectors for input ids
         embeds = self.embedding(net_inputs)
         # do forward calculations
+        if self.name == "xIntent":
+            tlog.info("LSTM: %s", self.name)
+            tlog.info("after net inputs:  %s", net_inputs)
+            tlog.info("after prompt token ids:  %s", prompt_token_ids)
+            tlog.info("lstm embeds: %s",embeds)
+
         x = self.lstm(embeds.unsqueeze(0))
         #emblog.info("XXXXXXXXXXXXXXXXX: %s",x)
         #emblog.info("XXXXXXXXXXXXXXXXX[0]: %s",x[0])
