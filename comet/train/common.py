@@ -831,13 +831,17 @@ class MyDataset(torch.utils.data.IterableDataset):
                 "_" + str(len(split_df)) + "_" + str(self.num_samples) + ".pickle"
         if Path(self.save_path).is_file():
             mlog.info("Loading from saved data %s ", self.save_path)
-            self.load()
+            #self.load()
+            mlog.info("Loading from saved data was commented!!")
 
 
     def save(self):
         data = (self.flat_data, self.data_split)
-        with open(self.save_path, "wb") as f:
-            pickle.dump(data,f)
+        if not Path(self.save_path).existst():
+            with open(self.save_path, "wb") as f:
+                pickle.dump(data,f)
+        else:
+            mlog.info("The file already exists, skipping save ...")
 
     def load(self):
         with open(self.save_path, "rb") as f:
