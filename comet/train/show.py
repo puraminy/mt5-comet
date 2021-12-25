@@ -480,6 +480,7 @@ main_win = None
 text_width = 60
 std = None
 dfname = ""
+dfpath = ""
 base_dir = os.path.join(resPath, "sel")
 def start(stdscr):
     global info_bar, text_win, cmd_win, std, main_win, colors, dfname
@@ -515,7 +516,7 @@ def start(stdscr):
     if not dfname:
         mlog.info("No file name provided")
     else:
-        path = os.path.join(base_dir, dfname)
+        path = dfpath
         dfname = Path(path).stem
         if not Path(path).exists():
             mlog.info("File %s doesn't exists!", path)
@@ -538,9 +539,10 @@ def start(stdscr):
     help="The current path (it is set by system)"
 )
 def main(fname, path):
-    global dfname
+    global dfname,dfpath
     if fname != "last":
-        dfname = fname
+        dfname = fname 
+        dfpath = os.path.join(path,fname)
     set_app("showdf")
     wrapper(start)
 

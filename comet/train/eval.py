@@ -129,10 +129,12 @@ def save_results(results, fid, step, results_info):
     name = fid + "_results_" + (human_format(step) if step > 0 else "full") 
     with open(os.path.join(resPath, name + ".json"), "w") as f:
         json.dump(results, f, indent=2)
-    with open(os.path.join(resPath, name + results_info + ".json"), "w") as f:
-        json.dump(results, f, indent=2)
-    with open(os.path.join(logPath, name + results_info + ".json"), "w") as f:
-        json.dump(results, f, indent=2)
+    if step < 0:
+        with open(os.path.join(resPath, name + "_" + results_info + ".json"), "w") as f:
+            json.dump(results, f, indent=2)
+    if colab and step < 0:
+        with open(os.path.join(logPath, name + results_info + ".json"), "w") as f:
+            json.dump(results, f, indent=2)
 # vvvvvvvvvvvvvvv
 # ################################### Evaluation #########################
 def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info, val_records, gen_param="greedy", at_mask = None, do_score=True):  
