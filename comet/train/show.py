@@ -480,7 +480,7 @@ main_win = None
 text_width = 60
 std = None
 dfname = ""
-base_dir = resPath
+base_dir = os.path.join(resPath, "sel")
 def start(stdscr):
     global info_bar, text_win, cmd_win, std, main_win, colors, dfname
     stdscr.refresh()
@@ -530,7 +530,14 @@ def start(stdscr):
 
 @click.command()
 @click.argument("fname", type=str)
-def main(fname):
+@click.option(
+    "--path",
+    envvar="PWD",
+    #    multiple=True,
+    type=click.Path(),
+    help="The current path (it is set by system)"
+)
+def main(fname, path):
     global dfname
     if fname != "last":
         dfname = fname
