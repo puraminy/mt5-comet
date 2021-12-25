@@ -128,11 +128,11 @@ def bert_score(bert_scorer, hyps, refs):
 def save_results(results, fid, step, results_info):
     name = fid + "_results_" + (human_format(step) if step > 0 else "full") 
     with open(os.path.join(resPath, name + ".json"), "w") as f:
-        json.dump(new_results, f, indent=2)
+        json.dump(results, f, indent=2)
     with open(os.path.join(resPath, name + results_info + ".json"), "w") as f:
-        json.dump(new_results, f, indent=2)
+        json.dump(results, f, indent=2)
     with open(os.path.join(logPath, name + results_info + ".json"), "w") as f:
-        json.dump(new_results, f, indent=2)
+        json.dump(results, f, indent=2)
 # vvvvvvvvvvvvvvv
 # ################################### Evaluation #########################
 def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info, val_records, gen_param="greedy", at_mask = None, do_score=True):  
@@ -320,7 +320,7 @@ def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info,
         vlog.info("Match Score:{}--{}".format(match_score, mean_match[scope]))
         #vlog.info("BLEU Score:{:.4f}--{}".format(bleu_score, mean_bleu[scope]))
         vlog.info("======================================================")
-        pbar.set_description(f"{scope} :Bert:{mean_bert[scope]} | {mean_bert['all']} Rouge {mean_rouge[scope]}|{mean_rouge['all']} ")
+        pbar.set_description(f"{scope:<20} :Bert:{mean_bert[scope]:<7} | {mean_bert['all']:<7} Rouge {mean_rouge[scope]:<7}|{mean_rouge['all']:<7} ")
         pbar.update(1)
         dictPath(str(qid) + "_" + results_info, full_results, data, sep="_")
         dictPath(str(qid) + "_" + results_info, new_results, data, sep="_")
