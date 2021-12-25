@@ -17,14 +17,14 @@ if Path(resFile).exists():
         results = json.load(f)
 
 full_results = {}
-resFile = os.path.join(resPath, "full_results.json")
-if Path(resFile).exists():
-    try:
-        with open(resFile, "r") as f:
-            mlog.info("Reading stored full_results ...")
-            full_results = json.load(f)
-    except:
-        full_results = {}
+#resFile = os.path.join(resPath, "full_results.json")
+#if Path(resFile).exists():
+#    try:
+#        with open(resFile, "r") as f:
+#            mlog.info("Reading stored full_results ...")
+#            full_results = json.load(f)
+#    except:
+#        full_results = {}
 def reset_all_results():
     global results, new_results, full_results
     with open(os.path.join(resPath, f"results_{now}.json"), "w") as f:
@@ -322,10 +322,10 @@ def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info,
         vlog.info("======================================================")
         pbar.set_description(f"{scope:<20} :Bert:{mean_bert[scope]:<7} | {mean_bert['all']:<7} Rouge {mean_rouge[scope]:<7}|{mean_rouge['all']:<7} ")
         pbar.update(1)
-        dictPath(str(qid) + "_" + results_info, full_results, data, sep="_")
+        #dictPath(str(qid) + "_" + results_info, full_results, data, sep="_")
         dictPath(str(qid) + "_" + results_info, new_results, data, sep="_")
         if step % 2500 == 0:
-            save_results(full_results, "full", step, results_info)
+            #save_results(full_results, "full", step, results_info)
             save_results(new_results, "new", step, results_info)
         rows.append(data)
 
@@ -401,15 +401,8 @@ def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info,
         mlog.info("Skipping saving the results!!!!!!! df mean rouge is low %s", df_mean_rouge)
     else:
         dictPath(results_info, results, res, sep="_")
-        with open(os.path.join(resPath, "results.json"), "w") as f:
-            json.dump(results, f, indent=2)
-        with open(os.path.join(logPath, "results.json"), "w") as f:
-            json.dump(results, f, indent=2)
-
-        with open(os.path.join(resPath, "full_results.json"), "w") as f:
-            json.dump(full_results, f, indent=2)
-        with open(os.path.join(logPath, "full_results.json"), "w") as f:
-            json.dump(full_results, f, indent=2)
+        #save_results(results, "results", -1, results_info)
+        #save_results(full_results, "full", -1, results_info)
 
     for logger in [mlog, vlog, clog]:
         logger.info("Len data frame: {}".format(len(new_df)))
