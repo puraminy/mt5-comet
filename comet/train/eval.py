@@ -335,8 +335,8 @@ def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info,
     new_df = pd.DataFrame(rows)
     new_df = new_df.sort_values(by=["input_text"])
 
-    def write_preds(new_df):
-        out = os.path.join(logPath,f"__{results_info}.txt")
+    out = os.path.join(logPath,f"__{results_info}.txt")
+    def write_preds(new_df, out):
         handler = logging.FileHandler(out, mode="w")
         mlog.addHandler(handler)
         old_input = ""
