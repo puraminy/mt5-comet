@@ -326,36 +326,36 @@ def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info,
         pbar.update(1)
         #dictPath(str(qid) + "_" + results_info, full_results, data, sep="_")
         dictPath(str(qid) + "_" + results_info, new_results, data, sep="_")
-        if step % 2500 == 0:
+        if step % 10000 == 0:
             #save_results(full_results, "full", step, results_info)
             save_results(new_results, "new", step, results_info)
         rows.append(data)
 
     # %%%%%%%%%%%%%%%%%%
-    out = os.path.join(logPath,f"__{results_info}.txt")
-
-    handler = logging.FileHandler(out, mode="w")
-    mlog.addHandler(handler)
-
     new_df = pd.DataFrame(rows)
     new_df = new_df.sort_values(by=["input_text"])
-    old_input = ""
-    for i, row in new_df.iterrows(): 
-        q = row["input_text"] 
-        p = row["prefix"]
-        if q != old_input:
-            old_input = q
-            mlog.info("\n\n")
-        mlog.info("\n")
-        mlog.info("{:<2} {} {:<60}:".format(i, q, p))
-        preds = row["all_preds"]
-        answers = row["target_text"]
-        mlog.info("------------------------------------  preds for {}:".format(p))
-        for pred in preds.split("<br />"):
-            mlog.info("{:<60}:".format(pred))
-        mlog.info("-----------------------------------  targets for {}:".format(p))
-        for ans in answers.split("<br />"):
-            mlog.info("{:<60}:".format(ans))
+
+    def write_preds(new_df):
+        out = os.path.join(logPath,f"__{results_info}.txt")
+        handler = logging.FileHandler(out, mode="w")
+        mlog.addHandler(handler)
+        old_input = ""
+        for i, row in new_df.iterrows(): 
+            q = row["input_text"] 
+            p = row["prefix"]
+            if q != old_input:
+                old_input = q
+                mlog.info("\n\n")
+            mlog.info("\n")
+            mlog.info("{:<2} {} {:<60}:".format(i, q, p))
+            preds = row["all_preds"]
+            answers = row["target_text"]
+            mlog.info("------------------------------------  preds for {}:".format(p))
+            for pred in preds.split("<br />"):
+                mlog.info("{:<60}:".format(pred))
+            mlog.info("-----------------------------------  targets for {}:".format(p))
+            for ans in answers.split("<br />"):
+                mlog.info("{:<60}:".format(ans))
 
     for metric in [mean_rouge, mean_bert, mean_match, mean_bleu]:
         s =0 
