@@ -584,6 +584,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     #bbbbbbbbbbb
     #underlying_model_name = "logs/atomic-mt5/last"
     mlog.info("given load path: %s", load_path)
+    vlog.info("given load path: %s", load_path)
     mlog.info("given save path: %s", save_path)
     if "dlog" in print_log: # data logger
         dlog.addHandler(consoleHandler)
@@ -686,7 +687,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
                mlog.info("Qtemp: %s", args['qtemp'])
                mlog.info("Anstemp: %s", args['anstemp'])
 
-    for logger in [mlog, clog, dlog, tlog]:
+    for logger in [mlog, clog, dlog, tlog, vlog]:
         logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
         logger.info(f"%%%%%%%%%%%%%%%%%% { model_id } ")
         logger.info(f"%%%%%%%%%%%%%%%%%% { output_name } ")
