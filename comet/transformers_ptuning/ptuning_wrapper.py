@@ -201,8 +201,7 @@ class PTuningWrapper(torch.nn.Module):
                             for _id,_embed in zip(prompt_input_ids.numpy(),prompt_embeds):
                                 _key = encoder.name + "_" + str(_id)
                                 if not _key in merge_dict:
-                                    merge_dict[_key] = []
-                                merge_dict[_key].append(_embed)
+                                    merge_dict[_key] = [_embed]
                                 
                             embeds_list.append(prompt_embeds)
                         # replace prompt_embeddings calculated by prompt encoder in input embeddings

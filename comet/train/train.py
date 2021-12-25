@@ -982,8 +982,6 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     if wrapped_model:
         wrapped_model.to(device=device)
         wrapped_model.prompt_encoders.to(device=device)
-        if merge_prompts:
-            wrapped_model.merge_embedding.to(device=device)
         mlog.info("len tokenizer after wrapping %s", len(tokenizer))
     else:
         wrap = False
@@ -1194,8 +1192,9 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
                     if wrap:
                         #tlog.info("Merge embedding grads:%s", wrapped_model.merge_encoder.embedding.weight.grad)
                         for encoder in wrapped_model.prompt_encoders:
-                            tlog.info("---------------- %s ---------------", encoder.name)
-                            tlog.info("Prompt embedding grads:%s", encoder.embedding.weight.grad)
+                            if encoder.name == "xIntent":
+                                timelog.info("---------------- %s ---------------", encoder.name)
+                                timelog.info("Prompt embedding grads:%s", encoder.embedding.weight.grad)
 
                     batch_loss += loss.item()
                 optimizer.step()

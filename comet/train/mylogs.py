@@ -32,10 +32,12 @@ clog = logging.getLogger("comet.cfg")
 dlog = logging.getLogger("comet.data")
 vlog = logging.getLogger("comet.eval")
 tlog = logging.getLogger("comet.train")
+timelog = logging.getLogger("comet.time")
+
 
 mlog.info(now)
 
-for logger, fname in zip([mlog,dlog,clog,vlog,tlog], ["all_main","all_data","all_cfg","all_eval","all_train"]):
+for logger, fname in zip([mlog,dlog,clog,vlog,tlog,timelog], ["all_main","all_data","all_cfg","all_eval","all_train", "all_time"]):
     logger.setLevel(logging.INFO)
     logFilename = os.path.join(logPath, fname + ".log")
     handler = logging.FileHandler(logFilename, mode="w")
