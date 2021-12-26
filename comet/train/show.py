@@ -60,8 +60,9 @@ def show_df(df):
     store_back = False
     df['id']=df.index
     df = df.reset_index(drop=True)
-    df['input_text'] = df['input_text'].str.replace('##','')
-    df['input_text'] = df['input_text'].str.strip()
+    if "input_text" in df:
+        df['input_text'] = df['input_text'].str.replace('##','')
+        df['input_text'] = df['input_text'].str.strip()
     main_df = df
     edit_col = ""
     count_col = ""
@@ -297,6 +298,24 @@ def show_df(df):
                 char = "SS"
                 if col in df:
                     del df[col]
+        elif char == "o":
+            canceled, col,val = list_df_values(main_df, get_val=False)
+            if not canceled:
+                new_name = rowinput("New name:")
+                main_df = main_df.rename({col:new_name})
+                char = "SS"
+                if col in df:
+                    df = df.rename({col:new_name})
+        elif char == "R":
+            canceled, col,val = list_df_values(main_df, get_val=False)
+            if not canceled:
+                new_name = rowinput("New name:")
+                main_df = main_df.rename({col:new_name})
+                char = "SS"
+                if col in df:
+                    df = df.rename({col:new_name})
+
+
 
         elif char in ["d"]:
             canceled, col, val = list_df_values(main_df)
@@ -316,7 +335,11 @@ def show_df(df):
                 info_cols = []
                 if col in df:
                     df = df.drop(df[df[col] == val].index)
-        elif char in ["m","M"]:
+        elif char == "M":
+            info_cols = []
+            for col in df.columns:
+                info_cols.append(col)
+        elif char == "m":
             cond = ""
             canceled = False
             sels = []

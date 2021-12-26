@@ -96,7 +96,7 @@ def bert_score(model, df, before, after, col1, col2, score_col, cpu):
         top = pairs[0]
 
         data["target"] = df.loc[idx, "best_target"] = targets[top["index"][0]]
-        data["prediction"] = df.loc[idx, "best_pred"] = targets[top["index"][1]]
+        data["prediction"] = df.loc[idx, "best_pred"] = preds[top["index"][1]]
         data[score_col] = df.loc[idx, score_col] = "{:.4f}".format(top["score"])
         sum_bert += top["score"]
         counter += 1
@@ -189,7 +189,7 @@ def main(fname, model_name, path, step, col1, col2, score_col, cpu, concat):
 
         model = BARTScorer(device=device, checkpoint=model_name)
 
-    score_col = Path(model_name).stem.replace("/","_") + "_" + col1 + "_" + score_col
+    #score_col = Path(model_name).stem.replace("/","_") + "_" + col1 + "_" + score_col
     mlog.info("score_col: %s", score_col)
     mlog.info("col1: %s", col1)
     mlog.info("col2: %s", col2)
