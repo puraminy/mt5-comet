@@ -199,11 +199,11 @@ def main(fname, model_name, path, step, col1, col2, score_col, cpu, concat):
         srcdf = pd.read_table(fname)
 
     if score_col in srcdf:
-        mlog.info("%s exits, removing it...", score_col)
+        mlog.info("%s exits, removing it...current mean: %s", score_col, srcdf[score_col].mean())
         del srcdf[score_col]
         
     if "rouge_score" in srcdf:
-        mlog.info("%s exits, removing it...", "rouge_score")
+        mlog.info("%s exits, removing it... current mean: %s", "rouge_score", srcdf["rouge_score"].mean())
         del srcdf["rouge_score"]
 
     srcdf[col2] = srcdf[col2].astype(str)

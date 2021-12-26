@@ -284,8 +284,11 @@ def show_df(df):
                     rename(columns={group_col:'top_target'}).\
                       merge(df.groupby(['date','prefix','input_text'],as_index=False)[group_col].agg('<br />'.join))
             if not group_col in info_cols: info_cols.append(group_col)
-        elif char == "G":
-            canceled, col, _ = list_df_values(df, get_val=False)
+        elif char in ["G", "Y"]:
+            if char ==  "Y":
+                canceled, col, _ = list_df_values(df, get_val=False)
+            else:
+                canceled, col = False, "date"
             if not canceled:
                g_cols = [col, "method", "model", "rouge_score","bert_score"]
                sel_cols = df[g_cols]
