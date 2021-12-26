@@ -1075,7 +1075,7 @@ def save_checkpoint(model, tokenizer, optimizer, scheduler, step,
         mlog.info("Saves in temp are skipped ")
         return
 
-    mlog.info("Saving model ...")
+    mlog.info("Saving model ... %s", save_path)
     with open(save_path + "/best_model.txt", "a") as f:
         print("best_step:", best_eval_step, file=f)
         print("best dev loss:", best_dev_loss, file=f)
