@@ -1099,6 +1099,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
             mlog.info("skipping %s", train_start)
             for i in range(train_start):
                 batch = next(train_iter)
+                pbar.update()
             mlog.info("batch: %s", batch)
             step = train_start
         while step < iterations-1 and (wrap or not frozen):
