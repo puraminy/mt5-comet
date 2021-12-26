@@ -2,7 +2,7 @@ from sentence_transformers import SentenceTransformer, util
 #model = SentenceTransformer('paraphrase-MiniLM-L12-v2')
 from comet.train.bart_score import BARTScorer
 from comet.train.common import *
-
+from rouge import Rouge
 
 import pandas as pd
 from tqdm import tqdm
@@ -55,17 +55,27 @@ def bert_score(model, df, before, after, col1, col2, score_col, cpu):
   if cpu:
       device = torch.device("cpu")
 
+  rouge_scorer = Rouge()
   data_rows = []
-  for idx, row in tqdm(df.iterrows(), total=len(df)):
+  pbar = tqdm(total = len(df))
+  sum_bert = 0
+  sum_rouge = 0
+  counter =  0
+  for idx, row in df.iterrows():
         data = {}
         data["s1"] = row[col1]
         data["s2"] = row[col2]
-        sents1 = row[col1].split("<br />")
-        sents2 = row[col2].split("<br />")
+        preds = row[col1].split("<br />")
+        targets = row[col2].split("<br />")
 
+        top_hyp = preds[0]
+        rouge_score = rouge_scorer.get_scores(top_hyp, ".".join(targets), 
+                                        avg=True, ignore_empty=True)
+        rouge_score = rouge_score["rouge-l"]["f"]
         #Compute embeddings
-        embeddings1 = model.encode(sents1, device=device, convert_to_tensor=True)
-        embeddings2 = model.encode(sents2, device=device, convert_to_tensor=True)
+        sum_rouge += rouge_score
+        embeddings1 = model.encode(preds, device=device, convert_to_tensor=True)
+        embeddings2 = model.encode(targets, device=device, convert_to_tensor=True)
 
         #Compute cosine-similarities for each sentence with each other sentence
         cosine_scores = util.pytorch_cos_sim(embeddings1, embeddings2)
@@ -85,9 +95,17 @@ def bert_score(model, df, before, after, col1, col2, score_col, cpu):
 
         top = pairs[0]
 
-        data["target"] = df.loc[idx, "best_target"] = sents2[top["index"][0]]
-        data["prediction"] = df.loc[idx, "best_pred"] = sents2[top["index"][1]]
+        data["target"] = df.loc[idx, "best_target"] = targets[top["index"][0]]
+        data["prediction"] = df.loc[idx, "best_pred"] = targets[top["index"][1]]
         data[score_col] = df.loc[idx, score_col] = "{:.4f}".format(top["score"])
+        sum_bert += top["score"]
+        counter += 1
+        mean_rouge = "{:.4f}".format(sum_rouge/counter)
+        mean_bert = "{:.4f}".format(sum_bert/counter)
+        pbar.set_description("Rouge: {:<7},  Bert: {:<7}".format(mean_rouge, mean_bert))
+        
+        pbar.update()
+        data["rouge_score"] = df.loc[idx, "rouge_score"] = "{:.6f}".format(rouge_score)
         data_rows.append(data)
 
   new_df = pd.DataFrame(data=data_rows)
@@ -184,6 +202,12 @@ def main(fname, model_name, path, step, col1, col2, score_col, cpu, concat):
         mlog.info("%s exits, removing it...", score_col)
         del srcdf[score_col]
         
+    if "rouge_score" in srcdf:
+        mlog.info("%s exits, removing it...", "rouge_score")
+        del srcdf["rouge_score"]
+
+    srcdf[col2] = srcdf[col2].astype(str)
+    srcdf[col1] = srcdf[col1].astype(str)
     before = 0
     after = step
     if after < 0:
@@ -212,24 +236,31 @@ def main(fname, model_name, path, step, col1, col2, score_col, cpu, concat):
           if before == 0:
               break
     
-    df[col2] = df[col2].astype(str)
     if concat:
         df = df.sort_values(score_col, ascending=False).\
           drop_duplicates(['prefix','input_text']).\
             rename(columns={col2:'top'}).\
               merge(df.groupby(['prefix','input_text'],as_index=False)[col2].agg('<br />'.join))
 
-    out1 = resPath + "/" + Path(fname).stem  + ".tsv" 
-    out2 = logPath + "/" + Path(fname).stem  + ".tsv" 
-    out_new1 = resPath + "/new_" + Path(fname).stem  + ".tsv" 
-    out_new2 = logPath + "/new_" + Path(fname).stem  + ".tsv" 
-    df.to_csv(out1, sep="\t", index=False)
-    df.to_csv(out2, sep="\t", index=False)
-    new_df.to_csv(out_new1, sep="\t", index=False)
-    new_df.to_csv(out_new2, sep="\t", index=False)
+    if colab:
+        out1 = resPath + "/" + Path(fname).stem  + ".tsv" 
+        out2 = logPath + "/" + Path(fname).stem  + ".tsv" 
+        out_new1 = resPath + "/new_" + Path(fname).stem  + ".tsv" 
+        out_new2 = logPath + "/new_" + Path(fname).stem  + ".tsv" 
+        df.to_csv(out1, sep="\t", index=False)
+        df.to_csv(out2, sep="\t", index=False)
+        new_df.to_csv(out_new1, sep="\t", index=False)
+        new_df.to_csv(out_new2, sep="\t", index=False)
+        out1 = out1.replace("/content/drive/MyDrive/", "")
+        print(f"rcopy nlp:{out1} . ")
+    else:
+        out1 = path + "/" + Path(fname).stem  + ".tsv" 
+        df.to_csv(out1, sep="\t", index=False)
+        out_new1 = path + "/new_" + Path(fname).stem  + ".tsv" 
+        new_df.to_csv(out_new1, sep="\t", index=False)
+        print(out1)
+
     print(len(df))
-    out1 = out1.replace("/content/drive/MyDrive/", "")
-    print(f"rcopy nlp:{out1} . ")
 
 if __name__ == "__main__":
     main()
