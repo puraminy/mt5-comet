@@ -140,7 +140,7 @@ def save_results(results, fid, step, results_info, save_path=""):
             json.dump(results, f, indent=2)
 # vvvvvvvvvvvvvvv
 # ################################### Evaluation #########################
-def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info, val_records, gen_param="greedy", at_mask = None, do_score=True):  
+def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info, val_records, gen_param="greedy", at_mask = None, no_score=False):  
 
     try:
         nltk_path = str(nltk.data.find("tokenizers/punkt"))
@@ -161,7 +161,7 @@ def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info,
     bert_scorer = None
     if "ahmad" in home:
         bert_scorer = None
-    elif do_score:
+    elif not no_score:
         bert_scorer = SentenceTransformer(local_path)
     rouge_scorer = Rouge()
     local_path = f"{base_path}/nli-roberta-base"
@@ -305,7 +305,7 @@ def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info,
         mean_bleu[scope] = "{:.4f}".format(sum_bleu[scope] / counter[scope])
         #### Rouge score
         rouge_score = 0
-        if do_score:
+        if not no_score:
             rouge_score = rouge_scorer.get_scores(top_hyp, ".".join(tails), 
                                             avg=True, ignore_empty=True)
             rouge_score = rouge_score["rouge-l"]["f"]
