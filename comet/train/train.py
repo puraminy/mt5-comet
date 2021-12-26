@@ -802,8 +802,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     split_path = {"train":train_path, "validation":val_path, "sample":sample_path, "test":test_path}
     save_ds_path = {}
     for split, _path in split_path.items():
-        _path = _path.replace(".tsv","_")
-        save_ds_path[split] = _path
+        #_path = _path.replace(".tsv","_")
+        save_ds_path[split] = os.path.join(underlying_model_name, split)
     #tokenize_relations(tokenizer)
     atomic_query_responses = {"train":[], "validation":[]}
     generate_samples = {}
