@@ -1100,6 +1100,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
             for i in range(train_start):
                 batch = next(train_iter)
             mlog.info("batch: %s", batch)
+            step = train_start
         while step < iterations-1 and (wrap or not frozen):
             try:
                 if cycle > 0 and (step % cycle == 0 and step > 0): #validation
