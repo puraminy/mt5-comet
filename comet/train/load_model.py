@@ -21,6 +21,8 @@ def main(path):
     underlying_model_name = path
     tokenizer = AutoTokenizer.from_pretrained(underlying_model_name)
     model = T5ForConditionalGeneration.from_pretrained(underlying_model_name)
+    #model.load_state_dict(torch.load(path + "/sate_dict"))
+    model.eval()
 
     my_spacials = [x for x in tokenizer.additional_special_tokens if not "<extra_id"  in x]
     print(my_spacials)

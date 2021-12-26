@@ -127,10 +127,14 @@ def bert_score(bert_scorer, hyps, refs):
 
 def save_results(results, fid, step, results_info, save_path=""):
     name = fid + "_results_" + (human_format(step) if step > 0 else "full") 
-    with open(os.path.join(resPath, name + ".json"), "w") as f:
+    path = os.path.join(resPath, name + ".json")
+    mlog.info("Saving results %s", path)
+    with open(path, "w") as f:
         json.dump(results, f, indent=2)
     if save_path:
-        with open(os.path.join(save_path, name + ".json"), "w") as f:
+        path = os.path.join(save_path, name + ".json")
+        mlog.info("Saving results %s", path)
+        with open(path, "w") as f:
             json.dump(results, f, indent=2)
     if step < 0:
         with open(os.path.join(resPath, name + "_" + results_info + ".json"), "w") as f:
@@ -335,6 +339,9 @@ def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info,
         rows.append(data)
 
     # %%%%%%%%%%%%%%%%%%
+    dictPath(str(qid) + "_" + results_info, new_results, data, sep="_")
+    save_results(new_results, "new", -1, results_info, save_path)
+
     new_df = pd.DataFrame(rows)
     new_df = new_df.sort_values(by=["input_text"])
 
@@ -401,7 +408,6 @@ def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info,
     res["hyps"] = hyp_counter
     df_mean_rouge = new_df["rouge_score"].mean()
 
-    save_results(new_results, "new", -1, results_info, save_path)
     if df_mean_rouge < 0.10:
         mlog.info("Skipping saving the results!!!!!!! df mean rouge is low %s", df_mean_rouge)
     else:

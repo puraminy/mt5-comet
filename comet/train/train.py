@@ -892,7 +892,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     if do_eval or (not wrap and frozen):
         mlog.info("Evaluating the model...")
         model.to(device=device)
-        evaluate(model, tokenizer, myds[test_set], inter, save_path, results_info, val_records, gen_param, no_score=no_score)  
+        evaluate(model, tokenizer, myds[test_set], inter, underlying_model_name, results_info, val_records, gen_param, no_score=no_score)  
         return
     accumulation_tiny_steps = 2 
     if "gpt" in model_id:
@@ -1238,6 +1238,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
         with torch.no_grad():
             mlog.info("Updating the model weights before evaluaton...")
             wrapped_model.update_model_weight()
+    model.eval()
     save_checkpoint(model, tokenizer, optimizer, scheduler, step, 
                     best_eval_step, best_dev_loss,
                     save_path)

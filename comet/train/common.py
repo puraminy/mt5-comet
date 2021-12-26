@@ -1082,6 +1082,8 @@ def save_checkpoint(model, tokenizer, optimizer, scheduler, step,
     model.save_pretrained(save_path)
     tokenizer.save_pretrained(save_path)
 
+    #torch.save(model.state_dict(), os.path.join(save_path,"state_dict"))
+    #torch.save(model, os.path.join(save_path,"mymodel"))
 #    torch.save({
 #            'step': step,
 #            'eval_step': best_eval_step,
