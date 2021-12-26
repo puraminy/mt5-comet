@@ -837,7 +837,7 @@ class MyDataset(torch.utils.data.IterableDataset):
 
     def save(self):
         data = (self.flat_data, self.data_split)
-        if not Path(self.save_path).existst():
+        if not Path(self.save_path).exists():
             with open(self.save_path, "wb") as f:
                 pickle.dump(data,f)
         else:
