@@ -290,10 +290,10 @@ def show_df(df):
             else:
                 canceled, col = False, "date"
             if not canceled:
-               g_cols = [col, "method", "model", "rouge_score","bert_score"]
+               g_cols = [col, "method", "model", "rouge_score","bert_score", "wrap"]
                sel_cols = df[g_cols]
                df = df.groupby(col).agg({"rouge_score":"mean","bert_score":"mean",
-                                         "method":"first","model":"first"})
+                   "method":"first","model":"first", "wrap":"first"})
                #df = df.reset_index()
                sel_cols = order(sel_cols, g_cols)
         elif char == "D":
