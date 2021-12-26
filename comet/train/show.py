@@ -2,6 +2,7 @@ import curses as cur
 from curses import wrapper
 import click
 import numpy as np
+from glob import glob
 import os
 from pathlib import Path
 import pandas as pd
@@ -87,6 +88,7 @@ def show_df(df):
     back = {"df":df, "sel_cols":sel_cols, "info_cols":info_cols, "sel_row":0}
     filter_df = main_df
     #wwwwwwwwww
+    open_dfnames = [dfname]
     prev_cahr = ""
     while ch != ord("q"):
         text_win.erase()
@@ -299,21 +301,26 @@ def show_df(df):
                 if col in df:
                     del df[col]
         elif char == "o":
-            canceled, col,val = list_df_values(main_df, get_val=False)
+            files = [Path(f).stem for f in glob(base_dir+"/*.tsv")]
+            for i,f in enumerate(files):
+                if f in open_dfnames:
+                    files[i] = "** " + f
+
+            canceled, _file = list_values(files)
             if not canceled:
-                new_name = rowinput("New name:")
-                main_df = main_df.rename({col:new_name})
-                char = "SS"
-                if col in df:
-                    df = df.rename({col:new_name})
+                open_dfnames.append(_file)
+                _file = os.path.join(base_dir, _file + ".tsv")
+                consts["files"] = open_dfnames
+                new_df = pd.read_table(_file)
+                df = pd.concat([df, new_df], ignore_index=True)
         elif char == "R":
             canceled, col,val = list_df_values(main_df, get_val=False)
             if not canceled:
-                new_name = rowinput("New name:")
-                main_df = main_df.rename({col:new_name})
+                new_name = rowinput(f"Rename {col}:")
+                main_df = main_df.rename(columns={col:new_name})
                 char = "SS"
                 if col in df:
-                    df = df.rename({col:new_name})
+                    df = df.rename(columns={col:new_name})
 
 
 

@@ -608,7 +608,7 @@ def convert(
         with open(out, "w") as fou:
             cw = csv.writer(fou, escapechar="\\")
             for index, row in tqdm(df.iterrows(), total=len(df)):
-                cw.writerow(filecontents)
+                cw.writerow(row)
     elif ext == ".json":
         dlist = []
         for index, row in tqdm(df.iterrows(), total=len(df)):
