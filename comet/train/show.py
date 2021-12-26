@@ -551,6 +551,7 @@ def start(stdscr):
     else:
         path = dfpath
         dfname = Path(path).stem
+        if path.endswith("*"):
         if not Path(path).exists():
             mlog.info("File %s doesn't exists!", path)
         if path.endswith(".tsv"):
