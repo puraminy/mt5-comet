@@ -556,7 +556,7 @@ def start(stdscr):
             for f in files:
                 dfs.append(pd.read_table(f))
             df = pd.concat(dfs, ignore_index=True)
-            dfname = "__merged"
+            dfname = "merged"
             show_df(df)
         elif not Path(path).exists():
             mlog.info("File %s doesn't exists!", path)
