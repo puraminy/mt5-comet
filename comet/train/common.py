@@ -658,6 +658,9 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
        elif method == "unsup-tokens":
            qtemp = "{event} {tokens} {ph}"
            anstemp = "{ph} {resp} {end}"
+       elif method == "sup-tokens-start":
+           qtemp = "{tokens} {event}"
+           anstemp = "{resp} {end}"
        elif method == "unsup-tokens-start":
            qtemp = "{tokens} {event} {ph}"
            anstemp = "{ph} {resp} {end}"

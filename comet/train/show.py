@@ -550,7 +550,7 @@ def start(stdscr):
         mlog.info("No file name provided")
     else:
         path = os.path.join(dfpath, dfname)
-        if dfname == "*":
+        if dfname == "all":
             files = glob(dfpath + "/*.tsv")
             dfs = []
             for f in files:
