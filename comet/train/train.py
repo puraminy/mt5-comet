@@ -1,5 +1,6 @@
 #%% load libraries
 from comet.train.common import *
+import itertools, collections
 from comet.train.eval import *
 from transformers.optimization import Adafactor, AdafactorSchedule
 from transformers import (
@@ -1078,6 +1079,9 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
         step = checkpoint['step']
         best_eval_step = checkpoint['best_eval_step']
         best_dev_loss = checkpoint['best_dev_loss']
+    def consume(iterator, n):
+        '''Advance the iterator n-steps ahead. If n is none, consume entirely.'''
+        collections.deque(itertools.islice(iterator, n), maxlen=0)
 
     #%% tttttt
     mlog.info("batch size: %s", batch_size)
@@ -1097,10 +1101,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
         step = 0
         if train_start > 0:
             mlog.info("skipping %s", train_start)
-            for i in range(train_start):
-                batch = next(train_iter)
-                pbar.update()
-            mlog.info("batch: %s", batch)
+            consume(train_iter, train_start)
+            pbar.update(train_start)
             step = train_start
         while step < iterations-1 and (wrap or not frozen):
             try:
