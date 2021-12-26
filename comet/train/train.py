@@ -1102,8 +1102,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
         if train_start > 0:
             mlog.info("skipping %s", train_start)
             consume(train_iter, train_start)
-            pbar.update(train_start)
-            step = train_start
+            iterations -= train_start
+            pbar = tqdm(total=iterations, position=0, leave=True) #,dynamic_ncols=True)
         while step < iterations-1 and (wrap or not frozen):
             try:
                 if cycle > 0 and (step % cycle == 0 and step > 0): #validation
