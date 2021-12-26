@@ -555,7 +555,10 @@ def start(stdscr):
             dfs = []
             for f in files:
                 dfs.append(pd.read_table(f))
-            df = pd.concat(dfs, ignore_index=True)
+            try:
+                df = pd.concat(dfs, ignore_index=True)
+            except:
+                pass
             dfname = "merged"
             show_df(df)
         elif not Path(path).exists():

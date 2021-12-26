@@ -576,8 +576,15 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
     is_flag=True,
     help=""
 )
+@click.option(
+    "--train_start",
+    "-tstart",
+    default=0,
+    type=int,
+    help=""
+)
 def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, test_set, 
-         val_samples, test_samples, load_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, reset_results, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, no_score):
+         val_samples, test_samples, load_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, reset_results, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, no_score, train_start):
 
     #%% some hyper-parameters
 
@@ -1088,6 +1095,11 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
         tlog.info(f"============== epoch {epoch}\n")
         tot_loss = 0
         step = 0
+        if train_start > 0:
+            mlog.info("skipping %s", train_start)
+            for i in range(train_start):
+                batch = next(train_iter)
+            mlog.info("batch: %s", batch)
         while step < iterations-1 and (wrap or not frozen):
             try:
                 if cycle > 0 and (step % cycle == 0 and step > 0): #validation
@@ -1237,7 +1249,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
 @click.option(
     "--models_dir",
     "-m",
-    default="/content/drive/MyDrive",
+    default="/home/pouramini/pret",
     type=str,
     help=""
 )
@@ -1268,9 +1280,9 @@ def create_confs(experiment, models_dir):
     args["batch_size"] = 2 
     args["gen_param"] = "greedy" 
     args["exclude"] = "natural" 
-    models = {"fat5-large":True, "fat5-3k-gen":True}
-    langs = {"en":True, "fa":True, "mix":True}
-    methods = {"unsup":True, "context-en":True,"context-fa":False, "sup": True}
+    models = {"t5-base":True}
+    langs = {"en":True}
+    methods = {"unsup":True, "sup":True,"unsup-tokens":True, "sup-tokens": True}
     to_wrap = {"wrapped":True, "unwrapped": True}
     to_freez = {"freezed":True, "unfreezed": True}
     ii = 0

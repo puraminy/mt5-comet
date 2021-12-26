@@ -4,6 +4,7 @@ from transformers import (
 import click
 from termcolor import colored
 from comet.train.common import *
+from comet.train.eval import *
 import pandas as pd
 import random
 
@@ -25,7 +26,7 @@ def main(path):
     print(my_spacials)
     doc = ""
     input_text = ""
-    df = pd.read_table("/home/pouramini/results/sel/merged.tsv")
+    df = pd.read_table("/home/pouramini/results/sel/merged.tsv", low_memory=False)
     df = df[["input_text","date", "method","prefix","pred_text1","model", "wrap","target_text", "rouge_score", "bert_score"]]
     df["target_text"] = df["target_text"].astype(str)
     score_col = "rouge_score"
@@ -69,16 +70,11 @@ def main(path):
         print(f"{ii:<2})", colored(doc, 'green'))
         ii += 1
         # encode input context
-        doc_tokens = tokenizer.tokenize(doc)
-        #print("doc_tokens:", doc_tokens)
-        doc_ids = tokenizer.convert_tokens_to_ids(doc_tokens)
-        input_ids = tokenizer(doc, return_tensors="pt").input_ids
-        #print("doc_ids:", doc_ids)
-        #print("input_ids:", input_ids)
         # generate 3 independent sequences using beam search decoding (5 beams)
         # with T5 encoder-decoder model conditioned on short news article.
-        outputs = model.generate(input_ids=input_ids, num_beams=5, num_return_sequences=3)
-        print("Generated:", colored(tokenizer.batch_decode(outputs, skip_special_tokens=True),'blue'))
+        #outputs = model.generate(input_ids=input_ids, num_beams=5, num_return_sequences=3)
+        outputs = gen_resp(model, tokenizer, doc)
+        print("Generated:", colored(outputs,'blue'))
         if rand_inp in doc or doc == rand_inp:
             print(colored("------------------------------------------------","yellow"))
             preds = df[(df["input_text"] == rand_inp) & (df["prefix"] == prefix)]
