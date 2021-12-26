@@ -611,16 +611,14 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     f_str = "freezed" if frozen else "unfreezed"
     if not output_name and not (cont or do_eval):
         output_name = method
-    conf_path = os.path.join(save_path,"confs")
+    conf_path = os.path.join(save_path)
     if model_id == "test":
         save_path = ""
         output_name = "test"
         conf_path = os.path.join(home, "logs/confs")
     Path(conf_path).mkdir(exist_ok=True, parents=True)
-    with open(os.path.join(conf_path, f'conf_{output_name}.json'), 'w') as outfile:
+    with open(os.path.join(conf_path, f'exp_conf.json'), 'w') as outfile:
         json.dump(args, outfile, indent=4)
-
-
 
     if config:
         mlog.info("Config %s was created at %s", "conf_" + output_name, conf_path)
@@ -745,7 +743,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
             mlog.info("Saving model on local %s", load_path)
             model.save_pretrained(os.path.join(load_path, model_id))
             tokenizer.save_pretrained(os.path.join(load_path, model_id))
-        return model, tokenizer
+            underlying_model_name = os.path.join(load_path, model_id)
+        return model, tokenizer, underlying_model_name
 
     #%% load atomic data
     atomic_dataset = {}
@@ -764,7 +763,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
             val_path = _val_path
             mlog.info("Loading val data...")
     if trans:
-        model, tokenizer = load_model(model_id, underlying_model_name)
+        model, tokenizer, underlying_model_name = load_model(model_id, underlying_model_name)
         for split_name, df in atomic_dataset.items():
             mlog.info("Translating ...%s ", split_name)
             if trans != split_name:
@@ -777,7 +776,10 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
             translate(model, tokenizer, trans_df, "input_text@fa@5000", path, logger, start, load_path) 
         return
     
-    model, tokenizer = load_model(model_id, underlying_model_name)
+    model, tokenizer, underlying_model_name = load_model(model_id, underlying_model_name)
+    with open(os.path.join(underlying_model_name, f'exp_conf.json'), 'w') as outfile:
+        json.dump(args, outfile, indent=4)
+
     if from_words and from_words != "rel" and from_words != "none":
         fw_tokens = tokenizer.tokenize(from_words)
         mlog.info("from words ids ***: %s", fw_tokens)
