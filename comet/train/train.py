@@ -1102,8 +1102,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
         if train_start > 0:
             mlog.info("skipping %s", train_start)
             consume(train_iter, train_start)
-            iterations -= train_start
-            pbar = tqdm(total=iterations, position=0, leave=True) #,dynamic_ncols=True)
+            pbar.update(train_start)
+            step = train_start
         while step < iterations-1 and (wrap or not frozen):
             try:
                 if cycle > 0 and (step % cycle == 0 and step > 0): #validation
@@ -1221,7 +1221,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
                 step+=1
                 bloss = batch_loss.item()
                 tot_loss += bloss
-                mean_loss = tot_loss/step
+                mean_loss = tot_loss/(step-train_start)
                 sw.add_scalar('train/loss',bloss,global_step=step)
                 tlog.info("{:<5}: {:6.2f} > {:6.2f}".format(step, bloss, mean_loss))
                 pbar.set_description(f'training ...[loss:{bloss:.2f} ({mean_loss:.2f}) best:{best_eval_step} {best_dev_loss:.2f}]')
