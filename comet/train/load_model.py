@@ -33,8 +33,9 @@ def main(path):
         print(colored("------------------------------------------------","red"))
         print("%=Random:", rand_inp)
         inp = input(f"[#={input_text}]:") 
-        if inp == "":
+        if not inp:
             r = random.randint(0, len(df) -1)
+            inp = "%"
             rand_inp = df.iloc[r]["input_text"] 
 
         if inp.startswith("@"):
@@ -54,7 +55,7 @@ def main(path):
                 prefix = key
             doc = doc.replace(key, item["tokens"]) 
 
-        print(ii,")", colored(doc, 'green'))
+        print(f"{ii:<2})", colored(doc, 'green'))
         ii += 1
         # encode input context
         doc_tokens = tokenizer.tokenize(doc)
