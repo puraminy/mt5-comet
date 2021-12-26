@@ -549,12 +549,18 @@ def start(stdscr):
     if not dfname:
         mlog.info("No file name provided")
     else:
-        path = dfpath
-        dfname = Path(path).stem
-        if path.endswith("*"):
-        if not Path(path).exists():
+        path = os.path.join(dfpath, dfname)
+        if dfname == "*":
+            files = glob(dfpath + "/*.tsv")
+            dfs = []
+            for f in files:
+                dfs.append(pd.read_table(f))
+            df = pd.concat(dfs, ignore_index=True)
+            dfname = "__merged"
+            show_df(df)
+        elif not Path(path).exists():
             mlog.info("File %s doesn't exists!", path)
-        if path.endswith(".tsv"):
+        elif path.endswith(".tsv"):
             df = pd.read_table(path)
             show_df(df)
         elif path.endswith(".json"):
@@ -562,6 +568,7 @@ def start(stdscr):
             show_df(df)
         else:
             mlog.info("No tsv or json file was found")
+        dfname = Path(dfname).stem
 
 @click.command()
 @click.argument("fname", type=str)
@@ -576,7 +583,7 @@ def main(fname, path):
     global dfname,dfpath
     if fname != "last":
         dfname = fname 
-        dfpath = os.path.join(path,fname)
+        dfpath = path
     set_app("showdf")
     wrapper(start)
 
