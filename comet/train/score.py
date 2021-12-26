@@ -136,7 +136,7 @@ import click
 @click.option(
     "--score_col",
     "-sc",
-    default="bart_score",
+    default="bert_score",
     type=str,
     help=""
 )
