@@ -356,7 +356,7 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
 @click.option(
     "--train_path",
     "-tp",
-    default="atomic/train_45k.tsv",
+    default="atomic/train.tsv",
     type=str,
     help=""
 )
@@ -856,7 +856,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
 
     if do_eval:
         myds = load_data([test_set])
-        val_records = myds[test_set].num_samples
+        val_records = myds[test_set].num_records
         train_records = 0
     else:
         myds = load_data(["train", "validation", "sample"])
@@ -871,7 +871,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
                 generate_samples["sample"].append((_sample[0], _sample[1]))
         dlog.info("--------------------------------")
         mlog.info("Preparing samples: %s ", len(generate_samples["sample"]))
-        train_records = myds["train"].num_samples
+        train_records = myds["train"].num_records
 
     for logger in [mlog, clog, vlog]:
         logger.info("Train records:"  + str(train_records))
@@ -1243,7 +1243,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
 
     #% vvvvvvvvvvvvvvvv
     myds = load_data([test_set])
-    val_records = myds[test_set].num_samples
+    val_records = myds[test_set].num_records
     results_info = f"{experiment}_{model_id}_{lang}_{method}_{w_str}-{encoder_type}_{f_str}_tr:{training_round}-ep:{epochs_num}-({start}-{train_records})-{val_records}{extra}"
     evaluate(model, tokenizer, myds[test_set], inter, save_path, results_info, val_records, gen_param, attention_mask, no_score=no_score)  
 
@@ -1264,7 +1264,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     is_flag=True,
     help="keep old experiments"
 )
-def create_exp(experiment, models_dir, keep):
+def exp(experiment, models_dir, keep):
     #cccccccccccc
     base_dir = home
     if "_" in experiment:
@@ -1291,6 +1291,7 @@ def create_exp(experiment, models_dir, keep):
     args["cycle"] = 0
     args["load_path"] = os.path.join(models_dir, "pret")
     args["save_path"] = os.path.join(models_dir, "pret", experiment)
+    args["train_path"] = "atomic/train.tsv"
     Path(args["save_path"]).mkdir(exist_ok=True, parents=True)
     args["cpu"] = False 
     args["config"] = False 
@@ -1299,14 +1300,15 @@ def create_exp(experiment, models_dir, keep):
     args["exclude"] = "natural" 
     models = {"t5-base":True}
     langs = {"en":True}
-    args["test_samples"] = 6000
-    methods = {"unsup-tokens":"wrapped-unwrapped", "unsup":"unwrapped"}
-    samples_list = [27, 270,2700, 27000]
+    args["test_samples"] = 500
+    methods = {"unsup-tokens":"w-u","unsup-nat":"u", "unsup":"u"}
+    samples_list = [3, 30,300, 3000]
     ii = 0
     for model in [k for k in models.keys() if models[k]]:
         for method,wrap in methods.items():
             for w in wrap.split("-"): 
                 for samples in samples_list: 
+                   w = "wrapped" if w == "w" else "unwrapped"
                    args["method"] = method
                    args["train_samples"] = samples
                    args["is_even"] = False

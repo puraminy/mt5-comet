@@ -815,13 +815,15 @@ class MyDataset(torch.utils.data.IterableDataset):
 
         mlog.info(f"len after filtering:{len(split_df)}")
         assert len(split_df) > 0, "Data frame is empty " + self.split_name
-        if "same_rel" in ex_type:
+        self.num_records = self.num_samples
+        if not per_record:
             if rel_filter:
                 split_df = split_df[split_df["prefix"] == rel_filter]
                 dlog.info("len after relation filter: %s", len(split_df))
             elif self.num_samples < len(split_df) and not is_even: 
                 #TODO 
                 split_df = split_df.groupby("prefix").sample(n=self.num_samples)
+                self.num_records = len(split_df)
                 dlog.info(f"NUM samples %s, %s", self.num_samples, len(split_df))
                 dlog.info(f"len after sampling:{len(split_df)}")
         self.split_df = split_df.sort_values(by="input_text")
@@ -1070,7 +1072,8 @@ class MyDataset(torch.utils.data.IterableDataset):
                         self.lang_counter[lang] = 1
                     else:
                         self.lang_counter[lang] += 1
-                    if self.lang_counter[lang] > self.num_samples or self.lang_counter[lang] > iter_end:
+                    if (self.lang_counter[lang] > self.num_records 
+                        or self.lang_counter[lang] > iter_end):
                         dlog.info("Lang limit reached! %s %s", lang, self.lang_counter[lang])
                         self.flat_data.extend(flat_data)
                         return flat_data
@@ -1079,7 +1082,7 @@ class MyDataset(torch.utils.data.IterableDataset):
                     if show_progress:
                         pbar.update()
                     kk += 1
-                    if (self.is_even or self.per_record) and (kk > iter_end or kk > self.num_samples):
+                    if (kk > iter_end or kk > self.num_records):
                         dlog.info("record limit reached!")
                         self.flat_data.extend(flat_data)
                         return flat_data
