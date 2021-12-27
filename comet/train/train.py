@@ -1268,6 +1268,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
 def create_exp(experiment, models_dir, clean):
     #cccccccccccc
     base_dir = home
+    if "_" in experiment:
+        raise ValueError("Experiment name shouldn't have underscore in it, use dash")
     conf = os.path.join(base_dir, "logs/confs/exp_conf.json")
     save_path = os.path.join(base_dir, "mt5-comet/comet/train/")
     conf_path = os.path.join(save_path,"confs")
@@ -1317,7 +1319,7 @@ def create_exp(experiment, models_dir, clean):
                    if w == "wrapped":
                        args["wrap"] = True
                        args["batch_size"] = 20 
-                   name = f"{experiment}_{model}-{samples}_{method}_{w}"
+                   name = f"{experiment}-{model}-{samples}-{method}-{w}"
                    args["output_name"] = name
                    args["overwrite"] = name
                    #name = name.replace("_unwrapped", "")
@@ -1325,6 +1327,8 @@ def create_exp(experiment, models_dir, clean):
                    ii +=1
                    name = str(ii) + "_" + name
                    print(name)
+                   args["path"] = name
+                   args["date"] += ":" + str(ii)
                    with open(os.path.join(conf_path, f'{name}.json'), 'w') as outfile:
                             json.dump(args, outfile, indent=4)
 

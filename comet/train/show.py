@@ -19,14 +19,15 @@ def load_results(path):
     if fname == "results":
         main_df = pd.DataFrame(sd, columns=["exp","model","lang", "method","wrap","frozen","epochs","stype", "date", "dir", "score"])
     else:
-        main_df = pd.DataFrame(sd, columns=["tid","exp","model","lang", "method","wrap","frozen","epochs","date", "field", "text"])
+        main_df = pd.DataFrame(sd, columns=["tid","exp", "exp2","model","lang", "method","wrap","frozen","epochs","date", "field", "text"])
 
     out = f"{fname}.tsv"
     df = main_df.pivot(index=list(main_df.columns[~main_df.columns.isin(['field', 'text'])]), columns='field').reset_index()
 
     #df.columns = list(map("".join, df.columns))
     df.columns = [('_'.join(str(s).strip() for s in col if s)).replace("text_","") for col in df.columns]
-    df.to_csv(os.path.join(resPath, out), sep="\t", index = False)
+    df["path"] = Path(path).parent.stem
+    df.to_csv(path.replace("json", "tsv"), sep="\t", index = False)
     return df
 
 def show_df(df):
@@ -284,16 +285,20 @@ def show_df(df):
                     rename(columns={group_col:'top_target'}).\
                       merge(df.groupby(['date','prefix','input_text'],as_index=False)[group_col].agg('<br />'.join))
             if not group_col in info_cols: info_cols.append(group_col)
-        elif char in ["G", "Y"]:
+        elif char in ["G", "Y", "P"]:
             if char ==  "Y":
                 canceled, col, _ = list_df_values(df, get_val=False)
-            else:
+            elif char == "G":
                 canceled, col = False, "date"
+            elif char == "P":
+                canceled, col = False, "path"
             if not canceled:
-               g_cols = [col, "method", "model", "rouge_score","bert_score", "wrap"]
-               sel_cols = df[g_cols]
-               df = df.groupby(col).agg({"rouge_score":"mean","bert_score":"mean",
-                   "method":"first","model":"first", "wrap":"first"})
+               g_cols = ["exp_id", "rouge_score", "bert_score", "epochs", "method","model", "wrap"]
+               df = (df.groupby(col).agg({"rouge_score":"mean","bert_score":"mean",
+                   "method":"first","model":"first", "wrap":"first", col:"first", "epochs":"first"})
+                 .rename(columns={col:'exp_id'})
+                 .sort_values(by = ["epochs", "rouge_score"])
+                    )
                #df = df.reset_index()
                sel_cols = order(sel_cols, g_cols)
         elif char == "D":
@@ -550,27 +555,36 @@ def start(stdscr):
         mlog.info("No file name provided")
     else:
         path = os.path.join(dfpath, dfname)
-        if dfname == "all":
-            files = glob(dfpath + "/*.tsv")
+        if Path(path).is_file():
+            if path.endswith(".tsv"):
+                df = pd.read_table(path)
+                show_df(df)
+            elif path.endswith(".json"):
+                df = load_results(path)
+                show_df(df)
+        else:
+            files = []
+            for root, dirs, _files in os.walk(dfpath):
+                for _file in _files:
+                    if dfname in _file:
+                        files.append(os.path.join(root, _file))
             dfs = []
             for f in files:
-                dfs.append(pd.read_table(f))
+                mlog.info(f)
+                if f.endswith(".tsv"):
+                    df = pd.read_table(f)
+                elif f.endswith(".json"):
+                    df = load_results(f)
+                dfs.append(df)
             try:
                 df = pd.concat(dfs, ignore_index=True)
             except:
                 pass
             dfname = "merged"
-            show_df(df)
-        elif not Path(path).exists():
-            mlog.info("File %s doesn't exists!", path)
-        elif path.endswith(".tsv"):
-            df = pd.read_table(path)
-            show_df(df)
-        elif path.endswith(".json"):
-            df = load_results(path)
-            show_df(df)
-        else:
-            mlog.info("No tsv or json file was found")
+            if files:
+                show_df(df)
+            else:
+                mlog.info("No tsv or json file was found")
         dfname = Path(dfname).stem
 
 @click.command()
