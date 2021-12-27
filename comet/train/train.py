@@ -1302,7 +1302,7 @@ def exp(experiment, models_dir, keep):
     langs = {"en":True}
     args["test_samples"] = 500
     methods = {"unsup-tokens":"w-u","unsup-nat":"u", "unsup":"u"}
-    samples_list = [3, 30,300, 3000]
+    samples_list = [27, 270,2700, 27000]
     ii = 0
     for model in [k for k in models.keys() if models[k]]:
         for method,wrap in methods.items():

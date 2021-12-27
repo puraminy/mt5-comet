@@ -795,6 +795,7 @@ class MyDataset(torch.utils.data.IterableDataset):
         if self.num_samples == 0: 
             self.num_samples = len(split_df)
             self.samples_per_head = 0
+            self.is_even = False
         for col in targets:
             if col in split_df:
                 split_df[col] = split_df[col].astype(str)
@@ -816,11 +817,11 @@ class MyDataset(torch.utils.data.IterableDataset):
         mlog.info(f"len after filtering:{len(split_df)}")
         assert len(split_df) > 0, "Data frame is empty " + self.split_name
         self.num_records = self.num_samples
-        if not per_record:
-            if rel_filter:
-                split_df = split_df[split_df["prefix"] == rel_filter]
-                dlog.info("len after relation filter: %s", len(split_df))
-            elif self.num_samples < len(split_df) and not is_even: 
+        if rel_filter:
+            split_df = split_df[split_df["prefix"] == rel_filter]
+            dlog.info("len after relation filter: %s", len(split_df))
+        if False:
+            if self.num_samples < len(split_df) and not is_even: 
                 #TODO 
                 split_df = split_df.groupby("prefix").sample(n=self.num_samples)
                 self.num_records = len(split_df)
@@ -892,7 +893,7 @@ class MyDataset(torch.utils.data.IterableDataset):
         if self.flat_data:
             _iter = iter(self.flat_data)
         else:
-            _iter = iter(self.fill_all_data(iter_start, iter_end))
+            _iter = iter(self.fill_data(iter_start, iter_end))
         self.example_counter = 0
         return map(self.preproc, _iter)
 
