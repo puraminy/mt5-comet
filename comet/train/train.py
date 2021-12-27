@@ -990,7 +990,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
             load_prompt_path = os.path.join(load_path, model_id, "prompt")
             mlog.info("prompt path:%s ", load_prompt_path)
         mlog.info("Wrapping the model ...")
-        wrapped_model = wrap_model(model, tokenizer, encoder_type, load_prompt_path, from_words = from_words, merge_prompts=merge_prompts) 
+        wrapped_model = wrap_model(model, tokenizer, encoder_type, load_prompt_path, from_words = from_words, merge_prompts=merge_prompts, method = method) 
     if wrapped_model:
         wrapped_model.to(device=device)
         wrapped_model.prompt_encoders.to(device=device)
@@ -1299,13 +1299,14 @@ def create_exp(experiment, models_dir, clean):
     args["exclude"] = "natural" 
     models = {"t5-base":True}
     langs = {"en":True}
-    methods = {"unsup":"unwrapped", "sup":"unwrapped",
-            "unsup-tokens":"wrapped-unwrapped", "sup-tokens": "wrapped-unwrapped"}
+    methods = {"unsup-tokens":"wrapped-unwrapped", "sup-tokens": "wrapped-unwrapped", "unsup":"unwrapped", "sup":"unwrapped"}
+
     ii = 0
     for model in [k for k in models.keys() if models[k]]:
         for method,wrap in methods.items():
             for w in wrap.split("-"): 
                 for samples in [900, 9000, 27000]:
+                   args["method"] = method
                    args["train_samples"] = samples
                    args["is_even"] = False
                    args["model_id"]= model
@@ -1323,7 +1324,8 @@ def create_exp(experiment, models_dir, clean):
                    #name = name.replace("_unwrapped", "")
                    #name = name.replace("_unfreezed", "")
                    ii +=1
-                   print(str(ii) + ":" + name)
+                   name = str(ii) + "_" + name
+                   print(name)
                    with open(os.path.join(conf_path, f'{name}.json'), 'w') as outfile:
                             json.dump(args, outfile, indent=4)
 

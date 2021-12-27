@@ -6,7 +6,7 @@
     "extemp": "",
     "train_samples": 900,
     "test_set": "test",
-    "val_samples": 50,
+    "val_samples": 100,
     "test_samples": 5000,
     "train_path": "atomic/train_45k.tsv",
     "val_path": "atomic/val_all_rels.tsv",
@@ -57,7 +57,7 @@
     "is_even": false,
     "is_flax": false,
     "load_path": "/home/pouramini/pret",
-    "method": "unsup",
+    "method": "unsup-tokens",
     "nli_group": "all",
     "only_blanks": false,
     "per_record": false,
@@ -66,6 +66,6 @@
     "rel_filter": "",
     "samples_per_head": 0,
     "sampling": 5,
-    "save_path": "/home/pouramini/pret",
+    "save_path": "/home/pouramini/pret/few_shot",
     "start": 0
 }

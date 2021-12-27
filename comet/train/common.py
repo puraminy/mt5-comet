@@ -187,11 +187,32 @@ def extend_tokenizer(tokenizer, prompt_tokens = [], model_id=""):
     else:
         mlog.info("No new token was added")
 
-def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words=False, merge_prompts=False):
+def fill_sample(mt, rel):
+    qtemp, anstemp, ex_qtemp, ex_anstemp, context = create_templates(mt, 
+            gen_pos="end")
+    mask =1
+    context_df = None
+    d = {"prefix":rel}
+    event = "test event"
+    resp = "test answer"
+    input_lang = "en"
+    target_lang = "en"
+    gen_token = "gen_en"
+    _qtemp = fill_consts(qtemp, ex_qtemp, context,d, context_df, mask=mask,method = mt)
+    _anstemp = fill_consts(anstemp, ex_anstemp, context,d, context_df, mask=mask,method = mt)
+    _query = fill_vars(_qtemp, rel, event, gen_token, resp, 
+            input_lang, target_lang) 
+    response = fill_vars(_anstemp, rel, event, gen_token, resp, 
+            input_lang, target_lang)
+
+def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words=False, merge_prompts=False, method=""):
     wrapped_model = None
     prompt_encoders = []
     offsets = []
     tokenize_relations(tokenizer)
+    for rel in all_rels:
+        fill_sample(method, rel)
+
     for rel, prompt_tokens in encoder_prompts.items():
         mlog.info("******************* Wrapping model for %s", rel)
         if rel == "com":
@@ -656,6 +677,9 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
        elif method == "unsup-wrap":
            qtemp = "{rel_i_start} {event} {rel_i_end} {ph}"
            anstemp = "{ph} {resp} {end}"
+       elif method == "sup-tokens":
+           qtemp = "{event} {tokens}"
+           anstemp = "{resp} {end}"
        elif method == "unsup-tokens":
            qtemp = "{event} {tokens} {ph}"
            anstemp = "{ph} {resp} {end}"
@@ -833,7 +857,7 @@ class MyDataset(torch.utils.data.IterableDataset):
         dlog.info("sels: %s", self._sels)
         self.save_path = save_ds_path  + "-".join(self.methods) + \
                 "_" + str(len(split_df)) + "_" + str(self.num_samples) + ".pickle"
-        if Path(self.save_path).is_file():
+        if Path(self.save_path).is_file() and self.num_samples > 1000 and not self.split_name == "sample":
             mlog.info("Loading from saved data %s ", self.save_path)
             self.load()
 
