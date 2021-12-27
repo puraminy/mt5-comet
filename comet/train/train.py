@@ -1,4 +1,4 @@
-#%% load libraries
+/%% load libraries
 from comet.train.common import *
 import itertools, collections
 import shutil
@@ -872,7 +872,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
         dlog.info("--------------------------------")
         mlog.info("Preparing samples: %s ", len(generate_samples["sample"]))
         train_records = myds["train"].num_samples
-        val_records = myds["validation"].num_samples
+        val_records = myds[test_set].num_samples
 
     for logger in [mlog, clog, vlog]:
         logger.info("Train records:"  + str(train_records))
