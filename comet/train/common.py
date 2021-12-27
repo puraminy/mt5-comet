@@ -821,7 +821,7 @@ class MyDataset(torch.utils.data.IterableDataset):
                 dlog.info("len after relation filter: %s", len(split_df))
             elif self.num_samples < len(split_df) and not is_even: 
                 #TODO 
-                #split_df = split_df.groupby("prefix").sample(n=self.num_samples)
+                split_df = split_df.groupby("prefix").sample(n=self.num_samples)
                 dlog.info(f"NUM samples %s, %s", self.num_samples, len(split_df))
                 dlog.info(f"len after sampling:{len(split_df)}")
         self.split_df = split_df.sort_values(by="input_text")

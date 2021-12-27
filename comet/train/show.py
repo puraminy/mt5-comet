@@ -569,12 +569,13 @@ def start(stdscr):
                 df = pd.read_table(f)
             elif f.endswith(".json"):
                 df = load_results(f)
-            if file_id == "parent":
-                df["fid"] = Path(f).parent.stem
-            elif file_id == "name":
-                df["fid"] = Path(f).stem
-            else:
-                df["fid"] = df[file_id]
+            if not "fid" in df:
+                if file_id == "parent":
+                    df["fid"] = Path(f).parent.stem
+                elif file_id == "name":
+                    df["fid"] = Path(f).stem
+                else:
+                    df["fid"] = df[file_id]
             dfs.append(df)
         if len(dfs) > 1:
             df = pd.concat(dfs, ignore_index=True)

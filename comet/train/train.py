@@ -1260,12 +1260,12 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     help=""
 )
 @click.option(
-    "--clean",
-    "-c",
+    "--keep",
+    "-k",
     is_flag=True,
-    help=""
+    help="keep old experiments"
 )
-def create_exp(experiment, models_dir, clean):
+def create_exp(experiment, models_dir, keep):
     #cccccccccccc
     base_dir = home
     if "_" in experiment:
@@ -1273,7 +1273,7 @@ def create_exp(experiment, models_dir, clean):
     conf = os.path.join(base_dir, "logs/confs/exp_conf.json")
     save_path = os.path.join(base_dir, "mt5-comet/comet/train/")
     conf_path = os.path.join(save_path,"confs")
-    if clean:
+    if not keep:
         cur_files = glob.glob(f"{conf_path}/*")
         mlog.info("Cleaning previous exps ... %s", len(cur_files))
         for f in cur_files: 
@@ -1289,7 +1289,6 @@ def create_exp(experiment, models_dir, clean):
         return
     samples = 300
     args["experiment"] = experiment
-    args["test_samples"] = 5000
     args["cycle"] = 0
     args["load_path"] = os.path.join(models_dir, "pret")
     args["save_path"] = os.path.join(models_dir, "pret", experiment)
@@ -1301,13 +1300,14 @@ def create_exp(experiment, models_dir, clean):
     args["exclude"] = "natural" 
     models = {"t5-base":True}
     langs = {"en":True}
-    methods = {"unsup-tokens":"wrapped-unwrapped", "sup-tokens": "wrapped-unwrapped", "unsup":"unwrapped", "sup":"unwrapped"}
-
+    args["test_samples"] = 6000
+    methods = {"unsup-tokens":"wrapped-unwrapped", "unsup":"unwrapped"}
+    samples_list = [27, 270,2700, 27000]
     ii = 0
     for model in [k for k in models.keys() if models[k]]:
         for method,wrap in methods.items():
             for w in wrap.split("-"): 
-                for samples in [900, 9000, 27000]:
+                for samples in samples_list: 
                    args["method"] = method
                    args["train_samples"] = samples
                    args["is_even"] = False
@@ -1327,8 +1327,6 @@ def create_exp(experiment, models_dir, clean):
                    ii +=1
                    name = str(ii) + "_" + name
                    print(name)
-                   args["path"] = name
-                   args["date"] += ":" + str(ii)
                    with open(os.path.join(conf_path, f'{name}.json'), 'w') as outfile:
                             json.dump(args, outfile, indent=4)
 
