@@ -57,7 +57,7 @@ def main(path, load_model, fname):
     preds = None
     filt_preds = None
     prefix = ""
-    sort = rouge_score
+    sort = "rouge_score"
     filt = ""
     #wwwwwwwww
     while doc != "q":
@@ -86,6 +86,8 @@ def main(path, load_model, fname):
             filt = inp.split("*")[1]
         if inp.startswith("^"):
             sort = inp.split("^")[1]
+            if sort == "r": sort = "rouge_score"
+            if sort == "b": sort = "bert_score"
 
         if inp.startswith("@"):
             input_text = inp.replace("@","")
