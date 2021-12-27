@@ -10,7 +10,7 @@ from nodcast.util.util import *
 from mylogs import * 
 import json
 from comet.utils.myutils import *
-
+file_id = "date"
 def load_results(path):
     with open(path, "r") as f:
         data = json.load(f)
@@ -26,7 +26,12 @@ def load_results(path):
 
     #df.columns = list(map("".join, df.columns))
     df.columns = [('_'.join(str(s).strip() for s in col if s)).replace("text_","") for col in df.columns]
-    df["path"] = Path(path).parent.stem
+    if file_id == "parent":
+        df["fid"] = Path(path).parent.stem
+    elif file_id == "name":
+        df["fid"] = Path(path).stem
+    else:
+        df["fid"] = df[file_id]
     df.to_csv(path.replace("json", "tsv"), sep="\t", index = False)
     return df
 
@@ -90,6 +95,8 @@ def show_df(df):
     filter_df = main_df
     #wwwwwwwwww
     open_dfnames = [dfname]
+    if not "fid" in df:
+        df["fid"] = df["date"]
     prev_cahr = ""
     while ch != ord("q"):
         text_win.erase()
@@ -281,9 +288,9 @@ def show_df(df):
             score_col = "rouge_score"
             group_col = "pred_text1"
             df = df.sort_values(score_col, ascending=False).\
-                 drop_duplicates(['date','prefix','input_text']).\
+                 drop_duplicates(['path','prefix','input_text']).\
                     rename(columns={group_col:'top_target'}).\
-                      merge(df.groupby(['date','prefix','input_text'],as_index=False)[group_col].agg('<br />'.join))
+                      merge(df.groupby(['path','prefix','input_text'],as_index=False)[group_col].agg('<br />'.join))
             if not group_col in info_cols: info_cols.append(group_col)
         elif char in ["G", "Y", "P"]:
             if char ==  "Y":
@@ -291,7 +298,7 @@ def show_df(df):
             elif char == "G":
                 canceled, col = False, "date"
             elif char == "P":
-                canceled, col = False, "path"
+                canceled, col = False, "fid"
             if not canceled:
                g_cols = ["exp_id", "rouge_score", "bert_score", "epochs", "method","model", "wrap"]
                df = (df.groupby(col).agg({"rouge_score":"mean","bert_score":"mean",
@@ -430,7 +437,8 @@ def show_df(df):
             pass
             #mbeep()
         if char == "S":
-            cmd, _ = minput(cmd_win, 0, 1, "File Name=", default=dfname, all_chars=True)
+            cmd, _ = minput(cmd_win, 0, 1, "File Name (without extension)=", default=dfname, all_chars=True)
+            cmd = cmd.split(".")[0]
             if cmd != "<ESC>":
                 dfname = cmd
                 char = "SS"
@@ -596,8 +604,16 @@ def start(stdscr):
     type=click.Path(),
     help="The current path (it is set by system)"
 )
-def main(fname, path):
-    global dfname,dfpath
+@click.option(
+    "--fid",
+    "-fid",
+    default="date",
+    type=str,
+    help=""
+)
+def main(fname, path, fid):
+    global dfname,dfpath,file_id
+    file_id = fid
     if fname != "last":
         dfname = fname 
         dfpath = path
