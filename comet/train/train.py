@@ -1,6 +1,7 @@
 #%% load libraries
 from comet.train.common import *
 import itertools, collections
+import shutil
 from comet.train.eval import *
 from transformers.optimization import Adafactor, AdafactorSchedule
 from transformers import (
@@ -123,6 +124,8 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
                    out = args["output_name"].split("_")
                    out[1] = model_id
                    args["output_name"] = "_".join(out)
+                   if args["load_path"]:
+                       shutil.copy(conf, args["load_path"])
                ctx.invoke(train, **args)
 
 
@@ -619,7 +622,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     f_str = "freezed" if frozen else "unfreezed"
     if not output_name and not (cont or do_eval):
         output_name = method
-    conf_path = os.path.join(save_path)
+    conf_path = save_path
     if model_id == "test":
         save_path = ""
         output_name = "test"
@@ -785,9 +788,6 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
         return
     
     model, tokenizer, underlying_model_name = load_model(model_id, underlying_model_name)
-    with open(os.path.join(underlying_model_name, f'exp_conf.json'), 'w') as outfile:
-        json.dump(args, outfile, indent=4)
-
     if from_words and from_words != "rel" and from_words != "none":
         fw_tokens = tokenizer.tokenize(from_words)
         mlog.info("from words ids ***: %s", fw_tokens)
@@ -1294,7 +1294,7 @@ def create_exp(experiment, models_dir, clean):
     Path(args["save_path"]).mkdir(exist_ok=True, parents=True)
     args["cpu"] = False 
     args["config"] = False 
-    args["batch_size"] = 2 
+    args["batch_size"] = 4 
     args["gen_param"] = "greedy" 
     args["exclude"] = "natural" 
     models = {"t5-base":True}
@@ -1314,10 +1314,9 @@ def create_exp(experiment, models_dir, clean):
                    if w == "wrapped":
                        args["frozen"] = True
                    args["wrap"] = ""
-                   args["batch_size"] = 8 
                    if w == "wrapped":
                        args["wrap"] = True
-                       args["batch_size"] = 30 
+                       args["batch_size"] = 20 
                    name = f"{experiment}_{model}-{samples}_{method}_{w}"
                    args["output_name"] = name
                    args["overwrite"] = name
