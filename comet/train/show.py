@@ -10,7 +10,7 @@ from nodcast.util.util import *
 from mylogs import * 
 import json
 from comet.utils.myutils import *
-file_id = "date"
+file_id = "name"
 def load_results(path):
     with open(path, "r") as f:
         data = json.load(f)
@@ -19,19 +19,13 @@ def load_results(path):
     if fname == "results":
         main_df = pd.DataFrame(sd, columns=["exp","model","lang", "method","wrap","frozen","epochs","stype", "date", "dir", "score"])
     else:
-        main_df = pd.DataFrame(sd, columns=["tid","exp", "exp2","model","lang", "method","wrap","frozen","epochs","date", "field", "text"])
+        main_df = pd.DataFrame(sd, columns=["tid","exp","model","lang", "method","wrap","frozen","epochs","date", "field", "text"])
 
     out = f"{fname}.tsv"
     df = main_df.pivot(index=list(main_df.columns[~main_df.columns.isin(['field', 'text'])]), columns='field').reset_index()
 
     #df.columns = list(map("".join, df.columns))
     df.columns = [('_'.join(str(s).strip() for s in col if s)).replace("text_","") for col in df.columns]
-    if file_id == "parent":
-        df["fid"] = Path(path).parent.stem
-    elif file_id == "name":
-        df["fid"] = Path(path).stem
-    else:
-        df["fid"] = df[file_id]
     df.to_csv(path.replace("json", "tsv"), sep="\t", index = False)
     return df
 
@@ -95,8 +89,6 @@ def show_df(df):
     filter_df = main_df
     #wwwwwwwwww
     open_dfnames = [dfname]
-    if not "fid" in df:
-        df["fid"] = df["date"]
     prev_cahr = ""
     while ch != ord("q"):
         text_win.erase()
@@ -288,16 +280,14 @@ def show_df(df):
             score_col = "rouge_score"
             group_col = "pred_text1"
             df = df.sort_values(score_col, ascending=False).\
-                 drop_duplicates(['path','prefix','input_text']).\
+                 drop_duplicates(['fid','prefix','input_text']).\
                     rename(columns={group_col:'top_target'}).\
-                      merge(df.groupby(['path','prefix','input_text'],as_index=False)[group_col].agg('<br />'.join))
+                      merge(df.groupby(['fid','prefix','input_text'],as_index=False)[group_col].agg('<br />'.join))
             if not group_col in info_cols: info_cols.append(group_col)
         elif char in ["G", "Y", "P"]:
             if char ==  "Y":
                 canceled, col, _ = list_df_values(df, get_val=False)
             elif char == "G":
-                canceled, col = False, "date"
-            elif char == "P":
                 canceled, col = False, "fid"
             if not canceled:
                g_cols = ["exp_id", "rouge_score", "bert_score", "epochs", "method","model", "wrap"]
@@ -564,36 +554,35 @@ def start(stdscr):
     else:
         path = os.path.join(dfpath, dfname)
         if Path(path).is_file():
-            if path.endswith(".tsv"):
-                df = pd.read_table(path)
-                show_df(df)
-            elif path.endswith(".json"):
-                df = load_results(path)
-                show_df(df)
+            files = [path]
+            dfname = Path(dfname).stem
         else:
             files = []
             for root, dirs, _files in os.walk(dfpath):
                 for _file in _files:
-                    if dfname in _file:
+                    if all(s in _file for s in dfname.split("+")):
                         files.append(os.path.join(root, _file))
-            dfs = []
-            for f in files:
-                mlog.info(f)
-                if f.endswith(".tsv"):
-                    df = pd.read_table(f)
-                elif f.endswith(".json"):
-                    df = load_results(f)
-                dfs.append(df)
-            try:
-                df = pd.concat(dfs, ignore_index=True)
-            except:
-                pass
-            dfname = "merged"
-            if files:
-                show_df(df)
+        dfs = []
+        for f in files:
+            mlog.info(f)
+            if f.endswith(".tsv"):
+                df = pd.read_table(f)
+            elif f.endswith(".json"):
+                df = load_results(f)
+            if file_id == "parent":
+                df["fid"] = Path(f).parent.stem
+            elif file_id == "name":
+                df["fid"] = Path(f).stem
             else:
-                mlog.info("No tsv or json file was found")
-        dfname = Path(dfname).stem
+                df["fid"] = df[file_id]
+            dfs.append(df)
+        if len(dfs) > 1:
+            df = pd.concat(dfs, ignore_index=True)
+            dfname = "merged"
+        if files:
+            show_df(df)
+        else:
+            mlog.info("No tsv or json file was found")
 
 @click.command()
 @click.argument("fname", type=str)
@@ -607,7 +596,7 @@ def start(stdscr):
 @click.option(
     "--fid",
     "-fid",
-    default="date",
+    default="name",
     type=str,
     help=""
 )
