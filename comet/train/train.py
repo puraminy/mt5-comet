@@ -872,14 +872,11 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
         dlog.info("--------------------------------")
         mlog.info("Preparing samples: %s ", len(generate_samples["sample"]))
         train_records = myds["train"].num_samples
-        val_records = myds[test_set].num_samples
 
     for logger in [mlog, clog, vlog]:
         logger.info("Train records:"  + str(train_records))
-        logger.info("Val Records:"  + str(val_records))
     if not do_eval:
         assert train_records != 0, "There is no data to train!!!!!!!!"
-    assert val_records != 0, "There is no data for validation!!!!!!!!"
     if model_id == "test":
         return
     mlog.info("len tokenizer %s", len(tokenizer))
@@ -889,7 +886,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     m_name = model_id + "-" + method
     if do_eval:
         m_name = model_id + "-EVAL"
-    results_info = f"{experiment}_{model_id}_{lang}_{method}_{w_str}-{encoder_type}_{f_str}_tr:{training_round}-ep:{epochs_num}-({start}-{train_records})-{val_records}{extra}"
+        results_info = f"{experiment}_{model_id}_{lang}_{method}_{w_str}-{encoder_type}_{f_str}_tr:{training_round}-ep:{epochs_num}-({start}-{train_records})-{val_records}{extra}"
     if do_eval or (not wrap and frozen):
         mlog.info("Evaluating the model...")
         model.to(device=device)
@@ -1244,8 +1241,10 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
                     best_eval_step, best_dev_loss,
                     save_path)
 
-
+    #% vvvvvvvvvvvvvvvv
     myds = load_data([test_set])
+    val_records = myds[test_set].num_samples
+    results_info = f"{experiment}_{model_id}_{lang}_{method}_{w_str}-{encoder_type}_{f_str}_tr:{training_round}-ep:{epochs_num}-({start}-{train_records})-{val_records}{extra}"
     evaluate(model, tokenizer, myds[test_set], inter, save_path, results_info, val_records, gen_param, attention_mask, no_score=no_score)  
 
 #ettt
