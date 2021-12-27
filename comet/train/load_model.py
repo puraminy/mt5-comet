@@ -9,6 +9,7 @@ import pandas as pd
 import random
 
 @click.command()
+@click.argument("fname", type=str)
 @click.option(
     "--path",
     envvar="PWD",
@@ -22,14 +23,7 @@ import random
     is_flag=True,
     help=""
 )
-@click.option(
-    "--fname",
-    "-f",
-    default="",
-    type=str,
-    help=""
-)
-def main(path, load_model, fname):
+def main(fname, path, load_model):
     if load_model:
         print("Loading model...")
         underlying_model_name = path
@@ -40,6 +34,9 @@ def main(path, load_model, fname):
 
         my_spacials = [x for x in tokenizer.additional_special_tokens if not "<extra_id"  in x]
         print(my_spacials)
+
+
+    pd.options.mode.chained_assignment = None
     doc = ""
     input_text = ""
     df = pd.read_table(f"/home/pouramini/results/sel/{fname}.tsv", low_memory=False)
@@ -61,18 +58,25 @@ def main(path, load_model, fname):
     filt = ""
     #wwwwwwwww
     while doc != "q":
-        print(colored("------------------------------------------------","red"))
-        print("%=Random:", rand_inp, f" [{prefix}]")
+        print(colored("? (help) --------------------------------------","red"))
+        print("Input:", colored(rand_inp,'cyan'), f" [{prefix}]")
         inp = input(f" :") 
         if not inp:
             r = random.randint(0, len(df) -1)
             inp = "%"
             rand_inp = str(df.iloc[r]["input_text"])
             input_text = rand_inp
+            filt=""
+            filt_preds = None
         if inp.isnumeric():
             inp = list(relation_natural_mappings.keys())[int(inp)] 
-        if inp.startswith("?"):
+        if inp.startswith("?") or inp == "help":
+            if inp == "help": inp = "?"
             ch = inp.split("?")[1]
+            if ch == "":
+                print(colored("Enter",'cyan'), ": get random input")
+                print(colored("?rels",'cyan'), ": show numbers for relation")
+                print(colored("#",'cyan'), ": place holder for the previous input")
             if ch == "rels":
                 for i, key in enumerate(list(relation_natural_mappings.keys())):
                     print(colored(i,"cyan").strip(),":", key, end=" ")
@@ -108,21 +112,17 @@ def main(path, load_model, fname):
 
         print(f"{ii:<2})", colored(doc, 'green'))
         ii += 1
-        # encode input context
-        # generate 3 independent sequences using beam search decoding (5 beams)
-        # with T5 encoder-decoder model conditioned on short news article.
-        #outputs = model.generate(input_ids=input_ids, num_beams=5, num_return_sequences=3)
         if load_model:
             outputs = gen_resp(model, tokenizer, doc)
             print("Generated:", colored(outputs,'blue'))
         if filt and preds is not None:
-            filt_preds = preds[preds["fid"].str.contains(filt)]
-        elif rand_inp in doc:
+            filt_preds = preds.loc[preds["fid"].str.contains(filt),:]
+        elif prefix and rand_inp and rand_inp in doc:
             print(prefix, ":", colored("---------------------------------------","yellow"))
-            preds = df[(df["input_text"] == rand_inp) & (df["prefix"] == prefix)]
-            filt_preds = preds
+            preds = df.loc[(df["input_text"] == rand_inp) & (df["prefix"] == prefix),:]
+            filt_preds = preds.loc[:,:]
 
-        if filt_preds is not None:
+        if inp != "q" and filt_preds is not None:
             filt_preds.sort_values(by=sort,ascending=False,inplace=True)
             first = True
             for idx, row in filt_preds.iterrows():

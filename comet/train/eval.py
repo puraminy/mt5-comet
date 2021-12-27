@@ -340,7 +340,7 @@ def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info,
 
     # %%%%%%%%%%%%%%%%%%
     dictPath(str(qid) + "_" + results_info, new_results, data, sep="_")
-    save_results(new_results, "new", -1, results_info, save_path)
+    save_results(new_results, "new", val_records, results_info, save_path)
 
     new_df = pd.DataFrame(rows)
     new_df = new_df.sort_values(by=["input_text"])
