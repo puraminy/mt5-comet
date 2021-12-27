@@ -166,7 +166,7 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
 @click.option(
     "--val_samples",
     "-vn",
-    default=100,
+    default=150,
     type=int,
     help=""
 )
@@ -656,7 +656,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     weight_decay = 0.01
     shuffle = False
     shuffle_evaluation=False
-    validation_size = val_samples
+    validation_size = val_samples 
     validation_num_generation = 20
     if not frozen and learning_rate == 0: 
         learning_rate = 6.25e-05 if opt_type == "adam" else 1e-3
@@ -798,7 +798,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
         length = [int(s) for s in prompt_length.split("-")]
         set_prompt_lengths(rel_filter, length)
 
-    num_samples = {"train": train_samples, "validation":val_samples, "sample":20, "test":test_samples}
+    num_samples = {"train": train_samples, "validation":val_samples, "sample":0, "test":test_samples}
     split_path = {"train":train_path, "validation":val_path, "sample":sample_path, "test":test_path}
     save_ds_path = {}
     for split, _path in split_path.items():
@@ -838,6 +838,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
             inp_include, inp_exclude = filter_inputs(include, exclude, inp_lang)
             targ_include, targ_exclude = filter_inputs(include, exclude, targ_lang)
             mlog.info("Creating dataset for %s", split_name)
+            # dddddddddddddd
             myds[split_name] = MyDataset(split_df, split_name,
                                 method, prompt_pos, rel_filter,
                                 num_samples[split_name], 
@@ -882,8 +883,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     if model_id == "test":
         return
     mlog.info("len tokenizer %s", len(tokenizer))
-    my_spacials = [x for x in tokenizer.additional_special_tokens if not "<extra_id"  in x]
-    mlog.info("list of spcial tokens: %s", my_spacials)
+    my_specials = [x for x in tokenizer.additional_special_tokens if not "<extra_id"  in x]
+    mlog.info("list of spcial tokens: %s", my_specials)
     extra = "_" + now
     m_name = model_id + "-" + method
     if do_eval:
@@ -1254,17 +1255,29 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
 @click.option(
     "--models_dir",
     "-m",
-    default="/home/pouramini/pret",
+    default="/home/pouramini",
     type=str,
     help=""
 )
-def create_confs(experiment, models_dir):
+@click.option(
+    "--clean",
+    "-c",
+    is_flag=True,
+    help=""
+)
+def create_exp(experiment, models_dir, clean):
     #cccccccccccc
-    print("Creating configurations...")
     base_dir = home
-    conf = os.path.join(base_dir, "logs/confs/conf_test.json")
+    conf = os.path.join(base_dir, "logs/confs/exp_conf.json")
     save_path = os.path.join(base_dir, "mt5-comet/comet/train/")
     conf_path = os.path.join(save_path,"confs")
+    if clean:
+        cur_files = glob.glob(f"{conf_path}/*")
+        mlog.info("Cleaning previous exps ... %s", len(cur_files))
+        for f in cur_files: 
+            os.remove(f)
+
+    mlog.info("Creating configurations...%s ", conf_path)
     Path(conf_path).mkdir(exist_ok=True, parents=True)
     if Path(conf).exists():
        with open(conf, 'r') as f:
@@ -1274,12 +1287,11 @@ def create_confs(experiment, models_dir):
         return
     samples = 300
     args["experiment"] = experiment
-    args["train_samples"] = samples
-    args["val_samples"] = 50
+    args["test_samples"] = 5000
     args["cycle"] = 0
     args["load_path"] = os.path.join(models_dir, "pret")
-    args["save_path"] = os.path.join(models_dir, "logs")
-    args["overwrite"] = experiment
+    args["save_path"] = os.path.join(models_dir, "pret", experiment)
+    Path(args["save_path"]).mkdir(exist_ok=True, parents=True)
     args["cpu"] = False 
     args["config"] = False 
     args["batch_size"] = 2 
@@ -1287,36 +1299,33 @@ def create_confs(experiment, models_dir):
     args["exclude"] = "natural" 
     models = {"t5-base":True}
     langs = {"en":True}
-    methods = {"unsup":True, "sup":True,"unsup-tokens":True, "sup-tokens": True}
-    to_wrap = {"wrapped":True, "unwrapped": True}
-    to_freez = {"freezed":True, "unfreezed": True}
+    methods = {"unsup":"unwrapped", "sup":"unwrapped",
+            "unsup-tokens":"wrapped-unwrapped", "sup-tokens": "wrapped-unwrapped"}
     ii = 0
     for model in [k for k in models.keys() if models[k]]:
-        for lang in [k for k in langs.keys() if langs[k]]: 
-            for method in [k for k in methods.keys() if methods[k]]:
-                for w in [k for k in to_wrap.keys() if to_wrap[k]]:
-                   for f in [k for k in to_freez.keys() if to_freez[k]]:
-                       if method == "context-en" and lang == "en":
-                           continue
-                       if method == "context-fa" and lang == "fa":
-                           continue
-                       if f == "freezed" and method == "sup" and w == "unwrapped":
-                           continue
-                       args["model_id"]= model
-                       args["frozen"] = False
-                       if f == "freezed":
-                           args["frozen"] = True
-                       args["wrap"] = ""
-                       if w == "wrapped":
-                           args["wrap"] = "xIntent"
-                       name = f"{experiment}_{model}-{samples}_{lang}_{method}_{w}_{f}"
-                       args["output_name"] = name
-                       #name = name.replace("_unwrapped", "")
-                       #name = name.replace("_unfreezed", "")
-                       ii +=1
-                       print(str(ii) + ":" + name)
-                       with open(os.path.join(conf_path, f'{name}.json'), 'w') as outfile:
-                                json.dump(args, outfile, indent=4)
+        for method,wrap in methods.items():
+            for w in wrap.split("-"): 
+                for samples in [900, 9000, 27000]:
+                   args["train_samples"] = samples
+                   args["is_even"] = False
+                   args["model_id"]= model
+                   args["frozen"] = False
+                   if w == "wrapped":
+                       args["frozen"] = True
+                   args["wrap"] = ""
+                   args["batch_size"] = 8 
+                   if w == "wrapped":
+                       args["wrap"] = True
+                       args["batch_size"] = 30 
+                   name = f"{experiment}_{model}-{samples}_{method}_{w}"
+                   args["output_name"] = name
+                   args["overwrite"] = name
+                   #name = name.replace("_unwrapped", "")
+                   #name = name.replace("_unfreezed", "")
+                   ii +=1
+                   print(str(ii) + ":" + name)
+                   with open(os.path.join(conf_path, f'{name}.json'), 'w') as outfile:
+                            json.dump(args, outfile, indent=4)
 
 
 def translate(model, tokenizer, df, trans_col, path, logger=None, start=0, save_path=""):

@@ -217,7 +217,8 @@ def create_encoder(name, model, tokenizer, prompt_tokens, encoder_type="lstm",
     rel_tokens = prompt_tokens + common_tokens
     mlog.info("** rel tokens : %s", rel_tokens)
     cur_list = tokenizer.additional_special_tokens
-    mlog.info("** cur tokens : %s", cur_list)
+    my_specials = [x for x in cur_list if not "<extra_id"  in x]
+    mlog.info("** cur tokens : %s", my_specials)
 
 
     enc_plen =len(rel_tokens) 
