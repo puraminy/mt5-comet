@@ -92,7 +92,7 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
         if reset_results:
             reset_all_results()
         mlog.info("Reading from conf %s", conf_path)
-        confs = glob.glob(f"{conf_path}/*")
+        confs = sorted(glob.glob(f"{conf_path}/*"))
         default_model = ""
         for conf in confs:
             fname = Path(conf).stem
@@ -108,9 +108,15 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
                    args = json.load(f) 
                args["print_log"] = print_log
                spath = args["save_path"]
-               if glob.glob(os.path.join(spath, "new_result*.json")) and not recal:
+               mlog.info("save path: %s", spath)
+               cur_res_path = os.path.join(spath, args["output_name"], "new_result*")
+               mlog.info("cur_res_path: %s", cur_res_path)
+               cur_res = glob.glob(cur_res_path)
+               mlog.info("cur_res: %s", cur_res)
+               if cur_res and not recal:
                     mlog.info("Skipping .... This was done before %s ", spath)
                     continue
+               raise
                if train_samples > 0:
                    args["train_samples"] = train_samples
                if model_id:
@@ -1347,12 +1353,12 @@ def exp(experiment, model_ids, no_score, keep):
                        args["wrap"] = True
                        args["batch_size"] = 20 if not colab else 48 
                    name = f"{experiment}-{model}-{samples}-{method}-{w}"
-                   args["output_name"] = name
-                   args["overwrite"] = name
                    #name = name.replace("_unwrapped", "")
                    #name = name.replace("_unfreezed", "")
                    ii +=1
                    name = "{:02d}".format(ii) + "_" + name
+                   args["output_name"] = name
+                   args["overwrite"] = name
                    print(name)
                    with open(os.path.join(conf_path, f'{name}.json'), 'w') as outfile:
                             json.dump(args, outfile, indent=4)

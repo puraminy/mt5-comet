@@ -56,8 +56,34 @@ def get_verb(document):
             return w
     return ""
 
+
+def gen_resp(model, tokenizer, queries, gen_token = "", gen_param = "greedy", at_mask=None):
+    decode_method="beam", 
+    num_generate=5, 
+    batch_size = 1 
+    decoder_start_token_id = None
+    with torch.no_grad():
+        examples = queries
+        decs = []
+        for batch in list(chunks(examples, batch_size)):
+            batch = tokenizer(batch, return_tensors="pt", truncation=True, padding="max_length").to(self.device)
+            input_ids, attention_mask = trim_batch(**batch, pad_token_id=self.tokenizer.pad_token_id)
+
+            summaries = model.generate(
+                input_ids=input_ids,
+                attention_mask=attention_mask,
+                decoder_start_token_id=decoder_start_token_id,
+                num_beams=num_generate,
+                num_return_sequences=num_generate,
+                )
+
+            dec = tokenizer.batch_decode(summaries, skip_special_tokens=True, clean_up_tokenization_spaces=False)
+            decs.append(dec)
+
+        return decs
+
 # ggggggggg
-def gen_resp(model, tokenizer, query, gen_token = "", gen_param = "greedy", at_mask=None):
+def gen_resp2(model, tokenizer, queries, gen_token = "", gen_param = "greedy", at_mask=None):
     skip_special = "True"
     #verb = get_verb(query)
     #vlog.info("Ignoring verb %s", verb)
@@ -86,7 +112,7 @@ def gen_resp(model, tokenizer, query, gen_token = "", gen_param = "greedy", at_m
             "repetition_penalty":3.5,
             "bad_words_ids": bad_words_ids
         }
-    inputs = tokenizer(query,return_tensors='pt').to(device=device)
+    inputs = tokenizer(queries,return_tensors='pt').to(device=device)
     if False: #gen_token != "":
         gen_token_id = tokenizer.convert_tokens_to_ids(gen_token)
         hyps = model.generate(**inputs,**generation_params,
@@ -211,6 +237,8 @@ def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info,
             break
         query, tail, rel, lang, qid = batch
         tails = [tail]
+        hyps = gen_resp(model, tokenizer, query, gen_token, gen_param, at_mask)
+        for 
         data = {}
         scope = rel + "_" + lang
         if not scope in sum_bert: 
@@ -228,7 +256,6 @@ def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info,
             if query == "c":
                 interactive = False
         gen_token = gen_tokens[lang]
-        hyps = gen_resp(model, tokenizer, query, gen_token, gen_param, at_mask)
         input_text = re.sub(r'<.*?>','##',query)
         top_hyp = hyps[0]
         for const in resp_const_parts:
