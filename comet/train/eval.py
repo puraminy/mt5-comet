@@ -56,18 +56,27 @@ def get_verb(document):
             return w
     return ""
 
+def trim_batch(
+    input_ids, pad_token_id, attention_mask=None,
+):
+    """Remove columns that are populated exclusively by pad_token_id"""
+    keep_column_mask = input_ids.ne(pad_token_id).any(dim=0)
+    if attention_mask is None:
+        return input_ids[:, keep_column_mask]
+    else:
+        return (input_ids[:, keep_column_mask], attention_mask[:, keep_column_mask])
 
 def gen_resp(model, tokenizer, queries, gen_token = "", gen_param = "greedy", at_mask=None):
     decode_method="beam", 
     num_generate=5, 
-    batch_size = 1 
+    batch_size = 3 
     decoder_start_token_id = None
     with torch.no_grad():
         examples = queries
         decs = []
         for batch in list(chunks(examples, batch_size)):
-            batch = tokenizer(batch, return_tensors="pt", truncation=True, padding="max_length").to(self.device)
-            input_ids, attention_mask = trim_batch(**batch, pad_token_id=self.tokenizer.pad_token_id)
+            batch = tokenizer(batch, return_tensors="pt", truncation=True, padding=True).to(device)
+            input_ids, attention_mask = trim_batch(**batch, pad_token_id=tokenizer.pad_token_id)
 
             summaries = model.generate(
                 input_ids=input_ids,
@@ -83,7 +92,7 @@ def gen_resp(model, tokenizer, queries, gen_token = "", gen_param = "greedy", at
         return decs
 
 # ggggggggg
-def gen_resp2(model, tokenizer, queries, gen_token = "", gen_param = "greedy", at_mask=None):
+def gen_resp2(model, tokenizer, queries, batch_size=5, gen_token = "", gen_param = "greedy", at_mask=None):
     skip_special = "True"
     #verb = get_verb(query)
     #vlog.info("Ignoring verb %s", verb)
@@ -97,7 +106,7 @@ def gen_resp2(model, tokenizer, queries, gen_token = "", gen_param = "greedy", a
             "max_length":260,
             "num_beams":4,
             "repetition_penalty":5.5,
-            "num_return_sequences":3,
+            "num_return_sequences":1,
             "bad_words_ids": bad_words_ids
         }
     elif gen_param == "top_p":
@@ -112,16 +121,21 @@ def gen_resp2(model, tokenizer, queries, gen_token = "", gen_param = "greedy", a
             "repetition_penalty":3.5,
             "bad_words_ids": bad_words_ids
         }
-    inputs = tokenizer(queries,return_tensors='pt').to(device=device)
-    if False: #gen_token != "":
-        gen_token_id = tokenizer.convert_tokens_to_ids(gen_token)
-        hyps = model.generate(**inputs,**generation_params,
-                decoder_start_token_id=gen_token_id)
-        hyps = tokenizer.batch_decode(hyps,skip_special_tokens=True)
-    else:
-        hyps = model.generate(**inputs,**generation_params)
-        hyps = tokenizer.batch_decode(hyps,skip_special_tokens=skip_special == "True")
-    return hyps
+    with torch.no_grad():
+        examples = queries
+        decs = []
+        for batch in list(chunks(queries, batch_size)):
+            inputs = tokenizer(batch, return_tensors="pt", truncation=True, padding=True).to(device)
+            if False: #gen_token != "":
+                gen_token_id = tokenizer.convert_tokens_to_ids(gen_token)
+                hyps = model.generate(**inputs,**generation_params,
+                        decoder_start_token_id=gen_token_id)
+                hyps = tokenizer.batch_decode(hyps,skip_special_tokens=True)
+            else:
+                hyps = model.generate(**inputs,**generation_params)
+                hyps = tokenizer.batch_decode(hyps,skip_special_tokens=skip_special == "True")
+                decs.extend(hyps)
+    return decs
 
 def bert_score(bert_scorer, hyps, refs):
         if bert_scorer == None:
@@ -170,6 +184,17 @@ def save_results(results, fid, step, results_info, save_path=""):
             json.dump(results, f, indent=2)
 # vvvvvvvvvvvvvvv
 # ################################### Evaluation #########################
+def chunks(lst, n):
+    """Yield successive n-sized chunks from lst."""
+    for i in range(0, len(lst), n):
+        yield lst[i : i + n]
+
+def batched(iterable, n=1):
+    l = len(iterable)
+    for ndx in range(0, l, n):
+        yield iterable[ndx:min(ndx + n, l)]
+
+
 def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info, val_records, gen_param="greedy", at_mask = None, no_score=False):  
 
     try:
@@ -228,142 +253,142 @@ def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info,
     mlog.info("Scoring...")
     pbar = tqdm(total=val_records, position=0, leave=True) #,dynamic_ncols=True)
     step = 0
-    while True:
-        try:
-            batch = next(test_iter)
-            step += 1
-        except StopIteration:
-            tlog.info("Stop Iteration occured at %s", step)
-            break
-        query, tail, rel, lang, qid = batch
-        tails = [tail]
-        hyps = gen_resp(model, tokenizer, query, gen_token, gen_param, at_mask)
-        for 
-        data = {}
-        scope = rel + "_" + lang
-        if not scope in sum_bert: 
-            sum_bert[scope] = 0
-            sum_rouge[scope] = 0
-            sum_bleu[scope] = 0
-            sum_match[scope] = 0
-            counter[scope] = 0
-        vlog.debug("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
-        if interactive: #interactive mode
-            query = get_input("Enter an even or Enter) skip, c) continue, e) exit.")
-            resp = "NA"
-            if query == "e":
-                return data_split, flat_data, kk
-            if query == "c":
-                interactive = False
-        gen_token = gen_tokens[lang]
-        input_text = re.sub(r'<.*?>','##',query)
-        top_hyp = hyps[0]
-        for const in resp_const_parts:
-            top_hyp = top_hyp.replace(const, "")
-        if not top_hyp.strip():
-            top_hyp = "EMPT"
-        new_tails = []
-        for tail in tails:
-            if not tail.strip():
+    for batch_list in batched(list(test_iter), 20):
+        queries = [x[0] for x in batch_list]
+        hyps = gen_resp2(model, tokenizer, queries, batch_size = 5)
+        pbar.update(20)
+        for (query, tail, rel, lang, qid), top_hyp in zip(batch_list, hyps):
+            tails = [tail]
+            data = {}
+            data["qid"] = qid
+            data["pred_text1"] = top_hyp
+            data["target_text"] = "<br />".join(tails)
+            data["prefix"] = rel
+            data["langs"] = lang
+            input_text = re.sub(r'<.*?>','##',query)
+            data["input_text"] = input_text 
+            if no_score:
+                dictPath(str(qid) + "_" + results_info, new_results, data, sep="_")
+                if step % 10000 == 0:
+                    save_results(new_results, "new", step, results_info)
+                step += 1
                 continue
-            nt = tail
+            scope = rel + "_" + lang
+            if not scope in sum_bert: 
+                sum_bert[scope] = 0
+                sum_rouge[scope] = 0
+                sum_bleu[scope] = 0
+                sum_match[scope] = 0
+                counter[scope] = 0
+            vlog.debug("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
+            if interactive: #interactive mode
+                query = get_input("Enter an even or Enter) skip, c) continue, e) exit.")
+                resp = "NA"
+                if query == "e":
+                    return data_split, flat_data, kk
+                if query == "c":
+                    interactive = False
+            gen_token = gen_tokens[lang]
             for const in resp_const_parts:
-                nt = nt.replace(const,"")
-            new_tails.append(nt)
-        tails = new_tails
-        data["qid"] = qid
-        data["pred_text1"] = top_hyp
-        #Compute embeddings
-        hi, ri, cur_score = bert_score(bert_scorer, hyps, tails)
-        best_hyp = hyps[hi]
-        best_ref = tails[ri]
-        hyp_counter[hi] += 1
-        if nli_model:
-            pair = (best_hyp, best_ref)
-            nli_scores = nli_model.predict(pair)  
-            _max  = nli_scores.argmax()
-            label = nli_map[_max]
-            nli_counter[label] += 1
-            data["nli_group"] = label
-            vlog.info("Label:"+ label)
-        data["top"] = best_ref
-        data["input_text"] = input_text 
-        data["all_preds"] = "<br />".join(hyps) 
-        data["target_text"] = "<br />".join(tails)
-        data["prefix"] = rel
-        data["langs"] = lang
-        data["top_pred"] = best_hyp
-        data["bert_score"] = float("{:.2f}".format(cur_score))
-        sum_bert[scope] += cur_score
-        sum_bert["all"] += cur_score
-        counter[scope] += 1
-        counter["all"] += 1
-        mean_bert[scope] = "{:.4f}".format(sum_bert[scope] / counter[scope])
-        mean_bert["all"] = "{:.4f}".format(sum_bert["all"] / counter["all"])
-        #tqdm.write(f"Mean score:{mean_bert}")
-        vlog.info("")
-        vlog.info(f"=============   {lang}  ===  {rel}   =====================")
-        _q = query.replace("<", "\n<", 1)
-        _q = _q.replace(">", ">\n")
-        data["prompt"] = _q
-        vlog.info(str(counter["all"])+ ":" + _q)
-        vlog.info("'''''''''''''''''''''''''''''''''''''''''' Preds:")
-        for h in hyps: 
-            if h == best_hyp:
-                h += " (***) " 
-            vlog.info(h)
-        vlog.debug('"""""""""""""""""""""""""""""""""""""""" Targets:')
-        for _tail in tails:
-            if _tail == best_ref:
-                _tail += "(*)" 
-            vlog.debug(_tail)
+                top_hyp = top_hyp.replace(const, "")
+            if not top_hyp.strip():
+                top_hyp = "EMPT"
+            new_tails = []
+            for tail in tails:
+                if not tail.strip():
+                    continue
+                nt = tail
+                for const in resp_const_parts:
+                    nt = nt.replace(const,"")
+                new_tails.append(nt)
+            tails = new_tails
+            #Compute embeddings
+            hi, ri, cur_score = bert_score(bert_scorer, hyps, tails)
+            best_hyp = hyps[hi]
+            best_ref = tails[ri]
+            hyp_counter[hi] += 1
+            if nli_model:
+                pair = (best_hyp, best_ref)
+                nli_scores = nli_model.predict(pair)  
+                _max  = nli_scores.argmax()
+                label = nli_map[_max]
+                nli_counter[label] += 1
+                data["nli_group"] = label
+                vlog.info("Label:"+ label)
+            data["top"] = best_ref
+            data["all_preds"] = "<br />".join(hyps) 
+            data["top_pred"] = best_hyp
+            data["bert_score"] = float("{:.2f}".format(cur_score))
+            sum_bert[scope] += cur_score
+            sum_bert["all"] += cur_score
+            counter[scope] += 1
+            counter["all"] += 1
+            mean_bert[scope] = "{:.4f}".format(sum_bert[scope] / counter[scope])
+            mean_bert["all"] = "{:.4f}".format(sum_bert["all"] / counter["all"])
+            #tqdm.write(f"Mean score:{mean_bert}")
+            vlog.info("")
+            vlog.info(f"=============   {lang}  ===  {rel}   =====================")
+            _q = query.replace("<", "\n<", 1)
+            _q = _q.replace(">", ">\n")
+            data["prompt"] = _q
+            vlog.info(str(counter["all"])+ ":" + _q)
+            vlog.info("'''''''''''''''''''''''''''''''''''''''''' Preds:")
+            for h in hyps: 
+                if h == best_hyp:
+                    h += " (***) " 
+                vlog.info(h)
+            vlog.debug('"""""""""""""""""""""""""""""""""""""""" Targets:')
+            for _tail in tails:
+                if _tail == best_ref:
+                    _tail += "(*)" 
+                vlog.debug(_tail)
 
-        vlog.info("'''''''''''''''''''''''''''''''''''''''''''''''''''''")
-        mlog.debug(f"TOP hyp:{top_hyp}")
-        mlog.debug(f"Tails: {tails}")
-        #### BLUE score
-        #tokenized_rs = []
-        #for r in tails:
-        #    tokenized_rs.append(word_tokenize(r))
-        #hypo = word_tokenize(top_hyp)
-        bleu_score = 0.0
-        #try:
-        #    bleu_score = sentence_bleu(tokenized_rs, hypo, smoothing_function=smoothie)
-        #except ValueError: # TODO ZeroDivisionError
-        #    vlog.warning("math domain error in bleu, set to 0.0. generated sentence: {}".format(hypo))
-        data["bleu_score"] = bleu_score 
-        sum_bleu[scope] += bleu_score 
-        mean_bleu[scope] = "{:.4f}".format(sum_bleu[scope] / counter[scope])
-        #### Rouge score
-        rouge_score = 0
-        if not no_score:
-            rouge_score = rouge_scorer.get_scores(top_hyp, ".".join(tails), 
-                                            avg=True, ignore_empty=True)
-            rouge_score = rouge_score["rouge-l"]["f"]
-        match_score = 0
-        if rouge_score > 0.9:
-            match_score = 1
-            sum_match[scope] += 1
-        mean_match[scope] = "{:.4f}".format(sum_match[scope] / counter[scope])
+            vlog.info("'''''''''''''''''''''''''''''''''''''''''''''''''''''")
+            mlog.debug(f"TOP hyp:{top_hyp}")
+            mlog.debug(f"Tails: {tails}")
+            #### BLUE score
+            #tokenized_rs = []
+            #for r in tails:
+            #    tokenized_rs.append(word_tokenize(r))
+            #hypo = word_tokenize(top_hyp)
+            bleu_score = 0.0
+            #try:
+            #    bleu_score = sentence_bleu(tokenized_rs, hypo, smoothing_function=smoothie)
+            #except ValueError: # TODO ZeroDivisionError
+            #    vlog.warning("math domain error in bleu, set to 0.0. generated sentence: {}".format(hypo))
+            data["bleu_score"] = bleu_score 
+            sum_bleu[scope] += bleu_score 
+            mean_bleu[scope] = "{:.4f}".format(sum_bleu[scope] / counter[scope])
+            #### Rouge score
+            rouge_score = 0
+            if not no_score:
+                rouge_score = rouge_scorer.get_scores(top_hyp, ".".join(tails), 
+                                                avg=True, ignore_empty=True)
+                rouge_score = rouge_score["rouge-l"]["f"]
+            match_score = 0
+            if rouge_score > 0.9:
+                match_score = 1
+                sum_match[scope] += 1
+            mean_match[scope] = "{:.4f}".format(sum_match[scope] / counter[scope])
 
-        data["rouge_score"] = rouge_score
-        sum_rouge[scope] += rouge_score
-        sum_rouge["all"] += rouge_score
-        mean_rouge[scope] = "{:.4f}".format(sum_rouge[scope] / counter[scope])
-        mean_rouge["all"] = "{:.4f}".format(sum_rouge["all"] / counter["all"])
-        vlog.info("Bert Score:{:.4f}--{}".format(cur_score, mean_bert[scope]))
-        vlog.info("Rouge Score:{:.4f}--{}".format(rouge_score, mean_rouge[scope]))
-        vlog.info("Match Score:{}--{}".format(match_score, mean_match[scope]))
-        #vlog.info("BLEU Score:{:.4f}--{}".format(bleu_score, mean_bleu[scope]))
-        vlog.info("======================================================")
-        pbar.set_description(f"{scope:<20} :Bert:{mean_bert[scope]:<7} | {mean_bert['all']:<7} Rouge {mean_rouge[scope]:<7}|{mean_rouge['all']:<7} ")
-        pbar.update(1)
-        #dictPath(str(qid) + "_" + results_info, full_results, data, sep="_")
-        dictPath(str(qid) + "_" + results_info, new_results, data, sep="_")
-        if step % 10000 == 0:
-            #save_results(full_results, "full", step, results_info)
-            save_results(new_results, "new", step, results_info)
-        rows.append(data)
+            data["rouge_score"] = rouge_score
+            sum_rouge[scope] += rouge_score
+            sum_rouge["all"] += rouge_score
+            mean_rouge[scope] = "{:.4f}".format(sum_rouge[scope] / counter[scope])
+            mean_rouge["all"] = "{:.4f}".format(sum_rouge["all"] / counter["all"])
+            vlog.info("Bert Score:{:.4f}--{}".format(cur_score, mean_bert[scope]))
+            vlog.info("Rouge Score:{:.4f}--{}".format(rouge_score, mean_rouge[scope]))
+            vlog.info("Match Score:{}--{}".format(match_score, mean_match[scope]))
+            #vlog.info("BLEU Score:{:.4f}--{}".format(bleu_score, mean_bleu[scope]))
+            vlog.info("======================================================")
+            pbar.set_description(f"{scope:<20} :Bert:{mean_bert[scope]:<7} | {mean_bert['all']:<7} Rouge {mean_rouge[scope]:<7}|{mean_rouge['all']:<7} ")
+            pbar.update(1)
+            #dictPath(str(qid) + "_" + results_info, full_results, data, sep="_")
+            dictPath(str(qid) + "_" + results_info, new_results, data, sep="_")
+            if step % 10000 == 0:
+                #save_results(full_results, "full", step, results_info)
+                save_results(new_results, "new", step, results_info)
+            rows.append(data)
 
     # %%%%%%%%%%%%%%%%%%
     dictPath(str(qid) + "_" + results_info, new_results, data, sep="_")
