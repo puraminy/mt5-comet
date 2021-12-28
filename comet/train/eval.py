@@ -401,9 +401,9 @@ def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info,
     mlog.info("Pred counts")
     vlog.info("Pred counts")
     if len(pred_counts) < 100:
-        for i, r in pred_counts.iterrows():
-            mlog.info(r["pred_text1"])
-            vlog.info(r["pred_text1"])
+        for  r in pred_counts:
+            mlog.info(r)
+            vlog.info(r)
 
     res = {}
     res["rouge"] = mean_rouge
