@@ -9,31 +9,6 @@ from rouge import Rouge
 #%% Aggregate instances of queries and corresponding responses
 # (str)split_name -> (dict) query -> (list) response 
 
-results = {}
-resFile = os.path.join(resPath, "results.json")
-if Path(resFile).exists():
-    with open(resFile, "r") as f:
-        mlog.info("Reading stored results...")
-        results = json.load(f)
-
-full_results = {}
-#resFile = os.path.join(resPath, "full_results.json")
-#if Path(resFile).exists():
-#    try:
-#        with open(resFile, "r") as f:
-#            mlog.info("Reading stored full_results ...")
-#            full_results = json.load(f)
-#    except:
-#        full_results = {}
-def reset_all_results():
-    global results, new_results, full_results
-    with open(os.path.join(resPath, f"results_{now}.json"), "w") as f:
-        json.dump(results, f, indent=2)
-    with open(os.path.join(resPath, f"full_results_{now}.json"), "w") as f:
-        json.dump(full_results, f, indent=2)
-    results = {}
-    full_results = {}
-
 device = "cpu"
 def set_device(dev):
     global device
@@ -66,33 +41,8 @@ def trim_batch(
     else:
         return (input_ids[:, keep_column_mask], attention_mask[:, keep_column_mask])
 
-def gen_resp(model, tokenizer, queries, gen_token = "", gen_param = "greedy", at_mask=None):
-    decode_method="beam", 
-    num_generate=5, 
-    batch_size = 3 
-    decoder_start_token_id = None
-    with torch.no_grad():
-        examples = queries
-        decs = []
-        for batch in list(chunks(examples, batch_size)):
-            batch = tokenizer(batch, return_tensors="pt", truncation=True, padding=True).to(device)
-            input_ids, attention_mask = trim_batch(**batch, pad_token_id=tokenizer.pad_token_id)
-
-            summaries = model.generate(
-                input_ids=input_ids,
-                attention_mask=attention_mask,
-                decoder_start_token_id=decoder_start_token_id,
-                num_beams=num_generate,
-                num_return_sequences=num_generate,
-                )
-
-            dec = tokenizer.batch_decode(summaries, skip_special_tokens=True, clean_up_tokenization_spaces=False)
-            decs.append(dec)
-
-        return decs
-
 # ggggggggg
-def gen_resp2(model, tokenizer, queries, batch_size=5, gen_token = "", gen_param = "greedy", at_mask=None):
+def generate(model, tokenizer, queries, batch_size=5, gen_token = "", gen_param = "greedy", at_mask=None):
     skip_special = "True"
     #verb = get_verb(query)
     #vlog.info("Ignoring verb %s", verb)
@@ -125,14 +75,17 @@ def gen_resp2(model, tokenizer, queries, batch_size=5, gen_token = "", gen_param
         examples = queries
         decs = []
         for batch in list(chunks(queries, batch_size)):
-            inputs = tokenizer(batch, return_tensors="pt", truncation=True, padding=True).to(device)
+            batch = tokenizer(batch, return_tensors="pt", truncation=True, padding=True).to(device)
+            input_ids, attention_mask = trim_batch(**batch, pad_token_id=tokenizer.pad_token_id)
             if False: #gen_token != "":
                 gen_token_id = tokenizer.convert_tokens_to_ids(gen_token)
-                hyps = model.generate(**inputs,**generation_params,
+                hyps = model.generate(input_ids=input_ids,**generation_params,
+                        attention_mask=attention_mask,
                         decoder_start_token_id=gen_token_id)
                 hyps = tokenizer.batch_decode(hyps,skip_special_tokens=True)
             else:
-                hyps = model.generate(**inputs,**generation_params)
+                hyps = model.generate(input_ids=input_ids,**generation_params,
+                        attention_mask=attention_mask)
                 hyps = tokenizer.batch_decode(hyps,skip_special_tokens=skip_special == "True")
                 decs.extend(hyps)
     return decs
@@ -165,23 +118,20 @@ def bert_score(bert_scorer, hyps, refs):
 
         return best_hyp_index, best_ref_index, top["score"] 
 
-def save_results(results, fid, step, results_info, save_path=""):
+def save_results(rows, fid, step, exp_info, save_path=""):
     name = fid + "_results_" + (human_format(step) if step > 0 else "full") 
-    path = os.path.join(resPath, name + ".json")
+    _info = "_".join(list(exp_info.values()))
+    path = os.path.join(resPath, name + "_" + _info + ".tsv")
     mlog.info("Saving results %s", path)
-    with open(path, "w") as f:
-        json.dump(results, f, indent=2)
+    df = pd.DataFrame(rows)
+    for key, info in exp_info.items():
+        df[key] = info
+    df.to_csv(path, index=False, sep="\t")
     if save_path:
-        path = os.path.join(save_path, name + ".json")
+        path = os.path.join(save_path, name + ".tsv")
         mlog.info("Saving results %s", path)
-        with open(path, "w") as f:
-            json.dump(results, f, indent=2)
-    if step < 0:
-        with open(os.path.join(resPath, name + "_" + results_info + ".json"), "w") as f:
-            json.dump(results, f, indent=2)
-    if colab and step < 0:
-        with open(os.path.join(logPath, name + results_info + ".json"), "w") as f:
-            json.dump(results, f, indent=2)
+        df.to_csv(path, index=False, sep="\t")
+    return df
 # vvvvvvvvvvvvvvv
 # ################################### Evaluation #########################
 def chunks(lst, n):
@@ -195,7 +145,7 @@ def batched(iterable, n=1):
         yield iterable[ndx:min(ndx + n, l)]
 
 
-def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info, val_records, gen_param="greedy", at_mask = None, no_score=False):  
+def evaluate(model, tokenizer, dataloader, save_path, exp_info, val_records, gen_param="greedy", no_score=False):  
 
     try:
         nltk_path = str(nltk.data.find("tokenizers/punkt"))
@@ -257,12 +207,13 @@ def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info,
     vlog.disabled = True
     for batch_list in batched(list(test_iter), bs):
         queries = [x[0] for x in batch_list]
-        hyps = gen_resp2(model, tokenizer, queries, batch_size = 20)
+        hyps = generate(model, tokenizer, queries, batch_size = 20)
         pbar.update(bs)
         for (query, tail, rel, lang, qid), top_hyp in zip(batch_list, hyps):
             tails = [tail]
             data = {}
             data["qid"] = qid
+            data["tid"] = qid
             for const in resp_const_parts:
                 top_hyp = top_hyp.replace(const, "")
             if not top_hyp.strip():
@@ -283,10 +234,10 @@ def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info,
             input_text = re.sub(r'<.*?>','##',query)
             data["input_text"] = input_text 
             if no_score:
-                dictPath(str(qid) + "_" + results_info, new_results, data, sep="_")
                 if step % 10000 == 0:
-                    save_results(new_results, "new", step, results_info)
+                    save_results(rows, "new", step, exp_info)
                 step += 1
+                rows.append(data)
                 continue
             scope = rel + "_" + lang
             if not scope in sum_bert: 
@@ -296,13 +247,6 @@ def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info,
                 sum_match[scope] = 0
                 counter[scope] = 0
             vlog.debug("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
-            if interactive: #interactive mode
-                query = get_input("Enter an even or Enter) skip, c) continue, e) exit.")
-                resp = "NA"
-                if query == "e":
-                    return data_split, flat_data, kk
-                if query == "c":
-                    interactive = False
             gen_token = gen_tokens[lang]
             #Compute embeddings
             preds = [top_hyp]
@@ -385,23 +329,20 @@ def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info,
             #vlog.info("BLEU Score:{:.4f}--{}".format(bleu_score, mean_bleu[scope]))
             vlog.info("======================================================")
             pbar.set_description(f"{scope:<20} :Bert:{mean_bert[scope]:<7} | {mean_bert['all']:<7} Rouge {mean_rouge[scope]:<7}|{mean_rouge['all']:<7} ")
-            #dictPath(str(qid) + "_" + results_info, full_results, data, sep="_")
             step += 1
-            dictPath(str(qid) + "_" + results_info, new_results, data, sep="_")
             if step % 10000 == 0:
-                #save_results(full_results, "full", step, results_info)
-                save_results(new_results, "new", step, results_info)
+                save_results(rows, "new", step, exp_info)
             rows.append(data)
 
     # %%%%%%%%%%%%%%%%%%
-    dictPath(str(qid) + "_" + results_info, new_results, data, sep="_")
-    save_results(new_results, "new", val_records, results_info, save_path)
-
+    new_df = save_results(rows, "new", val_records, exp_info, save_path)
     if no_score:
         return
 
 
-    out = os.path.join(logPath,f"__{results_info}.txt")
+    new_df = new_df.sort_values(by=["input_text"])
+    _info = "_".join(list(exp_info.values()))
+    out = os.path.join(logPath,f"__{_info}.txt")
     def write_preds(new_df, out):
         handler = logging.FileHandler(out, mode="w")
         mlog.addHandler(handler)
@@ -423,9 +364,6 @@ def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info,
             for ans in answers.split("<br />"):
                 mlog.info("{:<60}:".format(ans))
 
-    if rows:
-        new_df = pd.DataFrame(rows)
-        new_df = new_df.sort_values(by=["input_text"])
 
 
     for metric in [mean_rouge, mean_bert, mean_match, mean_bleu]:
@@ -450,14 +388,6 @@ def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info,
         print("{:<40}:".format(mean_match_str), file = f)
     mlog.info("-----------------------------------------------------")
     pbar.close()
-    #out1 = os.path.join(save_path,f"scored_{results_info}.tsv")
-    #out2 = os.path.join(resPath,f"scored_{results_info}.tsv")
-    #out3 = os.path.join(logPath,f"scored_{results_info}.tsv")
-
-    #new_df.to_csv(out1, sep="\t", index=False)
-    #new_df.to_csv(out2, sep="\t", index=False)
-    #if colab:
-    #   new_df.to_csv(out3, sep="\t", index=False)
     pred_counts = new_df['pred_text1'].unique()
     mlog.info("Pred counts")
     vlog.info("Pred counts")
@@ -466,22 +396,7 @@ def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info,
             mlog.info(r)
             vlog.info(r)
 
-    res = {}
-    res["rouge"] = mean_rouge
-    res["bert"] = mean_bert
-    #res["bleu"] = mean_bleu
-    #res["match"] = mean_match
-    res["distinct"] ="{} avg: {:.2f}".format(len(pred_counts), len(pred_counts)/len(new_df))
-    res["hyps"] = hyp_counter
-    df_mean_rouge = float(mean_rouge["all"].split("--")[0])
-
-    if df_mean_rouge < 0.10:
-        mlog.info("Skipping saving the results!!!!!!! df mean rouge is low %s", df_mean_rouge)
-    else:
-        dictPath(results_info, results, res, sep="_")
-        #save_results(results, "results", -1, results_info)
-        #save_results(full_results, "full", -1, results_info)
-
+    df_mean_rouge = new_df["rouge_score"].mean()
     for logger in [mlog, vlog, clog]:
         logger.info("Len data frame: {}".format(len(new_df)))
         logger.info("Rouge:{} Match: {} BERT: {} BLEU: {}".format(mean_rouge_str, 

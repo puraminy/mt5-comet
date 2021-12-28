@@ -77,20 +77,12 @@ from tqdm import tqdm
     type=str,
     help=""
 )
-@click.option(
-    "--reset_results",
-    "-reset",
-    is_flag=True,
-    help=""
-)
 @click.pass_context
 #rrrrrrrrrrr
 def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal, 
-        exclude, reset_results):
+        exclude):
      global results
      if ctx.invoked_subcommand is None:
-        if reset_results:
-            reset_all_results()
         mlog.info("Reading from conf %s", conf_path)
         confs = sorted(glob.glob(f"{conf_path}/*"))
         default_model = ""
@@ -307,12 +299,6 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
     help=""
 )
 @click.option(
-    "--inter",
-    "-inter",
-    is_flag=True,
-    help="Interactive output generation"
-)
-@click.option(
     "--cont",
     "-cont",
     is_flag=True,
@@ -458,12 +444,6 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
     help="Show if data set has equal number of records for each relation" 
 )
 @click.option(
-    "--reset_results",
-    "-reset",
-    is_flag=True,
-    help=""
-)
-@click.option(
     "--start",
     "-start",
     default=0,
@@ -598,7 +578,7 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
     help=""
 )
 def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, test_set, 
-         val_samples, test_samples, load_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, reset_results, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, no_score, train_start, no_save_model):
+         val_samples, test_samples, load_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, no_score, train_start, no_save_model):
 
     #%% some hyper-parameters
 
@@ -619,8 +599,6 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
 
     args = locals() # input parameters
 
-    if reset_results:
-        reset_all_results()
     mlog.info("========================= Version 7 ========================")
     if save_path == "":
         if "ahmad" or "pouramini" in home:
@@ -896,11 +874,14 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     m_name = model_id + "-" + method
     if do_eval:
         m_name = model_id + "-EVAL"
-        results_info = f"{experiment}_{model_id}_{lang}_{method}_{w_str}-{encoder_type}_{f_str}_tr:{training_round}-ep:{epochs_num}-({start}-{train_records})-{val_records}{extra}"
+        exp_info = {"exp":experiment, "model":model_id, "lang": lang, 
+                        "method":method, "wrap": w_str + "-" + encoder_type,
+                        "frozen":f_str, 
+                        "epochs":f"tr:{training_round}-ep:{epochs_num}-({start}-{train_records})-{val_records}", "date":extra}
     if do_eval or (not wrap and frozen):
         mlog.info("Evaluating the model...")
         model.to(device=device)
-        evaluate(model, tokenizer, myds[test_set], inter, underlying_model_name, results_info, val_records, gen_param, no_score=no_score)  
+        evaluate(model, tokenizer, myds[test_set], underlying_model_name, exp_info, val_records, gen_param, no_score=no_score)  
         return
     accumulation_tiny_steps = 2 
     if "gpt" in model_id:
@@ -1258,8 +1239,11 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     if test_set:
         myds = load_data([test_set])
         val_records = myds[test_set].num_records
-        results_info = f"{experiment}_{model_id}_{lang}_{method}_{w_str}-{encoder_type}_{f_str}_tr:{training_round}-ep:{epochs_num}-({start}-{train_records})-{val_records}{extra}"
-        evaluate(model, tokenizer, myds[test_set], inter, save_path, results_info, val_records, gen_param, attention_mask, no_score=no_score)  
+        exp_info = {"exp":experiment, "model":model_id, "lang": lang, 
+                        "method":method, "wrap": w_str + "-" + encoder_type,
+                        "frozen":f_str, 
+                        "epochs":f"tr:{training_round}-ep:{epochs_num}-({start}-{train_records})-{val_records}", "date":extra}
+        evaluate(model, tokenizer, myds[test_set], save_path, exp_info, val_records, gen_param, attention_mask, no_score=no_score)  
     else:
         mlog.info("Test set was not provided.... skip testing...")
         
