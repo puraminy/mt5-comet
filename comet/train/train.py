@@ -1317,8 +1317,7 @@ def exp(experiment, model_ids, no_score, keep):
     args["exclude"] = "natural" 
     langs = {"en":True}
     args["test_samples"] = 4500
-    #methods = {"sup-tokens":"w-u","sup":"u", "sup-nat":"u","unsup":"u","unsup-tokens":"w-u","unsup-nat":"u"}
-    methods = {"sup-nat-tokens":"u","unsup-nat-tokens":"u"}
+    methods = {"sup-tokens":"u","sup":"u", "sup-nat":"u","unsup":"u","unsup-tokens":"w-u","unsup-nat":"u", "sup-nat-tokens":"u","unsup-nat-tokens":"u"}
     samples_list = [270,2700, 27000, 36000]
     ii = 0
     models = model_ids.split("#")

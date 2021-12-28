@@ -401,7 +401,7 @@ def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info,
     mlog.info("Pred counts")
     vlog.info("Pred counts")
     if len(pred_counts) < 100:
-        for i, r in pred_counts:
+        for i, r in pred_counts.iterrows():
             mlog.info(r["pred_text1"])
             vlog.info(r["pred_text1"])
 

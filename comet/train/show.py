@@ -426,12 +426,15 @@ def show_df(df):
         elif not char in ["q", "S","r"]:
             pass
             #mbeep()
-        if char == "S":
+        if char in ["S", "V"]:
             cmd, _ = minput(cmd_win, 0, 1, "File Name (without extension)=", default=dfname, all_chars=True)
             cmd = cmd.split(".")[0]
             if cmd != "<ESC>":
-                dfname = cmd
-                char = "SS"
+                if char == "V":
+                    df.to_csv(os.path.join(base_dir, cmd+".tsv"), sep="\t", index=False)
+                else:
+                    dfname = cmd
+                    char = "SS"
         if char == "SS":
                 main_df.to_csv(os.path.join(base_dir, dfname+".tsv"), sep="\t", index=False)
                 save_obj(dfname, "dfname", dfname)
@@ -597,7 +600,7 @@ def start(stdscr):
 @click.option(
     "--fid",
     "-fid",
-    default="name",
+    default="parent",
     type=str,
     help=""
 )
