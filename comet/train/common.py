@@ -879,7 +879,7 @@ class MyDataset(torch.utils.data.IterableDataset):
         dlog.info("sels: %s", self._sels)
         self.save_path = save_ds_path  + "-".join(self.methods) + \
                 "_" + str(len(split_df)) + "_" + str(self.num_samples) + ".pickle"
-        if Path(self.save_path).is_file() and self.num_samples > 1000 and not self.split_name == "sample":
+        if Path(self.save_path).is_file() and self.num_samples > 100_000 and not self.split_name == "sample":
             mlog.info("Loading from saved data %s ", self.save_path)
             self.load()
 
