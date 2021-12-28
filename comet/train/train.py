@@ -1242,10 +1242,14 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
                     save_path)
 
     #% vvvvvvvvvvvvvvvv
-    myds = load_data([test_set])
-    val_records = myds[test_set].num_records
-    results_info = f"{experiment}_{model_id}_{lang}_{method}_{w_str}-{encoder_type}_{f_str}_tr:{training_round}-ep:{epochs_num}-({start}-{train_records})-{val_records}{extra}"
-    evaluate(model, tokenizer, myds[test_set], inter, save_path, results_info, val_records, gen_param, attention_mask, no_score=no_score)  
+    if test_set:
+        myds = load_data([test_set])
+        val_records = myds[test_set].num_records
+        results_info = f"{experiment}_{model_id}_{lang}_{method}_{w_str}-{encoder_type}_{f_str}_tr:{training_round}-ep:{epochs_num}-({start}-{train_records})-{val_records}{extra}"
+        evaluate(model, tokenizer, myds[test_set], inter, save_path, results_info, val_records, gen_param, attention_mask, no_score=no_score)  
+    else:
+        mlog.info("Test set was not provided.... skip testing...")
+        
 
 #ettt
 
@@ -1299,7 +1303,7 @@ def exp(experiment, model_ids, no_score, keep):
     save_path = os.path.join(pretPath, experiment)
     args["train_path"] = "atomic/train.tsv"
     if not keep and Path(save_path).exists():
-        ans = input("Removing previous experiment with this name?")
+        ans = input(colored("Removing previous experiment with this name?","red"))
         if ans == "y":
             shutil.rmtree(save_path)
 
@@ -1308,7 +1312,7 @@ def exp(experiment, model_ids, no_score, keep):
 
     args["cpu"] = False 
     args["config"] = False 
-    args["batch_size"] = 4 
+    args["batch_size"] = 8 if colab else 4 
     args["gen_param"] = "greedy" 
     args["exclude"] = "natural" 
     langs = {"en":True}
@@ -1328,12 +1332,14 @@ def exp(experiment, model_ids, no_score, keep):
                    args["is_even"] = False
                    args["model_id"]= model
                    args["frozen"] = False
+                   if colab and w == "unwrapped":
+                       args["test_set"] = ""
                    if w == "wrapped":
                        args["frozen"] = True
                    args["wrap"] = ""
                    if w == "wrapped":
                        args["wrap"] = True
-                       args["batch_size"] = 20 
+                       args["batch_size"] = 20 if not colab else 48 
                    name = f"{experiment}-{model}-{samples}-{method}-{w}"
                    args["output_name"] = name
                    args["overwrite"] = name

@@ -1,5 +1,6 @@
 from pathlib import Path
 import math
+from termcolor import colored
 from transformers import AddedToken 
 import pandas as pd
 from comet.utils.myutils import *
@@ -42,54 +43,55 @@ relation_natural_mappings = {
     "oReact":{ 
         "en":"As a result others feel ",
         "fa":"در نتیجه دیگران حس می کنند",
-        "tokens":"<state> <other> <after>"
+        "tokens":"<state> <other> <after>",
         "nat-tokens":"then, the state of others is "
     },
     "xReact":{ 
         "en":"As a result PersonX feels ",
         "fa":"در نتیجه PersonX حس می کند", 
-        "tokens":"<state> <agent> <after>"
+        "tokens":"<state> <agent> <after>",
         "nat-tokens":"then, the state of the person is "
     },
     "xWant":{ 
         "en":"Then PersonX wants ",
         "fa":"بعد از آن PersonX می خواهد",
-        "tokens":"<event> <agent> <after> <want>"
+        "tokens":"<event> <agent> <after> <want>",
         "nat-tokens":"then, the person wants "
     },
     "oWant":{ 
         "en":"Then others want ",
         "fa":"بعد از آن دیگران می خواهند",
-        "tokens":"<event> <other> <after> <want>"
+        "tokens":"<event> <other> <after> <want>",
         "nat-tokens":"then, others want "
     },
     "xEffect":{ 
         "en":"As a result PersonX  ",
         "fa":"در نتیجه PersonX ",
-        "tokens":"<event> <agent> <after> <effect>"
+        "tokens":"<event> <agent> <after> <effect>",
         "nat-tokens":"then, the effect on the person "
     },
     "oEffect":{ 
         "en":"As a result others  ",
         "fa":"در نتیجه دیگران ",
-        "tokens":"<event> <other> <after> <effect>"
+        "tokens":"<event> <other> <after> <effect>",
         "nat-tokens":"then, the effect on others "
     },
     "xAttr":{ 
         "en":"PersonX is seen as",
         "fa":"مردم فکر می کنند PersonX ",
-        "nat-tokens":"always, the state of the person is"
+        "tokens":"<state> <agent> <static>",
+        "nat-tokens":"always, the state of the person is",
     },
     "xIntent":{ 
         "en":"Because PersonX intended ",
         "fa":"زیرا PersonX می خواست",
-        "tokens":"<event> <agent> <before> <cause> <want>"
+        "tokens":"<event> <agent> <before> <cause> <want>",
         "nat-tokens":"before, because the person want "
     },
     "xNeed":{ 
         "en":"Before that, PersonX needs ",
         "fa":"قبل از آن PersonX نیاز دارد",
-        "tokens":"<event> <agent> <before> <cause> <need>"
+        "tokens":"<event> <agent> <before> <cause> <need>",
         "nat-tokens":"before, because the person needs "
     },
 }
