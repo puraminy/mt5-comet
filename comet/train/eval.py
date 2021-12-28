@@ -295,10 +295,10 @@ def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info,
         mlog.debug(f"TOP hyp:{top_hyp}")
         mlog.debug(f"Tails: {tails}")
         #### BLUE score
-        tokenized_rs = []
-        for r in tails:
-            tokenized_rs.append(word_tokenize(r))
-        hypo = word_tokenize(top_hyp)
+        #tokenized_rs = []
+        #for r in tails:
+        #    tokenized_rs.append(word_tokenize(r))
+        #hypo = word_tokenize(top_hyp)
         bleu_score = 0.0
         #try:
         #    bleu_score = sentence_bleu(tokenized_rs, hypo, smoothing_function=smoothie)
