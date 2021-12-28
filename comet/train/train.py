@@ -103,15 +103,14 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
             if exclude and exclude in fname:
                 mlog.info("Skipping .... by exclude")
                 continue
-            val = getVal(fname, results) 
-            mlog.info("current val: {}".format(val))
-            if val != "NA" and not recal:
-                mlog.info("Skipping .... This was done before")
-                continue
             if Path(conf).exists():
                with open(conf, 'r') as f:
                    args = json.load(f) 
                args["print_log"] = print_log
+               spath = args["save_path"]
+               if glob.glob(os.path.join(spath, "new_result*.json")) and not recal:
+                    mlog.info("Skipping .... This was done before %s ", spath)
+                    continue
                if train_samples > 0:
                    args["train_samples"] = train_samples
                if model_id:
