@@ -108,11 +108,11 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
                    args = json.load(f) 
                args["print_log"] = print_log
                spath = args["save_path"]
-               mlog.info("save path: %s", spath)
+               #mlog.info("save path: %s", spath)
                cur_res_path = os.path.join(spath, args["output_name"], "new_result*")
-               mlog.info("cur_res_path: %s", cur_res_path)
+               #mlog.info("cur_res_path: %s", cur_res_path)
                cur_res = glob.glob(cur_res_path)
-               mlog.info("cur_res: %s", cur_res)
+               #mlog.info("cur_res: %s", cur_res)
                if cur_res and not recal:
                     mlog.info("Skipping .... This was done before %s ", spath)
                     continue

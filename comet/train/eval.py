@@ -385,7 +385,6 @@ def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info,
             #vlog.info("BLEU Score:{:.4f}--{}".format(bleu_score, mean_bleu[scope]))
             vlog.info("======================================================")
             pbar.set_description(f"{scope:<20} :Bert:{mean_bert[scope]:<7} | {mean_bert['all']:<7} Rouge {mean_rouge[scope]:<7}|{mean_rouge['all']:<7} ")
-            pbar.update(1)
             #dictPath(str(qid) + "_" + results_info, full_results, data, sep="_")
             step += 1
             dictPath(str(qid) + "_" + results_info, new_results, data, sep="_")
