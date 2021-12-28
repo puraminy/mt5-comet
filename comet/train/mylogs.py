@@ -13,8 +13,10 @@ colab = not "ahmad" in home and not "pouramini" in home
 if not colab: 
     logPath = os.path.join(home, "logs")
     resPath = os.path.join(home, "results") 
+    pretPath = os.path.join(home, "pret") 
 else:
     home = "/content/drive/MyDrive/pouramini"
+    pretPath = "/content/drive/MyDrive/pret"
     logPath = "/content/"
     resPath = "/content/drive/MyDrive/pouramini/results"
 

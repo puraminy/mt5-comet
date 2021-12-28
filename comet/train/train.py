@@ -1252,7 +1252,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
 @run.command()
 @click.argument("experiment", type=str)
 @click.option(
-    "--model",
+    "--model_ids",
     "-m",
     default="t5-base",
     type=str,
@@ -1260,8 +1260,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
 )
 @click.option(
     "--models_dir",
-    "-m",
-    default="/home/pouramini",
+    "-md",
+    default="",
     type=str,
     help=""
 )
@@ -1271,7 +1271,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     is_flag=True,
     help="keep old experiments"
 )
-def exp(experiment, model, models_dir, keep):
+def exp(experiment, model_ids, models_dir, keep):
     #cccccccccccc
     base_dir = home
     if "_" in experiment:
@@ -1295,8 +1295,8 @@ def exp(experiment, model, models_dir, keep):
     samples = 300
     args["experiment"] = experiment
     args["cycle"] = 0
-    args["load_path"] = os.path.join(models_dir, "pret")
-    save_path = os.path.join(models_dir, "pret", experiment)
+    args["load_path"] = pretPath
+    save_path = os.path.join(pretPath, experiment)
     args["train_path"] = "atomic/train.tsv"
     if not keep and Path(save_path).exists():
         ans = input("Removing previous experiment with this name?")
@@ -1311,13 +1311,13 @@ def exp(experiment, model, models_dir, keep):
     args["batch_size"] = 4 
     args["gen_param"] = "greedy" 
     args["exclude"] = "natural" 
-    models = {model:True}
     langs = {"en":True}
     args["test_samples"] = 4500
     methods = {"sup-tokens":"w-u","sup":"u", "sup-nat":"u","unsup":"u","unsup-tokens":"w-u","unsup-nat":"u"}
     samples_list = [270,2700, 27000, 36000]
     ii = 0
-    for model in [k for k in models.keys() if models[k]]:
+    models = model_ids.split("#")
+    for model in models:
         for method,wrap in methods.items():
             for wrap in wrap.split("-"): 
                 for samples in samples_list: 
