@@ -398,13 +398,19 @@ def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info,
     #if colab:
     #   new_df.to_csv(out3, sep="\t", index=False)
     pred_counts = new_df['pred_text1'].unique()
+    mlog.info("Pred counts")
+    vlog.info("Pred counts")
+    if pred_counts < 100:
+        for i, r in pred_counts:
+            mlog.info(r["pred_text1"])
+            vlog.info(r["pred_text1"])
 
     res = {}
     res["rouge"] = mean_rouge
     res["bert"] = mean_bert
     #res["bleu"] = mean_bleu
     #res["match"] = mean_match
-    res["distinct"] ="{} {:.2f}".format(len(pred_counts), len(pred_counts)/len(new_df))
+    res["distinct"] ="{} avg: {:.2f}".format(len(pred_counts), len(pred_counts)/len(new_df))
     res["hyps"] = hyp_counter
     df_mean_rouge = new_df["rouge_score"].mean()
 
