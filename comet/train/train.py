@@ -587,8 +587,14 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
     type=int,
     help=""
 )
+@click.option(
+    "--no_save_model",
+    "-nsm",
+    is_flag=True,
+    help=""
+)
 def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, test_set, 
-         val_samples, test_samples, load_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, reset_results, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, no_score, train_start):
+         val_samples, test_samples, load_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, inter, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, reset_results, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, no_score, train_start, no_save_model):
 
     #%% some hyper-parameters
 
@@ -1237,9 +1243,12 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
             mlog.info("Updating the model weights before evaluaton...")
             wrapped_model.update_model_weight()
     model.eval()
-    save_checkpoint(model, tokenizer, optimizer, scheduler, step, 
-                    best_eval_step, best_dev_loss,
-                    save_path)
+    if not no_save_model:
+        save_checkpoint(model, tokenizer, optimizer, scheduler, step, 
+                        best_eval_step, best_dev_loss,
+                        save_path)
+    else:
+        mlog.info("No save model is on!!")
 
     #% vvvvvvvvvvvvvvvv
     if test_set:
@@ -1298,6 +1307,7 @@ def exp(experiment, model_ids, no_score, keep):
     samples = 300
     args["experiment"] = experiment
     args["cycle"] = 0
+    args["no_save_model"] = True if colab else False
     args["no_score"] = no_score
     args["load_path"] = pretPath
     save_path = os.path.join(pretPath, experiment)
@@ -1312,13 +1322,13 @@ def exp(experiment, model_ids, no_score, keep):
 
     args["cpu"] = False 
     args["config"] = False 
-    args["batch_size"] = 8 if colab else 4 
+    args["batch_size"] = 16 if colab else 4 
     args["gen_param"] = "greedy" 
     args["exclude"] = "natural" 
     langs = {"en":True}
-    args["test_samples"] = 4500
+    args["test_samples"] = 4500 
     methods = {"sup-tokens":"u","sup":"u", "sup-nat":"u","unsup":"u","unsup-tokens":"w-u","unsup-nat":"u", "sup-nat-tokens":"u","unsup-nat-tokens":"u"}
-    samples_list = [270,2700, 27000, 36000]
+    samples_list = [270,2700, 27000]
     ii = 0
     models = model_ids.split("#")
     for model in models:
@@ -1331,8 +1341,6 @@ def exp(experiment, model_ids, no_score, keep):
                    args["is_even"] = False
                    args["model_id"]= model
                    args["frozen"] = False
-                   if colab and w == "unwrapped":
-                       args["test_set"] = ""
                    if w == "wrapped":
                        args["frozen"] = True
                    args["wrap"] = ""
