@@ -831,9 +831,9 @@ class MyDataset(torch.utils.data.IterableDataset):
         assert len(self.split_df) > 0, "Data frame is empty " + self.split_name + " " + str(self.num_samples)
         self.cats_num = cats_num = len(split_df["prefix"].unique())
         dlog.info("Num Samples: %s", self.num_samples)
-        dlog.info("Cats Num: %s", cats_num)
+        mlog.info("Cats Num: %s", cats_num)
         self.num_per_cat = self.num_samples // cats_num if cats_num > 1 else self.num_samples
-        dlog.info("Num per cat: %s", self.num_per_cat)
+        mlog.info("Num per cat: %s", self.num_per_cat)
         self.rel_counter = {}
         self.rel_filter = rel_filter
         self.lang_counter = {}
@@ -992,7 +992,7 @@ class MyDataset(torch.utils.data.IterableDataset):
         if iter_end < 0:
             iter_end = self.num_samples
         kk = 0 
-        dlog.info("========================== SPLIT: %s", self.split_name)
+        dlog.info("==========NNNNN========= SPLIT: %s", self.split_name)
         dlog.info("get data from %s to %s", iter_start, iter_end)
         dlog.info("total rows: %s", len(self.split_df))
         context_rows=[]
@@ -1009,6 +1009,7 @@ class MyDataset(torch.utils.data.IterableDataset):
             rel = d["prefix"]
             if not rel in self.rel_counter:
                 self.rel_counter[rel] = 0
+            dlog.info("rel counter %s", self.rel_counter)
             if self.num_per_cat > 0 and self.rel_counter[rel] > self.num_per_cat:
                 dlog.info("!!!!!!!!! number per cat limit reached %s for %s", rel, self.num_per_cat)
                 continue 

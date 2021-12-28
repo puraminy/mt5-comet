@@ -1300,9 +1300,9 @@ def exp(experiment, models_dir, keep):
     args["exclude"] = "natural" 
     models = {"t5-base":True}
     langs = {"en":True}
-    args["test_samples"] = 500
-    methods = {"unsup-tokens":"w-u","unsup-nat":"u", "unsup":"u"}
-    samples_list = [27, 270,2700, 27000]
+    args["test_samples"] = 4500
+    methods = {"sup-tokens":"w-u","sup":"u","unsup":"u","unsup-tokens":"w-u","unsup-nat":"u"}
+    samples_list = [270,2700, 27000, 36000]
     ii = 0
     for model in [k for k in models.keys() if models[k]]:
         for method,wrap in methods.items():
