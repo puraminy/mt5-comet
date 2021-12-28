@@ -1313,7 +1313,8 @@ def exp(experiment, model_ids, no_score, keep):
     args["exclude"] = "natural" 
     langs = {"en":True}
     args["test_samples"] = 4500
-    methods = {"sup-tokens":"w-u","sup":"u", "sup-nat":"u","unsup":"u","unsup-tokens":"w-u","unsup-nat":"u"}
+    #methods = {"sup-tokens":"w-u","sup":"u", "sup-nat":"u","unsup":"u","unsup-tokens":"w-u","unsup-nat":"u"}
+    methods = {"sup-nat-tokens":"u","unsup-nat-tokens":"u"}
     samples_list = [270,2700, 27000, 36000]
     ii = 0
     models = model_ids.split("#")
@@ -1339,7 +1340,7 @@ def exp(experiment, model_ids, no_score, keep):
                    #name = name.replace("_unwrapped", "")
                    #name = name.replace("_unfreezed", "")
                    ii +=1
-                   name = str(ii) + "_" + name
+                   name = "{:02d}".format(ii) + "_" + name
                    print(name)
                    with open(os.path.join(conf_path, f'{name}.json'), 'w') as outfile:
                             json.dump(args, outfile, indent=4)
