@@ -116,7 +116,6 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
                if cur_res and not recal:
                     mlog.info("Skipping .... This was done before %s ", spath)
                     continue
-               raise
                if train_samples > 0:
                    args["train_samples"] = train_samples
                if model_id:

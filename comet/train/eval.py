@@ -253,14 +253,29 @@ def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info,
     mlog.info("Scoring...")
     pbar = tqdm(total=val_records, position=0, leave=True) #,dynamic_ncols=True)
     step = 0
-    for batch_list in batched(list(test_iter), 20):
+    bs = 40
+    vlog.disabled = True
+    for batch_list in batched(list(test_iter), bs):
         queries = [x[0] for x in batch_list]
-        hyps = gen_resp2(model, tokenizer, queries, batch_size = 5)
-        pbar.update(20)
+        hyps = gen_resp2(model, tokenizer, queries, batch_size = 20)
+        pbar.update(bs)
         for (query, tail, rel, lang, qid), top_hyp in zip(batch_list, hyps):
             tails = [tail]
             data = {}
             data["qid"] = qid
+            for const in resp_const_parts:
+                top_hyp = top_hyp.replace(const, "")
+            if not top_hyp.strip():
+                top_hyp = "EMPT"
+            new_tails = []
+            for tail in tails:
+                if not tail.strip():
+                    continue
+                nt = tail
+                for const in resp_const_parts:
+                    nt = nt.replace(const,"")
+                new_tails.append(nt)
+            tails = new_tails
             data["pred_text1"] = top_hyp
             data["target_text"] = "<br />".join(tails)
             data["prefix"] = rel
@@ -289,22 +304,10 @@ def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info,
                 if query == "c":
                     interactive = False
             gen_token = gen_tokens[lang]
-            for const in resp_const_parts:
-                top_hyp = top_hyp.replace(const, "")
-            if not top_hyp.strip():
-                top_hyp = "EMPT"
-            new_tails = []
-            for tail in tails:
-                if not tail.strip():
-                    continue
-                nt = tail
-                for const in resp_const_parts:
-                    nt = nt.replace(const,"")
-                new_tails.append(nt)
-            tails = new_tails
             #Compute embeddings
-            hi, ri, cur_score = bert_score(bert_scorer, hyps, tails)
-            best_hyp = hyps[hi]
+            preds = [top_hyp]
+            hi, ri, cur_score = bert_score(bert_scorer, preds, tails)
+            best_hyp = preds[hi]
             best_ref = tails[ri]
             hyp_counter[hi] += 1
             if nli_model:
@@ -316,7 +319,7 @@ def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info,
                 data["nli_group"] = label
                 vlog.info("Label:"+ label)
             data["top"] = best_ref
-            data["all_preds"] = "<br />".join(hyps) 
+            data["all_preds"] = "<br />".join(preds) 
             data["top_pred"] = best_hyp
             data["bert_score"] = float("{:.2f}".format(cur_score))
             sum_bert[scope] += cur_score
@@ -333,7 +336,7 @@ def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info,
             data["prompt"] = _q
             vlog.info(str(counter["all"])+ ":" + _q)
             vlog.info("'''''''''''''''''''''''''''''''''''''''''' Preds:")
-            for h in hyps: 
+            for h in preds: 
                 if h == best_hyp:
                     h += " (***) " 
                 vlog.info(h)
@@ -384,6 +387,7 @@ def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info,
             pbar.set_description(f"{scope:<20} :Bert:{mean_bert[scope]:<7} | {mean_bert['all']:<7} Rouge {mean_rouge[scope]:<7}|{mean_rouge['all']:<7} ")
             pbar.update(1)
             #dictPath(str(qid) + "_" + results_info, full_results, data, sep="_")
+            step += 1
             dictPath(str(qid) + "_" + results_info, new_results, data, sep="_")
             if step % 10000 == 0:
                 #save_results(full_results, "full", step, results_info)
@@ -394,8 +398,9 @@ def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info,
     dictPath(str(qid) + "_" + results_info, new_results, data, sep="_")
     save_results(new_results, "new", val_records, results_info, save_path)
 
-    new_df = pd.DataFrame(rows)
-    new_df = new_df.sort_values(by=["input_text"])
+    if no_score:
+        return
+
 
     out = os.path.join(logPath,f"__{results_info}.txt")
     def write_preds(new_df, out):
@@ -418,6 +423,11 @@ def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info,
             mlog.info("-----------------------------------  targets for {}:".format(p))
             for ans in answers.split("<br />"):
                 mlog.info("{:<60}:".format(ans))
+
+    if rows:
+        new_df = pd.DataFrame(rows)
+        new_df = new_df.sort_values(by=["input_text"])
+
 
     for metric in [mean_rouge, mean_bert, mean_match, mean_bleu]:
         s =0 
@@ -464,7 +474,7 @@ def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info,
     #res["match"] = mean_match
     res["distinct"] ="{} avg: {:.2f}".format(len(pred_counts), len(pred_counts)/len(new_df))
     res["hyps"] = hyp_counter
-    df_mean_rouge = new_df["rouge_score"].mean()
+    df_mean_rouge = float(mean_rouge["all"].split("--")[0])
 
     if df_mean_rouge < 0.10:
         mlog.info("Skipping saving the results!!!!!!! df mean rouge is low %s", df_mean_rouge)
