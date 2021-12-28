@@ -1259,10 +1259,9 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     help=""
 )
 @click.option(
-    "--models_dir",
-    "-md",
-    default="",
-    type=str,
+    "--no_score",
+    "-ns",
+    is_flag=True,
     help=""
 )
 @click.option(
@@ -1271,7 +1270,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     is_flag=True,
     help="keep old experiments"
 )
-def exp(experiment, model_ids, models_dir, keep):
+def exp(experiment, model_ids, no_score, keep):
     #cccccccccccc
     base_dir = home
     if "_" in experiment:
@@ -1295,6 +1294,7 @@ def exp(experiment, model_ids, models_dir, keep):
     samples = 300
     args["experiment"] = experiment
     args["cycle"] = 0
+    args["no_score"] = no_score
     args["load_path"] = pretPath
     save_path = os.path.join(pretPath, experiment)
     args["train_path"] = "atomic/train.tsv"
