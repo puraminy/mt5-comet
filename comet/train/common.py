@@ -548,6 +548,9 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
        elif method == "unsup-nat-gen":
            qtemp = "{rel_i} {event} {rel_natural} {gen} {ph}" 
            anstemp = "{ph} {resp} {end}"
+       elif method == "sup-nat":
+           qtemp = "{event} {rel_natural}" 
+           anstemp = "{resp} {end}"
        elif method == "unsup-nat":
            qtemp = "{event} {rel_natural} {ph}" 
            anstemp = "{ph} {resp} {end}"

@@ -1301,14 +1301,14 @@ def exp(experiment, models_dir, keep):
     models = {"t5-base":True}
     langs = {"en":True}
     args["test_samples"] = 4500
-    methods = {"sup-tokens":"w-u","sup":"u","unsup":"u","unsup-tokens":"w-u","unsup-nat":"u"}
+    methods = {"sup-tokens":"w-u","sup":"u", "sup-nat":"u","unsup":"u","unsup-tokens":"w-u","unsup-nat":"u"}
     samples_list = [270,2700, 27000, 36000]
     ii = 0
     for model in [k for k in models.keys() if models[k]]:
         for method,wrap in methods.items():
-            for w in wrap.split("-"): 
+            for wrap in wrap.split("-"): 
                 for samples in samples_list: 
-                   w = "wrapped" if w == "w" else "unwrapped"
+                   w = "wrapped" if wrap == "w" else "unwrapped"
                    args["method"] = method
                    args["train_samples"] = samples
                    args["is_even"] = False
