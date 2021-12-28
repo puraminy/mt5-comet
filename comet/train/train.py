@@ -1252,6 +1252,13 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
 @run.command()
 @click.argument("experiment", type=str)
 @click.option(
+    "--model",
+    "-m",
+    default="t5-base",
+    type=str,
+    help=""
+)
+@click.option(
     "--models_dir",
     "-m",
     default="/home/pouramini",
@@ -1264,7 +1271,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     is_flag=True,
     help="keep old experiments"
 )
-def exp(experiment, models_dir, keep):
+def exp(experiment, model, models_dir, keep):
     #cccccccccccc
     base_dir = home
     if "_" in experiment:
@@ -1304,7 +1311,7 @@ def exp(experiment, models_dir, keep):
     args["batch_size"] = 4 
     args["gen_param"] = "greedy" 
     args["exclude"] = "natural" 
-    models = {"t5-base":True}
+    models = {model:True}
     langs = {"en":True}
     args["test_samples"] = 4500
     methods = {"sup-tokens":"w-u","sup":"u", "sup-nat":"u","unsup":"u","unsup-tokens":"w-u","unsup-nat":"u"}
