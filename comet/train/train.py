@@ -1272,13 +1272,12 @@ def exp(experiment, models_dir, keep):
     conf = os.path.join(base_dir, "logs/confs/exp_conf.json")
     save_path = os.path.join(base_dir, "mt5-comet/comet/train/")
     conf_path = os.path.join(save_path,"confs")
+    mlog.info("Creating configurations...%s ", conf_path)
     if not keep:
         cur_files = glob.glob(f"{conf_path}/*")
         mlog.info("Cleaning previous exps ... %s", len(cur_files))
         for f in cur_files: 
             os.remove(f)
-
-    mlog.info("Creating configurations...%s ", conf_path)
     Path(conf_path).mkdir(exist_ok=True, parents=True)
     if Path(conf).exists():
        with open(conf, 'r') as f:
@@ -1290,9 +1289,16 @@ def exp(experiment, models_dir, keep):
     args["experiment"] = experiment
     args["cycle"] = 0
     args["load_path"] = os.path.join(models_dir, "pret")
-    args["save_path"] = os.path.join(models_dir, "pret", experiment)
+    save_path = os.path.join(models_dir, "pret", experiment)
     args["train_path"] = "atomic/train.tsv"
-    Path(args["save_path"]).mkdir(exist_ok=True, parents=True)
+    if not keep and Path(save_path).exists():
+        ans = input("Removing previous experiment with this name?")
+        if ans == "y":
+            os.rmdir(save_path)
+
+    Path(save_path).mkdir(exist_ok=True, parents=True)
+    args["save_path"] = save_path
+
     args["cpu"] = False 
     args["config"] = False 
     args["batch_size"] = 4 
