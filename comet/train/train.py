@@ -1354,10 +1354,10 @@ def exp(experiment, model_ids, no_score, keep):
                    name = f"{experiment}-{model}-{samples}-{method}-{w}"
                    #name = name.replace("_unwrapped", "")
                    #name = name.replace("_unfreezed", "")
-                   ii +=1
-                   name = "{:02d}".format(ii) + "_" + name
                    args["output_name"] = name
                    args["overwrite"] = name
+                   ii +=1
+                   name = "{:02d}".format(ii) + "_" + name
                    print(name)
                    with open(os.path.join(conf_path, f'{name}.json'), 'w') as outfile:
                             json.dump(args, outfile, indent=4)
