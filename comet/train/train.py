@@ -1301,7 +1301,7 @@ def exp(experiment, model_ids, no_score, keep):
     if not keep and Path(save_path).exists():
         ans = input("Removing previous experiment with this name?")
         if ans == "y":
-            os.rmdir(save_path)
+            shutil.rmtree(save_path)
 
     Path(save_path).mkdir(exist_ok=True, parents=True)
     args["save_path"] = save_path
