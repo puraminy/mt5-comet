@@ -43,46 +43,54 @@ relation_natural_mappings = {
         "en":"As a result others feel ",
         "fa":"در نتیجه دیگران حس می کنند",
         "tokens":"<state> <other> <after>"
+        "nat-tokens":"then, the state of others is "
     },
     "xReact":{ 
         "en":"As a result PersonX feels ",
         "fa":"در نتیجه PersonX حس می کند", 
         "tokens":"<state> <agent> <after>"
+        "nat-tokens":"then, the state of the person is "
     },
     "xWant":{ 
         "en":"Then PersonX wants ",
         "fa":"بعد از آن PersonX می خواهد",
         "tokens":"<event> <agent> <after> <want>"
+        "nat-tokens":"then, the person wants "
     },
     "oWant":{ 
         "en":"Then others want ",
         "fa":"بعد از آن دیگران می خواهند",
         "tokens":"<event> <other> <after> <want>"
+        "nat-tokens":"then, others want "
     },
     "xEffect":{ 
         "en":"As a result PersonX  ",
         "fa":"در نتیجه PersonX ",
         "tokens":"<event> <agent> <after> <effect>"
+        "nat-tokens":"then, the effect on the person "
     },
     "oEffect":{ 
         "en":"As a result others  ",
         "fa":"در نتیجه دیگران ",
         "tokens":"<event> <other> <after> <effect>"
+        "nat-tokens":"then, the effect on others "
     },
     "xAttr":{ 
         "en":"PersonX is seen as",
         "fa":"مردم فکر می کنند PersonX ",
-        "tokens":"<state> <agent> <static> "
+        "nat-tokens":"always, the state of the person is"
     },
     "xIntent":{ 
         "en":"Because PersonX intended ",
         "fa":"زیرا PersonX می خواست",
         "tokens":"<event> <agent> <before> <cause> <want>"
+        "nat-tokens":"before, because the person want "
     },
     "xNeed":{ 
         "en":"Before that, PersonX needs ",
         "fa":"قبل از آن PersonX نیاز دارد",
         "tokens":"<event> <agent> <before> <cause> <need>"
+        "nat-tokens":"before, because the person needs "
     },
 }
 gen_token_en = "<gen_en>"
@@ -548,6 +556,12 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
        elif method == "unsup-nat-gen":
            qtemp = "{rel_i} {event} {rel_natural} {gen} {ph}" 
            anstemp = "{ph} {resp} {end}"
+       elif method == "sup-nat-tokens":
+           qtemp = "{event} {nat_tokens}" 
+           anstemp = "{resp} {end}"
+       elif method == "unsup-nat-tokens":
+           qtemp = "{event} {nat_tokens} {ph}" 
+           anstemp = "{ph} {resp} {end}"
        elif method == "sup-nat":
            qtemp = "{event} {rel_natural}" 
            anstemp = "{resp} {end}"
@@ -729,9 +743,11 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
 
 def fill_vars(template, rel, event, gen_token, resp, inp_lang, resp_lang):
     rel_natural = relation_natural_mappings[rel][inp_lang]        
+    rel_natural_tokens = relation_natural_mappings[rel]["nat-tokens"]        
     rep  = {"{event}":event, 
             "{resp}":resp,
             "{rel_natural}":rel_natural,
+            "{nat_toekns}":rel_natural_tokens,
             "{gen}":gen_token}
     rep = dict((re.escape(k), v) for k, v in rep.items()) 
     pattern = re.compile("|".join(rep.keys()))
