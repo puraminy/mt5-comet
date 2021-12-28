@@ -400,7 +400,7 @@ def evaluate(model, tokenizer, dataloader, interactive, save_path, results_info,
     pred_counts = new_df['pred_text1'].unique()
     mlog.info("Pred counts")
     vlog.info("Pred counts")
-    if pred_counts < 100:
+    if len(pred_counts) < 100:
         for i, r in pred_counts:
             mlog.info(r["pred_text1"])
             vlog.info(r["pred_text1"])
