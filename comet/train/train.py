@@ -77,15 +77,22 @@ from tqdm import tqdm
     type=str,
     help=""
 )
+@click.option(
+    "--overwrite",
+    "-ow",
+    is_flag=True,
+    help=""
+)
 @click.pass_context
 #rrrrrrrrrrr
 def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal, 
-        exclude):
+        exclude, overwrite):
      global results
      if ctx.invoked_subcommand is None:
         mlog.info("Reading from conf %s", conf_path)
         confs = sorted(glob.glob(f"{conf_path}/*"))
         default_model = ""
+        first = True
         for conf in confs:
             fname = Path(conf).stem
             mlog.info(f"%%% {fname} %%%")
@@ -100,6 +107,17 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
                    args = json.load(f) 
                args["print_log"] = print_log
                spath = args["save_path"]
+               if first and Path(spath).exists():
+                   mlog.info("%s already exists!", spath)
+                   if not overwrite:
+                       ans = input(colored("Do you want to remove previous experiments in this folder?","red"))
+                   else:
+                       ans = "y"
+                   first = False
+                   if ans == "y":
+                       shutil.rmtree(spath)
+
+               Path(spath).mkdir(exist_ok=True, parents=True)
                #mlog.info("save path: %s", spath)
                cur_res_path = os.path.join(spath, args["output_name"], "new_result*")
                #mlog.info("cur_res_path: %s", cur_res_path)
@@ -1271,14 +1289,32 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     is_flag=True,
     help="keep old experiments"
 )
-def exp(experiment, model_ids, no_score, keep):
+@click.option(
+    "--colab",
+    "-c",
+    is_flag=True,
+    help="Force settings for colab"
+)
+def exp(experiment, model_ids, no_score, keep, colab):
     #cccccccccccc
+    if colab:
+        pretPath = "/content/drive/MyDrive/pret"
+        logPath = "/content/"
+        resPath = "/content/drive/MyDrive/pouramini/results"
+    else:
+        logPath = os.path.join(home, "logs")
+        resPath = os.path.join(home, "results") 
+        pretPath = os.path.join(home, "pret") 
+
     base_dir = home
     if "_" in experiment:
         raise ValueError("Experiment name shouldn't have underscore in it, use dash")
     conf = os.path.join(base_dir, "logs/confs/exp_conf.json")
     save_path = os.path.join(base_dir, "mt5-comet/comet/train/")
-    conf_path = os.path.join(save_path,"confs")
+    if not colab:
+        conf_path = os.path.join(save_path,"confs")
+    else:
+        conf_path = os.path.join(save_path,"colab_confs")
     mlog.info("Creating configurations...%s ", conf_path)
     if not keep:
         cur_files = glob.glob(f"{conf_path}/*")
@@ -1298,14 +1334,8 @@ def exp(experiment, model_ids, no_score, keep):
     args["no_save_model"] = True if colab else False
     args["no_score"] = no_score
     args["load_path"] = pretPath
-    save_path = os.path.join(pretPath, experiment)
     args["train_path"] = "atomic/train.tsv"
-    if not keep and Path(save_path).exists():
-        ans = input(colored("Removing previous experiment with this name?","red"))
-        if ans == "y":
-            shutil.rmtree(save_path)
-
-    Path(save_path).mkdir(exist_ok=True, parents=True)
+    save_path = os.path.join(pretPath, experiment)
     args["save_path"] = save_path
 
     args["cpu"] = False 
