@@ -120,7 +120,7 @@ def bert_score(bert_scorer, hyps, refs):
 
 def save_results(rows, fid, step, exp_info, save_path=""):
     name = fid + "_results_" + (human_format(step) if step > 0 else "full") 
-    _info = "_".join(list(exp_info.values()))
+    _info = "_".join([str(x) for x in list(exp_info.values())])
     path = os.path.join(resPath, name + "_" + _info + ".tsv")
     mlog.info("Saving results %s", path)
     df = pd.DataFrame(rows)
@@ -342,7 +342,7 @@ def evaluate(model, tokenizer, dataloader, save_path, exp_info, val_records, gen
 
 
     new_df = new_df.sort_values(by=["input_text"])
-    _info = "_".join(list(exp_info.values()))
+    _info = "_".join([str(x) for x in list(exp_info.values())])
     out = os.path.join(logPath,f"__{_info}.txt")
     def write_preds(new_df, out):
         handler = logging.FileHandler(out, mode="w")
