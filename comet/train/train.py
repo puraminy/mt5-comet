@@ -137,6 +137,7 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples,
                    out = args["output_name"].split("_")
                    out[1] = model_id
                    if batch_size > 0:
+                       mlog.info("Forcing input batch size %s", batch_size)
                        args["batch_size"] = batch_size
                    args["output_name"] = "_".join(out)
                    if args["load_path"]:
