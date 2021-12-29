@@ -1287,7 +1287,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
 )
 def exp(experiment, model_ids, keep, server):
     #cccccccccccc
-    if colab:
+    is_colab = colab or server == "colab"
+    if is_colab:
         pretPath = "/content/drive/MyDrive/pret"
         logPath = "/content/"
         resPath = "/content/drive/MyDrive/pouramini/results"
@@ -1301,7 +1302,7 @@ def exp(experiment, model_ids, keep, server):
         raise ValueError("Experiment name shouldn't have underscore in it, use dash")
     conf = os.path.join(base_dir, "logs/confs/exp_conf.json")
     save_path = os.path.join(base_dir, "mt5-comet/comet/train/")
-    if not colab:
+    if not is_colab:
         conf_path = os.path.join(save_path,"confs")
     else:
         conf_path = os.path.join(save_path,"colab_confs")
@@ -1321,7 +1322,7 @@ def exp(experiment, model_ids, keep, server):
     samples = 300
     args["experiment"] = experiment
     args["cycle"] = 0
-    args["no_save_model"] = True if colab else False
+    args["no_save_model"] = True if is_colab else False
     args["load_path"] = pretPath
     args["train_path"] = "atomic/train.tsv"
     save_path = os.path.join(pretPath, experiment)
@@ -1333,16 +1334,16 @@ def exp(experiment, model_ids, keep, server):
     args["exclude"] = "natural" 
     langs = {"en":True}
     args["test_samples"] = 4500 
-    methods = {"sup-tokens":"u","sup":"u", "sup-nat":"u","unsup":"u","unsup-tokens":"w-u","unsup-nat":"u", "sup-nat-tokens":"u","unsup-nat-tokens":"u"}
-    #methods = {"sup-wrap":"w", "unsup-wrap":"w", "unsup-wrap-nat":"w"}
+    #methods = {"sup-tokens":"u","sup":"u", "sup-nat":"u","unsup":"u","unsup-tokens":"w-u","unsup-nat":"u", "sup-nat-tokens":"u","unsup-nat-tokens":"u"}
+    methods = {"sup-wrap":"w", "unsup-wrap":"w", "unsup-wrap-nat":"w"}
     samples_list = [270,2700, 27000]
     ii = 0
     models = model_ids.split("#")
     for model in models:
         for method,wrap in methods.items():
-            for ww in wrap.split("-"): 
+            for wu in wrap.split("-"): 
                 for samples in samples_list: 
-                   w = "wrapped" if ww == "w" else "unwrapped"
+                   w = "wrapped" if wu == "w" else "unwrapped"
                    args["method"] = method
                    args["train_samples"] = samples
                    args["is_even"] = False
@@ -1351,10 +1352,10 @@ def exp(experiment, model_ids, keep, server):
                    if w == "wrapped":
                        args["frozen"] = True
                    args["wrap"] = w == "wrapped" 
-                   args["batch_size"] = 16 if colab else 4 
+                   args["batch_size"] = 16 if is_colab else 4 
                    if w == "wrapped":
                        args["wrap"] = True
-                       args["batch_size"] = 20 if not colab else 48 
+                       args["batch_size"] = 20 if not is_colab else 48 
                    name = f"{experiment}-{model}-{samples}-{method}-{w}"
                    #name = name.replace("_unwrapped", "")
                    #name = name.replace("_unfreezed", "")
