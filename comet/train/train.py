@@ -931,9 +931,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
 
 
 # ggggggggg
-    attention_mask = None
     def collate_fn_for_flattened(batch):
-        global attention_mask
         queries,responses,rel,lang, index = zip(*batch)
         new_batch = tokenizer(list(queries),return_tensors='pt',padding='longest')
         with tokenizer.as_target_tokenizer():
@@ -941,15 +939,12 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
             labels = tokenized['input_ids']
             labels[labels==tokenizer.pad_token_id] = -100
             new_batch['labels']=labels
-            attention_mask = new_batch['attention_mask']
-            tlog.info("att mask %s", attention_mask)
             new_batch['decoder_input_ids'] = model.prepare_decoder_input_ids_from_labels(
                 tokenized['input_ids']
             )
             new_batch['decoder_attention_mask'] = tokenized['attention_mask']
         return new_batch
     def collate_fn_for_generation(batch):
-         global attention_mask
          queries,responses,_,_,_ = zip(*batch)
          inputs = list(queries)
          outputs =list(responses)
@@ -967,7 +962,6 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
          labels[labels==tokenizer.pad_token_id] = -100
          new_batch['input_ids']=tokenized['input_ids']
          new_batch['attention_mask']=tokenized['attention_mask']
-         attention_mask = new_batch['attention_mask']
          new_batch['labels']=labels
          return new_batch #,references
     #%% build dataloader
@@ -1259,7 +1253,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
                         "method":method, "wrap": w_str + "-" + encoder_type,
                         "frozen":f_str, 
                         "epochs":f"tr:{training_round}-ep:{epochs_num}-({start}-{train_records})-{val_records}", "date":extra}
-        evaluate(model, tokenizer, myds[test_set], save_path, exp_info, val_records, gen_param, attention_mask, no_score=no_score)  
+        evaluate(model, tokenizer, myds[test_set], save_path, exp_info, val_records, gen_param, no_score=no_score)  
     else:
         mlog.info("Test set was not provided.... skip testing...")
         
