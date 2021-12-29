@@ -88,6 +88,7 @@ def show_df(df):
     back = {"df":df, "sel_cols":sel_cols, "info_cols":info_cols, "sel_row":0}
     filter_df = main_df
     #wwwwwwwwww
+    ax = None
     open_dfnames = [dfname]
     prev_cahr = ""
     while ch != ord("q"):
@@ -318,14 +319,23 @@ def show_df(df):
                 consts["files"] = open_dfnames
                 new_df = pd.read_table(_file)
                 df = pd.concat([df, new_df], ignore_index=True)
-        elif char == "P":
+        elif char == "p":
             canceled, col1,_ = list_df_values(df, get_val=False)
             if not canceled:
-                canceled, col2,_ = list_df_values(df, get_val=False)
+                canceled, col2,_ = list_df_values(df, get_val=False, sels=[col1])
             if not canceled:
-                plot = df.plot(col1, col2)
-                fig = plot.get_figure()
-                fig.savefig(os.path.join(base_dir, "plots", col1 + "@" + col2 + ".png"))
+                df = df.sort_values(col2)
+                ax = df.plot(ax=ax, x=col1, y=col2)
+        elif char == "y":
+           canceled, col1,_ = list_df_values(df, get_val=False)
+           for key, grp in df.groupby(col1):
+                ax = grp.plot(ax=ax, kind='line', x='exp_id', y='rouge_score', label=key)
+
+        elif char == "P":
+            _path = rowinput("Plot name:")
+            if _path:
+                fig = ax.get_figure()
+                fig.savefig(os.path.join(base_dir, "plots", _path +  ".png"))
         elif char == "R":
             canceled, col,val = list_df_values(main_df, get_val=False)
             if not canceled:
