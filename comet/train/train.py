@@ -111,13 +111,11 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
                spath = args["save_path"]
                if first and Path(spath).exists():
                    mlog.info("%s already exists!", spath)
-                   if not overwrite:
-                       ans = input(colored("Do you want to remove previous experiments in this folder?","red"))
-                   else:
-                       ans = "y"
                    first = False
-                   if ans == "y":
-                       shutil.rmtree(spath)
+                   if overwrite:
+                      shutil.rmtree(spath)
+                   else:
+                      os_rename(spath, spath + "_backup_" + now)
 
                Path(spath).mkdir(exist_ok=True, parents=True)
                #mlog.info("save path: %s", spath)
