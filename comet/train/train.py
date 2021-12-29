@@ -127,6 +127,9 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples,
                     continue
                if train_samples > 0:
                    args["train_samples"] = train_samples
+               if batch_size > 0:
+                   mlog.info("Forcing input batch size %s", batch_size)
+                   args["batch_size"] = batch_size
                if model_id:
                    if default_model and args["model_id"] != default_model:
                        break
@@ -136,9 +139,6 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples,
                    args["model_id"] = model_id
                    out = args["output_name"].split("_")
                    out[1] = model_id
-                   if batch_size > 0:
-                       mlog.info("Forcing input batch size %s", batch_size)
-                       args["batch_size"] = batch_size
                    args["output_name"] = "_".join(out)
                    if args["load_path"]:
                        shutil.copy(conf, args["load_path"])
@@ -1329,13 +1329,12 @@ def exp(experiment, model_ids, keep, server):
 
     args["cpu"] = False 
     args["config"] = False 
-    args["batch_size"] = 16 if colab else 4 
     args["gen_param"] = "greedy" 
     args["exclude"] = "natural" 
     langs = {"en":True}
     args["test_samples"] = 4500 
     methods = {"sup-tokens":"u","sup":"u", "sup-nat":"u","unsup":"u","unsup-tokens":"w-u","unsup-nat":"u", "sup-nat-tokens":"u","unsup-nat-tokens":"u"}
-    methods = {"sup-wrap":"w", "unsup-wrap":"w", "unsup-wrap-nat":"w"}
+    #methods = {"sup-wrap":"w", "unsup-wrap":"w", "unsup-wrap-nat":"w"}
     samples_list = [270,2700, 27000]
     ii = 0
     models = model_ids.split("#")
@@ -1352,6 +1351,7 @@ def exp(experiment, model_ids, keep, server):
                    if w == "wrapped":
                        args["frozen"] = True
                    args["wrap"] = ""
+                   args["batch_size"] = 16 if colab else 4 
                    if w == "wrapped":
                        args["wrap"] = True
                        args["batch_size"] = 20 if not colab else 48 
