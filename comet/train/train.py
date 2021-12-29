@@ -115,7 +115,7 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
                    if overwrite:
                       shutil.rmtree(spath)
                    else:
-                      os_rename(spath, spath + "_backup_" + now)
+                      os.rename(spath, spath + "_backup_" + now)
 
                Path(spath).mkdir(exist_ok=True, parents=True)
                #mlog.info("save path: %s", spath)
