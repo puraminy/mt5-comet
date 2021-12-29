@@ -1340,9 +1340,9 @@ def exp(experiment, model_ids, keep, server):
     models = model_ids.split("#")
     for model in models:
         for method,wrap in methods.items():
-            for wrap in wrap.split("-"): 
+            for ww in wrap.split("-"): 
                 for samples in samples_list: 
-                   w = "wrapped" if wrap == "w" else "unwrapped"
+                   w = "wrapped" if ww == "w" else "unwrapped"
                    args["method"] = method
                    args["train_samples"] = samples
                    args["is_even"] = False
@@ -1350,7 +1350,7 @@ def exp(experiment, model_ids, keep, server):
                    args["frozen"] = False
                    if w == "wrapped":
                        args["frozen"] = True
-                   args["wrap"] = ""
+                   args["wrap"] = w == "wrapped" 
                    args["batch_size"] = 16 if colab else 4 
                    if w == "wrapped":
                        args["wrap"] = True
