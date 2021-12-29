@@ -897,7 +897,9 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
         exp_info = {"exp":experiment, "model":model_id, "lang": lang, 
                         "method":method, "wrap": w_str + "-" + encoder_type,
                         "frozen":f_str, 
-                        "epochs":f"tr:{training_round}-ep:{epochs_num}-({start}-{train_records})-{val_records}", "date":extra}
+                        "steps":train_records,
+                        "epochs":epochs_num,
+                        "val_steps":val_records, "date":extra}
     if do_eval or (not wrap and frozen):
         mlog.info("Evaluating the model...")
         model.to(device=device)
@@ -1256,7 +1258,9 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
         exp_info = {"exp":experiment, "model":model_id, "lang": lang, 
                         "method":method, "wrap": w_str + "-" + encoder_type,
                         "frozen":f_str, 
-                        "epochs":f"tr:{training_round}-ep:{epochs_num}-({start}-{train_records})-{val_records}", "date":extra}
+                        "steps":train_records,
+                        "epochs":epochs_num,
+                        "val_steps":val_records, "date":extra}
         evaluate(model, tokenizer, myds[test_set], save_path, exp_info, val_records, gen_param, no_score=no_score)  
     else:
         mlog.info("Test set was not provided.... skip testing...")
@@ -1334,8 +1338,7 @@ def exp(experiment, model_ids, keep, server):
     args["exclude"] = "natural" 
     langs = {"en":True}
     args["test_samples"] = 4500 
-    methods = {"sup-tokens":"u","sup":"u", "sup-nat":"u","unsup":"u","unsup-tokens":"w-u","unsup-nat":"u", "sup-nat-tokens":"u","unsup-nat-tokens":"u"}
-    methods = {"sup-wrap":"w", "unsup-wrap":"w", "unsup-wrap-nat":"w"}
+    methods = {"sup-tokens":"u","sup":"u", "sup-nat":"u","unsup":"u","unsup-tokens":"w-u","unsup-nat":"u", "sup-nat-tokens":"u","unsup-nat-tokens":"u", "sup-wrap":"w", "unsup-wrap":"w", "unsup-wrap-nat":"w"}
     samples_list = [270,2700, 27000]
     samples_list = [36000]
     ii = 0

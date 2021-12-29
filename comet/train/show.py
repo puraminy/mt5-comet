@@ -296,14 +296,16 @@ def show_df(df):
             elif char == "G":
                 canceled, col = False, "fid"
             if not canceled:
-               g_cols = ["exp_id", "rouge_score", "bert_score", "epochs", "method","model", "wrap"]
+               g_cols = ["exp_id", "rouge_score", "bert_score", "steps", "method","model", "wrap"]
                df = (df.groupby(col).agg({"rouge_score":"mean","bert_score":"mean",
-                   "method":"first","model":"first", "wrap":"first", col:"first", "epochs":"first"})
+                   "method":"first","model":"first", "wrap":"first", col:"first", "steps":"first"})
                  .rename(columns={col:'exp_id'})
-                 .sort_values(by = ["epochs", "rouge_score"])
+                 .sort_values(by = ["steps", "rouge_score"])
                     )
                #df = df.reset_index()
                sel_cols = order(sel_cols, g_cols)
+               back["df"] = df
+               back["sel_cols"] = sel_cols
         elif char == "D":
             canceled, col,val = list_df_values(main_df, get_val=False)
             if not canceled:
@@ -344,7 +346,7 @@ def show_df(df):
         elif char == "y":
            #cols = get_cols(df)
            for key, grp in df.groupby(['model']):
-                ax = grp.plot(ax=ax, kind='line', x='epochs', y='rouge_score', label=key)
+                ax = grp.plot(ax=ax, kind='line', x='steps', y='rouge_score', label=key)
         elif char == "P":
             _path = rowinput("Plot name:")
             if _path:
@@ -450,6 +452,30 @@ def show_df(df):
             sel_row = df.loc[mask.any(axis=1)].index[0]
         elif char == ":":
             cmd = rowinput()
+            if cmd == "rep" or cmd == "rep@":
+                canceled, col,val = list_df_values(main_df, get_val=False)
+                if not canceled:
+                    vals = df[col].unique()
+                    d = {}
+                    for v in vals:
+                        rep = rowinput(v + "=" ,v)
+                        if not rep:
+                            break
+                        d[v] = rep
+                    if rowinput("Apply?") == "y":
+                        if "@" in cmd:
+                            df = df.replace(d)
+                        else:
+                            main_df = main_df.replace(d)
+            if cmd == "cp" or cmd == "cp@":
+                canceled, col,val = list_df_values(main_df, get_val=False)
+                if not canceled:
+                    copy = rowinput("Copy " + col + " to:", col)
+                    if copy:
+                        if "@" in cmd:
+                            df = df.replace(d)
+                        else:
+                            main_df[copy] = main_df[col]
             if cmd.isnumeric():
                 sel_row = int(cmd)
             elif cmd == "q":
@@ -513,14 +539,13 @@ def render_mpl_table(data, wrate, col_width=3.0, row_height=0.625, font_size=14,
             cell.set_facecolor(row_colors[k[0]%len(row_colors) ])
     return ax
 
-def get_cols(df, num = 1000):
+def get_cols(df, num = 1):
     canceled = False
     sels = []
     while not canceled and len(sels) < num:
         canceled, col,_ = list_df_values(df, get_val=False, sels = sels)
-        sels.append(col)
-    if num != 1000 and len(sels) != num:
-        return []
+        if not canceled:
+            sels.append(col)
     return sels
 
 def biginput(prompt=":", default=""):
