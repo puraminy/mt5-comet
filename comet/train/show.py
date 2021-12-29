@@ -1,9 +1,12 @@
 import curses as cur
+import matplotlib.pyplot as plt
 from curses import wrapper
 import click
 import numpy as np
 from glob import glob
+import six
 import os
+import seaborn as sns
 from pathlib import Path
 import pandas as pd
 from nodcast.util.util import *
@@ -28,6 +31,7 @@ def load_results(path):
     df.columns = [('_'.join(str(s).strip() for s in col if s)).replace("text_","") for col in df.columns]
     df.to_csv(path.replace("json", "tsv"), sep="\t", index = False)
     return df
+
 
 def show_df(df):
     global dfname
@@ -275,6 +279,7 @@ def show_df(df):
                 sel_cols = list(df.columns)
                 col_widths["index"]=50
                 info_cols = []
+            
         elif char == "T":
             df = df.drop_duplicates(['prefix'])
         elif char == "g": 
@@ -319,23 +324,33 @@ def show_df(df):
                 consts["files"] = open_dfnames
                 new_df = pd.read_table(_file)
                 df = pd.concat([df, new_df], ignore_index=True)
-        elif char == "p":
-            canceled, col1,_ = list_df_values(df, get_val=False)
-            if not canceled:
-                canceled, col2,_ = list_df_values(df, get_val=False, sels=[col1])
-            if not canceled:
-                df = df.sort_values(col2)
-                ax = df.plot(ax=ax, x=col1, y=col2)
-        elif char == "y":
-           canceled, col1,_ = list_df_values(df, get_val=False)
-           for key, grp in df.groupby(col1):
-                ax = grp.plot(ax=ax, kind='line', x='exp_id', y='rouge_score', label=key)
+        elif char == "t":
+            cols = get_cols(df,2)
+            if cols:
+                tdf = df[cols].round(2)
+                fname = rowinput("Table name:", "table_")
+                if fname:
+                    tname = os.path.join(base_dir, "plots", fname + ".png")
+                    wrate = [col_widths[c] for c in cols]
+                    tax = render_mpl_table(tdf, wrate = wrate, col_width=4.0)
+                    fig = tax.get_figure()
+                    fig.savefig(tname)
 
+        elif char == "p":
+            cols = get_cols(df,2)
+            if cols:
+                df = df.sort_values(cols[1])
+                ax = df.plot(ax=ax, x=cols[0], y=cols[1])
+        elif char == "y":
+           #cols = get_cols(df)
+           for key, grp in df.groupby(['model']):
+                ax = grp.plot(ax=ax, kind='line', x='epochs', y='rouge_score', label=key)
         elif char == "P":
             _path = rowinput("Plot name:")
             if _path:
                 fig = ax.get_figure()
                 fig.savefig(os.path.join(base_dir, "plots", _path +  ".png"))
+                ax = None
         elif char == "R":
             canceled, col,val = list_df_values(main_df, get_val=False)
             if not canceled:
@@ -473,6 +488,41 @@ def show_df(df):
             info_cols = back["info_cols"]
             sel_row = back["sel_row"]
 
+def render_mpl_table(data, wrate, col_width=3.0, row_height=0.625, font_size=14,
+                     header_color='#40466e', row_colors=['#f1f1f2', 'w'], edge_color='w',
+                     bbox=[0, 0, 1, 1], header_columns=0,
+                     ax=None, **kwargs):
+    if ax is None:
+        size = (np.array(data.shape[::-1]) + np.array([0, 1])) * np.array([col_width, row_height])
+        mlog.info("Size %s", size)
+        fig, ax = plt.subplots(figsize=size)
+        ax.axis('off')
+
+    mpl_table = ax.table(cellText=data.values, bbox=bbox, colLabels=data.columns, **kwargs)
+
+    mpl_table.auto_set_font_size(False)
+    mpl_table.set_fontsize(font_size)
+    mpl_table.auto_set_column_width(col=list(range(len(data.columns)))) # Provide integer list of columns to adjust
+
+    for k, cell in  six.iteritems(mpl_table._cells):
+        cell.set_edgecolor(edge_color)
+        if k[0] == 0 or k[1] < header_columns:
+            cell.set_text_props(weight='bold', color='w')
+            cell.set_facecolor(header_color)
+        else:
+            cell.set_facecolor(row_colors[k[0]%len(row_colors) ])
+    return ax
+
+def get_cols(df, num = 1000):
+    canceled = False
+    sels = []
+    while not canceled and len(sels) < num:
+        canceled, col,_ = list_df_values(df, get_val=False, sels = sels)
+        sels.append(col)
+    if num != 1000 and len(sels) != num:
+        return []
+    return sels
+
 def biginput(prompt=":", default=""):
     rows, cols = std.getmaxyx()
     win = cur.newwin(12, cols - 10, 5, 5)
@@ -513,7 +563,7 @@ def list_values(vals,si=0, sels=[]):
     if si == 0:
         if key in si_hash:
             si = si_hash[key]
-    opts = {"items":{"sels":sels, "range":["Done!"] + vals}}
+    opts = {"items":{"sels":sels, "range":["Cancel!"] + vals}}
     is_cancled = True
     si,canceled, _ = open_submenu(tag_win, opts, "items", si, "Select a value", std)
     val = ""
@@ -595,13 +645,18 @@ def start(stdscr):
                 df = pd.read_table(f)
             elif f.endswith(".json"):
                 df = load_results(f)
-            if not "fid" in df:
-                if file_id == "parent":
+            force_fid = False
+            sfid = file_id.split("@")
+            fid = sfid[0]
+            if len(sfid) > 1:
+                force_fid = sfid[1] == "force"
+            if not "fid" in df or force_fid:
+                if fid == "parent":
                     df["fid"] = Path(f).parent.stem
-                elif file_id == "name":
+                elif fid == "name":
                     df["fid"] = Path(f).stem
                 else:
-                    df["fid"] = df[file_id]
+                    df["fid"] = df[fid]
             dfs.append(df)
         if len(dfs) > 1:
             df = pd.concat(dfs, ignore_index=True)
