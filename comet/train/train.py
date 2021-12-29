@@ -32,7 +32,7 @@ from tqdm import tqdm
 @click.option(
     "--conf_path",
     "-cp",
-    default="confs",
+    default="",
     type=str,
     help=""
 )
@@ -87,7 +87,9 @@ from tqdm import tqdm
 #rrrrrrrrrrr
 def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal, 
         exclude, overwrite):
-     global results
+     if not conf_path:
+        conf_path = "confs"
+        if colab: conf_path = "colab_confs"
      if ctx.invoked_subcommand is None:
         mlog.info("Reading from conf %s", conf_path)
         confs = sorted(glob.glob(f"{conf_path}/*"))
@@ -1165,7 +1167,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
                             for i,(_q,_target) in enumerate(generate_samples['sample']):
                                 if i==validation_num_generation:
                                     break
-                                results = gen_resp(model, tokenizer, _q.strip()) 
+                                results = generate(model, tokenizer, [_q.strip()]) 
                                 vlog.info("%02d) %-50s | %-50s | %-40s", i, _q.strip(), 
                                         results, _target.strip())
                                 generation_results+=f"|`{_q},{_target}`|`{str(results)}`|\n"

@@ -6,7 +6,7 @@
     "extemp": "",
     "train_samples": 27000,
     "test_set": "test",
-    "val_samples": 100,
+    "val_samples": 150,
     "test_samples": 4500,
     "train_path": "atomic/train.tsv",
     "val_path": "atomic/val_all_rels.tsv",
@@ -17,7 +17,6 @@
     "lang": "en",
     "learning_rate": 0.0,
     "do_eval": false,
-    "inter": false,
     "cont": false,
     "wrap": "",
     "frozen": false,
@@ -36,7 +35,6 @@
     "print_log": "",
     "training_round": 1,
     "epochs_num": 1,
-    "reset_results": false,
     "prompt_length": "",
     "zero_shot": false,
     "opt_type": "adam",
@@ -50,6 +48,7 @@
     "num_workers": 0,
     "no_score": false,
     "train_start": 0,
+    "no_save_model": true,
     "ex_type": "",
     "exclude": "natural",
     "ignore_blanks": false,
@@ -67,6 +66,5 @@
     "samples_per_head": 0,
     "sampling": 5,
     "save_path": "/content/drive/MyDrive/pret/fscolab",
-    "start": 0,
-    "no_save_model": true
+    "start": 0
 }
