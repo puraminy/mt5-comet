@@ -284,7 +284,7 @@ def show_df(df):
                     rename(columns={group_col:'top_target'}).\
                       merge(df.groupby(['fid','prefix','input_text'],as_index=False)[group_col].agg('<br />'.join))
             if not group_col in info_cols: info_cols.append(group_col)
-        elif char in ["G", "Y", "P"]:
+        elif char in ["G", "Y"]:
             if char ==  "Y":
                 canceled, col, _ = list_df_values(df, get_val=False)
             elif char == "G":
@@ -318,6 +318,14 @@ def show_df(df):
                 consts["files"] = open_dfnames
                 new_df = pd.read_table(_file)
                 df = pd.concat([df, new_df], ignore_index=True)
+        elif char == "P":
+            canceled, col1,_ = list_df_values(df, get_val=False)
+            if not canceled:
+                canceled, col2,_ = list_df_values(df, get_val=False)
+            if not canceled:
+                plot = df.plot(col1, col2)
+                fig = plot.get_figure()
+                fig.savefig(os.path.join(base_dir, "plots", col1 + "@" + col2 + ".png"))
         elif char == "R":
             canceled, col,val = list_df_values(main_df, get_val=False)
             if not canceled:
@@ -376,9 +384,15 @@ def show_df(df):
                     col_widths[s] = 35
                 store_back = True
         elif char in ["f","F"]:
-            canceled, col, val = list_df_values(main_df)
+            if char == "F":
+                canceled, col, val = list_df_values(main_df)
+            else:
+                canceled, col, val = list_df_values(df)
             if not canceled:
-                df = filter_df[filter_df[col] == val]
+                if char == "F":
+                    df = main_df[main_df[col] == val]
+                else:
+                    df = df[df[col] == val]
                 df = df.reset_index()
                 if not "filter" in consts:
                     consts["filter"] = []
@@ -386,7 +400,6 @@ def show_df(df):
                 if char == "F":
                     sel_cols = order(sel_cols, [col])
                 sel_row = 0
-                filter_df = df
         elif is_enter(ch):
             col = sel_cols[0]
             val = sel_dict[col]

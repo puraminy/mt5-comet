@@ -75,7 +75,7 @@ def generate(model, tokenizer, queries, batch_size=5, gen_token = "", gen_param 
         examples = queries
         decs = []
         for batch in list(chunks(queries, batch_size)):
-            batch = tokenizer(batch, return_tensors="pt", truncation=True, padding=True).to(device)
+            batch = tokenizer(batch, return_tensors="pt", max_length=200, truncation=True, padding=True).to(device)
             input_ids, attention_mask = trim_batch(**batch, pad_token_id=tokenizer.pad_token_id)
             if False: #gen_token != "":
                 gen_token_id = tokenizer.convert_tokens_to_ids(gen_token)

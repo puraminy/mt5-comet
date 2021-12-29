@@ -1334,9 +1334,10 @@ def exp(experiment, model_ids, keep, server):
     args["exclude"] = "natural" 
     langs = {"en":True}
     args["test_samples"] = 4500 
-    #methods = {"sup-tokens":"u","sup":"u", "sup-nat":"u","unsup":"u","unsup-tokens":"w-u","unsup-nat":"u", "sup-nat-tokens":"u","unsup-nat-tokens":"u"}
+    methods = {"sup-tokens":"u","sup":"u", "sup-nat":"u","unsup":"u","unsup-tokens":"w-u","unsup-nat":"u", "sup-nat-tokens":"u","unsup-nat-tokens":"u"}
     methods = {"sup-wrap":"w", "unsup-wrap":"w", "unsup-wrap-nat":"w"}
     samples_list = [270,2700, 27000]
+    samples_list = [36000]
     ii = 0
     models = model_ids.split("#")
     for model in models:
