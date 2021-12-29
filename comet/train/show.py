@@ -346,8 +346,10 @@ def show_df(df):
         elif char == "y":
            #cols = get_cols(df)
            for key, grp in df.groupby(['model']):
-                ax = grp.plot(ax=ax, kind='line', x='steps', y='rouge_score', label=key)
-        elif char == "P":
+                 ax = grp.plot(ax=ax,linestyle="--",marker="o", kind='line', x='steps', y='rouge_score', label=key)
+           ax.set_xticks(df["steps"].unique())
+           char = "P"
+        if char == "P":
             _path = rowinput("Plot name:")
             if _path:
                 fig = ax.get_figure()
