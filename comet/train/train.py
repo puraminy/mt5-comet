@@ -1359,7 +1359,7 @@ def exp(experiment, model_ids, keep, server):
                    args["batch_size"] = 16 if is_colab else 4 
                    if w == "wrapped":
                        args["wrap"] = True
-                       args["batch_size"] = 20 if not is_colab else 48 
+                       args["batch_size"] = 20 if not is_colab else 40 
                    name = f"{experiment}-{model}-{samples}-{method}-{w}"
                    #name = name.replace("_unwrapped", "")
                    #name = name.replace("_unfreezed", "")
