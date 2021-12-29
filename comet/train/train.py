@@ -65,12 +65,6 @@ from tqdm import tqdm
     help=""
 )
 @click.option(
-    "--recal",
-    "-rc",
-    is_flag=True,
-    help=""
-)
-@click.option(
     "--exclude",
     "-ex",
     default="",
@@ -83,10 +77,17 @@ from tqdm import tqdm
     is_flag=True,
     help=""
 )
+@click.option(
+    "--batch_size",
+    "-bs",
+    default=0,
+    type=int,
+    help=""
+)
 @click.pass_context
 #rrrrrrrrrrr
-def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal, 
-        exclude, overwrite):
+def run(ctx, conf_path, experiment, print_log, model_id, train_samples,
+        exclude, overwrite, batch_size):
      if not conf_path:
         conf_path = "confs"
         if colab: conf_path = "colab_confs"
@@ -121,7 +122,7 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
                #mlog.info("cur_res_path: %s", cur_res_path)
                cur_res = glob.glob(cur_res_path)
                #mlog.info("cur_res: %s", cur_res)
-               if cur_res and not recal:
+               if cur_res:
                     mlog.info("Skipping .... This was done before %s ", spath)
                     continue
                if train_samples > 0:
@@ -135,6 +136,8 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples, recal,
                    args["model_id"] = model_id
                    out = args["output_name"].split("_")
                    out[1] = model_id
+                   if batch_size > 0:
+                       args["batch_size"] = batch_size
                    args["output_name"] = "_".join(out)
                    if args["load_path"]:
                        shutil.copy(conf, args["load_path"])
@@ -1270,24 +1273,18 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     help=""
 )
 @click.option(
-    "--no_score",
-    "-ns",
-    is_flag=True,
-    help=""
-)
-@click.option(
     "--keep",
     "-k",
     is_flag=True,
-    help="keep old experiments"
+    help="Keep old experiment files"
 )
 @click.option(
-    "--colab",
-    "-c",
-    is_flag=True,
-    help="Force settings for colab"
+    "--server",
+    "-s",
+    default="Specify the server to run the experiment (e.g. colab)",
+    type=str,
 )
-def exp(experiment, model_ids, no_score, keep, colab):
+def exp(experiment, model_ids, keep, server):
     #cccccccccccc
     if colab:
         pretPath = "/content/drive/MyDrive/pret"
@@ -1324,7 +1321,6 @@ def exp(experiment, model_ids, no_score, keep, colab):
     args["experiment"] = experiment
     args["cycle"] = 0
     args["no_save_model"] = True if colab else False
-    args["no_score"] = no_score
     args["load_path"] = pretPath
     args["train_path"] = "atomic/train.tsv"
     save_path = os.path.join(pretPath, experiment)
@@ -1338,6 +1334,7 @@ def exp(experiment, model_ids, no_score, keep, colab):
     langs = {"en":True}
     args["test_samples"] = 4500 
     methods = {"sup-tokens":"u","sup":"u", "sup-nat":"u","unsup":"u","unsup-tokens":"w-u","unsup-nat":"u", "sup-nat-tokens":"u","unsup-nat-tokens":"u"}
+    methods = {"sup-wrap":"w", "unsup-wrap":"w", "unsup-wrap-nat":"w"}
     samples_list = [270,2700, 27000]
     ii = 0
     models = model_ids.split("#")

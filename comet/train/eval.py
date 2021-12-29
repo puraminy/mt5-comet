@@ -232,6 +232,7 @@ def evaluate(model, tokenizer, dataloader, save_path, exp_info, val_records, gen
             data["prefix"] = rel
             data["langs"] = lang
             input_text = re.sub(r'<.*?>','##',query)
+            input_text = input_text.replace("\n", "")
             data["input_text"] = input_text 
             if no_score:
                 if step % 10000 == 0:
