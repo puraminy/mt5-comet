@@ -63,7 +63,6 @@ def show_df(df):
     if not col_widths:
         col_widths = {"qid":5, "model":30, "pred_text1":30, "epochs":30, "date":30, "rouge_score":7, "bert_score":7, "input_text":50}
 
-    store_back = False
     df['id']=df.index
     df = df.reset_index(drop=True)
     if "input_text" in df:
@@ -90,10 +89,10 @@ def show_df(df):
         sel_df = pd.read_table(sel_path)
     else:
         sel_df = pd.DataFrame(columns = df.columns)
-    back = {"df":df, "sel_cols":sel_cols, "info_cols":info_cols, "sel_row":0}
+    back = []
     filter_df = main_df
     #wwwwwwwwww
-    colors = ['blue','orange','green']
+    colors = ['blue','orange','green', 'red', 'purple', 'brown', 'pink','gray','olive','cyan']
     ax = None
     open_dfnames = [dfname]
     prev_cahr = ""
@@ -158,11 +157,8 @@ def show_df(df):
             infos.append("{:<5}:{}".format(key,val))
         change_info(infos)
 
-        if store_back:
-            back = {"df":df, "sel_cols":sel_cols, "info_cols":info_cols, "sel_row":sel_row}
         prev_char = chr(ch)
         ch = get_key(std)
-        store_back = False
         char = chr(ch)
         vals = []
         get_cmd = False
@@ -227,20 +223,14 @@ def show_df(df):
             mbeep()
             sel_df.to_csv(sel_path, sep="\t", index=False)
         elif char == "X":
-            back["df"] = df
-            back["sel_cols"] = sel_cols
-            back["info_cols"] = info_cols
-            back["sel_row"] = sel_row
+            back.append(df)
             df = sel_df
         elif char == "z":
             fav_df = fav_df.append(df.iloc[sel_row])
             mbeep()
             fav_df.to_csv(fav_path, sep="\t", index=False)
         elif char == "Z":
-            back["df"] = df
-            back["sel_cols"] = sel_cols
-            back["info_cols"] = info_cols
-            back["sel_row"] = sel_row
+            back.append(df)
             df = fav_df
         elif char == "j":
             canceled, col = list_values(info_cols)
@@ -292,6 +282,8 @@ def show_df(df):
                     rename(columns={group_col:'top_target'}).\
                       merge(df.groupby(['fid','prefix','input_text'],as_index=False)[group_col].agg('<br />'.join))
             if not group_col in info_cols: info_cols.append(group_col)
+            consts["filter"].append("group predictions")
+            back.append(df)
         elif char in ["G", "Y"]:
             if char ==  "Y":
                 canceled, col, _ = list_df_values(df, get_val=False)
@@ -306,8 +298,8 @@ def show_df(df):
                     )
                #df = df.reset_index()
                sel_cols = order(sel_cols, g_cols)
-               back["df"] = df
-               back["sel_cols"] = sel_cols
+               back.append(df)
+               consts["filter"].append("group experiments")
         elif char == "D":
             canceled, col,val = list_df_values(main_df, get_val=False)
             if not canceled:
@@ -350,17 +342,21 @@ def show_df(df):
                 ax = df.plot(ax=ax, x=cols[0], y=cols[1])
         elif char == "y":
             #yyyyyyyy
-           cond = get_cond(df, "method", 5)
-           df = df[eval(cond)]
-           gi = 0 
-           name = ""
-           for key, grp in df.groupby(['method']):
-                 ax = grp.plot(ax=ax,linestyle="--",marker="o", kind='line', x='steps', y='rouge_score', label=key, color=colors[gi])
-                 gi += 1
-                 name += key + "_"
-           ax.set_xticks(df["steps"].unique())
-           ax.set_title(name)
-           char = "P"
+           canceled, gcol,val = list_df_values(main_df, get_val=False)
+           if not canceled:
+               cond = get_cond(df, gcol, 5)
+               df = df[eval(cond)]
+               gi = 0 
+               name = ""
+               for key, grp in df.groupby([gcol]):
+                     ax = grp.plot(ax=ax,linestyle="--",marker="o", kind='line', x='steps', y='rouge_score', label=key, color=colors[gi])
+                     gi += 1
+                     name += key + "_"
+               ax.set_xticks(df["steps"].unique())
+               ax.set_title(name)
+               back.append(df)
+               consts["filter"].append("group by " + name)
+               char = "P"
         if char == "P":
             name = ax.get_title()
             pname = rowinput("Plot name:", name)
@@ -418,24 +414,17 @@ def show_df(df):
                 df.columns = list(map("_".join, df.columns))
                 for s in sel_cols:
                     col_widths[s] = 35
-                store_back = True
-        elif char in ["f","F"]:
-            if char == "F":
-                canceled, col, val = list_df_values(main_df)
-            else:
-                canceled, col, val = list_df_values(df)
+        elif char in ["f"]:
+            canceled, col, val = list_df_values(df)
             if not canceled:
-                if char == "F":
-                    df = main_df[main_df[col] == val]
-                else:
-                    df = df[df[col] == val]
-                df = df.reset_index()
-                if not "filter" in consts:
+               cond = get_cond(df, gcol, 5)
+               df = df[eval(cond)]
+               df = df.reset_index()
+               if not "filter" in consts:
                     consts["filter"] = []
-                consts["filter"].append(" {} == {}".format(col,val))
-                if char == "F":
-                    sel_cols = order(sel_cols, [col])
-                sel_row = 0
+               consts["filter"].append(cond)
+               sel_row = 0
+               back.append(df)
         elif is_enter(ch):
             col = sel_cols[0]
             val = sel_dict[col]
@@ -463,7 +452,7 @@ def show_df(df):
             cmd = rowinput()
             if cmd == "clean":
                 df = df.replace(r'\n',' ', regex=True)
-                main_df = mian_df.replace(r'\n',' ', regex=True)
+                main_df = main_df.replace(r'\n',' ', regex=True)
                 char = "SS"
             if cmd == "rep" or cmd == "rep@":
                 canceled, col,val = list_df_values(main_df, get_val=False)
@@ -536,11 +525,9 @@ def show_df(df):
             save_obj(sel_cols,"sel_cols",dfname)
             info_cols = []
         if char == "b" and back:
-            df = back["df"] 
-            consts["filter"] = []
-            sel_cols = back["sel_cols"] 
-            info_cols = back["info_cols"]
-            sel_row = back["sel_row"]
+            back.pop() 
+            df = back[-1]
+            consts["filter"].pop()
 
 def render_mpl_table(data, wrate, col_width=3.0, row_height=0.625, font_size=14,
                      header_color='#40466e', row_colors=['#f1f1f2', 'w'], edge_color='w',
