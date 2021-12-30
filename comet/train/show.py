@@ -347,7 +347,8 @@ def show_df(df):
                 df = df.sort_values(cols[1])
                 ax = df.plot(ax=ax, x=cols[0], y=cols[1])
         elif char == "y":
-           #cols = get_cols(df)
+           cond = get_cond(df, "method", 5)
+           df = df[eval(cond)]
            for key, grp in df.groupby(['model']):
                  ax = grp.plot(ax=ax,linestyle="--",marker="o", kind='line', x='steps', y='rouge_score', label=key)
            ax.set_xticks(df["steps"].unique())
@@ -392,19 +393,9 @@ def show_df(df):
             for col in df.columns:
                 info_cols.append(col)
         elif char == "m":
-            cond = ""
-            canceled = False
-            sels = []
             info_cols = []
             sel_cols = []
-            while not canceled:
-                canceled, col, val = list_df_values(main_df, col="model", get_val=True,sels=sels)
-                cond += f"| (df['{col}'] == '{val}') "
-                info_cols.append("input_text_"+val)
-                info_cols.append("prefix_"+val)
-                sel_cols.append("pred_text1_"+val)
-                sels.append(val)
-            cond = cond.strip("|")
+            cond = get_cond(df, "model", 2)
             df = main_df[eval(cond)]
             if df.duplicated(['qid','model']).any():
                 show_err("There is duplicated rows for qid and model")
@@ -558,6 +549,16 @@ def render_mpl_table(data, wrate, col_width=3.0, row_height=0.625, font_size=14,
         else:
             cell.set_facecolor(row_colors[k[0]%len(row_colors) ])
     return ax
+def get_cond(df, for_col, num = 1):
+    canceled = False
+    sels = []
+    cond = ""
+    while not canceled and len(sels) < num:
+        canceled, col, val = list_df_values(df, col=for_col, get_val=True,sels=sels)
+        cond += f"| (df['{col}'] == '{val}') "
+        sels.append(val)
+    cond = cond.strip("|")
+    return cond
 
 def get_cols(df, num = 1):
     canceled = False
@@ -608,7 +609,7 @@ def list_values(vals,si=0, sels=[]):
     if si == 0:
         if key in si_hash:
             si = si_hash[key]
-    opts = {"items":{"sels":sels, "range":["Cancel!"] + vals}}
+    opts = {"items":{"sels":sels, "range":["Done!"] + vals}}
     is_cancled = True
     si,canceled, _ = open_submenu(tag_win, opts, "items", si, "Select a value", std)
     val = ""
