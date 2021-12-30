@@ -644,7 +644,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     if model_id == "test":
         save_path = ""
         output_name = "test"
-        conf_path = os.path.join(home, "logs/confs")
+        conf_path = "" #os.path.join(home, "logs/confs")
     Path(conf_path).mkdir(exist_ok=True, parents=True)
     with open(os.path.join(conf_path, f'exp_conf.json'), 'w') as outfile:
         json.dump(args, outfile, indent=4)
@@ -1334,7 +1334,7 @@ def exp(experiment, model_ids, keep, server, exclude, include, save_model):
     base_dir = home
     if "_" in experiment:
         raise ValueError("Experiment name shouldn't have underscore in it, use dash")
-    conf = os.path.join(base_dir, "logs/confs/exp_conf.json")
+    conf = "exp_conf.json" #os.path.join(base_dir, "logs/confs/exp_conf.json")
     save_path = os.path.join(base_dir, "mt5-comet/comet/train/")
     if not is_colab:
         conf_path = os.path.join(save_path,"confs")
