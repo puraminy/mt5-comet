@@ -1,4 +1,5 @@
 import curses as cur
+import subprocess
 import matplotlib.pyplot as plt
 from curses import wrapper
 import click
@@ -51,7 +52,7 @@ def show_df(df):
     stats = []
     col_widths = load_obj("widths", "")
     def refresh():
-        text_win.refresh(0, left, 1, 1, ROWS-1, COLS-2)
+        text_win.refresh(0, left, 0, 0, ROWS-1, COLS-2)
     def fill_text_win(rows):
         text_win.erase()
         for row in rows:
@@ -92,6 +93,7 @@ def show_df(df):
     back = {"df":df, "sel_cols":sel_cols, "info_cols":info_cols, "sel_row":0}
     filter_df = main_df
     #wwwwwwwwww
+    colors = ['blue','orange','green']
     ax = None
     open_dfnames = [dfname]
     prev_cahr = ""
@@ -349,16 +351,26 @@ def show_df(df):
         elif char == "y":
            cond = get_cond(df, "method", 5)
            df = df[eval(cond)]
-           for key, grp in df.groupby(['model']):
-                 ax = grp.plot(ax=ax,linestyle="--",marker="o", kind='line', x='steps', y='rouge_score', label=key)
+           gi = 0 
+           name = ""
+           for key, grp in df.groupby(['method']):
+                 ax = grp.plot(ax=ax,linestyle="--",marker="o", kind='line', x='steps', y='rouge_score', label=key, color=colors[gi])
+                 gi += 1
+                 name += key + "_"
            ax.set_xticks(df["steps"].unique())
+           ax.set_title(name)
            char = "P"
         if char == "P":
-            _path = rowinput("Plot name:")
-            if _path:
+            name = ax.get_title()
+            pname = rowinput("Plot name:", name)
+            if pname:
+                ax.set_title(pname)
+                pname = os.path.join(base_dir, "plots", pname +  ".png")
                 fig = ax.get_figure()
-                fig.savefig(os.path.join(base_dir, "plots", _path +  ".png"))
+                fig.savefig(pname)
                 ax = None
+                if "ahmad" in home:
+                    subprocess.run(["eog", pname])
         elif char == "R":
             canceled, col,val = list_df_values(main_df, get_val=False)
             if not canceled:
@@ -448,6 +460,10 @@ def show_df(df):
             sel_row = df.loc[mask.any(axis=1)].index[0]
         elif char == ":":
             cmd = rowinput()
+            if cmd == "clean":
+                df = df.replace(r'\n',' ', regex=True)
+                main_df = mian_df.replace(r'\n',' ', regex=True)
+                char = "SS"
             if cmd == "rep" or cmd == "rep@":
                 canceled, col,val = list_df_values(main_df, get_val=False)
                 if not canceled:
@@ -688,7 +704,7 @@ def start(stdscr):
         for f in files:
             mlog.info(f)
             if f.endswith(".tsv"):
-                df = pd.read_table(f)
+                df = pd.read_table(f, lowmemory=False)
             elif f.endswith(".json"):
                 df = load_results(f)
             force_fid = False

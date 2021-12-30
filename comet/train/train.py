@@ -72,6 +72,13 @@ from tqdm import tqdm
     help=""
 )
 @click.option(
+    "--include",
+    "-in",
+    default="",
+    type=str,
+    help=""
+)
+@click.option(
     "--overwrite",
     "-ow",
     is_flag=True,
@@ -87,7 +94,7 @@ from tqdm import tqdm
 @click.pass_context
 #rrrrrrrrrrr
 def run(ctx, conf_path, experiment, print_log, model_id, train_samples,
-        exclude, overwrite, batch_size):
+        exclude, include, overwrite, batch_size):
      if not conf_path:
         conf_path = "confs"
         if colab: conf_path = "colab_confs"
@@ -104,6 +111,9 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples,
                 continue
             if exclude and exclude in fname:
                 mlog.info("Skipping .... by exclude")
+                continue
+            if include and not include in fname:
+                mlog.info("Skipping .... by include")
                 continue
             if Path(conf).exists():
                with open(conf, 'r') as f:
@@ -1289,7 +1299,21 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     default="Specify the server to run the experiment (e.g. colab)",
     type=str,
 )
-def exp(experiment, model_ids, keep, server):
+@click.option(
+    "--exclude",
+    "-ex",
+    default="",
+    type=str,
+    help=""
+)
+@click.option(
+    "--include",
+    "-in",
+    default="",
+    type=str,
+    help=""
+)
+def exp(experiment, model_ids, keep, server, exclude, include):
     #cccccccccccc
     is_colab = colab or server == "colab"
     if is_colab:
@@ -1339,8 +1363,7 @@ def exp(experiment, model_ids, keep, server):
     langs = {"en":True}
     args["test_samples"] = 4500 
     methods = {"sup-tokens":"u","sup":"u", "sup-nat":"u","unsup":"u","unsup-tokens":"w-u","unsup-nat":"u", "sup-nat-tokens":"u","unsup-nat-tokens":"u", "sup-wrap":"w", "unsup-wrap":"w", "unsup-wrap-nat":"w"}
-    samples_list = [270,2700, 27000]
-    samples_list = [36000]
+    samples_list = [270,2700, 27000, 36000]
     ii = 0
     models = model_ids.split("#")
     for model in models:
@@ -1361,6 +1384,12 @@ def exp(experiment, model_ids, keep, server):
                        args["wrap"] = True
                        args["batch_size"] = 20 if not is_colab else 40 
                    name = f"{experiment}-{model}-{samples}-{method}-{w}"
+                   if include and not include in name:
+                       mlog.info("Skipping by include ... %s", include)
+                       continue
+                   if exclude and exclude in name:
+                       mlog.info("Skipping by include ... %s", exclude)
+                       continue
                    #name = name.replace("_unwrapped", "")
                    #name = name.replace("_unfreezed", "")
                    ii +=1
