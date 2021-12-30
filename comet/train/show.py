@@ -526,7 +526,10 @@ def show_df(df):
             info_cols = []
         if char == "b" and back:
             back.pop() 
-            df = back[-1]
+            if back:
+                df = back[-1]
+            else:
+                mbeep()
             consts["filter"].pop()
 
 def render_mpl_table(data, wrate, col_width=3.0, row_height=0.625, font_size=14,
@@ -559,8 +562,9 @@ def get_cond(df, for_col, num = 1):
     cond = ""
     while not canceled and len(sels) < num:
         canceled, col, val = list_df_values(df, col=for_col, get_val=True,sels=sels)
-        cond += f"| (df['{col}'] == '{val}') "
-        sels.append(val)
+        if not canceled:
+            cond += f"| (df['{col}'] == '{val}') "
+            sels.append(val)
     cond = cond.strip("|")
     return cond
 
