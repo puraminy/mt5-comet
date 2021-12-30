@@ -1370,8 +1370,9 @@ def exp(experiment, model_ids, keep, server, exclude, include, save_model):
     args["test_samples"] = 4500 
     methods = {"sup-tokens":"u","sup":"u", "sup-nat":"u","unsup":"u","unsup-tokens":"w-u","unsup-nat":"u", "sup-nat-tokens":"u","unsup-nat-tokens":"u", "sup-wrap":"w", "unsup-wrap":"w", "unsup-wrap-nat":"w"}
     #samples_list = [270,2700, 27000, 36000]
-    methods = {"unsup":"u", "unsup-nat":"u", "unsup-tokens":"u", "unsup-tokens-wrap":"w"}
-    samples_list = [0]
+    methods = {"unsup":"w", "sup":"w"} #, "sup-tokens-wrap":"w", "unsup-tokens-wrap":"w"}
+    #samples_list = [0]
+    samples_list = [270,2700, 27000] #, 36000]
     ii = 0
     models = model_ids.split("#")
     for model in models:
@@ -1382,6 +1383,7 @@ def exp(experiment, model_ids, keep, server, exclude, include, save_model):
                    args["method"] = method
                    args["train_samples"] = samples
                    args["is_even"] = False
+                   args["prompt_length"] = 10
                    args["model_id"]= model
                    args["frozen"] = False
                    if w == "wrapped":
