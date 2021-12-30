@@ -313,7 +313,7 @@ def show_df(df):
                 char = "SS"
                 if col in df:
                     del df[col]
-        elif char == "o":
+        elif char in ["o","O"]:
             files = [Path(f).stem for f in glob(base_dir+"/*.tsv")]
             for i,f in enumerate(files):
                 if f in open_dfnames:
@@ -325,7 +325,10 @@ def show_df(df):
                 _file = os.path.join(base_dir, _file + ".tsv")
                 consts["files"] = open_dfnames
                 new_df = pd.read_table(_file)
-                df = pd.concat([df, new_df], ignore_index=True)
+                if char == "o":
+                    df = pd.concat([df, new_df], ignore_index=True)
+                else:
+                    main_df = pd.concat([main_df, new_df], ignore_index=True)
         elif char == "t":
             cols = get_cols(df,2)
             if cols:
@@ -469,15 +472,30 @@ def show_df(df):
                             df = df.replace(d)
                         else:
                             main_df = main_df.replace(d)
+                            char = "SS"
+            if cmd in ["set", "set@", "add", "add@"]:
+                if "add" in cmd:
+                    col = rowinput("New col name:")
+                else:
+                    canceled, col,val = list_df_values(main_df, get_val=False)
+                if not canceled:
+                    val = rowinput("Set " + col + " to:")
+                    if val:
+                        if "@" in cmd:
+                            df[col] = val
+                        else:
+                            main_df[col] =val
+                            char = "SS"
             if cmd == "cp" or cmd == "cp@":
                 canceled, col,val = list_df_values(main_df, get_val=False)
                 if not canceled:
                     copy = rowinput("Copy " + col + " to:", col)
                     if copy:
                         if "@" in cmd:
-                            df = df.replace(d)
+                            df[copy] = df[col]
                         else:
                             main_df[copy] = main_df[col]
+                            char = "SS"
             if cmd.isnumeric():
                 sel_row = int(cmd)
             elif cmd == "q":
