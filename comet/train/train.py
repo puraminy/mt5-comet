@@ -813,7 +813,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
         mlog.info("length got from words ids ***: %s", length)
         set_prompt_lengths(rel_filter, length)
     elif prompt_length:
-        length = [int(s) for s in prompt_length.split("-")]
+        #length = [int(s) for s in prompt_length.split("-")]
         set_prompt_lengths(rel_filter, length)
 
     num_samples = {"train": train_samples, "validation":val_samples, "sample":0, "test":test_samples}
