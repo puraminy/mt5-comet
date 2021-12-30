@@ -417,7 +417,7 @@ def show_df(df):
         elif char in ["f"]:
             canceled, col, val = list_df_values(df)
             if not canceled:
-               cond = get_cond(df, gcol, 5)
+               cond = get_cond(df, col, 5)
                df = df[eval(cond)]
                df = df.reset_index()
                if not "filter" in consts:
