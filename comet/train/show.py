@@ -331,7 +331,19 @@ def show_df(df):
             if cols:
                 df = df.sort_values(cols[1])
                 ax = df.plot(ax=ax, x=cols[0], y=cols[1])
-        elif char in ["y","Y"]:
+        elif char in ["f", "F"]:
+            canceled, col, val = list_df_values(df)
+            back.append(df)
+            if not canceled:
+               cond = get_cond(df, col, 15)
+               df = df[eval(cond)]
+               df = df.reset_index()
+               if not "filter" in consts:
+                    consts["filter"] = []
+               consts["filter"].append(cond)
+               sel_row = 0
+               if char == "F": char = "y"
+        if char in ["y","Y"]:
             #yyyyyyyy
            canceled, gcol,val = list_df_values(main_df, get_val=False)
            back.append(df)
@@ -409,17 +421,6 @@ def show_df(df):
                 df.columns = list(map("_".join, df.columns))
                 for s in sel_cols:
                     col_widths[s] = 35
-        elif char in ["f"]:
-            canceled, col, val = list_df_values(df)
-            back.append(df)
-            if not canceled:
-               cond = get_cond(df, col, 5)
-               df = df[eval(cond)]
-               df = df.reset_index()
-               if not "filter" in consts:
-                    consts["filter"] = []
-               consts["filter"].append(cond)
-               sel_row = 0
         elif is_enter(ch):
             col = sel_cols[0]
             val = sel_dict[col]
@@ -537,13 +538,15 @@ def show_df(df):
             df = main_df
             sel_cols = list(df.columns)
             save_obj(sel_cols,"sel_cols",dfname)
+            consts["filter"] = []
             info_cols = []
         if char == "b" and back:
             if back:
                 df = back.pop()
             else:
                 mbeep()
-            consts["filter"].pop()
+            if consts["filter"]:
+                consts["filter"].pop()
 
 def render_mpl_table(data, wrate, col_width=3.0, row_height=0.625, font_size=14,
                      header_color='#40466e', row_colors=['#f1f1f2', 'w'], edge_color='w',
