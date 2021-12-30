@@ -276,6 +276,7 @@ def show_df(df):
             df = df.drop_duplicates(['prefix'])
         elif char == "g": 
             score_col = "rouge_score"
+            back.append(df)
             group_col = "pred_text1"
             df = df.sort_values(score_col, ascending=False).\
                  drop_duplicates(['fid','prefix','input_text']).\
@@ -283,9 +284,9 @@ def show_df(df):
                       merge(df.groupby(['fid','prefix','input_text'],as_index=False)[group_col].agg('<br />'.join))
             if not group_col in info_cols: info_cols.append(group_col)
             consts["filter"].append("group predictions")
+        elif char in ["G", "L"]:
             back.append(df)
-        elif char in ["G", "Y"]:
-            if char ==  "Y":
+            if char ==  "L":
                 canceled, col, _ = list_df_values(df, get_val=False)
             elif char == "G":
                 canceled, col = False, "fid"
@@ -298,7 +299,6 @@ def show_df(df):
                     )
                #df = df.reset_index()
                sel_cols = order(sel_cols, g_cols)
-               back.append(df)
                consts["filter"].append("group experiments")
         elif char == "D":
             canceled, col,val = list_df_values(main_df, get_val=False)
@@ -340,21 +340,25 @@ def show_df(df):
             if cols:
                 df = df.sort_values(cols[1])
                 ax = df.plot(ax=ax, x=cols[0], y=cols[1])
-        elif char == "y":
+        elif char in ["y","Y"]:
             #yyyyyyyy
            canceled, gcol,val = list_df_values(main_df, get_val=False)
+           back.append(df)
            if not canceled:
-               cond = get_cond(df, gcol, 5)
-               df = df[eval(cond)]
+               if char == "Y":
+                   cond = get_cond(df, gcol, 10)
+                   df = df[eval(cond)]
                gi = 0 
                name = ""
                for key, grp in df.groupby([gcol]):
                      ax = grp.plot(ax=ax,linestyle="--",marker="o", kind='line', x='steps', y='rouge_score', label=key, color=colors[gi])
                      gi += 1
+                     if gi > len(colors) - 1: gi = 0
                      name += key + "_"
                ax.set_xticks(df["steps"].unique())
                ax.set_title(name)
-               back.append(df)
+               if not "filter" in consts:
+                   consts["filter"] = []
                consts["filter"].append("group by " + name)
                char = "P"
         if char == "P":
@@ -416,6 +420,7 @@ def show_df(df):
                     col_widths[s] = 35
         elif char in ["f"]:
             canceled, col, val = list_df_values(df)
+            back.append(df)
             if not canceled:
                cond = get_cond(df, col, 5)
                df = df[eval(cond)]
@@ -424,7 +429,6 @@ def show_df(df):
                     consts["filter"] = []
                consts["filter"].append(cond)
                sel_row = 0
-               back.append(df)
         elif is_enter(ch):
             col = sel_cols[0]
             val = sel_dict[col]
@@ -454,6 +458,12 @@ def show_df(df):
                 df = df.replace(r'\n',' ', regex=True)
                 main_df = main_df.replace(r'\n',' ', regex=True)
                 char = "SS"
+            if cmd == "fix_method":
+                main_df.loc[(df["method"] == "unsup-tokens") & 
+                        (main_df["wrap"] == "wrapped-lstm"), "method"] = "unsup-tokens-wrap"
+                main_df.loc[(main_df["method"] == "sup-tokens") & 
+                        (main_df["wrap"] == "wrapped-lstm"), "method"] = "sup-tokens-wrap"
+            
             if cmd == "rep" or cmd == "rep@":
                 canceled, col,val = list_df_values(main_df, get_val=False)
                 if not canceled:
@@ -470,19 +480,32 @@ def show_df(df):
                         else:
                             main_df = main_df.replace(d)
                             char = "SS"
-            if cmd in ["set", "set@", "add", "add@"]:
+            if cmd in ["set", "set@", "add", "add@", "setcond"]:
                 if "add" in cmd:
                     col = rowinput("New col name:")
                 else:
                     canceled, col,val = list_df_values(main_df, get_val=False)
+                cond = ""
+                if "cond" in cmd:
+                    cond = get_cond(df, num=5, op="&")
                 if not canceled:
-                    val = rowinput("Set " + col + " to:")
+                    if cond:
+                        val = rowinput(f"Set {col} under {cond} to:")
+                    else:
+                        val = rowinput("Set " + col + " to:")
                     if val:
-                        if "@" in cmd:
-                            df[col] = val
+                        if cond:
+                            if "@" in cmd:
+                                df.loc[eval(cond), col] = val
+                            else:
+                                main_df[eval(cond), col] =val
+                                char = "SS"
                         else:
-                            main_df[col] =val
-                            char = "SS"
+                            if "@" in cmd:
+                                df[col] = val
+                            else:
+                                main_df[col] =val
+                                char = "SS"
             if cmd == "cp" or cmd == "cp@":
                 canceled, col,val = list_df_values(main_df, get_val=False)
                 if not canceled:
@@ -525,9 +548,8 @@ def show_df(df):
             save_obj(sel_cols,"sel_cols",dfname)
             info_cols = []
         if char == "b" and back:
-            back.pop() 
             if back:
-                df = back[-1]
+                df = back.pop()
             else:
                 mbeep()
             consts["filter"].pop()
@@ -556,16 +578,16 @@ def render_mpl_table(data, wrate, col_width=3.0, row_height=0.625, font_size=14,
         else:
             cell.set_facecolor(row_colors[k[0]%len(row_colors) ])
     return ax
-def get_cond(df, for_col, num = 1):
+def get_cond(df, for_col = "", num = 1, op="|"):
     canceled = False
     sels = []
     cond = ""
     while not canceled and len(sels) < num:
         canceled, col, val = list_df_values(df, col=for_col, get_val=True,sels=sels)
         if not canceled:
-            cond += f"| (df['{col}'] == '{val}') "
+            cond += f"{op} (df['{col}'] == '{val}') "
             sels.append(val)
-    cond = cond.strip("|")
+    cond = cond.strip(op)
     return cond
 
 def get_cols(df, num = 1):
