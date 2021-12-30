@@ -349,6 +349,7 @@ def show_df(df):
                 df = df.sort_values(cols[1])
                 ax = df.plot(ax=ax, x=cols[0], y=cols[1])
         elif char == "y":
+            #yyyyyyyy
            cond = get_cond(df, "method", 5)
            df = df[eval(cond)]
            gi = 0 
