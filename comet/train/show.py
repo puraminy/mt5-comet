@@ -96,6 +96,7 @@ def show_df(df):
     ax = None
     open_dfnames = [dfname]
     prev_cahr = ""
+    df = df[df["model"] == "t5-base"]
     while ch != ord("q"):
         text_win.erase()
         left = min(left, max_col  - width)
@@ -175,20 +176,10 @@ def show_df(df):
         elif ch == cur.KEY_PPAGE:
             sel_row -= ROWS - 4
         elif char in ["l","L"]:
-            cmd, _ = minput(cmd_win, 0, 1, "File Name=", default=dfname, all_chars=True)
-            if cmd != "<ESC>":
-                dfname = cmd
-                path = os.path.join(base_dir, dfname + ".tsv")
-                if not Path(path) or char == "L":
-                    path = os.path.join(base_dir, dfname + ".json")
-                    df = load_results(path)
-                    sel_cols = list(df.columns) 
-                else:
-                    df = pd.read_table(path)
-                    sel_cols = load_obj("sel_cols", dfname, list(df.columns)) 
-                save_obj(dfname, "dfname", "")
-                info_cols = load_obj("info_cols", dfname, []) 
-                main_df = df
+            if char == "L":
+                df = main_df[main_df["model"] == "t5-large"]
+            else:
+                df = main_df[main_df["model"] == "t5-base"]
         elif char in list("0123456789"):
             canceled, col, val = list_df_values(df, get_val=False)
             if not canceled:
@@ -205,7 +196,7 @@ def show_df(df):
                 if new_val:
                     df.at[sel_row, edit_col] = new_val
                     char = "SS"
-        elif char in ["a", "A"]:
+        elif char in ["A"]:
             canceled, col, val = list_df_values(df, get_val=False)
             if not canceled:
                 if not col in sel_cols:
@@ -363,10 +354,10 @@ def show_df(df):
                char = "P"
         if char == "P":
             name = ax.get_title()
-            pname = rowinput("Plot name:", name)
+            pname = rowinput("Plot name:", name[:30])
             if pname:
                 ax.set_title(pname)
-                pname = os.path.join(base_dir, "plots", pname +  ".png")
+                pname = os.path.join(base_dir, "plots", now + "_" + pname +  ".png")
                 fig = ax.get_figure()
                 fig.savefig(pname)
                 ax = None
@@ -629,7 +620,7 @@ def change_info(infos):
     for msg in infos:
         mprint(str(msg), info_bar, color=HL_COLOR)
     rows,cols = std.getmaxyx()
-    info_bar.refresh(0,0, rows -len(infos),0, rows-1, cols)
+    info_bar.refresh(0,0, rows -len(infos),0, rows-1, cols - 2)
 si_hash = {}
 def list_values(vals,si=0, sels=[]):
     tag_win = cur.newwin(15, 70, 3, 5)
@@ -682,7 +673,7 @@ def start(stdscr):
     text_win = cur.newpad(rows * 50, cols * 20)
     text_win.bkgd(' ', cur.color_pair(TEXT_COLOR)) # | cur.A_REVERSE)
     cmd_win = cur.newwin(1, cols, rows - 1, 0)
-    info_bar = cur.newpad(20, cols -2)
+    info_bar = cur.newpad(rows*10, cols*20)
     info_bar.bkgd(' ', cur.color_pair(HL_COLOR)) # | cur.A_REVERSE)
 
     cur.start_color()
