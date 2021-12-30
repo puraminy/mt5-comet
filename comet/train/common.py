@@ -696,16 +696,16 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
        elif method == "unsup-wrap":
            qtemp = "{rel_i_start} {event} {rel_i_end} {ph}"
            anstemp = "{ph} {resp} {end}"
-       elif method == "sup-tokens" or "sup-tokens-wrap":
+       elif method == "sup-tokens" or method  == "sup-tokens-wrap":
            qtemp = "{event} {tokens}"
            anstemp = "{resp} {end}"
-       elif method == "unsup-tokens" or "unsup-tokens-wrap":
+       elif method == "unsup-tokens" or method  == "unsup-tokens-wrap":
            qtemp = "{event} {tokens} {ph}"
            anstemp = "{ph} {resp} {end}"
        elif method == "sup-tokens-start":
            qtemp = "{tokens} {event}"
            anstemp = "{resp} {end}"
-       elif method == "unsup-tokens-start":
+       elif method == "unsup-tokens-start" or method == "unsup-tokens-wrap-start":
            qtemp = "{tokens} {event} {ph}"
            anstemp = "{ph} {resp} {end}"
        elif method == "unsup-tokens-gen":
