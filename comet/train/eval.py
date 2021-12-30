@@ -204,10 +204,11 @@ def evaluate(model, tokenizer, dataloader, save_path, exp_info, val_records, gen
     pbar = tqdm(total=val_records, position=0, leave=True) #,dynamic_ncols=True)
     step = 0
     bs = 40
+    gen_bs = 20 if colab else 5
     vlog.disabled = True
     for batch_list in batched(list(test_iter), bs):
         queries = [x[0] for x in batch_list]
-        hyps = generate(model, tokenizer, queries, batch_size = 20)
+        hyps = generate(model, tokenizer, queries, batch_size = gen_bs)
         pbar.update(bs)
         for (query, tail, rel, lang, qid), top_hyp in zip(batch_list, hyps):
             tails = [tail]

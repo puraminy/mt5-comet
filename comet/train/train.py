@@ -1313,7 +1313,13 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     type=str,
     help=""
 )
-def exp(experiment, model_ids, keep, server, exclude, include):
+@click.option(
+    "--save_model",
+    "-sm",
+    is_flag=True,
+    help=""
+)
+def exp(experiment, model_ids, keep, server, exclude, include, save_model):
     #cccccccccccc
     is_colab = colab or server == "colab"
     if is_colab:
@@ -1350,7 +1356,7 @@ def exp(experiment, model_ids, keep, server, exclude, include):
     samples = 300
     args["experiment"] = experiment
     args["cycle"] = 0
-    args["no_save_model"] = True if is_colab else False
+    args["no_save_model"] = not save_model
     args["load_path"] = pretPath
     args["train_path"] = "atomic/train.tsv"
     save_path = os.path.join(pretPath, experiment)
@@ -1385,10 +1391,10 @@ def exp(experiment, model_ids, keep, server, exclude, include):
                        args["batch_size"] = 20 if not is_colab else 40 
                    name = f"{experiment}-{model}-{samples}-{method}-{w}"
                    if include and not include in name:
-                       mlog.info("Skipping by include ... %s", include)
+                       #mlog.info("Skipping by include ... %s", include)
                        continue
                    if exclude and exclude in name:
-                       mlog.info("Skipping by include ... %s", exclude)
+                       #mlog.info("Skipping by include ... %s", exclude)
                        continue
                    #name = name.replace("_unwrapped", "")
                    #name = name.replace("_unfreezed", "")
