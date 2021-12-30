@@ -1045,7 +1045,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
         tlog.info("Wrapped model require grad %s, ", len(rgrad))
         tlog.info("Wrapped model not require grad %s, ", len(nrgrad))
 
-    tokenizer.save_pretrained(save_path)
+    if not no_save_model:
+        tokenizer.save_pretrained(save_path)
     def get_optimizer(model, learning_rate, wrap, opt_type):
         if wrap:
             optimizer_grouped_parameters = [
