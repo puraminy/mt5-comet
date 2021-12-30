@@ -705,7 +705,7 @@ def start(stdscr):
         for f in files:
             mlog.info(f)
             if f.endswith(".tsv"):
-                df = pd.read_table(f, lowmemory=False)
+                df = pd.read_table(f, low_memory=False)
             elif f.endswith(".json"):
                 df = load_results(f)
             force_fid = False
