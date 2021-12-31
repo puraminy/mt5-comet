@@ -71,7 +71,7 @@ def show_df(df):
     main_df = df
     edit_col = ""
     count_col = ""
-    consts = {}
+    consts = {"filter":[]}
     save_obj(dfname, "dfname", "")
     sel_cols = load_obj("sel_cols", dfname)
     if not sel_cols:
@@ -96,7 +96,6 @@ def show_df(df):
     ax = None
     open_dfnames = [dfname]
     prev_cahr = ""
-    df = df[df["model"] == "t5-base"]
     while ch != ord("q"):
         text_win.erase()
         left = min(left, max_col  - width)
@@ -250,7 +249,11 @@ def show_df(df):
                counts[col] = df[col].nunique()
             df = pd.DataFrame(data=[counts], columns = df.columns)
         elif char == "U":
-            df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
+            #df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
+            df = df[df["wrap"] == "unwrapped-lstm"]
+        elif char == "W":
+            #df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
+            df = df[df["wrap"] == "wrapped-lstm"]
         elif char == "u": 
             if not count_col:
                 canceled, col, _ = list_df_values(df, get_val=False)

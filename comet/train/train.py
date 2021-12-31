@@ -1370,19 +1370,23 @@ def exp(experiment, model_ids, keep, server, exclude, include, save_model):
     langs = {"en":True}
     args["test_samples"] = 4500 
     methods = {"sup-tokens":"u","sup":"u", "sup-nat":"u","unsup":"u","unsup-tokens":"w-u","unsup-nat":"u", "sup-nat-tokens":"u","unsup-nat-tokens":"u", "sup-wrap":"w", "unsup-wrap":"w", "unsup-wrap-nat":"w"}
-    #samples_list = [270,2700, 27000, 36000]
     methods = {"unsup-wrap":"w", "sup-wrap":"w", "unsup-tokens-start":"u", "unsup-tokens-wrap-start":"w"} #, "sup-tokens-wrap":"w", "unsup-tokens-wrap":"w"}
-    #samples_list = [0]
-    samples_list = [270,2700, 27000] #, 36000]
+    #var_list = [270,2700, 27000] #, 36000] #samples
+    args["train_samples"] = 2700
+    var_list = [0.01,0.001, 0.0001] #, 36000] #learning rate
     ii = 0
     models = model_ids.split("#")
     for model in models:
         for method,wrap in methods.items():
             for wu in wrap.split("-"): 
-                for samples in samples_list: 
+                for var in var_list: 
                    w = "wrapped" if wu == "w" else "unwrapped"
+                   
+
+                   args["learning_rate"] = var
+                   
+
                    args["method"] = method
-                   args["train_samples"] = samples
                    args["is_even"] = False
                    args["prompt_length"] = "10"
                    args["model_id"]= model
