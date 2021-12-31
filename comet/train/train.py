@@ -645,12 +645,12 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
         save_path = ""
         output_name = "test"
         conf_path = "" #os.path.join(home, "logs/confs")
-    Path(conf_path).mkdir(exist_ok=True, parents=True)
-    with open(os.path.join(conf_path, f'exp_conf.json'), 'w') as outfile:
-        json.dump(args, outfile, indent=4)
+        Path(conf_path).mkdir(exist_ok=True, parents=True)
+        with open(os.path.join(conf_path, f'exp_conf.json'), 'w') as outfile:
+            json.dump(args, outfile, indent=4)
 
     if config:
-        mlog.info("Config %s was created at %s", "conf_" + output_name, conf_path)
+        mlog.info("Config %s was created at %s", "exp_conf.json", conf_path)
         return
 
     if save_path != logPath:
@@ -724,6 +724,9 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     for logger in [clog]:
         logger.info(args_str)
         logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+
+    with open(os.path.join(save_path, f'exp_conf.json'), 'w') as outfile:
+        json.dump(args, outfile, indent=4)
 
     do_overwrite = False
     if overwrite or do_eval:
