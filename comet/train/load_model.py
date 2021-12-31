@@ -56,6 +56,7 @@ def main(fname, path, load_model):
     prefix = ""
     sort = "rouge_score"
     filt = ""
+    gen_token=""
     #wwwwwwwww
     while doc != "q":
         print(colored("? (help) --------------------------------------","red"))
@@ -65,7 +66,6 @@ def main(fname, path, load_model):
             r = random.randint(0, len(df) -1)
             inp = "%"
             rand_inp = str(df.iloc[r]["input_text"])
-            input_text = rand_inp
             filt=""
             filt_preds = None
         if inp.isnumeric():
@@ -84,6 +84,9 @@ def main(fname, path, load_model):
                         print("")
                 print("")
             continue
+        if inp.startswith("~"):
+            gen_token = inp[1:]
+            inp = "!"
         if inp in relation_natural_mappings:
             inp = "#" + inp
         if inp.startswith("*"):
@@ -113,7 +116,7 @@ def main(fname, path, load_model):
         print(f"{ii:<2})", colored(doc, 'green'))
         ii += 1
         if load_model:
-            outputs = gen_resp(model, tokenizer, doc)
+            outputs = generate(model, tokenizer, [doc], 1, gen_token)
             print("Generated:", colored(outputs,'blue'))
         if filt and preds is not None:
             filt_preds = preds.loc[preds["fid"].str.contains(filt),:]
