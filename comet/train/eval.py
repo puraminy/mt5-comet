@@ -158,6 +158,7 @@ def evaluate(model, tokenizer, dataloader, save_path, exp_info, val_records, gen
         base_path = os.path.join(home, "pret")
 
     mlog.info("Loading models for evaluation ..")
+    mlog.info("%s", save_path)
 
     #local_path = f"{base_path}/paraphrase-multilingual-MiniLM-L12-v2"        
     local_path = f"{base_path}/paraphrase-MiniLM-L6-v2"

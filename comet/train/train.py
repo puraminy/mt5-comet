@@ -1378,48 +1378,53 @@ def exp(experiment, model_ids, keep, server, exclude, include, save_model):
     methods = {"unsup-wrap":"w", "sup-wrap":"w", "unsup-tokens-wrap":"w"} #, "sup-tokens-wrap":"w", "unsup-tokens-wrap":"w"}
     #var_list = [270,2700, 27000] #, 36000] #samples
     args["train_samples"] = 2700
-    var_name = "learning_rate"
-    var_list = [0.01,0.001, 0.0001] #, 36000] #learning rate
+    #var_name = "learning_rate"
+    #var_list = [0.01,0.001, 0.0001] #, 36000] #learning rate
+    var_list = [] 
     ii = 0
     models = model_ids.split("#")
+
+    def fill_args(model, method, wu, ii, var_name="", var=""):
+       w = "wrapped" if wu == "w" else "unwrapped"
+       if var_name:
+           args[var_name] = var
+       args["method"] = method
+       args["is_even"] = False
+       args["model_id"]= model
+       args["frozen"] = False
+       if w == "wrapped":
+           args["frozen"] = True
+       args["wrap"] = w == "wrapped" 
+       args["batch_size"] = 16 if is_colab else 8 
+       if w == "wrapped":
+           args["wrap"] = True
+           args["batch_size"] = 20 if not is_colab else 40 
+       name = f"{experiment}-{model}-{method}-{var_name}-{var}"
+       if include and not include in name:
+           #mlog.info("Skipping by include ... %s", include)
+           return
+       if exclude and exclude in name:
+           #mlog.info("Skipping by include ... %s", exclude)
+           return
+       #name = name.replace("_unwrapped", "")
+       #name = name.replace("_unfreezed", "")
+       name = "{:02d}".format(ii) + "_" + name
+       args["output_name"] = name
+       args["overwrite"] = name
+       print(name)
+       with open(os.path.join(conf_path, f'{name}.json'), 'w') as outfile:
+                json.dump(args, outfile, indent=4)
+
+    ii = 0
     for model in models:
         for method,wrap in methods.items():
             for wu in wrap.split("-"): 
-                for var in var_list: 
-                   w = "wrapped" if wu == "w" else "unwrapped"
-                   
-
-                   args[var_name] = var
-                   
-
-                   args["method"] = method
-                   args["is_even"] = False
-                   args["model_id"]= model
-                   args["frozen"] = False
-                   if w == "wrapped":
-                       args["frozen"] = True
-                   args["wrap"] = w == "wrapped" 
-                   args["batch_size"] = 16 if is_colab else 8 
-                   if w == "wrapped":
-                       args["wrap"] = True
-                       args["batch_size"] = 20 if not is_colab else 40 
-                   name = f"{experiment}-{method}-{var_name}-{var}"
-                   if include and not include in name:
-                       #mlog.info("Skipping by include ... %s", include)
-                       continue
-                   if exclude and exclude in name:
-                       #mlog.info("Skipping by include ... %s", exclude)
-                       continue
-                   #name = name.replace("_unwrapped", "")
-                   #name = name.replace("_unfreezed", "")
-                   ii +=1
-                   name = "{:02d}".format(ii) + "_" + name
-                   args["output_name"] = name
-                   args["overwrite"] = name
-                   print(name)
-                   with open(os.path.join(conf_path, f'{name}.json'), 'w') as outfile:
-                            json.dump(args, outfile, indent=4)
-
+                if var_list:
+                    for var in var_list: 
+                        fill_args(model, method, wu,ii, var_name, var)
+                else:
+                    fill_args(model, method, wu, ii)
+                ii += 1
 
 def translate(model, tokenizer, df, trans_col, path, logger=None, start=0, save_path=""):
     pbar = tqdm(total= len(df))
