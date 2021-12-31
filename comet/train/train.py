@@ -725,8 +725,6 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
         logger.info(args_str)
         logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
 
-    with open(os.path.join(save_path, f'exp_conf.json'), 'w') as outfile:
-        json.dump(args, outfile, indent=4)
 
     do_overwrite = False
     if overwrite or do_eval:
@@ -742,6 +740,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
         mlog.info(save_path)
         ii += 1
 
+    with open(os.path.join(save_path, f'exp_conf.json'), 'w') as outfile:
+        json.dump(args, outfile, indent=4)
     mlog.info(f"SAVE Path:{save_path}" + " (Overwrite)" if overwrite else "")
     mlog.info(f"LOAD Path:{underlying_model_name}")
     Path(save_path).mkdir(exist_ok=True, parents=True)
