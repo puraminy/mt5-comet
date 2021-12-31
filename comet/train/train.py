@@ -1392,7 +1392,6 @@ def exp(experiment, model_ids, keep, server, exclude, include, save_model):
 
                    args["method"] = method
                    args["is_even"] = False
-                   args["prompt_length"] = "10"
                    args["model_id"]= model
                    args["frozen"] = False
                    if w == "wrapped":

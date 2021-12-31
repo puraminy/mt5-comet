@@ -89,6 +89,7 @@ def show_df(df):
         sel_df = pd.read_table(sel_path)
     else:
         sel_df = pd.DataFrame(columns = df.columns)
+
     back = []
     filter_df = main_df
     #wwwwwwwwww
@@ -450,7 +451,8 @@ def show_df(df):
         elif char == ":":
             cmd = rowinput()
             if cmd == "clean":
-                df = df.replace(r'\n',' ', regex=True)
+                for col in ["target_text", "pred_text1"]: 
+                    main_df[col] = main_df[col].astype(str)
                 main_df = main_df.replace(r'\n',' ', regex=True)
                 char = "SS"
             if cmd == "fix_method":
