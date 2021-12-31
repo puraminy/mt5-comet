@@ -1,6 +1,6 @@
 {
     "model_id": "t5-base",
-    "experiment": "lr",
+    "experiment": "lr5",
     "qtemp": "{rel_token}: {event} {gen} {ph}",
     "anstemp": "{ph} {resp} {end}",
     "extemp": "",
@@ -12,8 +12,8 @@
     "val_path": "atomic/val_all_rels.tsv",
     "test_path": "atomic/test.tsv",
     "sample_path": "atomic/val_all_rels.tsv",
-    "overwrite": "10_lr-unsup-wrap-learning_rate-0.01",
-    "output_name": "10_lr-unsup-wrap-learning_rate-0.01",
+    "overwrite": "13_lr5-sup-wrap-learning_rate-0.01",
+    "output_name": "13_lr5-sup-wrap-learning_rate-0.01",
     "lang": "en",
     "learning_rate": 0.01,
     "do_eval": false,
@@ -56,7 +56,7 @@
     "is_even": false,
     "is_flax": false,
     "load_path": "/content/drive/MyDrive/pret",
-    "method": "unsup-wrap",
+    "method": "sup-wrap",
     "nli_group": "all",
     "only_blanks": false,
     "per_record": false,
@@ -65,6 +65,6 @@
     "rel_filter": "",
     "samples_per_head": 0,
     "sampling": 5,
-    "save_path": "/content/drive/MyDrive/pret/lr",
+    "save_path": "/content/drive/MyDrive/pret/lr5",
     "start": 0
 }
