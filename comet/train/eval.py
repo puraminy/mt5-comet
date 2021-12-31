@@ -124,6 +124,7 @@ def save_results(rows, fid, step, exp_info, save_path=""):
     path = os.path.join(resPath, name + "_" + _info + ".tsv")
     mlog.info("Saving results %s", path)
     df = pd.DataFrame(rows)
+    df["val_steps"] = step
     for key, info in exp_info.items():
         df[key] = info
     df.to_csv(path, index=False, sep="\t")
@@ -206,7 +207,10 @@ def evaluate(model, tokenizer, dataloader, save_path, exp_info, val_records, gen
     bs = 40
     gen_bs = 20 if colab else 5
     vlog.disabled = True
+    exit_loop = False
     for batch_list in batched(list(test_iter), bs):
+        if exit_loop:
+            break
         queries = [x[0] for x in batch_list]
         hyps = generate(model, tokenizer, queries, batch_size = gen_bs)
         pbar.update(bs)
@@ -324,7 +328,12 @@ def evaluate(model, tokenizer, dataloader, save_path, exp_info, val_records, gen
             sum_rouge[scope] += rouge_score
             sum_rouge["all"] += rouge_score
             mean_rouge[scope] = "{:.4f}".format(sum_rouge[scope] / counter[scope])
-            mean_rouge["all"] = "{:.4f}".format(sum_rouge["all"] / counter["all"])
+            mean_rouge_all = sum_rouge["all"] / counter["all"]
+            if step > int(0.5*val_records) and mean_rouge_all < 0.1:
+                mlog.info("Early exit because of low score")
+                exit_loop = True
+                break
+            mean_rouge["all"] = "{:.4f}".format(mean_rouge_all)
             vlog.info("Bert Score:{:.4f}--{}".format(cur_score, mean_bert[scope]))
             vlog.info("Rouge Score:{:.4f}--{}".format(rouge_score, mean_rouge[scope]))
             vlog.info("Match Score:{}--{}".format(match_score, mean_match[scope]))
@@ -337,7 +346,7 @@ def evaluate(model, tokenizer, dataloader, save_path, exp_info, val_records, gen
             rows.append(data)
 
     # %%%%%%%%%%%%%%%%%%
-    new_df = save_results(rows, "new", val_records, exp_info, save_path)
+    new_df = save_results(rows, "new", step, exp_info, save_path)
     if no_score:
         return
 

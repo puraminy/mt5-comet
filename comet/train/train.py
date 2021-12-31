@@ -914,7 +914,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
                         "frozen":f_str, 
                         "steps":train_records,
                         "epochs":epochs_num,
-                        "val_steps":val_records, "date":extra}
+                        "date":extra}
     if do_eval or (not wrap and frozen):
         mlog.info("Evaluating the model...")
         model.to(device=device)
@@ -1276,7 +1276,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
                         "frozen":f_str, 
                         "steps":train_records,
                         "epochs":epochs_num,
-                        "val_steps":val_records, "date":extra}
+                        "date":extra}
         evaluate(model, tokenizer, myds[test_set], save_path, exp_info, val_records, gen_param, no_score=no_score)  
     else:
         mlog.info("Test set was not provided.... skip testing...")
