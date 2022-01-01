@@ -43,7 +43,7 @@ def trim_batch(
 
 # ggggggggg
 def generate(model, tokenizer, queries, batch_size=5, gen_token = "", gen_param = "greedy", at_mask=None):
-    skip_special = "False"
+    skip_special = "True"
     #verb = get_verb(query)
     #vlog.info("Ignoring verb %s", verb)
     bad_words_ids = None
@@ -119,17 +119,18 @@ def bert_score(bert_scorer, hyps, refs):
         return best_hyp_index, best_ref_index, top["score"] 
 
 def save_results(rows, fid, step, exp_info, save_path=""):
-    name = fid + "_results_" + (human_format(step) if step > 0 else "full") 
-    _info = "_".join([str(x) for x in list(exp_info.values())])
-    path = os.path.join(resPath, name + "_" + _info + ".tsv")
-    mlog.info("Saving results %s", path)
+    name = fid + "_results_" + human_format(step) 
     df = pd.DataFrame(rows)
     df["val_steps"] = step
     for key, info in exp_info.items():
         df[key] = info
-    df.to_csv(path, index=False, sep="\t")
     if save_path:
         path = os.path.join(save_path, name + ".tsv")
+        mlog.info("Saving results %s", path)
+        df.to_csv(path, index=False, sep="\t")
+    else:
+        _info = "_".join([str(x) for x in list(exp_info.values())])
+        path = os.path.join(resPath, name + "_" + _info + ".tsv")
         mlog.info("Saving results %s", path)
         df.to_csv(path, index=False, sep="\t")
     return df
@@ -242,7 +243,7 @@ def evaluate(model, tokenizer, dataloader, save_path, exp_info, val_records, gen
             data["input_text"] = input_text 
             if no_score:
                 if step % 10000 == 0:
-                    save_results(rows, "new", step, exp_info)
+                    save_results(rows, "step", step, exp_info, save_path)
                 step += 1
                 rows.append(data)
                 continue
@@ -343,11 +344,11 @@ def evaluate(model, tokenizer, dataloader, save_path, exp_info, val_records, gen
             pbar.set_description(f"{scope:<20} :Bert:{mean_bert[scope]:<7} | {mean_bert['all']:<7} Rouge {mean_rouge[scope]:<7}|{mean_rouge['all']:<7} ")
             step += 1
             if step % 10000 == 0:
-                save_results(rows, "new", step, exp_info)
+                save_results(rows, "step", step, exp_info, save_path)
             rows.append(data)
 
     # %%%%%%%%%%%%%%%%%%
-    new_df = save_results(rows, "new", step, exp_info, save_path)
+    new_df = save_results(rows, "full", step, exp_info, save_path)
     if no_score:
         return
 

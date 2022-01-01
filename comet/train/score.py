@@ -256,7 +256,7 @@ def main(fname, model_name, path, step, col1, col2, score_col, cpu, concat):
     else:
         out1 = path + "/" + Path(fname).stem  + ".tsv" 
         df.to_csv(out1, sep="\t", index=False)
-        out_new1 = path + "/new_" + Path(fname).stem  + ".tsv" 
+        out_new1 = path + "/scored_" + Path(fname).stem  + ".tsv" 
         new_df.to_csv(out_new1, sep="\t", index=False)
         print(out1)
 
