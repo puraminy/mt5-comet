@@ -100,7 +100,7 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples,
         if colab: conf_path = "colab_confs"
      if ctx.invoked_subcommand is None:
         mlog.info("Reading from conf %s", conf_path)
-        confs = sorted(glob.glob(f"{conf_path}/*"))
+        confs = sorted(glob.glob(f"{conf_path}/{experiment}/*"))
         default_model = ""
         first = True
         for conf in confs:
@@ -1343,9 +1343,9 @@ def exp(experiment, model_ids, keep, server, exclude, include, save_model):
     conf = "exp_conf.json" #os.path.join(base_dir, "logs/confs/exp_conf.json")
     save_path = os.path.join(base_dir, "mt5-comet/comet/train/")
     if not is_colab:
-        conf_path = os.path.join(save_path,"confs")
+        conf_path = os.path.join(save_path,"confs",experiment)
     else:
-        conf_path = os.path.join(save_path,"colab_confs")
+        conf_path = os.path.join(save_path,"colab_confs",experiment)
     mlog.info("Creating configurations...%s ", conf_path)
     if not keep:
         cur_files = glob.glob(f"{conf_path}/*")

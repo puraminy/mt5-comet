@@ -816,7 +816,6 @@ class MyDataset(torch.utils.data.IterableDataset):
         if self.num_samples == 0: 
             self.num_samples = len(split_df)
             self.samples_per_head = 0
-            self.is_even = False
         for col in targets:
             if col in split_df:
                 split_df[col] = split_df[col].astype(str)
@@ -914,7 +913,10 @@ class MyDataset(torch.utils.data.IterableDataset):
         if self.flat_data:
             _iter = iter(self.flat_data)
         else:
-            _iter = iter(self.fill_data(iter_start, iter_end))
+            if self.is_even:
+                _iter = iter(self.fill_all_data(iter_start, iter_end))
+            else:
+                _iter = iter(self.fill_data(iter_start, iter_end))
         self.example_counter = 0
         return map(self.preproc, _iter)
 
