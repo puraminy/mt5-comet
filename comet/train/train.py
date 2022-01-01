@@ -1401,9 +1401,9 @@ def exp(experiment, model_ids, keep, server, exclude, include, save_model):
            args["wrap"] = True
            args["batch_size"] = 20 if not is_colab else 40 
        if var_name:
-           name = f"{experiment}-{model}-{method}-{var_name}-{var}"
+           name = f"{experiment}-{model}-{method}-{w}-{var_name}-{var}"
        else:
-           name = f"{experiment}-{model}-{method}-{var_name}-{var}"
+           name = f"{experiment}-{model}-{method}-{w}"
        if include and not include in name:
            #mlog.info("Skipping by include ... %s", include)
            return
