@@ -290,7 +290,7 @@ def show_df(df):
                df = (df.groupby(col).agg({"rouge_score":"mean","bert_score":"mean",
                    "method":"first","model":"first", "wrap":"first", col:"first", "steps":"first"})
                  .rename(columns={col:'exp_id'})
-                 .sort_values(by = ["steps", "rouge_score"])
+                 .sort_values(by = ["steps", "rouge_score"], ascending=False)
                     )
                #df = df.reset_index()
                sel_cols = order(sel_cols, g_cols)

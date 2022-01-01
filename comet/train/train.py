@@ -1360,6 +1360,7 @@ def exp(experiment, model_ids, keep, server, exclude, include, save_model):
         print(conf + " doesn't exists!")
         return
     samples = 300
+    var_list = []
     args["experiment"] = experiment
     args["cycle"] = 0
     args["no_save_model"] = not save_model
@@ -1373,14 +1374,15 @@ def exp(experiment, model_ids, keep, server, exclude, include, save_model):
     args["gen_param"] = "greedy" 
     args["exclude"] = "natural" 
     langs = {"en":True}
-    args["test_samples"] = 4500 
+    args["test_samples"] = 0 
+    args["test_path"] = "atomic/val_all_rels.tsv"
     methods = {"sup-tokens":"u","sup":"u", "sup-nat":"u","unsup":"u","unsup-tokens":"w-u","unsup-nat":"u", "sup-nat-tokens":"u","unsup-nat-tokens":"u", "sup-wrap":"w", "unsup-wrap":"w", "unsup-wrap-nat":"w"}
-    methods = {"unsup-wrap":"w", "sup-wrap":"w", "unsup-tokens-wrap":"w"} #, "sup-tokens-wrap":"w", "unsup-tokens-wrap":"w"}
+    #methods = {"unsup-wrap":"w", "sup-wrap":"w", "unsup-tokens-wrap":"w"} #, "sup-tokens-wrap":"w", "unsup-tokens-wrap":"w"}
     #var_list = [270,2700, 27000] #, 36000] #samples
     args["train_samples"] = 2700
     #var_name = "learning_rate"
     #var_list = [0.01,0.001, 0.0001] #, 36000] #learning rate
-    var_list = [] 
+    #var_list = [] 
     ii = 0
     models = model_ids.split("#")
 

@@ -43,7 +43,7 @@ def trim_batch(
 
 # ggggggggg
 def generate(model, tokenizer, queries, batch_size=5, gen_token = "", gen_param = "greedy", at_mask=None):
-    skip_special = "True"
+    skip_special = "False"
     #verb = get_verb(query)
     #vlog.info("Ignoring verb %s", verb)
     bad_words_ids = None
@@ -77,12 +77,12 @@ def generate(model, tokenizer, queries, batch_size=5, gen_token = "", gen_param 
         for batch in list(chunks(queries, batch_size)):
             batch = tokenizer(batch, return_tensors="pt", max_length=200, truncation=True, padding=True).to(device)
             input_ids, attention_mask = trim_batch(**batch, pad_token_id=tokenizer.pad_token_id)
-            if gen_token != "":
+            if False: #gen_token != "":
                 gen_token_id = tokenizer.convert_tokens_to_ids(gen_token)
                 hyps = model.generate(input_ids=input_ids,**generation_params,
                         attention_mask=attention_mask,
                         decoder_start_token_id=gen_token_id)
-                hyps = tokenizer.batch_decode(hyps,skip_special_tokens=True)
+                hyps = tokenizer.batch_decode(hyps,skip_special_tokens=False)
             else:
                 hyps = model.generate(input_ids=input_ids,**generation_params,
                         attention_mask=attention_mask)
@@ -206,7 +206,7 @@ def evaluate(model, tokenizer, dataloader, save_path, exp_info, val_records, gen
     pbar = tqdm(total=val_records, position=0, leave=True) #,dynamic_ncols=True)
     step = 0
     bs = 40
-    gen_bs = 20 if colab else 5
+    gen_bs = 20 if colab else 10
     vlog.disabled = True
     exit_loop = False
     for batch_list in batched(list(test_iter), bs):
@@ -330,7 +330,7 @@ def evaluate(model, tokenizer, dataloader, save_path, exp_info, val_records, gen
             sum_rouge["all"] += rouge_score
             mean_rouge[scope] = "{:.4f}".format(sum_rouge[scope] / counter[scope])
             mean_rouge_all = sum_rouge["all"] / counter["all"]
-            if step > int(0.5*val_records) and mean_rouge_all < 0.1:
+            if val_records > 2000 and step > int(0.5*val_records) and mean_rouge_all < 0.1:
                 mlog.info("Early exit because of low score")
                 exit_loop = True
                 break
