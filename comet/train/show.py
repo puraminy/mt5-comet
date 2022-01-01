@@ -714,15 +714,18 @@ def start(stdscr):
     if not dfname:
         mlog.info("No file name provided")
     else:
-        path = os.path.join(dfpath, dfname)
-        if Path(path).is_file():
-            files = [path]
-            dfname = Path(dfname).stem
+        if type(dfname) == tuple:
+            files = list(dfname)
         else:
-            files = []
-            for root, dirs, _files in os.walk(dfpath):
-                for _file in _files:
-                    if all(s in _file for s in dfname.split("+")):
+            path = os.path.join(dfpath, dfname)
+            if Path(path).is_file():
+                files = [path]
+                dfname = Path(dfname).stem
+            else:
+                files = []
+                for root, dirs, _files in os.walk(dfpath):
+                    for _file in _files:
+                        if all(s in _file for s in dfname.split("+")):
                         files.append(os.path.join(root, _file))
         dfs = []
         for f in files:
@@ -753,7 +756,7 @@ def start(stdscr):
             mlog.info("No tsv or json file was found")
 
 @click.command()
-@click.argument("fname", type=str)
+@click.argument("fname", nargs=-1, type=str)
 @click.option(
     "--path",
     envvar="PWD",
