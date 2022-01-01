@@ -330,7 +330,7 @@ def evaluate(model, tokenizer, dataloader, save_path, exp_info, val_records, gen
             sum_rouge["all"] += rouge_score
             mean_rouge[scope] = "{:.4f}".format(sum_rouge[scope] / counter[scope])
             mean_rouge_all = sum_rouge["all"] / counter["all"]
-            if val_records > 2000 and step > int(0.5*val_records) and mean_rouge_all < 0.1:
+            if val_records > 20000 and step > int(0.5*val_records) and mean_rouge_all < 0.1:
                 mlog.info("Early exit because of low score")
                 exit_loop = True
                 break

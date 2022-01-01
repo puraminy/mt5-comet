@@ -336,17 +336,21 @@ def show_df(df):
                 df = df.sort_values(cols[1])
                 ax = df.plot(ax=ax, x=cols[0], y=cols[1])
         elif char in ["f", "F"]:
-            canceled, col, val = list_df_values(df)
             back.append(df)
             if not canceled:
-               cond = get_cond(df, col, 15)
-               df = df[eval(cond)]
-               df = df.reset_index()
-               if not "filter" in consts:
-                    consts["filter"] = []
-               consts["filter"].append(cond)
-               sel_row = 0
-               if char == "F": char = "y"
+               if char == "F":
+                    cond = get_cond(df, num=15)
+               else:
+                    canceled, col, val = list_df_values(df, get_val=True)
+                    if not canceled:
+                        cond = f"df['{col}'] == {val}"
+               if cond:
+                   df = df[eval(cond)]
+                   df = df.reset_index()
+                   if not "filter" in consts:
+                        consts["filter"] = []
+                   consts["filter"].append(cond)
+                   sel_row = 0
         if char in ["y","Y"]:
             #yyyyyyyy
            canceled, gcol,val = list_df_values(main_df, get_val=False)
@@ -450,9 +454,13 @@ def show_df(df):
             sel_row = df.loc[mask.any(axis=1)].index[0]
         elif char == ":":
             cmd = rowinput()
-            if cmd == "clean":
+            if cmd == "fix_types":
                 for col in ["target_text", "pred_text1"]: 
                     main_df[col] = main_df[col].astype(str)
+                for col in ["steps", "epochs", "val_steps"]: 
+                    main_df[col] = main_df[col].astype(int)
+                char = "SS"
+            if cmd == "clean":
                 main_df = main_df.replace(r'\n',' ', regex=True)
                 char = "SS"
             if cmd == "fix_method":
@@ -503,6 +511,9 @@ def show_df(df):
                             else:
                                 main_df[col] =val
                                 char = "SS"
+            if "==" in cmd:
+                col, val = cmd.split("==")
+                df = df[df[col] == val]
             if cmd == "cp" or cmd == "cp@":
                 canceled, col,val = list_df_values(main_df, get_val=False)
                 if not canceled:
