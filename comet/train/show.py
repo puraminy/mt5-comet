@@ -714,9 +714,10 @@ def start(stdscr):
     if not dfname:
         mlog.info("No file name provided")
     else:
-        if type(dfname) == tuple:
+        if len(dfname) > 1:
             files = list(dfname)
         else:
+            dfname = dfname[0]
             path = os.path.join(dfpath, dfname)
             if Path(path).is_file():
                 files = [path]
@@ -726,7 +727,8 @@ def start(stdscr):
                 for root, dirs, _files in os.walk(dfpath):
                     for _file in _files:
                         if all(s in _file for s in dfname.split("+")):
-                        files.append(os.path.join(root, _file))
+                            files.append(os.path.join(root, _file))
+        mlog.info("files: %s",files)
         dfs = []
         for f in files:
             mlog.info(f)

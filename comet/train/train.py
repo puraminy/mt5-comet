@@ -1378,7 +1378,7 @@ def exp(experiment, model_ids, keep, server, exclude, include, save_model):
     methods = {"sup-tokens":"u","sup":"u", "sup-nat":"u","unsup":"u","unsup-tokens":"w-u","unsup-nat":"u", "sup-nat-tokens":"u","unsup-nat-tokens":"u", "sup-wrap":"w", "unsup-wrap":"w", "unsup-wrap-nat":"w"}
     #methods = {"unsup-wrap":"w", "sup-wrap":"w", "unsup-tokens-wrap":"w"} #, "sup-tokens-wrap":"w", "unsup-tokens-wrap":"w"}
     #var_list = [270,2700, 27000] #, 36000] #samples
-    args["train_samples"] = 2700
+    args["train_samples"] = 27000
     #var_name = "learning_rate"
     #var_list = [0.01,0.001, 0.0001] #, 36000] #learning rate
     #var_list = [] 
@@ -1400,7 +1400,10 @@ def exp(experiment, model_ids, keep, server, exclude, include, save_model):
        if w == "wrapped":
            args["wrap"] = True
            args["batch_size"] = 20 if not is_colab else 40 
-       name = f"{experiment}-{model}-{method}-{var_name}-{var}"
+       if var_name:
+           name = f"{experiment}-{model}-{method}-{var_name}-{var}"
+       else:
+           name = f"{experiment}-{model}-{method}-{var_name}-{var}"
        if include and not include in name:
            #mlog.info("Skipping by include ... %s", include)
            return
