@@ -337,11 +337,11 @@ def show_df(df):
                 ax = df.plot(ax=ax, x=cols[0], y=cols[1])
         elif char in ["f", "F"]:
             back.append(df)
+            canceled, col, val = list_df_values(df, get_val=True)
             if not canceled:
                if char == "F":
-                    cond = get_cond(df, num=15)
+                    cond = get_cond(df, col, num=15)
                else:
-                    canceled, col, val = list_df_values(df, get_val=True)
                     if not canceled:
                         if val.isnumeric():
                             cond = f"df['{col}'] == {val}"
