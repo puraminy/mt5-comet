@@ -1378,16 +1378,15 @@ def exp(experiment, model_ids, keep, server, exclude, include, save_model):
     args["cpu"] = False 
     args["config"] = False 
     args["gen_param"] = "top_p" 
-    args["exclude"] = "natural" 
     langs = {"en":True}
     args["test_samples"] = 1000 
     #args["test_path"] = "atomic/val_all_rels.tsv"
     methods = {"sup-tokens":"u","sup":"u", "sup-nat":"u","unsup":"u","unsup-tokens":"u","unsup-nat":"u", "sup-nat-tokens":"u","unsup-nat-tokens":"u", "sup-wrap":"w", "unsup-wrap":"w", "unsup-wrap-nat":"w", "unsup-tokens-wrap":"w", "sup-tokens-wrap":"w"}
     #methods = {"unsup-wrap":"w", "sup-wrap":"w", "unsup-tokens-wrap":"w"} #, "sup-tokens-wrap":"w", "unsup-tokens-wrap":"w"}
-    var_list = [90, 5600, 9000] #, 36000] #samples
-    var_name = "train_samples"
-    #var_list = [0.01,0.001, 0.0001] #, 36000] #learning rate
-    #var_list = [] 
+    only_wrapped = True
+    var_list = ["emb", "mlp"] #, 36000] #samples
+    var_name = "encoder_type"
+    args["train_samples"] = 5600
     ii = 0
     models = model_ids.split("#")
 
@@ -1412,6 +1411,8 @@ def exp(experiment, model_ids, keep, server, exclude, include, save_model):
                args["batch_size"] = 10 if not is_colab else 40 
                args["gen_bs"] = "5@1" if not is_colab else "40@20" 
        else:
+           if only_wrapped:
+               return ii
            if model == "t5-large":
                return ii
        if var_name:

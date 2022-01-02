@@ -347,6 +347,45 @@ class EmbeddingPromptEncoder(PromptEncoder):
         emblog.info("on this ids: %s", self.prompt_ids)
         weight[self.prompt_ids,:]=detached_embeddings
 
+class MLPPromptEncoder(PromptEncoder):
+    def __init__(self,name,length,embedding_dim,id_offset,init_embs=None, prompt_ids=[]) -> None:
+        super().__init__(name, length,embedding_dim,id_offset, init_embs, prompt_ids)
+        self.mlp = torch.nn.Sequential(
+            torch.nn.Linear(embedding_dim, embedding_dim),
+            torch.nn.ReLU(),
+            torch.nn.Linear(embedding_dim, embedding_dim)
+        )
+
+    
+    def forward(self,prompt_token_ids,pids=None):
+        emblog.info("=========================== Forward ===================")
+        emblog.info("=========================== %s ===================", self.name)
+        emblog.info("Before prompt token ids: %s", prompt_token_ids)
+        #emblog.info("id offset: %s", self.id_offset)
+        #emblog.info("id length: %s", self.length)
+        if self.id_offset > 0:
+            prompt_token_ids = prompt_token_ids - self.id_offset
+        else:
+            prompt_token_ids = (prompt_token_ids.view(-1,1) == self.input_ids).int().argmax(dim=1)
+        emblog.info("self input ids: %s", self.input_ids)
+        emblog.info("After prompt token ids: %s", prompt_token_ids)
+        emblog.info(self.embedding.weight)
+        embs = self.embedding(prompt_token_ids)
+        ret_embs = self.mlp(embs)
+        emblog.info("ret embs %s", ret_embs)
+        emblog.info("=========================== Forward end ===================")
+        return ret_embs
+
+    def dump_embedding(self, weight):
+        wlog.info("Dump embeddings")
+        emblog.info("=========================== %s ===================", self.name)
+        with torch.no_grad():
+            embs = self.forward(self.prompt_ids)
+        emblog.info("input weights: %s", weight)
+        detached_embeddings = embs.detach()
+        emblog.info("Dump embeddings: %s", detached_embeddings)
+        emblog.info("on this ids: %s", self.prompt_ids)
+        weight[self.prompt_ids,:]=detached_embeddings
 
 class LSTMEmbeddingPromptEncoder(PromptEncoder):
     def __init__(self,name, length,embedding_dim,id_offset, init_embs=None, prompt_ids=[]) -> None:

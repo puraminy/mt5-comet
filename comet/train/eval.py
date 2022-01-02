@@ -206,7 +206,6 @@ def evaluate(model, tokenizer, dataloader, save_path, exp_info, val_records, gen
     mlog.info("Scoring...")
     pbar = tqdm(total=val_records, position=0, leave=True) #,dynamic_ncols=True)
     step = 0
-    batch_size = "5@1"
     bs, gen_bs = batch_size.split("@")
     bs = int(bs)
     gen_bs = int(gen_bs)

@@ -5,7 +5,7 @@ from transformers import AddedToken
 import pandas as pd
 from comet.utils.myutils import *
 from comet.transformers_ptuning import PTuningWrapper
-from comet.transformers_ptuning.ptuning_wrapper import LSTMEmbeddingPromptEncoder, EmbeddingPromptEncoder
+from comet.transformers_ptuning.ptuning_wrapper import LSTMEmbeddingPromptEncoder, EmbeddingPromptEncoder, MLPPromptEncoder
 from tqdm import tqdm
 import logging, sys
 import random
@@ -263,7 +263,14 @@ def create_encoder(name, model, tokenizer, prompt_tokens, encoder_type="lstm",
     mlog.info("id_offset: %s", id_offset)
     mlog.info("enc_plan: %s", enc_plen)
     mlog.info("enc prompts: %s", rel_tokens)
-    if encoder_type.startswith("emb"):
+
+    if encoder_type.startswith("mlp"):
+        mlog.info("in Emb %s", encoder_type)
+        if enc_plen > 0:
+            mlog.info("Prompt Encoder defined : %s", enc_plen)
+            prompt_encoder = MLPPromptEncoder(name, enc_plen,
+                    embedding_dim,id_offset = -1, prompt_ids=rel_ids)
+    elif encoder_type.startswith("emb"):
         mlog.info("in Emb %s", encoder_type)
         if enc_plen > 0:
             mlog.info("Prompt Encoder defined : %s", enc_plen)
