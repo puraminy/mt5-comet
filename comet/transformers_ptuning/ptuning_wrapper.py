@@ -41,7 +41,7 @@ tlog.setLevel(logging.INFO)
 class PTuningWrapper(torch.nn.Module):
     def __init__(self,model,prompt_encoders,decoder_prompt_encoder=None,
         prompt_token_fn=None, prompt_token_id=None, prompt_token_ids=None,
-        replacing_token_id=0, do_log=True, merge_prompts = False):
+        replacing_token_id=0, do_log=True, merge_prompts = ""):
         """
         PTuningWrapper for Huggingface transformer models (Encoder Models).
         It will replace the prompt token embeddings with ones from prompt encoder.
@@ -119,7 +119,17 @@ class PTuningWrapper(torch.nn.Module):
         self.merge_encoder = None 
         self.merge_embedding = None
         if merge_prompts:
-            self.merge_encoder = None #LSTMEmbeddingPromptEncoder("wrap_all", len(self.merge_prompt_ids), self.embedding_dim, self.merge_offset, prompt_ids=self.merge_prompt_ids)
+            _enc_type = merge_prompts.split("@")
+            num_layers = 1
+            if len(_enc_type) > 1:
+                num_layers = int(_enc_type[1])
+            hidden_size = -1
+            if len(_enc_type) > 2:
+                hidden_size = int(_enc_type[2])
+            if merge_prompts.startswith("mlp"):
+                self.merge_encoder = MLPPromptEncoder("wrap_all", len(self.merge_prompt_ids), self.embedding_dim, self.merge_offset, prompt_ids=self.merge_prompt_ids, num_layers=num_layers, hidden_size=hidden_size)
+            elif merge_prompts.startswith("lstml"):
+                self.merge_encoder = MLPPromptEncoder("wrap_all", len(self.merge_prompt_ids), self.embedding_dim, self.merge_offset, prompt_ids=self.merge_prompt_ids, num_layers=num_layers, hidden_size=hidden_size)
            # self.merge_embedding = torch.nn.Embedding(len(self.merge_prompt_ids), self.embedding_dim)
            # for encoder in self.prompt_encoders:
            #     encoder.embedding = self.merge_embedding

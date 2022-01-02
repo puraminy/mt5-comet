@@ -1388,10 +1388,12 @@ def exp(experiment, model_ids, keep, server, exclude, include, save_model):
     args["test_samples"] = 1000 
     #args["test_path"] = "atomic/val_all_rels.tsv"
     methods = {"sup-tokens":"u","sup":"u", "sup-nat":"u","unsup":"u","unsup-tokens":"u","unsup-nat":"u", "sup-nat-tokens":"u","unsup-nat-tokens":"u", "sup-wrap":"w", "unsup-wrap":"w", "unsup-wrap-nat":"w", "unsup-tokens-wrap":"w", "sup-tokens-wrap":"w"}
-    #methods = {"unsup-wrap":"w", "sup-wrap":"w", "unsup-tokens-wrap":"w"} #, "sup-tokens-wrap":"w", "unsup-tokens-wrap":"w"}
+    methods = {"sup-tokens-wrap":"w", "unsup-tokens-wrap":"w"} #, "sup-tokens-wrap":"w", "unsup-tokens-wrap":"w"}
     only_wrapped = True
-    var_list = ["mlp", "mlp@2@200", "lstm@2@200", "mlp@1@200", "mlp@1@1000"] #, 36000] #samples
-    var_name = "encoder_type"
+    args["encoder_type"] = "mlp@2@200"
+    extra = "mlp@2@200"
+    var_list = [True] #, "mlp@2@200", "lstm@2@200", "mlp@1@200", "mlp@1@1000"] #, 36000] #samples
+    var_name = "merge_prompts"
     args["train_samples"] = 5600
     ii = 0
     models = model_ids.split("#")
@@ -1422,9 +1424,9 @@ def exp(experiment, model_ids, keep, server, exclude, include, save_model):
            if model == "t5-large":
                return ii
        if var_name:
-           name = f"{experiment}-{model}-{method}-{w}-{var_name}-{var}"
+           name = f"{experiment}-{model}-{method}-{var_name}-{var}@{extra}"
        else:
-           name = f"{experiment}-{model}-{method}-{w}"
+           name = f"{experiment}-{model}-{method}@{extra}"
        if include and not include in name:
            #mlog.info("Skipping by include ... %s", include)
            return ii

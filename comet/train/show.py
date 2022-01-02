@@ -448,7 +448,7 @@ def show_df(df):
         elif char == "w":
             canceled, col, val = list_df_values(df, get_val=False)
             if not canceled:
-                cmd, _ = minput(cmd_win, 0, 1, ":width=", all_chars=True)
+                cmd = rowinput(":width=", str(col_widths[col]))
                 if cmd.isnumeric():
                     col_widths[col] = int(cmd)
                     save_obj(col_widths, "widths", "")
