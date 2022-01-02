@@ -267,13 +267,16 @@ def create_encoder(name, model, tokenizer, prompt_tokens, encoder_type="lstm",
     if encoder_type.startswith("mlp"):
         mlog.info("in Emb %s", encoder_type)
         _enc_type = encoder_type.split("@")
-        num_layer = 1
+        num_layers = 1
         if len(_enc_type) > 1:
-            num_layer = int(_enc_type[1])
+            num_layers = int(_enc_type[1])
+        hidden_size = -1
+        if len(_enc_type) > 2:
+            hidden_size = int(_enc_type[2])
         if enc_plen > 0:
             mlog.info("Prompt Encoder defined : %s", enc_plen)
             prompt_encoder = MLPPromptEncoder(name, enc_plen,
-                    embedding_dim,id_offset = -1, prompt_ids=rel_ids, num_layer=num_layer)
+                    embedding_dim,id_offset = -1, prompt_ids=rel_ids, num_layers=num_layers, hidden_size=hidden_size)
     elif encoder_type.startswith("emb"):
         mlog.info("in Emb %s", encoder_type)
         if enc_plen > 0:
@@ -283,12 +286,15 @@ def create_encoder(name, model, tokenizer, prompt_tokens, encoder_type="lstm",
     else:
         if enc_plen > 0:
             _enc_type = encoder_type.split("@")
-            num_layer = 1
+            num_layers = 1
+            hidden_size = -1
             if len(_enc_type) > 1:
-                num_layer = int(_enc_type[1])
+                num_layers = int(_enc_type[1])
+            if len(_enc_type) > 2:
+                hidden_size = int(_enc_type[2])
             mlog.info("Prompt Encoder defined : %s", enc_plen)
             prompt_encoder = LSTMEmbeddingPromptEncoder(name, enc_plen,embedding_dim,
-                    id_offset = -1, prompt_ids=rel_ids, num_layer=num_layer)
+                    id_offset = -1, prompt_ids=rel_ids, num_layers=num_layers, hidden_size=hidden_size)
 
     model.resize_token_embeddings(len(tokenizer))
 

@@ -348,21 +348,22 @@ class EmbeddingPromptEncoder(PromptEncoder):
         weight[self.prompt_ids,:]=detached_embeddings
 
 class MLPPromptEncoder(PromptEncoder):
-    def __init__(self,name,length,embedding_dim,id_offset,init_embs=None, prompt_ids=[], num_layer=1) -> None:
+    def __init__(self,name,length,embedding_dim,id_offset,init_embs=None, prompt_ids=[], num_layers=1, hidden_size=-1) -> None:
         super().__init__(name, length,embedding_dim,id_offset, init_embs, prompt_ids)
-        if num_layer == 2:
+        hsize = hidden_size if hidden_size > 1 else embedding_dim
+        if num_layers == 2:
             self.mlp = torch.nn.Sequential(
-                torch.nn.Linear(embedding_dim, embedding_dim),
+                torch.nn.Linear(embedding_dim, hsize),
                 torch.nn.ReLU(),
-                torch.nn.Linear(embedding_dim, embedding_dim)
+                torch.nn.Linear(hsize, hsize),
                 torch.nn.ReLU(),
-                torch.nn.Linear(embedding_dim, embedding_dim)
+                torch.nn.Linear(hsize, embedding_dim)
             )
         else:
             self.mlp = torch.nn.Sequential(
-                torch.nn.Linear(embedding_dim, embedding_dim),
+                torch.nn.Linear(embedding_dim, hsize),
                 torch.nn.ReLU(),
-                torch.nn.Linear(embedding_dim, embedding_dim)
+                torch.nn.Linear(hsize, embedding_dim)
             )
     
     def forward(self,prompt_token_ids,pids=None):
@@ -396,31 +397,32 @@ class MLPPromptEncoder(PromptEncoder):
         weight[self.prompt_ids,:]=detached_embeddings
 
 class LSTMEmbeddingPromptEncoder(PromptEncoder):
-    def __init__(self,name, length,embedding_dim,id_offset, init_embs=None, prompt_ids=[], num_layers=1) -> None:
+    def __init__(self,name, length,embedding_dim,id_offset, init_embs=None, prompt_ids=[], num_layers=1, hidden_size=-1) -> None:
         super().__init__(name, length,embedding_dim,id_offset, init_embs, prompt_ids)
+        hsize = hidden_size if hidden_size > 1 else embedding_dim
         self.net_inps = torch.nn.parameter.Parameter(torch.arange(length),
             requires_grad=False)
         self.lstm = torch.nn.LSTM(
             input_size=embedding_dim,
-            hidden_size=embedding_dim //2, #my code
+            hidden_size=hsize, #my code
             num_layers=2,
             dropout=0,
             bidirectional=True,
             batch_first=True
         )
-        if num_layer == 2:
+        if num_layers == 2:
             self.mlp = torch.nn.Sequential(
-                torch.nn.Linear(embedding_dim, embedding_dim),
+                torch.nn.Linear(embedding_dim, hsize),
                 torch.nn.ReLU(),
-                torch.nn.Linear(embedding_dim, embedding_dim)
+                torch.nn.Linear(hsize, hsize),
                 torch.nn.ReLU(),
-                torch.nn.Linear(embedding_dim, embedding_dim)
+                torch.nn.Linear(hsize, embedding_dim)
             )
         else:
             self.mlp = torch.nn.Sequential(
-                torch.nn.Linear(embedding_dim, embedding_dim),
+                torch.nn.Linear(embedding_dim, hsize),
                 torch.nn.ReLU(),
-                torch.nn.Linear(embedding_dim, embedding_dim)
+                torch.nn.Linear(hsize, embedding_dim)
             )
 
  #### llllllf
