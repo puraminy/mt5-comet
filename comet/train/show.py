@@ -343,8 +343,12 @@ def show_df(df):
                else:
                     canceled, col, val = list_df_values(df, get_val=True)
                     if not canceled:
-                        cond = f"df['{col}'] == {val}"
+                        if val.isnumeric():
+                            cond = f"df['{col}'] == {val}"
+                        else:
+                            cond = f"df['{col}'] == '{val}'"
                if cond:
+                   mlog.info("cond %s, ", cond)
                    df = df[eval(cond)]
                    df = df.reset_index()
                    if not "filter" in consts:

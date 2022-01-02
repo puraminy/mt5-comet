@@ -1410,7 +1410,7 @@ def exp(experiment, model_ids, keep, server, exclude, include, save_model):
                args["gen_bs"] = "30@10" if not is_colab else "50@25" 
            else:  
                args["batch_size"] = 10 if not is_colab else 40 
-               args["gen_bs"] = "20@5" if not is_colab else "40@20" 
+               args["gen_bs"] = "5@1" if not is_colab else "40@20" 
        else:
            if model == "t5-large":
                return ii
