@@ -1393,8 +1393,8 @@ def exp(experiment, model_ids, keep, server, exclude, include, save_model):
     args["encoder_type"] = "mlp@2@200"
     extra = "mtype"
     var_list = ["mlp","mlp@2@200", "lstm"] #, "mlp@2@200", "lstm@2@200", "mlp@1@200", "mlp@1@1000"] #, 36000] #samples
-    var_name = "merge_prompts"
-    args["train_samples"] = 5600
+    var_name = "encoder_type"
+    args["train_samples"] = 2700
     ii = 0
     models = model_ids.split("#")
 
@@ -1414,19 +1414,21 @@ def exp(experiment, model_ids, keep, server, exclude, include, save_model):
            args["wrap"] = True
            if model == "t5-base":
                args["batch_size"] = 20 if not is_colab else 40 
-               args["gen_bs"] = "30@10" if not is_colab else "50@25" 
+               args["gen_bs"] = "30@10" if not is_colab else "30@15" 
            else:  
                args["batch_size"] = 10 if not is_colab else 40 
-               args["gen_bs"] = "5@1" if not is_colab else "40@20" 
+               args["gen_bs"] = "5@1" if not is_colab else "30@10" 
        else:
            if only_wrapped:
                return ii
            if model == "t5-large":
                return ii
        if var_name:
-           name = f"{experiment}-{model}-{method}-{var_name}-{var}@{extra}"
+           name = f"{experiment}-{model}-{method}-{var_name}-{var}"
        else:
-           name = f"{experiment}-{model}-{method}@{extra}"
+           name = f"{experiment}-{model}-{method}"
+       if extra:
+           name += f"@{extra}"
        if include and not include in name:
            #mlog.info("Skipping by include ... %s", include)
            return ii
