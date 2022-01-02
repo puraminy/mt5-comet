@@ -404,7 +404,7 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
             requires_grad=False)
         self.lstm = torch.nn.LSTM(
             input_size=embedding_dim,
-            hidden_size=hsize, #my code
+            hidden_size=embedding_dim // 2, #my code
             num_layers=2,
             dropout=0,
             bidirectional=True,
@@ -412,9 +412,9 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
         )
         if num_layers == 2:
             self.mlp = torch.nn.Sequential(
-                torch.nn.Linear(embedding_dim, hsize),
+                torch.nn.Linear(embedding_dim, embedding_dim),
                 torch.nn.ReLU(),
-                torch.nn.Linear(hsize, hsize),
+                torch.nn.Linear(embedding_dim, hsize),
                 torch.nn.ReLU(),
                 torch.nn.Linear(hsize, embedding_dim)
             )

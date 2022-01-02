@@ -1390,7 +1390,7 @@ def exp(experiment, model_ids, keep, server, exclude, include, save_model):
     methods = {"sup-tokens":"u","sup":"u", "sup-nat":"u","unsup":"u","unsup-tokens":"u","unsup-nat":"u", "sup-nat-tokens":"u","unsup-nat-tokens":"u", "sup-wrap":"w", "unsup-wrap":"w", "unsup-wrap-nat":"w", "unsup-tokens-wrap":"w", "sup-tokens-wrap":"w"}
     #methods = {"unsup-wrap":"w", "sup-wrap":"w", "unsup-tokens-wrap":"w"} #, "sup-tokens-wrap":"w", "unsup-tokens-wrap":"w"}
     only_wrapped = True
-    var_list = ["mlp@2", "lstm@2", "lstm"] #, 36000] #samples
+    var_list = ["mlp", "mlp@2@200", "lstm@2@200", "mlp@1@200", "mlp@1@1000"] #, 36000] #samples
     var_name = "encoder_type"
     args["train_samples"] = 5600
     ii = 0
