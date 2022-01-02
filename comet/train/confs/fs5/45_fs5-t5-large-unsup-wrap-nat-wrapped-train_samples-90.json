@@ -12,8 +12,8 @@
     "val_path": "atomic/val_all_rels.tsv",
     "test_path": "atomic/test.tsv",
     "sample_path": "atomic/val_all_rels.tsv",
-    "overwrite": "69_fs5-t5-large-unsup-wrap-nat-wrapped-train_samples-90",
-    "output_name": "69_fs5-t5-large-unsup-wrap-nat-wrapped-train_samples-90",
+    "overwrite": "45_fs5-t5-large-unsup-wrap-nat-wrapped-train_samples-90",
+    "output_name": "45_fs5-t5-large-unsup-wrap-nat-wrapped-train_samples-90",
     "lang": "en",
     "learning_rate": 0.0,
     "do_eval": false,
@@ -66,5 +66,6 @@
     "samples_per_head": 0,
     "sampling": 5,
     "save_path": "/home/pouramini/pret/fs5",
-    "start": 0
+    "start": 0,
+    "gen_bs": "20@5"
 }

@@ -12,8 +12,8 @@
     "val_path": "atomic/val_all_rels.tsv",
     "test_path": "atomic/test.tsv",
     "sample_path": "atomic/val_all_rels.tsv",
-    "overwrite": "70_fs5-t5-large-unsup-wrap-nat-wrapped-train_samples-5600",
-    "output_name": "70_fs5-t5-large-unsup-wrap-nat-wrapped-train_samples-5600",
+    "overwrite": "52_fs5-t5-large-sup-tokens-wrap-wrapped-train_samples-5600",
+    "output_name": "52_fs5-t5-large-sup-tokens-wrap-wrapped-train_samples-5600",
     "lang": "en",
     "learning_rate": 0.0,
     "do_eval": false,
@@ -56,7 +56,7 @@
     "is_even": false,
     "is_flax": false,
     "load_path": "/home/pouramini/pret",
-    "method": "unsup-wrap-nat",
+    "method": "sup-tokens-wrap",
     "nli_group": "all",
     "only_blanks": false,
     "per_record": false,
@@ -66,5 +66,6 @@
     "samples_per_head": 0,
     "sampling": 5,
     "save_path": "/home/pouramini/pret/fs5",
-    "start": 0
+    "start": 0,
+    "gen_bs": "20@5"
 }

@@ -66,5 +66,6 @@
     "samples_per_head": 0,
     "sampling": 5,
     "save_path": "/home/pouramini/pret/fs5",
-    "start": 0
+    "start": 0,
+    "gen_bs": "30@10"
 }

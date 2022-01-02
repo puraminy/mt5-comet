@@ -128,7 +128,7 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples,
 
                Path(spath).mkdir(exist_ok=True, parents=True)
                #mlog.info("save path: %s", spath)
-               cur_res_path = os.path.join(spath, args["output_name"], "new_result*")
+               cur_res_path = os.path.join(spath, args["output_name"], "full_result*")
                #mlog.info("cur_res_path: %s", cur_res_path)
                cur_res = glob.glob(cur_res_path)
                #mlog.info("cur_res: %s", cur_res)
@@ -925,7 +925,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     if do_eval or (not wrap and frozen):
         mlog.info("Evaluating the model...")
         model.to(device=device)
-        evaluate(model, tokenizer, myds[test_set], underlying_model_name, exp_info, val_records, gen_param, no_score=no_score, gen_bs=gen_bs)  
+        evaluate(model, tokenizer, myds[test_set], underlying_model_name, exp_info, val_records, gen_param, no_score=no_score, batch_size=gen_bs)  
         return
     accumulation_tiny_steps = 2 
     if "gpt" in model_id:
@@ -1284,7 +1284,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
                         "steps":train_records,
                         "epochs":epochs_num,
                         "date":extra}
-        evaluate(model, tokenizer, myds[test_set], save_path, exp_info, val_records, gen_param, no_score=no_score, gen_bs=gen_bs)  
+        evaluate(model, tokenizer, myds[test_set], save_path, exp_info, val_records, gen_param, no_score=no_score, batch_size=gen_bs)  
     else:
         mlog.info("Test set was not provided.... skip testing...")
         
@@ -1413,17 +1413,17 @@ def exp(experiment, model_ids, keep, server, exclude, include, save_model):
                args["gen_bs"] = "20@5" if not is_colab else "40@20" 
        else:
            if model == "t5-large":
-               return
+               return ii
        if var_name:
            name = f"{experiment}-{model}-{method}-{w}-{var_name}-{var}"
        else:
            name = f"{experiment}-{model}-{method}-{w}"
        if include and not include in name:
            #mlog.info("Skipping by include ... %s", include)
-           return
+           return ii
        if exclude and exclude in name:
            #mlog.info("Skipping by include ... %s", exclude)
-           return
+           return ii
        #name = name.replace("_unwrapped", "")
        #name = name.replace("_unfreezed", "")
        name = "{:02d}".format(ii) + "_" + name
@@ -1432,6 +1432,7 @@ def exp(experiment, model_ids, keep, server, exclude, include, save_model):
        print(name)
        with open(os.path.join(conf_path, f'{name}.json'), 'w') as outfile:
                 json.dump(args, outfile, indent=4)
+       return ii + 1
 
     ii = 0
     for model in models:
@@ -1439,11 +1440,9 @@ def exp(experiment, model_ids, keep, server, exclude, include, save_model):
             for wu in wrap.split("-"): 
                 if var_list:
                     for var in var_list: 
-                        fill_args(model, method, wu,ii, var_name, var)
-                        ii += 1
+                        ii = fill_args(model, method, wu,ii, var_name, var)
                 else:
-                    fill_args(model, method, wu, ii)
-                    ii += 1
+                    ii = fill_args(model, method, wu, ii)
 
 def translate(model, tokenizer, df, trans_col, path, logger=None, start=0, save_path=""):
     pbar = tqdm(total= len(df))
