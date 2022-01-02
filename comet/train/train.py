@@ -691,7 +691,13 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
         if "gpt" in model_id:
             learning_rate = 1e-5
     if frozen and learning_rate == 0: 
-        learning_rate = 0.01  #6.25e-05
+        if encoder_type == "lstm":
+            learning_rate = 0.01  
+        elif encoder_type == "emb":
+            learning_rate = 0.1  
+        else:
+            learning_rate = 0.01  
+
     assert learning_rate > 0, "Learning rate is zero!"
     device = 'cuda' if not cpu else 'cpu'
     mlog.info("Optimizer type %s:", opt_type)

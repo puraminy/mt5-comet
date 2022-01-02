@@ -348,14 +348,22 @@ class EmbeddingPromptEncoder(PromptEncoder):
         weight[self.prompt_ids,:]=detached_embeddings
 
 class MLPPromptEncoder(PromptEncoder):
-    def __init__(self,name,length,embedding_dim,id_offset,init_embs=None, prompt_ids=[]) -> None:
+    def __init__(self,name,length,embedding_dim,id_offset,init_embs=None, prompt_ids=[], num_layer=1) -> None:
         super().__init__(name, length,embedding_dim,id_offset, init_embs, prompt_ids)
-        self.mlp = torch.nn.Sequential(
-            torch.nn.Linear(embedding_dim, embedding_dim),
-            torch.nn.ReLU(),
-            torch.nn.Linear(embedding_dim, embedding_dim)
-        )
-
+        if num_layer == 2:
+            self.mlp = torch.nn.Sequential(
+                torch.nn.Linear(embedding_dim, embedding_dim),
+                torch.nn.ReLU(),
+                torch.nn.Linear(embedding_dim, embedding_dim)
+                torch.nn.ReLU(),
+                torch.nn.Linear(embedding_dim, embedding_dim)
+            )
+        else:
+            self.mlp = torch.nn.Sequential(
+                torch.nn.Linear(embedding_dim, embedding_dim),
+                torch.nn.ReLU(),
+                torch.nn.Linear(embedding_dim, embedding_dim)
+            )
     
     def forward(self,prompt_token_ids,pids=None):
         emblog.info("=========================== Forward ===================")
@@ -380,7 +388,7 @@ class MLPPromptEncoder(PromptEncoder):
         wlog.info("Dump embeddings")
         emblog.info("=========================== %s ===================", self.name)
         with torch.no_grad():
-            embs = self.forward(self.prompt_ids)
+            embs = self.forward(self.input_ids)
         emblog.info("input weights: %s", weight)
         detached_embeddings = embs.detach()
         emblog.info("Dump embeddings: %s", detached_embeddings)
@@ -388,7 +396,7 @@ class MLPPromptEncoder(PromptEncoder):
         weight[self.prompt_ids,:]=detached_embeddings
 
 class LSTMEmbeddingPromptEncoder(PromptEncoder):
-    def __init__(self,name, length,embedding_dim,id_offset, init_embs=None, prompt_ids=[]) -> None:
+    def __init__(self,name, length,embedding_dim,id_offset, init_embs=None, prompt_ids=[], num_layers=1) -> None:
         super().__init__(name, length,embedding_dim,id_offset, init_embs, prompt_ids)
         self.net_inps = torch.nn.parameter.Parameter(torch.arange(length),
             requires_grad=False)
@@ -400,11 +408,20 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
             bidirectional=True,
             batch_first=True
         )
-        self.mlp = torch.nn.Sequential(
-            torch.nn.Linear(embedding_dim, embedding_dim),
-            torch.nn.ReLU(),
-            torch.nn.Linear(embedding_dim, embedding_dim)
-        )
+        if num_layer == 2:
+            self.mlp = torch.nn.Sequential(
+                torch.nn.Linear(embedding_dim, embedding_dim),
+                torch.nn.ReLU(),
+                torch.nn.Linear(embedding_dim, embedding_dim)
+                torch.nn.ReLU(),
+                torch.nn.Linear(embedding_dim, embedding_dim)
+            )
+        else:
+            self.mlp = torch.nn.Sequential(
+                torch.nn.Linear(embedding_dim, embedding_dim),
+                torch.nn.ReLU(),
+                torch.nn.Linear(embedding_dim, embedding_dim)
+            )
 
  #### llllllf
     def forward(self,prompt_token_ids,pids=None):
