@@ -1391,8 +1391,8 @@ def exp(experiment, model_ids, keep, server, exclude, include, save_model):
     methods = {"sup-tokens-wrap":"w", "unsup-tokens-wrap":"w"} #, "sup-tokens-wrap":"w", "unsup-tokens-wrap":"w"}
     only_wrapped = True
     args["encoder_type"] = "mlp@2@200"
-    extra = "mlp@2@200"
-    var_list = [True] #, "mlp@2@200", "lstm@2@200", "mlp@1@200", "mlp@1@1000"] #, 36000] #samples
+    extra = "mtype"
+    var_list = ["mlp","mlp@2@200", "lstm"] #, "mlp@2@200", "lstm@2@200", "mlp@1@200", "mlp@1@1000"] #, 36000] #samples
     var_name = "merge_prompts"
     args["train_samples"] = 5600
     ii = 0
