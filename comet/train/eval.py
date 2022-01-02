@@ -53,22 +53,22 @@ def generate(model, tokenizer, queries, batch_size=5, gen_token = "", gen_param 
         gen_param, skip_special = gen_param.split("@")
     if gen_param == "greedy":
         generation_params = {
-            "max_length":260,
-            "num_beams":4,
-            "repetition_penalty":5.5,
+            "max_length":160,
+            "num_beams":5,
+            "repetition_penalty":2.5,
             "num_return_sequences":1,
             "bad_words_ids": bad_words_ids
         }
     elif gen_param == "top_p":
         generation_params = {
-            "max_length":260,
+            "max_length":160,
             "do_sample":True, 
             "top_p":0.9, 
             "top_k":10,
             "num_beams":5,
             "temperature": 1.0,
-            "num_return_sequences":3, 
-            "repetition_penalty":3.5,
+            "num_return_sequences":1, 
+            "repetition_penalty":2.5,
             "bad_words_ids": bad_words_ids
         }
     with torch.no_grad():
@@ -147,7 +147,7 @@ def batched(iterable, n=1):
         yield iterable[ndx:min(ndx + n, l)]
 
 
-def evaluate(model, tokenizer, dataloader, save_path, exp_info, val_records, gen_param="greedy", no_score=False):  
+def evaluate(model, tokenizer, dataloader, save_path, exp_info, val_records, gen_param="greedy", no_score=False, batch_size="20@5"):  
 
     try:
         nltk_path = str(nltk.data.find("tokenizers/punkt"))
@@ -206,8 +206,9 @@ def evaluate(model, tokenizer, dataloader, save_path, exp_info, val_records, gen
     mlog.info("Scoring...")
     pbar = tqdm(total=val_records, position=0, leave=True) #,dynamic_ncols=True)
     step = 0
-    bs = 40
-    gen_bs = 20 if colab else 10
+    bs, gen_bs = batch_size.split("@")
+    bs = int(bs)
+    gen_bs = int(gen_bs)
     vlog.disabled = True
     exit_loop = False
     for batch_list in batched(list(test_iter), bs):

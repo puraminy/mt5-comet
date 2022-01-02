@@ -607,8 +607,15 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples,
     is_flag=True,
     help=""
 )
+@click.option(
+    "--gen_bs",
+    "-gb",
+    default="40@20",
+    type=str,
+    help="Batch sizes for generation."
+)
 def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, test_set, 
-         val_samples, test_samples, load_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, no_score, train_start, no_save_model):
+         val_samples, test_samples, load_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, no_score, train_start, no_save_model, gen_bs):
 
     #%% some hyper-parameters
 
@@ -918,7 +925,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     if do_eval or (not wrap and frozen):
         mlog.info("Evaluating the model...")
         model.to(device=device)
-        evaluate(model, tokenizer, myds[test_set], underlying_model_name, exp_info, val_records, gen_param, no_score=no_score)  
+        evaluate(model, tokenizer, myds[test_set], underlying_model_name, exp_info, val_records, gen_param, no_score=no_score, gen_bs=gen_bs)  
         return
     accumulation_tiny_steps = 2 
     if "gpt" in model_id:
@@ -1277,7 +1284,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
                         "steps":train_records,
                         "epochs":epochs_num,
                         "date":extra}
-        evaluate(model, tokenizer, myds[test_set], save_path, exp_info, val_records, gen_param, no_score=no_score)  
+        evaluate(model, tokenizer, myds[test_set], save_path, exp_info, val_records, gen_param, no_score=no_score, gen_bs=gen_bs)  
     else:
         mlog.info("Test set was not provided.... skip testing...")
         
@@ -1370,16 +1377,15 @@ def exp(experiment, model_ids, keep, server, exclude, include, save_model):
 
     args["cpu"] = False 
     args["config"] = False 
-    args["gen_param"] = "greedy" 
+    args["gen_param"] = "top_p" 
     args["exclude"] = "natural" 
     langs = {"en":True}
     args["test_samples"] = 1000 
     #args["test_path"] = "atomic/val_all_rels.tsv"
-    methods = {"sup-tokens":"u","sup":"u", "sup-nat":"u","unsup":"u","unsup-tokens":"w-u","unsup-nat":"u", "sup-nat-tokens":"u","unsup-nat-tokens":"u", "sup-wrap":"w", "unsup-wrap":"w", "unsup-wrap-nat":"w"}
+    methods = {"sup-tokens":"u","sup":"u", "sup-nat":"u","unsup":"u","unsup-tokens":"u","unsup-nat":"u", "sup-nat-tokens":"u","unsup-nat-tokens":"u", "sup-wrap":"w", "unsup-wrap":"w", "unsup-wrap-nat":"w", "unsup-tokens-wrap":"w", "sup-tokens-wrap":"w"}
     #methods = {"unsup-wrap":"w", "sup-wrap":"w", "unsup-tokens-wrap":"w"} #, "sup-tokens-wrap":"w", "unsup-tokens-wrap":"w"}
-    #var_list = [270,2700, 27000] #, 36000] #samples
-    args["train_samples"] = 27000
-    #var_name = "learning_rate"
+    var_list = [90, 5600, 9000] #, 36000] #samples
+    var_name = "train_samples"
     #var_list = [0.01,0.001, 0.0001] #, 36000] #learning rate
     #var_list = [] 
     ii = 0
@@ -1399,7 +1405,15 @@ def exp(experiment, model_ids, keep, server, exclude, include, save_model):
        args["batch_size"] = 16 if is_colab else 8 
        if w == "wrapped":
            args["wrap"] = True
-           args["batch_size"] = 20 if not is_colab else 40 
+           if model == "t5-base":
+               args["batch_size"] = 20 if not is_colab else 40 
+               args["gen_bs"] = "30@10" if not is_colab else "50@25" 
+           else:  
+               args["batch_size"] = 10 if not is_colab else 40 
+               args["gen_bs"] = "20@5" if not is_colab else "40@20" 
+       else:
+           if model == "t5-large":
+               return
        if var_name:
            name = f"{experiment}-{model}-{method}-{w}-{var_name}-{var}"
        else:
@@ -1426,9 +1440,10 @@ def exp(experiment, model_ids, keep, server, exclude, include, save_model):
                 if var_list:
                     for var in var_list: 
                         fill_args(model, method, wu,ii, var_name, var)
+                        ii += 1
                 else:
                     fill_args(model, method, wu, ii)
-                ii += 1
+                    ii += 1
 
 def translate(model, tokenizer, df, trans_col, path, logger=None, start=0, save_path=""):
     pbar = tqdm(total= len(df))
