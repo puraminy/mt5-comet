@@ -380,8 +380,16 @@ def show_df(df):
             name = ax.get_title()
             pname = rowinput("Plot name:", name[:30])
             if pname:
+                folder = ""
+                if "/" in pname:
+                    folder, pname = pname.split("/")
                 ax.set_title(pname)
-                pname = os.path.join(base_dir, "plots", now + "_" + pname +  ".png")
+                if folder:
+                    folder = os.path.join(base_dir, "plots", folder)
+                else:
+                    folder = os.path.join(base_dir, "plots")
+                Path(folder).mkdir(exist_ok=True, parents=True)
+                pname = os.path.join(folder, now + "_" + pname +  ".png")
                 fig = ax.get_figure()
                 fig.savefig(pname)
                 ax = None
