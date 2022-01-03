@@ -112,8 +112,8 @@ def run(ctx, conf_path, base_conf, experiment,
                 if _key in args:
                     mlog.info("set %s = %s", _key, _val)
                     args[_key]= _val
+           output_name = experiment + "_" + base_conf + _extra
            if not var:
-               output_name = experiment + "_" + base_conf + _extra
                args["output_name"] = args["overwrite"] = output_name
                ctx.invoke(train, **args)
            else:
@@ -127,15 +127,15 @@ def run(ctx, conf_path, base_conf, experiment,
                    sub_var_item_list = sub_var_item_list.split("#")
                for var_item in main_var_item_list:
                    args[main_var_name] = var_item
+                   var_output_name = output_name + "_" + var_name + "_" + var_item 
                    if len(all_vars) > 1:
                        for sub_var_item in sub_var_item_list:
                            args[sub_var_name] = sub_var_item
-                           output_name += var_name + "_" + var_item 
-                           args["output_name"] = args["overwrite"] = output_name
+                           sub_output_name = var_output_name + "_" + sub_var_name + "_" + sub_var_item 
+                           args["output_name"] = args["overwrite"] = sub_output_name
                            ctx.invoke(train, **args)
                    else:
-                       output_name = experiment + "_" + base_conf + "_" + var_name + "_" + var_item + _extra
-                       args["output_name"] = args["overwrite"] = output_name
+                       args["output_name"] = args["overwrite"] = var_output_name
                        ctx.invoke(train, **args)
         else:
             confs = sorted(glob.glob(f"{_path}/*"))
