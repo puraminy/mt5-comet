@@ -104,18 +104,39 @@ def run(ctx, conf_path, base_conf, experiment,
            Path(spath).mkdir(exist_ok=True, parents=True)
            args["save_path"] = spath
            args["load_path"] = pretPath 
-           if var:
-               var_name,var_list = var.split("@")
-               var_list = var_list.split("#")
-               for var in var_list:
-                   output_name = experiment + "_" + base_conf + "_" + var_name + "_" + var
-                   args["output_name"] = args["overwrite"] = output_name
-                   args[var_name] = var
-                   for i in range(0, len(ctx.args), 2):
-                        _key = ctx.args[i][2:]
-                        if _key in args:
-                            args[_key]= ctx.args[i+1] 
-                   ctx.invoke(train, **args)
+           _extra = ""
+           for _item in ctx.args:
+                _key,_val = _item.split("=")
+                _key=_key.strip("--")
+                _extra += "_" + (_val if not str(_val)=="True" else _key)
+                if _key in args:
+                    mlog.info("set %s = %s", _key, _val)
+                    args[_key]= _val
+           if not var:
+               output_name = experiment + "_" + base_conf + _extra
+               args["output_name"] = args["overwrite"] = output_name
+               ctx.invoke(train, **args)
+           else:
+               all_vars = va.split("--")
+               main_var = all_vars[0]
+               main_var_name,main_var_item_list = main_var.split("=")
+               main_var_item_list = main_var_item_list.split("#")
+               if len(all_vars) > 1:
+                   sub_var = all_vars[1]
+                   sub_var_name,sub_var_item_list = sub_var.split("=")
+                   sub_var_item_list = sub_var_item_list.split("#")
+               for var_item in main_var_item_list:
+                   args[main_var_name] = var_item
+                   if len(all_vars) > 1:
+                       for sub_var_item in sub_var_item_list:
+                           args[sub_var_name] = sub_var_item
+                           output_name += var_name + "_" + var_item 
+                           args["output_name"] = args["overwrite"] = output_name
+                           ctx.invoke(train, **args)
+                   else:
+                       output_name = experiment + "_" + base_conf + "_" + var_name + "_" + var_item + _extra
+                       args["output_name"] = args["overwrite"] = output_name
+                       ctx.invoke(train, **args)
         else:
             confs = sorted(glob.glob(f"{_path}/*"))
             default_model = ""
@@ -652,6 +673,9 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
         else:
             save_path = "/content/drive/MyDrive/pouramini/logs"
 
+    if "-wrap" in method and not wrap:
+        mlog.info("Method %s is for wrapped models...", method)
+        wrap = True
     w_str = "wrapped" if wrap else "unwrapped"
     f_str = "freezed" if frozen else "unfreezed"
     if not output_name and not (cont or do_eval):
@@ -932,14 +956,14 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     mlog.info("list of spcial tokens: %s", my_specials)
     extra = "_" + now
     m_name = model_id + "-" + method
-    if do_eval:
-        m_name = model_id + "-EVAL"
-        exp_info = {"exp":experiment, "model":model_id, "lang": lang, 
-                        "method":method, "wrap": w_str + "-" + encoder_type,
-                        "frozen":f_str, 
-                        "steps":train_records,
-                        "epochs":epochs_num,
-                        "date":extra}
+    exp_info = {"exp":experiment, "model":model_id, "lang": lang, 
+                    "method":method, 
+                    "wrap": w_str + ("-" + encoder_type if wrap else "")
+                    "frozen":f_str, 
+                    "steps":train_records,
+                    "epochs":epochs_num,
+                    "date":extra}
+    exp_info["eval"] = do_eval
     if do_eval or (not wrap and frozen):
         mlog.info("Evaluating the model...")
         model.to(device=device)
@@ -1027,7 +1051,9 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     sw = SummaryWriter(save_path, flush_secs=1)
     no_decay = ['bias', 'LayerNorm.weight']
     if wrap and not frozen:
-        raise "Are you sure you want to wrap without freezing the model?"
+         ans = input("Are you sure you want to wrap without freezing the model?")
+         if ans != "y":
+             frozen = True
     wrapped_model = None
     if wrap:
         if not load_prompt_path and Path(os.path.join(load_path, model_id, "prompt")).exists():
@@ -1296,12 +1322,6 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     if test_set:
         myds = load_data([test_set])
         val_records = myds[test_set].num_records
-        exp_info = {"exp":experiment, "model":model_id, "lang": lang, 
-                        "method":method, "wrap": w_str + "-" + encoder_type,
-                        "frozen":f_str, 
-                        "steps":train_records,
-                        "epochs":epochs_num,
-                        "date":extra}
         evaluate(model, tokenizer, myds[test_set], save_path, exp_info, val_records, gen_param, no_score=no_score, batch_size=gen_bs)  
     else:
         mlog.info("Test set was not provided.... skip testing...")

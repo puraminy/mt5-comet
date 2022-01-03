@@ -286,11 +286,11 @@ def show_df(df):
             elif char == "G":
                 canceled, col = False, "fid"
             if not canceled:
-               g_cols = ["exp_id", "rouge_score", "bert_score", "steps", "method","model", "wrap"]
+               g_cols = ["exp_id", "rouge_score", "bert_score", "steps", "method","model", "wrap", "frozen"]
                df = (df.groupby(col).agg({"rouge_score":"mean","bert_score":"mean",
-                   "method":"first","model":"first", "wrap":"first", col:"first", "steps":"first"})
+                   "method":"first","model":"first", "wrap":"first", col:"first", "steps":"first", "frozen":"first"})
                  .rename(columns={col:'exp_id'})
-                 .sort_values(by = ["steps", "rouge_score"], ascending=False)
+                 .sort_values(by = ["rouge_score"], ascending=False)
                     )
                #df = df.reset_index()
                sel_cols = order(sel_cols, g_cols)
