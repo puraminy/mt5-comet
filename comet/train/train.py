@@ -28,7 +28,10 @@ from tqdm import tqdm
 
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Run    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-@click.group(invoke_without_command=True, context_settings=dict(
+@click.group()
+def cli():
+    pass
+@cli.command(context_settings=dict(
             ignore_unknown_options=True,
             allow_extra_args=True,))
 @click.option(
@@ -96,6 +99,7 @@ def run(ctx, conf_path, base_conf, experiment,
                with open(conf, 'r') as f:
                    args = json.load(f) 
            args["config"] = False
+           args["output_name"] = "" 
            spath = os.path.join(pretPath, experiment)
            Path(spath).mkdir(exist_ok=True, parents=True)
            args["save_path"] = spath
@@ -105,7 +109,7 @@ def run(ctx, conf_path, base_conf, experiment,
                var_list = var_list.split("#")
                for var in var_list:
                    args[var_name] = var
-                   for i in range(0, len(ctc.args), 2):
+                   for i in range(0, len(ctx.args), 2):
                         _key = ctx.args[i][2:]
                         if _key in args:
                             args[_key]= ctx.args[i+1] 
@@ -145,7 +149,7 @@ def run(ctx, conf_path, base_conf, experiment,
                    if cur_res:
                         mlog.info("Skipping .... This was done before %s ", spath)
                         continue
-                   for i in range(0, len(ctc.args), 2):
+                   for i in range(0, len(ctx.args), 2):
                         _key = ctx.args[i][2:]
                         if _key in args:
                             args[_key]= ctx.args[i+1] 
@@ -153,7 +157,7 @@ def run(ctx, conf_path, base_conf, experiment,
 
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Training %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-@run.command()
+@cli.command()
 @click.argument("model_id", type=str)
 @click.option(
     "--experiment",
@@ -657,6 +661,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     if config:
         conf_path = "base_confs"
         Path(conf_path).mkdir(exist_ok=True, parents=True)
+        args["config"] = False
+        args["output_name"] = ""
         with open(os.path.join(conf_path, f'{output_name}.json'), 'w') as outfile:
             json.dump(args, outfile, indent=4)
 
@@ -1300,7 +1306,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
 
 #ettt
 
-@run.command()
+@cli.command()
 @click.argument("experiment", type=str)
 @click.option(
     "--model_ids",
@@ -1513,4 +1519,4 @@ def translate(model, tokenizer, df, trans_col, path, logger=None, start=0, save_
 
 
 if __name__ == "__main__":
-   run()
+   cli()
