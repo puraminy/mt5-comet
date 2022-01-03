@@ -614,8 +614,14 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples,
     type=str,
     help="Batch sizes for generation."
 )
+@click.option(
+    "--shared_embs",
+    "-she",
+    is_flag=True,
+    help=""
+)
 def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, test_set, 
-         val_samples, test_samples, load_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, no_score, train_start, no_save_model, gen_bs):
+         val_samples, test_samples, load_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, no_score, train_start, no_save_model, gen_bs, shared_embs):
 
     #%% some hyper-parameters
 
@@ -1022,7 +1028,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
             load_prompt_path = os.path.join(load_path, model_id, "prompt")
             mlog.info("prompt path:%s ", load_prompt_path)
         mlog.info("Wrapping the model ...")
-        wrapped_model = wrap_model(model, tokenizer, encoder_type, load_prompt_path, from_words = from_words, merge_prompts=merge_prompts, method = method) 
+        wrapped_model = wrap_model(model, tokenizer, encoder_type, load_prompt_path, from_words = from_words, merge_prompts=merge_prompts, method = method, shared_embs= shared_embs) 
     if wrapped_model:
         wrapped_model.to(device=device)
         wrapped_model.prompt_encoders.to(device=device)

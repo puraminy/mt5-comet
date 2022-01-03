@@ -215,7 +215,7 @@ def fill_sample(mt, rel):
     response = fill_vars(_anstemp, rel, event, gen_token, resp, 
             input_lang, target_lang)
 
-def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words=False, merge_prompts=False, method=""):
+def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words=False, merge_prompts=False, method="", shared_embs =False):
     wrapped_model = None
     prompt_encoders = []
     offsets = []
@@ -237,7 +237,7 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words
         offsets.append(offset)
     id_offset = min(offsets)
     mlog.info("ID OFFSET: %s", id_offset)
-    wrapped_model = PTuningWrapper(model, prompt_encoders, prompt_token_fn=get_prompt_token_fn(id_offset), merge_prompts=merge_prompts)
+    wrapped_model = PTuningWrapper(model, prompt_encoders, prompt_token_fn=get_prompt_token_fn(id_offset), merge_prompts=merge_prompts, shared_embs = shared_embs)
     return wrapped_model
 
 def create_encoder(name, model, tokenizer, prompt_tokens, encoder_type="lstm", 

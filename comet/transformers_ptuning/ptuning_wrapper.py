@@ -41,7 +41,7 @@ tlog.setLevel(logging.INFO)
 class PTuningWrapper(torch.nn.Module):
     def __init__(self,model,prompt_encoders,decoder_prompt_encoder=None,
         prompt_token_fn=None, prompt_token_id=None, prompt_token_ids=None,
-        replacing_token_id=0, do_log=True, merge_prompts = ""):
+        replacing_token_id=0, do_log=True, merge_prompts = "", shared_embs = False):
         """
         PTuningWrapper for Huggingface transformer models (Encoder Models).
         It will replace the prompt token embeddings with ones from prompt encoder.
@@ -130,11 +130,13 @@ class PTuningWrapper(torch.nn.Module):
                 self.merge_encoder = MLPPromptEncoder("wrap_all", len(self.merge_prompt_ids), self.embedding_dim, self.merge_offset, prompt_ids=self.merge_prompt_ids, num_layers=num_layers, hidden_size=hidden_size)
             elif merge_prompts.startswith("lstml"):
                 self.merge_encoder = MLPPromptEncoder("wrap_all", len(self.merge_prompt_ids), self.embedding_dim, self.merge_offset, prompt_ids=self.merge_prompt_ids, num_layers=num_layers, hidden_size=hidden_size)
-           # self.merge_embedding = torch.nn.Embedding(len(self.merge_prompt_ids), self.embedding_dim)
-           # for encoder in self.prompt_encoders:
-           #     encoder.embedding = self.merge_embedding
-           #     encoder.id_offset= self.merge_offset
-           #     encoder.length= len(self.merge_prompt_ids)
+        else:
+            if shared_embs:
+                self.merge_embedding = torch.nn.Embedding(len(self.merge_prompt_ids), self.embedding_dim)
+                for encoder in self.prompt_encoders:
+                    encoder.embedding = self.merge_embedding
+                    encoder.id_offset= self.merge_offset
+                    encoder.length= len(self.merge_prompt_ids)
 
 
         self.decoder_prompt_encoder = decoder_prompt_encoder
@@ -275,10 +277,6 @@ class PTuningWrapper(torch.nn.Module):
         self.cur_embeddings = self.underlying_model.get_input_embeddings()
         if self.merge_encoder:
             self.merge_encoder.dump_embedding(self.cur_embeddings.weight)
-        #elif self.merge_embedding:
-        #    detached_embeddings = self.merge_embedding.weight.detach()
-        #    emblog.info("Dump embeddings merge_embeddings: %s", detached_embeddings)
-        #    self.cur_embeddings.weight[self.merge_prompt_ids,:]=detached_embeddings
         else:
             for encoder in self.prompt_encoders:
                 wlog.info(f"the wrapper has prompt encoder")
