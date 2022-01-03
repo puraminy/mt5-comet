@@ -85,6 +85,13 @@ from tqdm import tqdm
     help=""
 )
 @click.option(
+    "--method",
+    "-mt",
+    default="",
+    type=str,
+    help=""
+)
+@click.option(
     "--batch_size",
     "-bs",
     default=0,
@@ -94,7 +101,7 @@ from tqdm import tqdm
 @click.pass_context
 #rrrrrrrrrrr
 def run(ctx, conf_path, experiment, print_log, model_id, train_samples,
-        exclude, include, overwrite, batch_size):
+        exclude, include, overwrite, method, batch_size):
      if not conf_path:
         conf_path = "confs"
         if colab: conf_path = "colab_confs"
@@ -107,8 +114,24 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples,
            if Path(conf).exists():
                with open(conf, 'r') as f:
                    args = json.load(f) 
-           
-           ctx.invoke(train, **args)
+           if model_id:
+               args["model_id"] = model_id
+           if method:
+               args["method"] = method 
+           if batch_size > 0:
+               args["batch_size"] = batch_size 
+           if train_samples > 0:
+               args["train_samples"] = train_samples
+           spath = os.join(pretPath, experiment)
+           Path(spath).mkdir(exist_ok=True, parents=True)
+           args["save_path"] = spath
+           if var:
+               var_name,var_list = var.split("@")
+               var_list = var_list.split("#")
+               for var in var_list:
+                   args["output_name"] = experiment + "_" + args["model_id"] + "_" + args["method"] + "_" + args["train_samples"] + "_" + var_name + "-" + var
+                   args[var_name] = var
+                   ctx.invoke(train, **args)
         else:
             confs = sorted(glob.glob(f"{_path}/*"))
             default_model = ""
