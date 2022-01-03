@@ -481,6 +481,13 @@ def show_df(df):
                 main_df.loc[(main_df["method"] == "sup-tokens") & 
                         (main_df["wrap"] == "wrapped-lstm"), "method"] = "sup-tokens-wrap"
             
+            if cmd == "repall":
+                canceled, col,val = list_df_values(main_df, get_val=False)
+                if not canceled:
+                    _a = rowinput("from")
+                    _b = rowinput("to")
+                    main_df[col] = main_df[col].str.replace(_a,_b)
+                    char = "SS"
             if cmd == "rep" or cmd == "rep@":
                 canceled, col,val = list_df_values(main_df, get_val=False)
                 if not canceled:
