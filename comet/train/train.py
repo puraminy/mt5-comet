@@ -28,7 +28,9 @@ from tqdm import tqdm
 
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Run    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-@click.group(invoke_without_command=True)
+@click.group(invoke_without_command=True, context_settings=dict(
+            ignore_unknown_options=True,
+            allow_extra_args=True,))
 @click.option(
     "--conf_path",
     "-cp",
@@ -51,58 +53,23 @@ from tqdm import tqdm
     help="Select the pattern of configurations files for an experiment (starts with)"
 )
 @click.option(
-    "--print_log",
-    "-p",
-    default="mlog",
-    type=str,
-    help=""
-)
-@click.option(
-    "--model_id",
-    "-m",
-    default="",
-    type=str,
-    help=""
-)
-@click.option(
-    "--train_samples",
-    "-n",
-    default=0,
-    type=int,
-    help=""
-)
-@click.option(
-    "--exclude",
+    "--exclude_conf",
     "-ex",
     default="",
     type=str,
     help=""
 )
 @click.option(
-    "--include",
+    "--include_conf",
     "-in",
     default="",
     type=str,
     help=""
 )
 @click.option(
-    "--overwrite",
+    "--overwrite_conf",
     "-ow",
     is_flag=True,
-    help=""
-)
-@click.option(
-    "--method",
-    "-mt",
-    default="",
-    type=str,
-    help=""
-)
-@click.option(
-    "--batch_size",
-    "-bs",
-    default=0,
-    type=int,
     help=""
 )
 @click.option(
@@ -114,8 +81,8 @@ from tqdm import tqdm
 )
 @click.pass_context
 #rrrrrrrrrrr
-def run(ctx, conf_path, base_conf, experiment, print_log, model_id, train_samples,
-        exclude, include, overwrite, method, batch_size, var):
+def run(ctx, conf_path, base_conf, experiment, 
+        exclude_conf, include_conf, overwrite_conf, var):
      if not conf_path:
         conf_path = "confs"
         if colab: conf_path = "colab_confs"
@@ -129,14 +96,6 @@ def run(ctx, conf_path, base_conf, experiment, print_log, model_id, train_sample
                with open(conf, 'r') as f:
                    args = json.load(f) 
            args["config"] = False
-           if model_id:
-               args["model_id"] = model_id
-           if method:
-               args["method"] = method 
-           if batch_size > 0:
-               args["batch_size"] = batch_size 
-           if train_samples > 0:
-               args["train_samples"] = train_samples
            spath = os.path.join(pretPath, experiment)
            Path(spath).mkdir(exist_ok=True, parents=True)
            args["save_path"] = spath
@@ -145,10 +104,11 @@ def run(ctx, conf_path, base_conf, experiment, print_log, model_id, train_sample
                var_name,var_list = var.split("@")
                var_list = var_list.split("#")
                for var in var_list:
-                   output_name = experiment + "_" + args["model_id"] + "_" + args["method"] + "_" + str(args["train_samples"]) + "_" + var_name + "-" + var
-                   mlog.info("out: %s", output_name)
-                   args["output_name"] = output_name
                    args[var_name] = var
+                   for i in range(0, len(ctc.args), 2):
+                        _key = ctx.args[i][2:]
+                        if _key in args:
+                            args[_key]= ctx.args[i+1] 
                    ctx.invoke(train, **args)
         else:
             confs = sorted(glob.glob(f"{_path}/*"))
@@ -160,21 +120,20 @@ def run(ctx, conf_path, base_conf, experiment, print_log, model_id, train_sample
                 if not experiment in fname:
                     mlog.info("Skipping .... This was not in experiments")
                     continue
-                if exclude and exclude in fname:
+                if exclude_conf and exclude_conf in fname:
                     mlog.info("Skipping .... by exclude")
                     continue
-                if include and not include in fname:
+                if include_conf and not include_conf in fname:
                     mlog.info("Skipping .... by include")
                     continue
                 if Path(conf).exists():
                    with open(conf, 'r') as f:
                        args = json.load(f) 
-                   args["print_log"] = print_log
                    spath = args["save_path"]
                    if first and Path(spath).exists():
                        mlog.info("%s already exists!", spath)
                        first = False
-                       if overwrite:
+                       if overwrite_conf:
                           shutil.rmtree(spath)
 
                    Path(spath).mkdir(exist_ok=True, parents=True)
@@ -186,23 +145,10 @@ def run(ctx, conf_path, base_conf, experiment, print_log, model_id, train_sample
                    if cur_res:
                         mlog.info("Skipping .... This was done before %s ", spath)
                         continue
-                   if train_samples > 0:
-                       args["train_samples"] = train_samples
-                   if batch_size > 0:
-                       mlog.info("Forcing input batch size %s", batch_size)
-                       args["batch_size"] = batch_size
-                   if model_id:
-                       if default_model and args["model_id"] != default_model:
-                           break
-                       elif args["model_id"] != default_model:
-                           default_model = args["model_id"]
-                       mlog.info(f"Replacing {default_model} with {model_id}")
-                       args["model_id"] = model_id
-                       out = args["output_name"].split("_")
-                       out[1] = model_id
-                       args["output_name"] = "_".join(out)
-                       if args["load_path"]:
-                           shutil.copy(conf, args["load_path"])
+                   for i in range(0, len(ctc.args), 2):
+                        _key = ctx.args[i][2:]
+                        if _key in args:
+                            args[_key]= ctx.args[i+1] 
                    ctx.invoke(train, **args)
 
 
@@ -709,7 +655,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
         save_path = ""
         output_name = "test"
     if config:
-        config_path = "base_confs"
+        conf_path = "base_confs"
         Path(conf_path).mkdir(exist_ok=True, parents=True)
         with open(os.path.join(conf_path, f'{output_name}.json'), 'w') as outfile:
             json.dump(args, outfile, indent=4)
