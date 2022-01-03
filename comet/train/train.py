@@ -108,6 +108,8 @@ def run(ctx, conf_path, base_conf, experiment,
                var_name,var_list = var.split("@")
                var_list = var_list.split("#")
                for var in var_list:
+                   output_name = experiment + "_" + base_conf + "_" + var_name + "_" + var
+                   args["output_name"] = args["overwrite"] = output_name
                    args[var_name] = var
                    for i in range(0, len(ctx.args), 2):
                         _key = ctx.args[i][2:]
@@ -653,7 +655,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     w_str = "wrapped" if wrap else "unwrapped"
     f_str = "freezed" if frozen else "unfreezed"
     if not output_name and not (cont or do_eval):
-        output_name = method
+        output_name = model_id + "_" + method 
     conf_path = save_path
     if model_id == "test":
         save_path = ""
@@ -726,6 +728,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
         if cont:
             if Path(checkpoint_path).exists():
                 checkpoint = torch.load(checkpoint_path)
+            conf_path = os.path.join(save_path, "exp_conf.json")
             if Path(conf_path).is_file():
                with open(conf_path, 'r') as f:
                    args = json.load(f) 
