@@ -100,59 +100,69 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples,
         if colab: conf_path = "colab_confs"
      if ctx.invoked_subcommand is None:
         mlog.info("Reading from conf %s", conf_path)
-        confs = sorted(glob.glob(f"{conf_path}/{experiment}/*"))
-        default_model = ""
-        first = True
-        for conf in confs:
-            fname = Path(conf).stem
-            mlog.info(f"%%% {fname} %%%")
-            if not experiment in fname:
-                mlog.info("Skipping .... This was not in experiments")
-                continue
-            if exclude and exclude in fname:
-                mlog.info("Skipping .... by exclude")
-                continue
-            if include and not include in fname:
-                mlog.info("Skipping .... by include")
-                continue
-            if Path(conf).exists():
+        _path = f"{conf_path}/{experiment}"
+        if not Path(_path).exists():
+           conf = "exp_conf.json" # default conf
+           mlog.info("NEW experiment! Reading from conf %s", conf)
+           if Path(conf).exists():
                with open(conf, 'r') as f:
                    args = json.load(f) 
-               args["print_log"] = print_log
-               spath = args["save_path"]
-               if first and Path(spath).exists():
-                   mlog.info("%s already exists!", spath)
-                   first = False
-                   if overwrite:
-                      shutil.rmtree(spath)
-
-               Path(spath).mkdir(exist_ok=True, parents=True)
-               #mlog.info("save path: %s", spath)
-               cur_res_path = os.path.join(spath, args["output_name"], "full_result*")
-               #mlog.info("cur_res_path: %s", cur_res_path)
-               cur_res = glob.glob(cur_res_path)
-               #mlog.info("cur_res: %s", cur_res)
-               if cur_res:
-                    mlog.info("Skipping .... This was done before %s ", spath)
+           
+           ctx.invoke(train, **args)
+        else:
+            confs = sorted(glob.glob(f"{_path}/*"))
+            default_model = ""
+            first = True
+            for conf in confs:
+                fname = Path(conf).stem
+                mlog.info(f"%%% {fname} %%%")
+                if not experiment in fname:
+                    mlog.info("Skipping .... This was not in experiments")
                     continue
-               if train_samples > 0:
-                   args["train_samples"] = train_samples
-               if batch_size > 0:
-                   mlog.info("Forcing input batch size %s", batch_size)
-                   args["batch_size"] = batch_size
-               if model_id:
-                   if default_model and args["model_id"] != default_model:
-                       break
-                   elif args["model_id"] != default_model:
-                       default_model = args["model_id"]
-                   mlog.info(f"Replacing {default_model} with {model_id}")
-                   args["model_id"] = model_id
-                   out = args["output_name"].split("_")
-                   out[1] = model_id
-                   args["output_name"] = "_".join(out)
-                   if args["load_path"]:
-                       shutil.copy(conf, args["load_path"])
-               ctx.invoke(train, **args)
+                if exclude and exclude in fname:
+                    mlog.info("Skipping .... by exclude")
+                    continue
+                if include and not include in fname:
+                    mlog.info("Skipping .... by include")
+                    continue
+                if Path(conf).exists():
+                   with open(conf, 'r') as f:
+                       args = json.load(f) 
+                   args["print_log"] = print_log
+                   spath = args["save_path"]
+                   if first and Path(spath).exists():
+                       mlog.info("%s already exists!", spath)
+                       first = False
+                       if overwrite:
+                          shutil.rmtree(spath)
+
+                   Path(spath).mkdir(exist_ok=True, parents=True)
+                   #mlog.info("save path: %s", spath)
+                   cur_res_path = os.path.join(spath, args["output_name"], "full_result*")
+                   #mlog.info("cur_res_path: %s", cur_res_path)
+                   cur_res = glob.glob(cur_res_path)
+                   #mlog.info("cur_res: %s", cur_res)
+                   if cur_res:
+                        mlog.info("Skipping .... This was done before %s ", spath)
+                        continue
+                   if train_samples > 0:
+                       args["train_samples"] = train_samples
+                   if batch_size > 0:
+                       mlog.info("Forcing input batch size %s", batch_size)
+                       args["batch_size"] = batch_size
+                   if model_id:
+                       if default_model and args["model_id"] != default_model:
+                           break
+                       elif args["model_id"] != default_model:
+                           default_model = args["model_id"]
+                       mlog.info(f"Replacing {default_model} with {model_id}")
+                       args["model_id"] = model_id
+                       out = args["output_name"].split("_")
+                       out[1] = model_id
+                       args["output_name"] = "_".join(out)
+                       if args["load_path"]:
+                           shutil.copy(conf, args["load_path"])
+                   ctx.invoke(train, **args)
 
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Training %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
