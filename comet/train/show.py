@@ -343,10 +343,10 @@ def show_df(df):
                     cond = get_cond(df, col, num=15)
                else:
                     if not canceled:
-                        if val.isnumeric():
-                            cond = f"df['{col}'] == {val}"
-                        else:
+                        if type(val) == str:
                             cond = f"df['{col}'] == '{val}'"
+                        else:
+                            cond = f"df['{col}'] == {val}"
                if cond:
                    mlog.info("cond %s, ", cond)
                    df = df[eval(cond)]
