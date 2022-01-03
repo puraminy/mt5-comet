@@ -105,19 +105,20 @@ def run(ctx, conf_path, base_conf, experiment,
            args["save_path"] = spath
            args["load_path"] = pretPath 
            _extra = ""
+           mlog.info("Extra args=%s", ctx.args)
            for _item in ctx.args:
                 _key,_val = _item.split("=")
                 _key=_key.strip("--")
-                _extra += "_" + (_val if not str(_val)=="True" else _key)
-                if _key in args:
-                    mlog.info("set %s = %s", _key, _val)
-                    args[_key]= _val
+                if not _key in ["no_confirm"]:
+                    _extra += "_" + (_val if not str(_val)=="True" else _key)
+                mlog.info("set %s = %s", _key, _val)
+                args[_key]= _val
            output_name = experiment + "_" + base_conf + _extra
            if not var:
                args["output_name"] = args["overwrite"] = output_name
                ctx.invoke(train, **args)
            else:
-               all_vars = va.split("--")
+               all_vars = var.split("--")
                main_var = all_vars[0]
                main_var_name,main_var_item_list = main_var.split("=")
                main_var_item_list = main_var_item_list.split("#")
@@ -127,7 +128,7 @@ def run(ctx, conf_path, base_conf, experiment,
                    sub_var_item_list = sub_var_item_list.split("#")
                for var_item in main_var_item_list:
                    args[main_var_name] = var_item
-                   var_output_name = output_name + "_" + var_name + "_" + var_item 
+                   var_output_name = output_name + "_" + main_var_name + "_" + var_item 
                    if len(all_vars) > 1:
                        for sub_var_item in sub_var_item_list:
                            args[sub_var_name] = sub_var_item
@@ -644,8 +645,14 @@ def run(ctx, conf_path, base_conf, experiment,
     is_flag=True,
     help=""
 )
+@click.option(
+    "--no_confirm",
+    "-nc",
+    is_flag=True,
+    help=""
+)
 def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, test_set, 
-         val_samples, test_samples, load_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, no_score, train_start, no_save_model, gen_bs, shared_embs):
+         val_samples, test_samples, load_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, no_score, train_start, no_save_model, gen_bs, shared_embs, no_confirm):
 
     #%% some hyper-parameters
 
@@ -776,7 +783,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
 
 
     do_overwrite = False
-    if overwrite or do_eval:
+    if overwrite or do_eval or no_confirm:
         save_path = os.path.join(log_dir, overwrite)
         do_overwrite = True
     ii = 1
@@ -870,7 +877,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
         length = [int(s) for s in str(prompt_length).split("-")]
         set_prompt_lengths(rel_filter, length)
 
-    num_samples = {"train": train_samples, "validation":val_samples, "sample":0, "test":test_samples}
+    num_samples = {"train": int(train_samples), "validation":int(val_samples), "sample":0, "test":int(test_samples)}
     split_path = {"train":train_path, "validation":val_path, "sample":sample_path, "test":test_path}
     save_ds_path = {}
     for split, _path in split_path.items():
@@ -958,7 +965,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     m_name = model_id + "-" + method
     exp_info = {"exp":experiment, "model":model_id, "lang": lang, 
                     "method":method, 
-                    "wrap": w_str + ("-" + encoder_type if wrap else "")
+                    "wrap": w_str + ("-" + encoder_type if wrap else ""),
                     "frozen":f_str, 
                     "steps":train_records,
                     "epochs":epochs_num,
@@ -1050,7 +1057,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     # %% prepare for training
     sw = SummaryWriter(save_path, flush_secs=1)
     no_decay = ['bias', 'LayerNorm.weight']
-    if wrap and not frozen:
+    if wrap and not frozen and not no_confirm:
          ans = input("Are you sure you want to wrap without freezing the model?")
          if ans != "y":
              frozen = True
