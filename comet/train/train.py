@@ -37,6 +37,13 @@ from tqdm import tqdm
     help=""
 )
 @click.option(
+    "--base_conf",
+    "-bc",
+    default="test",
+    type=str,
+    help=""
+)
+@click.option(
     "--experiment",
     "-exp",
     default="conf",
@@ -98,10 +105,17 @@ from tqdm import tqdm
     type=int,
     help=""
 )
+@click.option(
+    "--var",
+    "-var",
+    default="",
+    type=str,
+    help=""
+)
 @click.pass_context
 #rrrrrrrrrrr
-def run(ctx, conf_path, experiment, print_log, model_id, train_samples,
-        exclude, include, overwrite, method, batch_size):
+def run(ctx, conf_path, base_conf, experiment, print_log, model_id, train_samples,
+        exclude, include, overwrite, method, batch_size, var):
      if not conf_path:
         conf_path = "confs"
         if colab: conf_path = "colab_confs"
@@ -109,11 +123,12 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples,
         mlog.info("Reading from conf %s", conf_path)
         _path = f"{conf_path}/{experiment}"
         if not Path(_path).exists():
-           conf = "exp_conf.json" # default conf
+           conf = f"base_confs/{base_conf}.json" # default conf
            mlog.info("NEW experiment! Reading from conf %s", conf)
            if Path(conf).exists():
                with open(conf, 'r') as f:
                    args = json.load(f) 
+           args["config"] = False
            if model_id:
                args["model_id"] = model_id
            if method:
@@ -122,14 +137,17 @@ def run(ctx, conf_path, experiment, print_log, model_id, train_samples,
                args["batch_size"] = batch_size 
            if train_samples > 0:
                args["train_samples"] = train_samples
-           spath = os.join(pretPath, experiment)
+           spath = os.path.join(pretPath, experiment)
            Path(spath).mkdir(exist_ok=True, parents=True)
            args["save_path"] = spath
+           args["load_path"] = pretPath 
            if var:
                var_name,var_list = var.split("@")
                var_list = var_list.split("#")
                for var in var_list:
-                   args["output_name"] = experiment + "_" + args["model_id"] + "_" + args["method"] + "_" + args["train_samples"] + "_" + var_name + "-" + var
+                   output_name = experiment + "_" + args["model_id"] + "_" + args["method"] + "_" + str(args["train_samples"]) + "_" + var_name + "-" + var
+                   mlog.info("out: %s", output_name)
+                   args["output_name"] = output_name
                    args[var_name] = var
                    ctx.invoke(train, **args)
         else:
@@ -675,7 +693,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
 
     args = locals() # input parameters
 
-    mlog.info("========================= Version 7 ========================")
+    mlog.info("========================= Version 8 ========================")
     if save_path == "":
         if "ahmad" or "pouramini" in home:
             save_path = os.path.join(home, "logs")
@@ -690,13 +708,13 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     if model_id == "test":
         save_path = ""
         output_name = "test"
-        conf_path = "" #os.path.join(home, "logs/confs")
+    if config:
+        config_path = "base_confs"
         Path(conf_path).mkdir(exist_ok=True, parents=True)
-        with open(os.path.join(conf_path, f'exp_conf.json'), 'w') as outfile:
+        with open(os.path.join(conf_path, f'{output_name}.json'), 'w') as outfile:
             json.dump(args, outfile, indent=4)
 
-    if config:
-        mlog.info("Config %s was created at %s", "exp_conf.json", conf_path)
+        mlog.info("Config %s was created at %s", output_name + ".json", conf_path)
         return
 
     if save_path != logPath:
@@ -1392,7 +1410,7 @@ def exp(experiment, model_ids, keep, server, exclude, include, save_model):
     base_dir = home
     if "_" in experiment:
         raise ValueError("Experiment name shouldn't have underscore in it, use dash")
-    conf = "exp_conf.json" #os.path.join(base_dir, "logs/confs/exp_conf.json")
+    conf = "base_confs/test.json" 
     save_path = os.path.join(base_dir, "mt5-comet/comet/train/")
     if not is_colab:
         conf_path = os.path.join(save_path,"confs",experiment)
