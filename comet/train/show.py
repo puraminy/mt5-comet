@@ -92,6 +92,7 @@ def show_df(df):
 
     back = []
     filter_df = main_df
+    df["num_preds"] = len(df["pred_text1"].unique())
     #wwwwwwwwww
     colors = ['blue','orange','green', 'red', 'purple', 'brown', 'pink','gray','olive','cyan']
     ax = None
@@ -284,9 +285,9 @@ def show_df(df):
             elif char == "G":
                 canceled, col = False, "fid"
             if not canceled:
-               g_cols = ["exp_id", "rouge_score", "bert_score", "steps", "method","model", "wrap", "frozen"]
+               g_cols = ["exp_id", "rouge_score", "bert_score", "steps", "method","model", "wrap", "frozen", "num_preds"]
                df = (df.groupby(col).agg({"rouge_score":"mean","bert_score":"mean",
-                   "method":"first","model":"first", "wrap":"first", col:"first", "steps":"first", "frozen":"first"})
+                   "method":"first","model":"first", "wrap":"first", col:"first", "steps":"first", "frozen":"first", "num_preds":"first"})
                  .rename(columns={col:'exp_id'})
                  .sort_values(by = ["rouge_score"], ascending=False)
                     )
@@ -768,7 +769,7 @@ def start(stdscr):
                 force_fid = sfid[1] == "force"
             if not "fid" in df or force_fid:
                 if fid == "parent":
-                    df["fid"] = Path(f).parent.stem
+                    df["fid"] = Path(f).parent.name
                 elif fid == "name":
                     df["fid"] = Path(f).stem
                 else:

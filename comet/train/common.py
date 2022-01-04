@@ -130,19 +130,10 @@ inputs = ["input_text", "input_text_fa", "natural_input_text", "natural_input_te
 placeholder_token = "<extra_id_0>"
 end_token = SPECIAL_TOKENS['eos_token']  #"</s>"
 # %%
-relation_prompt_lengths = {
-    "xAttr":[4],
-    "xEffect":[8],
-    "oEffect":[8],
-    "xReact":[5],
-    "oReact":[5],
-    "xWant":[5],
-    "oWant":[5],
-    "xIntent":[5],
-    "xNeed":[5],
-    "com":[3],
-}
+relation_prompt_lengths = {"com":[3]}
 
+for key, val in relation_natural_mappings.items():
+    relation_prompt_lengths[key] = [len(val["tokens"].split())] 
 
 def get_prompt_token_fn(id_offset):
     return lambda x: (x>=id_offset) #&(x<id_offset+length)

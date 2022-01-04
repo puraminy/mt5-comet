@@ -138,9 +138,9 @@ def run(ctx, conf_path, base_conf, experiment,
                        len(main_var_item_list)*len(sub_var_item_list))
                ii = 0
                for var_item in main_var_item_list:
+                   var_output_name = output_name + "_" + main_var_name + "_" + var_item 
                    if var_item == "none": var_item = ""
                    args[main_var_name] = var_item
-                   var_output_name = output_name + "_" + main_var_name + "_" + var_item 
                    if len(all_vars) > 1:
                        for sub_var_item in sub_var_item_list:
                            sub_output_name = var_output_name + "_" + sub_var_name + \
@@ -759,6 +759,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     shuffle_evaluation=False
     validation_size = val_samples 
     validation_num_generation = 20
+    learning_rate = float(learning_rate)
     if not frozen and learning_rate == 0: 
         learning_rate = 6.25e-05 if opt_type == "adam" else 1e-3
         if "gpt" in model_id:
@@ -1105,7 +1106,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     else:
         wrap = False
         if learning_rate > 0.0001:
-            raise "Learning rate should be smaller"
+            #raise "Learning rate should be smaller"
+            pass
         extend_tokenizer(tokenizer)
         mlog.info("len tokenizer after extending %s", len(tokenizer))
         model.resize_token_embeddings(len(tokenizer))
