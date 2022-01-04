@@ -121,11 +121,11 @@ def run(ctx, conf_path, base_conf, experiment,
                all_vars = var.split("--")
                main_var = all_vars[0]
                main_var_name,main_var_item_list = main_var.split("=")
-               main_var_item_list = main_var_item_list.split("#")
+               main_var_item_list = main_var_item_list.split("$")
                if len(all_vars) > 1:
                    sub_var = all_vars[1]
                    sub_var_name,sub_var_item_list = sub_var.split("=")
-                   sub_var_item_list = sub_var_item_list.split("#")
+                   sub_var_item_list = sub_var_item_list.split("$")
                mlog.info("Number of Experiments: %s", 
                        len(main_var_item_list)*len(sub_var_item_list))
                ii = 0
@@ -1187,8 +1187,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     elif step <= iterations and (wrap or not frozen):
         mlog.info("Training... %s", save_path)
     epochs_num = int(epochs_num)
-    pbar = tqdm(total=iterations*(epochs_num+1), position=0, leave=True) 
     for epoch in range(epochs_num):
+        pbar = tqdm(total=iterations, position=0, leave=True) 
         train_iter = iter(train_dataloader)
         mlog.info("Saving train data set...")
         myds["train"].save()
