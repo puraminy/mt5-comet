@@ -132,9 +132,10 @@ def run(ctx, conf_path, base_conf, experiment,
                    var_output_name = output_name + "_" + main_var_name + "_" + var_item 
                    if len(all_vars) > 1:
                        for sub_var_item in sub_var_item_list:
+                           sub_output_name = var_output_name + "_" + sub_var_name + \
+                                   "_" + sub_var_item 
                            if sub_var_item == "none": sub_var_item = ""
                            args[sub_var_name] = sub_var_item
-                           sub_output_name = var_output_name + "_" + sub_var_name + "_" + sub_var_item 
                            args["output_name"] = args["overwrite"] = sub_output_name
                            ctx.invoke(train, **args)
                    else:
@@ -651,10 +652,16 @@ def run(ctx, conf_path, base_conf, experiment,
     "--no_confirm",
     "-nc",
     is_flag=True,
-    help=""
+    help="Don't ask confirmations"
+)
+@click.option(
+    "--follow_method",
+    "-fm",
+    is_flag=True,
+    help="Adjust some settings like wrapping or freezing the model according to the method"
 )
 def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, test_set, 
-         val_samples, test_samples, load_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, no_score, train_start, no_save_model, gen_bs, shared_embs, no_confirm):
+         val_samples, test_samples, load_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, no_score, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method):
 
     #%% some hyper-parameters
 
@@ -1059,10 +1066,13 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     # %% prepare for training
     sw = SummaryWriter(save_path, flush_secs=1)
     no_decay = ['bias', 'LayerNorm.weight']
-    if wrap and not frozen and not no_confirm:
-         ans = input("Are you sure you want to wrap without freezing the model?")
-         if ans != "y":
+    if wrap and not frozen:
+         if follow_method:
              frozen = True
+         elif not no_confirm:
+             ans = input("Are you sure you want to wrap without freezing the model?")
+             if ans != "y":
+                 frozen = True
     wrapped_model = None
     if wrap:
         if not load_prompt_path and Path(os.path.join(load_path, model_id, "prompt")).exists():
