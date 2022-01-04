@@ -267,8 +267,6 @@ def show_df(df):
                 col_widths["index"]=50
                 info_cols = []
             
-        elif char == "T":
-            df = df.drop_duplicates(['prefix'])
         elif char == "g": 
             score_col = "rouge_score"
             back.append(df)
@@ -318,17 +316,24 @@ def show_df(df):
                     df = pd.concat([df, new_df], ignore_index=True)
                 else:
                     main_df = pd.concat([main_df, new_df], ignore_index=True)
-        elif char == "t":
-            cols = get_cols(df,2)
+        elif char in ["t", "T"]:
+            cols = get_cols(df,5)
             if cols:
                 tdf = df[cols].round(2)
+                tdf = tdf.pivot(index=cols[0], columns=cols[1], values =cols[2]) 
                 fname = rowinput("Table name:", "table_")
                 if fname:
-                    tname = os.path.join(base_dir, "plots", fname + ".png")
-                    wrate = [col_widths[c] for c in cols]
-                    tax = render_mpl_table(tdf, wrate = wrate, col_width=4.0)
-                    fig = tax.get_figure()
-                    fig.savefig(tname)
+                    if char == "t":
+                        tname = os.path.join(base_dir, "plots", fname + ".png")
+                        wrate = [col_widths[c] for c in cols]
+                        tax = render_mpl_table(tdf, wrate = wrate, col_width=4.0)
+                        fig = tax.get_figure()
+                        fig.savefig(tname)
+                    else:
+                        latex = tdf.to_latex(index=False)
+                        tname = os.path.join(base_dir, "latex", fname + ".tex")
+                        with open(tname, "w") as f:
+                            f.write(latex)
 
         elif char == "p":
             cols = get_cols(df,2)
