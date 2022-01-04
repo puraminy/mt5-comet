@@ -109,7 +109,7 @@ def run(ctx, conf_path, base_conf, experiment,
            for _item in ctx.args:
                 _key,_val = _item.split("=")
                 _key=_key.strip("--")
-                if not _key in ["no_confirm"]:
+                if not _key in ["no_confirm", "follow_method"]:
                     _extra += "_" + (_val if not str(_val)=="True" else _key)
                 mlog.info("set %s = %s", _key, _val)
                 args[_key]= _val
@@ -697,6 +697,13 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     if "-wrap" in method and not wrap:
         mlog.info("Method %s is for wrapped models...", method)
         wrap = True
+        if wrap and not frozen and follow_method:
+            frozen = True
+    if wrap and not frozen:
+         if not no_confirm:
+             ans = input("Are you sure you want to wrap without freezing the model?")
+             if ans != "y":
+                 frozen = True
     w_str = "wrapped" if wrap else "unwrapped"
     f_str = "freezed" if frozen else "unfreezed"
     if not output_name and not (cont or do_eval):
@@ -1071,13 +1078,6 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     # %% prepare for training
     sw = SummaryWriter(save_path, flush_secs=1)
     no_decay = ['bias', 'LayerNorm.weight']
-    if wrap and not frozen:
-         if follow_method:
-             frozen = True
-         elif not no_confirm:
-             ans = input("Are you sure you want to wrap without freezing the model?")
-             if ans != "y":
-                 frozen = True
     wrapped_model = None
     if wrap:
         if not load_prompt_path and Path(os.path.join(load_path, model_id, "prompt")).exists():

@@ -366,7 +366,7 @@ def show_df(df):
                gi = 0 
                name = ""
                for key, grp in df.groupby([gcol]):
-                     ax = grp.plot(ax=ax,linestyle="--",marker="o", kind='line', x='steps', y='rouge_score', label=key, color=colors[gi])
+                     ax = grp.sort_values('steps').plot.line(ax=ax,linestyle="--",marker="o",  x='steps', y='rouge_score', label=key, color=colors[gi])
                      gi += 1
                      if gi > len(colors) - 1: gi = 0
                      name += key + "_"
