@@ -1181,7 +1181,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
         mlog.info("Skip training...")
     elif step <= iterations and (wrap or not frozen):
         mlog.info("Training... %s", save_path)
-    pbar = tqdm(total=iterations, position=0, leave=True) #,dynamic_ncols=True)
+    epochs_num = int(epochs_num)
+    pbar = tqdm(total=iterations*(epochs_num+1), position=0, leave=True) 
     for epoch in range(epochs_num):
         train_iter = iter(train_dataloader)
         mlog.info("Saving train data set...")
