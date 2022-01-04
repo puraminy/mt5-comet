@@ -127,10 +127,12 @@ def run(ctx, conf_path, base_conf, experiment,
                    sub_var_name,sub_var_item_list = sub_var.split("=")
                    sub_var_item_list = sub_var_item_list.split("#")
                for var_item in main_var_item_list:
+                   if var_item == "none": var_item = ""
                    args[main_var_name] = var_item
                    var_output_name = output_name + "_" + main_var_name + "_" + var_item 
                    if len(all_vars) > 1:
                        for sub_var_item in sub_var_item_list:
+                           if sub_var_item == "none": sub_var_item = ""
                            args[sub_var_name] = sub_var_item
                            sub_output_name = var_output_name + "_" + sub_var_name + "_" + sub_var_item 
                            args["output_name"] = args["overwrite"] = sub_output_name
