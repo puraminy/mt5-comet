@@ -507,6 +507,7 @@ def show_df(df):
                         if "@" in cmd:
                             df = df.replace(d)
                         else:
+                            df = df.replace(d)
                             main_df = main_df.replace(d)
                             char = "SS"
             if cmd in ["set", "set@", "add", "add@", "setcond"]:

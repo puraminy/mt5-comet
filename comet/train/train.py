@@ -82,10 +82,16 @@ def cli():
     type=str,
     help=""
 )
+@click.option(
+    "--save_model",
+    "-sm",
+    is_flag=True,
+    help=""
+)
 @click.pass_context
 #rrrrrrrrrrr
 def run(ctx, conf_path, base_conf, experiment, 
-        exclude_conf, include_conf, overwrite_conf, var):
+        exclude_conf, include_conf, overwrite_conf, var, save_model):
      if not conf_path:
         conf_path = "confs"
         if colab: conf_path = "colab_confs"
@@ -117,6 +123,7 @@ def run(ctx, conf_path, base_conf, experiment,
            # oooooooooooooo
            if not var:
                args["output_name"] = output_name
+               args["no_save_model"] = not save_model
                ctx.invoke(train, **args)
            else:
                all_vars = var.split("--")
@@ -142,10 +149,12 @@ def run(ctx, conf_path, base_conf, experiment,
                            args[sub_var_name] = sub_var_item
                            ii += 1
                            args["output_name"] = str(ii) + "_" + sub_output_name
+                           args["no_save_model"] = not save_model
                            ctx.invoke(train, **args)
                    else:
                        ii += 1
                        args["output_name"] = str(ii) + "_" + var_output_name
+                       args["no_save_model"] = not save_model
                        ctx.invoke(train, **args)
         else:
             confs = sorted(glob.glob(f"{_path}/*"))
