@@ -114,6 +114,7 @@ def run(ctx, conf_path, base_conf, experiment,
                 mlog.info("set %s = %s", _key, _val)
                 args[_key]= _val
            output_name = experiment + "_" + base_conf + _extra
+           # oooooooooooooo
            if not var:
                args["output_name"] = args["overwrite"] = output_name
                ctx.invoke(train, **args)
@@ -141,10 +142,12 @@ def run(ctx, conf_path, base_conf, experiment,
                            args[sub_var_name] = sub_var_item
                            ii += 1
                            args["output_name"] = str(ii) + "_" + sub_output_name
+                           args["overwrite"] = args["output_name"]
                            ctx.invoke(train, **args)
                    else:
                        ii += 1
                        args["output_name"] = str(ii) + "_" + var_output_name
+                       args["overwrite"] = args["output_name"]
                        ctx.invoke(train, **args)
         else:
             confs = sorted(glob.glob(f"{_path}/*"))
@@ -768,7 +771,6 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
 
     log_dir = save_path
     set_device(device)
-    output_name = model_id if not output_name else output_name
     mlog.info("Output name: %s", output_name)
     save_path = os.path.join(log_dir, output_name)
     model_name = f"{learning_rate}_{cycle}_{train_samples}"
@@ -804,12 +806,15 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
 
 
     do_overwrite = False
-    if overwrite or do_eval or no_confirm:
+    if overwrite:
         save_path = os.path.join(log_dir, overwrite)
         do_overwrite = True
     ii = 1
     while not do_overwrite and Path(save_path).exists() and not model_id=="test":
-        ans = input(f"The output directory {save_path} already exists, do you want to overwrite it? (y/n)")
+        if not no_confirm and not do_eval:
+            ans = input(f"The output directory {save_path} already exists, do you want to overwrite it? (y/n)")
+        else:
+            ans = "y"
         if ans == "y":
             do_overwrite = True 
             break
