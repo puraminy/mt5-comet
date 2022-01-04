@@ -126,6 +126,9 @@ def run(ctx, conf_path, base_conf, experiment,
                    sub_var = all_vars[1]
                    sub_var_name,sub_var_item_list = sub_var.split("=")
                    sub_var_item_list = sub_var_item_list.split("#")
+               mlog.info("Number of Experiments: %s", 
+                       len(main_var_item_list)*len(sub_var_item_list))
+               ii = 0
                for var_item in main_var_item_list:
                    if var_item == "none": var_item = ""
                    args[main_var_name] = var_item
@@ -136,10 +139,12 @@ def run(ctx, conf_path, base_conf, experiment,
                                    "_" + sub_var_item 
                            if sub_var_item == "none": sub_var_item = ""
                            args[sub_var_name] = sub_var_item
-                           args["output_name"] = args["overwrite"] = sub_output_name
+                           ii += 1
+                           args["output_name"] = str(ii) + "_" + sub_output_name
                            ctx.invoke(train, **args)
                    else:
-                       args["output_name"] = args["overwrite"] = var_output_name
+                       ii += 1
+                       args["output_name"] = str(ii) + "_" + var_output_name
                        ctx.invoke(train, **args)
         else:
             confs = sorted(glob.glob(f"{_path}/*"))
