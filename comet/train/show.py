@@ -362,7 +362,7 @@ def show_df(df):
                    sel_row = 0
         if char in ["y","Y"]:
             #yyyyyyyy
-           canceled, gcol,val = list_df_values(main_df, get_val=False)
+           canceled, gcol,val = list_df_values(df, get_val=False)
            back.append(df)
            if not canceled:
                if char == "Y":
