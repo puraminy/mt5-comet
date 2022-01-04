@@ -116,17 +116,17 @@ def run(ctx, conf_path, base_conf, experiment,
            output_name = experiment + "_" + base_conf + _extra
            # oooooooooooooo
            if not var:
-               args["output_name"] = args["overwrite"] = output_name
+               args["output_name"] = output_name
                ctx.invoke(train, **args)
            else:
                all_vars = var.split("--")
                main_var = all_vars[0]
                main_var_name,main_var_item_list = main_var.split("=")
-               main_var_item_list = main_var_item_list.split("$")
+               main_var_item_list = main_var_item_list.split("#")
                if len(all_vars) > 1:
                    sub_var = all_vars[1]
                    sub_var_name,sub_var_item_list = sub_var.split("=")
-                   sub_var_item_list = sub_var_item_list.split("$")
+                   sub_var_item_list = sub_var_item_list.split("#")
                mlog.info("Number of Experiments: %s", 
                        len(main_var_item_list)*len(sub_var_item_list))
                ii = 0
@@ -142,12 +142,10 @@ def run(ctx, conf_path, base_conf, experiment,
                            args[sub_var_name] = sub_var_item
                            ii += 1
                            args["output_name"] = str(ii) + "_" + sub_output_name
-                           args["overwrite"] = args["output_name"]
                            ctx.invoke(train, **args)
                    else:
                        ii += 1
                        args["output_name"] = str(ii) + "_" + var_output_name
-                       args["overwrite"] = args["output_name"]
                        ctx.invoke(train, **args)
         else:
             confs = sorted(glob.glob(f"{_path}/*"))
@@ -1003,6 +1001,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
         evaluate(model, tokenizer, myds[test_set], underlying_model_name, exp_info, val_records, gen_param, no_score=no_score, batch_size=gen_bs)  
         return
     accumulation_tiny_steps = 2 
+    batch_size = int(batch_size)
     if "gpt" in model_id:
         accumulation_tiny_steps = 1
     if batch_size >= 2:
