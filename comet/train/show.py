@@ -93,6 +93,9 @@ def show_df(df):
     back = []
     filter_df = main_df
     df["num_preds"] = df.groupby(["fid"])['pred_text1'].transform('nunique')
+    br_col = df.loc[: , "bert_score":"rouge_score"]
+    df['br_score'] = br_col.mean(axis=1)
+
     #wwwwwwwwww
     colors = ['blue','orange','green', 'red', 'purple', 'brown', 'pink','gray','olive','cyan']
     ax = None
@@ -285,9 +288,8 @@ def show_df(df):
             elif char == "G":
                 canceled, col = False, "fid"
             if not canceled:
-               g_cols = ["exp_id", "rouge_score", "bert_score", "steps", "method","model", "wrap", "frozen", "num_preds"]
-               df = (df.groupby(col).agg({"rouge_score":"mean","bert_score":"mean",
-                   "method":"first","model":"first", "wrap":"first", col:"first", "steps":"first", "frozen":"first", "num_preds":"first"})
+               g_cols = ["exp_id", "rouge_score", "bert_score", "br_score", "steps", "method","model", "wrap", "frozen", "num_preds"]
+               df = (df.groupby(col).agg({"rouge_score":"mean","bert_score":"mean","br_score": "mean", "method":"first","model":"first", "wrap":"first", col:"first", "steps":"first", "frozen":"first", "num_preds":"first"})
                  .rename(columns={col:'exp_id'})
                  .sort_values(by = ["rouge_score"], ascending=False)
                     )
@@ -340,7 +342,7 @@ def show_df(df):
             cols = get_cols(df,2)
             if cols:
                 df = df.sort_values(cols[1])
-                ax = df.plot(ax=ax, x=cols[0], y=cols[1])
+                ax = df.plot.scatter(ax=ax, x=cols[0], y=cols[1])
         elif char in ["f", "F"]:
             back.append(df)
             canceled, col, val = list_df_values(df, get_val=True)
@@ -371,17 +373,19 @@ def show_df(df):
                    df = df[eval(cond)]
                gi = 0 
                name = ""
-               for key, grp in df.groupby([gcol]):
-                     ax = grp.sort_values('steps').plot.line(ax=ax,linestyle="--",marker="o",  x='steps', y='rouge_score', label=key, color=colors[gi])
-                     gi += 1
-                     if gi > len(colors) - 1: gi = 0
-                     name += key + "_"
-               ax.set_xticks(df["steps"].unique())
-               ax.set_title(name)
-               if not "filter" in consts:
-                   consts["filter"] = []
-               consts["filter"].append("group by " + name)
-               char = "P"
+               canceled, y_col, _ = list_df_values(df, get_val=False)
+               if not canceled:
+                   for key, grp in df.groupby([gcol]):
+                         ax = grp.sort_values('steps').plot.line(ax=ax,linestyle="--",marker="o",  x='steps', y=y_col, label=key, color=colors[gi])
+                         gi += 1
+                         if gi > len(colors) - 1: gi = 0
+                         name += key + "_"
+                   ax.set_xticks(df["steps"].unique())
+                   ax.set_title(name)
+                   if not "filter" in consts:
+                       consts["filter"] = []
+                   consts["filter"].append("group by " + name)
+                   char = "P"
         if char == "P":
             name = ax.get_title()
             pname = rowinput("Plot name:", name[:30])
