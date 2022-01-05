@@ -832,9 +832,9 @@ class MyDataset(torch.utils.data.IterableDataset):
             if col in split_df:
                 split_df[col] = split_df[col].astype(str)
         if ignore_blanks: # and len(split_df) > num_rows:
-            split_df = split_df[split_df["input_text"].str.contains('___')==False]
-            #split_df = split_df[split_df["target_text"] != "none"]
-            dlog.info("*** Filtered for ignoring blanks ")
+            #split_df = split_df[split_df["input_text"].str.contains('___')==False]
+            split_df = split_df[split_df["target_text"] != "none"]
+            dlog.info("*** Filtered for ignoring blanks or nones ")
         elif only_blanks:
             split_df = split_df[split_df["input_text"].str.contains('___')==True]
             #split_df = split_df[split_df["target_text"] != "none"]

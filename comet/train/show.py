@@ -92,7 +92,7 @@ def show_df(df):
 
     back = []
     filter_df = main_df
-    df["num_preds"] = len(df["pred_text1"].unique())
+    df["num_preds"] = df.groupby(["fid"])['pred_text1'].transform('nunique')
     #wwwwwwwwww
     colors = ['blue','orange','green', 'red', 'purple', 'brown', 'pink','gray','olive','cyan']
     ax = None
