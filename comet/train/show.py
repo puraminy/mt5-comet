@@ -95,6 +95,9 @@ def show_df(df):
     df["num_preds"] = df.groupby(["fid"])['pred_text1'].transform('nunique')
     br_col = df.loc[: , "bert_score":"rouge_score"]
     df['br_score'] = br_col.mean(axis=1)
+    df['nr_score'] = df['rouge_score']
+    df['nr_score'] = np.where((df['bert_score'] > 0.4) & (df['nr_score'] < 0.1), df['bert_score'], df['rouge_score'])
+
 
     #wwwwwwwwww
     colors = ['blue','orange','green', 'red', 'purple', 'brown', 'pink','gray','olive','cyan']
@@ -288,8 +291,8 @@ def show_df(df):
             elif char == "G":
                 canceled, col = False, "fid"
             if not canceled:
-               g_cols = ["exp_id", "rouge_score", "bert_score", "br_score", "steps", "method","model", "wrap", "frozen", "num_preds"]
-               df = (df.groupby(col).agg({"rouge_score":"mean","bert_score":"mean","br_score": "mean", "method":"first","model":"first", "wrap":"first", col:"first", "steps":"first", "frozen":"first", "num_preds":"first"})
+               g_cols = ["exp_id", "rouge_score", "bert_score", "br_score","nr_score", "steps", "method","model", "wrap", "frozen", "num_preds"]
+               df = (df.groupby(col).agg({"rouge_score":"mean","bert_score":"mean","br_score": "mean", "nr_score":"mean", "method":"first","model":"first", "wrap":"first", col:"first", "steps":"first", "frozen":"first", "num_preds":"first"})
                  .rename(columns={col:'exp_id'})
                  .sort_values(by = ["rouge_score"], ascending=False)
                     )
@@ -342,7 +345,11 @@ def show_df(df):
             cols = get_cols(df,2)
             if cols:
                 df = df.sort_values(cols[1])
-                ax = df.plot.scatter(ax=ax, x=cols[0], y=cols[1])
+                x = cols[0]
+                y = cols[1]
+                #ax = df.plot.scatter(ax=ax, x=x, y=y)
+                ax = sns.regplot(df[x],df[y])
+
         elif char in ["f", "F"]:
             back.append(df)
             canceled, col, val = list_df_values(df, get_val=True)
