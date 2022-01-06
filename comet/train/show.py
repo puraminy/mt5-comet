@@ -406,6 +406,7 @@ def show_df(df):
                 else:
                     folder = os.path.join(base_dir, "plots")
                 Path(folder).mkdir(exist_ok=True, parents=True)
+                pname = pname.replace(" ", "_")
                 pname = os.path.join(folder, now + "_" + pname +  ".png")
                 fig = ax.get_figure()
                 fig.savefig(pname)
