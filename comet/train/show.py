@@ -375,7 +375,7 @@ def show_df(df):
            cols = get_cols(df, 2)
            back.append(df)
            if cols:
-               g_col = cols[0]
+               gcol = cols[0]
                y_col = cols[1]
                if char == "Y":
                    cond = get_cond(df, gcol, 10)
