@@ -859,8 +859,8 @@ class MyDataset(torch.utils.data.IterableDataset):
                 self.num_records = len(split_df)
                 dlog.info(f"NUM samples %s, %s", self.num_samples, len(split_df))
                 dlog.info(f"len after sampling:{len(split_df)}")
-        if self.split_name == "test":
-            self.split_df = split_df.sort_values(by="input_text")
+
+        self.split_df = split_df.sort_values(by="input_text")
         assert len(self.split_df) > 0, "Data frame is empty " + self.split_name + " " + str(self.num_samples)
         self.cats_num = cats_num = len(split_df["prefix"].unique())
         dlog.info("Num Samples: %s", self.num_samples)

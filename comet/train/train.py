@@ -754,7 +754,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     else:
         underlying_model_name = model_id
         
-    weight_decay = 0.005
+    weight_decay = 0.01
     shuffle = False
     shuffle_evaluation=False
     validation_size = val_samples 
@@ -766,7 +766,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
             learning_rate = 1e-5
     if frozen and learning_rate == 0: 
         if encoder_type == "lstm":
-            learning_rate = 0.01  
+            learning_rate = 0.05  
         elif encoder_type == "emb":
             learning_rate = 0.1  
         else:
@@ -938,6 +938,9 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     def load_data(split_names):
         myds = {}
         for split_name in split_names:
+            tails_per_head = int(samples_per_head)
+            if split_name == "test":
+                tails_per_head = 0
             df_path = split_path[split_name]
             split_df = pd.read_table(df_path)
             mlog.info("Path of dataset for %s %s", split_name, split_path[split_name])
@@ -963,7 +966,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
                                 targ_exclude,
                                 pred_tresh, nli_group, per_record, is_even, start, 
                                 sampling, ex_type,
-                                samples_per_head, save_ds_path[split_name]
+                                tails_per_head, save_ds_path[split_name]
                         )
         return myds
 

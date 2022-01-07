@@ -203,7 +203,7 @@ def show_df(df):
                 if new_val:
                     df.at[sel_row, edit_col] = new_val
                     char = "SS"
-        elif char in ["A"]:
+        elif char in ["%"]:
             canceled, col, val = list_df_values(df, get_val=False)
             if not canceled:
                 if not col in sel_cols:
@@ -284,9 +284,9 @@ def show_df(df):
                       merge(df.groupby(['fid','prefix','input_text'],as_index=False)[group_col].agg('<br />'.join))
             if not group_col in info_cols: info_cols.append(group_col)
             consts["filter"].append("group predictions")
-        elif char in ["G", "L"]:
+        elif char in ["G", "A"]:
             back.append(df)
-            if char ==  "L":
+            if char ==  "A":
                 canceled, col, _ = list_df_values(df, get_val=False)
             elif char == "G":
                 canceled, col = False, "fid"
@@ -372,27 +372,27 @@ def show_df(df):
                    sel_row = 0
         if char in ["y","Y"]:
             #yyyyyyyy
-           canceled, gcol,val = list_df_values(df, get_val=False)
+           cols = get_cols(df, 2)
            back.append(df)
-           if not canceled:
+           if cols:
+               g_col = cols[0]
+               y_col = cols[1]
                if char == "Y":
                    cond = get_cond(df, gcol, 10)
                    df = df[eval(cond)]
                gi = 0 
                name = ""
-               canceled, y_col, _ = list_df_values(df, get_val=False)
-               if not canceled:
-                   for key, grp in df.groupby([gcol]):
-                         ax = grp.sort_values('steps').plot.line(ax=ax,linestyle="--",marker="o",  x='steps', y=y_col, label=key, color=colors[gi])
-                         gi += 1
-                         if gi > len(colors) - 1: gi = 0
-                         name += key + "_"
-                   ax.set_xticks(df["steps"].unique())
-                   ax.set_title(name)
-                   if not "filter" in consts:
-                       consts["filter"] = []
-                   consts["filter"].append("group by " + name)
-                   char = "P"
+               for key, grp in df.groupby([gcol]):
+                     ax = grp.sort_values('steps').plot.line(ax=ax,linestyle="--",marker="o",  x='steps', y=y_col, label=key, color=colors[gi])
+                     gi += 1
+                     if gi > len(colors) - 1: gi = 0
+                     name += key + "_"
+               ax.set_xticks(df["steps"].unique())
+               ax.set_title(name)
+               if not "filter" in consts:
+                   consts["filter"] = []
+               consts["filter"].append("group by " + name)
+               char = "P"
         if char == "P":
             name = ax.get_title()
             pname = rowinput("Plot name:", name[:30])
@@ -512,10 +512,13 @@ def show_df(df):
                     vals = df[col].unique()
                     d = {}
                     for v in vals:
-                        rep = rowinput(v + "=" ,v)
+                        rep = rowinput(str(v) + "=" ,v)
                         if not rep:
                             break
-                        d[v] = rep
+                        if type(v) == int:
+                            d[v] = int(rep)
+                        else:
+                            d[v] = rep
                     if rowinput("Apply?") == "y":
                         if "@" in cmd:
                             df = df.replace(d)
@@ -659,6 +662,8 @@ def biginput(prompt=":", default=""):
     return _comment
 
 def rowinput(prompt=":", default=""):
+    prompt = str(prompt)
+    default = str(default)
     cmd, _ = minput(cmd_win, 0, 1, prompt, default=default, all_chars=True)
     if cmd == "<ESC>":
         cmd = ""
