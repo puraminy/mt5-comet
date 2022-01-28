@@ -44,7 +44,7 @@ def cli():
 @click.option(
     "--base_conf",
     "-bc",
-    default="test",
+    default="base",
     type=str,
     help=""
 )
@@ -104,6 +104,9 @@ def run(ctx, conf_path, base_conf, experiment,
            if Path(conf).exists():
                with open(conf, 'r') as f:
                    args = json.load(f) 
+           else:
+               mlog.info(f"%s doesn't exists ...", conf)
+               return
            args["config"] = False
            args["output_name"] = "" 
            spath = os.path.join(pretPath, experiment)
@@ -675,8 +678,15 @@ def run(ctx, conf_path, base_conf, experiment,
     is_flag=True,
     help="Adjust some settings like wrapping or freezing the model according to the method"
 )
+@click.option(
+    "--repeat",
+    "-rep",
+    default=1,
+    type=int,
+    help=""
+)
 def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, test_set, 
-         val_samples, test_samples, load_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, no_score, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method):
+         val_samples, test_samples, load_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, no_score, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat):
 
     #%% some hyper-parameters
 
@@ -966,7 +976,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
                                 targ_exclude,
                                 pred_tresh, nli_group, per_record, is_even, start, 
                                 sampling, ex_type,
-                                tails_per_head, save_ds_path[split_name]
+                                tails_per_head, save_ds_path[split_name], int(repeat)
                         )
         return myds
 
@@ -975,24 +985,22 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
         val_records = myds[test_set].num_records
         train_records = 0
     else:
-        myds = load_data(["train", "validation", "sample"])
-        samples_iter = iter(myds["sample"])
-        _sample = True
-        generate_samples["sample"] = []
-        dlog.info("----------- SAMPLES -------------")
-        while _sample:
-            _sample = next(samples_iter, None)
-            dlog.info(_sample)
-            if _sample:
-                generate_samples["sample"].append((_sample[0], _sample[1]))
-        dlog.info("--------------------------------")
-        mlog.info("Preparing samples: %s ", len(generate_samples["sample"]))
-        train_records = myds["train"].num_records
+        ds_list = ["train", "validation"]
+        #ds_list += ["sample"]
+        myds = load_data(ds_list)
+        if "sample" in ds_list:
+            samples_iter = iter(myds["sample"])
+            _sample = True
+            generate_samples["sample"] = []
+            dlog.info("----------- SAMPLES -------------")
+            while _sample:
+                _sample = next(samples_iter, None)
+                dlog.info(_sample)
+                if _sample:
+                    generate_samples["sample"].append((_sample[0], _sample[1]))
+            dlog.info("--------------------------------")
+            mlog.info("Preparing samples: %s ", len(generate_samples["sample"]))
 
-    for logger in [mlog, clog, vlog]:
-        logger.info("Train records:"  + str(train_records))
-    if not do_eval:
-        assert train_records != 0, "There is no data to train!!!!!!!!"
     if model_id == "test":
         return
     mlog.info("len tokenizer %s", len(tokenizer))
@@ -1004,7 +1012,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
                     "method":method, 
                     "wrap": w_str + ("-" + encoder_type if wrap else ""),
                     "frozen":f_str, 
-                    "steps":train_records,
+                    "steps":train_samples,
                     "epochs":epochs_num,
                     "date":extra}
     exp_info["eval"] = do_eval
@@ -1013,21 +1021,6 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
         model.to(device=device)
         evaluate(model, tokenizer, myds[test_set], underlying_model_name, exp_info, val_records, gen_param, no_score=no_score, batch_size=gen_bs)  
         return
-    accumulation_tiny_steps = 2 
-    batch_size = int(batch_size)
-    if "gpt" in model_id:
-        accumulation_tiny_steps = 1
-    if batch_size >= 2:
-        node_batch_size = batch_size//accumulation_tiny_steps
-    else:
-        accumulation_tiny_steps = 1
-        node_batch_size = 1
-
-    iterations = train_records//batch_size
-    
-    for logger in [mlog, tlog]:
-        logger.info("Iterations:"  + str(iterations))
-    warm_up_steps = 0.002*iterations
     #%% tokenizer & model
     allowed_out_token_length = len(tokenizer)
     def clip_logits(logits):
@@ -1042,6 +1035,16 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
     #%% Prepare training data
     if start > 0 and training_round == 1:
         training_round += 1
+
+    accumulation_tiny_steps = 2 
+    batch_size = int(batch_size)
+    if "gpt" in model_id:
+        accumulation_tiny_steps = 1
+    if batch_size >= 2:
+        node_batch_size = batch_size//accumulation_tiny_steps
+    else:
+        accumulation_tiny_steps = 1
+        node_batch_size = 1
 
 
 
@@ -1092,6 +1095,16 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
         batch_size=node_batch_size,shuffle=shuffle,collate_fn=data_collator, num_workers=num_workers)
     dev_dataloader = torch.utils.data.DataLoader(myds['validation'],
         batch_size=node_batch_size,shuffle=shuffle,collate_fn=data_collator)
+    train_iter = iter(train_dataloader)
+    train_records = myds["train"].num_records
+    assert train_records != 0, "There is no data to train!!!!!!!!"
+    for logger in [mlog, clog, vlog]:
+        logger.info("Train records: %s", train_records)
+    iterations = train_records//batch_size
+    
+    for logger in [mlog, tlog]:
+        logger.info("Iterations:"  + str(iterations))
+    warm_up_steps = 0.002*iterations
     # %% prepare for training
     sw = SummaryWriter(save_path, flush_secs=1)
     no_decay = ['bias', 'LayerNorm.weight']
@@ -1206,8 +1219,9 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
         mlog.info("Training... %s", save_path)
     epochs_num = int(epochs_num)
     for epoch in range(epochs_num):
-        pbar = tqdm(total=iterations, position=0, leave=True) 
-        train_iter = iter(train_dataloader)
+        pbar = tqdm(total = iterations, position=0, leave=True) #,dynamic_ncols=True)
+        if epoch > 0:
+            train_iter = iter(train_dataloader)
         mlog.info("Saving train data set...")
         myds["train"].save()
         mlog.info(f"============== epoch {epoch}\n")

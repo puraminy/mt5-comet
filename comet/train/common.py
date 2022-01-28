@@ -335,6 +335,10 @@ def fill_prompt(text, rel, place_holder, counter = 0, lang=""):
                 prompt += " " + token
         elif _pholder == "{tokens}": 
             prompt = relation_natural_mappings[rel]["tokens"]
+        elif _pholder == "{tokens-rand}": 
+            permute = relation_natural_mappings[rel]["tokens"].split()
+            random.shuffle(permute)
+            prompt = " ".join(permute)
         else:
             mlog.info("************** using tokens of pholder %s",_pholder)
             prompt = place_holder
@@ -440,6 +444,7 @@ def fill_consts(template, ex_temp, context, row, rows=None, mask=-1, method=""):
     text = fill_prompt(text, rel, "{rel_i}")
     text = fill_prompt(text, "com", "{com_i}")
     text = fill_prompt(text, rel, "{tokens}")
+    text = fill_prompt(text, rel, "{tokens-rand}")
     if "{examples}" in text:
         examples = ""
         assert rows is not None and len(rows) > 0, "Since there are examples in template, rows must be provided"
@@ -456,6 +461,7 @@ def fill_consts(template, ex_temp, context, row, rows=None, mask=-1, method=""):
             example = fill_const_for_rel(example, _row)
             example = fill_prompt(example, rel, "{rel_i}")
             example = fill_prompt(example, rel, "{tokens}")
+            example = fill_prompt(example, rel, "{tokens-rand}")
             for key,value in _row.items():
                 val = str(value)
                 if "fa" in method and "_fa" in key:
@@ -714,6 +720,9 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
        elif method == "unsup-tokens" or method  == "unsup-tokens-wrap":
            qtemp = "{event} {tokens} {ph}"
            anstemp = "{ph} {resp} {end}"
+       elif method == "unsup-tokens-rand" or method  == "unsup-tokens-rand-wrap":
+           qtemp = "{event} {tokens-rand} {ph}"
+           anstemp = "{ph} {resp} {end}"
        elif method == "sup-tokens-start":
            qtemp = "{tokens} {event}"
            anstemp = "{resp} {end}"
@@ -798,7 +807,7 @@ class MyDataset(torch.utils.data.IterableDataset):
             targ_exclude="",
             pred_tresh=0,
             nli_group="all", per_record=False, is_even=False, start=0, 
-            sampling=0, ex_type="",  samples_per_head=0, save_ds_path=""): 
+            sampling=0, ex_type="",  samples_per_head=0, save_ds_path="", repeat=1): 
         super(MyDataset).__init__()
         self.flat_data = []
         self.data_split = {}
@@ -888,6 +897,8 @@ class MyDataset(torch.utils.data.IterableDataset):
         self.old_input = ""
         self.si = 0
         self.example_counter = 0
+        self.repeat = repeat
+        mlog.info("Repeating for %s ", self.repeat)
         self.ex_df = pd.DataFrame()
         self._sels = self.sel_rels.copy()
         dlog.info("sels: %s", self._sels)
@@ -930,6 +941,10 @@ class MyDataset(torch.utils.data.IterableDataset):
                 _iter = iter(self.fill_all_data(iter_start, iter_end))
             else:
                 _iter = iter(self.fill_data(iter_start, iter_end))
+                mlog.info("Iter start: %s", iter_start)
+                mlog.info("Iter end: %s", iter_end)
+                mlog.info("Len of flat data: %s", len(self.flat_data))
+        self.num_records = len(self.flat_data)
         self.example_counter = 0
         return map(self.preproc, _iter)
 
@@ -1027,7 +1042,8 @@ class MyDataset(torch.utils.data.IterableDataset):
         flat_data = []
         if iter_end < 0:
             iter_end = self.num_samples
-        kk = 0 
+        kk = 0
+        jj = 0
         dlog.info("==========NNNNN========= SPLIT: %s", self.split_name)
         dlog.info("get data from %s to %s", iter_start, iter_end)
         dlog.info("total rows: %s", len(self.split_df))
@@ -1116,7 +1132,9 @@ class MyDataset(torch.utils.data.IterableDataset):
                         self.flat_data.extend(flat_data)
                         return flat_data
                     extra = {"inp":inp, "targ_col":targ_col, "rel":rel}
-                    flat_data.append((event, resp, extra, d, context_df, index))
+                    for rr in range(self.repeat): 
+                        flat_data.append((event, resp, extra, d, context_df, index))
+                        jj += 1
                     if show_progress:
                         pbar.update()
                     kk += 1

@@ -39,7 +39,8 @@ def main(fname, path, load_model):
     pd.options.mode.chained_assignment = None
     doc = ""
     input_text = ""
-    df = pd.read_table(f"/home/pouramini/results/sel/{fname}.tsv", low_memory=False)
+    base_dir = "/home/pouramini/results/sel/"
+    df = pd.read_table(base_dir + f"{fname}.tsv", low_memory=False)
     df = df[["input_text","date", "fid", "method","prefix","pred_text1","model", "wrap","target_text", "rouge_score", "bert_score"]]
     df["target_text"] = df["target_text"].astype(str)
     score_col = "rouge_score"
@@ -57,6 +58,12 @@ def main(fname, path, load_model):
     sort = "rouge_score"
     filt = ""
     gen_token=""
+    sel_path = os.path.join(base_dir, "share", "results_sel.tsv")
+    if Path(sel_path).exists():
+        sel_df = pd.read_table(sel_path)
+    else:
+        sel_df = pd.DataFrame(columns = df.columns)
+    top_row = None
     #wwwwwwwww
     while doc != "q":
         print(colored("? (help) --------------------------------------","red"))
@@ -68,6 +75,7 @@ def main(fname, path, load_model):
             rand_inp = str(df.iloc[r]["input_text"])
             filt=""
             filt_preds = None
+            to_row = None
         if inp.isnumeric():
             inp = list(relation_natural_mappings.keys())[int(inp)] 
         if inp.startswith("?") or inp == "help":
@@ -84,6 +92,10 @@ def main(fname, path, load_model):
                         print("")
                 print("")
             continue
+        if inp == "S" and top_row is not None:
+            sel_df.append(top_row)
+            sel_df.to_csv(sel_path, index=False, sep="\\t")
+
         if inp.startswith("~"):
             gen_token = inp[1:]
             inp = "!"
@@ -128,9 +140,11 @@ def main(fname, path, load_model):
         if inp != "q" and filt_preds is not None:
             filt_preds.sort_values(by=sort,ascending=False,inplace=True)
             first = True
+            top_row = None
             for idx, row in filt_preds.iterrows():
                 if first:
                     first = False
+                    top_row = row
                     print(colored(row["target_text"],"blue"))
                 print("{:<60}:{:<4} {:<4} {}".format(
                     #colored(row["model"]+"|"+row["method"]+"|"+row["wrap"],'yellow'),
