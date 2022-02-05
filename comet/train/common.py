@@ -738,8 +738,11 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
        elif method == "unsup-wrap-dec":
            qtemp = "{rel_i_start} {gen_start} {event} {rel_i_end} {gen_end} {ph}"
            anstemp = "{ph} {dec_token} {resp} {end}"
+       elif method == "unsup-wrap-2h":
+           qtemp = "{rel_i} {event} {rel_i} {ph}"
+           anstemp = "{ph} {resp} {end}"
        elif method == "unsup-wrap-2":
-           qtemp = "{rel_i} {gen_start} {event} {rel_i} {gen_end} {ph}"
+           qtemp = "{rel_i} {event} {ph} {rel_i} "
            anstemp = "{ph} {resp} {end}"
        elif method == "unsup-wrap-3":
            qtemp = "{rel_i} {gen_start} {event} {rel_i} {gen_end} {ph}"

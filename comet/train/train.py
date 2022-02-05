@@ -119,7 +119,8 @@ def run(ctx, conf_path, base_conf, experiment,
                 _key,_val = _item.split("=")
                 _key=_key.strip("--")
                 if not _key in ["no_confirm", "follow_method"]:
-                    _extra += "_" + (_val if not str(_val)=="True" else _key)
+                    _ks = "".join([k[0] for k in _key.split("_")])
+                    _extra += "_" + (_ks + "_" + _val if not str(_val)=="True" else _key)
                 mlog.info("set %s = %s", _key, _val)
                 args[_key]= _val
            output_name = experiment + "_" + base_conf + _extra
