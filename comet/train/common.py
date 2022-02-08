@@ -597,6 +597,9 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
        elif method == "unsup-wrap-nat":
            qtemp = "{rel_i} {event} {rel_natural} {ph}" 
            anstemp = "{ph} {resp} {end}"
+       elif method == "unsup-wrap-nat-mid":
+           qtemp = "{event} {rel_i} {rel_natural} {rel_i} {ph}" 
+           anstemp = "{ph} {resp} {end}"
        elif method == "unsup-wrap-lang":
            qtemp = "{rel_i} {event} {rel_lang_i} {ph}" 
            anstemp = "{ph} {resp} {end}"

@@ -323,6 +323,13 @@ def run(ctx, conf_path, base_conf, experiment,
     help="Based on the method (sup, unsup, context-en, ... ) templates for query and answer are created."
 )
 @click.option(
+    "--val_method",
+    "-vmt",
+    default="",
+    type=str,
+    help="Based on the method (sup, unsup, context-en, ... ) templates for query and answer are created."
+)
+@click.option(
     "--pred_tresh",
     "-pred_tresh",
     default=0,
@@ -686,8 +693,7 @@ def run(ctx, conf_path, base_conf, experiment,
     type=int,
     help=""
 )
-def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, test_set, 
-         val_samples, test_samples, load_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, no_score, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat):
+def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, no_score, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat):
 
     #%% some hyper-parameters
 
@@ -946,6 +952,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
         split_lang["sample"] = lang
         split_lang["test"] = lang
 
+    if not val_method:
+        val_method = method
     def load_data(split_names):
         myds = {}
         for split_name in split_names:
@@ -965,9 +973,12 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, train_samples, t
             inp_include, inp_exclude = filter_inputs(include, exclude, inp_lang)
             targ_include, targ_exclude = filter_inputs(include, exclude, targ_lang)
             mlog.info("Creating dataset for %s", split_name)
+            _method = method
+            if split_name == "test":
+                _method = val_method
             # dddddddddddddd
             myds[split_name] = MyDataset(split_df, split_name,
-                                method, prompt_pos, rel_filter,
+                                _method, prompt_pos, rel_filter,
                                 num_samples[split_name], 
                                 ignore_blanks,
                                 only_blanks,
