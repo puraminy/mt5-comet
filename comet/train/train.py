@@ -4,15 +4,7 @@ import itertools, collections
 import shutil
 from comet.train.eval import *
 from transformers.optimization import Adafactor, AdafactorSchedule
-from transformers import (
-    T5ForConditionalGeneration, T5TokenizerFast, 
-    AutoModelForSeq2SeqLM, 
-    MT5ForConditionalGeneration, MT5TokenizerFast, AdamW, AddedToken,
-    GPT2LMHeadModel, GPT2Tokenizer,
-    DataCollatorForLanguageModeling,
-    AutoTokenizer,
-    get_linear_schedule_with_warmup
-)
+from comet.train.model import *
 import torch
 import re
 import json
@@ -591,7 +583,7 @@ def run(ctx, conf_path, base_conf, experiment,
 @click.option(
     "--encoder_type",
     "-et",
-    default="lstm",
+    default="mlp",
     type=str,
     help=""
 )
@@ -691,9 +683,23 @@ def run(ctx, conf_path, base_conf, experiment,
     "-rep",
     default=1,
     type=int,
-    help=""
+    help="How many a training example must be repeated"
 )
-def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, no_score, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat):
+@click.option(
+    "--trial",
+    "-try",
+    default=1,
+    type=int,
+    help="Repeating the same experiment with different tirals"
+)
+@click.option(
+    "--fz_parts",
+    "-fzl",
+    default="",
+    type=str,
+    help="Layers to be freezed"
+)
+def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, no_score, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts):
 
     #%% some hyper-parameters
 
@@ -976,6 +982,9 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
             _method = method
             if split_name == "test":
                 _method = val_method
+            _repeat = int(repeat)
+            if split_name != "train":
+                _repeat = 1
             # dddddddddddddd
             myds[split_name] = MyDataset(split_df, split_name,
                                 _method, prompt_pos, rel_filter,
@@ -988,7 +997,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
                                 targ_exclude,
                                 pred_tresh, nli_group, per_record, is_even, start, 
                                 sampling, ex_type,
-                                tails_per_head, save_ds_path[split_name], int(repeat)
+                                tails_per_head, save_ds_path[split_name], _repeat
                         )
         return myds
 
@@ -998,7 +1007,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
         train_records = 0
     else:
         ds_list = ["train", "validation"]
-        #ds_list += ["sample"]
+        ds_list += ["sample"]
         myds = load_data(ds_list)
         if "sample" in ds_list:
             samples_iter = iter(myds["sample"])
@@ -1015,6 +1024,31 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
 
     if model_id == "test":
         return
+    if not fz_parts:
+        modules_to_freeze = model
+    else:
+        modules_to_freeze = []
+
+    _parts = fz_parts.split("@")
+    if not "@" in fz_parts:
+        enc_parts = _parts
+        freeze_self_att(modules_to_freeze, enc_parts, model.encoder)
+    else:
+        enc_parts = _parts[0]
+        dec_parts = _parts[1]
+        freeze_self_att(modules_to_freeze, enc_parts, model.encoder)
+        freeze_self_att(modules_to_freeze, dec_parts, model.decoder)
+    if len(_parts) == 3:
+        decx_parts = _parts[2]
+        freeze_cross_att(modules_to_freeze, decx_parts, model.decoder)
+
+    def freeze(modules_to_freeze, fz=False):
+        for module in modules_to_freeze:
+            for param in module.parameters():
+                param.requires_grad = fz  # Actual freezing operation
+    if frozen:
+        freeze(modules_to_freeze)
+
     mlog.info("len tokenizer %s", len(tokenizer))
     my_specials = [x for x in tokenizer.additional_special_tokens if not "<extra_id"  in x]
     mlog.info("list of spcial tokens: %s", my_specials)
@@ -1026,9 +1060,10 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
                     "frozen":f_str, 
                     "steps":train_samples,
                     "epochs":epochs_num,
+                    "trial":trial,
                     "date":extra}
     exp_info["eval"] = do_eval
-    if do_eval or (not wrap and frozen):
+    if do_eval or (not wrap and frozen and modules_to_freeze is model):
         mlog.info("Evaluating the model...")
         model.to(device=device)
         evaluate(model, tokenizer, myds[test_set], underlying_model_name, exp_info, val_records, gen_param, no_score=no_score, batch_size=gen_bs)  
@@ -1141,9 +1176,6 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
         model.resize_token_embeddings(len(tokenizer))
         model.to(device=device)
 
-    if frozen:
-        for p in model.parameters():
-            p.requires_grad = False 
 
     if wrap:
         #model.get_input_embeddings().weight.requires_grad = False
@@ -1225,9 +1257,9 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
     #%% tttttt
     mlog.info("batch size: %s", batch_size)
     mlog.info("node batch size: %s", node_batch_size)
-    if epochs_num == 0 or not wrap and frozen:
+    if epochs_num == 0 or (not wrap and frozen and modules_to_freeze is model):
         mlog.info("Skip training...")
-    elif step <= iterations and (wrap or not frozen):
+    elif step <= iterations and (wrap or not frozen or modules_to_freeze is not model):
         mlog.info("Training... %s", save_path)
     epochs_num = int(epochs_num)
     for epoch in range(epochs_num):
@@ -1245,7 +1277,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
             consume(train_iter, train_start)
             pbar.update(train_start)
             step = train_start
-        while step < iterations-1 and (wrap or not frozen):
+        while step < iterations-1:
             try:
                 if cycle > 0 and (step % cycle == 0 and step > 0): #validation
                     with torch.no_grad():
@@ -1307,15 +1339,13 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
                 if unfreez_step > 0 and step > unfreez_step and froze:
                     mlog.info("unfreezing the model")
                     unfreez_step = 0
-                    for p in model.parameters():
-                        p.requires_grad = True # Unfreezing
+                    freeze(modules_to_freeze, True)
                     last_lr = scheduler.get_last_lr()[0]
                     optimizer, scheduler = get_optimizer(model, last_lr, wrap, opt_type)
                 if freez_step > 0 and step > freez_step and not frozen:
                     mlog.info("freezing the model")
                     freez_step = 0
-                    for p in model.parameters():
-                        p.requires_grad = False # freezing
+                    freeze(modules_to_freeze)
                     last_lr = scheduler.get_last_lr()[0]
                     optimizer, scheduler = get_optimizer(model, last_lr, wrap, opt_type)
                 model.train()

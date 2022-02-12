@@ -291,14 +291,18 @@ def show_df(df):
             elif char == "G":
                 canceled, col = False, "fid"
             if not canceled:
-               g_cols = ["exp_id", "rouge_score", "bert_score", "br_score","nr_score", "steps", "method","model", "wrap", "frozen", "num_preds"]
-               df = (df.groupby(col).agg({"rouge_score":"mean","bert_score":"mean","br_score": "mean", "nr_score":"mean", "method":"first","model":"first", "wrap":"first", col:"first", "steps":"first", "frozen":"first", "num_preds":"first"})
+               g_cols = ["exp_id", "num_preds", "rouge_score", "bert_score", "br_score","nr_score", "steps", "method","model", "wrap", "frozen"]
+               df = (df.groupby(col).agg({"num_preds":"first", "rouge_score":"mean","bert_score":"mean","br_score": "mean", "nr_score":"mean", "method":"first","model":"first", "wrap":"first", col:"first", "steps":"first", "frozen":"first"})
                  .rename(columns={col:'exp_id'})
                  .sort_values(by = ["rouge_score"], ascending=False)
                     )
                #df = df.reset_index()
                sel_cols = order(sel_cols, g_cols)
                consts["filter"].append("group experiments")
+        elif char == "H":
+            exp=df.iloc[sel_row]["exp_id"]
+            consts["exp"] = exp
+            df = main_df["exp_id = exp"]
         elif char == "D":
             canceled, col,val = list_df_values(main_df, get_val=False)
             if not canceled:

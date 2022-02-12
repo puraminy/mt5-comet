@@ -211,8 +211,8 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words
     prompt_encoders = []
     offsets = []
     tokenize_relations(tokenizer)
-    for rel in all_rels:
-        fill_sample(method, rel)
+    #for rel in all_rels:
+    #    fill_sample(method, rel)
 
     for rel, prompt_tokens in encoder_prompts.items():
         mlog.info("******************* Wrapping model for %s", rel)
@@ -664,10 +664,10 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            qtemp = "{examples} {gen}"
            ex_qtemp = "{gen} {input_text_fa} {end} \n"
            anstemp = "{event} {end}"
-       elif method == "unsup-wrap-n-example":
-           qtemp = "{examples} {rel_i} {ph}"
-           ex_qtemp = "{rel_i} {input_text} {end} \n"
-           anstemp = "{ph} {event} {end}"
+       elif method == "unsup-wrap-nat-example":
+           qtemp = "{examples} {event} {rel_i} {ph}"
+           ex_qtemp = "{input_text} {rel_natural} {target_text}. {end} \n"
+           anstemp = "{ph} {resp} {end}"
        elif method == "gpt-n-example":
            qtemp = "{examples} {event} {rel_natural}"
            ex_qtemp = "{input_text} {rel_natural} {target_text} {end}"
@@ -1089,7 +1089,9 @@ class MyDataset(torch.utils.data.IterableDataset):
                     dlog.info("!!!!!!!!! just for including in conext rows %s", len(context_rows))
                     continue
             elif self.ex_type == "same_rel":
-                context_df = self.split_df[self.split_df["prefix"] == rel].sample(n=self.sampling)
+                context_df = self.split_df[self.split_df["prefix"] == rel].sample(n=int(self.sampling))
+                clog.info("SAME rel for example type %s | %s ", self.sampling, len(context_df))
+
             elif self.ex_type:
                 raise ValueError("Ex_type is invalid:" + self.ex_type)
             eng_inp = d["input_text"]
