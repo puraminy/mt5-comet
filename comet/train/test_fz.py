@@ -11,6 +11,7 @@ from transformers import (
 
 model = T5ForConditionalGeneration.from_pretrained("/home/pouramini/pret/t5-base/")
 print(model)
+print(len(model.encoder.block))
 # All modules in the 
 modules_to_freeze = [model.encoder.block[i].layer[0].SelfAttention.k for i in range(len(model.encoder.block))]
 modules_to_freeze.extend([model.encoder.block[i].layer[0].SelfAttention.v for i in range(len(model.encoder.block))])
@@ -23,6 +24,6 @@ for module in modules_to_freeze:
     for param in module.parameters():
         param.requires_grad = False  # Actual freezing operation
 
-for param in model.parameters():
-    print(param.name, "---", param.requires_grad)
+#for param in model.parameters():
+#    print(param.name, "---", param.requires_grad)
 

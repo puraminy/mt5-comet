@@ -104,6 +104,7 @@ def show_df(df):
     ax = None
     open_dfnames = [dfname]
     prev_cahr = ""
+    sel_exp = ""
     while ch != ord("q"):
         text_win.erase()
         left = min(left, max_col  - width)
@@ -132,6 +133,7 @@ def show_df(df):
                if not sel_col in row:
                    continue
                content = str(row[sel_col])
+               content = content.strip()
                if "score" in sel_col:
                    content = "{:.2f}".format(float(content))
                _info = sel_col + ":" + content
@@ -299,10 +301,34 @@ def show_df(df):
                #df = df.reset_index()
                sel_cols = order(sel_cols, g_cols)
                consts["filter"].append("group experiments")
-        elif char == "H":
+        elif char == "h":
+            back.append(df)
             exp=df.iloc[sel_row]["exp_id"]
+            sel_exp = exp
             consts["exp"] = exp
-            df = main_df["exp_id = exp"]
+            df = main_df[main_df["fid"] == exp]
+            df = df[["fid","pred_text1","target_text","rouge_score","input_text", "prefix"]]
+            df = df.sort_values(by="rouge_score")
+            df = df.groupby("pred_text1").agg({
+                "rouge_score":"first","pred_text1":"first", "fid":"count", 
+                "input_text":"first", "target_text":"first", "prefix":"first"})
+            g_cols = ["fid", "pred_text1","target_text","prefix", "input_text"]
+            df = df.sort_values("fid", ascending=False)
+            sel_cols = order(sel_cols, g_cols)
+            col_widths["fid"]=5
+            col_widths["pred_text1"]=40
+            col_widths["target_text"]=40
+            col_widths["prefix"]=40
+            col_widths["input_text"]=140
+
+        elif char == "H":
+            if sel_exp:
+                back.append(df)
+                pred=df.iloc[sel_row]["pred_text1"]
+                consts["pred"] =pred 
+                df = main_df[(main_df["fid"] == sel_exp) & (main_df["pred_text1"] == pred)]
+                df = df[["pred_text1","target_text","rouge_score","input_text", "prefix"]]
+                df = df.sort_values(by="rouge_score", ascending=False)
         elif char == "D":
             canceled, col,val = list_df_values(main_df, get_val=False)
             if not canceled:

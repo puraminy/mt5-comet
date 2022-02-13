@@ -1024,20 +1024,20 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
 
     if model_id == "test":
         return
-    if not fz_parts:
-        modules_to_freeze = model
+    if not fz_parts or fz_parts == "all":
+        modules_to_freeze = [model]
     else:
         modules_to_freeze = []
 
     _parts = fz_parts.split("@")
     if not "@" in fz_parts:
-        enc_parts = _parts
+        enc_parts = _parts[0]
         freeze_self_att(modules_to_freeze, enc_parts, model.encoder)
     else:
         enc_parts = _parts[0]
         dec_parts = _parts[1]
         freeze_self_att(modules_to_freeze, enc_parts, model.encoder)
-        freeze_self_att(modules_to_freeze, dec_parts, model.decoder)
+        freeze_self_att(modules_to_freeze, dec_parts, model.decoder, True)
     if len(_parts) == 3:
         decx_parts = _parts[2]
         freeze_cross_att(modules_to_freeze, decx_parts, model.decoder)
