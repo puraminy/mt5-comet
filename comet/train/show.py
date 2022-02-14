@@ -302,18 +302,20 @@ def show_df(df):
                sel_cols = order(sel_cols, g_cols)
                consts["filter"].append("group experiments")
         elif char == "h":
+            left = 0
             back.append(df)
             exp=df.iloc[sel_row]["exp_id"]
+            sel_row = 0
             sel_exp = exp
             consts["exp"] = exp
             df = main_df[main_df["fid"] == exp]
             df = df[["fid","pred_text1","target_text","rouge_score","input_text", "prefix"]]
             df = df.sort_values(by="rouge_score")
-            df = df.groupby("pred_text1").agg({
+            df = df.groupby(["pred_text1","prefix"]).agg({
                 "rouge_score":"first","pred_text1":"first", "fid":"count", 
-                "input_text":"first", "target_text":"first", "prefix":"first"})
+                "input_text":"first", "target_text":"first", "prefix":"first"}).reset_index(drop=True)
             g_cols = ["fid", "pred_text1","target_text","prefix", "input_text"]
-            df = df.sort_values("fid", ascending=False)
+            df = df.sort_values(by=["pred_text1","fid"], ascending=True)
             sel_cols = order(sel_cols, g_cols)
             col_widths["fid"]=5
             col_widths["pred_text1"]=40
@@ -322,9 +324,11 @@ def show_df(df):
             col_widths["input_text"]=140
 
         elif char == "H":
+            left = 0
             if sel_exp:
                 back.append(df)
                 pred=df.iloc[sel_row]["pred_text1"]
+                sel_row = 0
                 consts["pred"] =pred 
                 df = main_df[(main_df["fid"] == sel_exp) & (main_df["pred_text1"] == pred)]
                 df = df[["pred_text1","target_text","rouge_score","input_text", "prefix"]]

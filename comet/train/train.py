@@ -135,13 +135,13 @@ def run(ctx, conf_path, base_conf, experiment,
                ii = 0
                for var_item in main_var_item_list:
                    var_output_name = output_name + "_" + main_var_name + "_" + var_item 
-                   if var_item == "none": var_item = ""
+                   if var_item == "null": var_item = ""
                    args[main_var_name] = var_item
                    if len(all_vars) > 1:
                        for sub_var_item in sub_var_item_list:
                            sub_output_name = var_output_name + "_" + sub_var_name + \
                                    "_" + sub_var_item 
-                           if sub_var_item == "none": sub_var_item = ""
+                           if sub_var_item == "null": sub_var_item = ""
                            args[sub_var_name] = sub_var_item
                            ii += 1
                            args["output_name"] = str(ii) + "_" + sub_output_name
@@ -727,6 +727,10 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
         else:
             save_path = "/content/drive/MyDrive/pouramini/logs"
 
+    if fz_parts == "none":
+        frozen = False
+        fz_parts = ""
+
     if "-wrap" in method and not wrap:
         mlog.info("Method %s is for wrapped models...", method)
         wrap = True
@@ -776,6 +780,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
             underlying_model_name = model_id        
     else:
         underlying_model_name = model_id
+    
         
     weight_decay = 0.01
     shuffle = False
@@ -1269,6 +1274,9 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
         mlog.info("Saving train data set...")
         myds["train"].save()
         mlog.info(f"============== epoch {epoch}\n")
+        mlog.info(f"============== learning_rate {learning_rate}\n")
+        mlog.info(f"============== frozen {frozen} {fz_parts} \n")
+        mlog.info(f"============== wrap {wrap}\n")
         tlog.info(f"============== epoch {epoch}\n")
         tot_loss = 0
         step = 0
