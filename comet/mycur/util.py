@@ -9,9 +9,9 @@ import textwrap
 import subprocess
 import datetime
 try:
-    from nodcast.colors import *
-    from nodcast.util.obj_util import *
-    from nodcast.util.common import *
+    from comet.mycur.colors import *
+    from comet.mycur.obj_util import *
+    from comet.mycur.common import *
 except:
     from colors import *
     from obj_util import *
