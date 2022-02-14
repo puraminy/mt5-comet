@@ -4,7 +4,7 @@ from pathlib import Path
 from appdirs import *
 import os
 try:
-    from nodcast.util.common import *
+    from comet.mycur.common import *
 except:
     from common import *
 
