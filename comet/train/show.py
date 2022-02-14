@@ -10,7 +10,7 @@ import os
 import seaborn as sns
 from pathlib import Path
 import pandas as pd
-from nodcast.util.util import *
+from comet.mycur.util import *
 from mylogs import * 
 import json
 from comet.utils.myutils import *
