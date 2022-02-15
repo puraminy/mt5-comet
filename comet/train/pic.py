@@ -14,7 +14,23 @@ from comet.mycur.util import *
 from mylogs import * 
 import json
 from comet.utils.myutils import *
-file_id = "name"
+import sys
+from PIL import Image
+
+def combine(images):
+    widths, heights = zip(*(i.size for i in images))
+
+    total_width = sum(widths)
+    max_height = max(heights)
+
+    new_im = Image.new('RGB', (total_width, max_height))
+
+    x_offset = 0
+    for im in images:
+      new_im.paste(im, (x_offset,0))
+      x_offset += im.size[0]
+
+    return new_im
 
 def get_files(dfpath, dfname):
     files = []
@@ -42,12 +58,13 @@ def get_files(dfpath, dfname):
                             files.append(root_file)
     if files:
         df = pd.DataFrame(columns={"name"})
-        df["name"] = files
+        df["name"] = [Path(p).name for p in files]
+        df["fname"] = files
         return df
     else:
         return None
 
-def show_files(files_df):
+def show_files(df):
     global dfname
     cmd = ""
     sel_row = 0
@@ -75,32 +92,37 @@ def show_files(files_df):
 
 
     #wwwwwwwwww
+    main_df = df
+    search_df = df
     consts = {}
     colors = ['blue','orange','green', 'red', 'purple', 'brown', 'pink','gray','olive','cyan']
     ax = None
     prev_cahr = ""
     sel_exp = ""
     sel_cols=["name"]
+    sel_rows=[]
+    in_search = False
+    search = ""
     while ch != ord("q"):
         text_win.erase()
         left = min(left, max_col  - width)
         left = max(left, 0)
-        sel_row = min(sel_row, len(files_df) - 1)
+        sel_row = min(sel_row, len(df) - 1)
         sel_row = max(sel_row, 0)
         text = "{:<5}".format(sel_row)
         for i, sel_col in enumerate(sel_cols):
-            if not sel_col in files_df:
+            if not sel_col in df:
                 continue
             _w = col_widths[sel_col] if sel_col in col_widths else width
             head = textwrap.shorten(f"{i}) {sel_col}" , width=_w, placeholder=".")
             text += "{:<{x}}".format(head, x=_w) 
         mprint(text, text_win) 
         ii = 0
-        top_margin = min(len(files_df), 5)
+        top_margin = min(len(df), 5)
         #fffff
         infos = []
         sel_dict = {}
-        for idx, row in files_df.iterrows():
+        for idx, row in df.iterrows():
            if ii < sel_row - top_margin:
                ii += 1
                continue
@@ -118,27 +140,31 @@ def show_files(files_df):
                _color = TEXT_COLOR
                _w = col_widths[sel_col] if sel_col in col_widths else width
                text += "{:<{x}}".format(content, x= _w)
-
+           if ii in sel_rows:
+               _color = HL_COLOR
            if ii == sel_row:
-                _color = CUR_ITEM_COLOR
+               _color = CUR_ITEM_COLOR
+
            mprint(text, text_win, color = _color) 
            ii += 1
            if ii > sel_row + ROWS - 4:
                break
         refresh()
+        if in_search:
+            consts["search"] = search
         for c in info_cols:
-            if not c in files_df:
+            if not c in df:
                 continue
             if "score" in c:
-                mean = files_df[c].mean()
+                mean = df[c].mean()
                 _info = f"Mean {c}:" + "{:.2f}".format(mean)
                 infos.append(_info)
         infos.append("-------------------------")
-        consts["len"] = str(len(files_df))
         for key,val in consts.items():
             if type(val) == list:
                 val = "-".join(val)
             infos.append("{:<5}:{}".format(key,val))
+        infos.append("{:<5}:{}".format("len",str(len(df))))
         change_info(infos)
 
         prev_char = chr(ch)
@@ -147,24 +173,68 @@ def show_files(files_df):
         vals = []
         get_cmd = False
         if ch == LEFT:
+            in_search =False
             left -= width
         if ch == RIGHT:
+            in_search =False
             left += width
         if ch == DOWN:
+            in_search =False
             sel_row += 1
         elif ch == UP:
+            in_search =False
             sel_row -= 1
         elif ch == cur.KEY_NPAGE:
+            in_search =False
             sel_row += ROWS - 4
         elif ch == cur.KEY_PPAGE:
+            in_search =False
             sel_row -= ROWS - 4
+        elif is_enter(ch):
+            in_search = False
         char = chr(ch)
-        if char == ":":
-            cmd = rowinput()
-            if cmd == "q":
-                ch = ord("q")
-            elif cmd:
-                files_df = get_files(dfpath, [cmd])
+        if in_search:
+            if ch == cur.KEY_BACKSPACE or ch == 127:
+                if len(search) > 1:
+                    search = search[:-1]
+                else:
+                    search = ""
+            else:
+                search += char
+            df = search_df[search_df["name"].str.contains(search, na=False)==True]
+        else:
+            search = ""
+            search_df = df
+            consts.pop("search", None)
+            if char == "p":
+                sel_pics = df.iloc[sel_rows]["fname"].tolist()
+                images = [Image.open(x) for x in sel_pics]
+                new_im = combine(images)
+                pname = "/home/ahmad/heatmaps/out.png" 
+                new_im.save(pname)
+                if "ahmad" in home:
+                    subprocess.run(["eog", pname])
+            if char == " ":
+                sel_rows.append(sel_row)
+            if char == "D":
+                df = df.iloc[sel_rows,:]
+                sel_rows = []
+            if char == "r":
+                df = main_df
+                sel_cols = ["name"]
+                consts = {}
+                info_cols = []
+            if char == "/":
+                in_search = True
+                search_df = df
+                consts["search"] = ""
+                search = ""
+            if char == ":":
+                cmd = rowinput()
+                if cmd == "q":
+                    ch = ord("q")
+                elif cmd:
+                    df = get_files(dfpath, [cmd])
 
 def biginput(prompt=":", default=""):
     rows, cols = std.getmaxyx()
