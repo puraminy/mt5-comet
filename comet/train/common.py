@@ -153,7 +153,7 @@ decoder_relation_mappings = {}
 
 def tokenize_relations(tokenizer, map_lengths=False):
     for rel,phrase in relation_natural_mappings.items():
-        natural_rel = phrase["en"]
+        natural_rel = phrase["en-postfix"]
         #dlog.info("rel ids ***: %s", natural_rel)
         rel_tokens = tokenizer.tokenize(natural_rel)
         relation_natural_mappings[rel]["rel_tokens"] = rel_tokens
@@ -612,7 +612,7 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            qtemp = "{event} {rel_natural}" 
            anstemp = "{resp} {end}"
        elif method == "unsup-nat":
-           qtemp = ["{event} {rel_natural}","{rel_natural_pre} {event}"] 
+           qtemp = ["{event}. {rel_natural}","{rel_natural_pre} {event}"] 
            anstemp = "{ph} {resp} {end}"
        elif method == "enc-unsup-nat":
            qtemp = "{rel_i} {event} {rel_natural} {ph}" 
