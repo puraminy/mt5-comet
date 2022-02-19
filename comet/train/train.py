@@ -707,7 +707,13 @@ def run(ctx, conf_path, base_conf, experiment,
     type=int,
     help="Prompt id or index for templates that have multiple prompt templates"
 )
-def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, no_score, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid):
+@click.option(
+    "--break_sent",
+    "-brk",
+    is_flag=True,
+    help="Break in input sentencet to input and target at different positions (based on repeat)"
+)
+def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, no_score, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, break_sent):
 
     #%% some hyper-parameters
 
@@ -1011,7 +1017,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
                                 targ_exclude,
                                 pred_tresh, nli_group, per_record, is_even, start, 
                                 sampling, ex_type,
-                                tails_per_head, save_ds_path[split_name], _repeat, int(pid)
+                                tails_per_head, save_ds_path[split_name], _repeat, 
+                                int(pid), break_sent
                         )
         return myds
 

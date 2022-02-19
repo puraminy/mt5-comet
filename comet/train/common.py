@@ -839,7 +839,8 @@ class MyDataset(torch.utils.data.IterableDataset):
             targ_exclude="",
             pred_tresh=0,
             nli_group="all", per_record=False, is_even=False, start=0, 
-            sampling=0, ex_type="",  samples_per_head=0, save_ds_path="", repeat=1, pid=-1): 
+            sampling=0, ex_type="",  samples_per_head=0, 
+            save_ds_path="", repeat=1, pid=-1, sent_break=False): 
         super(MyDataset).__init__()
         self.flat_data = []
         self.data_split = {}
@@ -913,6 +914,7 @@ class MyDataset(torch.utils.data.IterableDataset):
         self.rel_filter = rel_filter
         self.lang_counter = {}
         self.sel_rels = []
+        self.break_sent = break_sent
         if "other_rel" in ex_type:
             self.samples_per_head = 0
             self.num_per_cat = 0
@@ -1009,12 +1011,13 @@ class MyDataset(torch.utils.data.IterableDataset):
         qtemp, anstemp, ex_qtemp, ex_anstemp, context = create_templates(mt, 
                 gen_pos="end", prompt_pos=self.prompt_pos)
         assert type(qtemp) == list, "qtemp must be a list"
+        _rep = rep
         if self.pid >= 0:
-            rep = self.pid
-        if rep > len(qtemp):
-            rep = len(qtemp) - 1
+            _rep = self.pid
+        if _rep > len(qtemp):
+            _rep = len(qtemp) - 1
 
-        qtemp = qtemp[rep] 
+        qtemp = qtemp[_rep] 
         plen = relation_prompt_lengths[rel][0]
         if self.only_blanks and "___" in event:
             event = event.replace("___", "{ph}")
@@ -1026,9 +1029,19 @@ class MyDataset(torch.utils.data.IterableDataset):
         query = (index, _query)
         response = fill_vars(_anstemp, rel, event, gen_token, resp, 
                 input_lang, target_lang)
+
+        __resp = response.replace(place_holder,"")
+        sent = _query.replace(place_holder, __resp)
+        sent_split = sent.split(" ")
+        if rep > 0 and self.break_sent and rep < len(sent_split):
+            _query = " ".join(sent_split[:rep]) + " " + place_holder
+            response = place_holder + " " + " ".join(sent_split[rep:])
+
         lang = input_lang + "2" + target_lang
         if self.example_counter < 10:
             clog.info(f"%%%%%%%%%%%%%%%%%% {lang} {mt} %%%%%%%%%%%%%%%%%%%")
+            clog.info(sent)
+            clong.info("---------------------------------------")
             clog.info(inp + "====>" + targ_col)
             _q = _query.replace(">",">\n") 
             clog.info(input_lang + ":"+ _q)
