@@ -5,6 +5,7 @@ from curses import wrapper
 import click
 import numpy as np
 from glob import glob
+import shutil
 import six
 import os
 import seaborn as sns
@@ -92,6 +93,7 @@ def show_files(df):
 
 
     #wwwwwwwwww
+    hl_start=0
     main_df = df
     search_df = df
     consts = {}
@@ -145,7 +147,7 @@ def show_files(df):
            if ii == sel_row:
                _color = CUR_ITEM_COLOR
 
-           mprint(text, text_win, color = _color) 
+           mprint(text, text_win, color = _color, color_start= hl_start) 
            ii += 1
            if ii > sel_row + ROWS - 4:
                break
@@ -206,12 +208,18 @@ def show_files(df):
             search = ""
             search_df = df
             consts.pop("search", None)
-            if char == "p":
-                sel_pics = df.iloc[sel_rows]["fname"].tolist()
+            if char in ["p", "P"]:
+                if char == "P":
+                    sel_pics = df.iloc[sel_rows]["fname"].tolist()
+                else:
+                    sel_pics = df["fname"].tolist()
                 images = [Image.open(x) for x in sel_pics]
                 new_im = combine(images)
                 pname = "/home/ahmad/heatmaps/out.png" 
                 new_im.save(pname)
+            if char == "x":
+                pname = df.iloc[sel_row]["fname"]
+            if char in ["p", "P", "x"]:
                 if "ahmad" in home:
                     subprocess.run(["eog", pname])
             if char == " ":
@@ -233,6 +241,41 @@ def show_files(df):
                 cmd = rowinput()
                 if cmd == "q":
                     ch = ord("q")
+                elif cmd.startswith("hl="):
+                    hl_start = int(cmd.split("=")[1])
+                elif cmd.startswith("comp"):
+                    cmd = cmd.split("=")
+                    s1 = int(cmd[1]) if len(cmd) > 1 else 10
+                    s2 = int(cmd[2]) if len(cmd) > 2 else -40
+                    files = []
+                    folder = "/home/ahmad/heatmaps/comp/"
+                    if Path(folder).exists():
+                        shutil.rmtree(folder)
+                    Path(folder).mkdir(parents=True, exist_ok=True)
+                    pairs = []
+                    for j, row1 in df.iterrows():
+                        img1 = row1["name"]
+                        img1_path = row1["fname"]
+                        for k, row2 in df.iterrows():
+                            img2 = row2["name"]
+                            img2_path = row2["fname"]
+                            if (j != k  
+                                and img1[:s1] == img2[:s1]  
+                                and img1[s2:] == img2[s2:] 
+                                and not (j,k) in pairs):
+                                p1 = str(Path(img1_path).parent.name) + "_"
+                                p2 = str(Path(img2_path).parent.name) + "_"
+                                pairs.append((j,k))
+                                pairs.append((k,j))
+                                images = [Image.open(x) for x in [img1_path, img2_path]]
+                                new_im = combine(images)
+                                pname = folder + p1 + img1[:s1] + "_VS_" + p2 + img2[s2:] + ".png" 
+                                new_im.save(pname)
+                                files.append(pname)
+                    if files:
+                        df = get_files(folder, files)
+                    else:
+                        show_msg("No select")
                 elif cmd:
                     df = get_files(dfpath, [cmd])
 

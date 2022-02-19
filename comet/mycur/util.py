@@ -244,12 +244,12 @@ def show_cursor(useCur = True):
         sys.stdout.write("\033[?25h")
         sys.stdout.flush()
 
-def mprint(text, win, color=None, attr = None, end="\n", refresh = False):
+def mprint(text, win, color=None, attr = None, end="\n", refresh = False, color_start=0):
     if color is None:
         color = TEXT_COLOR
-    m_print(text, win, color, attr, end, refresh)
+    m_print(text, win, color, attr, end, refresh, color_start)
 
-def m_print(text, win, color, attr = None, end="\n", refresh = False):
+def m_print(text, win, color, attr = None, end="\n", refresh = False, color_start=0):
     if win is None:
         print(text, end=end)
     else:
@@ -260,7 +260,14 @@ def m_print(text, win, color, attr = None, end="\n", refresh = False):
         height, width = win.getmaxyx()
         #win.addnstr(text + end, height*width-1, c)
         #text = textwrap.shorten(text, width=height*width-5)
-        win.addstr((text + end).encode(code), c)
+        text = text + end
+        if color_start == 0:
+            win.addstr((text).encode(code), c)
+        else:
+            p1 = text[:color_start]
+            p2 = text[color_start:]
+            win.addstr((p1).encode(code), c)
+            win.addstr((p2).encode(code), HL_COLOR)
         if not refresh:
             pass #win.refresh(0,0, 0,0, height -5, width)
         else:

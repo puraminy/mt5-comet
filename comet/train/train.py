@@ -108,6 +108,7 @@ def run(ctx, conf_path, base_conf, experiment,
            _extra = ""
            mlog.info("Extra args=%s", ctx.args)
            for _item in ctx.args:
+                mlog.info("arg = %s", _item)
                 _key,_val = _item.split("=")
                 _key=_key.strip("--")
                 if not _key in ["no_confirm", "follow_method"]:

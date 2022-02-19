@@ -41,55 +41,65 @@ atomic_relation_mappings = {
 }
 relation_natural_mappings = {
     "oReact":{ 
-        "en":"As a result others feel ",
+        "en-postfix":"As a result others feel {ph}",
+        "en-prefix":"Others feel {ph} because ",
         "fa":"در نتیجه دیگران حس می کنند",
         "tokens":"<state> <other> <after>",
         "nat-tokens":"then, the state of others is "
     },
     "xReact":{ 
-        "en":"As a result PersonX feels ",
+        "en-postfix":"As a result PersonX feels {ph}.",
+        "en-prefix":"Others feels {ph} because ",
         "fa":"در نتیجه PersonX حس می کند", 
         "tokens":"<state> <agent> <after>",
         "nat-tokens":"then, the state of the person is "
     },
     "xWant":{ 
-        "en":"Then PersonX wants ",
+        "en-postfix":"Then PersonX wants {ph}.",
+        "en-prefix":"PersonX wants {ph} after ",
         "fa":"بعد از آن PersonX می خواهد",
         "tokens":"<event> <agent> <after> <want>",
         "nat-tokens":"then, the person wants "
     },
     "oWant":{ 
-        "en":"Then others want ",
+        "en-postfix":"Then others want {ph}.",
+        "en-prefix":"Others want {ph} after ",
         "fa":"بعد از آن دیگران می خواهند",
         "tokens":"<event> <other> <after> <want>",
         "nat-tokens":"then, others want "
     },
     "xEffect":{ 
-        "en":"As a result PersonX  ",
+        "en-postfix":"As a result PersonX {ph}.",
+        "en-prefix":"PersonX {ph} because ",
         "fa":"در نتیجه PersonX ",
         "tokens":"<event> <agent> <after> <effect>",
         "nat-tokens":"then, the effect on the person "
     },
     "oEffect":{ 
-        "en":"As a result others  ",
+        "en-postfix":"As a result others {ph}.",
+        "en-prefix":"Others {ph} because",
         "fa":"در نتیجه دیگران ",
         "tokens":"<event> <other> <after> <effect>",
         "nat-tokens":"then, the effect on others "
     },
     "xAttr":{ 
-        "en":"PersonX is seen as",
+        "en-postfix":"PersonX is seen as {ph}.",
+        "en-prefix":"PersonX is seen as {ph}.",
         "fa":"مردم فکر می کنند PersonX ",
         "tokens":"<state> <agent> <static>",
         "nat-tokens":"always, the state of the person is",
     },
     "xIntent":{ 
-        "en":"Because PersonX intended ",
+        "en-postfix":"Because PersonX intended {ph}.",
+        "en-prefix":"PersonX intended {ph}. Therefore,",
         "fa":"زیرا PersonX می خواست",
         "tokens":"<event> <agent> <before> <cause> <want>",
         "nat-tokens":"before, because the person want "
     },
     "xNeed":{ 
-        "en":"Before that, PersonX needs ",
+        "en-postfix":"Before that, PersonX needs {ph}.",
+        "en-prefix":"PersonX needs {ph} before ",
+        "en":"Before that, PersonX needs {ph}.",
         "fa":"قبل از آن PersonX نیاز دارد",
         "tokens":"<event> <agent> <before> <cause> <need>",
         "nat-tokens":"before, because the person needs "
@@ -219,7 +229,7 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words
         if rel == "com":
             continue
         if from_words == "rel":
-            from_words = relation_natural_mappings[rel]["en"]
+            from_words = relation_natural_mappings[rel]["en-postfix"]
         if from_words == "rel_tokens":
             prompt_tokens = relation_natural_mappings[rel]["rel_tokens"]
 
@@ -298,11 +308,13 @@ def fill_const_for_rel(template, row):
     #dlog.debug("fill const for: %s", text)
     rel = row["prefix"]
     rel_token = atomic_relation_mappings[rel]        
-    rel_natural_en = relation_natural_mappings[rel]["en"]        
+    rel_natural_en_postfix = relation_natural_mappings[rel]["en-postfix"]        
+    rel_natural_en_prefix = relation_natural_mappings[rel]["en-prefix"]        
     rel_natural_fa = relation_natural_mappings[rel]["fa"]        
     rep  = {"{rel}":rel, 
             "{rel_token}":rel_token,
-            "{rel_natural_en}":rel_natural_en,
+            "{rel_natural_en}":rel_natural_en_postfix,
+            "{rel_natural_en_pre}":rel_natural_en_prefix,
             "{rel_natural_fa}":rel_natural_fa,
             "{gen_fa}":gen_token_fa,
             "{sep}":sep,
@@ -526,6 +538,20 @@ def filter_inputs(include, exclude, lang):
    exclude = exclude.strip("|")
    return include, exclude
 
+def fix_pos(qtemp, gen_pos, prompt_pos):
+   if gen_pos == "end":
+       qtemp = qtemp.replace("{gen_start} ","")
+       qtemp = qtemp.replace("{gen_end}","{gen}")
+   else:
+       qtemp = qtemp.replace(" {gen_end}","")
+       qtemp = qtemp.replace("{gen_start}","{gen}")
+   if prompt_pos == "end":
+       qtemp = qtemp.replace("{rel_i_start} ","")
+       qtemp = qtemp.replace("{rel_i_end}","{rel_i}")
+   else:
+       qtemp = qtemp.replace(" {rel_i_end}","")
+       qtemp = qtemp.replace("{rel_i_start}","{rel_i}")
+   return qtemp
 #tttttttttt
 def create_templates(method, gen_pos="end", prompt_pos="end"):
        ex_qtemp = ""
@@ -586,7 +612,7 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            qtemp = "{event} {rel_natural}" 
            anstemp = "{resp} {end}"
        elif method == "unsup-nat":
-           qtemp = "{event} {rel_natural} {ph}" 
+           qtemp = ["{event} {rel_natural}","{rel_natural_pre} {event}"] 
            anstemp = "{ph} {resp} {end}"
        elif method == "enc-unsup-nat":
            qtemp = "{rel_i} {event} {rel_natural} {ph}" 
@@ -752,30 +778,30 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            anstemp = "{ph} {dec_token} {resp} {end}"
        else:
            raise ValueError("not supprted method: " + method)
-       if gen_pos == "end":
-           qtemp = qtemp.replace("{gen_start} ","")
-           qtemp = qtemp.replace("{gen_end}","{gen}")
-       else:
-           qtemp = qtemp.replace(" {gen_end}","")
-           qtemp = qtemp.replace("{gen_start}","{gen}")
-       if prompt_pos == "end":
-           qtemp = qtemp.replace("{rel_i_start} ","")
-           qtemp = qtemp.replace("{rel_i_end}","{rel_i}")
-       else:
-           qtemp = qtemp.replace(" {rel_i_end}","")
-           qtemp = qtemp.replace("{rel_i_start}","{rel_i}")
-       while "  " in qtemp:
-           qtemp = qtemp.replace("  "," ")
-
-
+       
+       if not type(qtemp) == list:
+           qtemp = [qtemp]
+       ret_q = []
+       for q in qtemp:
+           while "  " in q:
+               q = q.replace("  "," ")
+           if method.startswith("sup"):
+               q = q.replace("{ph}","")
+           q = fix_pos(q, gen_pos, prompt_pos)
+           ret_q.append(q)
+       qtemp = ret_q
        return qtemp, anstemp, ex_qtemp, ex_anstemp, context
 
 def fill_vars(template, rel, event, gen_token, resp, inp_lang, resp_lang):
-    rel_natural = relation_natural_mappings[rel][inp_lang]        
+    rel_natural_pre = relation_natural_mappings[rel][inp_lang + "-prefix"]        
+    rel_natural = relation_natural_mappings[rel][inp_lang + "-postfix"]        
     rel_natural_tokens = relation_natural_mappings[rel]["nat-tokens"]        
+    rel_natural = rel_natural.replace("{ph}", placeholder_token)
+    rel_natural_pre = rel_natural_pre.replace("{ph}", placeholder_token)
     rep  = {"{event}":event, 
             "{resp}":resp,
             "{rel_natural}":rel_natural,
+            "{rel_natural_pre}":rel_natural_pre,
             "{nat_toekns}":rel_natural_tokens,
             "{gen}":gen_token}
     rep = dict((re.escape(k), v) for k, v in rep.items()) 
@@ -959,6 +985,7 @@ class MyDataset(torch.utils.data.IterableDataset):
         resp = data[1]
         extra = data[2]
         rel = extra["rel"]
+        rep = extra["rep"]
         targ_col = extra["targ_col"]
         inp = extra["inp"]
         d = data[3]
@@ -980,6 +1007,11 @@ class MyDataset(torch.utils.data.IterableDataset):
 
         qtemp, anstemp, ex_qtemp, ex_anstemp, context = create_templates(mt, 
                 gen_pos="end", prompt_pos=self.prompt_pos)
+        assert type(qtemp) == list, "qtemp must be a list"
+        if rep > len(qtemp):
+            rep = len(qtemp) - 1
+
+        qtemp = qtemp[rep] 
         plen = relation_prompt_lengths[rel][0]
         if self.only_blanks and "___" in event:
             event = event.replace("___", "{ph}")
@@ -1036,7 +1068,7 @@ class MyDataset(torch.utils.data.IterableDataset):
             if kk > iter_end:
                 self.flat_data.extend(flat_data)
                 return flat_data
-            extra = {"inp":inp, "targ_col":targ_col, "rel":rel}
+            extra = {"inp":inp, "targ_col":targ_col, "rel":rel, "rep":0}
             flat_data.append((event, resp, extra, d, context_df, index))
             kk += 1
             if show_progress:
@@ -1139,8 +1171,9 @@ class MyDataset(torch.utils.data.IterableDataset):
                         dlog.info("Lang limit reached! %s %s", lang, self.lang_counter[lang])
                         self.flat_data.extend(flat_data)
                         return flat_data
-                    extra = {"inp":inp, "targ_col":targ_col, "rel":rel}
+                    extra = {"inp":inp, "targ_col":targ_col, "rel":rel, "rep":0}
                     for rr in range(self.repeat): 
+                        extra["rep"] = rr
                         flat_data.append((event, resp, extra, d, context_df, index))
                         jj += 1
                     if show_progress:
