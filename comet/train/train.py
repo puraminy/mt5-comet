@@ -863,7 +863,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
         if len(logger.handlers) >= 3:
             continue
         logger.setLevel(logging.INFO)
-        logFilename = os.path.join(save_path, fname + ".log")
+        logFilename = os.path.join(save_path, fname + "_.log")
         handler = logging.FileHandler(logFilename, mode = "w" if clear_logs else "a")
         logger.addHandler(handler)
 

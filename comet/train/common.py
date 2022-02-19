@@ -840,7 +840,7 @@ class MyDataset(torch.utils.data.IterableDataset):
             pred_tresh=0,
             nli_group="all", per_record=False, is_even=False, start=0, 
             sampling=0, ex_type="",  samples_per_head=0, 
-            save_ds_path="", repeat=1, pid=-1, sent_break=False): 
+            save_ds_path="", repeat=1, pid=-1, break_sent=False): 
         super(MyDataset).__init__()
         self.flat_data = []
         self.data_split = {}
@@ -1030,18 +1030,20 @@ class MyDataset(torch.utils.data.IterableDataset):
         response = fill_vars(_anstemp, rel, event, gen_token, resp, 
                 input_lang, target_lang)
 
-        __resp = response.replace(place_holder,"")
-        sent = _query.replace(place_holder, __resp)
+        __resp = response.replace(placeholder_token,"")
+        sent = _query.strip().replace(placeholder_token, __resp.strip())
         sent_split = sent.split(" ")
-        if rep > 0 and self.break_sent and rep < len(sent_split):
-            _query = " ".join(sent_split[:rep]) + " " + place_holder
-            response = place_holder + " " + " ".join(sent_split[rep:])
+        if rep > 0:
+            br = random.randint(0, len(sent_split)-1)
+            if br > 0 and self.break_sent and br < len(sent_split):
+                _query = " ".join(sent_split[:br]) + " " + placeholder_token
+                response = placeholder_token + " " + " ".join(sent_split[br:])
 
         lang = input_lang + "2" + target_lang
         if self.example_counter < 10:
             clog.info(f"%%%%%%%%%%%%%%%%%% {lang} {mt} %%%%%%%%%%%%%%%%%%%")
             clog.info(sent)
-            clong.info("---------------------------------------")
+            clog.info("---------------------------------------")
             clog.info(inp + "====>" + targ_col)
             _q = _query.replace(">",">\n") 
             clog.info(input_lang + ":"+ _q)
