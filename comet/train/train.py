@@ -700,7 +700,14 @@ def run(ctx, conf_path, base_conf, experiment,
     type=str,
     help="Layers to be freezed"
 )
-def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, no_score, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts):
+@click.option(
+    "--pid",
+    "-pid",
+    default=-1,
+    type=int,
+    help="Prompt id or index for templates that have multiple prompt templates"
+)
+def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, no_score, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid):
 
     #%% some hyper-parameters
 
@@ -761,14 +768,6 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
         mlog.info("Config %s was created at %s", output_name + ".json", conf_path)
         return
 
-    if save_path != logPath:
-        for logger, fname in zip([mlog,dlog,clog,vlog,tlog], ["main","data","cfg","eval","train"]):
-            if len(logger.handlers) >= 2:
-                continue
-            logger.setLevel(logging.INFO)
-            logFilename = os.path.join(save_path, fname + ".log")
-            handler = logging.FileHandler(logFilename, mode = "w" if clear_logs else "a")
-            logger.addHandler(handler)
 
     if not load_path:
         load_path = os.path.join(home, "pret")
@@ -830,18 +829,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
                mlog.info("Qtemp: %s", args['qtemp'])
                mlog.info("Anstemp: %s", args['anstemp'])
 
-    for logger in [mlog, clog, dlog, tlog, vlog]:
-        logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
-        logger.info(f"%%%%%%%%%%%%%%%%%% { model_id } ")
-        logger.info(f"%%%%%%%%%%%%%%%%%% { output_name } ")
-        logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
-
     args_str = json.dumps(args, indent=4)
-    for logger in [clog]:
-        logger.info(args_str)
-        logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
-
-
     do_overwrite = False
     if overwrite:
         save_path = os.path.join(log_dir, overwrite)
@@ -863,6 +851,26 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
     mlog.info(f"LOAD Path:{underlying_model_name}")
     Path(save_path).mkdir(exist_ok=True, parents=True)
     Path(os.path.join(save_path, "best_model")).mkdir(exist_ok=True, parents=True)
+
+    #save log files
+    for logger, fname in zip([mlog,dlog,clog,vlog,tlog], ["main","data","cfg","eval","train"]):
+        if len(logger.handlers) >= 3:
+            continue
+        logger.setLevel(logging.INFO)
+        logFilename = os.path.join(save_path, fname + ".log")
+        handler = logging.FileHandler(logFilename, mode = "w" if clear_logs else "a")
+        logger.addHandler(handler)
+
+    for logger in [mlog, clog, dlog, tlog, vlog]:
+        logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+        logger.info(f"%%%%%%%%%%%%%%%%%% { model_id } ")
+        logger.info(f"%%%%%%%%%%%%%%%%%% { now } ")
+        logger.info(f"%%%%%%%%%%%%%%%%%% { output_name } ")
+        logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+    for logger in [clog]:
+        logger.info(args_str)
+        logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+
 
     # save configurations
     with open(os.path.join(save_path, f'exp_conf.json'), 'w') as outfile:
@@ -1003,7 +1011,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
                                 targ_exclude,
                                 pred_tresh, nli_group, per_record, is_even, start, 
                                 sampling, ex_type,
-                                tails_per_head, save_ds_path[split_name], _repeat
+                                tails_per_head, save_ds_path[split_name], _repeat, int(pid)
                         )
         return myds
 

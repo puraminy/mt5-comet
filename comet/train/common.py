@@ -42,35 +42,35 @@ atomic_relation_mappings = {
 relation_natural_mappings = {
     "oReact":{ 
         "en-postfix":"As a result others feel {ph}",
-        "en-prefix":"Others feel {ph} because ",
+        "en-prefix":"Others feel {ph} because",
         "fa":"در نتیجه دیگران حس می کنند",
         "tokens":"<state> <other> <after>",
         "nat-tokens":"then, the state of others is "
     },
     "xReact":{ 
         "en-postfix":"As a result PersonX feels {ph}.",
-        "en-prefix":"Others feels {ph} because ",
+        "en-prefix":"Others feels {ph} because",
         "fa":"در نتیجه PersonX حس می کند", 
         "tokens":"<state> <agent> <after>",
         "nat-tokens":"then, the state of the person is "
     },
     "xWant":{ 
         "en-postfix":"Then PersonX wants {ph}.",
-        "en-prefix":"PersonX wants {ph} after ",
+        "en-prefix":"PersonX wants {ph} after",
         "fa":"بعد از آن PersonX می خواهد",
         "tokens":"<event> <agent> <after> <want>",
         "nat-tokens":"then, the person wants "
     },
     "oWant":{ 
         "en-postfix":"Then others want {ph}.",
-        "en-prefix":"Others want {ph} after ",
+        "en-prefix":"Others want {ph} after",
         "fa":"بعد از آن دیگران می خواهند",
         "tokens":"<event> <other> <after> <want>",
         "nat-tokens":"then, others want "
     },
     "xEffect":{ 
         "en-postfix":"As a result PersonX {ph}.",
-        "en-prefix":"PersonX {ph} because ",
+        "en-prefix":"PersonX {ph} because",
         "fa":"در نتیجه PersonX ",
         "tokens":"<event> <agent> <after> <effect>",
         "nat-tokens":"then, the effect on the person "
@@ -84,7 +84,7 @@ relation_natural_mappings = {
     },
     "xAttr":{ 
         "en-postfix":"PersonX is seen as {ph}.",
-        "en-prefix":"PersonX is seen as {ph}.",
+        "en-prefix":"PersonX is seen as {ph} because",
         "fa":"مردم فکر می کنند PersonX ",
         "tokens":"<state> <agent> <static>",
         "nat-tokens":"always, the state of the person is",
@@ -98,7 +98,7 @@ relation_natural_mappings = {
     },
     "xNeed":{ 
         "en-postfix":"Before that, PersonX needs {ph}.",
-        "en-prefix":"PersonX needs {ph} before ",
+        "en-prefix":"PersonX needs {ph} before",
         "en":"Before that, PersonX needs {ph}.",
         "fa":"قبل از آن PersonX نیاز دارد",
         "tokens":"<event> <agent> <before> <cause> <need>",
@@ -612,7 +612,7 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            qtemp = "{event} {rel_natural}" 
            anstemp = "{resp} {end}"
        elif method == "unsup-nat":
-           qtemp = ["{event}. {rel_natural}","{rel_natural_pre} {event}"] 
+           qtemp = ["{event}. {rel_natural}","{rel_natural_pre} {event}."] 
            anstemp = "{ph} {resp} {end}"
        elif method == "enc-unsup-nat":
            qtemp = "{rel_i} {event} {rel_natural} {ph}" 
@@ -839,7 +839,7 @@ class MyDataset(torch.utils.data.IterableDataset):
             targ_exclude="",
             pred_tresh=0,
             nli_group="all", per_record=False, is_even=False, start=0, 
-            sampling=0, ex_type="",  samples_per_head=0, save_ds_path="", repeat=1): 
+            sampling=0, ex_type="",  samples_per_head=0, save_ds_path="", repeat=1, pid=-1): 
         super(MyDataset).__init__()
         self.flat_data = []
         self.data_split = {}
@@ -847,6 +847,7 @@ class MyDataset(torch.utils.data.IterableDataset):
         self.only_blanks = only_blanks
         self.samples_per_head = samples_per_head
         self.start = start
+        self.pid = pid
         self.prompt_pos = prompt_pos
         self.inp_include = inp_include
         self.inp_exclude = inp_exclude
@@ -1008,6 +1009,8 @@ class MyDataset(torch.utils.data.IterableDataset):
         qtemp, anstemp, ex_qtemp, ex_anstemp, context = create_templates(mt, 
                 gen_pos="end", prompt_pos=self.prompt_pos)
         assert type(qtemp) == list, "qtemp must be a list"
+        if self.pid >= 0:
+            rep = self.pid
         if rep > len(qtemp):
             rep = len(qtemp) - 1
 
