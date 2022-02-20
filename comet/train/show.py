@@ -311,11 +311,11 @@ def show_df(df):
             df = main_df[main_df["fid"] == exp]
             df = df[["fid","pred_text1","target_text","rouge_score","input_text", "prefix"]]
             df = df.sort_values(by="rouge_score")
-            df = df.groupby(["pred_text1","prefix"]).agg({
+            df = df.groupby(["pred_text1","prefix", "input_text"]).agg({
                 "rouge_score":"first","pred_text1":"first", "fid":"count", 
                 "input_text":"first", "target_text":"first", "prefix":"first"}).reset_index(drop=True)
             g_cols = ["fid", "pred_text1","target_text","prefix", "input_text"]
-            df = df.sort_values(by=["pred_text1","fid"], ascending=True)
+            df = df.sort_values(by=["fid","pred_text1"], ascending=True)
             sel_cols = order(sel_cols, g_cols)
             col_widths["fid"]=5
             col_widths["pred_text1"]=40

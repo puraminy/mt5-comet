@@ -612,7 +612,7 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            qtemp = "{event} {rel_natural}" 
            anstemp = "{resp} {end}"
        elif method == "unsup-nat":
-           qtemp = ["{event}. {rel_natural}","{rel_natural_pre} {event}."] 
+           qtemp = ["{event}. {rel_natural}","{rel_natural_pre} {event}"] 
            anstemp = "{ph} {resp} {end}"
        elif method == "enc-unsup-nat":
            qtemp = "{rel_i} {event} {rel_natural} {ph}" 
@@ -749,6 +749,12 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
        elif method == "unsup-tokens" or method  == "unsup-tokens-wrap":
            qtemp = "{event} {tokens} {ph}"
            anstemp = "{ph} {resp} {end}"
+       elif method == "unsup-wrap-rel-ans":
+           qtemp = "{event} {tokens} {ph} "
+           anstemp = "{ph} {rel_natural_pure} {resp}"
+       elif method == "unsup-nat-rel-ans":
+           qtemp = "{event}. {ph}"
+           anstemp = "{ph} {rel_natural_pure} {resp}."
        elif method == "unsup-tokens-rand" or method  == "unsup-tokens-rand-wrap":
            qtemp = "{event} {tokens-rand} {ph}"
            anstemp = "{ph} {resp} {end}"
@@ -796,11 +802,13 @@ def fill_vars(template, rel, event, gen_token, resp, inp_lang, resp_lang):
     rel_natural_pre = relation_natural_mappings[rel][inp_lang + "-prefix"]        
     rel_natural = relation_natural_mappings[rel][inp_lang + "-postfix"]        
     rel_natural_tokens = relation_natural_mappings[rel]["nat-tokens"]        
+    rel_natural_pure = rel_natural.replace("{ph}", "")
     rel_natural = rel_natural.replace("{ph}", placeholder_token)
     rel_natural_pre = rel_natural_pre.replace("{ph}", placeholder_token)
     rep  = {"{event}":event, 
             "{resp}":resp,
             "{rel_natural}":rel_natural,
+            "{rel_natural_pure}":rel_natural_pure,
             "{rel_natural_pre}":rel_natural_pre,
             "{nat_toekns}":rel_natural_tokens,
             "{gen}":gen_token}
@@ -1031,13 +1039,30 @@ class MyDataset(torch.utils.data.IterableDataset):
                 input_lang, target_lang)
 
         __resp = response.replace(placeholder_token,"")
-        sent = _query.strip().replace(placeholder_token, __resp.strip())
+        _query = _query.strip()
+        _q_len = len(_query.split(" "))
+        sent = _query.replace(placeholder_token, __resp.strip())
         sent_split = sent.split(" ")
         if rep > 0:
-            br = random.randint(0, len(sent_split)-1)
-            if br > 0 and self.break_sent and br < len(sent_split):
-                _query = " ".join(sent_split[:br]) + " " + placeholder_token
-                response = placeholder_token + " " + " ".join(sent_split[br:])
+            br = 0
+            if False: #rep == 1:
+                indexes = [i for i,x in enumerate(sent_split) if x == "PersonX" or x == "others" or x == "PersonY"]
+                if indexes:
+                    br = indexes[-1]
+                    _query = " ".join(sent_split[:br]) + " " + placeholder_token + " " + " ".join(sent_split[br+1:])
+                    response = placeholder_token + " " + sent_split[br]
+                    clog.info(">>>>>>>>>>>>>>>>>>>>=== rep:%s br:%s ========", rep, br)
+
+            if br == 0:
+                br = random.randint(len(sent_split)//2, len(sent_split)-1)
+                if br > 0 and self.break_sent and br < len(sent_split):
+                    _query = " ".join(sent_split[:br]) + " " + placeholder_token
+                    response = placeholder_token + " " + " ".join(sent_split[br:])
+                    clog.info("================== rep:%s br:%s ========", rep, br)
+            _q = _query.replace(">",">\n") 
+            clog.info(_q)
+            clog.info(response)
+            clog.info("========================================")
 
         lang = input_lang + "2" + target_lang
         if self.example_counter < 10:

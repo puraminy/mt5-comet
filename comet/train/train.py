@@ -115,7 +115,8 @@ def run(ctx, conf_path, base_conf, experiment,
                     _ks = "".join([k[0] for k in _key.split("_")])
                     _extra += "_" + (_ks + "_" + _val if not str(_val)=="True" else _key)
                 mlog.info("set %s = %s", _key, _val)
-                args[_key]= _val
+                if not _val == "False":
+                    args[_key]= _val
            output_name = experiment + "_" + base_conf + _extra
            # oooooooooooooo
            if not var:
@@ -137,13 +138,15 @@ def run(ctx, conf_path, base_conf, experiment,
                for var_item in main_var_item_list:
                    var_output_name = output_name + "_" + main_var_name + "_" + var_item 
                    if var_item == "null": var_item = ""
-                   args[main_var_name] = var_item
+                   if var_item != "False": 
+                       args[main_var_name] = var_item
                    if len(all_vars) > 1:
                        for sub_var_item in sub_var_item_list:
                            sub_output_name = var_output_name + "_" + sub_var_name + \
                                    "_" + sub_var_item 
                            if sub_var_item == "null": sub_var_item = ""
-                           args[sub_var_name] = sub_var_item
+                           if sub_var_item != "False": 
+                               args[sub_var_name] = sub_var_item
                            ii += 1
                            args["output_name"] = str(ii) + "_" + sub_output_name
                            args["no_save_model"] = not save_model
@@ -1287,8 +1290,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
         pbar = tqdm(total = iterations, position=0, leave=True) #,dynamic_ncols=True)
         if epoch > 0:
             train_iter = iter(train_dataloader)
-        mlog.info("Saving train data set...")
-        myds["train"].save()
+        #mlog.info("Saving train data set...")
+        #myds["train"].save()
         mlog.info(f"============== epoch {epoch}\n")
         mlog.info(f"============== learning_rate {learning_rate}\n")
         mlog.info(f"============== frozen {frozen} {fz_parts} \n")

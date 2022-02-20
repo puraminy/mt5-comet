@@ -222,6 +222,9 @@ def evaluate(model, tokenizer, dataloader, save_path, exp_info, val_records, gen
             data = {}
             data["qid"] = qid
             data["tid"] = qid
+            rel_natural = relation_natural_mappings[rel][lang + "-postfix"]        
+            rel_natural_pure = rel_natural.replace("{ph}", "")
+            top_hyp = top_hyp.replace(rel_natural_pure, "")
             for const in resp_const_parts:
                 top_hyp = top_hyp.replace(const, "")
             if not top_hyp.strip():
@@ -233,6 +236,7 @@ def evaluate(model, tokenizer, dataloader, save_path, exp_info, val_records, gen
                 nt = tail
                 for const in resp_const_parts:
                     nt = nt.replace(const,"")
+                nt = nt.replace(rel_natural_pure, "")
                 new_tails.append(nt)
             tails = new_tails
             data["pred_text1"] = top_hyp
