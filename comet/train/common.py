@@ -41,63 +41,63 @@ atomic_relation_mappings = {
 }
 relation_natural_mappings = {
     "oReact":{ 
-        "en-postfix":"As a result others feel {ph}",
-        "en-prefix":"Others feel {ph} because",
+        "en-postfix":"{event}, As a result others feel {ph}",
+        "en-prefix":"Others feel {ph} because {event}",
         "fa":"در نتیجه دیگران حس می کنند",
         "tokens":"<state> <other> <after>",
         "nat-tokens":"then, the state of others is "
     },
     "xReact":{ 
-        "en-postfix":"As a result PersonX feels {ph}.",
-        "en-prefix":"Others feels {ph} because",
+        "en-postfix":"{event}, As a result PersonX feels {ph}.",
+        "en-prefix":"Others feels {ph} because {event}",
         "fa":"در نتیجه PersonX حس می کند", 
         "tokens":"<state> <agent> <after>",
         "nat-tokens":"then, the state of the person is "
     },
     "xWant":{ 
-        "en-postfix":"Then PersonX wants {ph}.",
-        "en-prefix":"PersonX wants {ph} after",
+        "en-postfix":"{event}, Then PersonX wants {ph}.",
+        "en-prefix":"PersonX wants {ph} after {event}",
         "fa":"بعد از آن PersonX می خواهد",
         "tokens":"<event> <agent> <after> <want>",
         "nat-tokens":"then, the person wants "
     },
     "oWant":{ 
-        "en-postfix":"Then others want {ph}.",
-        "en-prefix":"Others want {ph} after",
+        "en-postfix":"{event}, Then others want {ph}.",
+        "en-prefix":"Others want {ph} after {event}",
         "fa":"بعد از آن دیگران می خواهند",
         "tokens":"<event> <other> <after> <want>",
         "nat-tokens":"then, others want "
     },
     "xEffect":{ 
-        "en-postfix":"As a result PersonX {ph}.",
-        "en-prefix":"PersonX {ph} because",
+        "en-postfix":"As a result of {event}, PersonX {ph} ",
+        "en-prefix":"PersonX {ph} because {event}",
         "fa":"در نتیجه PersonX ",
         "tokens":"<event> <agent> <after> <effect>",
         "nat-tokens":"then, the effect on the person "
     },
     "oEffect":{ 
-        "en-postfix":"As a result others {ph}.",
-        "en-prefix":"Others {ph} because",
+        "en-postfix":"As a result of {event}, others {ph} ",
+        "en-prefix":"Others {ph} because {event}",
         "fa":"در نتیجه دیگران ",
         "tokens":"<event> <other> <after> <effect>",
         "nat-tokens":"then, the effect on others "
     },
     "xAttr":{ 
-        "en-postfix":"PersonX is seen as {ph}.",
-        "en-prefix":"PersonX is seen as {ph} because",
+        "en-postfix":"{event}, So PersonX is seen as {ph}.",
+        "en-prefix":"PersonX is seen as {ph} because {event}",
         "fa":"مردم فکر می کنند PersonX ",
         "tokens":"<state> <agent> <static>",
         "nat-tokens":"always, the state of the person is",
     },
     "xIntent":{ 
-        "en-postfix":"Because PersonX intended {ph}.",
+        "en-postfix":"PersonX intended {ph}. Therefor, {event}",
         "en-prefix":"PersonX intended {ph}. Therefore,",
         "fa":"زیرا PersonX می خواست",
         "tokens":"<event> <agent> <before> <cause> <want>",
         "nat-tokens":"before, because the person want "
     },
     "xNeed":{ 
-        "en-postfix":"Before that, PersonX needs {ph}.",
+        "en-postfix":"{event}, Before that, PersonX needs {ph}.",
         "en-prefix":"PersonX needs {ph} before",
         "en":"Before that, PersonX needs {ph}.",
         "fa":"قبل از آن PersonX نیاز دارد",
@@ -612,7 +612,7 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            qtemp = "{event} {rel_natural}" 
            anstemp = "{resp} {end}"
        elif method == "unsup-nat":
-           qtemp = ["{event}. {rel_natural}","{rel_natural_pre} {event}"] 
+           qtemp = ["{rel_natural}","{rel_natural_pre}"] 
            anstemp = "{ph} {resp} {end}"
        elif method == "enc-unsup-nat":
            qtemp = "{rel_i} {event} {rel_natural} {ph}" 
@@ -621,7 +621,7 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            qtemp = "{event} {rel_natural_fa} {ph}" 
            anstemp = "{ph} {resp} {end}"
        elif method == "unsup-wrap-nat":
-           qtemp = "{rel_i} {event} {rel_natural} {ph}" 
+           qtemp = "{rel_i} {rel_natural}" 
            anstemp = "{ph} {resp} {end}"
        elif method == "unsup-wrap-nat-mid":
            qtemp = "{event} {rel_i} {rel_natural} {rel_i} {ph}" 
@@ -749,6 +749,12 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
        elif method == "unsup-tokens" or method  == "unsup-tokens-wrap":
            qtemp = "{event} {tokens} {ph}"
            anstemp = "{ph} {resp} {end}"
+       elif method == "unsup-tokens-nat":
+           qtemp = "{tokens} {rel_natural}"
+           anstemp = "{ph} {resp} {end}"
+       elif method == "unsup-rel-nat":
+           qtemp = "{prefix} {rel_natural}"
+           anstemp = "{ph} {resp} {end}"
        elif method == "unsup-wrap-rel-ans":
            qtemp = "{event} {tokens} {ph} "
            anstemp = "{ph} {rel_natural_pure} {resp}"
@@ -805,16 +811,21 @@ def fill_vars(template, rel, event, gen_token, resp, inp_lang, resp_lang):
     rel_natural_pure = rel_natural.replace("{ph}", "")
     rel_natural = rel_natural.replace("{ph}", placeholder_token)
     rel_natural_pre = rel_natural_pre.replace("{ph}", placeholder_token)
-    rep  = {"{event}":event, 
-            "{resp}":resp,
+    
+    rep1  = {
             "{rel_natural}":rel_natural,
             "{rel_natural_pure}":rel_natural_pure,
             "{rel_natural_pre}":rel_natural_pre,
             "{nat_toekns}":rel_natural_tokens,
             "{gen}":gen_token}
-    rep = dict((re.escape(k), v) for k, v in rep.items()) 
-    pattern = re.compile("|".join(rep.keys()))
-    text = pattern.sub(lambda m: rep[re.escape(m.group(0))], template)
+    rep2  = {"{event}":event, 
+            "{resp}":resp}
+    rep1 = dict((re.escape(k), v) for k, v in rep1.items()) 
+    rep2 = dict((re.escape(k), v) for k, v in rep2.items()) 
+    pattern1 = re.compile("|".join(rep1.keys()))
+    pattern2 = re.compile("|".join(rep2.keys()))
+    text = pattern1.sub(lambda m: rep1[re.escape(m.group(0))], template)
+    text = pattern2.sub(lambda m: rep2[re.escape(m.group(0))], text)
     lang = resp_lang
     plen = relation_prompt_lengths[rel]
     if not rel in encoder_prompts:
@@ -848,10 +859,11 @@ class MyDataset(torch.utils.data.IterableDataset):
             pred_tresh=0,
             nli_group="all", per_record=False, is_even=False, start=0, 
             sampling=0, ex_type="",  samples_per_head=0, 
-            save_ds_path="", repeat=1, pid=-1, break_sent=False): 
+            save_ds_path="", repeat=1, pid=-1, break_sent=-1, sind=6): 
         super(MyDataset).__init__()
         self.flat_data = []
         self.data_split = {}
+        self.sind = sind # sort index
 
         self.only_blanks = only_blanks
         self.samples_per_head = samples_per_head
@@ -978,15 +990,21 @@ class MyDataset(torch.utils.data.IterableDataset):
              iter_start = self.start + worker_id * per_worker
              iter_end = min(iter_start + per_worker, self.num_samples)
         if self.flat_data:
-            _iter = iter(self.flat_data)
+            #self.flat_data = sorted(self.flat_data, key = lambda x:x[5])
+            _data = self.flat_data
         else:
             if self.is_even:
-                _iter = iter(self.fill_all_data(iter_start, iter_end))
+                _data = self.fill_all_data(iter_start, iter_end)
             else:
-                _iter = iter(self.fill_data(iter_start, iter_end))
-                mlog.info("Iter start: %s", iter_start)
-                mlog.info("Iter end: %s", iter_end)
-                mlog.info("Len of flat data: %s", len(self.flat_data))
+                _data = self.fill_data(iter_start, iter_end)
+        if self.sind == 6:
+            _iter = iter(sorted(_data, key = lambda x:x[self.sind], reverse=True))
+        else:
+            _iter = iter(sorted(_data, key = lambda x:x[self.sind], reverse=False))
+        mlog.info("Iter start: %s", iter_start)
+        mlog.info("Iter end: %s", iter_end)
+        self.flat_data = _data
+        mlog.info("Len of flat data: %s", len(self.flat_data))
         self.num_records = len(self.flat_data)
         self.example_counter = 0
         return map(self.preproc, _iter)
@@ -996,12 +1014,12 @@ class MyDataset(torch.utils.data.IterableDataset):
         resp = data[1]
         extra = data[2]
         rel = extra["rel"]
-        rep = extra["rep"]
         targ_col = extra["targ_col"]
         inp = extra["inp"]
         d = data[3]
         context_df = data[4]
         index = data[5]
+        rep = data[6]
         rel_token = atomic_relation_mappings[rel]
         if self.natural:
             resp = resp.replace("PersonX intends", "")
@@ -1051,14 +1069,14 @@ class MyDataset(torch.utils.data.IterableDataset):
                     br = indexes[-1]
                     _query = " ".join(sent_split[:br]) + " " + placeholder_token + " " + " ".join(sent_split[br+1:])
                     response = placeholder_token + " " + sent_split[br]
-                    clog.info(">>>>>>>>>>>>>>>>>>>>=== rep:%s br:%s ========", rep, br)
+                    clog.info(">>>>>>>>>>>>>>>>>>>>=== rep:%s br:%s index:%s ========", rep, br, index)
 
             if br == 0:
                 br = random.randint(len(sent_split)//2, len(sent_split)-1)
-                if br > 0 and self.break_sent and br < len(sent_split):
+                if br > 0 and self.break_sent > 0 and br < len(sent_split):
                     _query = " ".join(sent_split[:br]) + " " + placeholder_token
                     response = placeholder_token + " " + " ".join(sent_split[br:])
-                    clog.info("================== rep:%s br:%s ========", rep, br)
+                    clog.info("================== rep:%s br:%s index:%s ========", rep, br, index)
             _q = _query.replace(">",">\n") 
             clog.info(_q)
             clog.info(response)
@@ -1066,7 +1084,7 @@ class MyDataset(torch.utils.data.IterableDataset):
 
         lang = input_lang + "2" + target_lang
         if self.example_counter < 10:
-            clog.info(f"%%%%%%%%%%%%%%%%%% {lang} {mt} %%%%%%%%%%%%%%%%%%%")
+            clog.info(f"%%%%%%%%%%%%%%%%%% index:{index} rep:{rep} %%%%%%%%%%%%%%%%%%%")
             clog.info(sent)
             clog.info("---------------------------------------")
             clog.info(inp + "====>" + targ_col)
@@ -1082,7 +1100,8 @@ class MyDataset(torch.utils.data.IterableDataset):
         #    self.data_split[rel][lang].append({query:[response]})
         #else:
         #    self.data_split[rel][lang][query].append(response)
-        return (_query, response, rel, lang, index)
+        return (_query, response, rel, lang, index, rep)
+
 
     def fill_all_data(self, iter_start, iter_end, show_progress=True):
         flat_data = []
@@ -1111,8 +1130,12 @@ class MyDataset(torch.utils.data.IterableDataset):
             if kk > iter_end:
                 self.flat_data.extend(flat_data)
                 return flat_data
-            extra = {"inp":inp, "targ_col":targ_col, "rel":rel, "rep":0}
-            flat_data.append((event, resp, extra, d, context_df, index))
+            extra = {"inp":inp, "targ_col":targ_col, "rel":rel}
+            for rr in range(self.repeat):
+                flat_data.append((event, resp, extra, d, context_df, index, 0))
+            if self.break_sent > 0:
+                for rr in range(1, self.break_sent + 1):
+                    flat_data.append((event, resp, extra, d, context_df, index, rr))
             kk += 1
             if show_progress:
                 pbar.update()
@@ -1214,11 +1237,14 @@ class MyDataset(torch.utils.data.IterableDataset):
                         dlog.info("Lang limit reached! %s %s", lang, self.lang_counter[lang])
                         self.flat_data.extend(flat_data)
                         return flat_data
-                    extra = {"inp":inp, "targ_col":targ_col, "rel":rel, "rep":0}
+                    extra = {"inp":inp, "targ_col":targ_col, "rel":rel}
                     for rr in range(self.repeat): 
-                        extra["rep"] = rr
-                        flat_data.append((event, resp, extra, d, context_df, index))
+                        flat_data.append((event, resp, extra, d, context_df, index, 0))
                         jj += 1
+                    if self.break_sent > 0:
+                        for rr in range(1, self.break_sent+1):
+                            flat_data.append((event, resp, extra, d, context_df, index, rr))
+                            jj += 1
                     if show_progress:
                         pbar.update()
                     kk += 1
@@ -1228,6 +1254,7 @@ class MyDataset(torch.utils.data.IterableDataset):
                         return flat_data
             
         self.flat_data.extend(flat_data)
+
         return flat_data
 
 def save_data(ex_df, save_ds_path):

@@ -120,7 +120,7 @@ def run(ctx, conf_path, base_conf, experiment,
            output_name = experiment + "_" + base_conf + _extra
            # oooooooooooooo
            if not var:
-               args["output_name"] = output_name
+               args["overwrite"] = output_name
                args["no_save_model"] = not save_model
                ctx.invoke(train, **args)
            else:
@@ -148,12 +148,12 @@ def run(ctx, conf_path, base_conf, experiment,
                            if sub_var_item != "False": 
                                args[sub_var_name] = sub_var_item
                            ii += 1
-                           args["output_name"] = str(ii) + "_" + sub_output_name
+                           args["overwrite"] = str(ii) + "_" + sub_output_name
                            args["no_save_model"] = not save_model
                            ctx.invoke(train, **args)
                    else:
                        ii += 1
-                       args["output_name"] = str(ii) + "_" + var_output_name
+                       args["overwrite"] = str(ii) + "_" + var_output_name
                        args["no_save_model"] = not save_model
                        ctx.invoke(train, **args)
         else:
@@ -706,7 +706,7 @@ def run(ctx, conf_path, base_conf, experiment,
 @click.option(
     "--pid",
     "-pid",
-    default=-1,
+    default=0,
     type=int,
     help="Prompt id or index for templates that have multiple prompt templates"
 )
@@ -716,7 +716,14 @@ def run(ctx, conf_path, base_conf, experiment,
     is_flag=True,
     help="Break in input sentencet to input and target at different positions (based on repeat)"
 )
-def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, no_score, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, break_sent):
+@click.option(
+    "--sort",
+    "-sind",
+    default=5,
+    type=int,
+    help="sort index"
+)
+def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, no_score, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, break_sent,sort):
 
     #%% some hyper-parameters
 
@@ -1005,9 +1012,9 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
             _method = method
             if split_name == "test":
                 _method = val_method
-            _repeat = int(repeat)
-            if split_name != "train":
-                _repeat = 1
+            _repeat = 1
+            if split_name == "train" or split_name == "sample":
+                _repeat = int(repeat)
             # dddddddddddddd
             myds[split_name] = MyDataset(split_df, split_name,
                                 _method, prompt_pos, rel_filter,
@@ -1021,7 +1028,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
                                 pred_tresh, nli_group, per_record, is_even, start, 
                                 sampling, ex_type,
                                 tails_per_head, save_ds_path[split_name], _repeat, 
-                                int(pid), break_sent
+                                int(pid), break_sent, int(sort)
                         )
         return myds
 
@@ -1045,7 +1052,6 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
                     generate_samples["sample"].append((_sample[0], _sample[1]))
             dlog.info("--------------------------------")
             mlog.info("Preparing samples: %s ", len(generate_samples["sample"]))
-
     if model_id == "test":
         return
     if not fz_parts or fz_parts == "all":
@@ -1121,7 +1127,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
 
 # ggggggggg
     def collate_fn_for_flattened(batch):
-        queries,responses,rel,lang, index = zip(*batch)
+        queries,responses,rel,lang, index, rep = zip(*batch)
+        #dlog.info("index:%s, rep: %s", index, rep)
         new_batch = tokenizer(list(queries),return_tensors='pt',padding='longest')
         with tokenizer.as_target_tokenizer():
             tokenized = tokenizer(list(responses),return_tensors='pt',padding='longest')
@@ -1134,7 +1141,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
             new_batch['decoder_attention_mask'] = tokenized['attention_mask']
         return new_batch
     def collate_fn_for_generation(batch):
-         queries,responses,_,_,_ = zip(*batch)
+         queries,responses,_,_,_,_ = zip(*batch)
          inputs = list(queries)
          outputs =list(responses)
          qr = []

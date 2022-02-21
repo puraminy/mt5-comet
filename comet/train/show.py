@@ -301,6 +301,28 @@ def show_df(df):
                #df = df.reset_index()
                sel_cols = order(sel_cols, g_cols)
                consts["filter"].append("group experiments")
+        elif char == "a":
+            left = 0
+            back.append(df)
+            exp=df.iloc[sel_row]["exp_id"]
+            sel_row = 0
+            sel_exp = exp
+            consts["exp"] = exp
+            df = main_df[main_df["fid"] == exp]
+            df = df[["fid","pred_text1","target_text","rouge_score","input_text", "prefix"]]
+            df = df.sort_values(by="rouge_score")
+            df = df.groupby(["target_text","prefix"]).agg({
+                "rouge_score":"first","pred_text1":"first", "fid":"count", 
+                "input_text":"first", "target_text":"first", "prefix":"first"}).reset_index(drop=True)
+            g_cols = ["fid", "target_text","pred_text","prefix", "input_text"]
+            df = df.sort_values(by=["fid","target_text"], ascending=False)
+            sel_cols = order(sel_cols, g_cols)
+            col_widths["fid"]=5
+            col_widths["pred_text1"]=40
+            col_widths["target_text"]=40
+            col_widths["prefix"]=40
+            col_widths["input_text"]=140
+
         elif char == "h":
             left = 0
             back.append(df)
@@ -311,11 +333,11 @@ def show_df(df):
             df = main_df[main_df["fid"] == exp]
             df = df[["fid","pred_text1","target_text","rouge_score","input_text", "prefix"]]
             df = df.sort_values(by="rouge_score")
-            df = df.groupby(["pred_text1","prefix", "input_text"]).agg({
+            df = df.groupby(["pred_text1","prefix"]).agg({
                 "rouge_score":"first","pred_text1":"first", "fid":"count", 
                 "input_text":"first", "target_text":"first", "prefix":"first"}).reset_index(drop=True)
             g_cols = ["fid", "pred_text1","target_text","prefix", "input_text"]
-            df = df.sort_values(by=["fid","pred_text1"], ascending=True)
+            df = df.sort_values(by=["fid","pred_text1"], ascending=False)
             sel_cols = order(sel_cols, g_cols)
             col_widths["fid"]=5
             col_widths["pred_text1"]=40

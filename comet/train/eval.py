@@ -217,14 +217,14 @@ def evaluate(model, tokenizer, dataloader, save_path, exp_info, val_records, gen
         queries = [x[0] for x in batch_list]
         hyps = generate(model, tokenizer, queries, batch_size = gen_bs)
         pbar.update(bs)
-        for (query, tail, rel, lang, qid), top_hyp in zip(batch_list, hyps):
+        for (query, tail, rel, lang, qid, repid), top_hyp in zip(batch_list, hyps):
             tails = [tail]
             data = {}
             data["qid"] = qid
             data["tid"] = qid
-            rel_natural = relation_natural_mappings[rel][lang + "-postfix"]        
-            rel_natural_pure = rel_natural.replace("{ph}", "")
-            top_hyp = top_hyp.replace(rel_natural_pure, "")
+            #rel_natural = relation_natural_mappings[rel]["en-postfix"]        
+            #rel_natural_pure = rel_natural.replace("{ph}", "").strip()
+            #top_hyp = top_hyp.replace(rel_natural_pure, "")
             for const in resp_const_parts:
                 top_hyp = top_hyp.replace(const, "")
             if not top_hyp.strip():
@@ -234,9 +234,9 @@ def evaluate(model, tokenizer, dataloader, save_path, exp_info, val_records, gen
                 if not tail.strip():
                     continue
                 nt = tail
+                #nt = nt.replace(rel_natural_pure, "")
                 for const in resp_const_parts:
                     nt = nt.replace(const,"")
-                nt = nt.replace(rel_natural_pure, "")
                 new_tails.append(nt)
             tails = new_tails
             data["pred_text1"] = top_hyp
