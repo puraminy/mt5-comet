@@ -850,7 +850,7 @@ def get_input(msg):
             continue
 
 #class MyDataset(datasets.Dataset):
-class MyDataset(torch.utils.data.IterableDataset):
+class MyDataset(torch.utils.data.Dataset):
     def __init__(self, split_df, split_name, method, 
             prompt_pos = "end", 
             rel_filter="", 
@@ -864,7 +864,8 @@ class MyDataset(torch.utils.data.IterableDataset):
             pred_tresh=0,
             nli_group="all", per_record=False, is_even=False, start=0, 
             sampling=0, ex_type="",  samples_per_head=0, 
-            save_ds_path="", repeat=1, pid=-1, break_sent=-1, sort_key="rep"): 
+            save_ds_path="", repeat=1, pid=-1, break_sent=-1, 
+            sort_key="rep"): 
         super(MyDataset).__init__()
         fingerprint = save_ds_path + "_" + split_name + "_"  + method + \
                 "_" + str(len(split_df)) + "_" + str(num_samples) 
@@ -979,7 +980,11 @@ class MyDataset(torch.utils.data.IterableDataset):
                     _data = self.fill_all_data(_start, _end)
                 else:
                     _data = self.fill_data(_start, _end)
-                self.flat_data = _data
+            if self.sort_key == "rep":
+                _data = sorted(_data, key = lambda x:x[self.sort_key], reverse=True)
+            elif self.sort_key != "none":
+                _data = sorted(_data, key = lambda x:x[self.sort_key], reverse=False)
+            self.flat_data = _data
             self.num_records = len(self.flat_data)
 
     def get_data(self):
@@ -1006,7 +1011,7 @@ class MyDataset(torch.utils.data.IterableDataset):
            data = pickle.load(f)
         self.flat_data, self.data_split = data
          
-    def __iter__(self):
+    def my_iter(self):
         iter_start = self.start
         iter_end = self.num_samples
         worker_info = torch.utils.data.get_worker_info()
@@ -1027,16 +1032,13 @@ class MyDataset(torch.utils.data.IterableDataset):
                 _data = self.fill_all_data(iter_start, iter_end)
             else:
                 _data = self.fill_data(iter_start, iter_end)
-        if self.sort_key == "rep":
-            _iter = iter(sorted(_data, key = lambda x:x[self.sort_key], reverse=True))
-        else:
-            _iter = iter(sorted(_data, key = lambda x:x[self.sort_key], reverse=False))
         mlog.info("Iter start: %s", iter_start)
         mlog.info("Iter end: %s", iter_end)
         self.flat_data = _data
         mlog.info("Len of flat data: %s", len(self.flat_data))
         self.num_records = len(self.flat_data)
         self.example_counter = 0
+        _iter = iter(_data)
         return map(self.preproc, _iter)
 
     def preproc(self, data):
@@ -1129,7 +1131,8 @@ class MyDataset(torch.utils.data.IterableDataset):
         #    self.data_split[rel][lang].append({query:[response]})
         #else:
         #    self.data_split[rel][lang][query].append(response)
-        return (_query, response, rel, lang, index, rep)
+        # return {"event":_query, "resp":response, "rel":rel, "index":index, "rep":rep}
+        return (_query, response, rel, index, rep)
 
 
     def fill_all_data(self, iter_start, iter_end, show_progress=True):

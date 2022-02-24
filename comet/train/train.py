@@ -723,7 +723,13 @@ def run(ctx, conf_path, base_conf, experiment,
     type=str,
     help="sort key"
 )
-def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, no_score, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, break_sent,sort):
+@click.option(
+    "--do_preproc",
+    "-dp",
+    is_flag=True,
+    help=""
+)
+def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, no_score, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, break_sent,sort, do_preproc):
 
     #%% some hyper-parameters
 
@@ -1129,8 +1135,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
 
 # ggggggggg
     def collate_fn_for_flattened(batch):
-        queries,responses,rel,lang, index, rep = zip(*batch)
-        #dlog.info("index:%s, rep: %s", index, rep)
+        queries,responses,rel,index,rep = zip(*batch)
         new_batch = tokenizer(list(queries),return_tensors='pt',padding='longest')
         with tokenizer.as_target_tokenizer():
             tokenized = tokenizer(list(responses),return_tensors='pt',padding='longest')

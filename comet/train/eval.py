@@ -211,13 +211,14 @@ def evaluate(model, tokenizer, dataloader, save_path, exp_info, val_records, gen
     gen_bs = int(gen_bs)
     vlog.disabled = True
     exit_loop = False
+    lang = "en2en"
     for batch_list in batched(list(test_iter), bs):
         if exit_loop:
             break
         queries = [x[0] for x in batch_list]
         hyps = generate(model, tokenizer, queries, batch_size = gen_bs)
         pbar.update(bs)
-        for (query, tail, rel, lang, qid, repid), top_hyp in zip(batch_list, hyps):
+        for (query, tail, rel, qid, repid), top_hyp in zip(batch_list, hyps):
             tails = [tail]
             data = {}
             data["qid"] = qid
