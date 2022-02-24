@@ -210,8 +210,8 @@ def fill_sample(mt, rel):
     input_lang = "en"
     target_lang = "en"
     gen_token = "gen_en"
-    _qtemp = fill_consts(qtemp, ex_qtemp, context,d, context_df, mask=mask,method = mt)
-    _anstemp = fill_consts(anstemp, ex_anstemp, context,d, context_df, mask=mask,method = mt)
+    _qtemp = fill_consts(qtemp, ex_qtemp, context,rel, d, context_df, mask=mask,method = mt)
+    _anstemp = fill_consts(anstemp, ex_anstemp, context,rel, d, context_df, mask=mask,method = mt)
     _query = fill_vars(_qtemp, rel, event, resp, gen_token, 
             input_lang, target_lang) 
     response = fill_vars(_anstemp, rel, event, resp, gen_token, 
@@ -306,6 +306,8 @@ encoder_prompts = {}
 decoder_prompts = {}
 def fill_const_for_rel(template, row):
     text = template
+    if row is None:
+        return text
     #dlog.debug("fill const for: %s", text)
     rel = row["prefix"]
     rel_token = atomic_relation_mappings[rel]        
@@ -371,11 +373,10 @@ def fill_prompt(text, rel, place_holder, counter = 0, lang=""):
     #dlog.info("text: %s", text)
     return text
 
-def fill_consts(template, ex_temp, context, row, rows=None, mask=-1, method=""):
+def fill_consts(template, ex_temp, context,rel, row, rows=None, mask=-1, method=""):
     #dlog.info("fill consts, input text: %s", template)
     text = fill_const_for_rel(template, row)
     #dlog.info("fill consts, input text: %s", text)
-    rel = row["prefix"]
     plen = relation_prompt_lengths[rel]
     text = text.replace("{ph}", placeholder_token)
     #dlog.info("fill consts, input text: %s", context)
@@ -848,6 +849,7 @@ def get_input(msg):
             print("Error occured, please try again or hit e to exit")
             continue
 
+#class MyDataset(datasets.Dataset):
 class MyDataset(torch.utils.data.IterableDataset):
     def __init__(self, split_df, split_name, method, 
             prompt_pos = "end", 
@@ -864,9 +866,12 @@ class MyDataset(torch.utils.data.IterableDataset):
             sampling=0, ex_type="",  samples_per_head=0, 
             save_ds_path="", repeat=1, pid=-1, break_sent=-1, sind=6): 
         super(MyDataset).__init__()
+        fingerprint = save_ds_path + "_" + split_name + "_"  + method + \
+                "_" + str(len(split_df)) + "_" + str(num_samples) 
         self.flat_data = []
         self.data_split = {}
         self.sind = sind # sort index
+
 
         self.only_blanks = only_blanks
         self.samples_per_head = samples_per_head
@@ -960,11 +965,33 @@ class MyDataset(torch.utils.data.IterableDataset):
         self.ex_df = pd.DataFrame()
         self._sels = self.sel_rels.copy()
         dlog.info("sels: %s", self._sels)
-        self.save_path = save_ds_path  + "-".join(self.methods) + \
-                "_" + str(len(split_df)) + "_" + str(self.num_samples) + ".pickle"
+        self.save_path = save_ds_path  + fingerprint + ".pickle"
         if Path(self.save_path).is_file() and self.num_samples > 100_000 and not self.split_name == "sample":
             mlog.info("Loading from saved data %s ", self.save_path)
             self.load()
+        else:
+            _start = self.start
+            _end = self.num_samples
+            if self.flat_data:
+                _data = self.flat_data
+            else:
+                if self.is_even:
+                    _data = self.fill_all_data(_start, _end)
+                else:
+                    _data = self.fill_data(_start, _end)
+                self.flat_data = _data
+            self.num_records = len(self.flat_data)
+
+    def get_data(self):
+        return self.flat_data
+
+    def __len__(self):
+        return len(self.flat_data)
+
+    def __getitem__(self, index):
+        _item = self.flat_data[index]
+        _ret = self.preproc(_item)
+        return _ret
 
     def save(self):
         data = (self.flat_data, self.data_split)
@@ -1013,16 +1040,15 @@ class MyDataset(torch.utils.data.IterableDataset):
         return map(self.preproc, _iter)
 
     def preproc(self, data):
-        event = data[0]
-        resp = data[1]
-        extra = data[2]
-        rel = extra["rel"]
-        targ_col = extra["targ_col"]
-        inp = extra["inp"]
-        d = data[3]
-        context_df = data[4]
-        index = data[5]
-        rep = data[6]
+        event = data["event"]
+        resp = data["resp"]
+        rel = data["rel"]
+        targ_col = data["targ_col"] if "targ_col" in data else "target_text"
+        inp = data["inp"] if "inp" in data else "input_text"
+        d = data["row"] if "row" in data else None
+        context_df = data["context_df"] if "context_df" in data else None
+        index = data["index"]
+        rep = data["rep"]
         rel_token = atomic_relation_mappings[rel]
         if self.natural:
             resp = resp.replace("PersonX intends", "")
@@ -1051,8 +1077,8 @@ class MyDataset(torch.utils.data.IterableDataset):
         if self.only_blanks and "___" in event:
             event = event.replace("___", "{ph}")
         mask = random.randint(0, plen-1)
-        _qtemp = fill_consts(qtemp, ex_qtemp, context,d, context_df, mask=mask,method = mt)
-        _anstemp = fill_consts(anstemp, ex_anstemp, context,d, context_df, mask=mask,method = mt)
+        _qtemp = fill_consts(qtemp, ex_qtemp, context, rel, d, context_df, mask=mask,method = mt)
+        _anstemp = fill_consts(anstemp, ex_anstemp, context,rel, d, context_df, mask=mask,method = mt)
         _query = fill_vars(_qtemp, rel, event, resp, gen_token, 
                 input_lang, target_lang) 
         query = (index, _query)
@@ -1133,12 +1159,21 @@ class MyDataset(torch.utils.data.IterableDataset):
             if kk > iter_end:
                 self.flat_data.extend(flat_data)
                 return flat_data
-            extra = {"inp":inp, "targ_col":targ_col, "rel":rel}
+            _ditem = {"event":event, "resp":resp, 
+                    "inp":inp, 
+                    "targ_col":targ_col, 
+                    "row":d,
+                    "context_df":context_df,
+                    "index": index,
+                    "rep":0
+                    "rel":rel}
             for rr in range(self.repeat):
-                flat_data.append((event, resp, extra, d, context_df, index, 0))
+                flat_data.append(_ditem)
             if self.break_sent > 0:
                 for rr in range(1, self.break_sent + 1):
-                    flat_data.append((event, resp, extra, d, context_df, index, rr))
+                    n_item = _ditem.copy()
+                    n_item["rep"] = rr
+                    flat_data.append(n_item)
             kk += 1
             if show_progress:
                 pbar.update()
@@ -1240,13 +1275,22 @@ class MyDataset(torch.utils.data.IterableDataset):
                         dlog.info("Lang limit reached! %s %s", lang, self.lang_counter[lang])
                         self.flat_data.extend(flat_data)
                         return flat_data
-                    extra = {"inp":inp, "targ_col":targ_col, "rel":rel}
-                    for rr in range(self.repeat): 
-                        flat_data.append((event, resp, extra, d, context_df, index, 0))
+                    _ditem = {"event":event, "resp":resp, 
+                            "inp":inp, 
+                            "targ_col":targ_col, 
+                            "row":d,
+                            "context_df":context_df,
+                            "index": index,
+                            "rep":0
+                            "rel":rel}
+                    for rr in range(self.repeat):
+                        flat_data.append(_ditem)
                         jj += 1
                     if self.break_sent > 0:
-                        for rr in range(1, self.break_sent+1):
-                            flat_data.append((event, resp, extra, d, context_df, index, rr))
+                        for rr in range(1, self.break_sent + 1):
+                            n_item = _ditem.copy()
+                            n_item["rep"] = rr
+                            flat_data.append(n_item)
                             jj += 1
                     if show_progress:
                         pbar.update()
