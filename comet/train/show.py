@@ -7,6 +7,7 @@ import numpy as np
 from glob import glob
 import six
 import os
+import re
 import seaborn as sns
 from pathlib import Path
 import pandas as pd
@@ -73,9 +74,7 @@ def show_df(df):
     count_col = ""
     consts = {"filter":[]}
     save_obj(dfname, "dfname", "")
-    sel_cols = load_obj("sel_cols", dfname)
-    if not sel_cols:
-        sel_cols = list(df.columns)
+    sel_cols = list(df.columns)
     for col in df.columns:
         if "score" in col:
             df[col] = pd.to_numeric(df[col])
@@ -105,6 +104,7 @@ def show_df(df):
     open_dfnames = [dfname]
     prev_cahr = ""
     sel_exp = ""
+    sel_rows = []
     while ch != ord("q"):
         text_win.erase()
         left = min(left, max_col  - width)
@@ -129,13 +129,16 @@ def show_df(df):
                ii += 1
                continue
            text = "{:<5}".format(ii)
-           for sel_col in sel_cols:
+           for sel_col in sel_cols + info_cols:
                if not sel_col in row:
                    continue
                content = str(row[sel_col])
                content = content.strip()
                if "score" in sel_col:
-                   content = "{:.2f}".format(float(content))
+                   try:
+                       content = "{:.2f}".format(float(content))
+                   except:
+                       pass
                _info = sel_col + ":" + content
                if sel_col in info_cols and ii == sel_row:
                     infos.append(_info)
@@ -143,8 +146,11 @@ def show_df(df):
                    sel_dict[sel_col] = row[sel_col]
                _color = TEXT_COLOR
                _w = col_widths[sel_col] if sel_col in col_widths else width
-               text += "{:<{x}}".format(content, x= _w)
+               if sel_col in sel_cols:
+                   text += "{:<{x}}".format(content, x= _w)
 
+           if ii in sel_rows:
+               _color = HL_COLOR
            if ii == sel_row:
                 _color = CUR_ITEM_COLOR
            mprint(text, text_win, color = _color) 
@@ -286,6 +292,11 @@ def show_df(df):
                       merge(df.groupby(['fid','prefix','input_text'],as_index=False)[group_col].agg('<br />'.join))
             if not group_col in info_cols: info_cols.append(group_col)
             consts["filter"].append("group predictions")
+        elif char == " ":
+            if sel_row in sel_rows:
+                sel_rows.remove(sel_row)
+            else:
+                sel_rows.append(sel_row)
         elif char in ["G", "A"]:
             back.append(df)
             if char ==  "A":
@@ -301,49 +312,51 @@ def show_df(df):
                #df = df.reset_index()
                sel_cols = order(sel_cols, g_cols)
                consts["filter"].append("group experiments")
-        elif char == "a":
+        elif char in ["a", "h"]:
             left = 0
             back.append(df)
-            exp=df.iloc[sel_row]["exp_id"]
-            sel_row = 0
-            sel_exp = exp
-            consts["exp"] = exp
-            df = main_df[main_df["fid"] == exp]
-            df = df[["fid","pred_text1","target_text","rouge_score","input_text", "prefix"]]
-            df = df.sort_values(by="rouge_score")
-            df = df.groupby(["target_text","prefix"]).agg({
-                "rouge_score":"first","pred_text1":"first", "fid":"count", 
-                "input_text":"first", "target_text":"first", "prefix":"first"}).reset_index(drop=True)
-            g_cols = ["fid", "target_text","pred_text","prefix", "input_text"]
-            df = df.sort_values(by=["fid","target_text"], ascending=False)
-            sel_cols = order(sel_cols, g_cols)
-            col_widths["fid"]=5
-            col_widths["pred_text1"]=40
-            col_widths["target_text"]=40
-            col_widths["prefix"]=40
-            col_widths["input_text"]=140
+            s_rows = sel_rows
+            if not sel_rows:
+                s_rows = [sel_row]
+            ii = 1
+            dfs = []
+            sdf = pd.DataFrame()
+            on_col = "target_text" if char =="a" else "pred_text1"
+            for s_row in s_rows:
+                exp=df.iloc[s_row]["exp_id"]
+                sel_exp = exp
+                consts["exp"] = exp
+                tdf = main_df[main_df["fid"] == exp]
+                tdf = tdf[["fid","pred_text1","target_text","id", "rouge_score","input_text", "prefix"]]
+                tdf = tdf.sort_values(by="rouge_score")
+                tdf = tdf.groupby(["pred_text1","prefix"]).agg({
+                    "rouge_score":"first","id":"first","pred_text1":"first", "fid":"count", 
+                    "input_text":"first", "target_text":"first", "prefix":"first"}).reset_index(drop=True)
+                tdf = tdf.sort_values(by="fid", ascending=False)
+                if ii == 1:
+                    sdf = tdf
+                else:
+                    sdf = tdf.merge(sdf, how="outer", on=["prefix",on_col]).rename(columns=lambda x: re.sub("(.+)\_x", r"\1_1", x)).rename(columns=lambda x: re.sub("(.+)\_y", r"\1_2", x))
 
-        elif char == "h":
-            left = 0
-            back.append(df)
-            exp=df.iloc[sel_row]["exp_id"]
-            sel_row = 0
-            sel_exp = exp
-            consts["exp"] = exp
-            df = main_df[main_df["fid"] == exp]
-            df = df[["fid","pred_text1","target_text","rouge_score","input_text", "prefix"]]
-            df = df.sort_values(by="rouge_score")
-            df = df.groupby(["pred_text1","prefix"]).agg({
-                "rouge_score":"first","pred_text1":"first", "fid":"count", 
-                "input_text":"first", "target_text":"first", "prefix":"first"}).reset_index(drop=True)
-            g_cols = ["fid", "pred_text1","target_text","prefix", "input_text"]
-            df = df.sort_values(by=["fid","pred_text1"], ascending=False)
+                ii += 1
+            df = sdf
+            g_cols = []
+            sel_cols = []
+            for _col in df.columns:
+                if (_col.startswith("fid") or
+                    _col.startswith("pred_text1") or 
+                    _col.startswith("target_text") or 
+                    _col.startswith("prefix")):
+                    g_cols.append(_col)
+                    col_widths[_col] = 20
+                    if (_col.startswith("pred_text1") or
+                        _col.startswith("target_text")):
+                        col_widths[_col] = 30
+                    if _col.startswith("fid"):
+                        col_widths[_col] = 10
             sel_cols = order(sel_cols, g_cols)
-            col_widths["fid"]=5
-            col_widths["pred_text1"]=40
-            col_widths["target_text"]=40
-            col_widths["prefix"]=40
-            col_widths["input_text"]=140
+            info_cols = ["prefix", "target_text", "input_text", "target_text_1", "target_text_2", "pred_text_1", "pred_text_2"]
+            sel_rows = []
 
         elif char == "H":
             left = 0
@@ -656,6 +669,7 @@ def show_df(df):
         if char == "b" and back:
             if back:
                 df = back.pop()
+                sel_cols = df.columns
             else:
                 mbeep()
             if consts["filter"]:

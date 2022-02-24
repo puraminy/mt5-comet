@@ -1013,8 +1013,10 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
             if split_name == "test":
                 _method = val_method
             _repeat = 1
+            _break_sent = -1
             if split_name == "train" or split_name == "sample":
                 _repeat = int(repeat)
+                _break_sent = int(break_sent)
             # dddddddddddddd
             myds[split_name] = MyDataset(split_df, split_name,
                                 _method, prompt_pos, rel_filter,
@@ -1028,7 +1030,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
                                 pred_tresh, nli_group, per_record, is_even, start, 
                                 sampling, ex_type,
                                 tails_per_head, save_ds_path[split_name], _repeat, 
-                                int(pid), break_sent, int(sort)
+                                int(pid), _break_sent, int(sort)
                         )
         return myds
 

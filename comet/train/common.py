@@ -1,5 +1,6 @@
 from pathlib import Path
 import math
+import datasets
 from termcolor import colored
 from transformers import AddedToken 
 import pandas as pd
@@ -9,12 +10,12 @@ from comet.transformers_ptuning.ptuning_wrapper import LSTMEmbeddingPromptEncode
 from tqdm import tqdm
 import logging, sys
 import random
-import tokens
+import comet.train.tokens as tokens
 import re
 import os
 import torch
 import json
-from mylogs import *
+from comet.train.mylogs import *
 import pickle5 as pickle
 
 SPECIAL_TOKENS  = { "bos_token": "<|BOS|>",
@@ -211,9 +212,9 @@ def fill_sample(mt, rel):
     gen_token = "gen_en"
     _qtemp = fill_consts(qtemp, ex_qtemp, context,d, context_df, mask=mask,method = mt)
     _anstemp = fill_consts(anstemp, ex_anstemp, context,d, context_df, mask=mask,method = mt)
-    _query = fill_vars(_qtemp, rel, event, gen_token, resp, 
+    _query = fill_vars(_qtemp, rel, event, resp, gen_token, 
             input_lang, target_lang) 
-    response = fill_vars(_anstemp, rel, event, gen_token, resp, 
+    response = fill_vars(_anstemp, rel, event, resp, gen_token, 
             input_lang, target_lang)
 
 def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words=False, merge_prompts=False, method="", shared_embs =False):
@@ -804,7 +805,7 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
        qtemp = ret_q
        return qtemp, anstemp, ex_qtemp, ex_anstemp, context
 
-def fill_vars(template, rel, event, gen_token, resp, inp_lang, resp_lang):
+def fill_vars(template, rel, event, resp, gen_token= "gen_en",  inp_lang="en", resp_lang="en"):
     rel_natural_pre = relation_natural_mappings[rel][inp_lang + "-prefix"]        
     rel_natural = relation_natural_mappings[rel][inp_lang + "-postfix"]        
     rel_natural_tokens = relation_natural_mappings[rel]["nat-tokens"]        
@@ -848,7 +849,9 @@ def get_input(msg):
             continue
 
 class MyDataset(torch.utils.data.IterableDataset):
-    def __init__(self, split_df, split_name, method, prompt_pos, rel_filter, 
+    def __init__(self, split_df, split_name, method, 
+            prompt_pos = "end", 
+            rel_filter="", 
             num_samples=0, 
             ignore_blanks=False,
             only_blanks=False,
@@ -1050,10 +1053,10 @@ class MyDataset(torch.utils.data.IterableDataset):
         mask = random.randint(0, plen-1)
         _qtemp = fill_consts(qtemp, ex_qtemp, context,d, context_df, mask=mask,method = mt)
         _anstemp = fill_consts(anstemp, ex_anstemp, context,d, context_df, mask=mask,method = mt)
-        _query = fill_vars(_qtemp, rel, event, gen_token, resp, 
+        _query = fill_vars(_qtemp, rel, event, resp, gen_token, 
                 input_lang, target_lang) 
         query = (index, _query)
-        response = fill_vars(_anstemp, rel, event, gen_token, resp, 
+        response = fill_vars(_anstemp, rel, event, resp, gen_token, 
                 input_lang, target_lang)
 
         __resp = response.replace(placeholder_token,"")
