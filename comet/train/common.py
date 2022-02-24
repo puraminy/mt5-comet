@@ -864,13 +864,13 @@ class MyDataset(torch.utils.data.IterableDataset):
             pred_tresh=0,
             nli_group="all", per_record=False, is_even=False, start=0, 
             sampling=0, ex_type="",  samples_per_head=0, 
-            save_ds_path="", repeat=1, pid=-1, break_sent=-1, sind=6): 
+            save_ds_path="", repeat=1, pid=-1, break_sent=-1, sort_key="rep"): 
         super(MyDataset).__init__()
         fingerprint = save_ds_path + "_" + split_name + "_"  + method + \
                 "_" + str(len(split_df)) + "_" + str(num_samples) 
         self.flat_data = []
         self.data_split = {}
-        self.sind = sind # sort index
+        self.sort_key = sort_key # sort index
 
 
         self.only_blanks = only_blanks
@@ -1027,10 +1027,10 @@ class MyDataset(torch.utils.data.IterableDataset):
                 _data = self.fill_all_data(iter_start, iter_end)
             else:
                 _data = self.fill_data(iter_start, iter_end)
-        if self.sind == 6:
-            _iter = iter(sorted(_data, key = lambda x:x[self.sind], reverse=True))
+        if self.sort_key == "rep":
+            _iter = iter(sorted(_data, key = lambda x:x[self.sort_key], reverse=True))
         else:
-            _iter = iter(sorted(_data, key = lambda x:x[self.sind], reverse=False))
+            _iter = iter(sorted(_data, key = lambda x:x[self.sort_key], reverse=False))
         mlog.info("Iter start: %s", iter_start)
         mlog.info("Iter end: %s", iter_end)
         self.flat_data = _data
@@ -1165,7 +1165,7 @@ class MyDataset(torch.utils.data.IterableDataset):
                     "row":d,
                     "context_df":context_df,
                     "index": index,
-                    "rep":0
+                    "rep":0,
                     "rel":rel}
             for rr in range(self.repeat):
                 flat_data.append(_ditem)
@@ -1281,7 +1281,7 @@ class MyDataset(torch.utils.data.IterableDataset):
                             "row":d,
                             "context_df":context_df,
                             "index": index,
-                            "rep":0
+                            "rep":0,
                             "rel":rel}
                     for rr in range(self.repeat):
                         flat_data.append(_ditem)
