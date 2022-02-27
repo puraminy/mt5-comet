@@ -42,56 +42,56 @@ atomic_relation_mappings = {
 }
 relation_natural_mappings = {
     "oReact":{ 
-        "en-postfix":"{event}, As a result others feel {ph}",
+        "en-postfix":"As a result of {event}, others would feel {ph}",
         "en-prefix":"Others feel {ph} because {event}",
         "fa":"در نتیجه دیگران حس می کنند",
         "tokens":"<state> <other> <after>",
         "nat-tokens":"then, the state of others is "
     },
     "xReact":{ 
-        "en-postfix":"{event}, As a result PersonX feels {ph}.",
+        "en-postfix":"As a result of {event}, PersonX would feel {ph}.",
         "en-prefix":"Others feels {ph} because {event}",
         "fa":"در نتیجه PersonX حس می کند", 
         "tokens":"<state> <agent> <after>",
         "nat-tokens":"then, the state of the person is "
     },
     "xWant":{ 
-        "en-postfix":"{event}, Then PersonX wants {ph}.",
+        "en-postfix":"After {event}, PersonX would want {ph}.",
         "en-prefix":"PersonX wants {ph} after {event}",
         "fa":"بعد از آن PersonX می خواهد",
         "tokens":"<event> <agent> <after> <want>",
         "nat-tokens":"then, the person wants "
     },
     "oWant":{ 
-        "en-postfix":"{event}, Then others want {ph}.",
+        "en-postfix":"After {event}, others would want {ph}.",
         "en-prefix":"Others want {ph} after {event}",
         "fa":"بعد از آن دیگران می خواهند",
         "tokens":"<event> <other> <after> <want>",
         "nat-tokens":"then, others want "
     },
     "xEffect":{ 
-        "en-postfix":"As a result of {event}, PersonX {ph} ",
+        "en-postfix":"As a result of {event}, PersonX will {ph} ",
         "en-prefix":"PersonX {ph} because {event}",
         "fa":"در نتیجه PersonX ",
         "tokens":"<event> <agent> <after> <effect>",
         "nat-tokens":"then, the effect on the person "
     },
     "oEffect":{ 
-        "en-postfix":"As a result of {event}, others {ph} ",
+        "en-postfix":"as a result of {event}, others will {ph} ",
         "en-prefix":"Others {ph} because {event}",
         "fa":"در نتیجه دیگران ",
         "tokens":"<event> <other> <after> <effect>",
         "nat-tokens":"then, the effect on others "
     },
     "xAttr":{ 
-        "en-postfix":"{event}, So PersonX is seen as {ph}.",
+        "en-postfix":"{event} is seen as {ph}.",
         "en-prefix":"PersonX is seen as {ph} because {event}",
         "fa":"مردم فکر می کنند PersonX ",
         "tokens":"<state> <agent> <static>",
         "nat-tokens":"always, the state of the person is",
     },
     "xIntent":{ 
-        "en-postfix":"PersonX intended {ph}. Therefor, {event}",
+        "en-postfix":"Because of {event}, PersonX wanted {ph} ",
         "en-prefix":"PersonX intended {ph}. Therefore,",
         "fa":"زیرا PersonX می خواست",
         "tokens":"<event> <agent> <before> <cause> <want>",

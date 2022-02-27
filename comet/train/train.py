@@ -440,7 +440,7 @@ def run(ctx, conf_path, base_conf, experiment,
 @click.option(
     "--test_path",
     "-tep",
-    default="atomic/test.tsv",
+    default="/home/pouramini/atomic/test.tsv",
     type=str,
     help=""
 )
@@ -919,7 +919,10 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
             model = AutoModelForSeq2SeqLM.from_pretrained(underlying_model_name)
             tokenizer = AutoTokenizer.from_pretrained(underlying_model_name)
         else:
-            tokenizer = AutoTokenizer.from_pretrained(underlying_model_name)
+            tpath = underlying_model_name 
+            if from_dir:
+                tpath = f"{load_path}/{model_id}"
+            tokenizer = AutoTokenizer.from_pretrained(tpath)
             model = T5ForConditionalGeneration.from_pretrained(underlying_model_name) 
 
         if underlying_model_name == model_id:
