@@ -1104,7 +1104,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
     if do_eval or (not wrap and frozen and modules_to_freeze is model):
         mlog.info("Evaluating the model...")
         model.to(device=device)
-        evaluate(model, tokenizer, myds[test_set], underlying_model_name, exp_info, val_records, gen_param, no_score=no_score, batch_size=gen_bs)  
+        evaluate(myds[test_set], underlying_model_name, exp_info, val_records, gen_param, no_score=no_score, batch_size=gen_bs, model=model, tokenizer=tokenizer)  
         return
     #%% tokenizer & model
     allowed_out_token_length = len(tokenizer)
@@ -1462,7 +1462,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
     if test_set:
         myds = load_data([test_set])
         val_records = myds[test_set].num_records
-        evaluate(model, tokenizer, myds[test_set], save_path, exp_info, val_records, gen_param, no_score=no_score, batch_size=gen_bs)  
+        evaluate(myds[test_set], save_path, exp_info, val_records, gen_param, no_score=no_score, batch_size=gen_bs, model=model, tokenizer=tokenizer)  
     else:
         mlog.info("Test set was not provided.... skip testing...")
         

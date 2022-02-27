@@ -139,7 +139,7 @@ targets = ["target_text", "target_text_fa", "pred_text1", "all_preds", "pred_tex
 inputs = ["input_text", "input_text_fa", "natural_input_text", "natural_input_text_fa"]
 
 placeholder_token = "<extra_id_0>"
-end_token = SPECIAL_TOKENS['eos_token']  #"</s>"
+end_token = "" #SPECIAL_TOKENS['eos_token']  #"</s>"
 # %%
 relation_prompt_lengths = {"com":[3]}
 
@@ -611,7 +611,7 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            qtemp = "{event} {nat_tokens} {ph}" 
            anstemp = "{ph} {resp} {end}"
        elif method == "sup-nat":
-           qtemp = "{event} {rel_natural}" 
+           qtemp = "{rel_natural_pure}" 
            anstemp = "{resp} {end}"
        elif method == "unsup-nat":
            qtemp = ["{rel_natural}","{rel_natural_pre}"] 
@@ -801,6 +801,7 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
                q = q.replace("  "," ")
            if method.startswith("sup"):
                q = q.replace("{ph}","")
+               q = q.replace("{rel_natural}","{rel_natural_pure}")
            q = fix_pos(q, gen_pos, prompt_pos)
            ret_q.append(q)
        qtemp = ret_q
@@ -811,6 +812,7 @@ def fill_vars(template, rel, event, resp, gen_token= "gen_en",  inp_lang="en", r
     rel_natural = relation_natural_mappings[rel][inp_lang + "-postfix"]        
     rel_natural_tokens = relation_natural_mappings[rel]["nat-tokens"]        
     rel_natural_pure = rel_natural.replace("{ph}", "")
+    rel_natural_pure = rel_natural_pure.replace(".", "")
     rel_natural = rel_natural.replace("{ph}", placeholder_token)
     rel_natural_pre = rel_natural_pre.replace("{ph}", placeholder_token)
     
@@ -1057,8 +1059,8 @@ class MyDataset(torch.utils.data.Dataset):
             resp = resp.replace("PersonX قصد دارد", "")
         resp = resp.strip()
         gen_token = gen_tokens[targ_col]
-        input_lang = langs[inp]
-        target_lang = langs[targ_col]
+        input_lang = "en" #langs[inp]
+        target_lang = "en" #langs[targ_col]
         mt = self.methods[0]
         if "-fa" in mt and input_lang == "fa":
             event = toPers(event)
@@ -1338,3 +1340,7 @@ def save_checkpoint(model, tokenizer, optimizer, scheduler, step,
 #            }, os.path.join(save_path, "saved_states"))
 #
 
+def batched(iterable, n=1):
+    l = len(iterable)
+    for ndx in range(0, l, n):
+        yield iterable[ndx:min(ndx + n, l)]

@@ -1,4 +1,5 @@
 
+from itertools import islice
 from comet.train.common import *
 import nltk
 from nltk.tokenize import word_tokenize
@@ -20,7 +21,6 @@ from nltk.corpus import wordnet
 
 lemmatizer = nltk.WordNetLemmatizer()
 #nltk.download('averaged_perceptron_tagger')
-
 #word tokenizeing and part-of-speech tagger
 def get_verb(document):
     tokens = [nltk.word_tokenize(sent) for sent in [document]]
@@ -141,14 +141,9 @@ def chunks(lst, n):
     for i in range(0, len(lst), n):
         yield lst[i : i + n]
 
-def batched(iterable, n=1):
-    l = len(iterable)
-    for ndx in range(0, l, n):
-        yield iterable[ndx:min(ndx + n, l)]
 
 
-def evaluate(model, tokenizer, dataloader, save_path, exp_info, val_records, gen_param="greedy", no_score=False, batch_size="20@5"):  
-
+def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", no_score=False, batch_size="20@5", model = None, tokenizer = None, preds_file = ""):  
     try:
         nltk_path = str(nltk.data.find("tokenizers/punkt"))
         mlog.info(f"using nltk from: {nltk_path}")
@@ -167,7 +162,7 @@ def evaluate(model, tokenizer, dataloader, save_path, exp_info, val_records, gen
         local_path = 'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2'
 
     bert_scorer = None
-    if "ahmad" in home:
+    if True: #"ahmad" in home:
         bert_scorer = None
     elif not no_score:
         bert_scorer = SentenceTransformer(local_path)
@@ -182,7 +177,7 @@ def evaluate(model, tokenizer, dataloader, save_path, exp_info, val_records, gen
     #df = df.groupby(['prefix','input_text'],as_index=False)[target].agg({"target_text":'<br />'.join})
     #resp_const_parts = re.split("{.*}", anstemp)
     resp_const_parts = ["<extra_id_0>", "<extra_id_1>", "<extra_id_2>", "</s>", "."]
-    model.eval()
+    if model is not None: model.eval()
     rows = []
     counter = {"all":0}
     sum_match = {"all":0} 
@@ -202,7 +197,7 @@ def evaluate(model, tokenizer, dataloader, save_path, exp_info, val_records, gen
         ignore_special_tokens = ist == "True"
 
     mlog.info("Preparing iterator ...")
-    test_iter = iter(dataloader)
+    test_iter = iter(test_set)
     mlog.info("Scoring...")
     pbar = tqdm(total=val_records, position=0, leave=True) #,dynamic_ncols=True)
     step = 0
@@ -212,11 +207,21 @@ def evaluate(model, tokenizer, dataloader, save_path, exp_info, val_records, gen
     vlog.disabled = True
     exit_loop = False
     lang = "en2en"
+    if preds_file:
+        with open(preds_file, 'r') as infile:
+              lines = infile.readlines()
+        lines = lines[1:]
+    l_count = 0
     for batch_list in batched(list(test_iter), bs):
         if exit_loop:
             break
         queries = [x[0] for x in batch_list]
-        hyps = generate(model, tokenizer, queries, batch_size = gen_bs)
+        if model is not None:
+            hyps = generate(model, tokenizer, queries, batch_size = gen_bs)
+        else:
+            #hyps = islice(infile, len(queries))
+            hyps = lines[l_count: l_count + len(queries)]
+            l_count += len(queries)
         pbar.update(bs)
         for (query, tail, rel, qid, repid), top_hyp in zip(batch_list, hyps):
             tails = [tail]
@@ -354,14 +359,16 @@ def evaluate(model, tokenizer, dataloader, save_path, exp_info, val_records, gen
             rows.append(data)
 
     # %%%%%%%%%%%%%%%%%%
-    new_df = save_results(rows, "full", step, exp_info, save_path)
+    file_gen = "_" + Path(preds_file).stem if preds_file else ""
+    new_df = save_results(rows, "full" + file_gen , step, exp_info, save_path)
     if no_score:
         return
 
 
     new_df = new_df.sort_values(by=["input_text"])
     _info = "_".join([str(x) for x in list(exp_info.values())])
-    out = os.path.join(logPath,f"__{_info}.txt")
+    
+    out = os.path.join(save_path,f"__{_info}.txt")
     def write_preds(new_df, out):
         handler = logging.FileHandler(out, mode="w")
         mlog.addHandler(handler)

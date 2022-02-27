@@ -1,3 +1,4 @@
+from pathlib import Path
 def human_format(num):
     magnitude = 0
     while abs(num) >= 1000:
@@ -6,6 +7,8 @@ def human_format(num):
     # add more suffixes if you need them
     return '%.2f%s' % (num, ['', 'K', 'M', 'G', 'T', 'P'][magnitude])
 
+def mkdir(path):
+    Path(path).mkdir(parents =True, exist_ok =True)
 
 def myconv(obj):
     if type(obj) == str:

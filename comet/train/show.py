@@ -856,7 +856,7 @@ def start(stdscr):
                 force_fid = sfid[1] == "force"
             if not "fid" in df or force_fid:
                 if fid == "parent":
-                    df["fid"] = Path(f).parent.name
+                    df["fid"] = Path(f).parent.name + "_" + Path(f).stem
                 elif fid == "name":
                     df["fid"] = Path(f).stem
                 else:
