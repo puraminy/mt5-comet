@@ -270,6 +270,7 @@ def show_df(df):
         elif char == "W":
             #df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
             df = df[df["wrap"] == "wrapped-lstm"]
+
         elif char == "u": 
             if not count_col:
                 canceled, col, _ = list_df_values(df, get_val=False)
@@ -297,6 +298,12 @@ def show_df(df):
                 sel_rows.remove(sel_row)
             else:
                 sel_rows.append(sel_row)
+        elif char == "?": 
+            exp=df.iloc[sel_row]["exp_id"]
+            sel_exp = exp
+            consts["exp"] = exp
+            path = main_df.loc[main_df["fid"] == exp, "path"][0]
+            consts["path"] = path
         elif char in ["G", "A"]:
             back.append(df)
             if char ==  "A":
@@ -855,6 +862,7 @@ def start(stdscr):
             if len(sfid) > 1:
                 force_fid = sfid[1] == "force"
             if not "fid" in df or force_fid:
+                df["path"] = f
                 if fid == "parent":
                     df["fid"] = Path(f).parent.name + "_" + Path(f).stem
                 elif fid == "name":
