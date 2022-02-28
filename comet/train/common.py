@@ -974,7 +974,7 @@ class MyDataset(torch.utils.data.Dataset):
             self.load()
         else:
             _start = self.start
-            _end = self.num_samples
+            _end = self.start + self.num_samples
             if self.flat_data:
                 _data = self.flat_data
             else:
@@ -1015,7 +1015,7 @@ class MyDataset(torch.utils.data.Dataset):
          
     def my_iter(self):
         iter_start = self.start
-        iter_end = self.num_samples
+        iter_end = self.start+ self.num_samples
         worker_info = torch.utils.data.get_worker_info()
         if worker_info is None:  # single-process data loading, return the full iterator
              iter_start = self.start
@@ -1140,7 +1140,7 @@ class MyDataset(torch.utils.data.Dataset):
     def fill_all_data(self, iter_start, iter_end, show_progress=True):
         flat_data = []
         if iter_end < 0:
-            iter_end = self.num_samples
+            iter_end = iter_start + self.num_samples
         kk = 0 
         dlog.info("========================== SPLIT: %s", self.split_name)
         dlog.info("get data from %s to %s", iter_start, iter_end)
@@ -1188,7 +1188,7 @@ class MyDataset(torch.utils.data.Dataset):
     def fill_data(self, iter_start, iter_end, show_progress=True):
         flat_data = []
         if iter_end < 0:
-            iter_end = self.num_samples
+            iter_end = iter_start + self.num_samples
         kk = 0
         jj = 0
         dlog.info("==========NNNNN========= SPLIT: %s", self.split_name)
@@ -1275,8 +1275,7 @@ class MyDataset(torch.utils.data.Dataset):
                         self.lang_counter[lang] = 1
                     else:
                         self.lang_counter[lang] += 1
-                    if (self.lang_counter[lang] > self.num_records 
-                        or self.lang_counter[lang] > iter_end):
+                    if (self.lang_counter[lang] > iter_end):
                         dlog.info("Lang limit reached! %s %s", lang, self.lang_counter[lang])
                         self.flat_data.extend(flat_data)
                         return flat_data
@@ -1300,7 +1299,7 @@ class MyDataset(torch.utils.data.Dataset):
                     if show_progress:
                         pbar.update()
                     kk += 1
-                    if (kk > iter_end or kk > self.num_records):
+                    if (kk > iter_end):
                         dlog.info("record limit reached!")
                         self.flat_data.extend(flat_data)
                         return flat_data

@@ -179,6 +179,7 @@ def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", no_
     resp_const_parts = ["<extra_id_0>", "<extra_id_1>", "<extra_id_2>", "</s>", "."]
     if model is not None: model.eval()
     rows = []
+    sel_rows = []
     counter = {"all":0}
     sum_match = {"all":0} 
     mean_match = {}
@@ -226,6 +227,7 @@ def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", no_
         for (query, tail, rel, qid, repid), top_hyp in zip(batch_list, hyps):
             tails = [tail]
             data = {}
+            sel_data = {}
             data["qid"] = qid
             data["tid"] = qid
             #rel_natural = relation_natural_mappings[rel]["en-postfix"]        
@@ -251,7 +253,7 @@ def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", no_
             data["langs"] = lang
             input_text = re.sub(r'<.*?>','##',query)
             input_text = input_text.replace("\n", "")
-            data["input_text"] = input_text 
+            data["input_text"] = query #input_text 
             if no_score:
                 if step % 10000 == 0:
                     save_results(rows, "step", step, exp_info, save_path)
@@ -332,9 +334,14 @@ def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", no_
                                                 avg=True, ignore_empty=True)
                 rouge_score = rouge_score["rouge-l"]["f"]
             match_score = 0
-            if rouge_score > 0.9:
+            if rouge_score > 0.7 and top_hyp.lower() != "none":
                 match_score = 1
                 sum_match[scope] += 1
+                sel_data["input_text"] = query
+                sel_data["prefix"] = rel
+                sel_data["target_text"] = tail
+                sel_rows.append(sel_data)
+
             mean_match[scope] = "{:.4f}".format(sum_match[scope] / counter[scope])
 
             data["rouge_score"] = rouge_score
@@ -358,9 +365,11 @@ def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", no_
                 save_results(rows, "step", step, exp_info, save_path)
             rows.append(data)
 
+
     # %%%%%%%%%%%%%%%%%%
     file_gen = "_" + Path(preds_file).stem if preds_file else ""
     new_df = save_results(rows, "full" + file_gen , step, exp_info, save_path)
+    sel_df = save_results(sel_rows, "sel" + file_gen , step, {}, save_path)
     if no_score:
         return
 

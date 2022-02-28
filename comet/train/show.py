@@ -91,11 +91,12 @@ def show_df(df):
 
     back = []
     filter_df = main_df
-    df["num_preds"] = df.groupby(["fid"])['pred_text1'].transform('nunique')
-    br_col = df.loc[: , "bert_score":"rouge_score"]
-    df['br_score'] = br_col.mean(axis=1)
-    df['nr_score'] = df['rouge_score']
-    df['nr_score'] = np.where((df['bert_score'] > 0.4) & (df['nr_score'] < 0.1), df['bert_score'], df['rouge_score'])
+    if "pred_text1" in df:
+        df["num_preds"] = df.groupby(["fid"])['pred_text1'].transform('nunique')
+        br_col = df.loc[: , "bert_score":"rouge_score"]
+        df['br_score'] = br_col.mean(axis=1)
+        df['nr_score'] = df['rouge_score']
+        df['nr_score'] = np.where((df['bert_score'] > 0.4) & (df['nr_score'] < 0.1), df['bert_score'], df['rouge_score'])
 
 
     #wwwwwwwwww
