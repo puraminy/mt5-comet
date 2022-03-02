@@ -176,7 +176,7 @@ def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", no_
         nli_counter[l] = 0
     #df = df.groupby(['prefix','input_text'],as_index=False)[target].agg({"target_text":'<br />'.join})
     #resp_const_parts = re.split("{.*}", anstemp)
-    resp_const_parts = ["<extra_id_0>", "<extra_id_1>", "<extra_id_2>", "</s>", "."]
+    resp_const_parts = ["<pad>","<extra_id_0>", "<extra_id_1>", "<extra_id_2>", "</s>", "."]
     if model is not None: model.eval()
     rows = []
     sel_rows = []
@@ -228,7 +228,8 @@ def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", no_
         pbar.update(bs)
         for (query, inp, tail, rel, qid, repid), top_hyp in zip(batch_list, hyps):
             tails = [tail]
-            mlog.info("query: %s, hyp: %s", query, top_hyp)
+            mlog.info("query: %s", query)
+            mlog.info("1)  hyp: %s",top_hyp)
             data = {}
             sel_data = {}
             data["qid"] = qid
@@ -236,8 +237,12 @@ def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", no_
             #rel_natural = relation_natural_mappings[rel]["en-postfix"]        
             #rel_natural_pure = rel_natural.replace("{ph}", "").strip()
             #top_hyp = top_hyp.replace(rel_natural_pure, "")
+            if "<extra_id_0>" in top_hyp:
+                top_hyp = top_hyp.split("<extra_id_0>")[1]
+            mlog.info("2)  hyp: %s",top_hyp)
             for const in resp_const_parts:
                 top_hyp = top_hyp.replace(const, "")
+            mlog.info("3)  hyp: %s", top_hyp)
             if not top_hyp.strip():
                 top_hyp = "EMPT"
             new_tails = []
