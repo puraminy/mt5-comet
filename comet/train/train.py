@@ -1030,6 +1030,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
             _method = method
             if "test" in split_name:
                 _method = val_method
+                only_blanks = True
             _repeat = 1
             _break_sent = -1
             if split_name == "train" or split_name == "sample":
