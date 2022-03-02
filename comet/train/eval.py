@@ -121,7 +121,7 @@ def bert_score(bert_scorer, hyps, refs):
 def save_results(rows, fid, step, exp_info, save_path=""):
     name = fid + "_results_" + human_format(step) 
     df = pd.DataFrame(rows)
-    df["val_steps"] = step
+    if exp_info: df["val_steps"] = step
     for key, info in exp_info.items():
         df[key] = info
     if save_path:
@@ -207,7 +207,9 @@ def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", no_
     gen_bs = int(gen_bs)
     vlog.disabled = True
     exit_loop = False
+    nones = 0
     lang = "en2en"
+    sel_inps = {}
     if preds_file:
         with open(preds_file, 'r') as infile:
               lines = infile.readlines()
@@ -224,7 +226,7 @@ def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", no_
             hyps = lines[l_count: l_count + len(queries)]
             l_count += len(queries)
         pbar.update(bs)
-        for (query, tail, rel, qid, repid), top_hyp in zip(batch_list, hyps):
+        for (query, inp, tail, rel, qid, repid), top_hyp in zip(batch_list, hyps):
             tails = [tail]
             data = {}
             sel_data = {}
@@ -334,13 +336,20 @@ def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", no_
                                                 avg=True, ignore_empty=True)
                 rouge_score = rouge_score["rouge-l"]["f"]
             match_score = 0
-            if rouge_score > 0.7 and top_hyp.lower() != "none":
+            inp_key = inp + rel
+            if rouge_score > 0.6 and inp_key not in sel_inps:
                 match_score = 1
                 sum_match[scope] += 1
-                sel_data["input_text"] = query
-                sel_data["prefix"] = rel
-                sel_data["target_text"] = tail
-                sel_rows.append(sel_data)
+                is_none = False
+                if "none" in top_hyp.lower():
+                    nones += 1
+                    is_none = True
+                if nones < 200 or not is_none:
+                    sel_data["input_text"] = inp 
+                    sel_data["prefix"] = rel
+                    sel_data["target_text"] = tails[0]
+                    sel_rows.append(sel_data)
+                    sel_inps[inp_key] = True
 
             mean_match[scope] = "{:.4f}".format(sum_match[scope] / counter[scope])
 

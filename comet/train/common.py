@@ -867,7 +867,7 @@ class MyDataset(torch.utils.data.Dataset):
             nli_group="all", per_record=False, is_even=False, start=0, 
             sampling=0, ex_type="",  samples_per_head=0, 
             save_ds_path="", repeat=1, pid=-1, break_sent=-1, 
-            sort_key="rep"): 
+            sort_key="rep", replace_blanks = False): 
         super(MyDataset).__init__()
         fingerprint = save_ds_path + "_" + split_name + "_"  + method + \
                 "_" + str(len(split_df)) + "_" + str(num_samples) 
@@ -899,6 +899,7 @@ class MyDataset(torch.utils.data.Dataset):
         if self.natural:
             dlog.info("natural is ON")
         self.num_samples = num_samples
+        self.replace_blanks = replace_blanks
         if self.num_samples == 0: 
             self.num_samples = len(split_df)
             self.samples_per_head = 0
@@ -1078,8 +1079,8 @@ class MyDataset(torch.utils.data.Dataset):
 
         qtemp = qtemp[_rep] 
         plen = relation_prompt_lengths[rel][0]
-        if self.only_blanks and "___" in event:
-            event = event.replace("___", "{ph}")
+        if self.replace_blanks and "___" in event:
+            event = event.replace("___", "<extra_id_1>")
         mask = random.randint(0, plen-1)
         _qtemp = fill_consts(qtemp, ex_qtemp, context, rel, d, context_df, mask=mask,method = mt)
         _anstemp = fill_consts(anstemp, ex_anstemp, context,rel, d, context_df, mask=mask,method = mt)
@@ -1134,7 +1135,7 @@ class MyDataset(torch.utils.data.Dataset):
         #else:
         #    self.data_split[rel][lang][query].append(response)
         # return {"event":_query, "resp":response, "rel":rel, "index":index, "rep":rep}
-        return (_query, response, rel, index, rep)
+        return (_query, event, response, rel, index, rep)
 
 
     def fill_all_data(self, iter_start, iter_end, show_progress=True):

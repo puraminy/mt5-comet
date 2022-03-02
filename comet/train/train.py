@@ -1138,7 +1138,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
 
 # ggggggggg
     def collate_fn_for_flattened(batch):
-        queries,responses,rel,index,rep = zip(*batch)
+        queries,inputs, responses,rel,index,rep = zip(*batch)
         new_batch = tokenizer(list(queries),return_tensors='pt',padding='longest')
         with tokenizer.as_target_tokenizer():
             tokenized = tokenizer(list(responses),return_tensors='pt',padding='longest')
@@ -1263,16 +1263,24 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
             scheduler = AdafactorSchedule(optimizer)
         elif opt_type == "ada":
             # replace AdamW with Adafactor
+#AdafactorOptimizer.beta1 = 0.0
+#AdafactorOptimizer.clipping_threshold = 1.0
+#AdafactorOptimizer.decay_rate = None
+#AdafactorOptimizer.epsilon1 = 1e-30
+#AdafactorOptimizer.epsilon2 = 0.001
+#AdafactorOptimizer.factored = True
+#AdafactorOptimizer.min_dim_size_to_factor = 128
+#AdafactorOptimizer.multiply_by_parameter_scale = True
             optimizer = Adafactor(
                 model.parameters(),
                 lr=learning_rate,
                 eps=(1e-30, 1e-3),
                 clip_threshold=1.0,
                 decay_rate=-0.8,
-                beta1=None,
+                beta1=0.0,
                 weight_decay=0.0,
                 relative_step=False,
-                scale_parameter=False,
+                scale_parameter=True,
                 warmup_init=False
             )
             scheduler = AdafactorSchedule(optimizer)
