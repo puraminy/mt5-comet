@@ -237,8 +237,8 @@ def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", no_
             #rel_natural = relation_natural_mappings[rel]["en-postfix"]        
             #rel_natural_pure = rel_natural.replace("{ph}", "").strip()
             #top_hyp = top_hyp.replace(rel_natural_pure, "")
-            if "<extra_id_0>" in top_hyp:
-                top_hyp = top_hyp.split("<extra_id_0>")[1]
+            if "<extra_id_1>" in top_hyp:
+                top_hyp = top_hyp.split("<extra_id_1>")[1]
             mlog.info("2)  hyp: %s",top_hyp)
             for const in resp_const_parts:
                 top_hyp = top_hyp.replace(const, "")
