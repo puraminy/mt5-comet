@@ -1480,6 +1480,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
     if test_set:
         for _set in test_set.split("@"):
             myds = load_data([_set])
+            mlog.info("Evaluating ... %s", _set)
             val_records = myds[_set].num_records
             exp_info["test_set"] = _set
             evaluate(myds[_set], save_path, exp_info, val_records, gen_param, no_score=no_score, batch_size=gen_bs, model=model, tokenizer=tokenizer)  
