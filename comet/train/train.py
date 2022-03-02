@@ -1001,9 +1001,16 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
         val_method = method
     def load_data(split_names):
         myds = {}
-        for split_name in split_names:
+        for _name in split_names:
+            split_name = _name.split("+")[0]
+            _replace_blanks = False
+            if len(_name) > 1:
+                _opt = _name[1]
+                if _opt == "replace_blanks":
+                    _replace_blanks = True
+
             tails_per_head = int(samples_per_head)
-            if split_name == "test":
+            if "test" in split_name:
                 tails_per_head = 0
             df_path = split_path[split_name]
             split_df = pd.read_table(df_path)
@@ -1019,7 +1026,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
             targ_include, targ_exclude = filter_inputs(include, exclude, targ_lang)
             mlog.info("Creating dataset for %s", split_name)
             _method = method
-            if split_name == "test":
+            if "test" in split_name:
                 _method = val_method
             _repeat = 1
             _break_sent = -1
@@ -1039,7 +1046,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
                                 pred_tresh, nli_group, per_record, is_even, start, 
                                 sampling, ex_type,
                                 tails_per_head, save_ds_path[split_name], _repeat, 
-                                int(pid), _break_sent, sort
+                                int(pid), _break_sent, sort, _replace_blanks
                         )
         return myds
 
@@ -1471,9 +1478,11 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
 
     #% vvvvvvvvvvvvvvvv
     if test_set:
-        myds = load_data([test_set])
-        val_records = myds[test_set].num_records
-        evaluate(myds[test_set], save_path, exp_info, val_records, gen_param, no_score=no_score, batch_size=gen_bs, model=model, tokenizer=tokenizer)  
+        for _set in test_set.split("@"):
+            myds = load_data([_set])
+            val_records = myds[_set].num_records
+            exp_info["test_set"] = _set
+            evaluate(myds[_set], save_path, exp_info, val_records, gen_param, no_score=no_score, batch_size=gen_bs, model=model, tokenizer=tokenizer)  
     else:
         mlog.info("Test set was not provided.... skip testing...")
         

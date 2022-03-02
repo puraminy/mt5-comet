@@ -119,7 +119,7 @@ def bert_score(bert_scorer, hyps, refs):
         return best_hyp_index, best_ref_index, top["score"] 
 
 def save_results(rows, fid, step, exp_info, save_path=""):
-    name = fid + "_results_" + human_format(step) 
+    name = fid + "_results_" + exp_info["test_set"] + "_" + human_format(step) 
     df = pd.DataFrame(rows)
     if exp_info: df["val_steps"] = step
     for key, info in exp_info.items():
