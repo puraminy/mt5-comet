@@ -264,6 +264,11 @@ def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", no_
             data["langs"] = lang
             input_text = re.sub(r'<.*?>','##',query)
             input_text = input_text.replace("\n", "")
+            if blank:
+                query = query.replace("<extra_id_0>", "[" + blank + "]")
+                query = query.replace("<extra_id_1>", ">>" + top_hyp)
+            else:
+                query = query.replace("<extra_id_0>", ">>" + top_hyp)
             data["input_text"] = query #input_text 
             if no_score:
                 if step % 10000 == 0:
