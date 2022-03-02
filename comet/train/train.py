@@ -1005,6 +1005,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
             split_name = _name.split("+")[0]
             _replace_blanks = False
             if len(_name) > 1:
+                input("_name:")
+                _replace_blanks = True
                 _opt = _name[1]
                 if _opt == "replace_blanks":
                     _replace_blanks = True
