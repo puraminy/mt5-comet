@@ -103,6 +103,8 @@ def show_df(df):
     colors = ['blue','orange','green', 'red', 'purple', 'brown', 'pink','gray','olive','cyan']
     ax = None
     open_dfnames = [dfname]
+    if not "blank" in df:
+        df["blank"] = "blank"
     prev_cahr = ""
     sel_exp = ""
     sel_rows = []
@@ -848,11 +850,12 @@ def start(stdscr):
                 files = []
                 for root, dirs, _files in os.walk(dfpath):
                     for _file in _files:
-                        if all(s in _file for s in dfname.split("+")):
-                            files.append(os.path.join(root, _file))
+                        root_file = os.path.join(root,_file)
+                        if all(s.strip() in root_file for s in dfname.split("+")):
+                            files.append(root_file)
         mlog.info("files: %s",files)
         dfs = []
-        for f in files:
+        for ii, f in enumerate(files):
             mlog.info(f)
             if f.endswith(".tsv"):
                 df = pd.read_table(f, low_memory=False)
@@ -866,11 +869,11 @@ def start(stdscr):
             if not "fid" in df or force_fid:
                 df["path"] = f
                 if fid == "parent":
-                    df["fid"] = Path(f).parent.name + "_" + Path(f).stem
+                    df["fid"] = str(ii) + "_" + Path(f).parent.name + "_" + Path(f).stem
                 elif fid == "name":
-                    df["fid"] = Path(f).stem
+                    df["fid"] = str(ii) + "_" + Path(f).stem
                 else:
-                    df["fid"] = df[fid]
+                    df["fid"] = str(ii) + "_" + df[fid]
             dfs.append(df)
         if len(dfs) > 1:
             df = pd.concat(dfs, ignore_index=True)

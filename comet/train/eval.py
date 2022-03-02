@@ -43,7 +43,7 @@ def trim_batch(
 
 # ggggggggg
 def generate(model, tokenizer, queries, batch_size=5, gen_token = "", gen_param = "greedy", at_mask=None):
-    skip_special = "False"
+    skip_special = "True"
     #verb = get_verb(query)
     #vlog.info("Ignoring verb %s", verb)
     bad_words_ids = None
@@ -53,7 +53,7 @@ def generate(model, tokenizer, queries, batch_size=5, gen_token = "", gen_param 
         gen_param, skip_special = gen_param.split("@")
     if gen_param == "greedy":
         generation_params = {
-            "max_length":160,
+            "max_length":360,
             "num_beams":5,
             "repetition_penalty":2.5,
             "num_return_sequences":1,
@@ -61,7 +61,7 @@ def generate(model, tokenizer, queries, batch_size=5, gen_token = "", gen_param 
         }
     elif gen_param == "top_p":
         generation_params = {
-            "max_length":160,
+            "max_length":360,
             "do_sample":True, 
             "top_p":0.9, 
             "top_k":10,
@@ -220,7 +220,7 @@ def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", no_
             break
         queries = [x[0] for x in batch_list]
         if model is not None:
-            hyps = generate(model, tokenizer, queries, batch_size = gen_bs)
+            hyps = generate(model, tokenizer, queries, batch_size = gen_bs, gen_param=gen_param)
         else:
             #hyps = islice(infile, len(queries))
             hyps = lines[l_count: l_count + len(queries)]
@@ -228,8 +228,8 @@ def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", no_
         pbar.update(bs)
         for (query, inp, tail, rel, qid, repid), top_hyp in zip(batch_list, hyps):
             tails = [tail]
-            #mlog.info("query: %s", query)
-            #mlog.info("1)  hyp: %s",top_hyp)
+            mlog.info("query: %s", query)
+            mlog.info("1)  hyp: %s",top_hyp)
             data = {}
             sel_data = {}
             data["qid"] = qid
@@ -240,11 +240,12 @@ def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", no_
             blank = ""
             if "<extra_id_1>" in top_hyp:
                 blank, top_hyp = top_hyp.split("<extra_id_1>")
-            #mlog.info("2)  hyp: %s",top_hyp)
+                if not blank: blank = "EMPT"
+            mlog.info("2)  hyp: %s",top_hyp)
             for const in resp_const_parts:
                 top_hyp = top_hyp.replace(const, "")
                 blank = blank.replace(const, "")
-            #mlog.info("3)  hyp: %s", top_hyp)
+            mlog.info("3)  hyp: %s", top_hyp)
             if not top_hyp.strip():
                 top_hyp = "EMPT"
             new_tails = []

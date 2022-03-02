@@ -28,7 +28,7 @@ pad_token = {"pad_token": "<|PAD|>"}
 sep_token = {"sep_token": sep}
 nli_map = ['contradiction', 'entailment', 'neutral']
 all_rels = ["oEffect","oReact", "oWant", "xAttr", "xEffect","xIntent","xNeed","xReact","xWant"]
-atomic_relation_mappings = {
+rel_maps = {
     "oEffect":"<oEffect>",
     "oReact":"<oReact>",
     "oWant":"<oWant>",
@@ -39,44 +39,47 @@ atomic_relation_mappings = {
     "xReact":"<xReact>",
     "xWant":"<xWant>"
 }
-relation_natural_mappings = {
+rel_nat_maps = {
     "oReact":{ 
-        "en-postfix":"As a result of {event}, others would feel {ph}",
+        "en-postfix":"As a result of {event}, others would feel {ph}.",
         "en-prefix":"Others feel {ph} because {event}",
         "fa":"در نتیجه دیگران حس می کنند",
         "tokens":"<state> <other> <after>",
-        "nat-tokens":"then, the state of others is "
+        "nat-tokens":"then, the state of others is ",
+        "token":"other's reaction"
     },
     "xReact":{ 
-        "en-postfix":"As a result of {event}, PersonX would feel {ph}.",
+        "en-postfix":"As a result of {event}, PersonX would feel {ph}. ",
         "en-prefix":"Others feels {ph} because {event}",
         "fa":"در نتیجه PersonX حس می کند", 
         "tokens":"<state> <agent> <after>",
-        "nat-tokens":"then, the state of the person is "
+        "nat-tokens":"then, the state of the person is ",
+        "token":"person reaction"
     },
     "xWant":{ 
-        "en-postfix":"After {event}, PersonX would want {ph}.",
+        "en-postfix":"After {event}, PersonX would want {ph}. ",
         "en-prefix":"PersonX wants {ph} after {event}",
         "fa":"بعد از آن PersonX می خواهد",
         "tokens":"<event> <agent> <after> <want>",
-        "nat-tokens":"then, the person wants "
+        "nat-tokens":"then, the person wants ",
+        "token":"person want"
     },
     "oWant":{ 
-        "en-postfix":"After {event}, others would want {ph}.",
+        "en-postfix":"After {event}, others would want {ph}. ",
         "en-prefix":"Others want {ph} after {event}",
         "fa":"بعد از آن دیگران می خواهند",
         "tokens":"<event> <other> <after> <want>",
         "nat-tokens":"then, others want "
     },
     "xEffect":{ 
-        "en-postfix":"As a result of {event}, PersonX will {ph} ",
+        "en-postfix":"As a result of {event}, PersonX will {ph}. ",
         "en-prefix":"PersonX {ph} because {event}",
         "fa":"در نتیجه PersonX ",
         "tokens":"<event> <agent> <after> <effect>",
         "nat-tokens":"then, the effect on the person "
     },
     "oEffect":{ 
-        "en-postfix":"as a result of {event}, others will {ph} ",
+        "en-postfix":"as a result of {event}, others will {ph}. ",
         "en-prefix":"Others {ph} because {event}",
         "fa":"در نتیجه دیگران ",
         "tokens":"<event> <other> <after> <effect>",
@@ -90,16 +93,16 @@ relation_natural_mappings = {
         "nat-tokens":"always, the state of the person is",
     },
     "xIntent":{ 
-        "en-postfix":"Because of {event}, PersonX wanted {ph} ",
-        "en-prefix":"PersonX intended {ph}. Therefore,",
+        "en-postfix":"Because of {event}, PersonX wanted {ph}i.",
+        "en-prefix":"PersonX intended {ph}  Therefore,",
         "fa":"زیرا PersonX می خواست",
         "tokens":"<event> <agent> <before> <cause> <want>",
         "nat-tokens":"before, because the person want "
     },
     "xNeed":{ 
-        "en-postfix":"{event}, Before that, PersonX needs {ph}.",
+        "en-postfix":"{event}, Before that, PersonX needs {ph}. ",
         "en-prefix":"PersonX needs {ph} before",
-        "en":"Before that, PersonX needs {ph}.",
+        "en":"Before that, PersonX needs {ph} ",
         "fa":"قبل از آن PersonX نیاز دارد",
         "tokens":"<event> <agent> <before> <cause> <need>",
         "nat-tokens":"before, because the person needs "
@@ -142,7 +145,7 @@ end_token = "" #SPECIAL_TOKENS['eos_token']  #"</s>"
 # %%
 relation_prompt_lengths = {"com":[3]}
 
-for key, val in relation_natural_mappings.items():
+for key, val in rel_nat_maps.items():
     relation_prompt_lengths[key] = [len(val["tokens"].split())] 
 
 def get_prompt_token_fn(id_offset):
@@ -152,15 +155,15 @@ encoder_relation_mappings = {}
 decoder_relation_mappings = {}
 
 def tokenize_relations(tokenizer, map_lengths=False):
-    for rel,phrase in relation_natural_mappings.items():
+    for rel,phrase in rel_nat_maps.items():
         natural_rel = phrase["en-postfix"]
         #dlog.info("rel ids ***: %s", natural_rel)
         rel_tokens = tokenizer.tokenize(natural_rel)
-        relation_natural_mappings[rel]["rel_tokens"] = rel_tokens
+        rel_nat_maps[rel]["rel_tokens"] = rel_tokens
         #dlog.info("rel ids ***: %s", rel_tokens)
         rel_ids = tokenizer.convert_tokens_to_ids(rel_tokens)
         #dlog.info("rel ids ***: %s", rel_ids)
-        relation_natural_mappings[rel]["rel_ids"] = rel_ids
+        rel_nat_maps[rel]["rel_ids"] = rel_ids
         if map_lengths:
             relation_prompt_lengths[rel] = [len(rel_tokens)]
 
@@ -174,14 +177,14 @@ def set_prompt_lengths(rel, length):
 def extend_tokenizer(tokenizer, prompt_tokens = [], model_id=""):
     cur_list = tokenizer.additional_special_tokens
     rels_tokens = []
-    for x,t in relation_natural_mappings.items():
+    for x,t in rel_nat_maps.items():
         rels_tokens += t["tokens"].split()
 
     rels_tokens = list(set(rels_tokens))
 
     mlog.info("RELS %s", rels_tokens)
     new_tokens = tokens.t5_tokens + \
-                 list(atomic_relation_mappings.values())+ \
+                 list(rel_maps.values())+ \
                  list(gen_tokens.values()) + rels_tokens
     if prompt_tokens:
         new_tokens += prompt_tokens
@@ -229,9 +232,9 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words
         if rel == "com":
             continue
         if from_words == "rel":
-            from_words = relation_natural_mappings[rel]["en-postfix"]
+            from_words = rel_nat_maps[rel]["en-postfix"]
         if from_words == "rel_tokens":
-            prompt_tokens = relation_natural_mappings[rel]["rel_tokens"]
+            prompt_tokens = rel_nat_maps[rel]["rel_tokens"]
 
         encoder, offset = create_encoder(rel, model, tokenizer, prompt_tokens, encoder_type, from_words, wrapped_model)
         prompt_encoders.append(encoder)
@@ -309,10 +312,10 @@ def fill_const_for_rel(template, row):
         return text
     #dlog.debug("fill const for: %s", text)
     rel = row["prefix"]
-    rel_token = atomic_relation_mappings[rel]        
-    rel_natural_en_postfix = relation_natural_mappings[rel]["en-postfix"]        
-    rel_natural_en_prefix = relation_natural_mappings[rel]["en-prefix"]        
-    rel_natural_fa = relation_natural_mappings[rel]["fa"]        
+    rel_token = rel_maps[rel]        
+    rel_natural_en_postfix = rel_nat_maps[rel]["en-postfix"]        
+    rel_natural_en_prefix = rel_nat_maps[rel]["en-prefix"]        
+    rel_natural_fa = rel_nat_maps[rel]["fa"]        
     rep  = {"{rel}":rel, 
             "{rel_token}":rel_token,
             "{rel_natural_en}":rel_natural_en_postfix,
@@ -348,9 +351,9 @@ def fill_prompt(text, rel, place_holder, counter = 0, lang=""):
                 token = token.replace("_i", "_" + str(i))  
                 prompt += " " + token
         elif _pholder == "{tokens}": 
-            prompt = relation_natural_mappings[rel]["tokens"]
+            prompt = rel_nat_maps[rel]["tokens"]
         elif _pholder == "{tokens-rand}": 
-            permute = relation_natural_mappings[rel]["tokens"].split()
+            permute = rel_nat_maps[rel]["tokens"].split()
             random.shuffle(permute)
             prompt = " ".join(permute)
         else:
@@ -388,7 +391,7 @@ def fill_consts(template, ex_temp, context,rel, row, rows=None, mask=-1, method=
         prompt = f"<enc_mask_{mask}>" 
         text = text.replace("{enc_token_mask}",prompt)
     while "{rel_fw}" in text:
-        rel_ids = relation_natural_mappings[rel]["rel_ids"]
+        rel_ids = rel_nat_maps[rel]["rel_ids"]
         prompt = ""
         for i in range(len(rel_ids)):
             token = f"<{rel}_{i}>" 
@@ -807,9 +810,9 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
        return qtemp, anstemp, ex_qtemp, ex_anstemp, context
 
 def fill_vars(template, rel, event, resp, gen_token= "gen_en",  inp_lang="en", resp_lang="en"):
-    rel_natural_pre = relation_natural_mappings[rel][inp_lang + "-prefix"]        
-    rel_natural = relation_natural_mappings[rel][inp_lang + "-postfix"]        
-    rel_natural_tokens = relation_natural_mappings[rel]["nat-tokens"]        
+    rel_natural_pre = rel_nat_maps[rel][inp_lang + "-prefix"]        
+    rel_natural = rel_nat_maps[rel][inp_lang + "-postfix"]        
+    rel_natural_tokens = rel_nat_maps[rel]["nat-tokens"]        
     rel_natural_pure = rel_natural.replace("{ph}", "")
     rel_natural_pure = rel_natural_pure.replace(".", "")
     rel_natural = rel_natural.replace("{ph}", placeholder_token)
@@ -1053,7 +1056,7 @@ class MyDataset(torch.utils.data.Dataset):
         context_df = data["context_df"] if "context_df" in data else None
         index = data["index"]
         rep = data["rep"]
-        rel_token = atomic_relation_mappings[rel]
+        rel_token = rel_maps[rel]
         if self.natural:
             resp = resp.replace("PersonX intends", "")
             resp = resp.replace("PersonX قصد دارد", "")
@@ -1126,7 +1129,9 @@ class MyDataset(torch.utils.data.Dataset):
         if self.replace_blanks and "___" in event:
             if "<extra_id_0>" in _query:
                 _query = _query.replace("<extra_id_0>", "<extra_id_1>")
-            _query = _query.replace("___", "<extra_id_0>")
+                _query = _query.replace("___", "<extra_id_0>")
+                response = response.replace("<extra_id_0>", "<extra_id_1>")
+                response = "<extra_id_0> ___ " + response
         #if not rel in self.data_split:
         #    self.data_split[rel] = {}
         #if not lang in self.data_split[rel]:
