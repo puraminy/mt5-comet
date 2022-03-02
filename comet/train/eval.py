@@ -228,7 +228,7 @@ def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", no_
         pbar.update(bs)
         for (query, inp, tail, rel, qid, repid), top_hyp in zip(batch_list, hyps):
             tails = [tail]
-            mlog.info("query: %s, hyp: %s", quer, top_hyp)
+            mlog.info("query: %s, hyp: %s", query, top_hyp)
             data = {}
             sel_data = {}
             data["qid"] = qid
