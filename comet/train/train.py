@@ -1008,6 +1008,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
                 _opt = _name[1]
                 if _opt == "replace_blanks":
                     _replace_blanks = True
+                    input("_rep = True:")
 
             tails_per_head = int(samples_per_head)
             if "test" in split_name:
@@ -1034,7 +1035,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
                 _repeat = int(repeat)
                 _break_sent = int(break_sent)
             # dddddddddddddd
-            myds[split_name] = MyDataset(split_df, split_name,
+            myds[_name] = MyDataset(split_df, split_name,
                                 _method, prompt_pos, rel_filter,
                                 num_samples[split_name], 
                                 ignore_blanks,
@@ -1480,7 +1481,6 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
     if test_set:
         for _set in test_set.split("@"):
             myds = load_data([_set])
-            _set = _set.split("+")[0]
             mlog.info("Evaluating ... %s", _set)
             val_records = myds[_set].num_records
             exp_info["test_set"] = _set
