@@ -43,7 +43,7 @@ def trim_batch(
 
 # ggggggggg
 def generate(model, tokenizer, queries, batch_size=5, gen_token = "", gen_param = "greedy", at_mask=None):
-    skip_special = "True"
+    skip_special = "False"
     #verb = get_verb(query)
     #vlog.info("Ignoring verb %s", verb)
     bad_words_ids = None
