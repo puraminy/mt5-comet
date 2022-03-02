@@ -1006,12 +1006,10 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
             split_name = name_opts[0]
             _replace_blanks = False
             if len(name_opts) > 1:
-                input("_name:")
                 _replace_blanks = True
                 _opt = name_opts[1]
                 if _opt == "replace_blanks":
                     _replace_blanks = True
-                    input("_rep = True:")
 
             tails_per_head = int(samples_per_head)
             if "test" in split_name:
