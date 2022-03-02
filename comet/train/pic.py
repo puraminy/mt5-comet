@@ -2,6 +2,7 @@ import curses as cur
 import subprocess
 import matplotlib.pyplot as plt
 from curses import wrapper
+from difflib import SequenceMatcher
 import click
 import numpy as np
 from glob import glob
@@ -18,7 +19,7 @@ from comet.utils.myutils import *
 import sys
 from PIL import Image
 
-def combine(images):
+def combine_x(images):
     widths, heights = zip(*(i.size for i in images))
 
     total_width = sum(widths)
@@ -30,6 +31,21 @@ def combine(images):
     for im in images:
       new_im.paste(im, (x_offset,0))
       x_offset += im.size[0]
+
+    return new_im
+
+def combine_y(images):
+    widths, heights = zip(*(i.size for i in images))
+
+    total_width = max(widths)
+    max_height = sum(heights)
+
+    new_im = Image.new('RGB', (total_width, max_height))
+
+    y_offset = 0
+    for im in images:
+      new_im.paste(im, (0, y_offset))
+      y_offset += im.size[1]
 
     return new_im
 
@@ -59,7 +75,7 @@ def get_files(dfpath, dfname):
                             files.append(root_file)
     if files:
         df = pd.DataFrame(columns={"name"})
-        df["name"] = [Path(p).name for p in files]
+        df["name"] = [Path(p).stem for p in files]
         df["fname"] = files
         return df
     else:
@@ -124,6 +140,7 @@ def show_files(df):
         #fffff
         infos = []
         sel_dict = {}
+        df = df.sort_values(by="name")
         for idx, row in df.iterrows():
            if ii < sel_row - top_margin:
                ii += 1
@@ -208,18 +225,18 @@ def show_files(df):
             search = ""
             search_df = df
             consts.pop("search", None)
-            if char in ["p", "P"]:
-                if char == "P":
+            if char in ["y", "Y", "x", "X"]:
+                if char in ["x","y"]:
                     sel_pics = df.iloc[sel_rows]["fname"].tolist()
                 else:
                     sel_pics = df["fname"].tolist()
                 images = [Image.open(x) for x in sel_pics]
-                new_im = combine(images)
+                new_im = combine_y(images) if char.lower() == "y" else combine_x(images)
                 pname = "/home/ahmad/heatmaps/out.png" 
                 new_im.save(pname)
-            if char == "x":
+            if char == "o":
                 pname = df.iloc[sel_row]["fname"]
-            if char in ["p", "P", "x"]:
+            if char.lower() in ["x", "y", "o"]:
                 if "ahmad" in home:
                     subprocess.run(["eog", pname])
             if char == " ":
@@ -227,51 +244,56 @@ def show_files(df):
             if char == "D":
                 df = df.iloc[sel_rows,:]
                 sel_rows = []
-            if char == "r":
-                df = main_df
+            if char in ["r", "R"]:
+                if char == "R": 
+                    df = main_df
+                else:
+                    df = search_df
+                df = df.sort_values(by="name")
                 sel_cols = ["name"]
                 consts = {}
                 info_cols = []
+                sel_rows = []
             if char == "/":
                 in_search = True
                 search_df = df
                 consts["search"] = ""
                 search = ""
-            if char == ":":
-                cmd = rowinput()
+            if char in [":", "c"]:
+                if char == ":":
+                    cmd = rowinput()
+                elif char == "c":
+                    cmd = "comp=3"
                 if cmd == "q":
                     ch = ord("q")
                 elif cmd.startswith("hl="):
                     hl_start = int(cmd.split("=")[1])
                 elif cmd.startswith("comp"):
                     cmd = cmd.split("=")
-                    s1 = int(cmd[1]) if len(cmd) > 1 else 10
-                    s2 = int(cmd[2]) if len(cmd) > 2 else -40
+                    s1 = int(cmd[1]) if len(cmd) > 1 else 2
+                    s2 = int(cmd[2]) if len(cmd) > 2 else len(df)
                     files = []
                     folder = "/home/ahmad/heatmaps/comp/"
                     if Path(folder).exists():
                         shutil.rmtree(folder)
                     Path(folder).mkdir(parents=True, exist_ok=True)
-                    pairs = []
-                    for j, row1 in df.iterrows():
-                        img1 = row1["name"]
-                        img1_path = row1["fname"]
-                        for k, row2 in df.iterrows():
-                            img2 = row2["name"]
-                            img2_path = row2["fname"]
-                            if (j != k  
-                                and img1[:s1] == img2[:s1]  
-                                and img1[s2:] == img2[s2:] 
-                                and not (j,k) in pairs):
-                                p1 = str(Path(img1_path).parent.name) + "_"
-                                p2 = str(Path(img2_path).parent.name) + "_"
-                                pairs.append((j,k))
-                                pairs.append((k,j))
-                                images = [Image.open(x) for x in [img1_path, img2_path]]
-                                new_im = combine(images)
-                                pname = folder + p1 + img1[:s1] + "_VS_" + p2 + img2[s2:] + ".png" 
-                                new_im.save(pname)
-                                files.append(pname)
+                    df = df.sort_values(by="name")
+                    m = 0
+                    j = 0
+                    while j + s1 < s2:
+                        img_path = []
+                        img = []
+                        for k in range(s1):
+                            img_path.append(df.iloc[j+k,:]["fname"])
+                            img.append(df.iloc[j+k,:]["name"])
+                        common = os.path.commonprefix(img)
+                        images = [Image.open(x) for x in img_path]
+                        new_im = combine_x(images)
+                        l = len(common)
+                        pname = folder +  common + "@".join([x[l:] for x in img]) + ".png" 
+                        new_im.save(pname)
+                        files.append(pname)
+                        j += s1
                     if files:
                         df = get_files(folder, files)
                     else:
@@ -370,7 +392,6 @@ def start(stdscr):
         mlog.info("No tsv or json file was found")
 
 @click.command()
-@click.argument("fname", nargs=-1, type=str)
 @click.option(
     "--path",
     envvar="PWD",
@@ -385,8 +406,16 @@ def start(stdscr):
     type=str,
     help=""
 )
-def main(fname, path, fid):
+@click.option(
+    "--fname",
+    "-fn",
+    default="",
+    type=str,
+    help=""
+)
+def main(path, fid, fname):
     global dfname,dfpath,file_id
+    if not fname: fname = ["png"]
     file_id = fid
     if fname != "last":
         dfname = fname 
