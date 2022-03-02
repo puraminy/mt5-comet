@@ -1078,8 +1078,6 @@ class MyDataset(torch.utils.data.Dataset):
 
         qtemp = qtemp[_rep] 
         plen = relation_prompt_lengths[rel][0]
-        if self.replace_blanks and "___" in event:
-            event = event.replace("___", "<extra_id_1>")
         mask = random.randint(0, plen-1)
         _qtemp = fill_consts(qtemp, ex_qtemp, context, rel, d, context_df, mask=mask,method = mt)
         _anstemp = fill_consts(anstemp, ex_anstemp, context,rel, d, context_df, mask=mask,method = mt)
@@ -1125,6 +1123,10 @@ class MyDataset(torch.utils.data.Dataset):
             clog.info(input_lang + ":"+ _q)
             clog.info(target_lang + ":" + response)
             self.example_counter += 1
+        if self.replace_blanks and "___" in event:
+            if "<extra_id_0>" in _query:
+                _query = _query.replace("<extra_id_0>", "<extra_id_1>")
+            _query = _query.replace("___", "<extra_id_0>")
         #if not rel in self.data_split:
         #    self.data_split[rel] = {}
         #if not lang in self.data_split[rel]:
