@@ -1002,12 +1002,13 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
     def load_data(split_names):
         myds = {}
         for _name in split_names:
-            split_name = _name.split("+")[0]
+            name_opts = _name.split("+")
+            split_name = name_opts[0]
             _replace_blanks = False
-            if len(_name) > 1:
+            if len(name_opts) > 1:
                 input("_name:")
                 _replace_blanks = True
-                _opt = _name[1]
+                _opt = name_opts[1]
                 if _opt == "replace_blanks":
                     _replace_blanks = True
                     input("_rep = True:")
