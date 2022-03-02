@@ -1487,7 +1487,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
             mlog.info("Evaluating ... %s", _set)
             val_records = myds[_set].num_records
             exp_info["test_set"] = _set
-            evaluate(myds[_set], save_path, exp_info, val_records, gen_param, no_score=no_score, batch_size=gen_bs, model=model, tokenizer=tokenizer)  
+            evaluate(myds[_set], save_path, exp_info, val_records, gen_param, no_score=no_score, batch_size=gen_bs, model=model, tokenizer=tokenizer, set_name=_set)  
     else:
         mlog.info("Test set was not provided.... skip testing...")
         

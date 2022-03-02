@@ -143,7 +143,7 @@ def chunks(lst, n):
 
 
 
-def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", no_score=False, batch_size="20@5", model = None, tokenizer = None, preds_file = ""):  
+def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", no_score=False, batch_size="20@5", model = None, tokenizer = None, preds_file = "", set_name = "test"):  
     try:
         nltk_path = str(nltk.data.find("tokenizers/punkt"))
         mlog.info(f"using nltk from: {nltk_path}")
@@ -383,8 +383,8 @@ def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", no_
 
     # %%%%%%%%%%%%%%%%%%
     file_gen = "_" + Path(preds_file).stem if preds_file else ""
-    new_df = save_results(rows, "full" + file_gen , step, exp_info, save_path)
-    sel_df = save_results(sel_rows, "sel" + file_gen , step, {}, save_path)
+    new_df = save_results(rows, "full_" + set_name + file_gen , step, exp_info, save_path)
+    sel_df = save_results(sel_rows, "sel_" + set_name + file_gen , step, {}, save_path)
     if no_score:
         return
 
