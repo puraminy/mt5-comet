@@ -228,8 +228,8 @@ def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", no_
         pbar.update(bs)
         for (query, inp, tail, rel, qid, repid), top_hyp in zip(batch_list, hyps):
             tails = [tail]
-            mlog.info("query: %s", query)
-            mlog.info("1)  hyp: %s",top_hyp)
+            #mlog.info("query: %s", query)
+            #mlog.info("1)  hyp: %s",top_hyp)
             data = {}
             sel_data = {}
             data["qid"] = qid
@@ -237,12 +237,14 @@ def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", no_
             #rel_natural = relation_natural_mappings[rel]["en-postfix"]        
             #rel_natural_pure = rel_natural.replace("{ph}", "").strip()
             #top_hyp = top_hyp.replace(rel_natural_pure, "")
+            blank = ""
             if "<extra_id_1>" in top_hyp:
-                top_hyp = top_hyp.split("<extra_id_1>")[1]
-            mlog.info("2)  hyp: %s",top_hyp)
+                blank, top_hyp = top_hyp.split("<extra_id_1>")
+            #mlog.info("2)  hyp: %s",top_hyp)
             for const in resp_const_parts:
                 top_hyp = top_hyp.replace(const, "")
-            mlog.info("3)  hyp: %s", top_hyp)
+                blank = blank.replace(const, "")
+            #mlog.info("3)  hyp: %s", top_hyp)
             if not top_hyp.strip():
                 top_hyp = "EMPT"
             new_tails = []
@@ -255,6 +257,7 @@ def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", no_
                     nt = nt.replace(const,"")
                 new_tails.append(nt)
             tails = new_tails
+            data["blank"] = blank
             data["pred_text1"] = top_hyp
             data["target_text"] = "<br />".join(tails)
             data["prefix"] = rel

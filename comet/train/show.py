@@ -335,11 +335,12 @@ def show_df(df):
                 sel_exp = exp
                 consts["exp"] = exp
                 tdf = main_df[main_df["fid"] == exp]
-                tdf = tdf[["fid","pred_text1","target_text","id", "rouge_score","input_text", "prefix"]]
+                tdf = tdf[["fid","pred_text1","target_text","id", "blank", "rouge_score","input_text", "prefix"]]
                 tdf = tdf.sort_values(by="rouge_score")
                 tdf = tdf.groupby(["pred_text1","prefix"]).agg({
                     "rouge_score":"first","id":"first","pred_text1":"first", "fid":"count", 
-                    "input_text":"first", "target_text":"first", "prefix":"first"}).reset_index(drop=True)
+                    "input_text":"first", "target_text":"first", "blank":"first", 
+                    "prefix":"first"}).reset_index(drop=True)
                 tdf = tdf.sort_values(by="fid", ascending=False)
                 if ii == 1:
                     sdf = tdf
