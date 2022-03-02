@@ -1028,9 +1028,10 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
             targ_include, targ_exclude = filter_inputs(include, exclude, targ_lang)
             mlog.info("Creating dataset for %s", split_name)
             _method = method
+            _only_blanks = only_blanks
             if "test" in split_name:
                 _method = val_method
-                only_blanks = True
+                _only_blanks = True
             _repeat = 1
             _break_sent = -1
             if split_name == "train" or split_name == "sample":
@@ -1041,7 +1042,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
                                 _method, prompt_pos, rel_filter,
                                 num_samples[split_name], 
                                 ignore_blanks,
-                                only_blanks,
+                                _only_blanks,
                                 inp_include,
                                 inp_exclude,
                                 targ_include,
