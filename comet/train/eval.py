@@ -458,11 +458,10 @@ def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", no_
     df_mean_rouge = new_df["rouge_score"].mean()
     for logger in [mlog, vlog, clog]:
         logger.info("Len data frame: {}".format(len(new_df)))
-        logger.info("Rouge:{} Match: {} BERT: {} BLEU: {}".format(mean_rouge_str, 
-            mean_match_str, mean_bert_str, mean_bleu_str))
-        logger.info("DF mean Bert Score: {}".format(new_df["bert_score"].mean()))
-        logger.info("DF mean Rouge Score: {}".format(df_mean_rouge))
-        logger.info("nli_counter: {}".format(nli_counter))
-        logger.info("hyp_counter: {}".format(hyp_counter))
+        logger.info("Rouge:{} ".format(mean_rouge_str)) 
+        #logger.info("DF mean Bert Score: {}".format(new_df["bert_score"].mean()))
+        #logger.info("DF mean Rouge Score: {}".format(df_mean_rouge))
+        #logger.info("nli_counter: {}".format(nli_counter))
+        #logger.info("hyp_counter: {}".format(hyp_counter))
         logger.info("Distinct preds:{}".format(len(pred_counts)))
 
