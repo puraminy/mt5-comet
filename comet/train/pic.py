@@ -71,7 +71,7 @@ def get_files(dfpath, dfname):
                 for root, dirs, _files in os.walk(dfpath):
                     for _file in _files:
                         root_file = os.path.join(root, _file)
-                        if all(s in root_file for s in dfname.split("|")):
+                        if all(s in root_file for s in dfname.split("+")):
                             files.append(root_file)
     if files:
         df = pd.DataFrame(columns={"name"})
@@ -259,10 +259,12 @@ def show_files(df):
                 search_df = df
                 consts["search"] = ""
                 search = ""
-            if char in [":", "c"]:
+            if char in [":", "c", "b"]:
                 if char == ":":
                     cmd = rowinput()
                 elif char == "c":
+                    cmd = "comp=3"
+                elif char == "b":
                     cmd = "comp=3"
                 if cmd == "q":
                     ch = ord("q")
@@ -278,9 +280,8 @@ def show_files(df):
                         shutil.rmtree(folder)
                     Path(folder).mkdir(parents=True, exist_ok=True)
                     df = df.sort_values(by="name")
-                    m = 0
                     j = 0
-                    while j + s1 < s2:
+                    while j + s1 <= s2:
                         img_path = []
                         img = []
                         for k in range(s1):
@@ -288,7 +289,10 @@ def show_files(df):
                             img.append(df.iloc[j+k,:]["name"])
                         common = os.path.commonprefix(img)
                         images = [Image.open(x) for x in img_path]
-                        new_im = combine_x(images)
+                        if char == "c":
+                            new_im = combine_x(images)
+                        else:
+                            new_im = combine_y(images)
                         l = len(common)
                         pname = folder +  common + "@".join([x[l:] for x in img]) + ".png" 
                         new_im.save(pname)
@@ -418,7 +422,7 @@ def main(path, fid, fname):
     if not fname: fname = ["png"]
     file_id = fid
     if fname != "last":
-        dfname = fname 
+        dfname = [fname] 
         dfpath = path
     set_app("show_files")
     wrapper(start)
