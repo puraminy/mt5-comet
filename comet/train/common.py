@@ -736,7 +736,7 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            qtemp = "{event} {rel_fw} {ph}"
            anstemp = "{ph} {resp} {end}"
        elif method == "unsup":
-           qtemp = "{rel_token} {event} {ph}"
+           qtemp = "{event} {rel_token} {ph}"
            anstemp = "{ph} {resp} {end}"
        elif method == "unsup-gen":
            qtemp = "{rel_token} {event} {gen} {ph}"

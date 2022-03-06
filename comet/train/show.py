@@ -365,8 +365,8 @@ def show_df(df):
                         col_widths[_col] = 30
                     if _col.startswith("fid"):
                         col_widths[_col] = 10
-            sel_cols = order(sel_cols, g_cols)
-            info_cols = ["prefix", "target_text", "input_text", "target_text_1", "target_text_2", "pred_text_1", "pred_text_2"]
+            sel_cols = order(sel_cols, ["pred_text1", "fid_1", "fid_2", "target_text_1", "target_text_2"])
+            info_cols = ["prefix", "target_text", "input_text", "target_text_1", "target_text_2", "pred_text1_1", "pred_text1_2"]
             sel_rows = []
 
         elif char == "H":
@@ -680,7 +680,7 @@ def show_df(df):
         if char == "b" and back:
             if back:
                 df = back.pop()
-                sel_cols = df.columns
+                sel_cols = list(df.columns)
             else:
                 mbeep()
             if consts["filter"]:

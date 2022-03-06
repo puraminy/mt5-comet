@@ -460,7 +460,7 @@ def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", no_
         logger.info("Len data frame: {}".format(len(new_df)))
         logger.info("Rouge:{} ".format(mean_rouge_str)) 
         #logger.info("DF mean Bert Score: {}".format(new_df["bert_score"].mean()))
-        #logger.info("DF mean Rouge Score: {}".format(df_mean_rouge))
+        logger.info("DF mean Rouge Score: {}".format(df_mean_rouge))
         #logger.info("nli_counter: {}".format(nli_counter))
         #logger.info("hyp_counter: {}".format(hyp_counter))
         logger.info("Distinct preds:{}".format(len(pred_counts)))

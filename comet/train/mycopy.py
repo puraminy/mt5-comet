@@ -38,13 +38,14 @@ def mycopy(fname, path, move, dest_dir):
             if all(s in root_file for s in fname.split("+")):
                 files.append(root_file)
     if not dest_dir: dest_dir = now
-    dest_dir = "~/share/" + dest_dir
+    dest_dir = "/home/pouramini/share/" + dest_dir
     for file in files:
         print("FROM:", file)
         rp = Path(file).relative_to(path)
         folders = Path(rp)
-        if folders.parts:
-            folder = os.path.join(dest_dir, "_".join(folders.parts))
+        parts = folders.parts[:-1]
+        if parts:
+            folder = os.path.join(dest_dir, "_".join(parts))
         else:
             folder = dest_dir
 
