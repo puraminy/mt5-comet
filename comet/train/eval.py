@@ -53,22 +53,22 @@ def generate(model, tokenizer, queries, batch_size=5, gen_token = "", gen_param 
         gen_param, skip_special = gen_param.split("@")
     if gen_param == "greedy":
         generation_params = {
-            "max_length":360,
+            "max_length":160,
             "num_beams":5,
-            "repetition_penalty":2.5,
+            "repetition_penalty":5.5,
             "num_return_sequences":1,
             "bad_words_ids": bad_words_ids
         }
     elif gen_param == "top_p":
         generation_params = {
-            "max_length":360,
+            "max_length":160,
             "do_sample":True, 
             "top_p":0.9, 
             "top_k":10,
             "num_beams":5,
             "temperature": 1.0,
             "num_return_sequences":1, 
-            "repetition_penalty":2.5,
+            "repetition_penalty":5.5,
             "bad_words_ids": bad_words_ids
         }
     with torch.no_grad():

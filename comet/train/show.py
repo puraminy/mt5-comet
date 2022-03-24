@@ -1,5 +1,6 @@
 import curses as cur
 import subprocess
+from functools import reduce
 import matplotlib.pyplot as plt
 from curses import wrapper
 import click
@@ -108,6 +109,7 @@ def show_df(df):
     prev_cahr = ""
     sel_exp = ""
     sel_rows = []
+    FID = "method"
     while ch != ord("q"):
         text_win.erase()
         left = min(left, max_col  - width)
@@ -253,6 +255,10 @@ def show_df(df):
                         sel_cols.insert(0, col)
                     save_obj(info_cols, "info_cols", dfname)
                     save_obj(sel_cols, "sel_cols", dfname)
+        elif char == "k":
+            canceled, col, val = list_df_values(df, get_val=False)
+            if not canceled:
+                FID = col
         elif char == "s":
             canceled, col, val = list_df_values(df, get_val=False)
             if not canceled:
@@ -312,7 +318,7 @@ def show_df(df):
             if char ==  "A":
                 canceled, col, _ = list_df_values(df, get_val=False)
             elif char == "G":
-                canceled, col = False, "fid"
+                canceled, col = False, FID
             if not canceled:
                g_cols = ["exp_id", "num_preds", "rouge_score", "bert_score", "br_score","nr_score", "steps", "method","model", "wrap", "frozen"]
                df = (df.groupby(col).agg({"num_preds":"first", "rouge_score":"mean","bert_score":"mean","br_score": "mean", "nr_score":"mean", "method":"first","model":"first", "wrap":"first", col:"first", "steps":"first", "frozen":"first"})
@@ -328,7 +334,7 @@ def show_df(df):
             s_rows = sel_rows
             if not sel_rows:
                 s_rows = [sel_row]
-            ii = 1
+            ii = 0
             dfs = []
             sdf = pd.DataFrame()
             on_col = "target_text" if char =="a" else "pred_text1"
@@ -336,7 +342,7 @@ def show_df(df):
                 exp=df.iloc[s_row]["exp_id"]
                 sel_exp = exp
                 consts["exp"] = exp
-                tdf = main_df[main_df["fid"] == exp]
+                tdf = main_df[main_df[FID] == exp]
                 tdf = tdf[["fid","pred_text1","target_text","id", "blank", "rouge_score","input_text", "prefix"]]
                 tdf = tdf.sort_values(by="rouge_score")
                 tdf = tdf.groupby(["pred_text1","prefix"]).agg({
@@ -344,13 +350,13 @@ def show_df(df):
                     "input_text":"first", "target_text":"first", "blank":"first", 
                     "prefix":"first"}).reset_index(drop=True)
                 tdf = tdf.sort_values(by="fid", ascending=False)
-                if ii == 1:
-                    sdf = tdf
-                else:
-                    sdf = tdf.merge(sdf, how="outer", on=["prefix",on_col]).rename(columns=lambda x: re.sub("(.+)\_x", r"\1_1", x)).rename(columns=lambda x: re.sub("(.+)\_y", r"\1_2", x))
-
+                dfs.append(tdf) #.copy())
                 ii += 1
-            df = sdf
+            if ii > 1:
+                df = reduce(lambda  left,right: pd.merge(left,right,on=[on_col],
+                                            how='inner'), dfs)
+            else:
+               df = tdf
             g_cols = []
             sel_cols = []
             for _col in df.columns:
@@ -365,8 +371,13 @@ def show_df(df):
                         col_widths[_col] = 30
                     if _col.startswith("fid"):
                         col_widths[_col] = 10
-            sel_cols = order(sel_cols, ["pred_text1", "fid_1", "fid_2", "target_text_1", "target_text_2"])
-            info_cols = ["prefix", "target_text", "input_text", "target_text_1", "target_text_2", "pred_text1_1", "pred_text1_2"]
+            if len(dfs) > 1:
+                sel_cols = order(sel_cols, ["pred_text1", "fid_x", "fid_y", "target_text_x", "target_text_y"])
+                info_cols = ["prefix", "target_text", "input_text", "target_text_x", "target_text_y", "pred_text1_x", "pred_text1_y"]
+            else:
+                sel_cols = order(sel_cols, g_cols) 
+                info_cols = ["prefix", "target_text", "input_text", "pred_text1"]
+
             sel_rows = []
 
         elif char == "H":
@@ -376,7 +387,7 @@ def show_df(df):
                 pred=df.iloc[sel_row]["pred_text1"]
                 sel_row = 0
                 consts["pred"] =pred 
-                df = main_df[(main_df["fid"] == sel_exp) & (main_df["pred_text1"] == pred)]
+                df = main_df[(main_df["method"] == sel_exp) & (main_df["pred_text1"] == pred)]
                 df = df[["pred_text1","target_text","rouge_score","input_text", "prefix"]]
                 df = df.sort_values(by="rouge_score", ascending=False)
         elif char == "D":
@@ -869,7 +880,7 @@ def start(stdscr):
             if not "fid" in df or force_fid:
                 df["path"] = f
                 if fid == "parent":
-                    df["fid"] = str(ii) + "_" + Path(f).parent.name + "_" + Path(f).stem
+                    df["fid"] = str(ii) + "_" + Path(f).parent.parent.parent.parent.name + "_" + Path(f).stem
                 elif fid == "name":
                     df["fid"] = str(ii) + "_" + Path(f).stem
                 else:

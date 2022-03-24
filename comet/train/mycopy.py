@@ -9,6 +9,7 @@ now = datetime.datetime.now(tehran)
 now = now.strftime('%Y-%m-%d-%H:%M')
 @click.command()
 @click.argument("fname", type=str)
+@click.argument("dest_dir", type=str)
 @click.option(
     "--path",
     "-p",
@@ -23,14 +24,9 @@ now = now.strftime('%Y-%m-%d-%H:%M')
     is_flag=True,
     help=""
 )
-@click.option(
-    "--dest_dir",
-    "-d",
-    default="",
-    type=str,
-    help=""
-)
 def mycopy(fname, path, move, dest_dir):
+    delete_file = dest_dir == "dd"
+    print_file = dest_dir == "pp"
     files = []
     for root, dirs, _files in os.walk(path):
         for _file in _files:
@@ -40,6 +36,13 @@ def mycopy(fname, path, move, dest_dir):
     if not dest_dir: dest_dir = now
     dest_dir = "/home/pouramini/share/" + dest_dir
     for file in files:
+        if print_file:
+            print("File: ", file)
+            continue
+        if delete_file:
+            os.remove(file)
+            print("Removing ", file)
+            continue
         print("FROM:", file)
         rp = Path(file).relative_to(path)
         folders = Path(rp)

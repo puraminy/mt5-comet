@@ -923,6 +923,8 @@ class MyDataset(torch.utils.data.Dataset):
             split_df = split_df[split_df["nli_group"] == nli_group]
             dlog.info("*** Filtered based on nli_group "+ nli_group)
 
+        if rel_filter == "all":
+            rel_filter = ""
         mlog.info(f"len after filtering:{len(split_df)}")
         assert len(split_df) > 0, "Data frame is empty " + self.split_name
         self.num_records = self.num_samples
@@ -956,7 +958,7 @@ class MyDataset(torch.utils.data.Dataset):
             if "@" in ex_type:
                 _rels = ex_type.split("@")[1]
                 self.sel_rels = _rels.split("-")
-        if rel_filter and not rel_filter in sel_rels:
+        if rel_filter and not rel_filter in self.sel_rels:
             self.sel_rels.append(rel_filter)
         self.methods = method.split("+")
         self.sampling = sampling
