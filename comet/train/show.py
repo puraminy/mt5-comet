@@ -38,6 +38,7 @@ def load_results(path):
 
 def show_df(df):
     global dfname
+    hotkey = ""
     cmd = ""
     sel_row = 0
     ROWS, COLS = std.getmaxyx()
@@ -60,7 +61,6 @@ def show_df(df):
         for row in rows:
             mprint(row, text_win)
         refresh()
-        get_key(std)
 
     if not col_widths:
         col_widths = {"qid":5, "model":30, "pred_text1":30, "epochs":30, "date":30, "rouge_score":7, "bert_score":7, "input_text":50}
@@ -92,8 +92,9 @@ def show_df(df):
 
     back = []
     filter_df = main_df
+    FID = "qid"
     if "pred_text1" in df:
-        df["num_preds"] = df.groupby(["fid"])['pred_text1'].transform('nunique')
+        df["num_preds"] = df.groupby([FID])['pred_text1'].transform('nunique')
         br_col = df.loc[: , "bert_score":"rouge_score"]
         df['br_score'] = br_col.mean(axis=1)
         df['nr_score'] = df['rouge_score']
@@ -108,61 +109,67 @@ def show_df(df):
         df["blank"] = "blank"
     prev_cahr = ""
     sel_exp = ""
+    back_row = 0
     sel_rows = []
-    FID = "method"
     while ch != ord("q"):
         text_win.erase()
         left = min(left, max_col  - width)
         left = max(left, 0)
         sel_row = min(sel_row, len(df) - 1)
         sel_row = max(sel_row, 0)
-        text = "{:<5}".format(sel_row)
-        for i, sel_col in enumerate(sel_cols):
-            if not sel_col in df:
-                continue
-            _w = col_widths[sel_col] if sel_col in col_widths else width
-            head = textwrap.shorten(f"{i}) {sel_col}" , width=_w, placeholder=".")
-            text += "{:<{x}}".format(head, x=_w) 
-        mprint(text, text_win) 
-        ii = 0
-        top_margin = min(len(df), 5)
-        #fffff
-        infos = []
-        sel_dict = {}
-        for idx, row in df.iterrows():
-           if ii < sel_row - top_margin:
-               ii += 1
-               continue
-           text = "{:<5}".format(ii)
-           for sel_col in sel_cols + info_cols:
-               if not sel_col in row:
+        if not hotkey:
+            text = "{:<5}".format(sel_row)
+            for i, sel_col in enumerate(sel_cols):
+                if not sel_col in df:
+                    continue
+                _w = col_widths[sel_col] if sel_col in col_widths else width
+                head = textwrap.shorten(f"{i}) {sel_col}" , width=_w, placeholder=".")
+                text += "{:<{x}}".format(head, x=_w) 
+            mprint(text, text_win) 
+            ii = 0
+            top_margin = min(len(df), 5)
+            #fffff
+            infos = []
+            sel_dict = {}
+            for idx, row in df.iterrows():
+               if ii < sel_row - top_margin:
+                   ii += 1
                    continue
-               content = str(row[sel_col])
-               content = content.strip()
-               if "score" in sel_col:
-                   try:
-                       content = "{:.2f}".format(float(content))
-                   except:
-                       pass
-               _info = sel_col + ":" + content
-               if sel_col in info_cols and ii == sel_row:
-                    infos.append(_info)
-               if ii == sel_row:
-                   sel_dict[sel_col] = row[sel_col]
-               _color = TEXT_COLOR
-               _w = col_widths[sel_col] if sel_col in col_widths else width
-               if sel_col in sel_cols:
-                   text += "{:<{x}}".format(content, x= _w)
+               text = "{:<5}".format(ii)
+               _sels = []
+               _infs = []
+               for sel_col in sel_cols + info_cols:
+                   if not sel_col in row or sel_col in _sels:
+                       continue
+                   content = str(row[sel_col])
+                   content = content.strip()
+                   if "score" in sel_col:
+                       try:
+                           content = "{:.2f}".format(float(content))
+                       except:
+                           pass
+                   _info = sel_col + ":" + content
+                   if sel_col in info_cols:
+                       if ii == sel_row and not sel_col in _infs:
+                          infos.append(_info)
+                          _infs.append(sel_col)
+                   if ii == sel_row:
+                       sel_dict[sel_col] = row[sel_col]
+                   _color = TEXT_COLOR
+                   _w = col_widths[sel_col] if sel_col in col_widths else width
+                   if sel_col in sel_cols:
+                       text += "{:<{x}}".format(content, x= _w)
+                       _sels.append(sel_col)
 
-           if ii in sel_rows:
-               _color = HL_COLOR
-           if ii == sel_row:
-                _color = CUR_ITEM_COLOR
-           mprint(text, text_win, color = _color) 
-           ii += 1
-           if ii > sel_row + ROWS - 4:
-               break
-        refresh()
+               if ii in sel_rows:
+                   _color = HL_COLOR
+               if ii == sel_row:
+                    _color = CUR_ITEM_COLOR
+               mprint(text, text_win, color = _color) 
+               ii += 1
+               if ii > sel_row + ROWS - 4:
+                   break
+            refresh()
         for c in info_cols:
             if not c in df:
                 continue
@@ -171,6 +178,7 @@ def show_df(df):
                 _info = f"Mean {c}:" + "{:.2f}".format(mean)
                 infos.append(_info)
         infos.append("-------------------------")
+        infos.append(f"hotkey:{hotkey}")
         consts["len"] = str(len(df))
         for key,val in consts.items():
             if type(val) == list:
@@ -179,7 +187,11 @@ def show_df(df):
         change_info(infos)
 
         prev_char = chr(ch)
-        ch = get_key(std)
+        if hotkey == "":
+            ch = std.getch()
+        else:
+            ch, hotkey = ord(hotkey[0]), hotkey[1:]
+
         char = chr(ch)
         vals = []
         get_cmd = False
@@ -187,12 +199,18 @@ def show_df(df):
             left -= width
         if ch == RIGHT:
             left += width
-        if ch == DOWN:
+        if ch == DOWN or char == "N":
             sel_row += 1
-        elif ch == UP:
+        elif ch == UP or char == "B":
             sel_row -= 1
         elif ch == cur.KEY_NPAGE:
             sel_row += ROWS - 4
+        elif ch == cur.KEY_HOME:
+            sel_row = 0 
+        elif ch == cur.KEY_SHOME:
+            left = 0 
+        elif ch == cur.KEY_END:
+            sel_row = len(df) -1
         elif ch == cur.KEY_PPAGE:
             sel_row -= ROWS - 4
         elif char in ["l","L"]:
@@ -259,6 +277,7 @@ def show_df(df):
             canceled, col, val = list_df_values(df, get_val=False)
             if not canceled:
                 FID = col
+            df["num_preds"] = df.groupby([FID])['pred_text1'].transform('nunique')
         elif char == "s":
             canceled, col, val = list_df_values(df, get_val=False)
             if not canceled:
@@ -328,9 +347,13 @@ def show_df(df):
                #df = df.reset_index()
                sel_cols = order(sel_cols, g_cols)
                consts["filter"].append("group experiments")
+        elif char == "n":
+            hotkey = "bNh"
         elif char in ["a", "h"]:
             left = 0
             back.append(df)
+            back_row = sel_row
+
             s_rows = sel_rows
             if not sel_rows:
                 s_rows = [sel_row]
@@ -343,10 +366,11 @@ def show_df(df):
                 sel_exp = exp
                 consts["exp"] = exp
                 tdf = main_df[main_df[FID] == exp]
-                tdf = tdf[["fid","pred_text1","target_text","id", "blank", "rouge_score","input_text", "prefix"]]
+                tdf = tdf[["fid","pred_text1","target_text","id", "blank", "rouge_score","input_text", "prefix", "method"]]
                 tdf = tdf.sort_values(by="rouge_score")
                 tdf = tdf.groupby(["pred_text1","prefix"]).agg({
-                    "rouge_score":"first","id":"first","pred_text1":"first", "fid":"count", 
+                    "rouge_score":"first", "method":"first","id":"first",
+                    "pred_text1":"first", "fid":"count", 
                     "input_text":"first", "target_text":"first", "blank":"first", 
                     "prefix":"first"}).reset_index(drop=True)
                 tdf = tdf.sort_values(by="fid", ascending=False)
@@ -358,12 +382,20 @@ def show_df(df):
             else:
                df = tdf
             g_cols = []
-            sel_cols = []
+            sel_cols = [on_col]
             for _col in df.columns:
                 if (_col.startswith("fid") or
                     _col.startswith("pred_text1") or 
                     _col.startswith("target_text") or 
+                    _col.startswith("input_text") or 
+                    _col.startswith("method") or 
                     _col.startswith("prefix")):
+                    if (_col.startswith("fid") or
+                        _col.startswith("pred_text1") or 
+                        _col.startswith("method")):
+                        sel_cols.append(_col)
+                    elif not _col == on_col and not _col in info_cols:
+                        info_cols.append(_col)
                     g_cols.append(_col)
                     col_widths[_col] = 20
                     if (_col.startswith("pred_text1") or
@@ -371,13 +403,14 @@ def show_df(df):
                         col_widths[_col] = 30
                     if _col.startswith("fid"):
                         col_widths[_col] = 10
-            if len(dfs) > 1:
-                sel_cols = order(sel_cols, ["pred_text1", "fid_x", "fid_y", "target_text_x", "target_text_y"])
-                info_cols = ["prefix", "target_text", "input_text", "target_text_x", "target_text_y", "pred_text1_x", "pred_text1_y"]
-            else:
-                sel_cols = order(sel_cols, g_cols) 
-                info_cols = ["prefix", "target_text", "input_text", "pred_text1"]
+            #if len(dfs) > 1:
+            #    sel_cols = order(sel_cols, ["pred_text1", "fid_x", "fid_y", "target_text_x", "target_text_y"])
+            #    info_cols = ["prefix", "target_text", "input_text", "target_text_x", "target_text_y", "pred_text1_x", "pred_text1_y"]
+            #else:
+            #    sel_cols = order(sel_cols, g_cols) 
+            #    info_cols = ["prefix", "target_text", "input_text", "pred_text1"]
 
+            sel_row = 0
             sel_rows = []
 
         elif char == "H":
@@ -692,6 +725,7 @@ def show_df(df):
             if back:
                 df = back.pop()
                 sel_cols = list(df.columns)
+                sel_row = back_row
             else:
                 mbeep()
             if consts["filter"]:

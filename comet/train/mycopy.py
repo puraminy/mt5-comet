@@ -3,6 +3,7 @@ import os, shutil
 import click
 from pytz import timezone
 import datetime
+import glob
 
 tehran = timezone('Asia/Tehran')
 now = datetime.datetime.now(tehran)
@@ -27,12 +28,16 @@ now = now.strftime('%Y-%m-%d-%H:%M')
 def mycopy(fname, path, move, dest_dir):
     delete_file = dest_dir == "dd"
     print_file = dest_dir == "pp"
-    files = []
-    for root, dirs, _files in os.walk(path):
-        for _file in _files:
-            root_file = os.path.join(root, _file)
-            if all(s in root_file for s in fname.split("+")):
-                files.append(root_file)
+    if glob.glob(fname):
+        files = glob.glob(fname)
+        files = [os.path.join(path, f) for f in files]
+    else:
+        files = []
+        for root, dirs, _files in os.walk(path):
+            for _file in _files:
+                root_file = os.path.join(root, _file)
+                if all(s in root_file for s in fname.split("+")):
+                    files.append(root_file)
     if not dest_dir: dest_dir = now
     dest_dir = "/home/pouramini/share/" + dest_dir
     for file in files:
