@@ -38,7 +38,6 @@ def load_results(path):
 
 def show_df(df):
     global dfname
-    hotkey = ""
     cmd = ""
     sel_row = 0
     ROWS, COLS = std.getmaxyx()
@@ -92,9 +91,10 @@ def show_df(df):
 
     back = []
     filter_df = main_df
-    FID = "qid"
+    FID = "fid"
     if "pred_text1" in df:
         df["num_preds"] = df.groupby([FID])['pred_text1'].transform('nunique')
+        df["num_query"] = df.groupby([FID])['input_text'].transform('nunique')
         br_col = df.loc[: , "bert_score":"rouge_score"]
         df['br_score'] = br_col.mean(axis=1)
         df['nr_score'] = df['rouge_score']
@@ -104,10 +104,13 @@ def show_df(df):
     #wwwwwwwwww
     colors = ['blue','orange','green', 'red', 'purple', 'brown', 'pink','gray','olive','cyan']
     ax = None
+    seq = ""
+    search = ""
     open_dfnames = [dfname]
     if not "blank" in df:
         df["blank"] = "blank"
     prev_cahr = ""
+    hotkey = ""
     sel_exp = ""
     back_row = 0
     sel_rows = []
@@ -193,6 +196,7 @@ def show_df(df):
             ch, hotkey = ord(hotkey[0]), hotkey[1:]
 
         char = chr(ch)
+        seq += char
         vals = []
         get_cmd = False
         if ch == LEFT:
@@ -213,11 +217,8 @@ def show_df(df):
             sel_row = len(df) -1
         elif ch == cur.KEY_PPAGE:
             sel_row -= ROWS - 4
-        elif char in ["l","L"]:
-            if char == "L":
-                df = main_df[main_df["model"] == "t5-large"]
-            else:
-                df = main_df[main_df["model"] == "t5-base"]
+        elif char == "l":
+            seq = ""
         elif char in list("0123456789"):
             canceled, col, val = list_df_values(df, get_val=False)
             if not canceled:
@@ -292,14 +293,7 @@ def show_df(df):
             for col in df:
                counts[col] = df[col].nunique()
             df = pd.DataFrame(data=[counts], columns = df.columns)
-        elif char == "U":
-            #df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
-            df = df[df["wrap"] == "unwrapped-lstm"]
-        elif char == "W":
-            #df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
-            df = df[df["wrap"] == "wrapped-lstm"]
-
-        elif char == "u": 
+        elif char == "U": 
             if not count_col:
                 canceled, col, _ = list_df_values(df, get_val=False)
                 if not canceled:
@@ -339,8 +333,8 @@ def show_df(df):
             elif char == "G":
                 canceled, col = False, FID
             if not canceled:
-               g_cols = ["exp_id", "num_preds", "rouge_score", "bert_score", "br_score","nr_score", "steps", "method","model", "wrap", "frozen"]
-               df = (df.groupby(col).agg({"num_preds":"first", "rouge_score":"mean","bert_score":"mean","br_score": "mean", "nr_score":"mean", "method":"first","model":"first", "wrap":"first", col:"first", "steps":"first", "frozen":"first"})
+               g_cols = ["exp_id", "num_preds", "num_query", "rouge_score", "bert_score", "br_score","nr_score", "steps", "method","model", "wrap", "frozen"]
+               df = (df.groupby(col).agg({"num_preds":"first", "num_query":"first", "rouge_score":"mean","bert_score":"mean","br_score": "mean", "nr_score":"mean", "method":"first","model":"first", "wrap":"first", col:"first", "steps":"first", "frozen":"first"})
                  .rename(columns={col:'exp_id'})
                  .sort_values(by = ["rouge_score"], ascending=False)
                     )
@@ -349,7 +343,7 @@ def show_df(df):
                consts["filter"].append("group experiments")
         elif char == "n":
             hotkey = "bNh"
-        elif char in ["a", "h"]:
+        elif char in ["a", "h", "u"]:
             left = 0
             back.append(df)
             back_row = sel_row
@@ -359,30 +353,46 @@ def show_df(df):
                 s_rows = [sel_row]
             ii = 0
             dfs = []
-            sdf = pd.DataFrame()
-            on_col = "target_text" if char =="a" else "pred_text1"
+            on_col_list = ["pred_text1"]
+            other_col = "target_text"
+            if char =="a": 
+                on_col_list = ["qid", "pred_text1"] 
+                other_col = "pred_text"
+            if char =="u": 
+                on_col_list = ["input_text"] 
+                other_col = ""
+            on_col_list.extend(["prefix"])
+            dfs_items = [] 
             for s_row in s_rows:
                 exp=df.iloc[s_row]["exp_id"]
                 sel_exp = exp
                 consts["exp"] = exp
+                dfs_val = {"exp":exp}
                 tdf = main_df[main_df[FID] == exp]
-                tdf = tdf[["fid","pred_text1","target_text","id", "blank", "rouge_score","input_text", "prefix", "method"]]
+                tdf = tdf[["pred_text1","qid", "method", "rouge_score", "fid","prefix", "input_text","target_text"]]
                 tdf = tdf.sort_values(by="rouge_score")
-                tdf = tdf.groupby(["pred_text1","prefix"]).agg({
-                    "rouge_score":"first", "method":"first","id":"first",
-                    "pred_text1":"first", "fid":"count", 
-                    "input_text":"first", "target_text":"first", "blank":"first", 
-                    "prefix":"first"}).reset_index(drop=True)
+                tdf = tdf.groupby(on_col_list).agg({"qid":"first","input_text":"first","target_text":"first", "method":"first", "rouge_score":"mean","prefix":"first","pred_text1":"first", "fid":"count"}).reset_index(drop=True)
                 tdf = tdf.sort_values(by="fid", ascending=False)
+                dfs_val["len"] = len(tdf)
+                for on_col in on_col_list:
+                    tdf[on_col] = tdf[on_col].astype(str).str.strip()
                 dfs.append(tdf) #.copy())
+                dfs_items.append(dfs_val)
                 ii += 1
             if ii > 1:
-                df = reduce(lambda  left,right: pd.merge(left,right,on=[on_col],
+                intersect = reduce(lambda  left,right: pd.merge(left,right,on=on_col_list,
                                             how='inner'), dfs)
+                if char == "a":
+                    union = reduce(lambda  left,right: pd.merge(left,right,on=on_col_list,
+                                            how='outer'), dfs)
+                    dfs_items.append({"exp": str(len(union)), "len": len(intersect)})
+                    df = pd.DataFrame(dfs_items)
+                else:
+                    df = intersect
             else:
                df = tdf
             g_cols = []
-            sel_cols = [on_col]
+            sel_cols = on_col_list
             for _col in df.columns:
                 if (_col.startswith("fid") or
                     _col.startswith("pred_text1") or 
@@ -394,7 +404,7 @@ def show_df(df):
                         _col.startswith("pred_text1") or 
                         _col.startswith("method")):
                         sel_cols.append(_col)
-                    elif not _col == on_col and not _col in info_cols:
+                    elif not _col in on_col_list and not _col in info_cols:
                         info_cols.append(_col)
                     g_cols.append(_col)
                     col_widths[_col] = 20
@@ -403,12 +413,15 @@ def show_df(df):
                         col_widths[_col] = 30
                     if _col.startswith("fid"):
                         col_widths[_col] = 10
-            #if len(dfs) > 1:
-            #    sel_cols = order(sel_cols, ["pred_text1", "fid_x", "fid_y", "target_text_x", "target_text_y"])
-            #    info_cols = ["prefix", "target_text", "input_text", "target_text_x", "target_text_y", "pred_text1_x", "pred_text1_y"]
-            #else:
-            #    sel_cols = order(sel_cols, g_cols) 
-            #    info_cols = ["prefix", "target_text", "input_text", "pred_text1"]
+            if char == "a":
+                sel_cols = list(df.columns)
+            else:
+                if len(dfs) > 1:
+                    sel_cols.extend([other_col + "_x", other_col + "_y", "method_x", "method_y", "fid_x", "fid_y" ])
+                #    info_cols = ["prefix", "target_text", "input_text", "target_text_x", "target_text_y", "pred_text1_x", "pred_text1_y"]
+                else:
+                    sel_cols.extend([other_col, "method"])
+                #    info_cols = ["prefix", "target_text", "input_text", "pred_text1"]
 
             sel_row = 0
             sel_rows = []
@@ -603,9 +616,15 @@ def show_df(df):
                     col_widths[col] = int(cmd)
                     save_obj(col_widths, "widths", "")
         elif char == "/":
-            search = rowinput("/")
-            mask = np.column_stack([df[col].str.contains(search, na=False) for col in df])
-            sel_row = df.loc[mask.any(axis=1)].index[0]
+            old_search = search
+            search = rowinput("/", search)
+            if search == old_search:
+                si += 1
+            else:
+                si = 0
+            mask = np.column_stack([df[col].astype(str).str.contains(search, na=False) for col in df])
+            si = min(si, len(mask) - 1)
+            sel_row = df.loc[mask.any(axis=1)].index[si]
         elif char == ":":
             cmd = rowinput()
             if cmd == "fix_types":

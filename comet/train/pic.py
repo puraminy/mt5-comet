@@ -419,10 +419,12 @@ def start(stdscr):
 )
 def main(path, fid, fname):
     global dfname,dfpath,file_id
-    if not fname: fname = ["png"]
     file_id = fid
     if fname != "last":
-        dfname = [fname] 
+        if not fname: 
+            dfname = ["png"]
+        else:
+            dfname = [fname] 
         dfpath = path
     set_app("show_files")
     wrapper(start)
