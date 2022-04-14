@@ -143,7 +143,7 @@ def chunks(lst, n):
 
 
 
-def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", no_score=False, batch_size="20@5", model = None, tokenizer = None, preds_file = "", set_name = "test"):  
+def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", scorers="rouge", batch_size="20@5", model = None, tokenizer = None, preds_file = "", set_name = "test"):  
     try:
         nltk_path = str(nltk.data.find("tokenizers/punkt"))
         mlog.info(f"using nltk from: {nltk_path}")
@@ -162,11 +162,12 @@ def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", no_
         local_path = 'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2'
 
     bert_scorer = None
-    if True: #"ahmad" in home:
-        bert_scorer = None
-    elif not no_score:
+    if "bert" in scorers:
         bert_scorer = SentenceTransformer(local_path)
-    rouge_scorer = Rouge()
+    rouge_score = None
+    if "rouge" in scorers:
+        rouge_scorer = Rouge()
+
     local_path = f"{base_path}/nli-roberta-base"
     if not Path(local_path).exists():
         local_path = 'sentence-transformers/nli-roberta-base'
@@ -271,7 +272,7 @@ def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", no_
             else:
                 query = query.replace("<extra_id_0>", ">>" + top_hyp)
             data["input_text"] = query #input_text 
-            if no_score:
+            if not scorers:
                 if step % 10000 == 0:
                     save_results(rows, "step", step, exp_info, save_path)
                 step += 1
@@ -346,7 +347,7 @@ def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", no_
             mean_bleu[scope] = "{:.4f}".format(sum_bleu[scope] / counter[scope])
             #### Rouge score
             rouge_score = 0
-            if not no_score:
+            if rouge_scorer:
                 rouge_score = rouge_scorer.get_scores(top_hyp, ".".join(tails), 
                                                 avg=True, ignore_empty=True)
                 rouge_score = rouge_score["rouge-l"]["f"]
@@ -392,9 +393,9 @@ def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", no_
 
     # %%%%%%%%%%%%%%%%%%
     file_gen = "_" + Path(preds_file).stem if preds_file else ""
-    new_df = save_results(rows, "full_" + set_name + file_gen , step, exp_info, save_path)
-    sel_df = save_results(sel_rows, "sel_" + set_name + file_gen , step, {}, save_path)
-    if no_score:
+    new_df = save_results(rows, "full_" + set_name + file_gen + "_" + scorers , step, exp_info, save_path)
+    sel_df = save_results(sel_rows, "sel_" + set_name + file_gen + "_" + scorers , step, {}, save_path)
+    if not scorers:
         return
 
 

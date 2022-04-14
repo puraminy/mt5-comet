@@ -92,7 +92,7 @@ def show_df(df):
 
     back = []
     filter_df = main_df
-    FID = "qid"
+    FID = "fid"
     if "pred_text1" in df:
         df["num_preds"] = df.groupby([FID])['pred_text1'].transform('nunique')
         br_col = df.loc[: , "bert_score":"rouge_score"]
@@ -339,13 +339,12 @@ def show_df(df):
             elif char == "G":
                 canceled, col = False, FID
             if not canceled:
-               g_cols = ["exp_id", "num_preds", "rouge_score", "bert_score", "br_score","nr_score", "steps", "method","model", "wrap", "frozen"]
+               sel_cols = ["num_preds", "rouge_score", "method", "exp_id","bert_score", "br_score","nr_score", "steps", "model", "wrap", "frozen"]
                df = (df.groupby(col).agg({"num_preds":"first", "rouge_score":"mean","bert_score":"mean","br_score": "mean", "nr_score":"mean", "method":"first","model":"first", "wrap":"first", col:"first", "steps":"first", "frozen":"first"})
                  .rename(columns={col:'exp_id'})
                  .sort_values(by = ["rouge_score"], ascending=False)
                     )
                #df = df.reset_index()
-               sel_cols = order(sel_cols, g_cols)
                consts["filter"].append("group experiments")
         elif char == "n":
             hotkey = "bNh"

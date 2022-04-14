@@ -93,7 +93,7 @@ rel_nat_maps = {
         "nat-tokens":"always, the state of the person is",
     },
     "xIntent":{ 
-        "en-postfix":"Because of {event}, PersonX wanted {ph}i.",
+        "en-postfix":"Because of {event}, PersonX wanted {ph}",
         "en-prefix":"PersonX intended {ph}  Therefore,",
         "fa":"زیرا PersonX می خواست",
         "tokens":"<event> <agent> <before> <cause> <want>",
@@ -718,6 +718,9 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            anstemp = "{ph} {resp} {end}"
        elif method == "sup":
            qtemp = "{rel_token} {event}"
+           anstemp = "{resp} {end}"
+       elif method == "sup-end":
+           qtemp = "{event} {rel_token}" 
            anstemp = "{resp} {end}"
        elif method == "sup-wrap-gen":
            qtemp = "{rel_i_start} {gen_start} {event} {rel_i_end} {gen_end}"
