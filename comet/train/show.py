@@ -339,7 +339,6 @@ def show_df(df):
                  .sort_values(by = ["rouge_score"], ascending=False)
                     )
                #df = df.reset_index()
-               sel_cols = order(sel_cols, g_cols)
                consts["filter"].append("group experiments")
         elif char == "n":
             hotkey = "bNh"
