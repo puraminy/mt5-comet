@@ -91,7 +91,7 @@ def show_df(df):
 
     back = []
     filter_df = main_df
-    FID = "fid"
+    FID = "method"
     if "pred_text1" in df:
         df["num_preds"] = df.groupby([FID])['pred_text1'].transform('nunique')
         df["num_query"] = df.groupby([FID])['input_text'].transform('nunique')
@@ -275,9 +275,10 @@ def show_df(df):
                     save_obj(info_cols, "info_cols", dfname)
                     save_obj(sel_cols, "sel_cols", dfname)
         elif char == "k":
-            canceled, col, val = list_df_values(df, get_val=False)
-            if not canceled:
-                FID = col
+            FID = "qid"
+            #canceled, col, val = list_df_values(df, get_val=False)
+            #if not canceled:
+            #    FID = col
             df["num_preds"] = df.groupby([FID])['pred_text1'].transform('nunique')
         elif char == "s":
             canceled, col, val = list_df_values(df, get_val=False)
@@ -333,7 +334,7 @@ def show_df(df):
             elif char == "G":
                 canceled, col = False, FID
             if not canceled:
-               g_cols = ["exp_id", "num_preds", "num_query", "rouge_score", "bert_score", "br_score","nr_score", "steps", "method","model", "wrap", "frozen"]
+               sel_cols = ["exp_id", "num_preds", "num_query", "rouge_score", "bert_score", "br_score","nr_score", "steps", "method","model", "wrap", "frozen"]
                df = (df.groupby(col).agg({"num_preds":"first", "num_query":"first", "rouge_score":"mean","bert_score":"mean","br_score": "mean", "nr_score":"mean", "method":"first","model":"first", "wrap":"first", col:"first", "steps":"first", "frozen":"first"})
                  .rename(columns={col:'exp_id'})
                  .sort_values(by = ["rouge_score"], ascending=False)
@@ -368,7 +369,7 @@ def show_df(df):
                 consts["exp"] = exp
                 dfs_val = {"exp":exp}
                 tdf = main_df[main_df[FID] == exp]
-                tdf = tdf[["pred_text1","qid", "method", "rouge_score", "fid","prefix", "input_text","target_text"]]
+                tdf = tdf[["pred_text1", "bert_score","qid", "method", "rouge_score", "fid","prefix", "input_text","target_text"]]
                 tdf = tdf.sort_values(by="rouge_score")
                 tdf = tdf.groupby(on_col_list).agg({"qid":"first","input_text":"first","target_text":"first", "method":"first", "rouge_score":"mean","prefix":"first","pred_text1":"first", "fid":"count"}).reset_index(drop=True)
                 tdf = tdf.sort_values(by="fid", ascending=False)
