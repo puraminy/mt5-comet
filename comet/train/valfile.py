@@ -14,12 +14,40 @@ from comet.train.mylogs import *
 )
 @click.option(
     "--model_id",
-    "-pm",
+    "-m",
     default="t5-base",
     type=str,
     help=""
 )
-def main(fname, exp, model_id):
+@click.option(
+    "--scorers",
+    "-ss",
+    default="rouge",
+    type=str,
+    help=""
+)
+@click.option(
+    "--method",
+    "-mt",
+    default="prefix",
+    type=str,
+    help=""
+)
+@click.option(
+    "--train_samples",
+    "-tn",
+    default=-1,
+    type=int,
+    help=""
+)
+@click.option(
+    "--epochs_num",
+    "-en",
+    default=-1,
+    type=int,
+    help=""
+)
+def main(fname, exp, model_id, scorers, method, train_samples, epochs_num):
     inps = glob.glob(f"*{fname}*")
     if len(inps) == 0:
         print(f"A file with this pattern '*{fname}*' wasn't found")
@@ -31,7 +59,6 @@ def main(fname, exp, model_id):
     lang = "en2en"
     w_str = "unwrapped"
     f_str = "unfrozen"
-    epochs_num = 1
     trial = 1
     experiment = Path(fname).stem + "_" + exp
     exp_info = {"exp":experiment, "model":model_id, "lang": lang, 

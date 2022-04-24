@@ -212,9 +212,16 @@ def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", sco
     lang = "en2en"
     sel_inps = {}
     if preds_file:
-        with open(preds_file, 'r') as infile:
-              lines = infile.readlines()
-        lines = lines[1:]
+        if Path(preds_file).suffix == "json":
+            with open(preds_file) as json_file:
+                records = json.load(json_file)
+            lines = []
+            for item in records:
+                lines.append(item["prediction"])
+        else:
+            with open(preds_file, 'r') as infile:
+                  lines = infile.readlines()
+            lines = lines[1:]
     l_count = 0
     for batch_list in batched(list(test_iter), bs):
         if exit_loop:

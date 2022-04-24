@@ -35,6 +35,38 @@ def load_results(path):
     df.to_csv(path.replace("json", "tsv"), sep="\t", index = False)
     return df
 
+def find_common(df, main_df, on_col_list, s_rows, FID, char):
+    dfs_items = [] 
+    dfs = []
+    ii = 0
+    dfs_val = {}
+    for s_row in s_rows:
+        exp=df.iloc[s_row]["exp_id"]
+        dfs_val["exp" + str(ii)] = exp
+        tdf = main_df[main_df[FID] == exp]
+        tdf = tdf[["pred_text1", "bert_score","qid", "method", "rouge_score", "fid","prefix", "input_text","target_text"]]
+        tdf = tdf.sort_values(by="rouge_score")
+        tdf = tdf.groupby(on_col_list).agg({"qid":"first","input_text":"first","target_text":"first", "method":"first", "rouge_score":"mean","prefix":"first","pred_text1":"first", "fid":"count"}).reset_index(drop=True)
+        tdf = tdf.sort_values(by="fid", ascending=False)
+        for on_col in on_col_list:
+            tdf[on_col] = tdf[on_col].astype(str).str.strip()
+        dfs.append(tdf) #.copy())
+        ii += 1
+    if ii > 1:
+        intersect = reduce(lambda  left,right: pd.merge(left,right,on=on_col_list,
+                                    how='inner'), dfs)
+        if char == "a":
+            union = reduce(lambda  left,right: pd.merge(left,right,on=on_col_list,
+                                    how='outer'), dfs)
+            dfs_val["union"] = str(len(union))
+            dfs_val["int"] = str(len(intersect))
+            dfs_items.append(dfs_val)
+            df = pd.DataFrame(dfs_items)
+        else:
+            df = intersect
+    else:
+       df = tdf
+    return df
 
 def show_df(df):
     global dfname
@@ -60,6 +92,8 @@ def show_df(df):
         for row in rows:
             mprint(row, text_win)
         refresh()
+
+
 
     if not col_widths:
         col_widths = {"qid":5, "model":30, "pred_text1":30, "epochs":30, "date":30, "rouge_score":7, "bert_score":7, "input_text":50}
@@ -343,7 +377,7 @@ def show_df(df):
                consts["filter"].append("group experiments")
         elif char == "n":
             hotkey = "bNh"
-        elif char in ["a", "h", "u"]:
+        elif char == "u":
             left = 0
             back.append(df)
             back_row = sel_row
@@ -351,47 +385,45 @@ def show_df(df):
             s_rows = sel_rows
             if not sel_rows:
                 s_rows = [sel_row]
-            ii = 0
-            dfs = []
+            cond = ""
+            for s_row in s_rows:
+                exp=df.iloc[s_row]["exp_id"]
+                cond += f"| (main_df['{FID}'] == '{exp}') "
+            cond = cond.strip("|")
+            filter_df = main_df[eval(cond)]
+            df = filter_df.copy()
+            sel_rows = []
+            FID = "qid"
+            hotkey = "gG"
+        elif char in ["a", "h"]:
+            left = 0
+            back.append(df)
+            back_row = sel_row
+
+            s_rows = sel_rows
+            if not sel_rows:
+                s_rows = [sel_row]
             on_col_list = ["pred_text1"]
             other_col = "target_text"
             if char =="a": 
                 on_col_list = ["qid", "pred_text1"] 
                 other_col = "pred_text"
-            if char =="u": 
-                on_col_list = ["input_text"] 
-                other_col = ""
             on_col_list.extend(["prefix"])
-            dfs_items = [] 
-            for s_row in s_rows:
-                exp=df.iloc[s_row]["exp_id"]
-                sel_exp = exp
-                consts["exp"] = exp
-                dfs_val = {"exp":exp}
-                tdf = main_df[main_df[FID] == exp]
-                tdf = tdf[["pred_text1", "bert_score","qid", "method", "rouge_score", "fid","prefix", "input_text","target_text"]]
-                tdf = tdf.sort_values(by="rouge_score")
-                tdf = tdf.groupby(on_col_list).agg({"qid":"first","input_text":"first","target_text":"first", "method":"first", "rouge_score":"mean","prefix":"first","pred_text1":"first", "fid":"count"}).reset_index(drop=True)
-                tdf = tdf.sort_values(by="fid", ascending=False)
-                dfs_val["len"] = len(tdf)
-                for on_col in on_col_list:
-                    tdf[on_col] = tdf[on_col].astype(str).str.strip()
-                dfs.append(tdf) #.copy())
-                dfs_items.append(dfs_val)
-                ii += 1
-            if ii > 1:
-                intersect = reduce(lambda  left,right: pd.merge(left,right,on=on_col_list,
-                                            how='inner'), dfs)
-                if char == "a":
-                    union = reduce(lambda  left,right: pd.merge(left,right,on=on_col_list,
-                                            how='outer'), dfs)
-                    dfs_items.append({"exp": str(len(union)), "len": len(intersect)})
-                    df = pd.DataFrame(dfs_items)
-                else:
-                    df = intersect
-            else:
-               df = tdf
             g_cols = []
+            _rows = s_rows
+            if char == "a":
+                dfs = []
+                all_rows = range(len(df))
+                for r1 in all_rows:
+                    for r2 in all_rows:
+                        if r2 > r1:
+                            _rows = [r1, r2]
+                            _df = find_common(df, filter_df, on_col_list, _rows, FID, char)
+                            dfs.append(_df)
+                df = pd.concat(dfs,ignore_index=True)
+                df = df.sort_values(by="int", ascending=False)
+            else:
+                df = find_common(df, filter_df, on_col_list, _rows, FID, char)
             sel_cols = on_col_list
             for _col in df.columns:
                 if (_col.startswith("fid") or
@@ -416,7 +448,7 @@ def show_df(df):
             if char == "a":
                 sel_cols = list(df.columns)
             else:
-                if len(dfs) > 1:
+                if len(s_rows) > 1:
                     sel_cols.extend([other_col + "_x", other_col + "_y", "method_x", "method_y", "fid_x", "fid_y" ])
                 #    info_cols = ["prefix", "target_text", "input_text", "target_text_x", "target_text_y", "pred_text1_x", "pred_text1_y"]
                 else:
