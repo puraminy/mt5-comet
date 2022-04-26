@@ -641,7 +641,7 @@ def run(ctx, conf_path, base_conf, experiment,
 @click.option(
     "--scorers",
     "-nos",
-    default="rouge"
+    default="rouge",
     type=str,
     help=""
 )

@@ -253,7 +253,7 @@ def show_df(df):
             sel_row -= ROWS - 4
         elif char == "l":
             seq = ""
-        elif char in list("0123456789"):
+        elif char in list("01234"):
             canceled, col, val = list_df_values(df, get_val=False)
             if not canceled:
                 sel_cols = order(sel_cols, [col],int(char))
@@ -308,12 +308,14 @@ def show_df(df):
                         sel_cols.insert(0, col)
                     save_obj(info_cols, "info_cols", dfname)
                     save_obj(sel_cols, "sel_cols", dfname)
-        elif char == "k":
-            FID = "qid"
-            #canceled, col, val = list_df_values(df, get_val=False)
-            #if not canceled:
-            #    FID = col
-            df["num_preds"] = df.groupby([FID])['pred_text1'].transform('nunique')
+        elif char in "56789":
+            ii = int(char) - 5
+            arr = ["qid","fid","method"]
+            if ii < len(arr):
+                FID = arr[ii] 
+                df = main_df
+                df["num_preds"] = df.groupby([FID])['pred_text1'].transform('nunique')
+                hotkey="gG"
         elif char == "s":
             canceled, col, val = list_df_values(df, get_val=False)
             if not canceled:
@@ -375,6 +377,7 @@ def show_df(df):
                     )
                #df = df.reset_index()
                consts["filter"].append("group experiments")
+               col_widths["exp_id"] = 2 + df.exp_id.str.len().max()
         elif char == "n":
             hotkey = "bNh"
         elif char == "u":

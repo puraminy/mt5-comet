@@ -1,6 +1,7 @@
 import glob
 import click
 from comet.train.mylogs import *
+from comet.train.eval import *
 
 
 @click.command()
@@ -11,6 +12,13 @@ from comet.train.mylogs import *
     default="",
     type=str,
     help=""
+)
+@click.option(
+    "--path",
+    envvar="PWD",
+    #    multiple=True,
+    type=click.Path(),
+    help="The current path (it is set by system)"
 )
 @click.option(
     "--model_id",
@@ -47,7 +55,7 @@ from comet.train.mylogs import *
     type=int,
     help=""
 )
-def main(fname, exp, model_id, scorers, method, train_samples, epochs_num):
+def main(fname, path, exp, model_id, scorers, method, train_samples, epochs_num):
     inps = glob.glob(f"*{fname}*")
     if len(inps) == 0:
         print(f"A file with this pattern '*{fname}*' wasn't found")
@@ -60,7 +68,9 @@ def main(fname, exp, model_id, scorers, method, train_samples, epochs_num):
     w_str = "unwrapped"
     f_str = "unfrozen"
     trial = 1
+    ds = None
     experiment = Path(fname).stem + "_" + exp
+    test_samples = 0
     exp_info = {"exp":experiment, "model":model_id, "lang": lang, 
                     "method":method, 
                     "wrap": w_str, 
@@ -69,7 +79,8 @@ def main(fname, exp, model_id, scorers, method, train_samples, epochs_num):
                     "epochs":epochs_num,
                     "trial":trial,
                     "date":extra}
-    evaluate(ds, split_dir, exp_info, 
+    print("Evaluating ", preds_file)
+    evaluate(ds, path, exp_info, 
             test_samples, preds_file = preds_file, scorers=scorers)
 
 if __name__ == "__main__":

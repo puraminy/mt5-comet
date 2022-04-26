@@ -199,7 +199,6 @@ def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", sco
         ignore_special_tokens = ist == "True"
 
     mlog.info("Preparing iterator ...")
-    test_iter = iter(test_set)
     mlog.info("Scoring...")
     pbar = tqdm(total=val_records, position=0, leave=True) #,dynamic_ncols=True)
     step = 0
@@ -212,17 +211,22 @@ def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", sco
     lang = "en2en"
     sel_inps = {}
     if preds_file:
-        if Path(preds_file).suffix == "json":
+        mlog.info("extention %s, %s", preds_file, Path(preds_file).suffix) 
+        if Path(preds_file).suffix == ".json":
             with open(preds_file) as json_file:
                 records = json.load(json_file)
             lines = []
+            test_set = []
             for item in records:
+                d = (item["text_in"], item["question"], item["answer_text"], item["meta"],item["id"], 0)
+                test_set.append(d)
                 lines.append(item["prediction"])
         else:
             with open(preds_file, 'r') as infile:
                   lines = infile.readlines()
             lines = lines[1:]
     l_count = 0
+    test_iter = iter(test_set)
     for batch_list in batched(list(test_iter), bs):
         if exit_loop:
             break
