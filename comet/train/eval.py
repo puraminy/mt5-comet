@@ -10,6 +10,28 @@ from rouge import Rouge
 #%% Aggregate instances of queries and corresponding responses
 # (str)split_name -> (dict) query -> (list) response 
 
+from datasets import load_metric
+import nltk
+
+#  the code below refers to the https://github.com/Yale-LILY/FeTaQA/blob/main/end2end/train.py
+def postprocess_text(preds, labels, metric_name):
+    preds = [pred.strip() for pred in preds]
+    labels = [label.strip() for label in labels]
+
+    # rougeLSum expects newline after each sentence
+    if metric_name == "rouge":
+        preds = ["\n".join(nltk.sent_tokenize(pred)) for pred in preds]
+        labels = ["\n".join(nltk.sent_tokenize(label)) for label in labels]
+    elif metric_name == "sacrebleu":  # sacrebleu
+        labels = [[label] for label in labels]
+    elif metric_name == "bleu":
+        preds = [pred.split(' ') for pred in preds]
+        labels = [[label.split(' ')] for label in labels]
+    else:
+        pass
+
+    return preds, labels
+
 device = "cpu"
 def set_device(dev):
     global device
@@ -94,6 +116,9 @@ def bert_score(bert_scorer, hyps, refs):
         if bert_scorer == None:
             return 0, 0, 0.0
 
+        hyps = [p.strip() for p in hyps]
+        refs = [g.strip() for g in refs]
+
         embeddings1 = bert_scorer.encode(hyps, device=device, convert_to_tensor=True)
         embeddings2 = bert_scorer.encode(refs, device=device, convert_to_tensor=True)
 
@@ -159,11 +184,14 @@ def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", sco
     #local_path = f"{base_path}/paraphrase-multilingual-MiniLM-L12-v2"        
     local_path = f"{base_path}/paraphrase-MiniLM-L6-v2"
     if not Path(local_path).exists():
-        local_path = 'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2'
+        local_path = 'sentence-transformers/paraphrase-MiniLM-L6-v2'
 
     bert_scorer = None
+    bert_metric = None
     if "bert" in scorers:
         bert_scorer = SentenceTransformer(local_path)
+        bert_metric = load_metric("bertscore")
+
     rouge_score = None
     if "rouge" in scorers:
         rouge_scorer = Rouge()
@@ -227,6 +255,10 @@ def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", sco
             lines = lines[1:]
     l_count = 0
     test_iter = iter(test_set)
+    iid  = 0
+    old_query = ""
+    all_predictions = []
+    all_golds = []
     for batch_list in batched(list(test_iter), bs):
         if exit_loop:
             break
@@ -244,7 +276,10 @@ def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", sco
             mlog.info("1)  hyp: %s",top_hyp)
             data = {}
             sel_data = {}
-            data["qid"] = qid
+            if query != old_query:
+                old_query = query
+                iid += 1
+            data["qid"] = iid
             data["tid"] = qid
             #rel_natural = relation_natural_mappings[rel]["en-postfix"]        
             #rel_natural_pure = rel_natural.replace("{ph}", "").strip()
@@ -270,6 +305,8 @@ def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", sco
                     nt = nt.replace(const,"")
                 new_tails.append(nt)
             tails = new_tails
+            all_predictions.append(top_hyp)
+            all_golds.append(tails[0])
             data["blank"] = blank
             data["pred_text1"] = top_hyp
             data["target_text"] = "<br />".join(tails)
@@ -277,12 +314,13 @@ def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", sco
             data["langs"] = lang
             input_text = re.sub(r'<.*?>','##',query)
             input_text = input_text.replace("\n", "")
-            if blank:
-                query = query.replace("<extra_id_0>", "[" + blank + "]")
-                query = query.replace("<extra_id_1>", ">>" + top_hyp)
-            else:
-                query = query.replace("<extra_id_0>", ">>" + top_hyp)
-            data["input_text"] = query #input_text 
+            #if blank:
+            #    query = query.replace("<extra_id_0>", "[" + blank + "]")
+            #    query = query.replace("<extra_id_1>", ">>" + top_hyp)
+            #else:
+            #    query = query.replace("<extra_id_0>", ">>" + top_hyp)
+            data["input_text"] = input_text 
+            data["query"] = query 
             if not scorers:
                 if step % 10000 == 0:
                     save_results(rows, "step", step, exp_info, save_path)
@@ -296,11 +334,14 @@ def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", sco
                 sum_bleu[scope] = 0
                 sum_match[scope] = 0
                 counter[scope] = 0
-            vlog.debug("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
+            mlog.debug("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
             gen_token = gen_tokens[lang]
             #Compute embeddings
             preds = [top_hyp]
+            hi, ri = 0, 0
             hi, ri, cur_score = bert_score(bert_scorer, preds, tails)
+            #summary = bert_score2(bert_metric, preds, tails)
+            #cur_score = summary["bertscore_f1"]
             best_hyp = preds[hi]
             best_ref = tails[ri]
             hyp_counter[hi] += 1
@@ -390,9 +431,11 @@ def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", sco
                 exit_loop = True
                 break
             mean_rouge["all"] = "{:.4f}".format(mean_rouge_all)
-            vlog.info("Bert Score:{:.4f}--{}".format(cur_score, mean_bert[scope]))
-            vlog.info("Rouge Score:{:.4f}--{}".format(rouge_score, mean_rouge[scope]))
-            vlog.info("Match Score:{}--{}".format(match_score, mean_match[scope]))
+            mlog.info("Bert Score:{:.4f}--{}".format(cur_score, mean_bert[scope]))
+            #mlog.info("Bert Score 2:{:.4f}".format(b_score))
+            mlog.info("Rouge Score:{:.4f}--{}".format(rouge_score, mean_rouge[scope]))
+            #mlog.info("Rouge Score 2:{:.4f}".format(r_score))
+            mlog.info("Match Score:{}--{}".format(match_score, mean_match[scope]))
             #vlog.info("BLEU Score:{:.4f}--{}".format(bleu_score, mean_bleu[scope]))
             vlog.info("======================================================")
             pbar.set_description(f"{scope:<20} :Bert:{mean_bert[scope]:<7} | {mean_bert['all']:<7} Rouge {mean_rouge[scope]:<7}|{mean_rouge['all']:<7} ")
@@ -403,6 +446,15 @@ def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", sco
 
 
     # %%%%%%%%%%%%%%%%%%
+    _info = "_".join([str(x) for x in list(exp_info.values())])
+    metric_list = ["rouge", "meteor", "bertscore"]
+    summary = calc_metrics(all_predictions, all_golds, metric_list)
+    out = os.path.join(save_path,f"summary__{_info}.txt")
+    print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+    print(summary)
+    with open(out, "w") as f:
+        print(summary, file=f)
+    print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
     file_gen = "_" + Path(preds_file).stem if preds_file else ""
     new_df = save_results(rows, "full_" + set_name + file_gen + "_" + scorers , step, exp_info, save_path)
     sel_df = save_results(sel_rows, "sel_" + set_name + file_gen + "_" + scorers , step, {}, save_path)
@@ -411,7 +463,6 @@ def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", sco
 
 
     new_df = new_df.sort_values(by=["input_text"])
-    _info = "_".join([str(x) for x in list(exp_info.values())])
     
     out = os.path.join(save_path,f"__{_info}.txt")
     def write_preds(new_df, out):
@@ -471,9 +522,52 @@ def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", sco
     for logger in [mlog, vlog, clog]:
         logger.info("Len data frame: {}".format(len(new_df)))
         logger.info("Rouge:{} ".format(mean_rouge_str)) 
-        #logger.info("DF mean Bert Score: {}".format(new_df["bert_score"].mean()))
         logger.info("DF mean Rouge Score: {}".format(df_mean_rouge))
+        if "bert" in scorers:
+            logger.info("BERT:{} ".format(mean_bert_str)) 
+            logger.info("DF mean Bert Score: {}".format(new_df["bert_score"].mean()))
         #logger.info("nli_counter: {}".format(nli_counter))
         #logger.info("hyp_counter: {}".format(hyp_counter))
         logger.info("Distinct preds:{}".format(len(pred_counts)))
 
+
+def bert_score2(metric, preds, golds):
+    summary = {}
+    preds = [p.strip() for p in preds]
+    golds = [g.strip() for g in golds]
+    res = metric.compute(predictions=preds, references=golds, lang="en", model_type="/home/pouramini/pret/paraphrase-MiniLM-L6-v2", num_layers=6)
+    #res = metric.compute(predictions=preds, references=golds, lang="en", model_type="/home/pouramini/pret/t5-large", num_layers=24)
+    for k, v in res.items():
+        if k == "hashcode":
+            continue
+        summary[f"bertscore_{k}"] = round(1.0 * sum(v) / len(v), 2)
+    return summary
+
+
+def calc_metrics(preds, golds, metric_list):
+    summary = {}
+    for metric_name in metric_list:
+        metric = load_metric(metric_name)
+        processed_preds, processed_golds = postprocess_text(preds, golds, metric_name)
+
+        if metric_name == "bertscore":
+            res = metric.compute(predictions=preds, references=golds, lang="en", model_type="/home/pouramini/pret/paraphrase-MiniLM-L6-v2", num_layers=6)
+            for k, v in res.items():
+                if k == "hashcode":
+                    continue
+                summary[f"{metric_name}_{k}"] = round(1.0 * sum(v) / len(v), 2)
+
+        else:
+            res = metric.compute(predictions=processed_preds, references=processed_golds)
+            if metric_name == "sacrebleu":
+                summary[metric_name] = res["score"] * 0.01  # limit it to range of [0, 1] for unifying
+            elif metric_name == "bleurt":
+                summary["bleurt"] = round(1.0 * sum(res["scores"]) / len(res["scores"]), 2)
+            elif metric_name == 'rouge':
+                for sub_metric_name in res.keys():
+                    for i, key in enumerate(['precision', 'recall', 'fmeasure']):
+                        summary["{}_{}".format(sub_metric_name, key)] = res[sub_metric_name][1][i]
+                    # this the the fmeasure('f-score') from the mid('mean aggregation')
+            else:
+                summary[metric_name] = res[metric_name]
+    return summary

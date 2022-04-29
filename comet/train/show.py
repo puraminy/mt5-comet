@@ -102,6 +102,7 @@ def show_df(df):
     df = df.reset_index(drop=True)
     if "input_text" in df:
         df['input_text'] = df['input_text'].str.replace('##','')
+        df['input_text'] = df['input_text'].str.split('>>').str[0]
         df['input_text'] = df['input_text'].str.strip()
     main_df = df
     edit_col = ""
@@ -127,8 +128,8 @@ def show_df(df):
     filter_df = main_df
     FID = "method"
     if "pred_text1" in df:
-        df["num_preds"] = df.groupby([FID])['pred_text1'].transform('nunique')
-        df["num_query"] = df.groupby([FID])['input_text'].transform('nunique')
+        df["num_preds"] = df.groupby([FID])[['pred_text1']].transform('nunique')
+        df["num_query"] = df.groupby([FID])[['qid']].transform('nunique')
         br_col = df.loc[: , "bert_score":"rouge_score"]
         df['br_score'] = br_col.mean(axis=1)
         df['nr_score'] = df['rouge_score']
@@ -315,6 +316,7 @@ def show_df(df):
                 FID = arr[ii] 
                 df = main_df
                 df["num_preds"] = df.groupby([FID])['pred_text1'].transform('nunique')
+                df["num_query"] = df.groupby([FID])['input_text'].transform('nunique')
                 hotkey="gG"
         elif char == "s":
             canceled, col, val = list_df_values(df, get_val=False)
@@ -377,6 +379,7 @@ def show_df(df):
                     )
                #df = df.reset_index()
                consts["filter"].append("group experiments")
+               df["exp_id"] = df["exp_id"].astype(str)
                col_widths["exp_id"] = 2 + df.exp_id.str.len().max()
         elif char == "n":
             hotkey = "bNh"
@@ -398,7 +401,7 @@ def show_df(df):
             sel_rows = []
             FID = "qid"
             hotkey = "gG"
-        elif char in ["a", "h"]:
+        elif char in ["a", "h", "T"]:
             left = 0
             back.append(df)
             back_row = sel_row
@@ -408,9 +411,9 @@ def show_df(df):
                 s_rows = [sel_row]
             on_col_list = ["pred_text1"]
             other_col = "target_text"
-            if char =="a": 
-                on_col_list = ["qid", "pred_text1"] 
-                other_col = "pred_text"
+            if char =="T": 
+                on_col_list = ["input_text"] 
+                other_col = "pred_text1"
             on_col_list.extend(["prefix"])
             g_cols = []
             _rows = s_rows
@@ -494,7 +497,7 @@ def show_df(df):
                     df = pd.concat([df, new_df], ignore_index=True)
                 else:
                     main_df = pd.concat([main_df, new_df], ignore_index=True)
-        elif char in ["t", "T"]:
+        elif char in ["t", "x"]:
             cols = get_cols(df,5)
             if cols:
                 tdf = df[cols].round(2)
@@ -994,7 +997,7 @@ def start(stdscr):
 @click.option(
     "--fid",
     "-fid",
-    default="parent",
+    default="name",
     type=str,
     help=""
 )

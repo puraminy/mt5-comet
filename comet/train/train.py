@@ -3,6 +3,10 @@ from comet.train.common import *
 import itertools, collections
 import shutil
 from comet.train.eval import *
+from comet.utils.configue import Configure
+import comet.utils.tool as ut
+from comet.models.unified.prefixtuning import Model
+from transformers.trainer_seq2seq import Seq2SeqTrainer
 from transformers.optimization import Adafactor, AdafactorSchedule
 from comet.train.model import *
 import torch
@@ -391,6 +395,12 @@ def run(ctx, conf_path, base_conf, experiment,
     help=""
 )
 @click.option(
+    "--prefix",
+    "-pt",
+    is_flag=True,
+    help=""
+)
+@click.option(
     "--frozen",
     "-f",
     is_flag=True,
@@ -641,7 +651,7 @@ def run(ctx, conf_path, base_conf, experiment,
 @click.option(
     "--scorers",
     "-nos",
-    default="rouge",
+    default="rouge-bert",
     type=str,
     help=""
 )
@@ -736,7 +746,7 @@ def run(ctx, conf_path, base_conf, experiment,
     is_flag=True,
     help=""
 )
-def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, break_sent,sort, do_preproc, replace_blanks):
+def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, break_sent,sort, do_preproc, replace_blanks):
 
     #%% some hyper-parameters
 
@@ -817,8 +827,12 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
     validation_size = val_samples 
     validation_num_generation = 20
     learning_rate = float(learning_rate)
+    lr_mt = {}
     if not frozen and learning_rate == 0: 
-        learning_rate = 6.25e-05 if opt_type == "adam" else 1e-3
+        if opt_type == "adam": 
+            learning_rate = lr_mt[method] if method in lr_mt else 6.25e-05  
+        else:
+            learning_rate = 1e-3
         if "gpt" in model_id:
             learning_rate = 1e-5
     if frozen and learning_rate == 0: 
@@ -1114,10 +1128,12 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
     mlog.info("list of spcial tokens: %s", my_specials)
     extra = "_" + now
     m_name = model_id + "-" + method
+    p_str = "prefixed" if prefix else ""
     exp_info = {"exp":experiment, "model":model_id, "lang": lang, 
                     "method":method, 
                     "wrap": w_str + ("-" + encoder_type if wrap else ""),
                     "frozen":f_str, 
+                    "prefix":p_str,
                     "steps":train_samples,
                     "epochs":epochs_num,
                     "trial":trial,
@@ -1212,6 +1228,12 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
     for logger in [mlog, tlog]:
         logger.info("Iterations:"  + str(iterations))
     warm_up_steps = 0.002*iterations
+    #ppppppppppppppp
+    if prefix:
+        pre_args = Configure.Get("pl5.cfg")
+        mlog.info("prefix conf: %s", pre_args)
+        model = Model(tokenizer, model, args=pre_args).pretrain_model
+        #model = ut.get_model(pre_args.model.name)(pre_args)
     # %% prepare for training
     sw = SummaryWriter(save_path, flush_secs=1)
     no_decay = ['bias', 'LayerNorm.weight']
@@ -1233,7 +1255,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
             pass
         extend_tokenizer(tokenizer)
         mlog.info("len tokenizer after extending %s", len(tokenizer))
-        model.resize_token_embeddings(len(tokenizer))
+        if not prefix:
+            model.resize_token_embeddings(len(tokenizer))
         model.to(device=device)
 
 

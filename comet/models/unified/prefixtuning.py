@@ -5,11 +5,11 @@ import torch
 from torch import nn
 from transformers import AutoTokenizer
 from .base import PushToHubFriendlyModel
-from ..prompt.modeling_auto import AutoModelForSeq2SeqLM
+from comet.models.prompt.modeling_auto import AutoModelForSeq2SeqLM
 
 
 class Model(PushToHubFriendlyModel):
-    def __init__(self, args):
+    def __init__(self, tokenizer, pretrained_model, args):
         super().__init__()
         self.args = args
 
@@ -25,13 +25,16 @@ class Model(PushToHubFriendlyModel):
         self.pretrain_model = AutoModelForSeq2SeqLM.from_pretrained(
             args.bert.location
         )
+        #self.tokenizer = tokenizer 
+        #self.pretrain_model = pretrained_model
         self.config = self.pretrain_model.config
-        from ..prompt.modeling_bart import BartForConditionalGeneration
-        from ..prompt.modeling_t5 import T5ForConditionalGeneration
-        if isinstance(self.pretrain_model, BartForConditionalGeneration):
-            self.match_n_layer = self.config.decoder_layers
-            self.match_n_head = self.config.decoder_attention_heads
-        elif isinstance(self.pretrain_model, (T5ForConditionalGeneration)):
+        #from ..prompt.modeling_bart import BartForConditionalGeneration
+        #from ..prompt.modeling_t5 import T5ForConditionalGeneration
+        #if isinstance(self.pretrain_model, BartForConditionalGeneration):
+        #    self.match_n_layer = self.config.decoder_layers
+        #    self.match_n_head = self.config.decoder_attention_heads
+        #elif isinstance(self.pretrain_model, (T5ForConditionalGeneration)):
+        if True:
             self.match_n_layer = self.config.num_decoder_layers
             self.match_n_head = self.config.num_heads
         else:

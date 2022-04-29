@@ -45,7 +45,7 @@
     "save_df": "",
     "merge_prompts": false,
     "num_workers": 0,
-    "scorers": "rouge",
+    "scorers": "rouge-bert",
     "train_start": 0,
     "no_save_model": false,
     "gen_bs": "30@10",
