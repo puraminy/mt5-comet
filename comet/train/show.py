@@ -372,8 +372,8 @@ def show_df(df):
             elif char == "G":
                 canceled, col = False, FID
             if not canceled:
-               sel_cols = ["exp_id", "num_preds", "num_query", "rouge_score", "bert_score", "br_score","nr_score", "steps", "method","model", "wrap", "frozen"]
-               df = (df.groupby(col).agg({"num_preds":"first", "num_query":"first", "rouge_score":"mean","bert_score":"mean","br_score": "mean", "nr_score":"mean", "method":"first","model":"first", "wrap":"first", col:"first", "steps":"first", "frozen":"first"})
+               sel_cols = ["exp_id", "num_preds", "num_query", "rouge_score", "bert_score", "br_score","nr_score", "steps", "method","model", "wrap", "frozen", "prefixed"]
+               df = (df.groupby(col).agg({"num_preds":"first", "num_query":"first", "rouge_score":"mean","bert_score":"mean","br_score": "mean", "nr_score":"mean", "method":"first","model":"first", "wrap":"first", col:"first", "steps":"first", "frozen":"first", "prefixed":"first"})
                  .rename(columns={col:'exp_id'})
                  .sort_values(by = ["rouge_score"], ascending=False)
                     )
@@ -997,7 +997,7 @@ def start(stdscr):
 @click.option(
     "--fid",
     "-fid",
-    default="name",
+    default="parent",
     type=str,
     help=""
 )

@@ -3,11 +3,13 @@ from comet.train.common import *
 import itertools, collections
 import shutil
 from comet.train.eval import *
+from comet.utils.dataset import TokenizedDataset
 from comet.utils.configue import Configure
 import comet.utils.tool as ut
 from comet.models.unified.prefixtuning import Model
 from transformers.trainer_seq2seq import Seq2SeqTrainer
 from transformers.optimization import Adafactor, AdafactorSchedule
+from transformers import TrainingArguments
 from comet.train.model import *
 import torch
 import re
@@ -22,7 +24,101 @@ import pandas as pd
 import click
 from tqdm import tqdm
 
+#gggggggggggggg
+class MyCollator(object):
+    def __init__(self, tokenizer, model, ds_type="train", prefix=False, model_type="t5"):
+        self.tokenizer = tokenizer
+        self.model = model
+        self.ds_type = ds_type 
+        self.prefix = prefix
+        self.model_type = model_type
+    def __call__(self, batch):
+        queries,inputs, responses,rel,index,rep = zip(*batch)
+        tokenizer = self.tokenizer
+        new_batch = tokenizer(list(queries),return_tensors='pt',padding='longest', 
+                                #truncation=True, max_length=50
+                             )
+        if self.prefix:
+            tokenized_description = tokenizer(list(rel),return_tensors='pt',padding='longest')
+            tokenized_knowledge = tokenizer(list(rel),return_tensors='pt',padding='longest')
 
+            new_batch['description_input_ids'] = torch.LongTensor(tokenized_description.data["input_ids"])
+            new_batch['description_attention_mask'] = torch.LongTensor(tokenized_description.data["attention_mask"])
+            new_batch['knowledge_input_ids'] = torch.LongTensor(tokenized_knowledge.data["input_ids"])
+            new_batch['knowledge_attention_mask'] = torch.LongTensor(tokenized_knowledge.data["attention_mask"])
+        if self.ds_type == "train": # or self.prefix:
+            with tokenizer.as_target_tokenizer():
+                tokenized_outputs = tokenizer(list(responses),return_tensors='pt',
+                        padding='longest', 
+                        #truncation=True, max_length=50
+                        )
+                labels = tokenized_outputs['input_ids']
+                labels[labels==tokenizer.pad_token_id] = -100
+                new_batch['labels']=labels
+                #new_batch['decoder_input_ids'] = model.prepare_decoder_input_ids_from_labels(
+                #    tokenized_outputs['input_ids']
+                #)
+                #new_batch['decoder_attention_mask'] = tokenized['attention_mask']
+        return new_batch
+        def tokenize(self, batch):
+            queries,inputs, responses,rel,index,rep = batch
+            #queries = list(queries)
+            #responses =list(responses)
+
+            tokenized_inputs = tokenizer(queries,
+                                    padding="max_length",
+                                    truncation=True,
+                                    max_length = 200,
+                                     )
+            input_ids = tokenized_inputs["input_ids"]
+            new_batch = {}
+            input_ids = torch.LongTensor(input_ids)
+            #input_ids = input_ids.to(device)
+            #input_ids = input_ids.unsqueeze(0)
+            new_batch['input_ids'] = input_ids
+            attention_mask = tokenized_inputs['attention_mask']
+            attention_mask = torch.LongTensor(attention_mask)
+            #attention_mask = attention_mask.unsqueeze(0)
+            new_batch['attention_mask'] = attention_mask
+            with tokenizer.as_target_tokenizer():
+                tokenized_outputs = tokenizer(responses,
+                                    padding="max_length",
+                                    truncation=True,
+                                    max_length = 200,
+                                     )
+                labels = tokenized_outputs['input_ids']
+                labels[labels==tokenizer.pad_token_id] = -100
+                labels = torch.LongTensor(labels)
+                new_batch['labels']=labels
+                #decoder_input_ids = model.prepare_decoder_input_ids_from_labels(
+                #    tokenized_outputs['input_ids']
+                #)
+                #decoder_input_ids = torch.LongTensor('decoder_input_ids')
+                #new_batch['decoder_input_ids'] = decoder_input_ids 
+                #decoder_attention_mask = tokenized_outputs['decoder_attention_mask']
+                #decoder_attention_mask = torch.LongTensor(decoder_attention_mask)
+                #new_batch['decoder_attention_mask'] = decoder_attention_mask 
+            return new_batch
+        def gpt_collate(batch):
+             queries,responses,_,_,_,_ = zip(*batch)
+             inputs = list(queries)
+             outputs =list(responses)
+             qr = []
+             for i in range(len(inputs)):
+                 qr.append(inputs[i] + " " + outputs[i])
+
+             new_batch = {}
+             #tokenized = tokenizer(outputs,return_tensors="pt",
+             #        truncation=True,
+             #        max_length=256,
+             #        padding='max_length')
+             tokenized = tokenizer(qr,return_tensors='pt',padding='longest')
+             labels = tokenized['input_ids'].detach().clone()
+             labels[labels==tokenizer.pad_token_id] = -100
+             new_batch['input_ids']=tokenized['input_ids']
+             new_batch['attention_mask']=tokenized['attention_mask']
+             new_batch['labels']=labels
+             return new_batch #,references
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Run    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @click.group()
 def cli():
@@ -746,7 +842,13 @@ def run(ctx, conf_path, base_conf, experiment,
     is_flag=True,
     help=""
 )
-def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, break_sent,sort, do_preproc, replace_blanks):
+@click.option(
+    "--loop",
+    "-tl",
+    is_flag=True,
+    help=""
+)
+def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, break_sent,sort, do_preproc, replace_blanks, loop):
 
     #%% some hyper-parameters
 
@@ -1072,7 +1174,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
                                 pred_tresh, nli_group, per_record, is_even, start, 
                                 sampling, ex_type,
                                 tails_per_head, save_ds_path[split_name], _repeat, 
-                                int(pid), _break_sent, sort, _replace_blanks
+                                int(pid), _break_sent, sort, _replace_blanks, tokenizer = None
                         )
         return myds
 
@@ -1092,7 +1194,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
             while _sample:
                 _sample = next(samples_iter, None)
                 dlog.info(_sample)
-                if _sample:
+                if False: #_sample:
                     generate_samples["sample"].append((_sample[0], _sample[1]))
             dlog.info("--------------------------------")
             mlog.info("Preparing samples: %s ", len(generate_samples["sample"]))
@@ -1133,7 +1235,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
                     "method":method, 
                     "wrap": w_str + ("-" + encoder_type if wrap else ""),
                     "frozen":f_str, 
-                    "prefix":p_str,
+                    "prefixed":p_str,
                     "steps":train_samples,
                     "epochs":epochs_num,
                     "trial":trial,
@@ -1172,53 +1274,27 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
 
 
 # ggggggggg
-    def collate_fn_for_flattened(batch):
-        queries,inputs, responses,rel,index,rep = zip(*batch)
-        new_batch = tokenizer(list(queries),return_tensors='pt',padding='longest')
-        with tokenizer.as_target_tokenizer():
-            tokenized = tokenizer(list(responses),return_tensors='pt',padding='longest')
-            labels = tokenized['input_ids']
-            labels[labels==tokenizer.pad_token_id] = -100
-            new_batch['labels']=labels
-            new_batch['decoder_input_ids'] = model.prepare_decoder_input_ids_from_labels(
-                tokenized['input_ids']
-            )
-            new_batch['decoder_attention_mask'] = tokenized['attention_mask']
-        return new_batch
-    def collate_fn_for_generation(batch):
-         queries,responses,_,_,_,_ = zip(*batch)
-         inputs = list(queries)
-         outputs =list(responses)
-         qr = []
-         for i in range(len(inputs)):
-             qr.append(inputs[i] + " " + outputs[i])
-
-         new_batch = {}
-         #tokenized = tokenizer(outputs,return_tensors="pt",
-         #        truncation=True,
-         #        max_length=256,
-         #        padding='max_length')
-         tokenized = tokenizer(qr,return_tensors='pt',padding='longest')
-         labels = tokenized['input_ids'].detach().clone()
-         labels[labels==tokenizer.pad_token_id] = -100
-         new_batch['input_ids']=tokenized['input_ids']
-         new_batch['attention_mask']=tokenized['attention_mask']
-         new_batch['labels']=labels
-         return new_batch #,references
     #%% build dataloader
     if "gpt" in model_id: 
         tokenizer.add_special_tokens(pad_token)
         tokenizer.add_special_tokens(sep_token)
         mlog.info("pad token id: %s", tokenizer.pad_token_id)
-        data_collator = collate_fn_for_generation
+        data_collator = MyCollator(tokenizer, model, ds_type="train", model_type="gpt")
     else:
-        data_collator = collate_fn_for_flattened
+        data_collator = MyCollator(tokenizer, model, ds_type="train", prefix=prefix)
 
-    train_dataloader = torch.utils.data.DataLoader(myds['train'],
-        batch_size=node_batch_size,shuffle=shuffle,collate_fn=data_collator, num_workers=num_workers)
-    dev_dataloader = torch.utils.data.DataLoader(myds['validation'],
-        batch_size=node_batch_size,shuffle=shuffle,collate_fn=data_collator)
-    train_iter = iter(train_dataloader)
+    train_dataset = myds["train"]#.map(tokenize)
+    dev_dataset = myds["validation"]#.map(tokenize)
+    train_dataloader = torch.utils.data.DataLoader(train_dataset,
+        batch_size=node_batch_size,shuffle=shuffle, num_workers=num_workers,
+        collate_fn=data_collator,
+    )
+    dev_dataloader = torch.utils.data.DataLoader(dev_dataset,
+        batch_size=node_batch_size,shuffle=shuffle,
+        collate_fn=data_collator,
+    )
+    #torch.utils.data.DataLoader(myds['validation'],
+    #    batch_size=node_batch_size,shuffle=shuffle,collate_fn=data_collator)
     train_records = myds["train"].num_records
     assert train_records != 0, "There is no data to train!!!!!!!!"
     for logger in [mlog, clog, vlog]:
@@ -1232,7 +1308,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
     if prefix:
         pre_args = Configure.Get("pl5.cfg")
         mlog.info("prefix conf: %s", pre_args)
-        model = Model(tokenizer, model, args=pre_args).pretrain_model
+        model = Model(tokenizer, model, args=pre_args)
+        model_tokenizer = model.tokenizer
         #model = ut.get_model(pre_args.model.name)(pre_args)
     # %% prepare for training
     sw = SummaryWriter(save_path, flush_secs=1)
@@ -1243,7 +1320,10 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
             load_prompt_path = os.path.join(load_path, model_id, "prompt")
             mlog.info("prompt path:%s ", load_prompt_path)
         mlog.info("Wrapping the model ...")
-        wrapped_model = wrap_model(model, tokenizer, encoder_type, load_prompt_path, from_words = from_words, merge_prompts=merge_prompts, method = method, shared_embs= shared_embs) 
+        model_to_wrap = model
+        if prefix:
+            model_to_wrap = model.pretrain_model
+        wrapped_model = wrap_model(model_to_wrap, tokenizer, encoder_type, load_prompt_path, from_words = from_words, merge_prompts=merge_prompts, method = method, shared_embs= shared_embs) 
     if wrapped_model:
         wrapped_model.to(device=device)
         wrapped_model.prompt_encoders.to(device=device)
@@ -1257,6 +1337,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
         mlog.info("len tokenizer after extending %s", len(tokenizer))
         if not prefix:
             model.resize_token_embeddings(len(tokenizer))
+        else:
+            model.pretrain_model.resize_token_embeddings(len(tokenizer))
         model.to(device=device)
 
 
@@ -1275,14 +1357,13 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
             tlog.info("len prompt ids %s: %s",encoder.name, len(encoder.prompt_ids))
 
         tlog.info("_sum: %s", _sum)
-        model_rgrad = [p for p in model.parameters() if p.requires_grad]
-        model_nrgrad = [p for p in model.parameters() if not p.requires_grad]
-        tlog.info("Model require grad %s, ", len(model_rgrad))
-        tlog.info("Model param that requires grad %s", model_rgrad)
-        tlog.info("Model not require grad %s, ", len(model_nrgrad))
         tlog.info("Wrapped model require grad %s, ", len(rgrad))
         tlog.info("Wrapped model not require grad %s, ", len(nrgrad))
 
+    model_rgrad = [p for p in model.parameters() if p.requires_grad]
+    model_nrgrad = [p for p in model.parameters() if not p.requires_grad]
+    mlog.info("Model require grad %s, ", len(model_rgrad))
+    mlog.info("Model not require grad %s, ", len(model_nrgrad))
     if not no_save_model:
         tokenizer.save_pretrained(save_path)
     def get_optimizer(model, learning_rate, wrap, opt_type):
@@ -1304,6 +1385,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
                     relative_step=True, warmup_init=True, lr=None)
             scheduler = AdafactorSchedule(optimizer)
         elif opt_type == "ada":
+            mlog.info("Ada Factor")
             # replace AdamW with Adafactor
 #AdafactorOptimizer.beta1 = 0.0
 #AdafactorOptimizer.clipping_threshold = 1.0
@@ -1315,25 +1397,34 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
 #AdafactorOptimizer.multiply_by_parameter_scale = True
             optimizer = Adafactor(
                 model.parameters(),
-                lr=learning_rate,
+                lr=1e-3,
                 eps=(1e-30, 1e-3),
                 clip_threshold=1.0,
                 decay_rate=-0.8,
-                beta1=0.0,
+                beta1=None,
                 weight_decay=0.0,
                 relative_step=False,
-                scale_parameter=True,
-                warmup_init=False
-            )
+                scale_parameter=False,
+                warmup_init=False,
+		    ) 
+        #optimizer = Adafactor(
+        #        model.parameters(),
+        #        lr=1e-3,
+        #        eps=(1e-30, 1e-3),
+        #        clip_threshold=1.0,
+        #        decay_rate=-0.8,
+        #        beta1=0.0,
+        #        weight_decay=0.0,
+        #        relative_step=False,
+        #        scale_parameter=True,
+        #        warmup_init=False
+        #    )
             scheduler = AdafactorSchedule(optimizer)
         else:
             raise ValueError(opt_type + " must be one of adam, ada, ada_no_lr")
         return optimizer, scheduler
 
     optimizer, scheduler = get_optimizer(model, learning_rate, wrap, opt_type) 
-    step = 0
-    best_dev_loss = 100
-    best_eval_step = 0
     if checkpoint:
         mlog.info("Restoring optimizer and scheduler")
         optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
@@ -1348,177 +1439,216 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
     #%% tttttt
     mlog.info("batch size: %s", batch_size)
     mlog.info("node batch size: %s", node_batch_size)
-    if epochs_num == 0 or (not wrap and frozen and modules_to_freeze is model):
-        mlog.info("Skip training...")
-    elif step <= iterations and (wrap or not frozen or modules_to_freeze is not model):
-        mlog.info("Training... %s", save_path)
     epochs_num = int(epochs_num)
-    for epoch in range(epochs_num):
-        pbar = tqdm(total = iterations, position=0, leave=True) #,dynamic_ncols=True)
-        if epoch > 0:
-            train_iter = iter(train_dataloader)
-        #mlog.info("Saving train data set...")
-        #myds["train"].save()
-        mlog.info(f"============== epoch {epoch}\n")
-        mlog.info(f"============== learning_rate {learning_rate}\n")
-        mlog.info(f"============== frozen {frozen} {fz_parts} \n")
-        mlog.info(f"============== wrap {wrap}\n")
-        tlog.info(f"============== epoch {epoch}\n")
-        tot_loss = 0
+    def train_loop(epochs_num):
+        train_iter = iter(train_dataloader)
         step = 0
-        if train_start > 0:
-            mlog.info("skipping %s", train_start)
-            consume(train_iter, train_start)
-            pbar.update(train_start)
-            step = train_start
-        while step < iterations-1:
-            try:
-                if cycle > 0 and (step % cycle == 0 and step > 0): #validation
-                    with torch.no_grad():
+        best_dev_loss = 100
+        best_eval_step = 0
+        if epochs_num == 0 or (not wrap and frozen and modules_to_freeze is model):
+            mlog.info("Skip training...")
+        elif step <= iterations and (wrap or not frozen or modules_to_freeze is not model):
+            mlog.info("Training... %s", save_path)
+        for epoch in range(epochs_num):
+            pbar = tqdm(total = iterations, position=0, leave=True) #,dynamic_ncols=True)
+            if epoch > 0:
+                train_iter = iter(train_dataloader)
+            #mlog.info("Saving train data set...")
+            #myds["train"].save()
+            mlog.info(f"============== epoch {epoch}\n")
+            mlog.info(f"============== learning_rate {learning_rate}\n")
+            mlog.info(f"============== frozen {frozen} {fz_parts} \n")
+            mlog.info(f"============== wrap {wrap}\n")
+            tlog.info(f"============== epoch {epoch}\n")
+            tot_loss = 0
+            step = 0
+            if train_start > 0:
+                mlog.info("skipping %s", train_start)
+                consume(train_iter, train_start)
+                pbar.update(train_start)
+                step = train_start
+            while step < iterations-1:
+                try:
+                    if cycle > 0 and (step % cycle == 0 and step > 0): #validation
+                        with torch.no_grad():
+                            if wrap:
+                                wrapped_model.update_model_weight()
+                            model.eval()
+                            pbar.set_description(f'validating on {cycle}...')
+                            vlog.info(f'validating on {cycle}...')
+                            dev_allset_micro_loss = 0.
+                            dev_token_loss = 0.
+                            dev_token_count = 0
+                            dev_sample_loss = 0. #avg on sample
+                            dev_sample_count = 0
+                            for batch in tqdm(dev_dataloader,desc=f'validating...',leave=True):
+                                if dev_sample_count>=validation_size:
+                                    break
+                                batch = {k:v.to(device=device) for k,v in batch.items()}
+                                result = model(**batch)
+                                loss = torch.nn.functional.cross_entropy(
+                                    result['logits'].reshape(-1,result['logits'].size(2)),
+                                    batch['labels'].reshape(-1,),
+                                    reduction='none'
+                                ).reshape(result['logits'].size(0),-1)
+                                labels_mask = (batch['labels'] != -100) 
+                                dev_token_loss += loss.sum().item()
+                                dev_token_count += labels_mask.sum().item()
+                                dev_sample_loss += (loss.sum(dim=-1)/labels_mask.sum(dim=-1)).sum().item()
+                                dev_sample_count += result['logits'].size(0)
+                                del result
+                                del loss
+                                del labels_mask
+                            dev_micro_avg_loss = dev_token_loss/dev_token_count
+                            dev_macro_avg_loss = dev_sample_loss/dev_sample_count
+                            sw.add_scalar('dev/micro_avg_loss',dev_micro_avg_loss,step)
+                            vlog.info('dev/micro_avg_loss: %s-%s',dev_micro_avg_loss,step)
+                            mlog.info('dev/micro_avg_loss: %s-%s',dev_micro_avg_loss,step)
+                            sw.add_scalar('dev/macro_avg_loss',dev_macro_avg_loss,step)
+                            vlog.info('dev/macro_avg_loss: %s-%s',dev_macro_avg_loss,step)
+                            mlog.info('dev/macro_avg_loss: %s-%s',dev_macro_avg_loss,step)
+                            if dev_micro_avg_loss < best_dev_loss:
+                                best_dev_loss = dev_micro_avg_loss
+                                best_eval_step = step
+                                tlog.info("epoch %s, best_eval_step: %s", epoch, best_eval_step)
+                                save_checkpoint(model, tokenizer, optimizer, scheduler, step, 
+                                                best_eval_step, best_dev_loss,
+                                                os.path.join(save_path, "best_model"))
+
+                                generation_results = \
+                                "|Queries|Generation Results|\n"\
+                                "|-|-|\n"
+                                for i,(_q,_target) in enumerate(generate_samples['sample']):
+                                    if i==validation_num_generation:
+                                        break
+                                    results = generate(model, tokenizer, [_q.strip()]) 
+                                    vlog.info("%02d) %-50s | %-50s | %-40s", i, _q.strip(), 
+                                            results, _target.strip())
+                                    generation_results+=f"|`{_q},{_target}`|`{str(results)}`|\n"
+                                sw.add_text('dev/generation_samples',generation_results,step)
+                    #if unfreez_step > 0 and step > unfreez_step and froze:
+                    #    mlog.info("unfreezing the model")
+                    #    unfreez_step = 0
+                    #    freeze(modules_to_freeze, True)
+                    #    last_lr = scheduler.get_last_lr()[0]
+                    #    optimizer, scheduler = get_optimizer(model, last_lr, wrap, opt_type)
+                    #if freez_step > 0 and step > freez_step and not frozen:
+                    #    mlog.info("freezing the model")
+                    #    freez_step = 0
+                    #    freeze(modules_to_freeze)
+                    #    last_lr = scheduler.get_last_lr()[0]
+                    #    optimizer, scheduler = get_optimizer(model, last_lr, wrap, opt_type)
+                    model.train()
+                    if wrap:
+                        tlog.info("Wrap model zero grad")
+                        wrapped_model.zero_grad()
+                    else:
+                        optimizer.zero_grad()
+                    batch_loss = torch.tensor(0.)
+                    for tiny_step in range(accumulation_tiny_steps):
+                        try:
+                            batch = next(train_iter)
+                        except StopIteration:
+                            tlog.info("Stop Iteration occured at %s", step)
+                            train_iter = iter(train_dataloader)
+                            batch = next(train_iter)
+                        batch = {k:v.to(device=device) for k,v in batch.items()}
                         if wrap:
-                            wrapped_model.update_model_weight()
-                        model.eval()
-                        pbar.set_description(f'validating on {cycle}...')
-                        vlog.info(f'validating on {cycle}...')
-                        dev_allset_micro_loss = 0.
-                        dev_token_loss = 0.
-                        dev_token_count = 0
-                        dev_sample_loss = 0. #avg on sample
-                        dev_sample_count = 0
-                        for batch in tqdm(dev_dataloader,desc=f'validating...',leave=True):
-                            if dev_sample_count>=validation_size:
-                                break
-                            batch = {k:v.to(device=device) for k,v in batch.items()}
+                            result = wrapped_model(**batch)
+                        else:
                             result = model(**batch)
+                        if "loss" in result:
+                            loss = result['loss']/accumulation_tiny_steps
+                        else:
                             loss = torch.nn.functional.cross_entropy(
                                 result['logits'].reshape(-1,result['logits'].size(2)),
                                 batch['labels'].reshape(-1,),
                                 reduction='none'
                             ).reshape(result['logits'].size(0),-1)
-                            labels_mask = (batch['labels'] != -100) 
-                            dev_token_loss += loss.sum().item()
-                            dev_token_count += labels_mask.sum().item()
-                            dev_sample_loss += (loss.sum(dim=-1)/labels_mask.sum(dim=-1)).sum().item()
-                            dev_sample_count += result['logits'].size(0)
-                            del result
-                            del loss
-                            del labels_mask
-                        dev_micro_avg_loss = dev_token_loss/dev_token_count
-                        dev_macro_avg_loss = dev_sample_loss/dev_sample_count
-                        sw.add_scalar('dev/micro_avg_loss',dev_micro_avg_loss,step)
-                        vlog.info('dev/micro_avg_loss: %s-%s',dev_micro_avg_loss,step)
-                        mlog.info('dev/micro_avg_loss: %s-%s',dev_micro_avg_loss,step)
-                        sw.add_scalar('dev/macro_avg_loss',dev_macro_avg_loss,step)
-                        vlog.info('dev/macro_avg_loss: %s-%s',dev_macro_avg_loss,step)
-                        mlog.info('dev/macro_avg_loss: %s-%s',dev_macro_avg_loss,step)
-                        if dev_micro_avg_loss < best_dev_loss:
-                            best_dev_loss = dev_micro_avg_loss
-                            best_eval_step = step
-                            tlog.info("epoch %s, best_eval_step: %s", epoch, best_eval_step)
-                            save_checkpoint(model, tokenizer, optimizer, scheduler, step, 
-                                            best_eval_step, best_dev_loss,
-                                            os.path.join(save_path, "best_model"))
+                            #loss /= accumulation_tiny_steps
+                            loss = loss.mean()
+                        loss.backward()
+                        #tlog.info("Original embedding grads:%s",model.get_input_embeddings().weight.grad)
+                        if wrap:
+                            #tlog.info("Merge embedding grads:%s", wrapped_model.merge_encoder.embedding.weight.grad)
+                            for encoder in wrapped_model.prompt_encoders:
+                                if encoder.name == "xIntent":
+                                    timelog.info("---------------- %s ---------------", encoder.name)
+                                    timelog.info("Prompt embedding grads:%s", encoder.embedding.weight.grad)
 
-                            generation_results = \
-                            "|Queries|Generation Results|\n"\
-                            "|-|-|\n"
-                            for i,(_q,_target) in enumerate(generate_samples['sample']):
-                                if i==validation_num_generation:
-                                    break
-                                results = generate(model, tokenizer, [_q.strip()]) 
-                                vlog.info("%02d) %-50s | %-50s | %-40s", i, _q.strip(), 
-                                        results, _target.strip())
-                                generation_results+=f"|`{_q},{_target}`|`{str(results)}`|\n"
-                            sw.add_text('dev/generation_samples',generation_results,step)
-                if unfreez_step > 0 and step > unfreez_step and froze:
-                    mlog.info("unfreezing the model")
-                    unfreez_step = 0
-                    freeze(modules_to_freeze, True)
-                    last_lr = scheduler.get_last_lr()[0]
-                    optimizer, scheduler = get_optimizer(model, last_lr, wrap, opt_type)
-                if freez_step > 0 and step > freez_step and not frozen:
-                    mlog.info("freezing the model")
-                    freez_step = 0
-                    freeze(modules_to_freeze)
-                    last_lr = scheduler.get_last_lr()[0]
-                    optimizer, scheduler = get_optimizer(model, last_lr, wrap, opt_type)
-                model.train()
-                if wrap:
-                    tlog.info("Wrap model zero grad")
-                    wrapped_model.zero_grad()
-                else:
-                    optimizer.zero_grad()
-                batch_loss = torch.tensor(0.)
-                for tiny_step in range(accumulation_tiny_steps):
-                    try:
-                        batch = next(train_iter)
-                    except StopIteration:
-                        tlog.info("Stop Iteration occured at %s", step)
-                        train_iter = iter(train_dataloader)
-                        batch = next(train_iter)
-                    batch = {k:v.to(device=device) for k,v in batch.items()}
-                    if wrap:
-                        result = wrapped_model(**batch)
-                    else:
-                        result = model(**batch)
-                    if "loss" in result:
-                        loss = result['loss']/accumulation_tiny_steps
-                    else:
-                        loss = torch.nn.functional.cross_entropy(
-                            result['logits'].reshape(-1,result['logits'].size(2)),
-                            batch['labels'].reshape(-1,),
-                            reduction='none'
-                        ).reshape(result['logits'].size(0),-1)
-                        #loss /= accumulation_tiny_steps
-                        loss = loss.mean()
-                    loss.backward()
-                    tlog.info("Original embedding grads:%s",model.get_input_embeddings().weight.grad)
-                    if wrap:
-                        #tlog.info("Merge embedding grads:%s", wrapped_model.merge_encoder.embedding.weight.grad)
-                        for encoder in wrapped_model.prompt_encoders:
-                            if encoder.name == "xIntent":
-                                timelog.info("---------------- %s ---------------", encoder.name)
-                                timelog.info("Prompt embedding grads:%s", encoder.embedding.weight.grad)
-
-                    batch_loss += loss.item()
-                optimizer.step()
-                scheduler.step()
-                step+=1
-                bloss = batch_loss.item()
-                tot_loss += bloss
-                mean_loss = tot_loss/(step-train_start)
-                sw.add_scalar('train/loss',bloss,global_step=step)
-                tlog.info("{:<5}: {:6.2f} > {:6.2f}".format(step, bloss, mean_loss))
-                pbar.set_description(f'training ...[loss:{bloss:.2f} ({mean_loss:.2f}) best:{best_eval_step} {best_dev_loss:.2f}]')
-                pbar.update()
-                del result
-                del loss
-            except KeyboardInterrupt:
-                mlog.info("exiting while ...")
-                break
-    # end train while
-    pbar.close()
-    sw.close()
-    if wrap:
-        with torch.no_grad():
-            mlog.info("Updating the model weights before evaluaton...")
-            wrapped_model.update_model_weight()
-    model.eval()
-    if not no_save_model:
-        save_checkpoint(model, tokenizer, optimizer, scheduler, step, 
-                        best_eval_step, best_dev_loss,
-                        save_path)
-    else:
-        mlog.info("No save model is on!!")
-
+                        batch_loss += loss.item()
+                    optimizer.step()
+                    scheduler.step()
+                    step+=1
+                    bloss = batch_loss.item()
+                    tot_loss += bloss
+                    mean_loss = tot_loss/(step-train_start)
+                    sw.add_scalar('train/loss',bloss,global_step=step)
+                    tlog.info("{:<5}: {:6.2f} > {:6.2f}".format(step, bloss, mean_loss))
+                    pbar.set_description(f'training ...[loss:{bloss:.2f} ({mean_loss:.2f}) best:{best_eval_step} {best_dev_loss:.2f}]')
+                    pbar.update()
+                    del result
+                    del loss
+                except KeyboardInterrupt:
+                    mlog.info("exiting while ...")
+                    break
+        # end train while
+        pbar.close()
+        sw.close()
+        if wrap:
+            with torch.no_grad():
+                mlog.info("Updating the model weights before evaluaton...")
+                wrapped_model.update_model_weight()
+        model.eval()
+        if not no_save_model:
+            save_checkpoint(model, tokenizer, optimizer, scheduler, step, 
+                            best_eval_step, best_dev_loss,
+                            save_path)
+        else:
+            mlog.info("No save model is on!!")
     #% vvvvvvvvvvvvvvvv
+    if loop: #not prefix:
+       train_loop(epochs_num)
+    else:
+        training_args = TrainingArguments(output_dir=save_path)
+        training_args.per_device_train_batch_size=node_batch_size
+        training_args.num_train_epochs=epochs_num
+        training_args.logging_steps=5
+        training_args.learning_rate=learning_rate
+        training_args.do_predict=True
+        training_args.gradient_accumulation_steps=accumulation_tiny_steps
+        train_dataset = myds["train"]#.map(tokenize)
+        test_dataset = myds["sample"]
+        trainer = Seq2SeqTrainer(
+            args=training_args,
+            model=model,
+            #optimizers = (optimizer, scheduler),
+            #schedulers = schedulers,
+            data_collator=data_collator,
+            #evaluator=evaluator,
+            # We name it "evaluator" while the hugging face call it "Metric",
+            # they are all f(predictions: List, references: List of dict) = eval_result: dict
+            tokenizer=tokenizer,
+            train_dataset=train_dataset,
+            #test_dataset=test_dataset,
+        )
+        train_result = trainer.train()
+    #vvvvvvvvvvv
     if test_set:
+        test_bs, test_gen_bs = gen_bs.split("@")
+        test_bs = int(test_bs)
         for _set in test_set.split("@"):
             myds = load_data([_set])
+            test_dataset = myds[_set]
+            data_collator = MyCollator(tokenizer, model, ds_type="test", prefix=prefix)
+            test_dataloader = torch.utils.data.DataLoader(test_dataset,
+                batch_size=test_bs,shuffle=False, 
+                collate_fn=data_collator,
+            )
             mlog.info("Evaluating ... %s", _set)
             val_records = myds[_set].num_records
             exp_info["test_set"] = _set
-            evaluate(myds[_set], save_path, exp_info, val_records, gen_param, scorers = scorers, batch_size=gen_bs, model=model, tokenizer=tokenizer, set_name=_set)  
+            evaluate(test_dataset, test_dataloader, save_path, exp_info, val_records, gen_param, scorers = scorers, batch_size=gen_bs, model=model, tokenizer=tokenizer, set_name=_set)  
     else:
         mlog.info("Test set was not provided.... skip testing...")
         

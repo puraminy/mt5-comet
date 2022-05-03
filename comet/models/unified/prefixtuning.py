@@ -202,10 +202,10 @@ class Model(PushToHubFriendlyModel):
         return result
 
     def get_description_representation(self, kwargs):
-        if self.args.model.use_description and self.args.model.map_description:
+        if self.args.model.use_description: # and self.args.model.map_description:
             description_input_ids = kwargs.pop("description_input_ids")
             description_attention_mask = kwargs.pop("description_attention_mask")
-            if self.args.bert.location in ["t5-small", "t5-base", "t5-large", "t5-3b", "t5-11b"]:
+            if True: #self.args.bert.location in ["t5-small", "t5-base", "t5-large", "t5-3b", "t5-11b"]:
                 description_outputs = self.pretrain_model.encoder(
                     input_ids=description_input_ids,
                     attention_mask=description_attention_mask,
@@ -227,8 +227,10 @@ class Model(PushToHubFriendlyModel):
     def get_knowledge_representation(self, kwargs):
         if self.args.model.knowledge_usage == 'separate':
             knowledge_input_ids = kwargs.pop("knowledge_input_ids", None)
+            labels = kwargs.pop("labels", None)
             knowledge_attention_mask = kwargs.pop("knowledge_attention_mask", None)
-            if self.args.bert.location in ["t5-small", "t5-base", "t5-large", "t5-3b", "t5-11b"]:
+            if True: #self.args.bert.location in ["t5-small", "t5-base", "t5-large", "t5-3b", "t5-11b"]:
+                assert knowledge_input_ids is not None, "knowledge input ids are none"
                 knowledge_outputs = self.pretrain_model.encoder(
                     input_ids=knowledge_input_ids,
                     attention_mask=knowledge_attention_mask,

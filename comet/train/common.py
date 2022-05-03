@@ -719,6 +719,9 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
        elif method == "sup":
            qtemp = "{rel_token} {event}"
            anstemp = "{resp} {end}"
+       elif method == "sup-no-rel":
+           qtemp = "{event}"
+           anstemp = "{resp} {end}"
        elif method == "sup-end":
            qtemp = "{event} {rel_token}" 
            anstemp = "{resp} {end}"
@@ -872,7 +875,7 @@ class MyDataset(torch.utils.data.Dataset):
             nli_group="all", per_record=False, is_even=False, start=0, 
             sampling=0, ex_type="",  samples_per_head=0, 
             save_ds_path="", repeat=1, pid=-1, break_sent=-1, 
-            sort_key="rep", replace_blanks = False): 
+            sort_key="rep", replace_blanks = False, tokenizer=None): 
         super(MyDataset).__init__()
         fingerprint = save_ds_path + "_" + split_name + "_"  + method + \
                 "_" + str(len(split_df)) + "_" + str(num_samples) 
@@ -885,6 +888,7 @@ class MyDataset(torch.utils.data.Dataset):
         self.samples_per_head = samples_per_head
         self.start = start
         self.pid = pid
+        self.tokenizer = tokenizer
         self.prompt_pos = prompt_pos
         self.inp_include = inp_include
         self.inp_exclude = inp_exclude

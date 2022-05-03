@@ -63,8 +63,7 @@ def trim_batch(
     else:
         return (input_ids[:, keep_column_mask], attention_mask[:, keep_column_mask])
 
-# ggggggggg
-def generate(model, tokenizer, queries, batch_size=5, gen_token = "", gen_param = "greedy", at_mask=None):
+def generate(model, tokenizer, batch, gen_token = "", gen_param = "greedy", at_mask=None):
     skip_special = "True"
     #verb = get_verb(query)
     #vlog.info("Ignoring verb %s", verb)
@@ -74,7 +73,73 @@ def generate(model, tokenizer, queries, batch_size=5, gen_token = "", gen_param 
     if "@" in gen_param:
         gen_param, skip_special = gen_param.split("@")
     if gen_param == "greedy":
-        generation_params = {
+        gen_kwargs = {
+            #"max_length":160,
+            "num_beams":1,
+            "repetition_penalty":5.5,
+            "num_return_sequences":1,
+            "bad_words_ids": bad_words_ids
+        }
+    elif gen_param == "top_p":
+        gen_kwargs = {
+            #"max_length":160,
+            "do_sample":True, 
+            "top_p":0.9, 
+            "top_k":10,
+            "num_beams":1,
+            "temperature": 1.0,
+            "num_return_sequences":1, 
+            "repetition_penalty":5.5,
+            "bad_words_ids": bad_words_ids
+        }
+    batch.to(device)
+    if "labels" in batch:
+        gen_kwargs["labels"] = batch["labels"]
+    if "description_input_ids" in batch:
+        gen_kwargs["description_input_ids"] = batch["description_input_ids"]
+    if "description_attention_mask" in batch:
+        gen_kwargs["description_attention_mask"] = batch["description_attention_mask"]
+    if "knowledge_input_ids" in batch:
+        gen_kwargs["knowledge_input_ids"] = batch["knowledge_input_ids"]
+    if "knowledge_attention_mask" in batch:
+        gen_kwargs["knowledge_attention_mask"] = batch["knowledge_attention_mask"]
+    if "task_ids" in batch:
+        gen_kwargs["task_ids"] = batch["task_ids"]
+
+    #input_batch = {}
+    #input_batch["input_ids"] = batch["input_ids"]
+    #input_batch["attention_mask"] = batch["attention_mask"]
+    #input_ids, attention_mask = trim_batch(**input_batch, pad_token_id=tokenizer.pad_token_id)
+    decs = []
+    if False: #gen_token != "":
+        gen_token_id = tokenizer.convert_tokens_to_ids(gen_token)
+        hyps = model.generate(
+                batch["input_ids"],
+                attention_mask=batch["attention_mask"],
+                **gen_kwargs,
+                decoder_start_token_id=gen_token_id)
+        hyps = tokenizer.batch_decode(hyps,skip_special_tokens=False)
+    else:
+        hyps = model.generate(
+                batch["input_ids"],
+                attention_mask=batch["attention_mask"],
+                **gen_kwargs,
+                )
+        hyps = tokenizer.batch_decode(hyps,skip_special_tokens=skip_special == "True")
+        decs.extend(hyps)
+    return decs
+# ggggggggg
+def batch_generate(model, tokenizer, queries, batch_size=5, gen_token = "", gen_param = "greedy", at_mask=None):
+    skip_special = "True"
+    #verb = get_verb(query)
+    #vlog.info("Ignoring verb %s", verb)
+    bad_words_ids = None
+    #if verb:
+    #    bad_words_ids = tokenizer(verb).input_ids
+    if "@" in gen_param:
+        gen_param, skip_special = gen_param.split("@")
+    if gen_param == "greedy":
+        gen_kwargs = {
             "max_length":160,
             "num_beams":5,
             "repetition_penalty":5.5,
@@ -82,7 +147,7 @@ def generate(model, tokenizer, queries, batch_size=5, gen_token = "", gen_param 
             "bad_words_ids": bad_words_ids
         }
     elif gen_param == "top_p":
-        generation_params = {
+        gen_kwargs = {
             "max_length":160,
             "do_sample":True, 
             "top_p":0.9, 
@@ -99,14 +164,15 @@ def generate(model, tokenizer, queries, batch_size=5, gen_token = "", gen_param 
         for batch in list(chunks(queries, batch_size)):
             batch = tokenizer(batch, return_tensors="pt", max_length=200, truncation=True, padding=True).to(device)
             input_ids, attention_mask = trim_batch(**batch, pad_token_id=tokenizer.pad_token_id)
+
             if False: #gen_token != "":
                 gen_token_id = tokenizer.convert_tokens_to_ids(gen_token)
-                hyps = model.generate(input_ids=input_ids,**generation_params,
+                hyps = model.generate(input_ids=input_ids,**gen_kwargs,
                         attention_mask=attention_mask,
                         decoder_start_token_id=gen_token_id)
                 hyps = tokenizer.batch_decode(hyps,skip_special_tokens=False)
             else:
-                hyps = model.generate(input_ids=input_ids,**generation_params,
+                hyps = model.generate(input_ids=input_ids,**gen_kwargs,
                         attention_mask=attention_mask)
                 hyps = tokenizer.batch_decode(hyps,skip_special_tokens=skip_special == "True")
                 decs.extend(hyps)
@@ -144,7 +210,7 @@ def bert_score(bert_scorer, hyps, refs):
         return best_hyp_index, best_ref_index, top["score"] 
 
 def save_results(rows, fid, step, exp_info, save_path=""):
-    name = fid + "_results_" + human_format(step) 
+    name = fid + "_" + save_path + "_" + human_format(step) 
     df = pd.DataFrame(rows)
     if exp_info: df["val_steps"] = step
     for key, info in exp_info.items():
@@ -168,7 +234,7 @@ def chunks(lst, n):
 
 
 
-def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", scorers="rouge", batch_size="20@5", model = None, tokenizer = None, preds_file = "", set_name = "test"):  
+def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="greedy", scorers="rouge", batch_size="20@5", model = None, tokenizer = None, preds_file = "", set_name = "test"):  
     try:
         nltk_path = str(nltk.data.find("tokenizers/punkt"))
         mlog.info(f"using nltk from: {nltk_path}")
@@ -255,20 +321,26 @@ def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", sco
             lines = lines[1:]
     l_count = 0
     test_iter = iter(test_set)
+    batches = batched(list(test_iter), bs)
+    dl_iter = iter(dataloader)
     iid  = 0
     old_query = ""
     all_predictions = []
     all_golds = []
-    for batch_list in batched(list(test_iter), bs):
+    for batch_list in batches: 
         if exit_loop:
             break
-        queries = [x[0] for x in batch_list]
         if model is not None:
-            hyps = generate(model, tokenizer, queries, batch_size = gen_bs, gen_param=gen_param)
+            if False:
+                queries = [x[0] for x in batch_list]
+                hyps = batch_generate(model, tokenizer, queries, batch_size = gen_bs, gen_param=gen_param)
+            else:
+                batch = next(dl_iter)
+                hyps = generate(model, tokenizer, batch, gen_param=gen_param)
         else:
             #hyps = islice(infile, len(queries))
-            hyps = lines[l_count: l_count + len(queries)]
-            l_count += len(queries)
+            hyps = lines[l_count: l_count + bs]
+            l_count += bs 
         pbar.update(bs)
         for (query, inp, tail, rel, qid, repid), top_hyp in zip(batch_list, hyps):
             tails = [tail]
@@ -447,8 +519,9 @@ def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", sco
 
     # %%%%%%%%%%%%%%%%%%
     _info = "_".join([str(x) for x in list(exp_info.values())])
-    metric_list = ["rouge", "meteor", "bertscore"]
-    summary = calc_metrics(all_predictions, all_golds, metric_list)
+    #metric_list = ["rouge", "meteor", "bertscore"]
+    #summary = calc_metrics(all_predictions, all_golds, metric_list)
+    summary = ""
     out = os.path.join(save_path,f"summary__{_info}.txt")
     print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
     print(summary)
@@ -456,8 +529,10 @@ def evaluate(test_set, save_path, exp_info, val_records, gen_param="greedy", sco
         print(summary, file=f)
     print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
     file_gen = "_" + Path(preds_file).stem if preds_file else ""
-    new_df = save_results(rows, "full_" + set_name + file_gen + "_" + scorers , step, exp_info, save_path)
-    sel_df = save_results(sel_rows, "sel_" + set_name + file_gen + "_" + scorers , step, {}, save_path)
+    ext = set_name + file_gen + "_" + scorers 
+    ext = ""
+    new_df = save_results(rows, "full" + ext, step, exp_info, save_path)
+    sel_df = save_results(sel_rows, "sel" + ext , step, {}, save_path)
     if not scorers:
         return
 
