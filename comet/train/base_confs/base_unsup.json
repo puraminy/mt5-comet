@@ -1,5 +1,5 @@
 {
-    "model_id": "t5-base",
+    "model_id": "base",
     "experiment": "custom",
     "qtemp": "{rel_token}: {event} {gen} {ph}",
     "anstemp": "{ph} {resp} {end}",

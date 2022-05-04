@@ -216,8 +216,11 @@ def run(ctx, conf_path, base_conf, experiment,
                     _extra += "_" + (_ks + "_" + _val if not str(_val)=="True" else _key)
                 mlog.info("set %s = %s", _key, _val)
                 if not _val == "False":
-                    args[_key]= _val
-           output_name = experiment + "_" + base_conf + _extra
+                    if _val == "True":
+                        args[_key]= True
+                    else:
+                        args[_key]= _val
+           output_name = base_conf + _extra
            # oooooooooooooo
            if not var:
                args["overwrite"] = output_name
@@ -225,37 +228,26 @@ def run(ctx, conf_path, base_conf, experiment,
                ctx.invoke(train, **args)
            else:
                all_vars = var.split("--")
-               main_var = all_vars[0]
-               main_var_name,main_var_item_list = main_var.split("=")
-               main_var_item_list = main_var_item_list.split("#")
-               if len(all_vars) > 1:
-                   sub_var = all_vars[1]
-                   sub_var_name,sub_var_item_list = sub_var.split("=")
-                   sub_var_item_list = sub_var_item_list.split("#")
-               mlog.info("Number of Experiments: %s", 
-                       len(main_var_item_list)*len(sub_var_item_list))
+               var_names = [x.split("=")[0] for x in all_vars]
+               values = [x.split("=")[1].split("#") for x in all_vars]
+               tot_comb = [dict(zip(var_names, comb)) for comb in itertools.product(*values)]
                ii = 0
-               for var_item in main_var_item_list:
-                   var_output_name = output_name + "_" + main_var_name + "_" + var_item 
-                   if var_item == "null": var_item = ""
-                   if var_item != "False": 
-                       args[main_var_name] = var_item
-                   if len(all_vars) > 1:
-                       for sub_var_item in sub_var_item_list:
-                           sub_output_name = var_output_name + "_" + sub_var_name + \
-                                   "_" + sub_var_item 
-                           if sub_var_item == "null": sub_var_item = ""
-                           if sub_var_item != "False": 
-                               args[sub_var_name] = sub_var_item
-                           ii += 1
-                           args["overwrite"] = str(ii) + "_" + sub_output_name
-                           args["no_save_model"] = not save_model
-                           ctx.invoke(train, **args)
-                   else:
-                       ii += 1
-                       args["overwrite"] = str(ii) + "_" + var_output_name
-                       args["no_save_model"] = not save_model
-                       ctx.invoke(train, **args)
+               for comb in tot_comb:
+                   _output_name = output_name
+                   for var_name,var_item in comb.items():
+                       if var_item == "null": var_item = ""
+                       if var_item.strip() == "False": 
+                           if var_name in args:
+                               del args[var_name]
+                       else:
+                           if var_item.strip() == "True":
+                               var_item = True
+                           _output_name +=  "/" + var_name + "_" + str(var_item)
+                           args[var_name]=var_item
+                   ii += 1
+                   args["overwrite"] = str(ii) + "_" + _output_name
+                   args["no_save_model"] = not save_model
+                   ctx.invoke(train, **args)
         else:
             confs = sorted(glob.glob(f"{_path}/*"))
             default_model = ""
@@ -848,7 +840,14 @@ def run(ctx, conf_path, base_conf, experiment,
     is_flag=True,
     help=""
 )
-def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, break_sent,sort, do_preproc, replace_blanks, loop):
+@click.option(
+    "--know",
+    "-ku",
+    default="s",
+    type=str,
+    help=""
+)
+def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, break_sent,sort, do_preproc, replace_blanks, loop, know):
 
     #%% some hyper-parameters
 
@@ -1227,10 +1226,10 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
 
     mlog.info("len tokenizer %s", len(tokenizer))
     my_specials = [x for x in tokenizer.additional_special_tokens if not "<extra_id"  in x]
-    mlog.info("list of spcial tokens: %s", my_specials)
+    vlog.info("list of spcial tokens: %s", my_specials)
     extra = "_" + now
     m_name = model_id + "-" + method
-    p_str = "prefixed" if prefix else ""
+    p_str = "prefixed" if prefix else "not_prefixed"
     exp_info = {"exp":experiment, "model":model_id, "lang": lang, 
                     "method":method, 
                     "wrap": w_str + ("-" + encoder_type if wrap else ""),
@@ -1307,7 +1306,10 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
     #ppppppppppppppp
     if prefix:
         pre_args = Configure.Get("pl5.cfg")
-        mlog.info("prefix conf: %s", pre_args)
+        #mlog.info("prefix conf: %s", pre_args)
+
+        pre_args.prefix_tuning.prefix_sequence_length = int(prompt_length)
+        pre_args.model.knowledge_usage = 'separate' if know=="s" else "concatenate"
         model = Model(tokenizer, model, args=pre_args)
         model_tokenizer = model.tokenizer
         #model = ut.get_model(pre_args.model.name)(pre_args)
@@ -1439,6 +1441,10 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
     #%% tttttt
     mlog.info("batch size: %s", batch_size)
     mlog.info("node batch size: %s", node_batch_size)
+    mlog.info(f"============== learning_rate {learning_rate}\n")
+    mlog.info(f"============== frozen {frozen} {fz_parts} \n")
+    mlog.info(f"============== prefixed {prefix}  \n")
+    mlog.info(f"============== wrap {wrap}\n")
     epochs_num = int(epochs_num)
     def train_loop(epochs_num):
         train_iter = iter(train_dataloader)
@@ -1450,16 +1456,12 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
         elif step <= iterations and (wrap or not frozen or modules_to_freeze is not model):
             mlog.info("Training... %s", save_path)
         for epoch in range(epochs_num):
+            tlog.info(f"============== epoch {epoch}\n")
             pbar = tqdm(total = iterations, position=0, leave=True) #,dynamic_ncols=True)
             if epoch > 0:
                 train_iter = iter(train_dataloader)
             #mlog.info("Saving train data set...")
             #myds["train"].save()
-            mlog.info(f"============== epoch {epoch}\n")
-            mlog.info(f"============== learning_rate {learning_rate}\n")
-            mlog.info(f"============== frozen {frozen} {fz_parts} \n")
-            mlog.info(f"============== wrap {wrap}\n")
-            tlog.info(f"============== epoch {epoch}\n")
             tot_loss = 0
             step = 0
             if train_start > 0:
@@ -1613,7 +1615,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
         training_args = TrainingArguments(output_dir=save_path)
         training_args.per_device_train_batch_size=node_batch_size
         training_args.num_train_epochs=epochs_num
-        training_args.logging_steps=5
+        #training_args.logging_steps=5
         training_args.learning_rate=learning_rate
         training_args.do_predict=True
         training_args.gradient_accumulation_steps=accumulation_tiny_steps
