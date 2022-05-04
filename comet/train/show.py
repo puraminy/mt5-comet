@@ -316,7 +316,7 @@ def show_df(df):
                 FID = arr[ii] 
                 df = main_df
                 df["num_preds"] = df.groupby([FID])['pred_text1'].transform('nunique')
-                df["num_query"] = df.groupby([FID])['input_text'].transform('nunique')
+                df["num_query"] = df.groupby([FID])['qid'].transform('nunique')
                 hotkey="gG"
         elif char == "s":
             canceled, col, val = list_df_values(df, get_val=False)
@@ -971,7 +971,7 @@ def start(stdscr):
             if not "fid" in df or force_fid:
                 df["path"] = f
                 if fid == "parent":
-                    df["fid"] = str(ii) + "_" + Path(f).parent.parent.parent.parent.name + "_" + Path(f).stem
+                    df["fid"] = str(ii) + "_" + "_".join(f.split("/")[2:]) 
                 elif fid == "name":
                     df["fid"] = str(ii) + "_" + Path(f).stem
                 else:

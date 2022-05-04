@@ -220,14 +220,16 @@ def run(ctx, conf_path, base_conf, experiment,
                         args[_key]= True
                     else:
                         args[_key]= _val
-           output_name = base_conf + _extra
            # oooooooooooooo
            if not var:
+               output_name = base_conf + _extra
                args["overwrite"] = output_name
                args["no_save_model"] = not save_model
                ctx.invoke(train, **args)
            else:
+               output_name = ""
                all_vars = var.split("--")
+               #all_vars = sorted(all_vars)
                var_names = [x.split("=")[0] for x in all_vars]
                values = [x.split("=")[1].split("#") for x in all_vars]
                tot_comb = [dict(zip(var_names, comb)) for comb in itertools.product(*values)]
@@ -245,7 +247,7 @@ def run(ctx, conf_path, base_conf, experiment,
                            _output_name +=  "/" + var_name + "_" + str(var_item)
                            args[var_name]=var_item
                    ii += 1
-                   args["overwrite"] = str(ii) + "_" + _output_name
+                   args["overwrite"] = str(ii) + "_" + _output_name + "/" + _extra
                    args["no_save_model"] = not save_model
                    ctx.invoke(train, **args)
         else:
