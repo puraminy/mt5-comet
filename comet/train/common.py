@@ -46,7 +46,7 @@ rel_nat_maps = {
         "fa":"در نتیجه دیگران حس می کنند",
         "tokens":"<state> <other> <after>",
         "nat-tokens":"then, the state of others is ",
-        "token":"other's reaction"
+        "desc":"other's reaction to the event"
     },
     "xReact":{ 
         "en-postfix":"As a result of {event}, PersonX would feel {ph}. ",
@@ -54,7 +54,7 @@ rel_nat_maps = {
         "fa":"در نتیجه PersonX حس می کند", 
         "tokens":"<state> <agent> <after>",
         "nat-tokens":"then, the state of the person is ",
-        "token":"person reaction"
+        "desc":"the person's reaction to the event"
     },
     "xWant":{ 
         "en-postfix":"After {event}, PersonX would want {ph}. ",
@@ -62,28 +62,31 @@ rel_nat_maps = {
         "fa":"بعد از آن PersonX می خواهد",
         "tokens":"<event> <agent> <after> <want>",
         "nat-tokens":"then, the person wants ",
-        "token":"person want"
+        "desc":"the person's decision after the event"
     },
     "oWant":{ 
         "en-postfix":"After {event}, others would want {ph}. ",
         "en-prefix":"Others want {ph} after {event}",
         "fa":"بعد از آن دیگران می خواهند",
         "tokens":"<event> <other> <after> <want>",
-        "nat-tokens":"then, others want "
+        "nat-tokens":"then, others want ",
+        "desc":"other's decision after the event"
     },
     "xEffect":{ 
         "en-postfix":"As a result of {event}, PersonX will {ph}. ",
         "en-prefix":"PersonX {ph} because {event}",
         "fa":"در نتیجه PersonX ",
         "tokens":"<event> <agent> <after> <effect>",
-        "nat-tokens":"then, the effect on the person "
+        "nat-tokens":"then, the effect on the person ",
+        "desc":"the effect of event on the person"
     },
     "oEffect":{ 
         "en-postfix":"as a result of {event}, others will {ph}. ",
         "en-prefix":"Others {ph} because {event}",
         "fa":"در نتیجه دیگران ",
         "tokens":"<event> <other> <after> <effect>",
-        "nat-tokens":"then, the effect on others "
+        "nat-tokens":"then, the effect on others ",
+        "desc":"the effect of the person on others"
     },
     "xAttr":{ 
         "en-postfix":"{event} is seen as {ph}.",
@@ -91,13 +94,15 @@ rel_nat_maps = {
         "fa":"مردم فکر می کنند PersonX ",
         "tokens":"<state> <agent> <static>",
         "nat-tokens":"always, the state of the person is",
+        "desc":"the person's attributes"
     },
     "xIntent":{ 
         "en-postfix":"Because of {event}, PersonX wanted {ph}",
         "en-prefix":"PersonX intended {ph}  Therefore,",
         "fa":"زیرا PersonX می خواست",
         "tokens":"<event> <agent> <before> <cause> <want>",
-        "nat-tokens":"before, because the person want "
+        "nat-tokens":"before, because the person want ",
+        "desc":"the intention of the person"
     },
     "xNeed":{ 
         "en-postfix":"{event}, Before that, PersonX needs {ph}. ",
@@ -105,7 +110,8 @@ rel_nat_maps = {
         "en":"Before that, PersonX needs {ph} ",
         "fa":"قبل از آن PersonX نیاز دارد",
         "tokens":"<event> <agent> <before> <cause> <need>",
-        "nat-tokens":"before, because the person needs "
+        "nat-tokens":"before, because the person needs ",
+        "desc": "the requirements for the action"
     },
 }
 gen_token_en = "<gen_en>"
@@ -618,6 +624,9 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
        elif method == "unsup-nat":
            qtemp = ["{rel_natural}","{rel_natural_pre}"] 
            anstemp = "{ph} {resp} {end}"
+       elif method == "unsup-nat-n":
+           qtemp = "{rel_nat_n}"
+           anstemp = "{ph} {resp} {end}"
        elif method == "enc-unsup-nat":
            qtemp = "{rel_i} {event} {rel_natural} {ph}" 
            anstemp = "{ph} {resp} {end}"
@@ -821,6 +830,11 @@ def fill_vars(template, rel, event, resp, gen_token= "gen_en",  inp_lang="en", r
     rel_natural_tokens = rel_nat_maps[rel]["nat-tokens"]        
     rel_natural_pure = rel_natural.replace("{ph}", "")
     rel_natural_pure = rel_natural_pure.replace(".", "")
+    n = 3
+    rel_n = ""
+    for i in range(n):
+        rel_n += "<extra_id_" + str(i) + "> "
+    rel_nat_n = rel_natural.replace("{ph}", rel_n)
     rel_natural = rel_natural.replace("{ph}", placeholder_token)
     rel_natural_pre = rel_natural_pre.replace("{ph}", placeholder_token)
     
@@ -828,6 +842,7 @@ def fill_vars(template, rel, event, resp, gen_token= "gen_en",  inp_lang="en", r
             "{rel_natural}":rel_natural,
             "{rel_natural_pure}":rel_natural_pure,
             "{rel_natural_pre}":rel_natural_pre,
+            "{rel_nat_n}":rel_nat_n,
             "{nat_toekns}":rel_natural_tokens,
             "{gen}":gen_token}
     rep2  = {"{event}":event, 

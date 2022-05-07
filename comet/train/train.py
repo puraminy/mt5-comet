@@ -35,12 +35,14 @@ class MyCollator(object):
     def __call__(self, batch):
         queries,inputs, responses,rel,index,rep = zip(*batch)
         tokenizer = self.tokenizer
+        rels = list(rel)
+        desc = ["Predict the {}:".format(rel_nat_maps[x]["desc"]) for x in rels] 
         new_batch = tokenizer(list(queries),return_tensors='pt',padding='longest', 
                                 #truncation=True, max_length=50
                              )
         if self.prefix:
-            tokenized_description = tokenizer(list(rel),return_tensors='pt',padding='longest')
-            tokenized_knowledge = tokenizer(list(rel),return_tensors='pt',padding='longest')
+            tokenized_description = tokenizer(desc,return_tensors='pt',padding='longest')
+            tokenized_knowledge = tokenizer(rels,return_tensors='pt',padding='longest')
 
             new_batch['description_input_ids'] = torch.LongTensor(tokenized_description.data["input_ids"])
             new_batch['description_attention_mask'] = torch.LongTensor(tokenized_description.data["attention_mask"])
@@ -180,10 +182,23 @@ def cli():
     is_flag=True,
     help=""
 )
+@click.option(
+    "--addto",
+    "-at",
+    default="",
+    type=str,
+    help=""
+)
+@click.option(
+    "--rem",
+    "-rem",
+    is_flag=True,
+    help="Remove old folder"
+)
 @click.pass_context
 #rrrrrrrrrrr
 def run(ctx, conf_path, base_conf, experiment, 
-        exclude_conf, include_conf, overwrite_conf, var, save_model):
+        exclude_conf, include_conf, overwrite_conf, var, save_model, addto, rem):
      if not conf_path:
         conf_path = "confs"
         if colab: conf_path = "colab_confs"
@@ -201,17 +216,23 @@ def run(ctx, conf_path, base_conf, experiment,
                return
            args["config"] = False
            args["output_name"] = "" 
-           spath = os.path.join(pretPath, experiment)
+           if addto:
+               spath = os.path.join(pretPath, addto)
+           else:
+               spath = os.path.join(pretPath, experiment)
+           if rem:
+               shutil.rmtree(spath)
            Path(spath).mkdir(exist_ok=True, parents=True)
            args["save_path"] = spath
            args["load_path"] = pretPath 
            _extra = ""
+           exclude_list = ["no_confirm", "follow_method", "method", "test_samples"]
            mlog.info("Extra args=%s", ctx.args)
            for _item in ctx.args:
                 mlog.info("arg = %s", _item)
                 _key,_val = _item.split("=")
                 _key=_key.strip("--")
-                if not _key in ["no_confirm", "follow_method"]:
+                if not _key in exclude_list:
                     _ks = "".join([k[0] for k in _key.split("_")])
                     _extra += "_" + (_ks + "_" + _val if not str(_val)=="True" else _key)
                 mlog.info("set %s = %s", _key, _val)
@@ -222,7 +243,7 @@ def run(ctx, conf_path, base_conf, experiment,
                         args[_key]= _val
            # oooooooooooooo
            if not var:
-               output_name = base_conf + _extra
+               output_name = base_conf + "/" + args["method"] + "/" + _extra
                args["overwrite"] = output_name
                args["no_save_model"] = not save_model
                ctx.invoke(train, **args)
@@ -244,10 +265,13 @@ def run(ctx, conf_path, base_conf, experiment,
                        else:
                            if var_item.strip() == "True":
                                var_item = True
-                           _output_name +=  "/" + var_name + "_" + str(var_item)
+                           if not var_name in exclude_list:
+                               _output_name +=  "/" + var_name + "_" + str(var_item)
                            args[var_name]=var_item
                    ii += 1
-                   args["overwrite"] = str(ii) + "_" + _output_name + "/" + _extra
+                   rel_folder = "all" if not args["rel_filter"] else args["rel_filter"]
+                   args["overwrite"] = args["method"] + "/" + rel_folder + "/" + _output_name \
+                           + "/" + _extra + "/" + experiment
                    args["no_save_model"] = not save_model
                    ctx.invoke(train, **args)
         else:
@@ -633,7 +657,7 @@ def run(ctx, conf_path, base_conf, experiment,
 @click.option(
     "--prompt_length",
     "-pl",
-    default="",
+    default="8",
     type=str,
     help="Encoder-decoder prompt length"
 )
@@ -849,7 +873,13 @@ def run(ctx, conf_path, base_conf, experiment,
     type=str,
     help=""
 )
-def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, break_sent,sort, do_preproc, replace_blanks, loop, know):
+@click.option(
+    "--show_samples",
+    "-ss",
+    is_flag=True,
+    help=""
+)
+def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples):
 
     #%% some hyper-parameters
 
@@ -1026,7 +1056,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
     def load_model(model_id, underlying_model_name):
         mlog.info("Loading model ...")
         if model_id == "test":
-            return None, None
+            return None, None, "test"
         elif "gpt" in model_id:
             model = GPT2LMHeadModel.from_pretrained(underlying_model_name)
             tokenizer = AutoTokenizer.from_pretrained(underlying_model_name, add_prefix_space=True)
@@ -1184,22 +1214,29 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
         val_records = myds[test_set].num_records
         train_records = 0
     else:
-        ds_list = ["train", "validation"]
-        ds_list += ["sample"]
+        if show_samples:
+            ds_list = ["sample"]
+        else:
+            ds_list = ["train", "validation"]
+            ds_list += ["sample"]
         myds = load_data(ds_list)
         if "sample" in ds_list:
             samples_iter = iter(myds["sample"])
             _sample = True
             generate_samples["sample"] = []
-            dlog.info("----------- SAMPLES -------------")
+            if not show_samples:
+                logger = dlog
+            else:
+                logger = mlog
+            logger.info("----------- SAMPLES -------------")
             while _sample:
                 _sample = next(samples_iter, None)
-                dlog.info(_sample)
+                logger.info(_sample)
                 if False: #_sample:
                     generate_samples["sample"].append((_sample[0], _sample[1]))
-            dlog.info("--------------------------------")
-            mlog.info("Preparing samples: %s ", len(generate_samples["sample"]))
-    if model_id == "test":
+            logger.info("--------------------------------")
+            logger.info("Preparing samples: %s ", len(generate_samples["sample"]))
+    if model_id == "test" or show_samples:
         return
     if not fz_parts or fz_parts == "all":
         modules_to_freeze = [model]
@@ -1617,6 +1654,10 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
         training_args = TrainingArguments(output_dir=save_path)
         training_args.per_device_train_batch_size=node_batch_size
         training_args.num_train_epochs=epochs_num
+        training_args.save_strategy="steps"
+        training_args.save_stepsi=10000 
+        training_args.save_total_limiti=1 
+
         #training_args.logging_steps=5
         training_args.learning_rate=learning_rate
         training_args.do_predict=True

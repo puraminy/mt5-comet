@@ -32,7 +32,7 @@
     "print_log": "",
     "training_round": 1,
     "epochs_num": 1,
-    "prompt_length": "",
+    "prompt_length": "8",
     "zero_shot": false,
     "opt_type": "adam",
     "deep_log": false,

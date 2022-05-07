@@ -75,7 +75,7 @@ def generate(model, tokenizer, batch, gen_token = "", gen_param = "greedy", at_m
     if gen_param == "greedy":
         gen_kwargs = {
             #"max_length":160,
-            "num_beams":1,
+            "num_beams":5,
             "repetition_penalty":5.5,
             "num_return_sequences":1,
             "bad_words_ids": bad_words_ids
@@ -86,7 +86,7 @@ def generate(model, tokenizer, batch, gen_token = "", gen_param = "greedy", at_m
             "do_sample":True, 
             "top_p":0.9, 
             "top_k":10,
-            "num_beams":1,
+            "num_beams":5,
             "temperature": 1.0,
             "num_return_sequences":1, 
             "repetition_penalty":5.5,
@@ -213,6 +213,7 @@ def save_results(rows, fid, step, exp_info, save_path=""):
     pp = save_path.split("/")
     pp = "_".join(pp[-2:])
     name = fid + "_" + human_format(step) 
+
     df = pd.DataFrame(rows)
     if exp_info: df["val_steps"] = step
     for key, info in exp_info.items():

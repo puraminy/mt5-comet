@@ -45,8 +45,8 @@ def find_common(df, main_df, on_col_list, s_rows, FID, char):
         dfs_val["exp" + str(ii)] = exp
         tdf = main_df[main_df[FID] == exp]
         tdf = tdf[["pred_text1", "bert_score","qid", "method", "rouge_score", "fid","prefix", "input_text","target_text"]]
-        tdf = tdf.sort_values(by="rouge_score")
-        tdf = tdf.groupby(on_col_list).agg({"qid":"first","input_text":"first","target_text":"first", "method":"first", "rouge_score":"mean","prefix":"first","pred_text1":"first", "fid":"count"}).reset_index(drop=True)
+        tdf = tdf.sort_values(by="rouge_score", ascending=False)
+        tdf = tdf.groupby(on_col_list).agg({"qid":"first","input_text":"first","target_text":"first", "method":"first", "rouge_score":"first","prefix":"first","pred_text1":"first", "fid":"count","bert_score":"first"}).reset_index(drop=True)
         tdf = tdf.sort_values(by="fid", ascending=False)
         for on_col in on_col_list:
             tdf[on_col] = tdf[on_col].astype(str).str.strip()
@@ -145,10 +145,12 @@ def show_df(df):
     if not "blank" in df:
         df["blank"] = "blank"
     prev_cahr = ""
-    hotkey = ""
+    hotkey = "6"
     sel_exp = ""
+    infos = []
     back_row = 0
     sel_rows = []
+    cmd = ""
     while ch != ord("q"):
         text_win.erase()
         left = min(left, max_col  - width)
@@ -464,6 +466,20 @@ def show_df(df):
             sel_row = 0
             sel_rows = []
 
+           # _rows = []
+           # ii = 0
+           # for idx, r in df.iterrows():
+           #     if ((main_df["prefix"] == r["prefix"]) & 
+           #         (main_df["target_text"] == r["pred_text1"]) & 
+           #         (main_df["input_text"] == r["input_text"])).any():
+           #         _rows.append({"prefix":r["prefix"],
+           #                       "input_text":r["input_text"],
+           #                       "target_text":r["target_text"]})
+           #     ii += 1
+           #     if ii > 10:
+           #         break
+           # if _rows:
+           #     df = pd.DataFrame(rows, columns=["prefix","input_text","target_text"])
         elif char == "H":
             left = 0
             if sel_exp:
@@ -664,7 +680,7 @@ def show_df(df):
             si = min(si, len(mask) - 1)
             sel_row = df.loc[mask.any(axis=1)].index[si]
         elif char == ":":
-            cmd = rowinput()
+            cmd = rowinput(default=cmd)
             if cmd == "fix_types":
                 for col in ["target_text", "pred_text1"]: 
                     main_df[col] = main_df[col].astype(str)
@@ -736,6 +752,10 @@ def show_df(df):
             if "==" in cmd:
                 col, val = cmd.split("==")
                 df = df[df[col] == val]
+            elif "top@" in cmd:
+                tresh = float(cmd.split("@")[1])
+                df = df[df["bert_score"] > tresh]
+                df = df[["prefix","input_text","target_text"]] 
             if cmd == "cp" or cmd == "cp@":
                 canceled, col,val = list_df_values(main_df, get_val=False)
                 if not canceled:
@@ -760,11 +780,11 @@ def show_df(df):
         elif not char in ["q", "S","r"]:
             pass
             #mbeep()
-        if char in ["S", "V"]:
+        if char in ["S", "}"]:
             cmd, _ = minput(cmd_win, 0, 1, "File Name (without extension)=", default=dfname, all_chars=True)
             cmd = cmd.split(".")[0]
             if cmd != "<ESC>":
-                if char == "V":
+                if char == "}":
                     df.to_csv(os.path.join(base_dir, cmd+".tsv"), sep="\t", index=False)
                 else:
                     dfname = cmd
@@ -905,6 +925,7 @@ text_width = 60
 std = None
 dfname = ""
 dfpath = ""
+dftype = "full"
 base_dir = os.path.join(resPath, "sel")
 def start(stdscr):
     global info_bar, text_win, cmd_win, std, main_win, colors, dfname
@@ -934,9 +955,9 @@ def start(stdscr):
     theme = {'preset': 'default', "sep1": "colors", 'text-color': '247', 'back-color': '233', 'item-color': '71','cur-item-color': '251', 'sel-item-color': '33', 'title-color': '28', "sep2": "reading mode",           "dim-color": '241', 'bright-color':"251", "highlight-color": '236', "hl-text-color": "250", "inverse-highlight": "True", "bold-highlight": "True", "bold-text": "False", "input-color":"234", "sep5": "Feedback Colors"}
 
     reset_colors(theme)
-    if not dfname:
-        fname = load_obj("dfname","","")
-        dfname = fname + ".tsv"
+    #if not dfname:
+    #    fname = load_obj("dfname","","")
+    #    dfname = fname + ".tsv"
     if not dfname:
         mlog.info("No file name provided")
     else:
@@ -953,12 +974,17 @@ def start(stdscr):
                 for root, dirs, _files in os.walk(dfpath):
                     for _file in _files:
                         root_file = os.path.join(root,_file)
-                        if all(s.strip() in root_file for s in dfname.split("+")):
+                        if dftype in root_file and all(s.strip() in root_file for s in dfname.split("+")):
                             files.append(root_file)
         mlog.info("files: %s",files)
+        if not files:
+            print("No file was selected")
+            return
         dfs = []
         for ii, f in enumerate(files):
             mlog.info(f)
+            print(f)
+            print("==================")
             if f.endswith(".tsv"):
                 df = pd.read_table(f, low_memory=False)
             elif f.endswith(".json"):
@@ -971,7 +997,7 @@ def start(stdscr):
             if not "fid" in df or force_fid:
                 df["path"] = f
                 if fid == "parent":
-                    df["fid"] = str(ii) + "_" + "_".join(f.split("/")[2:]) 
+                    df["fid"] = str(ii) + "_" + "_".join(f.split("/")[5:]) 
                 elif fid == "name":
                     df["fid"] = str(ii) + "_" + Path(f).stem
                 else:
@@ -1001,12 +1027,22 @@ def start(stdscr):
     type=str,
     help=""
 )
-def main(fname, path, fid):
-    global dfname,dfpath,file_id
+@click.option(
+    "--ftype",
+    "-ft",
+    default="full",
+    type=str,
+    help=""
+)
+def main(fname, path, fid, ftype):
+    global dfname,dfpath,file_id,dftype
     file_id = fid
+    if not fname:
+        fname = [dftype]
     if fname != "last":
         dfname = fname 
         dfpath = path
+    dftype= ftype
     set_app("showdf")
     wrapper(start)
 
