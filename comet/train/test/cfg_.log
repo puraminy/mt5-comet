@@ -1205,3 +1205,333 @@ en:as a result of PersonX accepts PersonY offer, others will <extra_id_0>
  <extra_id_2>
  .
 en:        <extra_id_0> get item they bought 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%% test 
+%%%%%%%%%%%%%%%%%% 2022-05-08-18:41 
+%%%%%%%%%%%%%%%%%% test 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+{
+    "model_id": "test",
+    "experiment": "custom",
+    "qtemp": "{rel_token}: {event} {gen} {ph}",
+    "anstemp": "{ph} {resp} {end}",
+    "extemp": "",
+    "train_samples": 0,
+    "test_set": "test",
+    "val_samples": 150,
+    "test_samples": 0,
+    "sample_samples": 10,
+    "train_path": "atomic/train.tsv",
+    "val_path": "atomic/val_all_rels.tsv",
+    "test_path": "/home/pouramini/atomic/test.tsv",
+    "sample_path": "atomic/val_all_rels.tsv",
+    "overwrite": "",
+    "output_name": "",
+    "lang": "en",
+    "learning_rate": 0.0,
+    "do_eval": false,
+    "cont": false,
+    "prefix": false,
+    "freez_step": 0,
+    "unfreez_step": 0,
+    "cpu": false,
+    "load_prompt_path": "",
+    "verbose": false,
+    "batch_size": 8,
+    "path": "/home/pouramini/mt5-comet/comet/train",
+    "config": false,
+    "clear_logs": false,
+    "gen_param": "greedy",
+    "print_log": "",
+    "training_round": 1,
+    "epochs_num": 1,
+    "prompt_length": "8",
+    "zero_shot": false,
+    "opt_type": "adam",
+    "deep_log": false,
+    "trans": "",
+    "encoder_type": "mlp",
+    "from_words": "",
+    "last_data": false,
+    "save_df": "",
+    "merge_prompts": false,
+    "num_workers": 0,
+    "scorers": "rouge-bert",
+    "gen_bs": "30@10",
+    "shared_embs": false,
+    "no_confirm": false,
+    "follow_method": false,
+    "trial": 1,
+    "fz_parts": "",
+    "do_preproc": false,
+    "loop": false,
+    "know": "s",
+    "show_samples": true,
+    "break_sent": false,
+    "cycle": 0,
+    "ex_type": "",
+    "exclude": "",
+    "from_dir": false,
+    "frozen": false,
+    "ignore_blanks": false,
+    "include": "",
+    "is_even": false,
+    "is_flax": false,
+    "load_path": "",
+    "method": "unsup-nat",
+    "nli_group": "all",
+    "no_save_model": false,
+    "only_blanks": false,
+    "per_record": false,
+    "ph_num": 3,
+    "pid": 1,
+    "pred_tresh": 0,
+    "prompt_pos": "end",
+    "rel_filter": "",
+    "repeat": 1,
+    "replace_blanks": false,
+    "samples_per_head": 0,
+    "sampling": 5,
+    "save_path": "",
+    "sort": "index",
+    "start": 0,
+    "train_start": 0,
+    "val_method": "",
+    "wrap": false
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%% index:0 rep:0 %%%%%%%%%%%%%%%%%%%
+Others PersonY smiles because PersonX accepts PersonY invitation
+---------------------------------------
+input_text====>target_text
+en:Others <extra_id_0>
+ because PersonX accepts PersonY invitation
+en:        <extra_id_0> PersonY smiles 
+%%%%%%%%%%%%%%%%%% index:1 rep:0 %%%%%%%%%%%%%%%%%%%
+Others feel happy invitation was accepted because PersonX accepts PersonY invitation
+---------------------------------------
+input_text====>target_text
+en:Others feel <extra_id_0>
+ because PersonX accepts PersonY invitation
+en:    <extra_id_0> happy invitation was accepted     
+%%%%%%%%%%%%%%%%%% index:2 rep:0 %%%%%%%%%%%%%%%%%%%
+Others want wait for engagement after PersonX accepts PersonY invitation
+---------------------------------------
+input_text====>target_text
+en:Others want <extra_id_0>
+ after PersonX accepts PersonY invitation
+en:      <extra_id_0> wait for engagement   
+%%%%%%%%%%%%%%%%%% index:3 rep:0 %%%%%%%%%%%%%%%%%%%
+PersonX is seen as polite because PersonX accepts PersonY invitation
+---------------------------------------
+input_text====>target_text
+en:PersonX is seen as <extra_id_0>
+ because PersonX accepts PersonY invitation
+en: <extra_id_0> polite        
+%%%%%%%%%%%%%%%%%% index:4 rep:0 %%%%%%%%%%%%%%%%%%%
+PersonX goes to party because PersonX accepts PersonY invitation
+---------------------------------------
+input_text====>target_text
+en:PersonX <extra_id_0>
+ because PersonX accepts PersonY invitation
+en:       <extra_id_0> goes to party  
+%%%%%%%%%%%%%%%%%% index:5 rep:0 %%%%%%%%%%%%%%%%%%%
+PersonX intended to gain person's friendship  Therefore,
+---------------------------------------
+input_text====>target_text
+en:PersonX intended <extra_id_0>
+  Therefore,
+en:<extra_id_0> to gain person's friendship         
+%%%%%%%%%%%%%%%%%% index:6 rep:0 %%%%%%%%%%%%%%%%%%%
+PersonX needs be invited by PersonY before
+---------------------------------------
+input_text====>target_text
+en:PersonX needs <extra_id_0>
+ before
+en:  <extra_id_0> be invited by PersonY       
+%%%%%%%%%%%%%%%%%% index:7 rep:0 %%%%%%%%%%%%%%%%%%%
+Others feels good because PersonX accepts PersonY invitation
+---------------------------------------
+input_text====>target_text
+en:Others feels <extra_id_0>
+ because PersonX accepts PersonY invitation
+en:   <extra_id_0> good      
+%%%%%%%%%%%%%%%%%% index:8 rep:0 %%%%%%%%%%%%%%%%%%%
+PersonX wants go to engagement after PersonX accepts PersonY invitation
+---------------------------------------
+input_text====>target_text
+en:PersonX wants <extra_id_0>
+ after PersonX accepts PersonY invitation
+en:     <extra_id_0> go to engagement    
+%%%%%%%%%%%%%%%%%% index:17 rep:0 %%%%%%%%%%%%%%%%%%%
+PersonX wants to discuss with personY after PersonX accepts PersonY offer
+---------------------------------------
+input_text====>target_text
+en:PersonX wants <extra_id_0>
+ after PersonX accepts PersonY offer
+en:     <extra_id_0> to discuss with personY    
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%% test 
+%%%%%%%%%%%%%%%%%% 2022-05-08-18:41 
+%%%%%%%%%%%%%%%%%% test 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+{
+    "model_id": "test",
+    "experiment": "custom",
+    "qtemp": "{rel_token}: {event} {gen} {ph}",
+    "anstemp": "{ph} {resp} {end}",
+    "extemp": "",
+    "train_samples": 0,
+    "test_set": "test",
+    "val_samples": 150,
+    "test_samples": 0,
+    "sample_samples": 10,
+    "train_path": "atomic/train.tsv",
+    "val_path": "atomic/val_all_rels.tsv",
+    "test_path": "/home/pouramini/atomic/test.tsv",
+    "sample_path": "atomic/val_all_rels.tsv",
+    "overwrite": "",
+    "output_name": "",
+    "lang": "en",
+    "learning_rate": 0.0,
+    "do_eval": false,
+    "cont": false,
+    "prefix": false,
+    "freez_step": 0,
+    "unfreez_step": 0,
+    "cpu": false,
+    "load_prompt_path": "",
+    "verbose": false,
+    "batch_size": 8,
+    "path": "/home/pouramini/mt5-comet/comet/train",
+    "config": false,
+    "clear_logs": false,
+    "gen_param": "greedy",
+    "print_log": "",
+    "training_round": 1,
+    "epochs_num": 1,
+    "prompt_length": "8",
+    "zero_shot": false,
+    "opt_type": "adam",
+    "deep_log": false,
+    "trans": "",
+    "encoder_type": "mlp",
+    "from_words": "",
+    "last_data": false,
+    "save_df": "",
+    "merge_prompts": false,
+    "num_workers": 0,
+    "scorers": "rouge-bert",
+    "gen_bs": "30@10",
+    "shared_embs": false,
+    "no_confirm": false,
+    "follow_method": false,
+    "trial": 1,
+    "fz_parts": "",
+    "do_preproc": false,
+    "loop": false,
+    "know": "s",
+    "show_samples": true,
+    "break_sent": false,
+    "cycle": 0,
+    "ex_type": "",
+    "exclude": "",
+    "from_dir": false,
+    "frozen": false,
+    "ignore_blanks": false,
+    "include": "",
+    "is_even": false,
+    "is_flax": false,
+    "load_path": "",
+    "method": "unsup-nat",
+    "nli_group": "all",
+    "no_save_model": false,
+    "only_blanks": false,
+    "per_record": false,
+    "ph_num": 3,
+    "pid": 0,
+    "pred_tresh": 0,
+    "prompt_pos": "end",
+    "rel_filter": "",
+    "repeat": 1,
+    "replace_blanks": false,
+    "samples_per_head": 0,
+    "sampling": 5,
+    "save_path": "",
+    "sort": "index",
+    "start": 0,
+    "train_start": 0,
+    "val_method": "",
+    "wrap": false
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%% index:0 rep:0 %%%%%%%%%%%%%%%%%%%
+as a result of PersonX accepts PersonY invitation, others will PersonY smiles.
+---------------------------------------
+input_text====>target_text
+en:as a result of PersonX accepts PersonY invitation, others will <extra_id_0>
+.
+en:        <extra_id_0> PersonY smiles 
+%%%%%%%%%%%%%%%%%% index:1 rep:0 %%%%%%%%%%%%%%%%%%%
+As a result of PersonX accepts PersonY invitation, others would feel happy invitation was accepted.
+---------------------------------------
+input_text====>target_text
+en:As a result of PersonX accepts PersonY invitation, others would feel <extra_id_0>
+.
+en:    <extra_id_0> happy invitation was accepted     
+%%%%%%%%%%%%%%%%%% index:2 rep:0 %%%%%%%%%%%%%%%%%%%
+After PersonX accepts PersonY invitation, others would want wait for engagement.
+---------------------------------------
+input_text====>target_text
+en:After PersonX accepts PersonY invitation, others would want <extra_id_0>
+.
+en:      <extra_id_0> wait for engagement   
+%%%%%%%%%%%%%%%%%% index:3 rep:0 %%%%%%%%%%%%%%%%%%%
+PersonX accepts PersonY invitation is seen as polite.
+---------------------------------------
+input_text====>target_text
+en:PersonX accepts PersonY invitation is seen as <extra_id_0>
+.
+en: <extra_id_0> polite        
+%%%%%%%%%%%%%%%%%% index:4 rep:0 %%%%%%%%%%%%%%%%%%%
+As a result of PersonX accepts PersonY invitation, PersonX will goes to party.
+---------------------------------------
+input_text====>target_text
+en:As a result of PersonX accepts PersonY invitation, PersonX will <extra_id_0>
+.
+en:       <extra_id_0> goes to party  
+%%%%%%%%%%%%%%%%%% index:5 rep:0 %%%%%%%%%%%%%%%%%%%
+Because of PersonX accepts PersonY invitation, PersonX wanted to gain person's friendship
+---------------------------------------
+input_text====>target_text
+en:Because of PersonX accepts PersonY invitation, PersonX wanted <extra_id_0>
+
+en:<extra_id_0> to gain person's friendship         
+%%%%%%%%%%%%%%%%%% index:6 rep:0 %%%%%%%%%%%%%%%%%%%
+PersonX accepts PersonY invitation, Before that, PersonX needs be invited by PersonY.
+---------------------------------------
+input_text====>target_text
+en:PersonX accepts PersonY invitation, Before that, PersonX needs <extra_id_0>
+.
+en:  <extra_id_0> be invited by PersonY       
+%%%%%%%%%%%%%%%%%% index:7 rep:0 %%%%%%%%%%%%%%%%%%%
+As a result of PersonX accepts PersonY invitation, PersonX would feel good.
+---------------------------------------
+input_text====>target_text
+en:As a result of PersonX accepts PersonY invitation, PersonX would feel <extra_id_0>
+.
+en:   <extra_id_0> good      
+%%%%%%%%%%%%%%%%%% index:8 rep:0 %%%%%%%%%%%%%%%%%%%
+After PersonX accepts PersonY invitation, PersonX would want go to engagement.
+---------------------------------------
+input_text====>target_text
+en:After PersonX accepts PersonY invitation, PersonX would want <extra_id_0>
+.
+en:     <extra_id_0> go to engagement    
+%%%%%%%%%%%%%%%%%% index:17 rep:0 %%%%%%%%%%%%%%%%%%%
+After PersonX accepts PersonY offer, PersonX would want to discuss with personY.
+---------------------------------------
+input_text====>target_text
+en:After PersonX accepts PersonY offer, PersonX would want <extra_id_0>
+.
+en:     <extra_id_0> to discuss with personY    

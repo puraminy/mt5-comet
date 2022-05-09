@@ -107,7 +107,7 @@ def show_df(df):
     main_df = df
     edit_col = ""
     count_col = ""
-    consts = {"filter":[]}
+    consts = {"filter":[], "inp":""}
     save_obj(dfname, "dfname", "")
     sel_cols = list(df.columns)
     for col in df.columns:
@@ -125,6 +125,7 @@ def show_df(df):
         sel_df = pd.DataFrame(columns = df.columns)
 
     back = []
+    sels = []
     filter_df = main_df
     FID = "method"
     if "pred_text1" in df:
@@ -134,7 +135,6 @@ def show_df(df):
         df['br_score'] = br_col.mean(axis=1)
         df['nr_score'] = df['rouge_score']
         df['nr_score'] = np.where((df['bert_score'] > 0.4) & (df['nr_score'] < 0.1), df['bert_score'], df['rouge_score'])
-
 
     #wwwwwwwwww
     colors = ['blue','orange','green', 'red', 'purple', 'brown', 'pink','gray','olive','cyan']
@@ -151,6 +151,12 @@ def show_df(df):
     back_row = 0
     sel_rows = []
     cmd = ""
+    prev_cmd = ""
+    def backit(df, sel_cols):
+        back.append(df)
+        sels.append(sel_cols)
+        back_row = sel_row
+
     while ch != ord("q"):
         text_win.erase()
         left = min(left, max_col  - width)
@@ -227,12 +233,14 @@ def show_df(df):
         change_info(infos)
 
         prev_char = chr(ch)
+        prev_cmd = cmd
+        cmd = ""
         if hotkey == "":
             ch = std.getch()
         else:
             ch, hotkey = ord(hotkey[0]), hotkey[1:]
-
         char = chr(ch)
+        consts["inp"] = char
         seq += char
         vals = []
         get_cmd = False
@@ -290,14 +298,14 @@ def show_df(df):
             mbeep()
             sel_df.to_csv(sel_path, sep="\t", index=False)
         elif char == "X":
-            back.append(df)
+            backit(df, sel_cols)
             df = sel_df
         elif char == "z":
             fav_df = fav_df.append(df.iloc[sel_row])
             mbeep()
             fav_df.to_csv(fav_path, sep="\t", index=False)
         elif char == "Z":
-            back.append(df)
+            backit(df, sel_cols)
             df = fav_df
         elif char == "j":
             canceled, col = list_values(info_cols)
@@ -311,7 +319,9 @@ def show_df(df):
                         sel_cols.insert(0, col)
                     save_obj(info_cols, "info_cols", dfname)
                     save_obj(sel_cols, "sel_cols", dfname)
-        elif char in "56789":
+        elif char in "56789" and prev_char == "\\":
+            cmd = "top@" + str(int(char)/10)
+        elif char in "56789" and prev_char != "\\":
             ii = int(char) - 5
             arr = ["qid","fid","method"]
             if ii < len(arr):
@@ -348,7 +358,7 @@ def show_df(df):
             
         elif char == "g": 
             score_col = "rouge_score"
-            back.append(df)
+            backit(df, sel_cols)
             group_col = "pred_text1"
             df = df.sort_values(score_col, ascending=False).\
                  drop_duplicates(['fid','prefix','input_text']).\
@@ -368,7 +378,7 @@ def show_df(df):
             path = main_df.loc[main_df["fid"] == exp, "path"][0]
             consts["path"] = path
         elif char in ["G", "A"]:
-            back.append(df)
+            backit(df, sel_cols)
             if char ==  "A":
                 canceled, col, _ = list_df_values(df, get_val=False)
             elif char == "G":
@@ -387,8 +397,7 @@ def show_df(df):
             hotkey = "bNh"
         elif char == "u":
             left = 0
-            back.append(df)
-            back_row = sel_row
+            backit(df, sel_cols)
 
             s_rows = sel_rows
             if not sel_rows:
@@ -405,8 +414,7 @@ def show_df(df):
             hotkey = "gG"
         elif char in ["a", "h", "T"]:
             left = 0
-            back.append(df)
-            back_row = sel_row
+            backit(df, sel_cols)
 
             s_rows = sel_rows
             if not sel_rows:
@@ -483,7 +491,7 @@ def show_df(df):
         elif char == "H":
             left = 0
             if sel_exp:
-                back.append(df)
+                backit(df, sel_cols)
                 pred=df.iloc[sel_row]["pred_text1"]
                 sel_row = 0
                 consts["pred"] =pred 
@@ -542,7 +550,7 @@ def show_df(df):
                 ax = sns.regplot(df[x],df[y])
 
         elif char in ["f", "F"]:
-            back.append(df)
+            backit(df, sel_cols)
             canceled, col, val = list_df_values(df, get_val=True)
             if not canceled:
                if char == "F":
@@ -564,7 +572,7 @@ def show_df(df):
         if char in ["y","Y"]:
             #yyyyyyyy
            cols = get_cols(df, 2)
-           back.append(df)
+           backit(df, sel_cols)
            if cols:
                gcol = cols[0]
                y_col = cols[1]
@@ -680,103 +688,103 @@ def show_df(df):
             si = min(si, len(mask) - 1)
             sel_row = df.loc[mask.any(axis=1)].index[si]
         elif char == ":":
-            cmd = rowinput(default=cmd)
-            if cmd == "fix_types":
-                for col in ["target_text", "pred_text1"]: 
-                    main_df[col] = main_df[col].astype(str)
-                for col in ["steps", "epochs", "val_steps"]: 
-                    main_df[col] = main_df[col].astype(int)
-                char = "SS"
-            if cmd == "clean":
-                main_df = main_df.replace(r'\n',' ', regex=True)
-                char = "SS"
-            if cmd == "fix_method":
-                main_df.loc[(df["method"] == "unsup-tokens") & 
-                        (main_df["wrap"] == "wrapped-lstm"), "method"] = "unsup-tokens-wrap"
-                main_df.loc[(main_df["method"] == "sup-tokens") & 
-                        (main_df["wrap"] == "wrapped-lstm"), "method"] = "sup-tokens-wrap"
-            
-            if cmd == "repall":
-                canceled, col,val = list_df_values(main_df, get_val=False)
-                if not canceled:
-                    _a = rowinput("from")
-                    _b = rowinput("to")
-                    main_df[col] = main_df[col].str.replace(_a,_b)
-                    char = "SS"
-            if cmd == "rep" or cmd == "rep@":
-                canceled, col,val = list_df_values(main_df, get_val=False)
-                if not canceled:
-                    vals = df[col].unique()
-                    d = {}
-                    for v in vals:
-                        rep = rowinput(str(v) + "=" ,v)
-                        if not rep:
-                            break
-                        if type(v) == int:
-                            d[v] = int(rep)
-                        else:
-                            d[v] = rep
-                    if rowinput("Apply?") == "y":
-                        if "@" in cmd:
-                            df = df.replace(d)
-                        else:
-                            df = df.replace(d)
-                            main_df = main_df.replace(d)
-                            char = "SS"
-            if cmd in ["set", "set@", "add", "add@", "setcond"]:
-                if "add" in cmd:
-                    col = rowinput("New col name:")
-                else:
-                    canceled, col,val = list_df_values(main_df, get_val=False)
-                cond = ""
-                if "cond" in cmd:
-                    cond = get_cond(df, num=5, op="&")
-                if not canceled:
-                    if cond:
-                        val = rowinput(f"Set {col} under {cond} to:")
-                    else:
-                        val = rowinput("Set " + col + " to:")
-                    if val:
-                        if cond:
-                            if "@" in cmd:
-                                df.loc[eval(cond), col] = val
-                            else:
-                                main_df[eval(cond), col] =val
-                                char = "SS"
-                        else:
-                            if "@" in cmd:
-                                df[col] = val
-                            else:
-                                main_df[col] =val
-                                char = "SS"
-            if "==" in cmd:
-                col, val = cmd.split("==")
-                df = df[df[col] == val]
-            elif "top@" in cmd:
-                tresh = float(cmd.split("@")[1])
-                df = df[df["bert_score"] > tresh]
-                df = df[["prefix","input_text","target_text"]] 
-            if cmd == "cp" or cmd == "cp@":
-                canceled, col,val = list_df_values(main_df, get_val=False)
-                if not canceled:
-                    copy = rowinput("Copy " + col + " to:", col)
-                    if copy:
-                        if "@" in cmd:
-                            df[copy] = df[col]
-                        else:
-                            main_df[copy] = main_df[col]
-                            char = "SS"
-            if cmd.isnumeric():
-                sel_row = int(cmd)
-            elif cmd == "q":
-                ch = ord("q")
+            cmd = rowinput() #default=prev_cmd)
         elif char == "q":
             cmd = rowinput("Are you sure you want to exit? (y/n)")
             if cmd == "y":
                 ch = ord("q")
             else:
                 ch = 0
-
+        if cmd == "fix_types":
+            for col in ["target_text", "pred_text1"]: 
+                main_df[col] = main_df[col].astype(str)
+            for col in ["steps", "epochs", "val_steps"]: 
+                main_df[col] = main_df[col].astype(int)
+            char = "SS"
+        if cmd == "clean":
+            main_df = main_df.replace(r'\n',' ', regex=True)
+            char = "SS"
+        if cmd == "fix_method":
+            main_df.loc[(df["method"] == "unsup-tokens") & 
+                    (main_df["wrap"] == "wrapped-lstm"), "method"] = "unsup-tokens-wrap"
+            main_df.loc[(main_df["method"] == "sup-tokens") & 
+                    (main_df["wrap"] == "wrapped-lstm"), "method"] = "sup-tokens-wrap"
+        
+        if cmd == "repall":
+            canceled, col,val = list_df_values(main_df, get_val=False)
+            if not canceled:
+                _a = rowinput("from")
+                _b = rowinput("to")
+                main_df[col] = main_df[col].str.replace(_a,_b)
+                char = "SS"
+        if cmd == "rep" or cmd == "rep@":
+            canceled, col,val = list_df_values(main_df, get_val=False)
+            if not canceled:
+                vals = df[col].unique()
+                d = {}
+                for v in vals:
+                    rep = rowinput(str(v) + "=" ,v)
+                    if not rep:
+                        break
+                    if type(v) == int:
+                        d[v] = int(rep)
+                    else:
+                        d[v] = rep
+                if rowinput("Apply?") == "y":
+                    if "@" in cmd:
+                        df = df.replace(d)
+                    else:
+                        df = df.replace(d)
+                        main_df = main_df.replace(d)
+                        char = "SS"
+        if cmd in ["set", "set@", "add", "add@", "setcond"]:
+            if "add" in cmd:
+                col = rowinput("New col name:")
+            else:
+                canceled, col,val = list_df_values(main_df, get_val=False)
+            cond = ""
+            if "cond" in cmd:
+                cond = get_cond(df, num=5, op="&")
+            if not canceled:
+                if cond:
+                    val = rowinput(f"Set {col} under {cond} to:")
+                else:
+                    val = rowinput("Set " + col + " to:")
+                if val:
+                    if cond:
+                        if "@" in cmd:
+                            df.loc[eval(cond), col] = val
+                        else:
+                            main_df[eval(cond), col] =val
+                            char = "SS"
+                    else:
+                        if "@" in cmd:
+                            df[col] = val
+                        else:
+                            main_df[col] =val
+                            char = "SS"
+        if "==" in cmd:
+            col, val = cmd.split("==")
+            df = df[df[col] == val]
+        elif "top@" in cmd:
+            backit(df, sel_cols)
+            tresh = float(cmd.split("@")[1])
+            df = df[df["bert_score"] > tresh]
+            df = df[["prefix","input_text","target_text", "pred_text1"]] 
+        if cmd == "cp" or cmd == "cp@":
+            canceled, col,val = list_df_values(main_df, get_val=False)
+            if not canceled:
+                copy = rowinput("Copy " + col + " to:", col)
+                if copy:
+                    if "@" in cmd:
+                        df[copy] = df[col]
+                    else:
+                        main_df[copy] = main_df[col]
+                        char = "SS"
+        if cmd.isnumeric():
+            sel_row = int(cmd)
+        elif cmd == "q":
+            ch = ord("q")
         elif not char in ["q", "S","r"]:
             pass
             #mbeep()
@@ -801,7 +809,7 @@ def show_df(df):
         if char == "b" and back:
             if back:
                 df = back.pop()
-                sel_cols = list(df.columns)
+                sel_cols = sels.pop() 
                 sel_row = back_row
             else:
                 mbeep()

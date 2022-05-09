@@ -1929,3 +1929,59 @@ Repeating for 1
 None
 --------------------------------
 Preparing samples: 0 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%% test 
+%%%%%%%%%%%%%%%%%% 2022-05-08-18:41 
+%%%%%%%%%%%%%%%%%% test 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Loading model ...
+Perparing data ...
+Path of dataset for sample atomic/val_all_rels.tsv
+Creating dataset for sample
+fill data input dataset len:360
+len after filtering:360
+Cats Num: 9
+Num per cat: 1
+Repeating for 1 
+----------- SAMPLES -------------
+('Others <extra_id_0> because PersonX accepts PersonY invitation', 'PersonX accepts PersonY invitation', '        <extra_id_0> PersonY smiles ', 'oEffect', 0, 0)
+('Others feel <extra_id_0> because PersonX accepts PersonY invitation', 'PersonX accepts PersonY invitation', '    <extra_id_0> happy invitation was accepted     ', 'oReact', 1, 0)
+('Others want <extra_id_0> after PersonX accepts PersonY invitation', 'PersonX accepts PersonY invitation', '      <extra_id_0> wait for engagement   ', 'oWant', 2, 0)
+('PersonX is seen as <extra_id_0> because PersonX accepts PersonY invitation', 'PersonX accepts PersonY invitation', ' <extra_id_0> polite        ', 'xAttr', 3, 0)
+('PersonX <extra_id_0> because PersonX accepts PersonY invitation', 'PersonX accepts PersonY invitation', '       <extra_id_0> goes to party  ', 'xEffect', 4, 0)
+('PersonX intended <extra_id_0>  Therefore,', 'PersonX accepts PersonY invitation', "<extra_id_0> to gain person's friendship         ", 'xIntent', 5, 0)
+('PersonX needs <extra_id_0> before', 'PersonX accepts PersonY invitation', '  <extra_id_0> be invited by PersonY       ', 'xNeed', 6, 0)
+('Others feels <extra_id_0> because PersonX accepts PersonY invitation', 'PersonX accepts PersonY invitation', '   <extra_id_0> good      ', 'xReact', 7, 0)
+('PersonX wants <extra_id_0> after PersonX accepts PersonY invitation', 'PersonX accepts PersonY invitation', '     <extra_id_0> go to engagement    ', 'xWant', 8, 0)
+('PersonX wants <extra_id_0> after PersonX accepts PersonY offer', 'PersonX accepts PersonY offer', '     <extra_id_0> to discuss with personY    ', 'xWant', 17, 0)
+None
+--------------------------------
+Preparing samples: 0 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%% test 
+%%%%%%%%%%%%%%%%%% 2022-05-08-18:41 
+%%%%%%%%%%%%%%%%%% test 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Loading model ...
+Perparing data ...
+Path of dataset for sample atomic/val_all_rels.tsv
+Creating dataset for sample
+fill data input dataset len:360
+len after filtering:360
+Cats Num: 9
+Num per cat: 1
+Repeating for 1 
+----------- SAMPLES -------------
+('as a result of PersonX accepts PersonY invitation, others will <extra_id_0>.', 'PersonX accepts PersonY invitation', '        <extra_id_0> PersonY smiles ', 'oEffect', 0, 0)
+('As a result of PersonX accepts PersonY invitation, others would feel <extra_id_0>.', 'PersonX accepts PersonY invitation', '    <extra_id_0> happy invitation was accepted     ', 'oReact', 1, 0)
+('After PersonX accepts PersonY invitation, others would want <extra_id_0>.', 'PersonX accepts PersonY invitation', '      <extra_id_0> wait for engagement   ', 'oWant', 2, 0)
+('PersonX accepts PersonY invitation is seen as <extra_id_0>.', 'PersonX accepts PersonY invitation', ' <extra_id_0> polite        ', 'xAttr', 3, 0)
+('As a result of PersonX accepts PersonY invitation, PersonX will <extra_id_0>.', 'PersonX accepts PersonY invitation', '       <extra_id_0> goes to party  ', 'xEffect', 4, 0)
+('Because of PersonX accepts PersonY invitation, PersonX wanted <extra_id_0>', 'PersonX accepts PersonY invitation', "<extra_id_0> to gain person's friendship         ", 'xIntent', 5, 0)
+('PersonX accepts PersonY invitation, Before that, PersonX needs <extra_id_0>.', 'PersonX accepts PersonY invitation', '  <extra_id_0> be invited by PersonY       ', 'xNeed', 6, 0)
+('As a result of PersonX accepts PersonY invitation, PersonX would feel <extra_id_0>.', 'PersonX accepts PersonY invitation', '   <extra_id_0> good      ', 'xReact', 7, 0)
+('After PersonX accepts PersonY invitation, PersonX would want <extra_id_0>.', 'PersonX accepts PersonY invitation', '     <extra_id_0> go to engagement    ', 'xWant', 8, 0)
+('After PersonX accepts PersonY offer, PersonX would want <extra_id_0>.', 'PersonX accepts PersonY offer', '     <extra_id_0> to discuss with personY    ', 'xWant', 17, 0)
+None
+--------------------------------
+Preparing samples: 0 

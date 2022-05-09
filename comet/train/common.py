@@ -27,7 +27,7 @@ sep = "<|SEP|>"
 pad_token = {"pad_token": "<|PAD|>"}
 sep_token = {"sep_token": sep}
 nli_map = ['contradiction', 'entailment', 'neutral']
-all_rels = ["oEffect","oReact", "oWant", "xAttr", "xEffect","xIntent","xNeed","xReact","xWant"]
+all_rels = ["xAttr","xIntent","xNeed","xReact","oReact", "xEffect", "oEffect", "xWant","oWant"]
 rel_maps = {
     "oEffect":"<oEffect>",
     "oReact":"<oReact>",
@@ -619,7 +619,8 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            qtemp = "{event} {nat_tokens} {ph}" 
            anstemp = "{ph} {resp} {end}"
        elif method == "sup-nat":
-           qtemp = "{rel_natural_pure}" 
+           #qtemp = "{rel_natural_pure}" 
+           qtemp = ["{rel_natural}","{rel_natural_pre}"] 
            anstemp = "{resp} {end}"
        elif method == "unsup-nat":
            qtemp = ["{rel_natural}","{rel_natural_pre}"] 
@@ -824,15 +825,14 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
        qtemp = ret_q
        return qtemp, anstemp, ex_qtemp, ex_anstemp, context
 
-def fill_vars(template, rel, event, resp, gen_token= "gen_en",  inp_lang="en", resp_lang="en"):
+def fill_vars(template, rel, event, resp, gen_token= "gen_en",  inp_lang="en", resp_lang="en", ph_num=3):
     rel_natural_pre = rel_nat_maps[rel][inp_lang + "-prefix"]        
     rel_natural = rel_nat_maps[rel][inp_lang + "-postfix"]        
     rel_natural_tokens = rel_nat_maps[rel]["nat-tokens"]        
     rel_natural_pure = rel_natural.replace("{ph}", "")
     rel_natural_pure = rel_natural_pure.replace(".", "")
-    n = 3
     rel_n = ""
-    for i in range(n):
+    for i in range(ph_num):
         rel_n += "<extra_id_" + str(i) + "> "
     rel_nat_n = rel_natural.replace("{ph}", rel_n)
     rel_natural = rel_natural.replace("{ph}", placeholder_token)
@@ -890,13 +890,14 @@ class MyDataset(torch.utils.data.Dataset):
             nli_group="all", per_record=False, is_even=False, start=0, 
             sampling=0, ex_type="",  samples_per_head=0, 
             save_ds_path="", repeat=1, pid=-1, break_sent=-1, 
-            sort_key="rep", replace_blanks = False, tokenizer=None): 
+            sort_key="rep", replace_blanks = False, tokenizer=None, ph_num=3): 
         super(MyDataset).__init__()
         fingerprint = save_ds_path + "_" + split_name + "_"  + method + \
                 "_" + str(len(split_df)) + "_" + str(num_samples) 
         self.flat_data = []
         self.data_split = {}
         self.sort_key = sort_key # sort index
+        self.ph_num = ph_num
 
 
         self.only_blanks = only_blanks
@@ -1109,10 +1110,10 @@ class MyDataset(torch.utils.data.Dataset):
         _qtemp = fill_consts(qtemp, ex_qtemp, context, rel, d, context_df, mask=mask,method = mt)
         _anstemp = fill_consts(anstemp, ex_anstemp, context,rel, d, context_df, mask=mask,method = mt)
         _query = fill_vars(_qtemp, rel, event, resp, gen_token, 
-                input_lang, target_lang) 
+                input_lang, target_lang, self.ph_num) 
         query = (index, _query)
         response = fill_vars(_anstemp, rel, event, resp, gen_token, 
-                input_lang, target_lang)
+                input_lang, target_lang, self.ph_num)
 
         __resp = response.replace(placeholder_token,"")
         _query = _query.strip()

@@ -220,7 +220,7 @@ def run(ctx, conf_path, base_conf, experiment,
                spath = os.path.join(pretPath, addto)
            else:
                spath = os.path.join(pretPath, experiment)
-           if rem:
+           if rem and input("Are you sure you want to delete the experiment folder") == "y":
                shutil.rmtree(spath)
            Path(spath).mkdir(exist_ok=True, parents=True)
            args["save_path"] = spath
@@ -249,6 +249,7 @@ def run(ctx, conf_path, base_conf, experiment,
                ctx.invoke(train, **args)
            else:
                output_name = ""
+               var = var.replace("all_rels","#".join(all_rels))
                all_vars = var.split("--")
                #all_vars = sorted(all_vars)
                var_names = [x.split("=")[0] for x in all_vars]
@@ -363,6 +364,13 @@ def run(ctx, conf_path, base_conf, experiment,
 @click.option(
     "--test_samples",
     "-tn",
+    default=0,
+    type=int,
+    help=""
+)
+@click.option(
+    "--sample_samples",
+    "-sn",
     default=0,
     type=int,
     help=""
@@ -879,7 +887,14 @@ def run(ctx, conf_path, base_conf, experiment,
     is_flag=True,
     help=""
 )
-def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples):
+@click.option(
+    "--ph_num",
+    "-pn",
+    default=3,
+    type=int,
+    help="Repeat of placeholder"
+)
+def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, sample_samples, load_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num):
 
     #%% some hyper-parameters
 
@@ -1127,7 +1142,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
         length = [int(s) for s in str(prompt_length).split("-")]
         set_prompt_lengths(rel_filter, length)
 
-    num_samples = {"train": int(train_samples), "validation":int(val_samples), "sample":0, "test":int(test_samples)}
+    num_samples = {"train": int(train_samples), "validation":int(val_samples), "sample":int(sample_samples), "test":int(test_samples)}
     split_path = {"train":train_path, "validation":val_path, "sample":sample_path, "test":test_path}
     save_ds_path = {}
     for split, _path in split_path.items():
@@ -1205,7 +1220,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
                                 pred_tresh, nli_group, per_record, is_even, start, 
                                 sampling, ex_type,
                                 tails_per_head, save_ds_path[split_name], _repeat, 
-                                int(pid), _break_sent, sort, _replace_blanks, tokenizer = None
+                                int(pid), _break_sent, sort, _replace_blanks, 
+                                None, int(ph_num),
                         )
         return myds
 
