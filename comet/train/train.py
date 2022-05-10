@@ -195,10 +195,16 @@ def cli():
     is_flag=True,
     help="Remove old folder"
 )
+@click.option(
+    "--save_data",
+    "-sd",
+    is_flag=True,
+    help=""
+)
 @click.pass_context
 #rrrrrrrrrrr
 def run(ctx, conf_path, base_conf, experiment, 
-        exclude_conf, include_conf, overwrite_conf, var, save_model, addto, rem):
+        exclude_conf, include_conf, overwrite_conf, var, save_model, addto, rem, save_data):
      if not conf_path:
         conf_path = "confs"
         if colab: conf_path = "colab_confs"
@@ -276,6 +282,8 @@ def run(ctx, conf_path, base_conf, experiment,
                    args["overwrite"] = args["method"] + "/" + rel_folder + "/" + _output_name \
                            + "/" + _extra + "/" + experiment
                    args["no_save_model"] = not save_model
+                   if save_data:
+                       args["save_data"] = spath
                    ctx.invoke(train, **args)
         else:
             confs = sorted(glob.glob(f"{_path}/*"))
@@ -896,7 +904,14 @@ def run(ctx, conf_path, base_conf, experiment,
     type=int,
     help="Repeat of placeholder"
 )
-def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, sample_samples, load_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num):
+@click.option(
+    "--save_data",
+    "-sd",
+    default="",
+    type=str,
+    help=""
+)
+def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, sample_samples, load_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data):
 
     #%% some hyper-parameters
 
@@ -1225,6 +1240,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
                                 int(pid), _break_sent, sort, _replace_blanks, 
                                 None, int(ph_num),
                         )
+            if save_data:
+                myds[_name].save_data(os.path.join(save_data,_name + ".tsv"), merge=True)
         return myds
 
     if do_eval:

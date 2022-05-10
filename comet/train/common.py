@@ -1037,6 +1037,27 @@ class MyDataset(torch.utils.data.Dataset):
         else:
             mlog.info("The file already exists, skipping save ...")
 
+    def save_data(self, save_path, merge=False):
+        mlog.info("Saving data set in dataframe ...")
+        df1 = None
+        if merge and Path(save_path).is_file():
+            df1 = pd.read_table(save_path)
+        rows = []
+        for item in self.flat_data:
+            row = item["row"]
+            data = {"prefix":row["prefix"], "input_text":row["input_text"],"target_text":row["target_text"]}
+            if df1 is None:
+                rows.append(data)
+            elif not ((df1["prefix"] == row["prefix"]) &
+                     (df1["input_text"] == row["input_text"]) &
+                     (df1["target_text"] == row["target_text"])).any():
+                rows.append(data)
+        df = pd.DataFrame(rows)
+        if merge and df1 is not None:
+            df = pd.concat([df1, df])
+        df.to_csv(save_path, sep="\t", index=False)
+
+
     def load(self):
         with open(self.save_path, "rb") as f:
            data = pickle.load(f)
