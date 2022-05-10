@@ -789,7 +789,8 @@ def show_df(df):
             pass
             #mbeep()
         if char in ["S", "}"]:
-            cmd, _ = minput(cmd_win, 0, 1, "File Name (without extension)=", default=dfname, all_chars=True)
+            _name = "main_df" if char == "S" else "df"
+            cmd, _ = minput(cmd_win, 0, 1, f"File Name for {_name} (without extension)=", default=dfname, all_chars=True)
             cmd = cmd.split(".")[0]
             if cmd != "<ESC>":
                 if char == "}":
@@ -798,7 +799,8 @@ def show_df(df):
                     dfname = cmd
                     char = "SS"
         if char == "SS":
-                main_df.to_csv(os.path.join(base_dir, dfname+".tsv"), sep="\t", index=False)
+                save_df = main_df["prefix","input_text","target_text"]
+                save_df.to_csv(os.path.join(base_dir, dfname+".tsv"), sep="\t", index=False)
                 save_obj(dfname, "dfname", dfname)
         if char == "r":
             df = main_df
@@ -934,7 +936,7 @@ std = None
 dfname = ""
 dfpath = ""
 dftype = "full"
-base_dir = os.path.join(resPath, "sel")
+base_dir = os.path.join(home, "mt5-comet/comet/train/" , "sel")
 def start(stdscr):
     global info_bar, text_win, cmd_win, std, main_win, colors, dfname
     stdscr.refresh()

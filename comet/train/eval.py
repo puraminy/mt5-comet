@@ -299,7 +299,11 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
     mlog.info("Scoring...")
     pbar = tqdm(total=val_records, position=0, leave=True) #,dynamic_ncols=True)
     step = 0
-    bs, gen_bs = batch_size.split("@")
+    if "@" in batch_size:
+        bs, gen_bs = batch_size.split("@")
+    else:
+        bs = batch_size
+        gen_bs = max(2, bs - 5)
     bs = int(bs)
     gen_bs = int(gen_bs)
     vlog.disabled = True

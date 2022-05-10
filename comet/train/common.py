@@ -28,6 +28,7 @@ pad_token = {"pad_token": "<|PAD|>"}
 sep_token = {"sep_token": sep}
 nli_map = ['contradiction', 'entailment', 'neutral']
 all_rels = ["xAttr","xIntent","xNeed","xReact","oReact", "xEffect", "oEffect", "xWant","oWant"]
+x_rels = ["xAttr","xIntent","xNeed","xReact","xEffect", "xWant"]
 rel_maps = {
     "oEffect":"<oEffect>",
     "oReact":"<oReact>",
@@ -98,7 +99,7 @@ rel_nat_maps = {
     },
     "xIntent":{ 
         "en-postfix":"Because of {event}, PersonX wanted {ph}",
-        "en-prefix":"PersonX intended {ph}  Therefore,",
+        "en-prefix":"PersonX intended {ph}  Therefore, {event}",
         "fa":"زیرا PersonX می خواست",
         "tokens":"<event> <agent> <before> <cause> <want>",
         "nat-tokens":"before, because the person want ",
@@ -106,7 +107,7 @@ rel_nat_maps = {
     },
     "xNeed":{ 
         "en-postfix":"{event}, Before that, PersonX needs {ph}. ",
-        "en-prefix":"PersonX needs {ph} before",
+        "en-prefix":"PersonX needs {ph} before {event}",
         "en":"Before that, PersonX needs {ph} ",
         "fa":"قبل از آن PersonX نیاز دارد",
         "tokens":"<event> <agent> <before> <cause> <need>",
@@ -620,10 +621,10 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            anstemp = "{ph} {resp} {end}"
        elif method == "sup-nat":
            #qtemp = "{rel_natural_pure}" 
-           qtemp = ["{rel_natural}","{rel_natural_pre}"] 
+           qtemp = ["{rel_natural}","{rel_natural2}"] 
            anstemp = "{resp} {end}"
        elif method == "unsup-nat":
-           qtemp = ["{rel_natural}","{rel_natural_pre}"] 
+           qtemp = ["{rel_natural}","{rel_natural2}"] 
            anstemp = "{ph} {resp} {end}"
        elif method == "unsup-nat-n":
            qtemp = "{rel_nat_n}"
@@ -826,8 +827,8 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
        return qtemp, anstemp, ex_qtemp, ex_anstemp, context
 
 def fill_vars(template, rel, event, resp, gen_token= "gen_en",  inp_lang="en", resp_lang="en", ph_num=3):
-    rel_natural_pre = rel_nat_maps[rel][inp_lang + "-prefix"]        
-    rel_natural = rel_nat_maps[rel][inp_lang + "-postfix"]        
+    rel_natural = rel_nat_maps[rel][inp_lang + "-prefix"]        
+    rel_natural2 = rel_nat_maps[rel][inp_lang + "-postfix"]        
     rel_natural_tokens = rel_nat_maps[rel]["nat-tokens"]        
     rel_natural_pure = rel_natural.replace("{ph}", "")
     rel_natural_pure = rel_natural_pure.replace(".", "")
@@ -836,12 +837,12 @@ def fill_vars(template, rel, event, resp, gen_token= "gen_en",  inp_lang="en", r
         rel_n += "<extra_id_" + str(i) + "> "
     rel_nat_n = rel_natural.replace("{ph}", rel_n)
     rel_natural = rel_natural.replace("{ph}", placeholder_token)
-    rel_natural_pre = rel_natural_pre.replace("{ph}", placeholder_token)
+    rel_natural2 = rel_natural2.replace("{ph}", placeholder_token)
     
     rep1  = {
             "{rel_natural}":rel_natural,
             "{rel_natural_pure}":rel_natural_pure,
-            "{rel_natural_pre}":rel_natural_pre,
+            "{rel_natural2}":rel_natural2,
             "{rel_nat_n}":rel_nat_n,
             "{nat_toekns}":rel_natural_tokens,
             "{gen}":gen_token}

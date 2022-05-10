@@ -220,8 +220,9 @@ def run(ctx, conf_path, base_conf, experiment,
                spath = os.path.join(pretPath, addto)
            else:
                spath = os.path.join(pretPath, experiment)
-           if rem and input("Are you sure you want to delete the experiment folder") == "y":
-               shutil.rmtree(spath)
+           if Path(spath).exists() and rem:
+               if input("Are you sure you want to delete the experiment folder?") == "y":
+                   shutil.rmtree(spath)
            Path(spath).mkdir(exist_ok=True, parents=True)
            args["save_path"] = spath
            args["load_path"] = pretPath 
@@ -250,6 +251,7 @@ def run(ctx, conf_path, base_conf, experiment,
            else:
                output_name = ""
                var = var.replace("all_rels","#".join(all_rels))
+               var = var.replace("x_rels","#".join(x_rels))
                all_vars = var.split("--")
                #all_vars = sorted(all_vars)
                var_names = [x.split("=")[0] for x in all_vars]
@@ -1696,7 +1698,11 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
         train_result = trainer.train()
     #vvvvvvvvvvv
     if test_set:
-        test_bs, test_gen_bs = gen_bs.split("@")
+        if "@" in gen_bs:
+            test_bs,_ = gen_bs.split("@")
+        else:
+            test_bs = int(gen_bs)
+
         test_bs = int(test_bs)
         for _set in test_set.split("@"):
             myds = load_data([_set])
