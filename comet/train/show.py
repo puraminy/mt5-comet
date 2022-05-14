@@ -43,13 +43,16 @@ def find_common(df, main_df, on_col_list, s_rows, FID, char):
     for s_row in s_rows:
         exp=df.iloc[s_row]["exp_id"]
         dfs_val["exp" + str(ii)] = exp
+        mlog.info("%s == %s", FID, exp)
+        cond = f"(main_df['{FID}'] == '{exp}')"
         tdf = main_df[main_df[FID] == exp]
         tdf = tdf[["pred_text1", "bert_score","qid", "method", "rouge_score", "fid","prefix", "input_text","target_text"]]
         tdf = tdf.sort_values(by="rouge_score", ascending=False)
-        tdf = tdf.groupby(on_col_list).agg({"qid":"first","input_text":"first","target_text":"first", "method":"first", "rouge_score":"first","prefix":"first","pred_text1":"first", "fid":"count","bert_score":"first"}).reset_index(drop=True)
-        tdf = tdf.sort_values(by="fid", ascending=False)
-        for on_col in on_col_list:
-            tdf[on_col] = tdf[on_col].astype(str).str.strip()
+        if len(tdf) > 1:
+            tdf = tdf.groupby(on_col_list).agg({"qid":"first","input_text":"first","target_text":"first", "method":"first", "rouge_score":"first","prefix":"first","pred_text1":"first", "fid":"count","bert_score":"first"}).reset_index(drop=True)
+            tdf = tdf.sort_values(by="fid", ascending=False)
+            for on_col in on_col_list:
+                tdf[on_col] = tdf[on_col].astype(str).str.strip()
         dfs.append(tdf) #.copy())
         ii += 1
     if ii > 1:
@@ -323,7 +326,7 @@ def show_df(df):
             cmd = "top@" + str(int(char)/10)
         elif char in "56789" and prev_char != "\\":
             ii = int(char) - 5
-            arr = ["qid","fid","method"]
+            arr = ["prefix","fid","qid","method"]
             if ii < len(arr):
                 FID = arr[ii] 
                 df = main_df
@@ -337,8 +340,6 @@ def show_df(df):
                     asc = not asc
                 sort = col
                 df = df.sort_values(by=sort, ascending=asc)
-                if not prev_char in ["g","G"]:
-                    sel_cols = order(sel_cols, [sort])
         elif char in ["c","C"]: 
             counts = {}
             for col in df:
@@ -391,8 +392,11 @@ def show_df(df):
                     )
                #df = df.reset_index()
                consts["filter"].append("group experiments")
-               df["exp_id"] = df["exp_id"].astype(str)
-               col_widths["exp_id"] = 2 + df.exp_id.str.len().max()
+               if col != "qid":
+                   df["exp_id"] = df["exp_id"].astype(str)
+                   col_widths["exp_id"] = 2 + df.exp_id.str.len().max()
+                else:
+                   col_widths["exp_id"] = 12 
         elif char == "n":
             hotkey = "bNh"
         elif char == "u":
@@ -801,6 +805,7 @@ def show_df(df):
         if char == "SS":
                 save_df = main_df["prefix","input_text","target_text"]
                 save_df.to_csv(os.path.join(base_dir, dfname+".tsv"), sep="\t", index=False)
+
                 save_obj(dfname, "dfname", dfname)
         if char == "r":
             df = main_df

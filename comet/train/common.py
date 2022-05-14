@@ -28,7 +28,7 @@ pad_token = {"pad_token": "<|PAD|>"}
 sep_token = {"sep_token": sep}
 nli_map = ['contradiction', 'entailment', 'neutral']
 all_rels = ["xAttr","xIntent","xNeed","xReact","oReact", "xEffect", "oEffect", "xWant","oWant"]
-x_rels = ["xAttr","xIntent","xNeed","xReact","xEffect", "xWant"]
+x_rels = ["xEffect","xIntent","xNeed","xReact","xAttr", "xWant"]
 rel_maps = {
     "oEffect":"<oEffect>",
     "oReact":"<oReact>",
@@ -144,8 +144,8 @@ langs = {"target_text":"en",
               "all_preds":"en",
               "all_preds_fa":"fa"}
               
-targets = ["target_text", "target_text_fa", "pred_text1", "all_preds", "pred_text_fa","all_preds_fa", "natural_target_text_fa", "natural_target_text"]
-inputs = ["input_text", "input_text_fa", "natural_input_text", "natural_input_text_fa"]
+targets = ["target_text"] #, "target_text_fa", "pred_text1", "all_preds", "pred_text_fa","all_preds_fa", "natural_target_text_fa", "natural_target_text"]
+inputs = ["input_text"] #, "input_text_fa", "natural_input_text", "natural_input_text_fa"]
 
 placeholder_token = "<extra_id_0>"
 end_token = "" #SPECIAL_TOKENS['eos_token']  #"</s>"
@@ -236,6 +236,7 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words
 
     for rel, prompt_tokens in encoder_prompts.items():
         mlog.info("******************* Wrapping model for %s", rel)
+        mlog.info("******************* from_words %s", from_words)
         if rel == "com":
             continue
         if from_words == "rel":
@@ -891,7 +892,8 @@ class MyDataset(torch.utils.data.Dataset):
             nli_group="all", per_record=False, is_even=False, start=0, 
             sampling=0, ex_type="",  samples_per_head=0, 
             save_ds_path="", repeat=1, pid=-1, break_sent=-1, 
-            sort_key="rep", replace_blanks = False, tokenizer=None, ph_num=3): 
+            sort_key="event", replace_blanks = False, 
+            tokenizer=None, ph_num=3, limit_lang = False): 
         super(MyDataset).__init__()
         fingerprint = save_ds_path + "_" + split_name + "_"  + method + \
                 "_" + str(len(split_df)) + "_" + str(num_samples) 
@@ -970,6 +972,7 @@ class MyDataset(torch.utils.data.Dataset):
         mlog.info("Cats Num: %s", cats_num)
         self.num_per_cat = self.num_samples // cats_num if cats_num > 1 else self.num_samples
         mlog.info("Num per cat: %s", self.num_per_cat)
+        dlog.info("Num per cat: %s", self.num_per_cat)
         self.rel_counter = {}
         self.rel_filter = rel_filter
         self.lang_counter = {}
@@ -986,6 +989,7 @@ class MyDataset(torch.utils.data.Dataset):
             self.sel_rels.append(rel_filter)
         self.methods = method.split("+")
         self.sampling = sampling
+        self.limit_lang = limit_lang
         if len(self.methods) > 1 and split_name == "validation":
             self.methods = self.methods[0]
 
@@ -1003,7 +1007,7 @@ class MyDataset(torch.utils.data.Dataset):
             self.load()
         else:
             _start = self.start
-            _end = self.start + self.num_samples
+            _end = -1 #self.start + self.num_samples
             if self.flat_data:
                 _data = self.flat_data
             else:
@@ -1037,20 +1041,23 @@ class MyDataset(torch.utils.data.Dataset):
         else:
             mlog.info("The file already exists, skipping save ...")
 
-    def save_data(self, save_path, merge=False):
+    def save_data(self, save_path, merge=True):
         mlog.info("Saving data set in dataframe ...")
         df1 = None
         if merge and Path(save_path).is_file():
             df1 = pd.read_table(save_path)
         rows = []
         for item in self.flat_data:
+            if item["rep"] != 0:
+                continue
+
             row = item["row"]
             data = {"prefix":row["prefix"], "input_text":row["input_text"],"target_text":row["target_text"]}
             if df1 is None:
                 rows.append(data)
             elif not ((df1["prefix"] == row["prefix"]) &
-                     (df1["input_text"] == row["input_text"]) &
-                     (df1["target_text"] == row["target_text"])).any():
+                 (df1["input_text"] == row["input_text"]) &
+                 (df1["target_text"] == row["target_text"])).any():
                 rows.append(data)
         df = pd.DataFrame(rows)
         if merge and df1 is not None:
@@ -1069,9 +1076,10 @@ class MyDataset(torch.utils.data.Dataset):
         worker_info = torch.utils.data.get_worker_info()
         if worker_info is None:  # single-process data loading, return the full iterator
              iter_start = self.start
-             iter_end = self.num_samples
+             iter_end = -1 #self.num_samples
         else:  # in a worker process
              # split workload
+             assert self.num_samples > 0, "number of samples must be specified"
              per_worker = int(math.ceil((self.num_samples - self.start) / float(worker_info.num_workers)))
              worker_id = worker_info.id
              iter_start = self.start + worker_id * per_worker
@@ -1227,9 +1235,11 @@ class MyDataset(torch.utils.data.Dataset):
                     "rep":0,
                     "rel":rel}
             for rr in range(self.repeat):
-                flat_data.append(_ditem)
+                n_item = _ditem.copy()
+                n_item["rep"] = rr
+                flat_data.append(n_item)
             if self.break_sent > 0:
-                for rr in range(1, self.break_sent + 1):
+                for rr in range(self.repeat, self.repeat + self.break_sent + 1):
                     n_item = _ditem.copy()
                     n_item["rep"] = rr
                     flat_data.append(n_item)
@@ -1241,8 +1251,8 @@ class MyDataset(torch.utils.data.Dataset):
 
     def fill_data(self, iter_start, iter_end, show_progress=True):
         flat_data = []
-        if iter_end < 0:
-            iter_end = iter_start + self.num_samples
+        #if iter_end < 0:
+        #    iter_end = iter_start + self.num_samples
         kk = 0
         jj = 0
         dlog.info("==========NNNNN========= SPLIT: %s", self.split_name)
@@ -1250,10 +1260,13 @@ class MyDataset(torch.utils.data.Dataset):
         dlog.info("total rows: %s", len(self.split_df))
         context_rows=[]
         context_df = None
+        old_event = ""
+        filled_cat = {}
         if show_progress:
             pbar = tqdm(total = self.num_samples, position=0, leave=True) #,dynamic_ncols=True)
             pbar.set_description("Preparing iterator "+ self.split_name)
 
+        no_new_item_added = False
         for index, d in self.split_df.iterrows():
             if kk < iter_start:
                 dlog.info("!!!!!!!!! before start %s", iter_start)
@@ -1262,9 +1275,16 @@ class MyDataset(torch.utils.data.Dataset):
             rel = d["prefix"]
             if not rel in self.rel_counter:
                 self.rel_counter[rel] = 0
-            dlog.info("rel counter %s", self.rel_counter)
+            dlog.info("rel counter %s -- %s", self.rel_counter, kk)
+            if len(filled_cat) == self.cats_num:
+                dlog.info("all cats filled limit reached!")
+                self.flat_data.extend(flat_data)
+                return flat_data
+
+            no_new_item_added = True
             if self.num_per_cat > 0 and self.rel_counter[rel] > self.num_per_cat:
                 dlog.info("!!!!!!!!! number per cat limit reached %s for %s", rel, self.num_per_cat)
+                filled_cat[rel] = True
                 continue 
             if "other_rel" in self.ex_type:
                 if len(context_rows) >= len(self.sel_rels):
@@ -1310,7 +1330,6 @@ class MyDataset(torch.utils.data.Dataset):
                     dlog.info("!!!!!!!!! excluded input col %s", self.inp_exclude)
                     continue
                 input_lang = langs[inp]
-                self.rel_counter[rel] += 1
                 for targ_col in targets:
                     if not targ_col in d or len(d[targ_col]) <= 1:
                         dlog.info("!!!!!!!!! not target lang %s", targ_col)
@@ -1322,17 +1341,22 @@ class MyDataset(torch.utils.data.Dataset):
                         dlog.info("!!!!!!!!!  target exclude %s", self.targ_exclude)
                         continue
                     event = d[inp]
+                    if event != old_event:
+                        self.rel_counter[rel] += 1
+                        old_event = event
                     resp = d[targ_col]
                     target_lang = langs[targ_col]
                     lang = input_lang + "2" + target_lang
-                    if not lang in self.lang_counter:
-                        self.lang_counter[lang] = 1
-                    else:
-                        self.lang_counter[lang] += 1
-                    if (self.lang_counter[lang] > iter_end):
-                        dlog.info("Lang limit reached! %s %s", lang, self.lang_counter[lang])
-                        self.flat_data.extend(flat_data)
-                        return flat_data
+                    if self.limit_lang:
+                        if not lang in self.lang_counter:
+                            self.lang_counter[lang] = 1
+                        else:
+                            self.lang_counter[lang] += 1
+                        if (iter_end > 0 and self.lang_counter[lang] > iter_end):
+                            dlog.info("Lang limit reached! %s %s", lang, self.lang_counter[lang])
+                            self.flat_data.extend(flat_data)
+                            return flat_data
+                    no_new_item_added = False
                     _ditem = {"event":event, "resp":resp, 
                             "inp":inp, 
                             "targ_col":targ_col, 
@@ -1342,10 +1366,12 @@ class MyDataset(torch.utils.data.Dataset):
                             "rep":0,
                             "rel":rel}
                     for rr in range(self.repeat):
-                        flat_data.append(_ditem)
+                        n_item = _ditem.copy()
+                        n_item["rep"] = rr
+                        flat_data.append(n_item)
                         jj += 1
                     if self.break_sent > 0:
-                        for rr in range(1, self.break_sent + 1):
+                        for rr in range(self.repeat, self.repeat + self.break_sent + 1):
                             n_item = _ditem.copy()
                             n_item["rep"] = rr
                             flat_data.append(n_item)
@@ -1353,7 +1379,7 @@ class MyDataset(torch.utils.data.Dataset):
                     if show_progress:
                         pbar.update()
                     kk += 1
-                    if (kk > iter_end):
+                    if (iter_end > 0 and kk > iter_end):
                         dlog.info("record limit reached!")
                         self.flat_data.extend(flat_data)
                         return flat_data

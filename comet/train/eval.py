@@ -74,7 +74,7 @@ def generate(model, tokenizer, batch, gen_token = "", gen_param = "greedy", at_m
         gen_param, skip_special = gen_param.split("@")
     if gen_param == "greedy":
         gen_kwargs = {
-            #"max_length":160,
+            "max_length":60,
             "num_beams":5,
             "repetition_penalty":5.5,
             "num_return_sequences":1,
@@ -82,7 +82,7 @@ def generate(model, tokenizer, batch, gen_token = "", gen_param = "greedy", at_m
         }
     elif gen_param == "top_p":
         gen_kwargs = {
-            #"max_length":160,
+            "max_length":60,
             "do_sample":True, 
             "top_p":0.9, 
             "top_k":10,
@@ -389,7 +389,10 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
             data["blank"] = blank
             data["pred_text1"] = top_hyp
             data["target_text"] = "<br />".join(tails)
-            data["prefix"] = rel
+            p_rel = rel
+            if exp_info["pre_prefix"]:
+                p_rel = exp_info["pre_prefix"] + "_" + rel
+            data["prefix"] = p_rel
             data["langs"] = lang
             input_text = re.sub(r'<.*?>','##',query)
             input_text = input_text.replace("\n", "")

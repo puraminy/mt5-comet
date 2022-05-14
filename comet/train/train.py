@@ -57,10 +57,11 @@ class MyCollator(object):
                 labels = tokenized_outputs['input_ids']
                 labels[labels==tokenizer.pad_token_id] = -100
                 new_batch['labels']=labels
-                #new_batch['decoder_input_ids'] = model.prepare_decoder_input_ids_from_labels(
-                #    tokenized_outputs['input_ids']
-                #)
-                #new_batch['decoder_attention_mask'] = tokenized['attention_mask']
+                if not self.prefix:
+                    new_batch['decoder_input_ids'] = self.model.prepare_decoder_input_ids_from_labels(
+                        tokenized_outputs['input_ids']
+                    )
+                    new_batch['decoder_attention_mask'] = tokenized_outputs['attention_mask']
         return new_batch
         def tokenize(self, batch):
             queries,inputs, responses,rel,index,rep = batch
@@ -201,10 +202,23 @@ def cli():
     is_flag=True,
     help=""
 )
+@click.option(
+    "--load_data",
+    "-ld",
+    is_flag=True,
+    help=""
+)
+@click.option(
+    "--add_prefix",
+    "-ap",
+    is_flag=True,
+    help=""
+)
 @click.pass_context
 #rrrrrrrrrrr
 def run(ctx, conf_path, base_conf, experiment, 
-        exclude_conf, include_conf, overwrite_conf, var, save_model, addto, rem, save_data):
+        exclude_conf, include_conf, overwrite_conf, var, 
+        save_model, addto, rem, save_data, load_data, add_prefix):
      if not conf_path:
         conf_path = "confs"
         if colab: conf_path = "colab_confs"
@@ -222,6 +236,8 @@ def run(ctx, conf_path, base_conf, experiment,
                return
            args["config"] = False
            args["output_name"] = "" 
+           if add_prefix:
+               args["pre_prefix"] = experiment
            if addto:
                spath = os.path.join(pretPath, addto)
            else:
@@ -230,6 +246,8 @@ def run(ctx, conf_path, base_conf, experiment,
                if input("Are you sure you want to delete the experiment folder?") == "y":
                    shutil.rmtree(spath)
            Path(spath).mkdir(exist_ok=True, parents=True)
+           if load_data:
+               args["data_path"] = spath
            args["save_path"] = spath
            args["load_path"] = pretPath 
            _extra = ""
@@ -282,8 +300,15 @@ def run(ctx, conf_path, base_conf, experiment,
                    args["overwrite"] = args["method"] + "/" + rel_folder + "/" + _output_name \
                            + "/" + _extra + "/" + experiment
                    args["no_save_model"] = not save_model
-                   if save_data:
+                   if save_data: 
                        args["save_data"] = spath
+                   if args["rel_filter"] == "multi":
+                       args["data_path"] = spath
+                       args["rel_filter"] = "" 
+                       args["pre_prefix"] = experiment 
+                   else:
+                       args["data_path"] = ""
+
                    ctx.invoke(train, **args)
         else:
             confs = sorted(glob.glob(f"{_path}/*"))
@@ -566,6 +591,13 @@ def run(ctx, conf_path, base_conf, experiment,
     help=""
 )
 @click.option(
+    "--data_path",
+    "-dp",
+    default="",
+    type=str,
+    help=""
+)
+@click.option(
     "--train_path",
     "-tp",
     default="atomic/train.tsv",
@@ -582,7 +614,7 @@ def run(ctx, conf_path, base_conf, experiment,
 @click.option(
     "--test_path",
     "-tep",
-    default="/home/pouramini/atomic/test.tsv",
+    default="atomic/test.tsv",
     type=str,
     help=""
 )
@@ -862,13 +894,13 @@ def run(ctx, conf_path, base_conf, experiment,
 @click.option(
     "--sort",
     "-sk",
-    default="index",
+    default="event",
     type=str,
     help="sort key"
 )
 @click.option(
     "--do_preproc",
-    "-dp",
+    "-dop",
     is_flag=True,
     help=""
 )
@@ -911,7 +943,14 @@ def run(ctx, conf_path, base_conf, experiment,
     type=str,
     help=""
 )
-def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, sample_samples, load_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data):
+@click.option(
+    "--pre_prefix",
+    "-pre",
+    default="",
+    type=str,
+    help=""
+)
+def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, sample_samples, load_path, data_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, pre_prefix):
 
     #%% some hyper-parameters
 
@@ -972,6 +1011,12 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
         mlog.info("Config %s was created at %s", output_name + ".json", conf_path)
         return
 
+    if data_path:
+        train_path = os.path.join(data_path, "train.tsv")
+        test_path = os.path.join(data_path, "test.tsv")
+        val_path = os.path.join(data_path, "validation.tsv")
+        sample_path = os.path.join(data_path, "sample.tsv")
+        train_samples, test_samples = 0, 0
 
     if not load_path:
         load_path = os.path.join(home, "pret")
@@ -1218,7 +1263,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
             _only_blanks = only_blanks
             if "test" in split_name:
                 _method = val_method
-                _only_blanks = True
+                #_only_blanks = True
             _repeat = 1
             _break_sent = -1
             if split_name == "train" or split_name == "sample":
@@ -1309,6 +1354,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
                     "wrap": w_str + ("-" + encoder_type if wrap else ""),
                     "frozen":f_str, 
                     "prefixed":p_str,
+                    "pre_prefix":pre_prefix,
                     "steps":train_samples,
                     "epochs":epochs_num,
                     "trial":trial,
