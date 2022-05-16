@@ -402,21 +402,20 @@ def show_df(df):
             if not canceled:
                _glist = [col, "prefix"]
                sel_cols = ["exp_id", "prefix", "num_preds", "num_targets", "num_inps", "num_records", "rouge_score", "bert_score", "br_score","nr_score", "steps", "method","model", "wrap", "frozen", "prefixed"]
-               df["num_records"] = df.groupby(_glist)[['input_text']].transform('count')
-               df["num_preds"] = df.groupby(_glist)[['pred_text1']].transform('count')
-               df["num_inps"] = df.groupby(_glist)[['input_text']].transform('count')
-               df["num_targets"] = df.groupby(_glist)[['target_text']].transform('count')
-               df = (df.groupby(col).agg({"num_preds":'sum', "prefix":"first", "num_targets":"sum", "num_inps":"sum", "num_records":"first", "rouge_score":"mean","bert_score":"mean","br_score": "mean", "nr_score":"mean", "method":"first","model":"first", "wrap":"first", col:"first", "steps":"first", "frozen":"first", "prefixed":"first"})
+               num_targets = (df['prefix']+'_'+df['target_text']).groupby(df[col]).nunique()
+               num_preds = (df['prefix']+'_'+df['pred_text1']).groupby(df[col]).nunique()
+               num_inps = (df['prefix']+'_'+df['input_text']).groupby(df[col]).nunique()
+               _agg = "frist"
+               df = (df.groupby(col).agg({"prefix":"first", "id":"count","rouge_score":"mean","bert_score":"mean","br_score": "mean", "nr_score":"mean", "method":"first","model":"first", "wrap":"first", col:"first", "steps":"first", "frozen":"first", "prefixed":"first"})
                        .rename(columns={col:'exp_id', 
-                           'pred_text1':'num_preds',
-                           'target_text':'num_targets',
-                           'input_text':'num_inps',
                            'id':'num_records',
-                           })
-                 .sort_values(by = ["rouge_score"], ascending=False)
-                    )
+                           }))
                #df = df.reset_index()
                consts["filter"].append("group experiments")
+               df["num_preds"] = num_preds
+               df["num_targets"] = num_targets
+               df["num_inps"] = num_inps
+               df = df.sort_values(by = ["rouge_score"], ascending=False)
                if col != "qid":
                    df["exp_id"] = df["exp_id"].astype(str)
                    col_widths["exp_id"] = 2 + df.exp_id.str.len().max()
