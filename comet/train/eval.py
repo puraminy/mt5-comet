@@ -401,7 +401,7 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
             #    query = query.replace("<extra_id_1>", ">>" + top_hyp)
             #else:
             #    query = query.replace("<extra_id_0>", ">>" + top_hyp)
-            data["input_text"] = input_text 
+            data["input_text"] = inp
             data["query"] = query 
             if not scorers:
                 if step % 10000 == 0:
@@ -416,7 +416,7 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
                 sum_bleu[scope] = 0
                 sum_match[scope] = 0
                 counter[scope] = 0
-            mlog.debug("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
+            #mlog.debug("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
             gen_token = gen_tokens[lang]
             #Compute embeddings
             preds = [top_hyp]
@@ -464,8 +464,8 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
                 vlog.debug(_tail)
 
             vlog.info("'''''''''''''''''''''''''''''''''''''''''''''''''''''")
-            mlog.debug(f"TOP hyp:{top_hyp}")
-            mlog.debug(f"Tails: {tails}")
+            #mlog.debug(f"TOP hyp:{top_hyp}")
+            #mlog.debug(f"Tails: {tails}")
             #### BLUE score
             #tokenized_rs = []
             #for r in tails:
@@ -513,11 +513,11 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
                 exit_loop = True
                 break
             mean_rouge["all"] = "{:.4f}".format(mean_rouge_all)
-            mlog.info("Bert Score:{:.4f}--{}".format(cur_score, mean_bert[scope]))
+            #mlog.info("Bert Score:{:.4f}--{}".format(cur_score, mean_bert[scope]))
             #mlog.info("Bert Score 2:{:.4f}".format(b_score))
-            mlog.info("Rouge Score:{:.4f}--{}".format(rouge_score, mean_rouge[scope]))
+            #mlog.info("Rouge Score:{:.4f}--{}".format(rouge_score, mean_rouge[scope]))
             #mlog.info("Rouge Score 2:{:.4f}".format(r_score))
-            mlog.info("Match Score:{}--{}".format(match_score, mean_match[scope]))
+            #mlog.info("Match Score:{}--{}".format(match_score, mean_match[scope]))
             #vlog.info("BLEU Score:{:.4f}--{}".format(bleu_score, mean_bleu[scope]))
             vlog.info("======================================================")
             pbar.set_description(f"{scope:<20} :Bert:{mean_bert[scope]:<7} | {mean_bert['all']:<7} Rouge {mean_rouge[scope]:<7}|{mean_rouge['all']:<7} ")

@@ -1728,7 +1728,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
                             save_path)
         else:
             mlog.info("No save model is on!!")
-    #% vvvvvvvvvvvvvvvv
+    #% vvvv
     if loop: #not prefix:
        train_loop(epochs_num)
     else:
@@ -1759,7 +1759,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
             #test_dataset=test_dataset,
         )
         train_result = trainer.train()
-    #vvvvvvvvvvv
+    #vvv
     if test_set:
         if "@" in gen_bs:
             test_bs,_ = gen_bs.split("@")
