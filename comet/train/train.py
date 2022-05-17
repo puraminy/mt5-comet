@@ -243,8 +243,8 @@ def run(ctx, conf_path, base_conf, experiment,
            else:
                spath = os.path.join(pretPath, experiment)
            if Path(spath).exists() and rem:
-               if input("Are you sure you want to delete the experiment folder?") == "y":
-                   shutil.rmtree(spath)
+               #if input("Are you sure you want to delete the experiment folder?") == "y":
+               shutil.rmtree(spath)
            Path(spath).mkdir(exist_ok=True, parents=True)
            if load_data:
                args["data_path"] = spath
@@ -308,6 +308,7 @@ def run(ctx, conf_path, base_conf, experiment,
                        args["pre_prefix"] = experiment 
                    else:
                        args["data_path"] = ""
+                       args["pre_prefix"] = "" 
 
                    ctx.invoke(train, **args)
         else:
@@ -775,7 +776,7 @@ def run(ctx, conf_path, base_conf, experiment,
 @click.option(
     "--rel_filter",
     "-rel",
-    default="",
+    default="xIntent",
     type=str,
     help=""
 )
@@ -886,10 +887,16 @@ def run(ctx, conf_path, base_conf, experiment,
     help="Prompt id or index for templates that have multiple prompt templates"
 )
 @click.option(
+    "--use_dif_templates",
+    "-udt",
+    is_flag=True,
+    help="Wether to use different templates (repeat must be greater or equal to the number of various templates)"
+)
+@click.option(
     "--break_sent",
     "-brk",
     is_flag=True,
-    help="Break in input sentencet to input and target at different positions (based on repeat)"
+    help="Break in input sentencet to input and target at different positions (based on how many times specified by repeat)"
 )
 @click.option(
     "--sort",
@@ -950,7 +957,7 @@ def run(ctx, conf_path, base_conf, experiment,
     type=str,
     help=""
 )
-def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, sample_samples, load_path, data_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, pre_prefix):
+def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, sample_samples, load_path, data_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, pre_prefix):
 
     #%% some hyper-parameters
 
@@ -1243,9 +1250,9 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
                     _replace_blanks = True
 
             tails_per_head = int(samples_per_head)
-            if "test" in split_name:
-                tails_per_head = 0
-                _replace_blanks = False
+            #if "test" in split_name:
+            #    tails_per_head = 0
+            #    _replace_blanks = False
             df_path = split_path[split_name]
             split_df = pd.read_table(df_path)
             mlog.info("Path of dataset for %s %s", split_name, split_path[split_name])
@@ -1265,10 +1272,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
                 _method = val_method
                 #_only_blanks = True
             _repeat = 1
-            _break_sent = -1
             if split_name == "train" or split_name == "sample":
                 _repeat = int(repeat)
-                _break_sent = int(break_sent)
             # dddddddddddddd
             myds[_name] = MyDataset(split_df, split_name,
                                 _method, prompt_pos, rel_filter,
@@ -1282,7 +1287,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
                                 pred_tresh, nli_group, per_record, is_even, start, 
                                 sampling, ex_type,
                                 tails_per_head, save_ds_path[split_name], _repeat, 
-                                int(pid), _break_sent, sort, _replace_blanks, 
+                                int(pid), break_sent, sort, _replace_blanks, 
                                 None, int(ph_num),
                         )
             if save_data:

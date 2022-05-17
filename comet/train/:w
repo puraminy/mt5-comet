@@ -891,7 +891,7 @@ class MyDataset(torch.utils.data.Dataset):
             pred_tresh=0,
             nli_group="all", per_record=False, is_even=False, start=0, 
             sampling=0, ex_type="",  samples_per_head=0, 
-            save_ds_path="", repeat=1, pid=0, break_sent=False, 
+            save_ds_path="", repeat=1, pid=0, break_sent=0, 
             sort_key="event", replace_blanks = False, 
             tokenizer=None, ph_num=3, limit_lang = False, use_dif_templates=False): 
         super(MyDataset).__init__()
@@ -1156,7 +1156,7 @@ class MyDataset(torch.utils.data.Dataset):
         _q_len = len(_query.split(" "))
         sent = _query.replace(placeholder_token, __resp.strip())
         sent_split = sent.split(" ")
-        if rep > 0 and self.break_sent:
+        if rep >= self.repeat and self.break_sent > 0:
             br = 0
             if False: #rep == 1:
                 indexes = [i for i,x in enumerate(sent_split) if x == "PersonX" or x == "others" or x == "PersonY"]
@@ -1242,8 +1242,14 @@ class MyDataset(torch.utils.data.Dataset):
                     "rel":rel}
             for rr in range(self.repeat):
                 n_item = _ditem.copy()
-                n_item["rep"] = rr
+                if self.use_dif_templates:
+                    n_item["rep"] = rr
                 flat_data.append(n_item)
+            if self.break_sent > 0:
+                for rr in range(self.repeat, self.repeat + self.break_sent):
+                    n_item = _ditem.copy()
+                    n_item["rep"] = rr
+                    flat_data.append(n_item)
             kk += 1
             if show_progress:
                 pbar.update()
@@ -1368,9 +1374,16 @@ class MyDataset(torch.utils.data.Dataset):
                             "rel":rel}
                     for rr in range(self.repeat):
                         n_item = _ditem.copy()
-                        n_item["rep"] = rr
+                        if self.use_dif_templates:
+                            n_item["rep"] = rr
                         flat_data.append(n_item)
                         jj += 1
+                    if self.break_sent > 0:
+                        for rr in range(self.repeat, self.repeat + self.break_sent):
+                            n_item = _ditem.copy()
+                            n_item["rep"] = rr
+                            flat_data.append(n_item)
+                            jj += 1
                     if show_progress:
                         pbar.update()
                     kk += 1

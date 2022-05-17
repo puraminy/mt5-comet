@@ -149,7 +149,7 @@ def show_df(df):
     if not "blank" in df:
         df["blank"] = "blank"
     prev_cahr = ""
-    hotkey = ""
+    hotkey = "6"
     sel_exp = ""
     infos = []
     back_row = 0
@@ -188,9 +188,9 @@ def show_df(df):
                    sel_dict[sel_col] = row[sel_col]
                _color = TEXT_COLOR
                if not sel_col in col_widths:
-                   col_widths[sel_col] = len(content) + 2
+                   col_widths[sel_col] = len(content) + 4
                if len(content) > col_widths[sel_col]:
-                   col_widths[sel_col] = len(content) + 2
+                   col_widths[sel_col] = len(content) + 4
                _w = col_widths[sel_col] if sel_col in col_widths else width
                if sel_col in sel_cols:
                    text += "{:<{x}}".format(content, x= _w)
