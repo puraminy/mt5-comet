@@ -21,7 +21,7 @@ def getFname(name):
     if "ahmad" in home or "pouramini" in home:
         logFilename = os.path.join(home, f"logs/{name}.log")
     else:
-        logFilename = f"/content/{name}.log"
+        logFilename = f"{name}.log"
     return logFilename
 wHandler = logging.FileHandler(getFname("wrapper"), mode='w')
 wHandler.setFormatter(FORMAT)
