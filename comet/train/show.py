@@ -7,7 +7,7 @@ import click
 import numpy as np
 from glob import glob
 import six
-import os
+import os, shutil
 import re
 import seaborn as sns
 from pathlib import Path
@@ -17,6 +17,38 @@ from mylogs import *
 import json
 from comet.utils.myutils import *
 file_id = "name"
+from PIL import Image
+
+def combine_x(images):
+    widths, heights = zip(*(i.size for i in images))
+
+    total_width = sum(widths)
+    max_height = max(heights)
+
+    new_im = Image.new('RGB', (total_width, max_height))
+
+    x_offset = 0
+    for im in images:
+      new_im.paste(im, (x_offset,0))
+      x_offset += im.size[0]
+
+    return new_im
+
+def combine_y(images):
+    widths, heights = zip(*(i.size for i in images))
+
+    total_width = max(widths)
+    max_height = sum(heights)
+
+    new_im = Image.new('RGB', (total_width, max_height))
+
+    y_offset = 0
+    for im in images:
+      new_im.paste(im, (0, y_offset))
+      y_offset += im.size[1]
+
+    return new_im
+
 def load_results(path):
     with open(path, "r") as f:
         data = json.load(f)
@@ -317,13 +349,58 @@ def show_df(df):
             sel_df = sel_df.append(df.iloc[sel_row])
             mbeep()
             sel_df.to_csv(sel_path, sep="\t", index=False)
+        elif char in ["h","v"] and prev_char == "x":
+            _cols = ["method", "model", "prefix"]
+            _types = ["l1_decoder", "l1_encoder", "cossim_decoder", "cossim_encoder"]
+            canceled, col = list_values(_cols)
+            folder = "/home/ahmad/share/comp/"
+            if Path(folder).exists():
+                shutil.rmtree(folder)
+            Path(folder).mkdir(parents=True, exist_ok=True)
+            files = []
+            for _type in _types:
+                g_list = ["method", "model", "prefix"]
+                mm = main_df.groupby(g_list, as_index=False).first()
+                g_list.remove(col)
+                mlog.info("g_list: %s", g_list)
+                g_df = mm.groupby(g_list, as_index=False)
+                sel_cols = [_type, "method", "model", "prefix"]
+                #_agg = {}
+                #for _g in g_list:
+                #    _agg[_g] ="first"
+                #_agg[col] = "count"
+                #df = g_df.agg(_agg)
+                if True:
+                    for g_name, _nn in g_df:
+                        img_path = []
+                        img = []
+                        for i, row in _nn.iterrows():
+                            _parent = str(Path(row["path"]).parent)
+                            f_path = os.path.join(_parent,row[_type] + ".png")
+                            img_path.append(f_path)
+                            img.append(row[_type])
+                        images = [Image.open(x) for x in img_path]
+                        if images:
+                            if char == "h":
+                                new_im = combine_x(images)
+                            else:
+                                new_im = combine_y(images)
+                            name = _type + "_".join(g_name) + "_" + row[col]
+                            pname = os.path.join(folder, name + ".png")
+                            new_im.save(pname)
+                            files.append({"pname":pname, "name":name})
+                if files:
+                    df = pd.DataFrame(files, columns=["pname","name"])
+                    sel_cols = ["name"]
+                else:
+                    show_msg("No select")
         elif char == "x" and prev_char == "x":
             backit(df, sel_cols)
             df = sel_df
         # png files
         elif char == "l" and prev_char == "x":
-            df = main_df.groupby(["l1_decoder", "method", "model"], as_index=False).first()
-            sel_cols = ["l1_decoder", "method", "model"]
+            df = main_df.groupby(["l1_decoder", "method", "model", "prefix"], as_index=False).first()
+            sel_cols = ["l1_decoder", "method", "model", "prefix"]
         elif char == "z":
             fav_df = fav_df.append(df.iloc[sel_row])
             mbeep()
@@ -360,7 +437,7 @@ def show_df(df):
                     asc = not asc
                 sort = col
                 df = df.sort_values(by=sort, ascending=asc)
-        elif char in ["c","C"]: 
+        elif char in ["c","C"] and prev_char == "c": 
             counts = {}
             for col in df:
                counts[col] = df[col].nunique()
@@ -445,7 +522,7 @@ def show_df(df):
             sel_rows = []
             FID = "input_text"
             hotkey = "gG"
-        elif char in ["a", "p", "t", "i", "h"]:
+        elif char in ["a", "p", "t", "i", "h"] and prev_cahr != "x":
             left = 0
             backit(df, sel_cols)
 
@@ -509,7 +586,7 @@ def show_df(df):
                 if col in df:
                     del df[col]
         elif char == "o":
-            pname = df.iloc[sel_row]["l1_encoder"]
+            pname = df.iloc[sel_row]["pname"]
             if "ahmad" in home:
                 subprocess.run(["eog", pname])
         elif char in ["o","O"] and prev_char=="x":
