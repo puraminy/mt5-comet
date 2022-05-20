@@ -1317,7 +1317,7 @@ class MyDataset(torch.utils.data.Dataset):
                 self._sels = self.sel_rels.copy()
                 self.old_input = eng_inp
                 self.si = 0
-            elif self.samples_per_head > 0 and self.si > self.samples_per_head:
+            elif self.samples_per_head > 0 and self.si >= self.samples_per_head:
                 dlog.info("!!!!!!!!! samples per head limit %s", self.samples_per_head)
                 continue
             for inp in inputs:

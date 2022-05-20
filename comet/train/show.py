@@ -68,7 +68,7 @@ def find_common(df, main_df, on_col_list, s_rows, FID, char):
             df = intersect
     else:
        df = tdf
-    df["sum_fid"] = df["fid"].sum()
+       df["sum_fid"] = df["fid"].sum()
     return df
 
 def show_df(df):
@@ -228,8 +228,8 @@ def show_df(df):
                    continue
                head = sel_col 
                #textwrap.shorten(f"{i}) {sel_col}" , width=_w, placeholder=".")
-               if len(head) > col_widths[sel_col]:
-                   col_widths[sel_col] = len(head) + 2
+               if len(head) + 4 > col_widths[sel_col]:
+                   col_widths[sel_col] = len(head) + 4
                _w = col_widths[sel_col] 
                text += "{:<{x}}".format(head, x=_w) 
             mprint(text, text_win) 
@@ -282,7 +282,7 @@ def show_df(df):
             sel_row = len(df) -1
         elif ch == cur.KEY_PPAGE:
             sel_row -= ROWS - 4
-        elif char == "l":
+        elif char == "l" and prev_char == "l":
             seq = ""
         elif char in list("01234"):
             canceled, col, val = list_df_values(df, get_val=False)
@@ -311,14 +311,19 @@ def show_df(df):
             if not canceled:
                 if not col in info_cols: info_cols.append(col)
                 save_obj(info_cols, "info_cols", dfname)
-                sel_cols.remove(col)
-        elif char == "x":
+                if col in sel_cols:
+                    sel_cols.remove(col)
+        elif char == "s" and prev_char == "x":
             sel_df = sel_df.append(df.iloc[sel_row])
             mbeep()
             sel_df.to_csv(sel_path, sep="\t", index=False)
-        elif char == "X":
+        elif char == "x" and prev_char == "x":
             backit(df, sel_cols)
             df = sel_df
+        # png files
+        elif char == "l" and prev_char == "x":
+            df = main_df.groupby(["l1_decoder", "method", "model"], as_index=False).first()
+            sel_cols = ["l1_decoder", "method", "model"]
         elif char == "z":
             fav_df = fav_df.append(df.iloc[sel_row])
             mbeep()
@@ -348,7 +353,7 @@ def show_df(df):
                 consts["FID"] = FID
                 df = main_df
                 hotkey="gG"
-        elif char == "s":
+        elif char == "s" and perv_char=="s":
             canceled, col, val = list_df_values(df, get_val=False)
             if not canceled:
                 if col == sort:
@@ -440,7 +445,7 @@ def show_df(df):
             sel_rows = []
             FID = "input_text"
             hotkey = "gG"
-        elif char in ["a", "p", "t", "i"]:
+        elif char in ["a", "p", "t", "i", "h"]:
             left = 0
             backit(df, sel_cols)
 
@@ -472,59 +477,20 @@ def show_df(df):
             else:
                 df = find_common(df, filter_df, on_col_list, _rows, FID, char)
             sel_cols = on_col_list
-            for _col in df.columns:
+            _from_cols = ["pred_text1", "pred_text1_x", "pred_text1_y","query_x","query_y", "query", "method", "fid","prefix", "input_text","target_text"]
+            for _col in _from_cols:
                 if (_col.startswith("fid") or
                     _col.startswith("pred_text1") or 
-                    _col.startswith("target_text") or 
-                    _col.startswith("input_text") or 
-                    _col.startswith("method") or 
-                    _col.startswith("prefix")):
-                    if (_col.startswith("fid") or
-                        _col.startswith("pred_text1") or 
-                        _col.startswith("method")):
-                        sel_cols.append(_col)
-                    elif not _col in on_col_list and not _col in info_cols:
-                        info_cols.append(_col)
-                    g_cols.append(_col)
-                    col_widths[_col] = 20
-                    if (_col.startswith("pred_text1") or
-                        _col.startswith("target_text")):
-                        col_widths[_col] = 30
-                    if _col.startswith("fid"):
-                        col_widths[_col] = 10
+                    _col.startswith("method")):
+                    sel_cols.append(_col)
+                elif not _col in on_col_list and not _col in info_cols:
+                    info_cols.append(_col)
             if char == "a":
                 sel_cols = list(df.columns)
-            else:
-                if len(s_rows) > 1:
-                    sel_cols.extend([other_col + "_x", other_col + "_y", "method_x", "method_y", "fid_x", "fid_y" ])
-                #    info_cols = ["prefix", "target_text", "input_text", "target_text_x", "target_text_y", "pred_text1_x", "pred_text1_y"]
-                else:
-                    sel_cols.extend([other_col, "method"])
-                #    info_cols = ["prefix", "target_text", "input_text", "pred_text1"]
-
             sel_row = 0
-            if char == "h" or char == "I":
-                df = df.sort_values(by="fid", ascending=False)
-            else:
-                df = df.sort_values(by="input_text", ascending=True)
-            sel_cols = order(sel_cols, ["input_text","pred_text1","target_text", "fid"])
             sel_rows = []
             info_cols.append("sum_fid")
 
-           # _rows = []
-           # ii = 0
-           # for idx, r in df.iterrows():
-           #     if ((main_df["prefix"] == r["prefix"]) & 
-           #         (main_df["target_text"] == r["pred_text1"]) & 
-           #         (main_df["input_text"] == r["input_text"])).any():
-           #         _rows.append({"prefix":r["prefix"],
-           #                       "input_text":r["input_text"],
-           #                       "target_text":r["target_text"]})
-           #     ii += 1
-           #     if ii > 10:
-           #         break
-           # if _rows:
-           #     df = pd.DataFrame(rows, columns=["prefix","input_text","target_text"])
         elif char == "H":
             left = 0
             if sel_exp:
@@ -542,7 +508,11 @@ def show_df(df):
                 char = "SS"
                 if col in df:
                     del df[col]
-        elif char in ["o","O"]:
+        elif char == "o":
+            pname = df.iloc[sel_row]["l1_encoder"]
+            if "ahmad" in home:
+                subprocess.run(["eog", pname])
+        elif char in ["o","O"] and prev_char=="x":
             files = [Path(f).stem for f in glob(base_dir+"/*.tsv")]
             for i,f in enumerate(files):
                 if f in open_dfnames:
@@ -558,7 +528,7 @@ def show_df(df):
                     df = pd.concat([df, new_df], ignore_index=True)
                 else:
                     main_df = pd.concat([main_df, new_df], ignore_index=True)
-        elif char in ["t", "x"]:
+        elif char in ["t"]:
             cols = get_cols(df,5)
             if cols:
                 tdf = df[cols].round(2)
@@ -628,8 +598,8 @@ def show_df(df):
                if not "filter" in consts:
                    consts["filter"] = []
                consts["filter"].append("group by " + name)
-               char = "h"
-        if char == "h":
+               char = "H"
+        if char == "H":
             name = ax.get_title()
             pname = rowinput("Plot name:", name[:30])
             if pname:
@@ -1044,6 +1014,11 @@ def start(stdscr):
                 force_fid = sfid[1] == "force"
             if not "fid" in df or force_fid:
                 df["path"] = f
+                _dir = str(Path(f).parent)
+                png_files = [Path(_f).stem for _f in glob(_dir+"/*.png")]
+                for i,png in enumerate(png_files):
+                    key = "_".join(png.split("_")[:2])
+                    df[key] = png
                 if fid == "parent":
                     df["fid"] = str(ii) + "_" + "_".join(f.split("/")[5:]) 
                 elif fid == "name":

@@ -214,11 +214,24 @@ def cli():
     is_flag=True,
     help=""
 )
+@click.option(
+    "--only_var",
+    "-ov",
+    is_flag=True,
+    help=""
+)
+@click.option(
+    "--sep",
+    "-sep",
+    default="/",
+    type=str,
+    help=""
+)
 @click.pass_context
 #rrrrrrrrrrr
 def run(ctx, conf_path, base_conf, experiment, 
         exclude_conf, include_conf, overwrite_conf, var, 
-        save_model, addto, rem, save_data, load_data, add_prefix):
+        save_model, addto, rem, save_data, load_data, add_prefix, only_var, sep):
      if not conf_path:
         conf_path = "confs"
         if colab: conf_path = "colab_confs"
@@ -256,19 +269,27 @@ def run(ctx, conf_path, base_conf, experiment,
            for _item in ctx.args:
                 mlog.info("arg = %s", _item)
                 _key,_val = _item.split("=")
+                _val = _val.strip()
                 _key=_key.strip("--")
                 if not _key in exclude_list:
                     _ks = "".join([k[0] for k in _key.split("_")])
                     _extra += "_" + (_ks + "_" + _val if not str(_val)=="True" else _key)
                 mlog.info("set %s = %s", _key, _val)
+
+                if _val == "null": 
+                    args[_key]= ""
+
                 if not _val == "False":
                     if _val == "True":
                         args[_key]= True
                     else:
                         args[_key]= _val
+                else:
+                   if _key in args:
+                       del args[_key]
            # oooooooooooooo
            if not var:
-               output_name = base_conf + "/" + args["method"] + "/" + _extra
+               output_name = base_conf + sep + args["method"] + sep + _extra
                args["overwrite"] = output_name
                args["no_save_model"] = not save_model
                ctx.invoke(train, **args)
@@ -284,6 +305,7 @@ def run(ctx, conf_path, base_conf, experiment,
                ii = 0
                for comb in tot_comb:
                    _output_name = output_name
+                   __output_name = output_name
                    for var_name,var_item in comb.items():
                        if var_item == "null": var_item = ""
                        if var_item.strip() == "False": 
@@ -293,12 +315,16 @@ def run(ctx, conf_path, base_conf, experiment,
                            if var_item.strip() == "True":
                                var_item = True
                            if not var_name in exclude_list:
-                               _output_name +=  "/" + var_name + "_" + str(var_item)
+                               _output_name +=  sep + var_name + "_" + str(var_item)
+                           __output_name +=  sep + var_name + "_" + str(var_item)
                            args[var_name]=var_item
                    ii += 1
                    rel_folder = "all" if not args["rel_filter"] else args["rel_filter"]
-                   args["overwrite"] = args["method"] + "/" + rel_folder + "/" + _output_name \
-                           + "/" + _extra + "/" + experiment
+                   if only_var:
+                       args["overwrite"] = __output_name.strip(sep)
+                   else:
+                       args["overwrite"] = args["method"] + sep + rel_folder + sep + _output_name \
+                           + sep + _extra 
                    args["no_save_model"] = not save_model
                    if save_data: 
                        args["save_data"] = spath
@@ -355,7 +381,13 @@ def run(ctx, conf_path, base_conf, experiment,
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Training %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @cli.command()
-@click.argument("model_id", type=str)
+@click.option(
+    "--model_id",
+    "-mid",
+    default="t5-base",
+    type=str,
+    help=""
+)
 @click.option(
     "--experiment",
     "-exp",
@@ -742,7 +774,7 @@ def run(ctx, conf_path, base_conf, experiment,
 @click.option(
     "--samples_per_head",
     "-sph",
-    default=0,
+    default=3,
     type=int,
     help=""
 )
@@ -957,7 +989,13 @@ def run(ctx, conf_path, base_conf, experiment,
     type=str,
     help=""
 )
-def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, sample_samples, load_path, data_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, pre_prefix):
+@click.option(
+    "--skip",
+    "-skip",
+    is_flag=True,
+    help="Skip the experiment if it already exists."
+)
+def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, sample_samples, load_path, data_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, pre_prefix, skip):
 
     #%% some hyper-parameters
 
@@ -1094,6 +1132,9 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
     if overwrite:
         save_path = os.path.join(log_dir, overwrite)
         do_overwrite = True
+    if Path(save_path).exists() and skip:
+        mlog.info("Skiping.... the folder already exists!!")
+        return
     ii = 1
     while not do_overwrite and Path(save_path).exists() and not model_id=="test":
         if not no_confirm and not do_eval:
