@@ -385,6 +385,8 @@ def show_df(df):
                         images = []
                         for i, row in _nn.iterrows():
                             _parent = str(Path(row["path"]).parent)
+                            if row[_type] is None:
+                                continue
                             f_path = os.path.join(_parent,row[_type] + ".png")
                             img.append(row[_type])
                             _image = Image.open(f_path)
