@@ -329,7 +329,8 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
     l_count = 0
     test_iter = iter(test_set)
     batches = batched(list(test_iter), bs)
-    dl_iter = iter(dataloader)
+    if model is not None:
+        dl_iter = iter(dataloader)
     iid  = 0
     old_query = ""
     all_predictions = []

@@ -25,7 +25,13 @@ now = now.strftime('%Y-%m-%d-%H:%M')
     is_flag=True,
     help=""
 )
-def mycopy(fname, path, move, dest_dir):
+@click.option(
+    "--show_dirs",
+    "-d",
+    is_flag=True,
+    help=""
+)
+def mycopy(fname, path, move, dest_dir, show_dirs):
     delete_file = dest_dir == "dd"
     print_file = dest_dir == "pp"
     if glob.glob(fname):
@@ -34,31 +40,47 @@ def mycopy(fname, path, move, dest_dir):
     else:
         files = []
         for root, dirs, _files in os.walk(path):
-            for _file in _files:
-                root_file = os.path.join(root, _file)
-                if all(s in root_file for s in fname.split("+")):
-                    files.append(root_file)
+            if show_dirs:
+                for _file in dirs:
+                    root_file = os.path.join(root, _file)
+                    if all(s in root_file for s in fname.split("+")):
+                        files.append(root_file)
+            else:
+                for _file in _files:
+                    root_file = os.path.join(root, _file)
+                    if all(s in root_file for s in fname.split("+")):
+                        files.append(root_file)
     if not dest_dir: dest_dir = now
-    dest_dir = "/home/pouramini/share/" + dest_dir
-    for file in files:
+    for ii, file in enumerate(files):
         if print_file:
-            print("File: ", file)
+            if show_dirs:
+                print(ii, " cd ", file)
+            else:
+                print(ii, " vi ", file)
             continue
         if delete_file:
             os.remove(file)
             print("Removing ", file)
             continue
         print("FROM:", file)
-        rp = Path(file).relative_to(path)
-        folders = Path(rp)
-        parts = folders.parts[:-1]
-        if parts:
-            folder = os.path.join(dest_dir, "_".join(parts))
-        else:
-            folder = dest_dir
+        if not Path(dest_dir).exists():
+            rp = Path(file).relative_to(path)
+            folders = Path(rp)
+            parts = folders.parts[:-1]
+            if parts:
+                folder = os.path.join(dest_dir, "_".join(parts))
+            else:
+                folder = dest_dir
 
+            Path(folder).mkdir(parents=True, exist_ok=True)
+        else:
+            if ".." in dest_dir:
+                folder = os.path.join(str(Path(file).parent), dest_dir)
+                folder = Path(folder).resolve()
+        if folder == Path(file).parent.resolve():
+            print("Same directory")
+            continue
         print("TO:", folder)
-        Path(folder).mkdir(parents=True, exist_ok=True)
         if not move:
             shutil.copy(file, folder)
         else:
