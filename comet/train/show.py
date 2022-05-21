@@ -388,12 +388,14 @@ def show_df(df):
                             if row[_type] is None:
                                 continue
                             f_path = os.path.join(_parent,row[_type] + ".png")
+                            if not Path(f_path).is_file(): 
+                                continue
                             img.append(row[_type])
                             _image = Image.open(f_path)
                             draw = ImageDraw.Draw(_image)
                             draw.text((0, 0),str(i) +" "+ row[col] ,(20,25,255),font=font)
-                            draw.text((0, 10),str(i) +" "+ g_name[0],(20,25,255),font=font)
-                            draw.text((0, 20),str(i) +" "+ g_name[1],(20,25,255),font=font)
+                            draw.text((0, 70),str(i) +" "+ g_name[0],(20,25,255),font=font)
+                            draw.text((0, 140),str(i) +" "+ g_name[1],(20,25,255),font=font)
                             images.append(_image)
                         if images:
                             if char == "h":
@@ -1107,7 +1109,11 @@ def start(stdscr):
             if not "fid" in df or force_fid:
                 df["path"] = f
                 _dir = str(Path(f).parent)
-                png_files = [Path(_f).stem for _f in glob(_dir+"/*.png")]
+                _pp = _dir + "/*.png"
+                png_files = [Path(_f).stem for _f in glob(_pp)]
+                if not png_files:
+                    _pp = str(Path(_dir).parent) + "/hf*/*.png"
+                    png_files = [Path(_f).stem for _f in glob(_pp)]
                 for i,png in enumerate(png_files):
                     key = "_".join(png.split("_")[:2])
                     if not key in df:
