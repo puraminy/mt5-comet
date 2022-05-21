@@ -31,7 +31,13 @@ now = now.strftime('%Y-%m-%d-%H:%M')
     is_flag=True,
     help=""
 )
-def mycopy(fname, path, move, dest_dir, show_dirs):
+@click.option(
+    "--only_name",
+    "-on",
+    is_flag=True,
+    help=""
+)
+def mycopy(fname, path, move, dest_dir, show_dirs, only_name):
     delete_file = dest_dir == "dd"
     print_file = dest_dir == "pp"
     if glob.glob(fname):
@@ -54,9 +60,15 @@ def mycopy(fname, path, move, dest_dir, show_dirs):
     for ii, file in enumerate(files):
         if print_file:
             if show_dirs:
-                print(ii, " cd ", file)
+                if only_name:
+                    print(ii, " cd ", Path(file).stem)
+                else:
+                    print(ii, " cd ", file)
             else:
-                print(ii, " vi ", file)
+                if only_name:
+                    print(ii, " vi ", Path(file).stem)
+                else:
+                    print(ii, " vi ", file)
             continue
         if delete_file:
             os.remove(file)
