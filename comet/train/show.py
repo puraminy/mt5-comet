@@ -18,6 +18,8 @@ import json
 from comet.utils.myutils import *
 file_id = "name"
 from PIL import Image
+from PIL import ImageFont
+from PIL import ImageDraw
 
 def combine_x(images):
     widths, heights = zip(*(i.size for i in images))
@@ -360,6 +362,7 @@ def show_df(df):
             _types = ["l1_decoder", "l1_encoder", "cossim_decoder", "cossim_encoder"]
             canceled, col = list_values(_cols)
             folder = "/home/ahmad/share/comp/"
+            font = ImageFont.truetype("/usr/share/vlc/skins2/fonts/FreeSans.ttf", 68)
             if Path(folder).exists():
                 shutil.rmtree(folder)
             Path(folder).mkdir(parents=True, exist_ok=True)
@@ -378,14 +381,16 @@ def show_df(df):
                 #df = g_df.agg(_agg)
                 if True:
                     for g_name, _nn in g_df:
-                        img_path = []
                         img = []
+                        images = []
                         for i, row in _nn.iterrows():
                             _parent = str(Path(row["path"]).parent)
                             f_path = os.path.join(_parent,row[_type] + ".png")
-                            img_path.append(f_path)
                             img.append(row[_type])
-                        images = [Image.open(x) for x in img_path]
+                            _image = Image.open(f_path)
+                            draw = ImageDraw.Draw(_image)
+                            draw.text((0, 0), str(i) + " "+ row[col] ,(20,25,255),font=font)
+                            images.append(_image)
                         if images:
                             if char == "h":
                                 new_im = combine_x(images)
