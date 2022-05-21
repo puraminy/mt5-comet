@@ -252,9 +252,9 @@ def run(ctx, conf_path, base_conf, experiment,
            if add_prefix:
                args["pre_prefix"] = experiment
            if addto:
-               spath = os.path.join(pretPath, addto)
+               spath = os.path.join(logPath, addto)
            else:
-               spath = os.path.join(pretPath, experiment)
+               spath = os.path.join(logPath, experiment)
            if Path(spath).exists() and rem:
                #if input("Are you sure you want to delete the experiment folder?") == "y":
                shutil.rmtree(spath)
@@ -1912,7 +1912,7 @@ def exp(experiment, model_ids, keep, server, exclude, include, save_model):
     args["no_save_model"] = not save_model
     args["load_path"] = pretPath
     args["train_path"] = "atomic/train.tsv"
-    save_path = os.path.join(pretPath, experiment)
+    save_path = os.path.join(logPath, experiment)
     args["save_path"] = save_path
 
     args["cpu"] = False 
