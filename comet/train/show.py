@@ -391,7 +391,9 @@ def show_df(df):
                             img.append(row[_type])
                             _image = Image.open(f_path)
                             draw = ImageDraw.Draw(_image)
-                            draw.text((0, 0), str(i) + " "+ row[col] ,(20,25,255),font=font)
+                            draw.text((0, 0),str(i) +" "+ row[col] ,(20,25,255),font=font)
+                            draw.text((0, 10),str(i) +" "+ g_name[0],(20,25,255),font=font)
+                            draw.text((0, 20),str(i) +" "+ g_name[1],(20,25,255),font=font)
                             images.append(_image)
                         if images:
                             if char == "h":
