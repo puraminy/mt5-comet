@@ -1110,7 +1110,8 @@ def start(stdscr):
                 png_files = [Path(_f).stem for _f in glob(_dir+"/*.png")]
                 for i,png in enumerate(png_files):
                     key = "_".join(png.split("_")[:2])
-                    df[key] = png
+                    if not key in df:
+                       df[key] = png
                 if fid == "parent":
                     df["fid"] = str(ii) + "_" + "_".join(f.split("/")[5:]) 
                 elif fid == "name":
