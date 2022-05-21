@@ -135,6 +135,12 @@ def show_df(df):
 
     df['id']=df.index
     df = df.reset_index(drop=True)
+    if not "query" in df:
+        df["query"] = df["input_text"]
+
+    if not "prefixed" in df:
+        df["prefixed"] = False
+
     if "input_text" in df:
         df['input_text'] = df['input_text'].str.replace('##','')
         df['input_text'] = df['input_text'].str.split('>>').str[0]
