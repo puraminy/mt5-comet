@@ -517,6 +517,7 @@ def show_df(df):
         elif char in ["G"]:
             backit(df, sel_cols)
             col = FID
+            left = 0
             _glist = [col, "prefix"]
             sel_cols = ["prefix", "method", "model", "learning_rate", "num_preds","rouge_score", "steps", "bert_score", "br_score","nr_score",  "num_targets", "num_inps", "num_records", "wrap", "frozen", "prefixed", "exp_id"]
             num_targets = (df['prefix']+'_'+df['target_text']).groupby(df[col]).nunique()
@@ -585,8 +586,8 @@ def show_df(df):
                 df = df.sort_values(by="int", ascending=False)
             else:
                 df = find_common(df, filter_df, on_col_list, _rows, FID, char)
-            if "pred_text1_x" in df and char == "i":
-                df = df[df['pred_text1_x'] != df['pred_text1_y']]
+            if "pred_text1_x" in df:
+                df = df[df['pred_text1_x'].str.strip() != df['pred_text1_y'].str.strip()]
 
             sel_cols = on_col_list
             _from_cols = ["pred_text1", "pred_text1_x", "pred_text1_y","query_x","query_y", "query", "method", "fid","prefix", "input_text","target_text"]
@@ -966,6 +967,7 @@ def show_df(df):
                 df = back.pop()
                 sel_cols = sels.pop() 
                 sel_row = back_rows.pop()
+                left = 0
             else:
                 mbeep()
             if consts["filter"]:
