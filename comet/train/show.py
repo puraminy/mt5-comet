@@ -139,6 +139,8 @@ def show_df(df):
     df = df.reset_index(drop=True)
     if not "query" in df:
         df["query"] = df["input_text"]
+    if not "learning_rate" in df:
+        df["learning_rate"] = 1
 
     if not "prefixed" in df:
         df["prefixed"] = False
