@@ -557,11 +557,13 @@ def show_df(df):
             hotkey = "gG"
         elif char in ["a", "p", "t", "i", "h"] and prev_cahr != "x":
             left = 0
-            backit(df, sel_cols)
-
             s_rows = sel_rows
             if not sel_rows:
                 s_rows = [sel_row]
+            sel_rows = sorted(sel_rows)
+            if sel_rows:
+                sel_row = sel_rows[-1]
+            backit(df, sel_cols)
             on_col_list = ["pred_text1"]
             other_col = "target_text"
             if char =="i": 
@@ -654,6 +656,7 @@ def show_df(df):
                     Path(folder).mkdir(exist_ok=True, parents=True)
                     pname = os.path.join(folder, name + ".png")
                     new_im.save(pname)
+            sel_rows = []
             if "ahmad" in home:
                 subprocess.run(["eog", pname])
         elif char in ["o","O"] and prev_char=="x":
