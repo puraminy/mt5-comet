@@ -439,6 +439,14 @@ def show_df(df):
                     save_obj(sel_cols, "sel_cols", dfname)
         elif char in "56789" and prev_char == "\\":
             cmd = "top@" + str(int(char)/10)
+        elif char in ["A"]: 
+            arr = ["prefix","fid","query","input_text","method", "model"]
+            canceled, col, _ = list_values(arr)
+            if not canceled:
+                FID = col 
+                consts["FID"] = FID
+                df = main_df
+                hotkey="gG"
         elif char in "56789" and prev_char != "\\":
             ii = int(char) - 5
             arr = ["prefix","fid","query","input_text","method"]
@@ -492,34 +500,30 @@ def show_df(df):
             consts["exp"] = exp
             path = main_df.loc[main_df["fid"] == exp, "path"][0]
             consts["path"] = path
-        elif char in ["G", "A"]:
+        elif char in ["G"]:
             backit(df, sel_cols)
-            if char ==  "A":
-                canceled, col, _ = list_df_values(df, get_val=False)
-            elif char == "G":
-                canceled, col = False, FID
-            if not canceled:
-               _glist = [col, "prefix"]
-               sel_cols = ["exp_id", "prefix", "num_preds", "num_targets", "num_inps", "num_records", "rouge_score", "bert_score", "br_score","nr_score", "steps", "method","model", "wrap", "frozen", "prefixed"]
-               num_targets = (df['prefix']+'_'+df['target_text']).groupby(df[col]).nunique()
-               num_preds = (df['prefix']+'_'+df['pred_text1']).groupby(df[col]).nunique()
-               num_inps = (df['prefix']+'_'+df['input_text']).groupby(df[col]).nunique()
-               _agg = "frist"
-               df = (df.groupby(col).agg({"prefix":"first", "id":"count","rouge_score":"mean","bert_score":"mean","br_score": "mean", "nr_score":"mean", "method":"first","model":"first", "wrap":"first", col:"first", "steps":"first", "frozen":"first", "prefixed":"first"})
-                       .rename(columns={col:'exp_id', 
-                           'id':'num_records',
-                           }))
-               #df = df.reset_index()
-               consts["filter"].append("group experiments")
-               df["num_preds"] = num_preds
-               df["num_targets"] = num_targets
-               df["num_inps"] = num_inps
-               df = df.sort_values(by = ["rouge_score"], ascending=False)
-               if col != "qid":
-                   df["exp_id"] = df["exp_id"].astype(str)
-                   col_widths["exp_id"] = 2 + df.exp_id.str.len().max()
-               else:
-                   col_widths["exp_id"] = 12 
+            col = FID
+            _glist = [col, "prefix"]
+            sel_cols = ["exp_id", "prefix", "num_preds", "num_targets", "num_inps", "num_records", "rouge_score", "bert_score", "br_score","nr_score", "steps", "method","model", "wrap", "frozen", "prefixed"]
+            num_targets = (df['prefix']+'_'+df['target_text']).groupby(df[col]).nunique()
+            num_preds = (df['prefix']+'_'+df['pred_text1']).groupby(df[col]).nunique()
+            num_inps = (df['prefix']+'_'+df['input_text']).groupby(df[col]).nunique()
+            _agg = "frist"
+            df = (df.groupby(col).agg({"prefix":"first", "id":"count","rouge_score":"mean","bert_score":"mean","br_score": "mean", "nr_score":"mean", "method":"first","model":"first", "wrap":"first", col:"first", "steps":"first", "frozen":"first", "prefixed":"first"})
+                   .rename(columns={col:'exp_id', 
+                       'id':'num_records',
+                       }))
+            #df = df.reset_index()
+            consts["filter"].append("group experiments")
+            df["num_preds"] = num_preds
+            df["num_targets"] = num_targets
+            df["num_inps"] = num_inps
+            df = df.sort_values(by = ["rouge_score"], ascending=False)
+            if col != "qid":
+               df["exp_id"] = df["exp_id"].astype(str)
+               col_widths["exp_id"] = 2 + df.exp_id.str.len().max()
+            else:
+               col_widths["exp_id"] = 12 
         elif char == "n":
             hotkey = "bNh"
         elif char == "u":
