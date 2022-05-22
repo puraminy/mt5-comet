@@ -386,10 +386,9 @@ def show_df(df):
                         img = []
                         images = []
                         for i, row in _nn.iterrows():
-                            _parent = str(Path(row["path"]).parent)
                             if row[_type] is None:
                                 continue
-                            f_path = os.path.join(_parent,row[_type] + ".png")
+                            f_path = row[_type] 
                             if not Path(f_path).is_file(): 
                                 continue
                             img.append(row[_type])
@@ -1122,14 +1121,12 @@ def start(stdscr):
                 df["path"] = f
                 _dir = str(Path(f).parent)
                 _pp = _dir + "/*.png"
-                png_files = [Path(_f).stem for _f in glob(_pp)]
+                png_files = glob(_pp)
                 if not png_files:
                     _pp = str(Path(_dir).parent) + "/hf*/*.png"
-                    png_files = [Path(_f).stem for _f in glob(_pp)]
-                    if png_files:
-                        assert False, _pp
+                    png_files = glob(_pp)
                 for i,png in enumerate(png_files):
-                    key = "_".join(png.split("_")[:2])
+                    key = Path(png).stem
                     if not key in df:
                        df[key] = png
                 if fid == "parent":
