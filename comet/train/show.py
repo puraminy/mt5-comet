@@ -186,6 +186,8 @@ def show_df(df):
     seq = ""
     search = ""
     open_dfnames = [dfname]
+    #if not "learning_rate" in df:
+    #    df[['fid_no_lr', 'learning_rate']] = df['fid'].str.split('_lr_', 1, expand=True)
     if not "blank" in df:
         df["blank"] = "blank"
     prev_cahr = ""
@@ -440,12 +442,12 @@ def show_df(df):
         elif char in "56789" and prev_char == "\\":
             cmd = "top@" + str(int(char)/10)
         elif char in ["A"]: 
-            arr = ["prefix","fid","query","input_text","method", "model"]
-            canceled, col, _ = list_values(arr)
+            arr = ["prefix","learning_rate","fid","input_text","method", "model"]
+            canceled, col = list_values(arr)
             if not canceled:
                 FID = col 
                 consts["FID"] = FID
-                df = main_df
+                df = filter_df
                 hotkey="gG"
         elif char in "56789" and prev_char != "\\":
             ii = int(char) - 5
@@ -453,7 +455,7 @@ def show_df(df):
             if ii < len(arr):
                 FID = arr[ii] 
                 consts["FID"] = FID
-                df = main_df
+                df = filter_df
                 hotkey="gG"
         elif char == "s" and perv_char=="s":
             canceled, col, val = list_df_values(df, get_val=False)
@@ -653,27 +655,29 @@ def show_df(df):
                 y = cols[1]
                 #ax = df.plot.scatter(ax=ax, x=x, y=y)
                 ax = sns.regplot(df[x],df[y])
-
         elif char in ["f", "F"]:
             backit(df, sel_cols)
-            canceled, col, val = list_df_values(df, get_val=True)
+            canceled, col, val = list_df_values(filter_df, get_val=True)
             if not canceled:
-               if char == "F":
-                    cond = get_cond(df, col, num=15)
+               if char == "F" and prev_char == "x":
+                    cond = get_cond(filter_df, col, num=15)
                else:
                     if not canceled:
                         if type(val) == str:
-                            cond = f"df['{col}'] == '{val}'"
+                            cond = f"filter_df['{col}'] == '{val}'"
                         else:
-                            cond = f"df['{col}'] == {val}"
+                            cond = f"filter_df['{col}'] == {val}"
                if cond:
                    mlog.info("cond %s, ", cond)
-                   df = df[eval(cond)]
+                   filter_df = filter_df[eval(cond)]
+                   df = filter_df
                    df = df.reset_index()
                    if not "filter" in consts:
                         consts["filter"] = []
                    consts["filter"].append(cond)
                    sel_row = 0
+                   if char == "F":
+                       hotkey = "gG"
         if char in ["y","Y"]:
             #yyyyyyyy
            cols = get_cols(df, 2)
@@ -908,7 +912,11 @@ def show_df(df):
                 save_df.to_csv(os.path.join(base_dir, dfname+".tsv"), sep="\t", index=False)
 
                 save_obj(dfname, "dfname", dfname)
-        if char == "r":
+        if char == "r" and prev_char != "x":
+            filter_df = main_df
+            df = filter_df
+            hotkey = "gG"
+        if char == "r" and prev_char == "x":
             df = main_df
             sel_cols = list(df.columns)
             save_obj(sel_cols,"sel_cols",dfname)

@@ -1404,6 +1404,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
                     "steps":train_samples,
                     "epochs":epochs_num,
                     "trial":trial,
+                    "learning_rate":learning_rate,
                     "date":extra}
     exp_info["eval"] = do_eval
     if do_eval or (not wrap and frozen and modules_to_freeze is model):

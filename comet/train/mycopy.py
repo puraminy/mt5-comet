@@ -71,7 +71,11 @@ def mycopy(fname, path, move, dest_dir, show_dirs, only_name):
                     print(ii, " vi ", file)
             continue
         if delete_file:
-            os.remove(file)
+            if show_dirs:
+                if Path(file).exists():
+                    shutil.rmtree(file)
+            else:
+                os.remove(file)
             print("Removing ", file)
             continue
         print("FROM:", file)
