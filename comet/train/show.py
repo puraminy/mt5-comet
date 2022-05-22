@@ -183,6 +183,7 @@ def show_df(df):
     #wwwwwwwwww
     colors = ['blue','orange','green', 'red', 'purple', 'brown', 'pink','gray','olive','cyan']
     ax = None
+    font = ImageFont.truetype("/usr/share/vlc/skins2/fonts/FreeSans.ttf", 68)
     seq = ""
     search = ""
     open_dfnames = [dfname]
@@ -194,7 +195,7 @@ def show_df(df):
     hotkey = "6"
     sel_exp = ""
     infos = []
-    back_row = 0
+    back_rows = []
     sel_rows = []
     cmd = ""
     prev_cmd = ""
@@ -252,10 +253,11 @@ def show_df(df):
     def backit(df, sel_cols):
         back.append(df)
         sels.append(sel_cols)
-        back_row = sel_row
+        back_rows.append(sel_row)
     for _col in ["input_text","pred_text1","target_text"]:
         df[_col] = df[_col].astype(str)
 
+    adjust = True
     while ch != ord("q"):
         text_win.erase()
         left = min(left, max_col  - width)
@@ -263,7 +265,8 @@ def show_df(df):
         sel_row = min(sel_row, len(df) - 1)
         sel_row = max(sel_row, 0)
         if not hotkey:
-            _, col_widths = row_print(df, sel_row, col_widths={})
+            if adjust:
+                _, col_widths = row_print(df, sel_row, col_widths={})
             text = "{:<5}".format(sel_row)
             for i, sel_col in enumerate(sel_cols):
                if not sel_col in df:
@@ -306,14 +309,19 @@ def show_df(df):
         seq += char
         vals = []
         get_cmd = False
+        adjust = True
         if ch == LEFT:
             left -= width
+            adjust = False
         if ch == RIGHT:
             left += width
+            adjust = False
         if ch == DOWN or char == "N":
             sel_row += 1
+            adjust = False
         elif ch == UP or char == "B":
             sel_row -= 1
+            adjust = False
         elif ch == cur.KEY_NPAGE:
             sel_row += ROWS - 4
         elif ch == cur.KEY_HOME:
@@ -364,7 +372,6 @@ def show_df(df):
             _types = ["l1_decoder", "l1_encoder", "cossim_decoder", "cossim_encoder"]
             canceled, col = list_values(_cols)
             folder = "/home/ahmad/share/comp/"
-            font = ImageFont.truetype("/usr/share/vlc/skins2/fonts/FreeSans.ttf", 68)
             if Path(folder).exists():
                 shutil.rmtree(folder)
             Path(folder).mkdir(parents=True, exist_ok=True)
@@ -500,6 +507,7 @@ def show_df(df):
                 sel_rows.remove(sel_row)
             else:
                 sel_rows.append(sel_row)
+            adjust = False
         elif char == "?": 
             exp=df.iloc[sel_row]["exp_id"]
             sel_exp = exp
@@ -577,6 +585,9 @@ def show_df(df):
                 df = df.sort_values(by="int", ascending=False)
             else:
                 df = find_common(df, filter_df, on_col_list, _rows, FID, char)
+            if "pred_text1_x" in df and char == "i":
+                df = df[df['pred_text1_x'] != df['pred_text1_y']]
+
             sel_cols = on_col_list
             _from_cols = ["pred_text1", "pred_text1_x", "pred_text1_y","query_x","query_y", "query", "method", "fid","prefix", "input_text","target_text"]
             for _col in _from_cols:
@@ -614,6 +625,7 @@ def show_df(df):
                 pname = df.iloc[sel_row]["pname"]
             elif "l1_encoder" in df:
                 if not sel_rows: sel_rows = [sel_row]
+                sel_rows = sorted(sel_rows)
                 pnames = []
                 for s_row in sel_rows:
                     pname1 = df.iloc[s_row]["l1_encoder"]
@@ -626,6 +638,9 @@ def show_df(df):
                     folder = os.path.join(base_dir, "images")
                     Path(folder).mkdir(exist_ok=True, parents=True)
                     pname = os.path.join(folder, name + ".png")
+                    draw = ImageDraw.Draw(new_im)
+                    draw.text((0, 0), str(s_row) + df.iloc[s_row]["method"] +  
+                                     " " + df.iloc[s_row]["model"] ,(20,25,255),font=font)
                     new_im.save(pname)
                     pnames.append(pname)
                 if len(pnames) == 1:
@@ -808,12 +823,8 @@ def show_df(df):
             sel_row = 0
             filter_df = df
         elif char == "w":
-            canceled, col, val = list_df_values(df, get_val=False)
-            if not canceled:
-                cmd = rowinput(":width=", str(col_widths[col]))
-                if cmd.isnumeric():
-                    col_widths[col] = int(cmd)
-                    save_obj(col_widths, "widths", "")
+            sel_rows = []
+            adjust = True
         elif char == "/":
             old_search = search
             search = rowinput("/", search)
@@ -954,7 +965,7 @@ def show_df(df):
             if back:
                 df = back.pop()
                 sel_cols = sels.pop() 
-                sel_row = back_row
+                sel_row = back_rows.pop()
             else:
                 mbeep()
             if consts["filter"]:
