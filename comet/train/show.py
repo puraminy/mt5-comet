@@ -176,7 +176,7 @@ def show_df(df):
         #df["num_inps"] = df.groupby(_glist)[['input_text']].transform('nunique')
         #df["num_records"] = df.groupby(_glist)[['input_text']].transform('count')
         br_col = df.loc[: , "bert_score":"rouge_score"]
-        df['br_score'] = br_col.mean(axis=1)
+        #df['br_score'] = br_col.mean(axis=1)
         df['nr_score'] = df['rouge_score']
         df['nr_score'] = np.where((df['bert_score'] > 0.4) & (df['nr_score'] < 0.1), df['bert_score'], df['rouge_score'])
 
@@ -382,6 +382,8 @@ def show_df(df):
                 #_agg[col] = "count"
                 #df = g_df.agg(_agg)
                 if True:
+                    gg = 1
+                    total = len(g_df)
                     for g_name, _nn in g_df:
                         img = []
                         images = []
@@ -397,7 +399,10 @@ def show_df(df):
                             draw.text((0, 0),str(i) +" "+ row[col] ,(20,25,255),font=font)
                             draw.text((0, 70),str(i) +" "+ g_name[0],(20,25,255),font=font)
                             draw.text((0, 140),str(i) +" "+ g_name[1],(20,25,255),font=font)
+                            draw.text((250, 0),str(gg) + " of " + str(total),
+                                    (20,25,255),font=font)
                             images.append(_image)
+                        gg += 1
                         if images:
                             if char == "h":
                                 new_im = combine_x(images)
@@ -505,26 +510,23 @@ def show_df(df):
             backit(df, sel_cols)
             col = FID
             _glist = [col, "prefix"]
-            sel_cols = ["exp_id", "prefix", "num_preds", "num_targets", "num_inps", "num_records", "rouge_score", "bert_score", "br_score","nr_score", "steps", "method","model", "wrap", "frozen", "prefixed"]
+            sel_cols = ["prefix", "method", "model", "learning_rate", "num_preds","rouge_score", "steps", "bert_score", "br_score","nr_score",  "num_targets", "num_inps", "num_records", "wrap", "frozen", "prefixed", "exp_id"]
             num_targets = (df['prefix']+'_'+df['target_text']).groupby(df[col]).nunique()
             num_preds = (df['prefix']+'_'+df['pred_text1']).groupby(df[col]).nunique()
             num_inps = (df['prefix']+'_'+df['input_text']).groupby(df[col]).nunique()
             _agg = "frist"
-            df = (df.groupby(col).agg({"prefix":"first", "id":"count","rouge_score":"mean","bert_score":"mean","br_score": "mean", "nr_score":"mean", "method":"first","model":"first", "wrap":"first", col:"first", "steps":"first", "frozen":"first", "prefixed":"first"})
+            df = (df.groupby(col).agg({"prefix":"first", "learning_rate":"first", "id":"count","rouge_score":"mean","bert_score":"mean", "nr_score":"mean", "method":"first","model":"first", "wrap":"first", col:"first", "steps":"first", 
+                "l1_decoder":"first", "l1_encoder":"first",
+                "cossim_decoder":"first", "cossim_encoder":"first",
+                "frozen":"first", "prefixed":"first"})
                    .rename(columns={col:'exp_id', 
                        'id':'num_records',
                        }))
             #df = df.reset_index()
-            consts["filter"].append("group experiments")
             df["num_preds"] = num_preds
             df["num_targets"] = num_targets
             df["num_inps"] = num_inps
             df = df.sort_values(by = ["rouge_score"], ascending=False)
-            if col != "qid":
-               df["exp_id"] = df["exp_id"].astype(str)
-               col_widths["exp_id"] = 2 + df.exp_id.str.len().max()
-            else:
-               col_widths["exp_id"] = 12 
         elif char == "n":
             hotkey = "bNh"
         elif char == "u":
@@ -608,7 +610,34 @@ def show_df(df):
                 if col in df:
                     del df[col]
         elif char == "o":
-            pname = df.iloc[sel_row]["pname"]
+            if "pname" in df:
+                pname = df.iloc[sel_row]["pname"]
+            elif "l1_encoder" in df:
+                if not sel_rows: sel_rows = [sel_row]
+                pnames = []
+                for s_row in sel_rows:
+                    pname1 = df.iloc[s_row]["l1_encoder"]
+                    pname2 = df.iloc[s_row]["l1_decoder"]
+                    pname3 = df.iloc[s_row]["cossim_encoder"]
+                    pname4 = df.iloc[s_row]["cossim_decoder"]
+                    images = [Image.open(_f) for _f in [pname1, pname2,pname3, pname4]]
+                    new_im = combine_y(images)
+                    name = "temp_" + str(s_row) 
+                    folder = os.path.join(base_dir, "images")
+                    Path(folder).mkdir(exist_ok=True, parents=True)
+                    pname = os.path.join(folder, name + ".png")
+                    new_im.save(pname)
+                    pnames.append(pname)
+                if len(pnames) == 1:
+                    pname = pnames[0]
+                else:
+                    images = [Image.open(_f) for _f in pnames]
+                    new_im = combine_x(images)
+                    name = "temp" 
+                    folder = os.path.join(base_dir, "images")
+                    Path(folder).mkdir(exist_ok=True, parents=True)
+                    pname = os.path.join(folder, name + ".png")
+                    new_im.save(pname)
             if "ahmad" in home:
                 subprocess.run(["eog", pname])
         elif char in ["o","O"] and prev_char=="x":
