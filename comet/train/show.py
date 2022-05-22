@@ -137,6 +137,12 @@ def show_df(df):
 
     df['id']=df.index
     df = df.reset_index(drop=True)
+    if not "l1_decoder" in df:
+        df["l1_decoder"] ="" 
+        df["l1_encoder"] ="" 
+        df["cossim_decoder"] ="" 
+        df["cossim_encoder"] ="" 
+
     if not "query" in df:
         df["query"] = df["input_text"]
     if not "learning_rate" in df:
