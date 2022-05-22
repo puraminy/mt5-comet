@@ -1126,6 +1126,8 @@ def start(stdscr):
                 if not png_files:
                     _pp = str(Path(_dir).parent) + "/hf*/*.png"
                     png_files = [Path(_f).stem for _f in glob(_pp)]
+                    if png_files:
+                        assert False, _pp
                 for i,png in enumerate(png_files):
                     key = "_".join(png.split("_")[:2])
                     if not key in df:
