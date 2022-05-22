@@ -1140,7 +1140,10 @@ class MyDataset(torch.utils.data.Dataset):
                 _rep = len(qtemp) - 1
             qtemp = qtemp[_rep] 
         else:
-            qtemp = qtemp[self.pid] 
+            if self.pid < len(qtemp):
+                qtemp = qtemp[self.pid] 
+            else:
+                qtemp = qtemp[-1] 
         plen = relation_prompt_lengths[rel][0]
         mask = random.randint(0, plen-1)
         _qtemp = fill_consts(qtemp, ex_qtemp, context, rel, d, context_df, mask=mask,method = mt)

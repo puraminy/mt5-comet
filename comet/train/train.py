@@ -848,7 +848,7 @@ def run(ctx, conf_path, base_conf, experiment,
 @click.option(
     "--scorers",
     "-nos",
-    default="rouge-bert",
+    default="rouge",
     type=str,
     help=""
 )
@@ -1400,6 +1400,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
                     "wrap": w_str + ("-" + encoder_type if wrap else ""),
                     "frozen":f_str, 
                     "prefixed":p_str,
+                    "pid":pid,
                     "pre_prefix":pre_prefix,
                     "steps":train_samples,
                     "epochs":epochs_num,
