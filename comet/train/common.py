@@ -637,7 +637,7 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            qtemp = "{event} {rel_natural_fa} {ph}" 
            anstemp = "{ph} {resp} {end}"
        elif method == "unsup-wrap-nat":
-           qtemp = "{rel_i} {rel_natural}" 
+           qtemp = ["{rel_i} {rel_natural}","{rel_i} {rel_natural2}"] 
            anstemp = "{ph} {resp} {end}"
        elif method == "unsup-wrap-nat-mid":
            qtemp = "{event} {rel_i} {rel_natural} {rel_i} {ph}" 
@@ -650,6 +650,9 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            anstemp = "{resp} {end}"
        elif method == "sup-wrap":
            qtemp = "{rel_i_start} {event} {rel_i_end} {gen}"
+           anstemp = "{resp} {end}"
+       elif method == "sup-wrap-nat":
+           qtemp = ["{rel_i} {rel_natural}","{rel_i} {rel_natural2}"] 
            anstemp = "{resp} {end}"
        elif method == "sup-no-gen":
            qtemp = "{event}"
@@ -764,6 +767,9 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            anstemp = "{ph} {resp} {end}"
        elif method == "unsup-wrap":
            qtemp = "{rel_i_start} {event} {rel_i_end} {ph}"
+           anstemp = "{ph} {resp} {end}"
+       elif method == "unsup-wrap-start":
+           qtemp = "{rel_i} {event} {ph}"
            anstemp = "{ph} {resp} {end}"
        elif method == "sup-tokens" or method  == "sup-tokens-wrap":
            qtemp = "{event} {tokens}"
