@@ -187,7 +187,7 @@ def main(const, pattern, path,folder, force):
                     files.append(os.path.join(root, _file))
         #print("files: ",files)
     names = files
-    Path(f"/home/pouramini/heatmaps/{folder}/").mkdir(parents=True, exist_ok=True)
+    #Path(f"/home/pouramini/heatmaps/{folder}/").mkdir(parents=True, exist_ok=True)
     for j, name in enumerate(names):
         fname = Path(name).stem
         pname = name.replace("htsv","png")
