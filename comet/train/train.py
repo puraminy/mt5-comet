@@ -1416,6 +1416,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
                     "steps":train_samples,
                     "epochs":epochs_num,
                     "plen":prompt_length,
+                    "opt_type":opt_type,
                     "trial":trial,
                     "learning_rate":learning_rate,
                     "date":extra}

@@ -531,13 +531,13 @@ def show_df(df):
             col = FID
             left = 0
             _glist = [col, "prefix"]
-            sel_cols = ["method", "model", "n_preds","rouge_score", "steps", "pid", "plen", "prefix", "bert_score", "br_score","nr_score", "learning_rate",  "num_targets", "num_inps", "num_records", "wrap", "frozen", "prefixed", "exp_id"]
+            sel_cols = ["method", "model", "n_preds","rouge_score", "steps", "opt_type", "pid", "plen", "prefix", "bert_score", "br_score","nr_score", "learning_rate",  "num_targets", "num_inps", "num_records", "wrap", "frozen", "prefixed", "exp_id"]
 
             num_targets = (df['prefix']+'_'+df['target_text']).groupby(df[col]).nunique()
             n_preds = (df['prefix']+'_'+df['pred_text1']).groupby(df[col]).nunique()
             num_inps = (df['prefix']+'_'+df['input_text']).groupby(df[col]).nunique()
             _agg = "frist"
-            df = (df.groupby(col).agg({"prefix":"first", "learning_rate":"first", "id":"count","rouge_score":"mean", "plen":"first", "pid":"first", "bert_score":"mean", "nr_score":"mean", "method":"first","model":"first", "wrap":"first", col:"first", "steps":"first", 
+            df = (df.groupby(col).agg({"prefix":"first", "learning_rate":"first", "opt_type"="first", "id":"count","rouge_score":"mean", "plen":"first", "pid":"first", "bert_score":"mean", "nr_score":"mean", "method":"first","model":"first", "wrap":"first", col:"first", "steps":"first", 
                 "l1_decoder":"first", "l1_encoder":"first",
                 "cossim_decoder":"first", "cossim_encoder":"first",
                 "frozen":"first", "prefixed":"first"})
