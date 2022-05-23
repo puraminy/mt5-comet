@@ -199,6 +199,8 @@ def show_df(df):
     open_dfnames = [dfname]
     #if not "learning_rate" in df:
     #    df[['fid_no_lr', 'learning_rate']] = df['fid'].str.split('_lr_', 1, expand=True)
+    if not "plen" in df:
+        df["plen"] = 8
     if not "blank" in df:
         df["blank"] = "blank"
     prev_cahr = ""
@@ -463,7 +465,7 @@ def show_df(df):
         elif char in "56789" and prev_char == "\\":
             cmd = "top@" + str(int(char)/10)
         elif char in ["A"]: 
-            arr = ["prefix","learning_rate","fid","input_text","method", "model"]
+            arr = sel_cols 
             canceled, col = list_values(arr)
             if not canceled:
                 FID = col 
