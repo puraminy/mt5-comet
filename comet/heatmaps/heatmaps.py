@@ -240,4 +240,5 @@ def main(const, pattern, path,folder, force):
 
 
 if __name__ == "__main__":
+    print("Comet version")
     main()
