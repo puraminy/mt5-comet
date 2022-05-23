@@ -287,9 +287,10 @@ def show_df(df):
                    continue
                head = sel_col 
                head = textwrap.shorten(f"{i} {head}" , width=15, placeholder=".")
-               if len(head) + 5 > col_widths[sel_col]:
+               _w = 40
+               if sel_col in col_widths and len(head) + 5 > col_widths[sel_col]:
                    col_widths[sel_col] = len(head) + 5
-               _w = col_widths[sel_col] 
+                   _w = col_widths[sel_col] 
                text += "{:<{x}}".format(head, x=_w) 
             mprint(text, text_win) 
             #fffff
