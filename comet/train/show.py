@@ -344,7 +344,7 @@ def show_df(df):
             sel_row -= ROWS - 4
         elif char == "l" and prev_char == "l":
             seq = ""
-        elif char in list("01234"):
+        elif char in "01234" and prev_char == "#":
             canceled, col, val = list_df_values(df, get_val=False)
             if not canceled:
                 sel_cols = order(sel_cols, [col],int(char))
