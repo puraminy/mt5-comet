@@ -239,7 +239,7 @@ def run(ctx, conf_path, base_conf, experiment,
         mlog.info("Reading from conf %s", conf_path)
         _path = f"{conf_path}/{experiment}"
         if not Path(_path).exists():
-           conf = f"base_confs/{base_conf}.json" # default conf
+           conf = os.path.join(confPath, base_conf + ".json") # default conf
            mlog.info("NEW experiment! Reading from conf %s", conf)
            if Path(conf).exists():
                with open(conf, 'r') as f:
@@ -332,9 +332,11 @@ def run(ctx, conf_path, base_conf, experiment,
                        args["data_path"] = spath
                        args["rel_filter"] = "" 
                        args["pre_prefix"] = experiment 
+                       args["use_all_data"] = True
                    else:
                        args["data_path"] = ""
                        args["pre_prefix"] = "" 
+                       args["use_all_data"] = False
 
                    ctx.invoke(train, **args)
         else:
@@ -995,7 +997,13 @@ def run(ctx, conf_path, base_conf, experiment,
     is_flag=True,
     help="Skip the experiment if it already exists."
 )
-def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, sample_samples, load_path, data_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, pre_prefix, skip):
+@click.option(
+    "--use_all_data",
+    "-uad",
+    is_flag=True,
+    help=""
+)
+def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, sample_samples, load_path, data_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, pre_prefix, skip, use_all_data):
 
     #%% some hyper-parameters
 
@@ -1060,8 +1068,10 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
     if data_path:
         train_path = os.path.join(data_path, "train.tsv")
         test_path = os.path.join(data_path, "test.tsv")
-        val_path = os.path.join(data_path, "validation.tsv")
+        val_path = os.path.join(data_path, "val.tsv")
         sample_path = os.path.join(data_path, "sample.tsv")
+
+    if use_all_data:
         train_samples, test_samples = 0, 0
 
     if not load_path:
