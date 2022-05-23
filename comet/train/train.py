@@ -1415,6 +1415,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
                     "pre_prefix":pre_prefix,
                     "steps":train_samples,
                     "epochs":epochs_num,
+                    "plen":prompt_length,
                     "trial":trial,
                     "learning_rate":learning_rate,
                     "date":extra}
