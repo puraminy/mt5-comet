@@ -203,6 +203,8 @@ def show_df(df):
         df["plen"] = 8
     if not "blank" in df:
         df["blank"] = "blank"
+    if not "opt_type" in df:
+        df["opt_type"] = "na"
     prev_cahr = ""
     hotkey = "6"
     sel_exp = ""
@@ -537,7 +539,7 @@ def show_df(df):
             n_preds = (df['prefix']+'_'+df['pred_text1']).groupby(df[col]).nunique()
             num_inps = (df['prefix']+'_'+df['input_text']).groupby(df[col]).nunique()
             _agg = "frist"
-            df = (df.groupby(col).agg({"prefix":"first", "learning_rate":"first", "opt_type"="first", "id":"count","rouge_score":"mean", "plen":"first", "pid":"first", "bert_score":"mean", "nr_score":"mean", "method":"first","model":"first", "wrap":"first", col:"first", "steps":"first", 
+            df = (df.groupby(col).agg({"prefix":"first", "learning_rate":"first", "opt_type":"first", "id":"count","rouge_score":"mean", "plen":"first", "pid":"first", "bert_score":"mean", "nr_score":"mean", "method":"first","model":"first", "wrap":"first", col:"first", "steps":"first", 
                 "l1_decoder":"first", "l1_encoder":"first",
                 "cossim_decoder":"first", "cossim_encoder":"first",
                 "frozen":"first", "prefixed":"first"})

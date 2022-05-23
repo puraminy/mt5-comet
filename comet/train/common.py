@@ -960,6 +960,8 @@ class MyDataset(torch.utils.data.Dataset):
         mlog.info(f"len after filtering:{len(split_df)}")
         assert len(split_df) > 0, "Data frame is empty " + self.split_name
         self.num_records = self.num_samples
+        rel_filter = rel_filter.strip()
+        assert rel_filter in all_rels, f"{rel_filter} is no in relations"
         if rel_filter:
             split_df = split_df[split_df["prefix"] == rel_filter]
             dlog.info("len after relation filter: %s", len(split_df))
