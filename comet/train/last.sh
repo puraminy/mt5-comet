@@ -4,7 +4,7 @@ alias runlite="python train.py"
 #extra="--cpu=True"
 
 # different models
-runlite run -exp base-v1-lmb -bc base -ov -sm $1 -var model_id=t5-base#t5-v1#t5-lmb--method=unsup-nat#sup-nat#sup#unsup--rel_filter=xIntent--train_samples=100#1  --test_samples=300 --repeat=3 --loop=True $extra --skip=True 
+runlite run -exp base-v1-lmb -bc base -ov -sm $1 -var model_id=t5-base#t5-v1#t5-lmb--method=unsup-nat#sup-nat#sup#unsup--rel_filter=xIntent--train_samples=100#1--pid=1  --test_samples=300 --repeat=3 --loop=True $extra --skip=True 
 
 # learning rate for supervised and unsupervised learning for t5-v1
 #runlite run -exp learning-rate -bc base -ov -sm $1 --model_id=t5-v1 -var train_samples=100#200#300--learning_rate=0.0001#0.00001--method=sup#sup-nat#unsup-nat  --rel_filter=xIntent --train_samples=100  --test_samples=300 --repeat=3 --loop=True $extra --skip=True 

@@ -626,7 +626,7 @@ def run(ctx, conf_path, base_conf, experiment,
 @click.option(
     "--data_path",
     "-dp",
-    default="",
+    default="home",
     type=str,
     help=""
 )
@@ -1055,7 +1055,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
 
         mlog.info("Config %s was created at %s", output_name + ".json", conf_path)
         return
-
+    if not data_path == "home":
+        data_path = home
     if data_path:
         train_path = os.path.join(data_path, "train.tsv")
         test_path = os.path.join(data_path, "test.tsv")
@@ -1881,10 +1882,12 @@ def exp(experiment, model_ids, keep, server, exclude, include, save_model):
         pretPath = "/content/drive/MyDrive/pret"
         logPath = "/content/"
         resPath = "/content/drive/MyDrive/pouramini/results"
+        dataPath = "" 
     else:
         logPath = os.path.join(home, "logs")
         resPath = os.path.join(home, "results") 
         pretPath = os.path.join(home, "pret") 
+        dataPath = home 
 
     base_dir = home
     if "_" in experiment:
