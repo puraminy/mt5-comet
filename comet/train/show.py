@@ -282,9 +282,9 @@ def show_df(df):
                if not sel_col in df:
                    continue
                head = sel_col 
-               #textwrap.shorten(f"{i}) {sel_col}" , width=_w, placeholder=".")
-               if len(head) + 4 > col_widths[sel_col]:
-                   col_widths[sel_col] = len(head) + 4
+               head = textwrap.shorten(f"{i} {head}" , width=15, placeholder=".")
+               if len(head) + 5 > col_widths[sel_col]:
+                   col_widths[sel_col] = len(head) + 5
                _w = col_widths[sel_col] 
                text += "{:<{x}}".format(head, x=_w) 
             mprint(text, text_win) 
@@ -510,7 +510,7 @@ def show_df(df):
             #df = df.sort_values(score_col, ascending=False).drop_duplicates(['fid','prefix','input_text']).merge(tdf)
             df["rouge_score"] = df.groupby(['fid','prefix','input_text'])["rouge_score"].transform("max")
             if not group_col in info_cols: info_cols.append(group_col)
-            sel_cols.append("num_preds")
+            sel_cols.append("n_preds")
             consts["filter"].append("group predictions")
         elif char == " ":
             if sel_row in sel_rows:
@@ -529,9 +529,10 @@ def show_df(df):
             col = FID
             left = 0
             _glist = [col, "prefix"]
-            sel_cols = ["prefix", "method", "model", "num_preds","rouge_score", "steps", "pid", "bert_score", "br_score","nr_score", "learning_rate",  "num_targets", "num_inps", "num_records", "wrap", "frozen", "prefixed", "exp_id"]
+            sel_cols = ["method", "model", "n_preds","rouge_score", "steps", "pid", "prefix", "bert_score", "br_score","nr_score", "learning_rate",  "num_targets", "num_inps", "num_records", "wrap", "frozen", "prefixed", "exp_id"]
+
             num_targets = (df['prefix']+'_'+df['target_text']).groupby(df[col]).nunique()
-            num_preds = (df['prefix']+'_'+df['pred_text1']).groupby(df[col]).nunique()
+            n_preds = (df['prefix']+'_'+df['pred_text1']).groupby(df[col]).nunique()
             num_inps = (df['prefix']+'_'+df['input_text']).groupby(df[col]).nunique()
             _agg = "frist"
             df = (df.groupby(col).agg({"prefix":"first", "learning_rate":"first", "id":"count","rouge_score":"mean", "pid":"first", "bert_score":"mean", "nr_score":"mean", "method":"first","model":"first", "wrap":"first", col:"first", "steps":"first", 
@@ -542,7 +543,7 @@ def show_df(df):
                        'id':'num_records',
                        }))
             #df = df.reset_index()
-            df["num_preds"] = num_preds
+            df["n_preds"] = n_preds
             df["num_targets"] = num_targets
             df["num_inps"] = num_inps
             df = df.sort_values(by = ["rouge_score"], ascending=False)
@@ -658,6 +659,7 @@ def show_df(df):
                     pnames.append(pname)
                 if len(pnames) == 1:
                     pname = pnames[0]
+                    sel_rows = []
                 else:
                     images = [Image.open(_f) for _f in pnames]
                     new_im = combine_x(images)
@@ -666,7 +668,6 @@ def show_df(df):
                     Path(folder).mkdir(exist_ok=True, parents=True)
                     pname = os.path.join(folder, name + ".png")
                     new_im.save(pname)
-            sel_rows = []
             if "ahmad" in home:
                 subprocess.run(["eog", pname])
         elif char in ["o","O"] and prev_char=="x":
