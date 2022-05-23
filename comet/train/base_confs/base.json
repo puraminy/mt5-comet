@@ -9,7 +9,7 @@
     "val_samples": 150,
     "test_samples": 0,
     "sample_samples": 0,
-    "data_path": "home",
+    "data_path": "",
     "train_path": "atomic/train.tsv",
     "val_path": "atomic/val_all_rels.tsv",
     "test_path": "atomic/test.tsv",

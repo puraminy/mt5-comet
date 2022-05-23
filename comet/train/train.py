@@ -1055,7 +1055,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
 
         mlog.info("Config %s was created at %s", output_name + ".json", conf_path)
         return
-    if not data_path == "":
+    if not data_path:
         data_path = dataPath
     if data_path:
         train_path = os.path.join(data_path, "train.tsv")
