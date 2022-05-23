@@ -137,6 +137,8 @@ def show_df(df):
 
     df['id']=df.index
     df = df.reset_index(drop=True)
+    if not "pid" in df:
+        df["pid"] = 0
     if not "l1_decoder" in df:
         df["l1_decoder"] ="" 
         df["l1_encoder"] ="" 
@@ -280,9 +282,9 @@ def show_df(df):
                if not sel_col in df:
                    continue
                head = sel_col 
-               #textwrap.shorten(f"{i}) {sel_col}" , width=_w, placeholder=".")
-               if len(head) + 4 > col_widths[sel_col]:
-                   col_widths[sel_col] = len(head) + 4
+               head = textwrap.shorten(f"{i} {head}" , width=15, placeholder=".")
+               if len(head) + 5 > col_widths[sel_col]:
+                   col_widths[sel_col] = len(head) + 5
                _w = col_widths[sel_col] 
                text += "{:<{x}}".format(head, x=_w) 
             mprint(text, text_win) 
@@ -342,7 +344,7 @@ def show_df(df):
             sel_row -= ROWS - 4
         elif char == "l" and prev_char == "l":
             seq = ""
-        elif char in list("01234"):
+        elif char in "01234" and prev_char == "#":
             canceled, col, val = list_df_values(df, get_val=False)
             if not canceled:
                 sel_cols = order(sel_cols, [col],int(char))
@@ -371,7 +373,7 @@ def show_df(df):
                 save_obj(info_cols, "info_cols", dfname)
                 if col in sel_cols:
                     sel_cols.remove(col)
-        elif char == "s" and prev_char == "x":
+        elif char == "s" and prev_char == "s":
             sel_df = sel_df.append(df.iloc[sel_row])
             mbeep()
             sel_df.to_csv(sel_path, sep="\t", index=False)
@@ -476,9 +478,9 @@ def show_df(df):
                 consts["FID"] = FID
                 df = filter_df
                 hotkey="gG"
-        elif char == "s" and perv_char=="s":
-            canceled, col, val = list_df_values(df, get_val=False)
-            if not canceled:
+        elif char in "012345678" and prev_char == "s":
+            if int(char) < len(sel_cols):
+                col = sel_cols[int(char)]
                 if col == sort:
                     asc = not asc
                 sort = col
@@ -508,7 +510,7 @@ def show_df(df):
             #df = df.sort_values(score_col, ascending=False).drop_duplicates(['fid','prefix','input_text']).merge(tdf)
             df["rouge_score"] = df.groupby(['fid','prefix','input_text'])["rouge_score"].transform("max")
             if not group_col in info_cols: info_cols.append(group_col)
-            sel_cols.append("num_preds")
+            sel_cols.append("n_preds")
             consts["filter"].append("group predictions")
         elif char == " ":
             if sel_row in sel_rows:
@@ -527,12 +529,13 @@ def show_df(df):
             col = FID
             left = 0
             _glist = [col, "prefix"]
-            sel_cols = ["prefix", "method", "model", "learning_rate", "num_preds","rouge_score", "steps", "bert_score", "br_score","nr_score",  "num_targets", "num_inps", "num_records", "wrap", "frozen", "prefixed", "exp_id"]
+            sel_cols = ["method", "model", "n_preds","rouge_score", "steps", "pid", "prefix", "bert_score", "br_score","nr_score", "learning_rate",  "num_targets", "num_inps", "num_records", "wrap", "frozen", "prefixed", "exp_id"]
+
             num_targets = (df['prefix']+'_'+df['target_text']).groupby(df[col]).nunique()
-            num_preds = (df['prefix']+'_'+df['pred_text1']).groupby(df[col]).nunique()
+            n_preds = (df['prefix']+'_'+df['pred_text1']).groupby(df[col]).nunique()
             num_inps = (df['prefix']+'_'+df['input_text']).groupby(df[col]).nunique()
             _agg = "frist"
-            df = (df.groupby(col).agg({"prefix":"first", "learning_rate":"first", "id":"count","rouge_score":"mean","bert_score":"mean", "nr_score":"mean", "method":"first","model":"first", "wrap":"first", col:"first", "steps":"first", 
+            df = (df.groupby(col).agg({"prefix":"first", "learning_rate":"first", "id":"count","rouge_score":"mean", "pid":"first", "bert_score":"mean", "nr_score":"mean", "method":"first","model":"first", "wrap":"first", col:"first", "steps":"first", 
                 "l1_decoder":"first", "l1_encoder":"first",
                 "cossim_decoder":"first", "cossim_encoder":"first",
                 "frozen":"first", "prefixed":"first"})
@@ -540,7 +543,7 @@ def show_df(df):
                        'id':'num_records',
                        }))
             #df = df.reset_index()
-            df["num_preds"] = num_preds
+            df["n_preds"] = n_preds
             df["num_targets"] = num_targets
             df["num_inps"] = num_inps
             df = df.sort_values(by = ["rouge_score"], ascending=False)
@@ -650,12 +653,13 @@ def show_df(df):
                     Path(folder).mkdir(exist_ok=True, parents=True)
                     pname = os.path.join(folder, name + ".png")
                     draw = ImageDraw.Draw(new_im)
-                    draw.text((0, 0), str(s_row) + df.iloc[s_row]["method"] +  
+                    draw.text((0, 0), str(s_row) + "  " + df.iloc[s_row]["method"] +  
                                      " " + df.iloc[s_row]["model"] ,(20,25,255),font=font)
                     new_im.save(pname)
                     pnames.append(pname)
                 if len(pnames) == 1:
                     pname = pnames[0]
+                    sel_rows = []
                 else:
                     images = [Image.open(_f) for _f in pnames]
                     new_im = combine_x(images)
@@ -664,7 +668,6 @@ def show_df(df):
                     Path(folder).mkdir(exist_ok=True, parents=True)
                     pname = os.path.join(folder, name + ".png")
                     new_im.save(pname)
-            sel_rows = []
             if "ahmad" in home:
                 subprocess.run(["eog", pname])
         elif char in ["o","O"] and prev_char=="x":
