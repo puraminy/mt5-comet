@@ -529,13 +529,13 @@ def show_df(df):
             col = FID
             left = 0
             _glist = [col, "prefix"]
-            sel_cols = ["method", "model", "n_preds","rouge_score", "steps", "pid", "prefix", "bert_score", "br_score","nr_score", "learning_rate",  "num_targets", "num_inps", "num_records", "wrap", "frozen", "prefixed", "exp_id"]
+            sel_cols = ["method", "model", "n_preds","rouge_score", "steps", "pid", "plen", "prefix", "bert_score", "br_score","nr_score", "learning_rate",  "num_targets", "num_inps", "num_records", "wrap", "frozen", "prefixed", "exp_id"]
 
             num_targets = (df['prefix']+'_'+df['target_text']).groupby(df[col]).nunique()
             n_preds = (df['prefix']+'_'+df['pred_text1']).groupby(df[col]).nunique()
             num_inps = (df['prefix']+'_'+df['input_text']).groupby(df[col]).nunique()
             _agg = "frist"
-            df = (df.groupby(col).agg({"prefix":"first", "learning_rate":"first", "id":"count","rouge_score":"mean", "pid":"first", "bert_score":"mean", "nr_score":"mean", "method":"first","model":"first", "wrap":"first", col:"first", "steps":"first", 
+            df = (df.groupby(col).agg({"prefix":"first", "learning_rate":"first", "id":"count","rouge_score":"mean", "plen":"first", "pid":"first", "bert_score":"mean", "nr_score":"mean", "method":"first","model":"first", "wrap":"first", col:"first", "steps":"first", 
                 "l1_decoder":"first", "l1_encoder":"first",
                 "cossim_decoder":"first", "cossim_encoder":"first",
                 "frozen":"first", "prefixed":"first"})
@@ -713,7 +713,7 @@ def show_df(df):
                 y = cols[1]
                 #ax = df.plot.scatter(ax=ax, x=x, y=y)
                 ax = sns.regplot(df[x],df[y])
-        elif char in ["f", "F"]:
+        elif char in ["f", "F", "m"]:
             backit(df, sel_cols)
             canceled, col, val = list_df_values(filter_df, get_val=True)
             if not canceled:
@@ -722,19 +722,22 @@ def show_df(df):
                else:
                     if not canceled:
                         if type(val) == str:
-                            cond = f"filter_df['{col}'] == '{val}'"
+                            cond = f"df['{col}'] == '{val}'"
                         else:
-                            cond = f"filter_df['{col}'] == {val}"
+                            cond = f"df['{col}'] == {val}"
                if cond:
                    mlog.info("cond %s, ", cond)
-                   filter_df = filter_df[eval(cond)]
-                   df = filter_df
+                   if char == "f":
+                       df = main_df
+                   else:
+                       df = filter_df
+                   df = df[eval(cond)]
                    df = df.reset_index()
                    if not "filter" in consts:
                         consts["filter"] = []
                    consts["filter"].append(cond)
                    sel_row = 0
-                   if char == "F":
+                   if char == "F" or char == "f":
                        hotkey = "gG"
         if char in ["y","Y"]:
             #yyyyyyyy
@@ -812,7 +815,7 @@ def show_df(df):
             info_cols = []
             for col in df.columns:
                 info_cols.append(col)
-        elif char == "m":
+        elif char == "m" and prev_char == "x":
             info_cols = []
             sel_cols = []
             cond = get_cond(df, "model", 2)
