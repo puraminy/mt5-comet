@@ -137,6 +137,8 @@ def show_df(df):
 
     df['id']=df.index
     df = df.reset_index(drop=True)
+    if not "pid" in df:
+        df["pid"] = 0
     if not "l1_decoder" in df:
         df["l1_decoder"] ="" 
         df["l1_encoder"] ="" 
@@ -371,7 +373,7 @@ def show_df(df):
                 save_obj(info_cols, "info_cols", dfname)
                 if col in sel_cols:
                     sel_cols.remove(col)
-        elif char == "s" and prev_char == "x":
+        elif char == "s" and prev_char == "s":
             sel_df = sel_df.append(df.iloc[sel_row])
             mbeep()
             sel_df.to_csv(sel_path, sep="\t", index=False)
@@ -476,9 +478,9 @@ def show_df(df):
                 consts["FID"] = FID
                 df = filter_df
                 hotkey="gG"
-        elif char == "s" and perv_char=="s":
-            canceled, col, val = list_df_values(df, get_val=False)
-            if not canceled:
+        elif char in "012345678" and prev_char == "s":
+            if int(char) < len(sel_cols):
+                col = sel_cols[int(char)]
                 if col == sort:
                     asc = not asc
                 sort = col
@@ -527,12 +529,12 @@ def show_df(df):
             col = FID
             left = 0
             _glist = [col, "prefix"]
-            sel_cols = ["prefix", "method", "model", "learning_rate", "num_preds","rouge_score", "steps", "bert_score", "br_score","nr_score",  "num_targets", "num_inps", "num_records", "wrap", "frozen", "prefixed", "exp_id"]
+            sel_cols = ["prefix", "method", "model", "num_preds","rouge_score", "steps", "pid", "bert_score", "br_score","nr_score", "learning_rate",  "num_targets", "num_inps", "num_records", "wrap", "frozen", "prefixed", "exp_id"]
             num_targets = (df['prefix']+'_'+df['target_text']).groupby(df[col]).nunique()
             num_preds = (df['prefix']+'_'+df['pred_text1']).groupby(df[col]).nunique()
             num_inps = (df['prefix']+'_'+df['input_text']).groupby(df[col]).nunique()
             _agg = "frist"
-            df = (df.groupby(col).agg({"prefix":"first", "learning_rate":"first", "id":"count","rouge_score":"mean","bert_score":"mean", "nr_score":"mean", "method":"first","model":"first", "wrap":"first", col:"first", "steps":"first", 
+            df = (df.groupby(col).agg({"prefix":"first", "learning_rate":"first", "id":"count","rouge_score":"mean", "pid":"first", "bert_score":"mean", "nr_score":"mean", "method":"first","model":"first", "wrap":"first", col:"first", "steps":"first", 
                 "l1_decoder":"first", "l1_encoder":"first",
                 "cossim_decoder":"first", "cossim_encoder":"first",
                 "frozen":"first", "prefixed":"first"})
@@ -650,7 +652,7 @@ def show_df(df):
                     Path(folder).mkdir(exist_ok=True, parents=True)
                     pname = os.path.join(folder, name + ".png")
                     draw = ImageDraw.Draw(new_im)
-                    draw.text((0, 0), str(s_row) + df.iloc[s_row]["method"] +  
+                    draw.text((0, 0), str(s_row) + "  " + df.iloc[s_row]["method"] +  
                                      " " + df.iloc[s_row]["model"] ,(20,25,255),font=font)
                     new_im.save(pname)
                     pnames.append(pname)
