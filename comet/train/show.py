@@ -610,6 +610,7 @@ def show_df(df):
                 df = df[df['pred_text1_x'].str.strip() != df['pred_text1_y'].str.strip()]
 
             sel_cols = on_col_list
+            sel_cols.remove("prefix")
             _from_cols = ["pred_text1", "pred_text1_x", "pred_text1_y","query_x","query_y", "query", "method", "fid","prefix", "input_text","target_text"]
             for _col in _from_cols:
                 if (_col.startswith("fid") or
@@ -618,6 +619,7 @@ def show_df(df):
                     sel_cols.append(_col)
                 elif not _col in on_col_list and not _col in info_cols:
                     info_cols.append(_col)
+            info_cols.append("prefix")
             if char == "a":
                 sel_cols = list(df.columns)
             sel_row = 0

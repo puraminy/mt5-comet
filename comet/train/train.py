@@ -315,10 +315,10 @@ def run(ctx, conf_path, base_conf, experiment,
                        else:
                            if var_item.strip() == "True":
                                var_item = True
-                           if not var_name in exclude_list:
-                               _output_name +=  sep + var_name + "_" + str(var_item)
-                           __output_name +=  sep + var_name + "_" + str(var_item)
                            args[var_name]=var_item
+                       if not var_name in exclude_list:
+                           _output_name +=  sep + var_name + "_" + str(var_item)
+                       __output_name +=  sep + var_name + "_" + str(var_item)
                    ii += 1
                    rel_folder = "all" if not args["rel_filter"] else args["rel_filter"]
                    if only_var:
@@ -1414,7 +1414,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
     extra = "_" + now
     m_name = model_id + "-" + method
     p_str = "prefixed" if prefix else "not_prefixed"
-    tag = tag  + "=" + str(args[tag])
+    if tag in args:
+        tag = tag  + "=" + str(args[tag])
     exp_info = {"exp":tag + "_" + experiment, "model":model_id, "lang": lang, 
                     "method":method, 
                     "wrap": w_str + ("-" + encoder_type if wrap else ""),
