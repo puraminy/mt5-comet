@@ -273,7 +273,7 @@ def run(ctx, conf_path, base_conf, experiment,
                 _key=_key.strip("--")
                 if not _key in exclude_list:
                     _ks = "".join([k[0] for k in _key.split("_")])
-                    _extra += "_" + (_ks + "_" + _val if not str(_val)=="True" else _key)
+                    _extra += "@" + (_ks + "=" + _val if not str(_val)=="True" else _key)
                 mlog.info("set %s = %s", _key, _val)
 
                 if _val == "null": 
@@ -317,8 +317,8 @@ def run(ctx, conf_path, base_conf, experiment,
                                var_item = True
                            args[var_name]=var_item
                        if not var_name in exclude_list:
-                           _output_name +=  sep + var_name + "_" + str(var_item)
-                       __output_name +=  sep + var_name + "_" + str(var_item)
+                           _output_name +=  sep + var_name + "=" + str(var_item)
+                       __output_name +=  sep + var_name + "=" + str(var_item)
                    ii += 1
                    rel_folder = "all" if not args["rel_filter"] else args["rel_filter"]
                    if only_var:

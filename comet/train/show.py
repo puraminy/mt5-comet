@@ -102,7 +102,7 @@ def find_common(df, main_df, on_col_list, s_rows, FID, char):
             df = intersect
     else:
        df = tdf
-       df["sum_fid"] = df["fid"].sum()
+       df["sum_fid"] = df["id"].sum()
     return df
 
 def show_df(df):
@@ -612,7 +612,7 @@ def show_df(df):
             sel_cols = on_col_list
             info_cols = []
             sel_cols.remove("prefix")
-            _from_cols = ["pred_text1", "id", "pred_text1_x", "pred_text1_y","query_x","query_y", "query", "method", "fid","prefix", "input_text","target_text"]
+            _from_cols = ["pred_text1", "id", "pred_text1_x", "pred_text1_y","query_x","query_y", "query", "method", "prefix", "input_text","target_text", "fid", "fid_x", "fid_y"]
             for _col in _from_cols:
                 if (_col.startswith("id") or
                     _col.startswith("pred_text1") or 
@@ -1201,7 +1201,7 @@ def start(stdscr):
                     if not key in df:
                        df[key] = png
                 if fid == "parent":
-                    df["fid"] = str(ii) + "_" + "_".join(f.split("/")[5:]) 
+                    df["fid"] = str(ii) + "_" + "@".join(f.split("/")[5:]) 
                 elif fid == "name":
                     df["fid"] = str(ii) + "_" + Path(f).stem
                 else:
