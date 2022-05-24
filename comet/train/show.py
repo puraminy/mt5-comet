@@ -83,7 +83,7 @@ def find_common(df, main_df, on_col_list, s_rows, FID, char):
         tdf = tdf[["pred_text1", "id", "bert_score","query", "method", "rouge_score", "fid","prefix", "input_text","target_text"]]
         tdf = tdf.sort_values(by="rouge_score", ascending=False)
         if len(tdf) > 1:
-            tdf = tdf.groupby(on_col_list).agg({"query":"first","input_text":"first","target_text":"first", "method":"first", "rouge_score":"first","prefix":"first","pred_text1":"first", "id":"count", "id":"count","bert_score":"first"}).reset_index(drop=True)
+            tdf = tdf.groupby(on_col_list).agg({"query":"first","input_text":"first","target_text":"first", "method":"first", "rouge_score":"first","prefix":"first","pred_text1":"first", "fid":"first", "id":"count","bert_score":"first"}).reset_index(drop=True)
             for on_col in on_col_list:
                 tdf[on_col] = tdf[on_col].astype(str).str.strip()
         dfs.append(tdf) #.copy())
@@ -610,8 +610,9 @@ def show_df(df):
                 df = df[df['pred_text1_x'].str.strip() != df['pred_text1_y'].str.strip()]
 
             sel_cols = on_col_list
+            info_cols = []
             sel_cols.remove("prefix")
-            _from_cols = ["pred_text1", "fid", "pred_text1_x", "pred_text1_y","query_x","query_y", "query", "method", "fid","prefix", "input_text","target_text"]
+            _from_cols = ["pred_text1", "id", "pred_text1_x", "pred_text1_y","query_x","query_y", "query", "method", "fid","prefix", "input_text","target_text"]
             for _col in _from_cols:
                 if (_col.startswith("id") or
                     _col.startswith("pred_text1") or 
@@ -1073,7 +1074,9 @@ def order(sel_cols, cols, pos=0):
                 
 def change_info(infos):
     info_bar.erase()
+    h,w = info_bar.getmaxyx()
     for msg in infos:
+        msg = textwrap.shorten(msg, width=w, placeholder=".")
         mprint(str(msg), info_bar, color=HL_COLOR)
     rows,cols = std.getmaxyx()
     info_bar.refresh(0,0, rows -len(infos),0, rows-1, cols - 2)
