@@ -404,8 +404,8 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
             data["pred_text1"] = top_hyp
             data["target_text"] = "<br />".join(tails)
             p_rel = rel
-            if exp_info["tag"]:
-                p_rel = exp_info["tag"] + "_" + rel
+            if exp_info["multi"]:
+                p_rel = "multi_" + rel
             data["prefix"] = p_rel
             data["langs"] = lang
             input_text = re.sub(r'<.*?>','##',query)

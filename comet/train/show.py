@@ -137,6 +137,8 @@ def show_df(df):
 
     df['id']=df.index
     df = df.reset_index(drop=True)
+    if not "tag" in df:
+        df["tag"] = "n/a"
     if not "pid" in df:
         df["pid"] = 0
     if not "l1_decoder" in df:
@@ -534,13 +536,13 @@ def show_df(df):
             col = FID
             left = 0
             _glist = [col, "prefix"]
-            sel_cols = ["method", "model", "n_preds","rouge_score", "steps", "opt_type", "pid", "plen", "prefix", "bert_score", "br_score","nr_score", "learning_rate",  "num_targets", "num_inps", "num_records", "wrap", "frozen", "prefixed", "exp_id"]
+            sel_cols = ["tag","method", "model", "n_preds","rouge_score", "steps", "opt_type", "pid", "plen", "prefix", "bert_score", "br_score","nr_score", "learning_rate",  "num_targets", "num_inps", "num_records", "wrap", "frozen", "prefixed", "exp_id"]
 
             num_targets = (df['prefix']+'_'+df['target_text']).groupby(df[col]).nunique()
             n_preds = (df['prefix']+'_'+df['pred_text1']).groupby(df[col]).nunique()
             num_inps = (df['prefix']+'_'+df['input_text']).groupby(df[col]).nunique()
             _agg = "frist"
-            df = (df.groupby(col).agg({"prefix":"first", "learning_rate":"first", "opt_type":"first", "id":"count","rouge_score":"mean", "plen":"first", "pid":"first", "bert_score":"mean", "nr_score":"mean", "method":"first","model":"first", "wrap":"first", col:"first", "steps":"first", 
+            df = (df.groupby(col).agg({"tag":"first","prefix":"first", "learning_rate":"first", "opt_type":"first", "id":"count","rouge_score":"mean", "plen":"first", "pid":"first", "bert_score":"mean", "nr_score":"mean", "method":"first","model":"first", "wrap":"first", col:"first", "steps":"first", 
                 "l1_decoder":"first", "l1_encoder":"first",
                 "cossim_decoder":"first", "cossim_encoder":"first",
                 "frozen":"first", "prefixed":"first"})

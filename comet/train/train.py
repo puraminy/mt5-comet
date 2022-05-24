@@ -237,7 +237,7 @@ def run(ctx, conf_path, base_conf, experiment,
         if colab: conf_path = "colab_confs"
      if ctx.invoked_subcommand is None:
         mlog.info("Reading from conf %s", conf_path)
-        _path = f"{conf_path}/{experiment}"
+        _path = os.path.join(confPath, conf_path, experiment)
         if not Path(_path).exists():
            conf = os.path.join(confPath, base_conf + ".json") # default conf
            mlog.info("NEW experiment! Reading from conf %s", conf)
@@ -250,7 +250,7 @@ def run(ctx, conf_path, base_conf, experiment,
            args["config"] = False
            args["output_name"] = "" 
            if add_prefix:
-               args["tag"] = experiment
+               args["tag"] = "experiment"
            if addto:
                spath = os.path.join(logPath, addto)
            else:
@@ -303,6 +303,7 @@ def run(ctx, conf_path, base_conf, experiment,
                values = [x.split("=")[1].split("#") for x in all_vars]
                tot_comb = [dict(zip(var_names, comb)) for comb in itertools.product(*values)]
                ii = 0
+               main_tag = args["tag"]
                for comb in tot_comb:
                    _output_name = output_name
                    __output_name = output_name
@@ -331,11 +332,11 @@ def run(ctx, conf_path, base_conf, experiment,
                    if args["rel_filter"] == "multi":
                        args["data_path"] = spath
                        args["rel_filter"] = "" 
-                       args["tag"] = experiment 
+                       args["multi"]= True
                        args["use_all_data"] = True
                    else:
                        args["data_path"] = ""
-                       args["tag"] = "" 
+                       args["multi"] = False 
                        args["use_all_data"] = False
 
                    ctx.invoke(train, **args)
@@ -986,7 +987,7 @@ def run(ctx, conf_path, base_conf, experiment,
 )
 @click.option(
     "--tag",
-    "-pre",
+    "-tag",
     default="",
     type=str,
     help=""
@@ -1003,7 +1004,13 @@ def run(ctx, conf_path, base_conf, experiment,
     is_flag=True,
     help=""
 )
-def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, sample_samples, load_path, data_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, tag, skip, use_all_data):
+@click.option(
+    "--multi",
+    "-multi",
+    is_flag=True,
+    help="A tag indicating multi-task"
+)
+def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, sample_samples, load_path, data_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, tag, skip, use_all_data, multi):
 
     #%% some hyper-parameters
 
@@ -1054,7 +1061,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
         save_path = ""
         output_name = "test"
     if config:
-        conf_path = "base_confs"
+        conf_path = confPath 
         Path(conf_path).mkdir(exist_ok=True, parents=True)
         args["config"] = False
         args["output_name"] = ""
@@ -1407,6 +1414,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
     extra = "_" + now
     m_name = model_id + "-" + method
     p_str = "prefixed" if prefix else "not_prefixed"
+    tag = tag  + "=" + str(args[tag])
     exp_info = {"exp":tag + "_" + experiment, "model":model_id, "lang": lang, 
                     "method":method, 
                     "wrap": w_str + ("-" + encoder_type if wrap else ""),
@@ -1414,6 +1422,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
                     "prefixed":p_str,
                     "pid":pid,
                     "tag":tag,
+                    "multi":multi, 
                     "steps":str(train_samples)+"x"+str(repeat)+"x"+str(epochs_num),
                     "plen":prompt_length,
                     "opt_type":opt_type,
