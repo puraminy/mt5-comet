@@ -98,7 +98,7 @@ rel_nat_maps = {
         "desc":"the person's attributes"
     },
     "xIntent":{ 
-        "1":"Because of {event}, PersonX want {ph}",
+        "1":"{event}, PersonX want {ph}",
         "2":"Because of {event}, PersonX want to {ph}",
         #"2":"PersonX want {ph}  Therefore, {event}",
         "fa":"زیرا PersonX می خواست",

@@ -80,10 +80,10 @@ def find_common(df, main_df, on_col_list, s_rows, FID, char):
         mlog.info("%s == %s", FID, exp)
         cond = f"(main_df['{FID}'] == '{exp}')"
         tdf = main_df[main_df[FID] == exp]
-        tdf = tdf[["pred_text1", "bert_score","query", "method", "rouge_score", "fid","prefix", "input_text","target_text"]]
+        tdf = tdf[["pred_text1", "id", "bert_score","query", "method", "rouge_score", "fid","prefix", "input_text","target_text"]]
         tdf = tdf.sort_values(by="rouge_score", ascending=False)
         if len(tdf) > 1:
-            tdf = tdf.groupby(on_col_list).agg({"query":"first","input_text":"first","target_text":"first", "method":"first", "rouge_score":"first","prefix":"first","pred_text1":"first", "fid":"count","bert_score":"first"}).reset_index(drop=True)
+            tdf = tdf.groupby(on_col_list).agg({"query":"first","input_text":"first","target_text":"first", "method":"first", "rouge_score":"first","prefix":"first","pred_text1":"first", "id":"count", "id":"count","bert_score":"first"}).reset_index(drop=True)
             for on_col in on_col_list:
                 tdf[on_col] = tdf[on_col].astype(str).str.strip()
         dfs.append(tdf) #.copy())
@@ -611,9 +611,9 @@ def show_df(df):
 
             sel_cols = on_col_list
             sel_cols.remove("prefix")
-            _from_cols = ["pred_text1", "pred_text1_x", "pred_text1_y","query_x","query_y", "query", "method", "fid","prefix", "input_text","target_text"]
+            _from_cols = ["pred_text1", "fid", "pred_text1_x", "pred_text1_y","query_x","query_y", "query", "method", "fid","prefix", "input_text","target_text"]
             for _col in _from_cols:
-                if (_col.startswith("fid") or
+                if (_col.startswith("id") or
                     _col.startswith("pred_text1") or 
                     _col.startswith("method")):
                     sel_cols.append(_col)
