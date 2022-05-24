@@ -228,7 +228,11 @@ def show_df(df):
            text = "{:<5}".format(ii)
            _sels = []
            _infs = []
-           for sel_col in sel_cols + info_cols:
+           if _print:
+               _cols = sel_cols + info_cols
+           else:
+               _cols = sel_cols
+           for sel_col in _cols: 
                if not sel_col in row or sel_col in _sels:
                    continue
                content = str(row[sel_col])
@@ -289,11 +293,13 @@ def show_df(df):
                if not sel_col in df:
                    continue
                head = sel_col 
-               head = textwrap.shorten(f"{i} {head}" , width=15, placeholder=".")
-               _w = 40
-               if sel_col in col_widths and len(head) + 5 > col_widths[sel_col]:
+               #head = textwrap.shorten(f"{i} {head}" , width=15, placeholder=".")
+               if not sel_col in col_widths and not adjust:
+                    _, col_widths = row_print(df, sel_row, col_widths={})
+                    adjust = True
+               if len(head) + 5 > col_widths[sel_col]:
                    col_widths[sel_col] = len(head) + 5
-                   _w = col_widths[sel_col] 
+               _w = col_widths[sel_col] 
                text += "{:<{x}}".format(head, x=_w) 
             mprint(text, text_win) 
             #fffff
@@ -988,10 +994,13 @@ def show_df(df):
                     dfname = cmd
                     char = "SS"
         if char == "SS":
-                save_df = main_df[["prefix","input_text","target_text"]]
+                df = main_df[["prefix","input_text","target_text"]]
+                df = df.groupby(['input_text','prefix','target_text'],as_index=False).first()
+
                 save_path = os.path.join(base_dir, dfname+".tsv")
+                sel_cols = ["prefix", "input_text", "target_text"]
                 Path(base_dir).mkdir(parents = True, exist_ok=True)
-                save_df.to_csv(save_path, sep="\t", index=False)
+                df.to_csv(save_path, sep="\t", index=False)
 
                 save_obj(dfname, "dfname", dfname)
         if char == "r" and prev_char != "x":

@@ -636,28 +636,28 @@ def run(ctx, conf_path, base_conf, experiment,
 @click.option(
     "--train_path",
     "-tp",
-    default="atomic/train.tsv",
+    default="train.tsv",
     type=str,
     help=""
 )
 @click.option(
     "--val_path",
     "-vp",
-    default="atomic/val_all_rels.tsv",
+    default="val.tsv",
     type=str,
     help=""
 )
 @click.option(
     "--test_path",
     "-tep",
-    default="atomic/test.tsv",
+    default="test.tsv",
     type=str,
     help=""
 )
 @click.option(
     "--sample_path",
     "-sp",
-    default="atomic/val_all_rels.tsv",
+    default="sample.tsv",
     type=str,
     help=""
 )
@@ -1072,7 +1072,11 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
         return
     if not data_path:
         data_path = dataPath
-    if data_path:
+        train_path = os.path.join(data_path, train_path) 
+        test_path = os.path.join(data_path, test_path)
+        val_path = os.path.join(data_path, val_path) 
+        sample_path = os.path.join(data_path, sample_path) 
+    else:
         train_path = os.path.join(data_path, "train.tsv")
         test_path = os.path.join(data_path, "test.tsv")
         val_path = os.path.join(data_path, "val.tsv")
