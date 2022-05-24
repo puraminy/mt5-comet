@@ -271,7 +271,8 @@ def show_df(df):
         sels.append(sel_cols)
         back_rows.append(sel_row)
     for _col in ["input_text","pred_text1","target_text"]:
-        df[_col] = df[_col].astype(str)
+        if _col in df:
+            df[_col] = df[_col].astype(str)
 
     adjust = True
     while ch != ord("q"):
@@ -607,12 +608,21 @@ def show_df(df):
             else:
                 df = find_common(df, filter_df, on_col_list, _rows, FID, char)
             if "pred_text1_x" in df:
+                _all = len(df)
                 df = df[df['pred_text1_x'].str.strip() != df['pred_text1_y'].str.strip()]
+                _dif = len(df)
+                _common = _all - _dif
+                consts["Common"] = _common
 
             sel_cols = on_col_list
             info_cols = []
             sel_cols.remove("prefix")
-            _from_cols = ["pred_text1", "id", "pred_text1_x", "pred_text1_y","query_x","query_y", "query", "method", "prefix", "input_text","target_text", "fid", "fid_x", "fid_y"]
+            _from_cols = ["pred_text1", "id", "pred_text1_x", "pred_text1_y","query_x","query_y", "query", "method", "prefix", "input_text","target_text_x", "target_text", "fid_x", "fid_y"]
+            if "fid_x" in df:
+                fid_x = df.iloc[0]["fid_x"]
+                fid_y = df.iloc[0]["fid_y"]
+                df["fid_x"] = "|".join(list(set(fid_x.split("@")) - set(fid_y.split("@"))))
+                df["fid_y"] = "|".join(list(set(fid_y.split("@")) - set(fid_x.split("@"))))
             for _col in _from_cols:
                 if (_col.startswith("id") or
                     _col.startswith("pred_text1") or 
@@ -966,7 +976,10 @@ def show_df(df):
             #mbeep()
         if char in ["S", "}"]:
             _name = "main_df" if char == "S" else "df"
-            cmd, _ = minput(cmd_win, 0, 1, f"File Name for {_name} (without extension)=", default=dfname, all_chars=True)
+            _dfname = dfname
+            if dfname == "merged":
+                _dfname = "test"
+            cmd, _ = minput(cmd_win, 0, 1, f"File Name for {_name} (without extension)=", default=_dfname, all_chars=True)
             cmd = cmd.split(".")[0]
             if cmd != "<ESC>":
                 if char == "}":
@@ -975,8 +988,10 @@ def show_df(df):
                     dfname = cmd
                     char = "SS"
         if char == "SS":
-                save_df = main_df["prefix","input_text","target_text"]
-                save_df.to_csv(os.path.join(base_dir, dfname+".tsv"), sep="\t", index=False)
+                save_df = main_df[["prefix","input_text","target_text"]]
+                save_path = os.path.join(base_dir, dfname+".tsv")
+                Path(base_dir).mkdir(parents = True, exist_ok=True)
+                save_df.to_csv(save_path, sep="\t", index=False)
 
                 save_obj(dfname, "dfname", dfname)
         if char == "r" and prev_char != "x":
@@ -1120,7 +1135,7 @@ std = None
 dfname = ""
 dfpath = ""
 dftype = "full"
-base_dir = os.path.join(home, "mt5-comet/comet/train/" , "sel")
+base_dir = os.path.join(home, "atomic" , "sel")
 def start(stdscr):
     global info_bar, text_win, cmd_win, std, main_win, colors, dfname
     stdscr.refresh()
@@ -1168,7 +1183,7 @@ def start(stdscr):
                 for root, dirs, _files in os.walk(dfpath):
                     for _file in _files:
                         root_file = os.path.join(root,_file)
-                        if dftype in root_file and all(s.strip() in root_file for s in dfname.split("+")):
+                        if dftype in _file and all(s.strip() in root_file for s in dfname.split("+")):
                             files.append(root_file)
         mlog.info("files: %s",files)
         if not files:
@@ -1201,11 +1216,12 @@ def start(stdscr):
                     if not key in df:
                        df[key] = png
                 if fid == "parent":
-                    df["fid"] = str(ii) + "_" + "@".join(f.split("/")[5:]) 
+                    _ff = "@".join(f.split("/")[5:]) 
+                    df["fid"] = _ff.replace("=","+").replace("_","+")
                 elif fid == "name":
-                    df["fid"] = str(ii) + "_" + Path(f).stem
+                    df["fid"] =  "_" + Path(f).stem
                 else:
-                    df["fid"] = str(ii) + "_" + df[fid]
+                    df["fid"] =  "_" + df[fid]
             dfs.append(df)
         if len(dfs) > 1:
             df = pd.concat(dfs, ignore_index=True)

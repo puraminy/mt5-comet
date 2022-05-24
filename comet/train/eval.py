@@ -80,7 +80,7 @@ def generate(model, tokenizer, batch, gen_token = "", gen_param = "greedy", at_m
             "num_return_sequences":1,
             "bad_words_ids": bad_words_ids
         }
-    elif gen_param == "top_p":
+    elif gen_param == "top_p" or gen_param == "top_k":
         gen_kwargs = {
             "max_length":60,
             "do_sample":True, 

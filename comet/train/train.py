@@ -273,7 +273,7 @@ def run(ctx, conf_path, base_conf, experiment,
                 _key=_key.strip("--")
                 if not _key in exclude_list:
                     _ks = "".join([k[0] for k in _key.split("_")])
-                    _extra += "@" + (_ks + "=" + _val if not str(_val)=="True" else _key)
+                    _extra += "@" + (_ks + "+" + _val if not str(_val)=="True" else _key)
                 mlog.info("set %s = %s", _key, _val)
 
                 if _val == "null": 
@@ -696,7 +696,7 @@ def run(ctx, conf_path, base_conf, experiment,
 @click.option(
     "--gen_param",
     "-gp",
-    default="greedy",
+    default="top_k",
     type=str,
     help=""
 )
@@ -1310,8 +1310,8 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
                     _replace_blanks = True
 
             tails_per_head = int(samples_per_head)
-            #if "test" in split_name:
-            #    tails_per_head = 0
+            if "test" in split_name:
+                tails_per_head = 0
             #    _replace_blanks = False
             df_path = split_path[split_name]
             split_df = pd.read_table(df_path)
@@ -1414,9 +1414,14 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
     extra = "_" + now
     m_name = model_id + "-" + method
     p_str = "prefixed" if prefix else "not_prefixed"
-    if tag in args:
-        tag = tag  + "=" + str(args[tag])
-    exp_info = {"exp":tag + "_" + experiment, "model":model_id, "lang": lang, 
+    _tag = ""
+    for _t in tag.split("@"):
+        if _t in args:
+            _tag += "|" + _t  + "=" + str(args[_t])
+        else:
+            _tag += "|" + _t  
+    tag = _tag
+    exp_info = {"exp":experiment, "model":model_id, "lang": lang, 
                     "method":method, 
                     "wrap": w_str + ("-" + encoder_type if wrap else ""),
                     "frozen":f_str, 
@@ -1811,7 +1816,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
         training_args.save_total_limiti=1 
 
         #training_args.logging_steps=5
-        training_args.learning_rate=learning_rate
+        #training_args.learning_rate=learning_rate
         training_args.do_predict=True
         training_args.gradient_accumulation_steps=accumulation_tiny_steps
         train_dataset = myds["train"]#.map(tokenize)
