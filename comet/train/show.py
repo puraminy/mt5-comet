@@ -1226,7 +1226,7 @@ def start(stdscr):
                        df[key] = png
                 if fid == "parent":
                     _ff = "@".join(f.split("/")[5:]) 
-                    df["fid"] = _ff.replace("=","+").replace("_","+")
+                    df["fid"] = _ff #.replace("=","+").replace("_","+")
                 elif fid == "name":
                     df["fid"] =  "_" + Path(f).stem
                 else:

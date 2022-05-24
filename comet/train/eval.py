@@ -209,11 +209,10 @@ def bert_score(bert_scorer, hyps, refs):
 
         return best_hyp_index, best_ref_index, top["score"] 
 
-def save_results(rows, fid, step, exp_info, save_path="", rewrite=False, orig_df = None):
+def save_results(df, fid, step, exp_info, save_path="", rewrite=False):
     pp = save_path.split("/")
     pp = "_".join(pp[-2:])
     name = fid + "_" + human_format(step) 
-
     if save_path:
         path = os.path.join(save_path, name + ".tsv")
     else:
@@ -222,10 +221,6 @@ def save_results(rows, fid, step, exp_info, save_path="", rewrite=False, orig_df
 
     if Path(path).is_file() and rewrite:
         df = pd.read_table(path)
-    else:
-        df = pd.DataFrame(rows)
-        if orig_df is not None:
-            df = orig_df.merge(df, how='outer')
 
     if exp_info: df["val_steps"] = step
     for key, info in exp_info.items():
@@ -234,7 +229,6 @@ def save_results(rows, fid, step, exp_info, save_path="", rewrite=False, orig_df
     mlog.info("Saving results %s", path)
     df.to_csv(path, index=False, sep="\t")
     return df
-# vvvvvvvvvvvvvvv
 # ################################### Evaluation #########################
 def chunks(lst, n):
     """Yield successive n-sized chunks from lst."""
@@ -243,6 +237,7 @@ def chunks(lst, n):
 
 
 
+# vvvvvvvvvvvvvvv
 def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="greedy", scorers="rouge", batch_size="20@5", model = None, tokenizer = None, preds_file = "", set_name = "test", rewrite_info=False):  
 
     file_gen = "_" + Path(preds_file).stem if preds_file else ""
@@ -250,10 +245,8 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
     ext = ""
     outdf_name = "full" + ext
     if rewrite_info:
-        save_results([], outdf_name, len(test_set), exp_info, save_path, rewrite=True)
+        save_results(None, outdf_name, len(test_set), exp_info, save_path, rewrite=True)
         return
-
-
     try:
         nltk_path = str(nltk.data.find("tokenizers/punkt"))
         mlog.info(f"using nltk from: {nltk_path}")
@@ -313,7 +306,7 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
 
     mlog.info("Preparing iterator ...")
     mlog.info("Scoring...")
-    pbar = tqdm(total=val_records, position=0, leave=True) #,dynamic_ncols=True)
+    pbar = tqdm(total=len(test_set), position=0, leave=True) #,dynamic_ncols=True)
     step = 0
     if "@" in batch_size:
         bs, gen_bs = batch_size.split("@")
@@ -367,9 +360,8 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
             l_count += bs 
         pbar.update(bs)
         for (query, inp, tail, rel, qid, repid), top_hyp in zip(batch_list, hyps):
-            tails = [tail]
-            mlog.info("query: %s", query)
-            mlog.info("1)  hyp: %s",top_hyp)
+            mlog.info("\n%s/%s) query: %s", step, len(test_set), query)
+            mlog.info("\nhyp: %s",top_hyp)
             data = {}
             sel_data = {}
             if query != old_query:
@@ -384,33 +376,19 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
             if "<extra_id_1>" in top_hyp:
                 blank, top_hyp = top_hyp.split("<extra_id_1>")
                 if not blank: blank = "EMPT"
-            mlog.info("2)  hyp: %s",top_hyp)
+            mlog.info("hyp: %s",top_hyp)
             for const in resp_const_parts:
                 top_hyp = top_hyp.replace(const, "")
                 blank = blank.replace(const, "")
-            mlog.info("3)  hyp: %s", top_hyp)
+            mlog.info("hyp: %s", top_hyp)
             if not top_hyp.strip():
                 top_hyp = "EMPT"
-            new_tails = []
-            for tail in tails:
-                if not tail.strip():
-                    continue
-                nt = tail
-                #nt = nt.replace(rel_natural_pure, "")
-                for const in resp_const_parts:
-                    nt = nt.replace(const,"")
-                new_tails.append(nt)
-            tails = new_tails
-            all_predictions.append(top_hyp)
-            all_golds.append(tails[0])
             data["blank"] = blank
-            data["pred_text1"] = top_hyp
-            data["target_text"] = "<br />".join(tails)
-            p_rel = rel
-            if exp_info["multi"]:
-                p_rel = "multi_" + rel
-            data["prefix"] = p_rel
+            data["pred_text1"] = str(top_hyp)
+            data["prefix"] = rel
             data["langs"] = lang
+            if test_set.orig_df is None:
+                data["target_text"] = tail
             input_text = re.sub(r'<.*?>','##',query)
             input_text = input_text.replace("\n", "")
             #if blank:
@@ -420,12 +398,24 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
             #    query = query.replace("<extra_id_0>", ">>" + top_hyp)
             data["input_text"] = inp
             data["query"] = query 
-            if not scorers:
-                if step % 10000 == 0:
-                    save_results(rows, "step", step, exp_info, save_path, orig_df = test_dataset.orig_df)
-                step += 1
-                rows.append(data)
-                continue
+            _q = query.replace("<", "\n<", 1)
+            _q = _q.replace(">", ">\n")
+            data["prompt"] = _q
+            rows.append(data)
+            pbar.update()
+            step += 1
+
+    df = pd.DataFrame(rows)
+    if test_set.orig_df is not None:
+       df = test_set.orig_df.merge(df, on=['prefix','input_text'], how='inner')
+    mlog.info("Scoring....")
+    if scorers:
+        rows = []
+        pbar = tqdm(total=len(df), position=0, leave=True) #,dynamic_ncols=True)
+        for step, row in df.iterrows():
+            data = {}
+            rel = row["prefix"]
+            lang = row["langs"] 
             scope = rel + "_" + lang
             if not scope in sum_bert: 
                 sum_bert[scope] = 0
@@ -436,7 +426,11 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
             #mlog.debug("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
             gen_token = gen_tokens[lang]
             #Compute embeddings
+            top_hyp = str(row["pred_text1"])
             preds = [top_hyp]
+            tails = [str(row["target_text"])]
+            all_predictions.append(top_hyp)
+            all_golds.append(tails[0])
             hi, ri = 0, 0
             hi, ri, cur_score = bert_score(bert_scorer, preds, tails)
             #summary = bert_score2(bert_metric, preds, tails)
@@ -452,7 +446,7 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
                 nli_counter[label] += 1
                 data["nli_group"] = label
                 vlog.info("Label:"+ label)
-            data["top"] = best_ref
+            df.at[step, "top"] = best_ref
             data["all_preds"] = "<br />".join(preds) 
             data["top_pred"] = best_hyp
             data["bert_score"] = float("{:.2f}".format(cur_score))
@@ -463,24 +457,6 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
             mean_bert[scope] = "{:.4f}".format(sum_bert[scope] / counter[scope])
             mean_bert["all"] = "{:.4f}".format(sum_bert["all"] / counter["all"])
             #tqdm.write(f"Mean score:{mean_bert}")
-            vlog.info("")
-            vlog.info(f"=============   {lang}  ===  {rel}   =====================")
-            _q = query.replace("<", "\n<", 1)
-            _q = _q.replace(">", ">\n")
-            data["prompt"] = _q
-            vlog.info(str(counter["all"])+ ":" + _q)
-            vlog.info("'''''''''''''''''''''''''''''''''''''''''' Preds:")
-            for h in preds: 
-                if h == best_hyp:
-                    h += " (***) " 
-                vlog.info(h)
-            vlog.debug('"""""""""""""""""""""""""""""""""""""""" Targets:')
-            for _tail in tails:
-                if _tail == best_ref:
-                    _tail += "(*)" 
-                vlog.debug(_tail)
-
-            vlog.info("'''''''''''''''''''''''''''''''''''''''''''''''''''''")
             #mlog.debug(f"TOP hyp:{top_hyp}")
             #mlog.debug(f"Tails: {tails}")
             #### BLUE score
@@ -539,11 +515,13 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
             vlog.info("======================================================")
             pbar.set_description(f"{scope:<20} :Bert:{mean_bert[scope]:<7} | {mean_bert['all']:<7} Rouge {mean_rouge[scope]:<7}|{mean_rouge['all']:<7} ")
             step += 1
-            if step % 10000 == 0:
-                save_results(rows, "step", step, exp_info, save_path, orig_df = test_dataset.orig_df)
             rows.append(data)
 
+    df2 = pd.DataFrame(rows)
+    df = pd.concat([df, df2], axis=1)
 
+    save_results(df, outdf_name, step, exp_info, save_path)
+    return
     # %%%%%%%%%%%%%%%%%%
     _info = "_".join([str(x) for x in list(exp_info.values())])
     #metric_list = ["rouge", "meteor", "bertscore"]
@@ -555,20 +533,18 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
     with open(out, "w") as f:
         print(summary, file=f)
     print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
-    new_df = save_results(rows, outdf_name, step, exp_info, save_path, orig_df = test_dataset.orig_df)
-    #sel_df = save_results(sel_rows, "sel" + ext , step, {}, save_path)
     if not scorers:
         return
 
 
-    new_df = new_df.sort_values(by=["input_text"])
+    df = df.sort_values(by=["input_text"])
     
     out = os.path.join(save_path,f"__{_info}.txt")
-    def write_preds(new_df, out):
+    def write_preds(df, out):
         handler = logging.FileHandler(out, mode="w")
         mlog.addHandler(handler)
         old_input = ""
-        for i, row in new_df.iterrows(): 
+        for i, row in df.iterrows(): 
             q = row["input_text"] 
             p = row["prefix"]
             if q != old_input:
@@ -609,7 +585,7 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
         print("{:<40}:".format(mean_match_str), file = f)
     mlog.info("-----------------------------------------------------")
     pbar.close()
-    pred_counts = new_df['pred_text1'].unique()
+    pred_counts = df['pred_text1'].unique()
     mlog.info("Pred counts")
     vlog.info("Pred counts")
     if len(pred_counts) < 100:
@@ -617,14 +593,14 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
             mlog.info(r)
             vlog.info(r)
 
-    df_mean_rouge = new_df["rouge_score"].mean()
+    df_mean_rouge = df["rouge_score"].mean()
     for logger in [mlog, vlog, clog]:
-        logger.info("Len data frame: {}".format(len(new_df)))
+        logger.info("Len data frame: {}".format(len(df)))
         logger.info("Rouge:{} ".format(mean_rouge_str)) 
         logger.info("DF mean Rouge Score: {}".format(df_mean_rouge))
         if "bert" in scorers:
             logger.info("BERT:{} ".format(mean_bert_str)) 
-            logger.info("DF mean Bert Score: {}".format(new_df["bert_score"].mean()))
+            logger.info("DF mean Bert Score: {}".format(df["bert_score"].mean()))
         #logger.info("nli_counter: {}".format(nli_counter))
         #logger.info("hyp_counter: {}".format(hyp_counter))
         logger.info("Distinct preds:{}".format(len(pred_counts)))

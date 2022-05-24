@@ -257,7 +257,12 @@ def run(ctx, conf_path, base_conf, experiment,
                spath = os.path.join(logPath, experiment)
            if Path(spath).exists() and rem:
                #if input("Are you sure you want to delete the experiment folder?") == "y":
-               shutil.rmtree(spath)
+               #shutil.rmtree(spath)
+               spath = spath.rstrip("/")
+               dirs = glob.glob(spath + '/*/')
+               for d in dirs:
+                    shutil.rmtree(d)
+
            Path(spath).mkdir(exist_ok=True, parents=True)
            if load_data:
                args["data_path"] = spath
@@ -273,7 +278,7 @@ def run(ctx, conf_path, base_conf, experiment,
                 _key=_key.strip("--")
                 if not _key in exclude_list:
                     _ks = "".join([k[0] for k in _key.split("_")])
-                    _extra += "@" + (_ks + "+" + _val if not str(_val)=="True" else _key)
+                    _extra += "@" + (_ks + "=" + _val if not str(_val)=="True" else _key)
                 mlog.info("set %s = %s", _key, _val)
 
                 if _val == "null": 

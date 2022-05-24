@@ -940,7 +940,7 @@ class MyDataset(torch.utils.data.Dataset):
         self.orig_df = None
         if group_them:
             self.orig_df = split_df.copy()
-            split_df = split_df.groupby[group_them].first()
+            split_df = split_df.groupby(group_them, as_index=False).first()
 
         if self.num_samples == 0: 
             self.num_samples = len(split_df)
