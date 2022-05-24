@@ -250,7 +250,7 @@ def run(ctx, conf_path, base_conf, experiment,
            args["config"] = False
            args["output_name"] = "" 
            if add_prefix:
-               args["pre_prefix"] = experiment
+               args["tag"] = experiment
            if addto:
                spath = os.path.join(logPath, addto)
            else:
@@ -331,11 +331,11 @@ def run(ctx, conf_path, base_conf, experiment,
                    if args["rel_filter"] == "multi":
                        args["data_path"] = spath
                        args["rel_filter"] = "" 
-                       args["pre_prefix"] = experiment 
+                       args["tag"] = experiment 
                        args["use_all_data"] = True
                    else:
                        args["data_path"] = ""
-                       args["pre_prefix"] = "" 
+                       args["tag"] = "" 
                        args["use_all_data"] = False
 
                    ctx.invoke(train, **args)
@@ -985,7 +985,7 @@ def run(ctx, conf_path, base_conf, experiment,
     help=""
 )
 @click.option(
-    "--pre_prefix",
+    "--tag",
     "-pre",
     default="",
     type=str,
@@ -1003,7 +1003,7 @@ def run(ctx, conf_path, base_conf, experiment,
     is_flag=True,
     help=""
 )
-def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, sample_samples, load_path, data_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, pre_prefix, skip, use_all_data):
+def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, sample_samples, load_path, data_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, tag, skip, use_all_data):
 
     #%% some hyper-parameters
 
@@ -1074,6 +1074,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
     if use_all_data:
         train_samples, test_samples = 0, 0
 
+    assert Path(train_path).is_file(), f"Train path {train_path} is not!"
     if not load_path:
         load_path = os.path.join(home, "pret")
 
@@ -1406,13 +1407,13 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
     extra = "_" + now
     m_name = model_id + "-" + method
     p_str = "prefixed" if prefix else "not_prefixed"
-    exp_info = {"exp":experiment, "model":model_id, "lang": lang, 
+    exp_info = {"exp":tag + "_" + experiment, "model":model_id, "lang": lang, 
                     "method":method, 
                     "wrap": w_str + ("-" + encoder_type if wrap else ""),
                     "frozen":f_str, 
                     "prefixed":p_str,
                     "pid":pid,
-                    "pre_prefix":pre_prefix,
+                    "tag":tag,
                     "steps":str(train_samples)+"x"+str(repeat)+"x"+str(epochs_num),
                     "plen":prompt_length,
                     "opt_type":opt_type,

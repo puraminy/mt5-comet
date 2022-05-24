@@ -227,6 +227,7 @@ def save_results(rows, fid, step, exp_info, save_path="", rewrite=False):
     if exp_info: df["val_steps"] = step
     for key, info in exp_info.items():
         df[key] = info
+
     mlog.info("Saving results %s", path)
     df.to_csv(path, index=False, sep="\t")
     return df
@@ -403,8 +404,8 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
             data["pred_text1"] = top_hyp
             data["target_text"] = "<br />".join(tails)
             p_rel = rel
-            if exp_info["pre_prefix"]:
-                p_rel = exp_info["pre_prefix"] + "_" + rel
+            if exp_info["tag"]:
+                p_rel = exp_info["tag"] + "_" + rel
             data["prefix"] = p_rel
             data["langs"] = lang
             input_text = re.sub(r'<.*?>','##',query)
