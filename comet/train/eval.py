@@ -209,7 +209,7 @@ def bert_score(bert_scorer, hyps, refs):
 
         return best_hyp_index, best_ref_index, top["score"] 
 
-def save_results(rows, fid, step, exp_info, save_path="", rewrite=False):
+def save_results(rows, fid, step, exp_info, save_path="", rewrite=False, orig_df = None):
     pp = save_path.split("/")
     pp = "_".join(pp[-2:])
     name = fid + "_" + human_format(step) 
@@ -224,6 +224,9 @@ def save_results(rows, fid, step, exp_info, save_path="", rewrite=False):
         df = pd.read_table(path)
     else:
         df = pd.DataFrame(rows)
+        if orig_df is not None:
+            df = orig_df.merge(df, how='outer')
+
     if exp_info: df["val_steps"] = step
     for key, info in exp_info.items():
         df[key] = info
@@ -419,7 +422,7 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
             data["query"] = query 
             if not scorers:
                 if step % 10000 == 0:
-                    save_results(rows, "step", step, exp_info, save_path)
+                    save_results(rows, "step", step, exp_info, save_path, orig_df = test_dataset.orig_df)
                 step += 1
                 rows.append(data)
                 continue
@@ -537,7 +540,7 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
             pbar.set_description(f"{scope:<20} :Bert:{mean_bert[scope]:<7} | {mean_bert['all']:<7} Rouge {mean_rouge[scope]:<7}|{mean_rouge['all']:<7} ")
             step += 1
             if step % 10000 == 0:
-                save_results(rows, "step", step, exp_info, save_path)
+                save_results(rows, "step", step, exp_info, save_path, orig_df = test_dataset.orig_df)
             rows.append(data)
 
 
@@ -552,7 +555,7 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
     with open(out, "w") as f:
         print(summary, file=f)
     print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
-    new_df = save_results(rows, outdf_name, step, exp_info, save_path)
+    new_df = save_results(rows, outdf_name, step, exp_info, save_path, orig_df = test_dataset.orig_df)
     #sel_df = save_results(sel_rows, "sel" + ext , step, {}, save_path)
     if not scorers:
         return

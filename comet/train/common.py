@@ -900,7 +900,8 @@ class MyDataset(torch.utils.data.Dataset):
             sampling=0, ex_type="",  samples_per_head=0, 
             save_ds_path="", repeat=1, pid=0, break_sent=False, 
             sort_key="event", replace_blanks = False, 
-            tokenizer=None, ph_num=3, limit_lang = False, use_dif_templates=False): 
+            tokenizer=None, ph_num=3, limit_lang = False, 
+            use_dif_templates=False, group_them=[]): 
         super(MyDataset).__init__()
         fingerprint = save_ds_path + "_" + split_name + "_"  + method + \
                 "_" + str(len(split_df)) + "_" + str(num_samples) 
@@ -935,6 +936,12 @@ class MyDataset(torch.utils.data.Dataset):
             dlog.info("natural is ON")
         self.num_samples = num_samples
         self.replace_blanks = replace_blanks
+
+        self.orig_df = None
+        if group_them:
+            self.orig_df = split_df.copy()
+            split_df = split_df.groupby[group_them].first()
+
         if self.num_samples == 0: 
             self.num_samples = len(split_df)
             self.samples_per_head = 0

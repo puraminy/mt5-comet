@@ -1314,8 +1314,10 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
                     _replace_blanks = True
 
             tails_per_head = int(samples_per_head)
+            group_them = []
             if "test" in split_name:
                 tails_per_head = 0
+                group_them = ["prefix", "input_text"]
             #    _replace_blanks = False
             df_path = split_path[split_name]
             split_df = pd.read_table(df_path)
@@ -1352,7 +1354,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
                                 sampling, ex_type,
                                 tails_per_head, save_ds_path[split_name], _repeat, 
                                 int(pid), break_sent, sort, _replace_blanks, 
-                                None, int(ph_num),
+                                None, int(ph_num), group_them = group_them
                         )
             if save_data:
                 myds[_name].save_data(os.path.join(save_data,_name + ".tsv"), merge=True)
