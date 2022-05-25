@@ -227,11 +227,18 @@ def cli():
     type=str,
     help=""
 )
+@click.option(
+    "--only_first",
+    "-of",
+    is_flag=True
+    help="only run the first experiment",
+)
 @click.pass_context
 #rrrrrrrrrrr
 def run(ctx, conf_path, base_conf, experiment, 
         exclude_conf, include_conf, overwrite_conf, var, 
-        save_model, addto, rem, save_data, load_data, add_prefix, only_var, sep):
+        save_model, addto, rem, save_data, load_data, add_prefix, 
+        only_var, sep, only_first):
      if not conf_path:
         conf_path = "confs"
         if colab: conf_path = "colab_confs"
@@ -309,6 +316,8 @@ def run(ctx, conf_path, base_conf, experiment,
                tot_comb = [dict(zip(var_names, comb)) for comb in itertools.product(*values)]
                ii = 0
                main_tag = args["tag"]
+               if only_first:
+                   tot_comb = [tot_comb[0]]
                for comb in tot_comb:
                    _output_name = output_name
                    __output_name = output_name
@@ -662,7 +671,7 @@ def run(ctx, conf_path, base_conf, experiment,
 @click.option(
     "--sample_path",
     "-sp",
-    default="sample.tsv",
+    default="val.tsv",
     type=str,
     help=""
 )
@@ -1373,8 +1382,9 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
         if show_samples:
             ds_list = ["sample"]
         else:
-            ds_list = ["train", "validation"]
-            ds_list += ["sample"]
+            ds_list = ["train"]
+            #ds_list += ["validation"]
+            #ds_list += ["sample"]
         myds = load_data(ds_list)
         if "sample" in ds_list:
             samples_iter = iter(myds["sample"])
