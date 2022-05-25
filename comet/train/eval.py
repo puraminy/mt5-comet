@@ -229,9 +229,6 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
         df.to_csv(save_path, index=False, sep="\t")
         return
 
-    base_path = "/content/drive/MyDrive/pret"
-    if not colab:
-        base_path = os.path.join(home, "pret")
 
     mlog.info("Loading models for evaluation ..")
     mlog.info("%s", save_path)
@@ -359,6 +356,9 @@ def do_score(df, scorers, save_path):
         mlog.info(f"using nltk from: {nltk_path}")
     except LookupError:
         nltk.download('punkt')
+    base_path = "/content/drive/MyDrive/pret"
+    if not colab:
+        base_path = os.path.join(home, "pret")
     local_path = f"{base_path}/paraphrase-MiniLM-L6-v2"
     if not Path(local_path).exists():
         local_path = 'sentence-transformers/paraphrase-MiniLM-L6-v2'
