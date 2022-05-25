@@ -300,7 +300,6 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
             mlog.info("\n%s/%s) query: %s", step, len(test_set), query)
             mlog.info("\nhyp: %s",top_hyp)
             data = {}
-            sel_data = {}
             if query != old_query:
                 old_query = query
                 iid += 1
@@ -416,6 +415,7 @@ def do_score(df, scorers, save_path):
             #Compute embeddings
             top_hyp = str(row["pred_text1"])
             preds = [top_hyp]
+            inp = row["input_text"]
             tails = [str(row["target_text"])]
             all_predictions.append(top_hyp)
             all_golds.append(tails[0])
@@ -468,20 +468,6 @@ def do_score(df, scorers, save_path):
                 rouge_score = rouge_score["rouge-l"]["f"]
             match_score = 0
             inp_key = inp + rel
-            if rouge_score > 0.6 and inp_key not in sel_inps:
-                match_score = 1
-                sum_match[scope] += 1
-                is_none = False
-                if "none" in top_hyp.lower():
-                    nones += 1
-                    is_none = True
-                if nones < 200 or not is_none:
-                    sel_data["input_text"] = inp 
-                    sel_data["prefix"] = rel
-                    sel_data["target_text"] = tails[0]
-                    sel_rows.append(sel_data)
-                    sel_inps[inp_key] = True
-
             mean_match[scope] = "{:.4f}".format(sum_match[scope] / counter[scope])
 
             data["rouge_score"] = rouge_score
@@ -489,10 +475,6 @@ def do_score(df, scorers, save_path):
             sum_rouge["all"] += rouge_score
             mean_rouge[scope] = "{:.4f}".format(sum_rouge[scope] / counter[scope])
             mean_rouge_all = sum_rouge["all"] / counter["all"]
-            if val_records > 20000 and step > int(0.5*val_records) and mean_rouge_all < 0.1:
-                mlog.info("Early exit because of low score")
-                exit_loop = True
-                break
             mean_rouge["all"] = "{:.4f}".format(mean_rouge_all)
             #mlog.info("Bert Score:{:.4f}--{}".format(cur_score, mean_bert[scope]))
             #mlog.info("Bert Score 2:{:.4f}".format(b_score))
@@ -508,7 +490,7 @@ def do_score(df, scorers, save_path):
     df2 = pd.DataFrame(rows)
     df = pd.concat([df, df2], axis=1)
 
-    mlog.info("Saving results %s", path)
+    mlog.info("Saving results %s", save_path)
     save_path = os.path.join(save_path, "full_results.tsv")
     df.to_csv(save_path, index=False, sep="\t")
     return
