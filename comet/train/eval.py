@@ -368,14 +368,16 @@ def do_score(df, scorers, save_path):
         bert_scorer = SentenceTransformer(local_path)
         bert_metric = load_metric("bertscore")
 
-    rouge_score = None
+    rouge_scorer = None
     if "rouge" in scorers:
         rouge_scorer = Rouge()
 
-    local_path = f"{base_path}/nli-roberta-base"
+    local_path = f"{base_path}/nli-roberta-base-v2"
     if not Path(local_path).exists():
-        local_path = 'sentence-transformers/nli-roberta-base'
-    nli_model = None #CrossEncoder(local_path)
+        local_path = 'sentence-transformers/nli-roberta-base-v2'
+    nli_model = None
+    if "nli" in scorers:
+        nli_model = CrossEncoder(local_path)
     nli_counter = {}
     for l in nli_map:
         nli_counter[l] = 0
@@ -444,9 +446,6 @@ def do_score(df, scorers, save_path):
             counter["all"] += 1
             mean_bert[scope] = "{:.4f}".format(sum_bert[scope] / counter[scope])
             mean_bert["all"] = "{:.4f}".format(sum_bert["all"] / counter["all"])
-            #tqdm.write(f"Mean score:{mean_bert}")
-            #mlog.debug(f"TOP hyp:{top_hyp}")
-            #mlog.debug(f"Tails: {tails}")
             #### BLUE score
             #tokenized_rs = []
             #for r in tails:
@@ -476,24 +475,21 @@ def do_score(df, scorers, save_path):
             mean_rouge[scope] = "{:.4f}".format(sum_rouge[scope] / counter[scope])
             mean_rouge_all = sum_rouge["all"] / counter["all"]
             mean_rouge["all"] = "{:.4f}".format(mean_rouge_all)
-            #mlog.info("Bert Score:{:.4f}--{}".format(cur_score, mean_bert[scope]))
-            #mlog.info("Bert Score 2:{:.4f}".format(b_score))
-            #mlog.info("Rouge Score:{:.4f}--{}".format(rouge_score, mean_rouge[scope]))
-            #mlog.info("Rouge Score 2:{:.4f}".format(r_score))
-            #mlog.info("Match Score:{}--{}".format(match_score, mean_match[scope]))
-            #vlog.info("BLEU Score:{:.4f}--{}".format(bleu_score, mean_bleu[scope]))
-            vlog.info("======================================================")
             pbar.set_description(f"{scope:<20} :Bert:{mean_bert[scope]:<7} | {mean_bert['all']:<7} Rouge {mean_rouge[scope]:<7}|{mean_rouge['all']:<7} ")
             step += 1
             rows.append(data)
 
+    data = rows[0]
+    for key,val in data.items():
+        if key in df:
+            df.drop(key, axis=1)
     df2 = pd.DataFrame(rows)
     df = pd.concat([df, df2], axis=1)
 
     mlog.info("Saving results %s", save_path)
     save_path = os.path.join(save_path, "full_results.tsv")
     df.to_csv(save_path, index=False, sep="\t")
-    return
+    return df
     # %%%%%%%%%%%%%%%%%%
     _info = "_".join([str(x) for x in list(exp_info.values())])
     #metric_list = ["rouge", "meteor", "bertscore"]

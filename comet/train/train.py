@@ -1041,7 +1041,14 @@ def run(ctx, conf_path, base_conf, experiment,
     is_flag=True,
     help="A tag indicating multi-task"
 )
-def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, sample_samples, load_path, data_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, tag, skip, use_all_data, multi):
+@click.option(
+    "--temp_num",
+    "-tid",
+    default=1,
+    type=int,
+    help="The number of template for each relation"
+)
+def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, sample_samples, load_path, data_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, tag, skip, use_all_data, multi, temp_num):
 
     #%% some hyper-parameters
 
@@ -1187,8 +1194,10 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
         save_path = os.path.join(log_dir, overwrite)
         do_overwrite = True
     if Path(save_path).exists() and skip:
-        mlog.info("Skiping.... the folder already exists!!")
-        return
+        tsv_files = glob.glob(path + "/**/*.tsv", recursive = True)
+        if tsv_files:
+            mlog.info("Skiping.... the folder already exists!!")
+            return
     ii = 1
     while not do_overwrite and Path(save_path).exists() and not model_id=="test":
         if not no_confirm and not do_eval:
@@ -1385,7 +1394,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
                                 sampling, ex_type,
                                 tails_per_head, save_ds_path[split_name], _repeat, 
                                 int(pid), break_sent, sort, _replace_blanks, 
-                                None, int(ph_num), group_them = group_them
+                                None, int(ph_num), group_them = group_them, temp_num = int(temp_num)
                         )
             if save_data:
                 myds[_name].save_data(os.path.join(save_data,_name + ".tsv"), merge=True)

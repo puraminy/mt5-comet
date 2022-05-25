@@ -16,6 +16,7 @@ from comet.mycur.util import *
 from mylogs import * 
 import json
 from comet.utils.myutils import *
+from comet.train.eval import *
 file_id = "name"
 from PIL import Image
 from PIL import ImageFont
@@ -340,10 +341,10 @@ def show_df(df):
         if ch == RIGHT:
             left += width
             adjust = False
-        if ch == DOWN or char == "N":
+        if ch == DOWN:
             sel_row += 1
             adjust = False
-        elif ch == UP or char == "B":
+        elif ch == UP: 
             sel_row -= 1
             adjust = False
         elif ch == cur.KEY_NPAGE:
@@ -380,6 +381,19 @@ def show_df(df):
                 if not col in sel_cols:
                     sel_cols.insert(0, col)
                     save_obj(sel_cols, "sel_cols", dfname)
+        elif char in ["B", "N"]:
+            s_rows = sel_rows
+            if not s_rows:
+                s_rows = [sel_row]
+            for s_row in s_rows:
+                exp=df.iloc[s_row]["exp_id"]
+                cond = f"(main_df['{FID}'] == '{exp}')"
+                df = main_df[main_df[FID] == exp]
+                #df = tdf[["pred_text1", "id", "bert_score","query", "method", "rouge_score", "fid","prefix", "input_text","target_text"]]
+                if char == "B":
+                    df = do_score(df, "bert", Path(df["path"]).parent)
+                tdf = tdf.sort_values(by="bert_score", ascending=False)
+
         elif char in ["I"]:
             canceled, col, val = list_df_values(df, get_val=False)
             if not canceled:

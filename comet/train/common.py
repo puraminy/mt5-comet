@@ -42,73 +42,75 @@ rel_maps = {
 }
 rel_nat_maps = {
     "oReact":{ 
-        "1":"As a result of {event}, others would feel {ph}.",
-        "2":"Others feel {ph} because {event}",
+        1:"As a result of {event}, others would feel {ph}.",
+        2:"Others feel {ph} because {event}",
         "fa":"در نتیجه دیگران حس می کنند",
         "tokens":"<state> <other> <after>",
         "nat-tokens":"then, the state of others is ",
         "desc":"other's reaction to the event"
     },
     "xReact":{ 
-        "1":"As a result of {event}, PersonX would feel {ph}. ",
-        "2":"Others feels {ph} because {event}",
+        1:"As a result of {event}, PersonX would feel {ph}. ",
+        2:"Others feels {ph} because {event}",
         "fa":"در نتیجه PersonX حس می کند", 
         "tokens":"<state> <agent> <after>",
         "nat-tokens":"then, the state of the person is ",
         "desc":"the person's reaction to the event"
     },
     "xWant":{ 
-        "1":"After {event}, PersonX would want {ph}. ",
-        "2":"PersonX wants {ph} after {event}",
+        1:"After {event}, PersonX would want {ph}. ",
+        2:"PersonX wants {ph} after {event}",
         "fa":"بعد از آن PersonX می خواهد",
         "tokens":"<event> <agent> <after> <want>",
         "nat-tokens":"then, the person wants ",
         "desc":"the person's decision after the event"
     },
     "oWant":{ 
-        "1":"After {event}, others would want {ph}. ",
-        "2":"Others want {ph} after {event}",
+        1:"After {event}, others would want {ph}. ",
+        2:"Others want {ph} after {event}",
         "fa":"بعد از آن دیگران می خواهند",
         "tokens":"<event> <other> <after> <want>",
         "nat-tokens":"then, others want ",
         "desc":"other's decision after the event"
     },
     "xEffect":{ 
-        "1":"As a result of {event}, PersonX will {ph}. ",
-        "2":"PersonX {ph} because {event}",
+        1:"As a result of {event}, PersonX will {ph}. ",
+        2:"PersonX {ph} because {event}",
         "fa":"در نتیجه PersonX ",
         "tokens":"<event> <agent> <after> <effect>",
         "nat-tokens":"then, the effect on the person ",
         "desc":"the effect of event on the person"
     },
     "oEffect":{ 
-        "1":"as a result of {event}, others will {ph}. ",
-        "2":"Others {ph} because {event}",
+        1:"as a result of {event}, others will {ph}. ",
+        2:"Others {ph} because {event}",
         "fa":"در نتیجه دیگران ",
         "tokens":"<event> <other> <after> <effect>",
         "nat-tokens":"then, the effect on others ",
         "desc":"the effect of the person on others"
     },
     "xAttr":{ 
-        "1":"{event}, So PersonX is seen as {ph}.",
-        "2":"PersonX is seen as {ph} because {event}",
+        1:"{event}, So PersonX is seen as {ph}.",
+        2:"{event}, So PersonX is seen as a {ph} person.",
+        3:"{event}, PersonX is seen as {ph}.",
+        4:"PersonX is seen as {ph} because {event}",
         "fa":"مردم فکر می کنند PersonX ",
         "tokens":"<state> <agent> <static>",
         "nat-tokens":"always, the state of the person is",
         "desc":"the person's attributes"
     },
     "xIntent":{ 
-        "1":"Because of {event}, PersonX want {ph}",
-        "2":"Because of {event}, PersonX want to {ph}",
-        #"2":"PersonX want {ph}  Therefore, {event}",
+        1:"Because of {event}, PersonX want {ph}",
+        2:"Because of {event}, PersonX want to {ph}",
+        #2:"PersonX want {ph}  Therefore, {event}",
         "fa":"زیرا PersonX می خواست",
         "tokens":"<event> <agent> <before> <cause> <want>",
         "nat-tokens":"before, because the person want ",
         "desc":"the intention of the person"
     },
     "xNeed":{ 
-        "1":"{event}, Before that, PersonX needs {ph}. ",
-        "2":"PersonX needs {ph} before {event}",
+        1:"{event}, Before that, PersonX needs {ph}. ",
+        2:"PersonX needs {ph} before {event}",
         "en":"Before that, PersonX needs {ph} ",
         "fa":"قبل از آن PersonX نیاز دارد",
         "tokens":"<event> <agent> <before> <cause> <need>",
@@ -164,7 +166,7 @@ decoder_relation_mappings = {}
 
 def tokenize_relations(tokenizer, map_lengths=False):
     for rel,phrase in rel_nat_maps.items():
-        natural_rel = phrase["1"]
+        natural_rel = phrase[1]
         #dlog.info("rel ids ***: %s", natural_rel)
         rel_tokens = tokenizer.tokenize(natural_rel)
         rel_nat_maps[rel]["rel_tokens"] = rel_tokens
@@ -209,23 +211,6 @@ def extend_tokenizer(tokenizer, prompt_tokens = [], model_id=""):
     else:
         mlog.info("No new token was added")
 
-def fill_sample(mt, rel):
-    qtemp, anstemp, ex_qtemp, ex_anstemp, context = create_templates(mt, 
-            gen_pos="end")
-    mask =1
-    context_df = None
-    d = {"prefix":rel}
-    event = "test event"
-    resp = "test answer"
-    input_lang = "en"
-    target_lang = "en"
-    gen_token = "gen_en"
-    _qtemp = fill_consts(qtemp, ex_qtemp, context,rel, d, context_df, mask=mask,method = mt)
-    _anstemp = fill_consts(anstemp, ex_anstemp, context,rel, d, context_df, mask=mask,method = mt)
-    _query = fill_vars(_qtemp, rel, event, resp, gen_token, 
-            input_lang, target_lang) 
-    response = fill_vars(_anstemp, rel, event, resp, gen_token, 
-            input_lang, target_lang)
 
 def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words=False, merge_prompts=False, method="", shared_embs =False):
     wrapped_model = None
@@ -241,7 +226,7 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words
         if rel == "com":
             continue
         if from_words == "rel":
-            from_words = rel_nat_maps[rel]["1"]
+            from_words = rel_nat_maps[rel][1]
         if from_words == "rel_tokens":
             prompt_tokens = rel_nat_maps[rel]["rel_tokens"]
 
@@ -322,8 +307,8 @@ def fill_const_for_rel(template, row):
     #dlog.debug("fill const for: %s", text)
     rel = row["prefix"]
     rel_token = rel_maps[rel]        
-    rel_natural_en_postfix = rel_nat_maps[rel]["1"]        
-    rel_natural_en_prefix = rel_nat_maps[rel]["2"]        
+    rel_natural_en_postfix = rel_nat_maps[rel][1]        
+    rel_natural_en_prefix = rel_nat_maps[rel][2]        
     rel_natural_fa = rel_nat_maps[rel]["fa"]        
     rep  = {"{rel}":rel, 
             "{rel_token}":rel_token,
@@ -623,10 +608,10 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            anstemp = "{ph} {resp} {end}"
        elif method == "sup-nat":
            #qtemp = "{rel_natural_pure}" 
-           qtemp = ["{rel_natural}","{rel_natural2}"] 
+           qtemp = "{rel_natural}"
            anstemp = "{resp} {end}"
        elif method == "unsup-nat":
-           qtemp = ["{rel_natural}","{rel_natural2}"] 
+           qtemp = "{rel_natural}"
            anstemp = "{ph} {resp} {end}"
        elif method == "unsup-nat-n":
            qtemp = "{rel_nat_n}"
@@ -638,7 +623,7 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            qtemp = "{event} {rel_natural_fa} {ph}" 
            anstemp = "{ph} {resp} {end}"
        elif method == "unsup-wrap-nat":
-           qtemp = ["{rel_i} {rel_natural}","{rel_i} {rel_natural2}"] 
+           qtemp = "{rel_i} {rel_natural}"
            anstemp = "{ph} {resp} {end}"
        elif method == "unsup-wrap-nat-mid":
            qtemp = "{event} {rel_i} {rel_natural} {rel_i} {ph}" 
@@ -653,7 +638,7 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            qtemp = "{rel_i_start} {event} {rel_i_end} {gen}"
            anstemp = "{resp} {end}"
        elif method == "sup-wrap-nat":
-           qtemp = ["{rel_i} {rel_natural}","{rel_i} {rel_natural2}"] 
+           qtemp = "{rel_i} {rel_natural}"
            anstemp = "{resp} {end}"
        elif method == "sup-no-gen":
            qtemp = "{event}"
@@ -834,9 +819,9 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
        qtemp = ret_q
        return qtemp, anstemp, ex_qtemp, ex_anstemp, context
 
-def fill_vars(template, rel, event, resp, gen_token= "gen_en",  inp_lang="en", resp_lang="en", ph_num=3):
-    rel_natural = rel_nat_maps[rel]["1"]        
-    rel_natural2 = rel_nat_maps[rel]["2"]        
+def fill_vars(template, rel, event, resp, gen_token= "gen_en",  inp_lang="en", resp_lang="en", ph_num=3, temp_num = 1):
+    assert temp_num in rel_nat_maps[rel], rel + " for " + str(temp_num)
+    rel_natural = rel_nat_maps[rel][temp_num]        
     rel_natural_tokens = rel_nat_maps[rel]["nat-tokens"]        
     rel_natural_pure = rel_natural.replace("{ph}", "")
     rel_natural_pure = rel_natural_pure.replace(".", "")
@@ -845,12 +830,10 @@ def fill_vars(template, rel, event, resp, gen_token= "gen_en",  inp_lang="en", r
         rel_n += "<extra_id_" + str(i) + "> "
     rel_nat_n = rel_natural.replace("{ph}", rel_n)
     rel_natural = rel_natural.replace("{ph}", placeholder_token)
-    rel_natural2 = rel_natural2.replace("{ph}", placeholder_token)
     
     rep1  = {
             "{rel_natural}":rel_natural,
             "{rel_natural_pure}":rel_natural_pure,
-            "{rel_natural2}":rel_natural2,
             "{rel_nat_n}":rel_nat_n,
             "{nat_toekns}":rel_natural_tokens,
             "{gen}":gen_token}
@@ -901,7 +884,7 @@ class MyDataset(torch.utils.data.Dataset):
             save_ds_path="", repeat=1, pid=0, break_sent=False, 
             sort_key="event", replace_blanks = False, 
             tokenizer=None, ph_num=3, limit_lang = False, 
-            use_dif_templates=False, group_them=[]): 
+            use_dif_templates=False, group_them=[], temp_num=1): 
         super(MyDataset).__init__()
         fingerprint = save_ds_path + "_" + split_name + "_"  + method + \
                 "_" + str(len(split_df)) + "_" + str(num_samples) 
@@ -909,7 +892,7 @@ class MyDataset(torch.utils.data.Dataset):
         self.data_split = {}
         self.sort_key = sort_key # sort index
         self.ph_num = ph_num
-
+        self.temp_num = temp_num
 
         self.only_blanks = only_blanks
         self.samples_per_head = samples_per_head
@@ -1165,10 +1148,10 @@ class MyDataset(torch.utils.data.Dataset):
         _qtemp = fill_consts(qtemp, ex_qtemp, context, rel, d, context_df, mask=mask,method = mt)
         _anstemp = fill_consts(anstemp, ex_anstemp, context,rel, d, context_df, mask=mask,method = mt)
         _query = fill_vars(_qtemp, rel, event, resp, gen_token, 
-                input_lang, target_lang, self.ph_num) 
+                input_lang, target_lang, self.ph_num, self.temp_num) 
         query = (index, _query)
         response = fill_vars(_anstemp, rel, event, resp, gen_token, 
-                input_lang, target_lang, self.ph_num)
+                input_lang, target_lang, self.ph_num, self.temp_num)
 
         __resp = response.replace(placeholder_token,"")
         _query = _query.strip()
