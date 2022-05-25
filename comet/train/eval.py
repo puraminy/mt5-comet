@@ -209,44 +209,26 @@ def bert_score(bert_scorer, hyps, refs):
 
         return best_hyp_index, best_ref_index, top["score"] 
 
-def save_results(df, fid, step, exp_info, save_path="", rewrite=False):
-    pp = save_path.split("/")
-    pp = "_".join(pp[-2:])
-    name = fid + "_" + human_format(step) 
-    if save_path:
-        path = os.path.join(save_path, name + ".tsv")
-    else:
-        _info = "_".join([str(x) for x in list(exp_info.values())])
-        path = os.path.join(resPath, name + "_" + _info + ".tsv")
-
-    if Path(path).is_file() and rewrite:
-        df = pd.read_table(path)
-
-    if exp_info: df["val_steps"] = step
-    for key, info in exp_info.items():
-        df[key] = info
-
-    mlog.info("Saving results %s", path)
-    df.to_csv(path, index=False, sep="\t")
-    return df
 # ################################### Evaluation #########################
 def chunks(lst, n):
     """Yield successive n-sized chunks from lst."""
     for i in range(0, len(lst), n):
         yield lst[i : i + n]
 
-
-
 # vvvvvvvvvvvvvvv
-def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="greedy", scorers="rouge", batch_size="20@5", model = None, tokenizer = None, preds_file = "", set_name = "test", rewrite_info=False):  
-
-    file_gen = "_" + Path(preds_file).stem if preds_file else ""
-    ext = set_name + file_gen + "_" + scorers 
-    ext = ""
-    outdf_name = "full" + ext
+def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="greedy", scorers="rouge", batch_size="20@5", model = None, tokenizer = None, preds_file = "", set_name = "test", rewrite_info = False):  
     if rewrite_info:
-        save_results(None, outdf_name, len(test_set), exp_info, save_path, rewrite=True)
+        save_path = os.path.join(save_path, "full_results.tsv")
+        if Path(sav_path).is_file() and rewrite:
+            df = pd.read_table(path)
+
+        for key, info in exp_info.items():
+            df[key] = info
+
+        mlog.info("Saving results %s", path)
+        df.to_csv(save_path, index=False, sep="\t")
         return
+
     base_path = "/content/drive/MyDrive/pret"
     if not colab:
         base_path = os.path.join(home, "pret")
@@ -366,9 +348,12 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
     df = pd.DataFrame(rows)
     if test_set.orig_df is not None:
        df = test_set.orig_df.merge(df, on=['prefix','input_text'], how='inner')
-    do_score(df, scorers)
+    for key, info in exp_info.items():
+        df[key] = info
 
-def do_score(df, scorers):
+    do_score(df, scorers, save_path)
+
+def do_score(df, scorers, save_path):
     try:
         nltk_path = str(nltk.data.find("tokenizers/punkt"))
         mlog.info(f"using nltk from: {nltk_path}")
@@ -523,7 +508,9 @@ def do_score(df, scorers):
     df2 = pd.DataFrame(rows)
     df = pd.concat([df, df2], axis=1)
 
-    save_results(df, outdf_name, step, exp_info, save_path)
+    mlog.info("Saving results %s", path)
+    save_path = os.path.join(save_path, "full_results.tsv")
+    df.to_csv(save_path, index=False, sep="\t")
     return
     # %%%%%%%%%%%%%%%%%%
     _info = "_".join([str(x) for x in list(exp_info.values())])
