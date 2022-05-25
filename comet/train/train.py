@@ -230,7 +230,7 @@ def cli():
 @click.option(
     "--only_first",
     "-of",
-    is_flag=True
+    is_flag=True,
     help="only run the first experiment",
 )
 @click.pass_context
@@ -1500,15 +1500,17 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
         data_collator = MyCollator(tokenizer, model, ds_type="train", prefix=prefix)
 
     train_dataset = myds["train"]#.map(tokenize)
-    dev_dataset = myds["validation"]#.map(tokenize)
     train_dataloader = torch.utils.data.DataLoader(train_dataset,
         batch_size=node_batch_size,shuffle=shuffle, num_workers=num_workers,
         collate_fn=data_collator,
     )
-    dev_dataloader = torch.utils.data.DataLoader(dev_dataset,
-        batch_size=node_batch_size,shuffle=shuffle,
-        collate_fn=data_collator,
-    )
+    do_valid = "validation" in myds
+    if do_valid: 
+        dev_dataset = myds["validation"]#.map(tokenize)
+        dev_dataloader = torch.utils.data.DataLoader(dev_dataset,
+            batch_size=node_batch_size,shuffle=shuffle,
+            collate_fn=data_collator,
+        )
     #torch.utils.data.DataLoader(myds['validation'],
     #    batch_size=node_batch_size,shuffle=shuffle,collate_fn=data_collator)
     train_records = myds["train"].num_records
@@ -1688,7 +1690,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
                 step = train_start
             while step < iterations-1:
                 try:
-                    if cycle > 0 and (step % cycle == 0 and step > 0): #validation
+                    if do_valid and cycle > 0 and (step % cycle == 0 and step > 0): #validation
                         with torch.no_grad():
                             if wrap:
                                 wrapped_model.update_model_weight()
