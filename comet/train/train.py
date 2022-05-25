@@ -233,12 +233,18 @@ def cli():
     is_flag=True,
     help="only run the first experiment",
 )
+@click.option(
+    "--cpu",
+    "-cpu",
+    is_flag=True,
+    help="only use cpu"
+)
 @click.pass_context
 #rrrrrrrrrrr
 def run(ctx, conf_path, base_conf, experiment, 
         exclude_conf, include_conf, overwrite_conf, var, 
         save_model, addto, rem, save_data, load_data, add_prefix, 
-        only_var, sep, only_first):
+        only_var, sep, only_first, cpu):
      if not conf_path:
         conf_path = "confs"
         if colab: conf_path = "colab_confs"
@@ -256,6 +262,9 @@ def run(ctx, conf_path, base_conf, experiment,
                return
            args["config"] = False
            args["output_name"] = "" 
+           if cpu:
+               args["cpu"] = True
+               os.environ["CUDA_VISIBLE_DEVICES"] = ""
            if add_prefix:
                args["tag"] = "experiment"
            if addto:
@@ -315,7 +324,8 @@ def run(ctx, conf_path, base_conf, experiment,
                values = [x.split("=")[1].split("#") for x in all_vars]
                tot_comb = [dict(zip(var_names, comb)) for comb in itertools.product(*values)]
                ii = 0
-               main_tag = args["tag"]
+               inp_tag = args["tag"]
+               inp_test_samples = args["test_samples"]
                if only_first:
                    tot_comb = [tot_comb[0]]
                for comb in tot_comb:
@@ -349,9 +359,16 @@ def run(ctx, conf_path, base_conf, experiment,
                        args["multi"]= True
                        args["use_all_data"] = True
                    else:
+                       _dp = os.path.join(dataPath,"sel",args["rel_filter"] + ".tsv")
                        args["data_path"] = ""
                        args["multi"] = False 
-                       args["use_all_data"] = False
+                       if Path(_dp).is_file():
+                           args["test_samples"] = 0
+                           args["test_path"] = _dp
+                       else:
+                           args["use_all_data"] = False
+                           args["test_path"] = "test.tsv"
+                           args["test_samples"] = inp_test_samples
 
                    ctx.invoke(train, **args)
         else:
@@ -1660,10 +1677,11 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
     #%% tttttt
     mlog.info("batch size: %s", batch_size)
     mlog.info("node batch size: %s", node_batch_size)
-    mlog.info(f"============== learning_rate {learning_rate}\n")
-    mlog.info(f"============== frozen {frozen} {fz_parts} \n")
-    mlog.info(f"============== prefixed {prefix}  \n")
-    mlog.info(f"============== wrap {wrap}\n")
+    mlog.info(f"============== learning_rate: {learning_rate}\n")
+    mlog.info(f"============== frozen: {frozen} {fz_parts} \n")
+    mlog.info(f"============== prefixed: {prefix}  \n")
+    mlog.info(f"============== wrap: {wrap}\n")
+    mlog.info(f"============== rel_filter: {rel_filter} | method: {method} | model: {model_id} \n")
     epochs_num = int(epochs_num)
     def train_loop(epochs_num):
         train_iter = iter(train_dataloader)
@@ -1843,7 +1861,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
         training_args.do_predict=True
         training_args.gradient_accumulation_steps=accumulation_tiny_steps
         train_dataset = myds["train"]#.map(tokenize)
-        test_dataset = myds["sample"]
+        #test_dataset = myds["test"]
         trainer = Seq2SeqTrainer(
             args=training_args,
             model=model,
