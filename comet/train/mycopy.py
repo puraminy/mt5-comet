@@ -37,7 +37,13 @@ now = now.strftime('%Y-%m-%d-%H:%M')
     is_flag=True,
     help=""
 )
-def mycopy(fname, path, move, dest_dir, show_dirs, only_name):
+@click.option(
+    "--anywhere",
+    "-a",
+    is_flag=True,
+    help=""
+)
+def mycopy(fname, path, move, dest_dir, show_dirs, only_name, anywhere):
     delete_file = dest_dir == "dd"
     print_file = dest_dir == "pp"
     if glob.glob(fname):
@@ -49,13 +55,21 @@ def mycopy(fname, path, move, dest_dir, show_dirs, only_name):
             if show_dirs:
                 for _file in dirs:
                     root_file = os.path.join(root, _file)
-                    if all(s in root_file for s in fname.split("+")):
-                        files.append(root_file)
+                    if anywhere:
+                        if all(s in root_file for s in fname.split("+")):
+                            files.append(root_file)
+                    else:
+                        if all(s in _file for s in fname.split("+")):
+                            files.append(root_file)
             else:
                 for _file in _files:
                     root_file = os.path.join(root, _file)
-                    if all(s in root_file for s in fname.split("+")):
-                        files.append(root_file)
+                    if anywhere:
+                        if all(s in root_file for s in fname.split("+")):
+                            files.append(root_file)
+                    else:
+                        if all(s in _file for s in fname.split("+")):
+                            files.append(root_file)
     if not dest_dir: dest_dir = now
     for ii, file in enumerate(files):
         if print_file:

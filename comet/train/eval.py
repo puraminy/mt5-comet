@@ -247,11 +247,6 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
     if rewrite_info:
         save_results(None, outdf_name, len(test_set), exp_info, save_path, rewrite=True)
         return
-    try:
-        nltk_path = str(nltk.data.find("tokenizers/punkt"))
-        mlog.info(f"using nltk from: {nltk_path}")
-    except LookupError:
-        nltk.download('punkt')
     base_path = "/content/drive/MyDrive/pret"
     if not colab:
         base_path = os.path.join(home, "pret")
@@ -260,51 +255,12 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
     mlog.info("%s", save_path)
 
     #local_path = f"{base_path}/paraphrase-multilingual-MiniLM-L12-v2"        
-    local_path = f"{base_path}/paraphrase-MiniLM-L6-v2"
-    if not Path(local_path).exists():
-        local_path = 'sentence-transformers/paraphrase-MiniLM-L6-v2'
-
-    bert_scorer = None
-    bert_metric = None
-    if "bert" in scorers:
-        bert_scorer = SentenceTransformer(local_path)
-        bert_metric = load_metric("bertscore")
-
-    rouge_score = None
-    if "rouge" in scorers:
-        rouge_scorer = Rouge()
-
-    local_path = f"{base_path}/nli-roberta-base"
-    if not Path(local_path).exists():
-        local_path = 'sentence-transformers/nli-roberta-base'
-    nli_model = None #CrossEncoder(local_path)
-    nli_counter = {}
-    for l in nli_map:
-        nli_counter[l] = 0
     #df = df.groupby(['prefix','input_text'],as_index=False)[target].agg({"target_text":'<br />'.join})
     #resp_const_parts = re.split("{.*}", anstemp)
     resp_const_parts = ["<pad>","<extra_id_0>", "<extra_id_1>", "<extra_id_2>", "</s>", "."]
     if model is not None: model.eval()
     rows = []
     sel_rows = []
-    counter = {"all":0}
-    sum_match = {"all":0} 
-    mean_match = {}
-    sum_bert = {"all":0} 
-    mean_bert = {}
-    sum_rouge = {"all":0}
-    mean_rouge = {}
-    sum_bleu = {"all":0}
-    mean_bleu = {}
-    new_results = {}
-    smoothie = SmoothingFunction().method4 # a function for smooth
-    hyp_counter = [0]*5
-    ignore_special_tokens = False
-    if "@" in gen_param:
-        _, ist = gen_param.split("@")
-        ignore_special_tokens = ist == "True"
-
-    mlog.info("Preparing iterator ...")
     mlog.info("Scoring...")
     pbar = tqdm(total=len(test_set), position=0, leave=True) #,dynamic_ncols=True)
     step = 0
@@ -336,14 +292,16 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
                   lines = infile.readlines()
             lines = lines[1:]
     l_count = 0
+    ignore_special_tokens = False
+    if "@" in gen_param:
+        _, ist = gen_param.split("@")
+        ignore_special_tokens = ist == "True"
     test_iter = iter(test_set)
     batches = batched(list(test_iter), bs)
     if model is not None:
         dl_iter = iter(dataloader)
     iid  = 0
     old_query = ""
-    all_predictions = []
-    all_golds = []
     for batch_list in batches: 
         if exit_loop:
             break
@@ -408,6 +366,51 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
     df = pd.DataFrame(rows)
     if test_set.orig_df is not None:
        df = test_set.orig_df.merge(df, on=['prefix','input_text'], how='inner')
+    do_score(df, scorers)
+
+def do_score(df, scorers):
+    try:
+        nltk_path = str(nltk.data.find("tokenizers/punkt"))
+        mlog.info(f"using nltk from: {nltk_path}")
+    except LookupError:
+        nltk.download('punkt')
+    local_path = f"{base_path}/paraphrase-MiniLM-L6-v2"
+    if not Path(local_path).exists():
+        local_path = 'sentence-transformers/paraphrase-MiniLM-L6-v2'
+
+    bert_scorer = None
+    bert_metric = None
+    if "bert" in scorers:
+        bert_scorer = SentenceTransformer(local_path)
+        bert_metric = load_metric("bertscore")
+
+    rouge_score = None
+    if "rouge" in scorers:
+        rouge_scorer = Rouge()
+
+    local_path = f"{base_path}/nli-roberta-base"
+    if not Path(local_path).exists():
+        local_path = 'sentence-transformers/nli-roberta-base'
+    nli_model = None #CrossEncoder(local_path)
+    nli_counter = {}
+    for l in nli_map:
+        nli_counter[l] = 0
+    counter = {"all":0}
+    sum_match = {"all":0} 
+    mean_match = {}
+    sum_bert = {"all":0} 
+    mean_bert = {}
+    sum_rouge = {"all":0}
+    mean_rouge = {}
+    sum_bleu = {"all":0}
+    mean_bleu = {}
+    new_results = {}
+    smoothie = SmoothingFunction().method4 # a function for smooth
+    hyp_counter = [0]*5
+
+    all_predictions = []
+    all_golds = []
+    mlog.info("Preparing iterator ...")
     mlog.info("Scoring....")
     if scorers:
         rows = []
