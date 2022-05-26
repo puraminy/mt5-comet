@@ -1714,12 +1714,9 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         collections.deque(itertools.islice(iterator, n), maxlen=0)
 
     #%% tttttt
-    mlog.info("batch size: %s", batch_size)
-    mlog.info("node batch size: %s", node_batch_size)
-    mlog.info(f"============== learning_rate: {learning_rate}\n")
-    mlog.info(f"============== frozen: {frozen} {fz_parts} \n")
-    mlog.info(f"============== prefixed: {prefix}  \n")
-    mlog.info(f"============== wrap: {wrap}\n")
+    mlog.info(f"============== Exp id: {exp_id}\n")
+    mlog.info(f"============== batch size: {batch_size} per node: {node_batch_size} | learning_rate: {learning_rate}\n")
+    mlog.info(f"============== wrap: {wrap} | prefixed: {prefix} | frozen: {frozen} {fz_parts}\n")
     mlog.info(f"============== rel_filter: {rel_filter} | method: {method} | model: {model_id} \n")
     epochs_num = int(epochs_num)
     def train_loop(epochs_num):
