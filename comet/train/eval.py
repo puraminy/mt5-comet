@@ -349,12 +349,12 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
 
     do_score(df, scorers, save_path)
 
-def do_score(df, scorers, save_path):
-    try:
-        nltk_path = str(nltk.data.find("tokenizers/punkt"))
-        mlog.info(f"using nltk from: {nltk_path}")
-    except LookupError:
-        nltk.download('punkt')
+def do_score(df, scorers, save_path, reval=False):
+    #try:
+    #    nltk_path = str(nltk.data.find("tokenizers/punkt"))
+    #    mlog.info(f"using nltk from: {nltk_path}")
+    #except LookupError:
+    #    nltk.download('punkt')
     base_path = "/content/drive/MyDrive/pret"
     if not colab:
         base_path = os.path.join(home, "pret")
@@ -396,8 +396,9 @@ def do_score(df, scorers, save_path):
 
     all_predictions = []
     all_golds = []
-    mlog.info("Preparing iterator ...")
-    mlog.info("Scoring....")
+    if not reval:
+        mlog.info("Preparing iterator ...")
+        mlog.info("Scoring....")
     if scorers:
         rows = []
         pbar = tqdm(total=len(df), position=0, leave=True) #,dynamic_ncols=True)
@@ -435,11 +436,13 @@ def do_score(df, scorers, save_path):
                 label = nli_map[_max]
                 nli_counter[label] += 1
                 data["nli_group"] = label
-                vlog.info("Label:"+ label)
-            df.at[step, "top"] = best_ref
+            data["top"] = best_ref
             data["all_preds"] = "<br />".join(preds) 
             data["top_pred"] = best_hyp
-            data["bert_score"] = float("{:.2f}".format(cur_score))
+            if "bert_score" in df and reval:
+                df.at[step, "bert_score"] = float("{:.2f}".format(cur_score))
+            else:
+                data["bert_score"] = float("{:.2f}".format(cur_score))
             sum_bert[scope] += cur_score
             sum_bert["all"] += cur_score
             counter[scope] += 1
@@ -477,14 +480,12 @@ def do_score(df, scorers, save_path):
             mean_rouge["all"] = "{:.4f}".format(mean_rouge_all)
             pbar.set_description(f"{scope:<20} :Bert:{mean_bert[scope]:<7} | {mean_bert['all']:<7} Rouge {mean_rouge[scope]:<7}|{mean_rouge['all']:<7} ")
             step += 1
+            pbar.update()
             rows.append(data)
 
-    data = rows[0]
-    for key,val in data.items():
-        if key in df:
-            df.drop(key, axis=1)
     df2 = pd.DataFrame(rows)
-    df = pd.concat([df, df2], axis=1)
+    if not reval:
+        df = pd.concat([df, df2], axis=1)
 
     mlog.info("Saving results %s", save_path)
     save_path = os.path.join(save_path, "full_results.tsv")

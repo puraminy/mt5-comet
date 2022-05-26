@@ -239,12 +239,18 @@ def cli():
     is_flag=True,
     help="only use cpu"
 )
+@click.option(
+    "--undone",
+    "-ud",
+    is_flag=True,
+    help="List undone experiments"
+)
 @click.pass_context
 #rrrrrrrrrrr
 def run(ctx, conf_path, base_conf, experiment, 
         exclude_conf, include_conf, overwrite_conf, var, 
         save_model, addto, rem, save_data, load_data, add_prefix, 
-        only_var, sep, only_first, cpu):
+        only_var, sep, only_first, cpu, undone):
      if not conf_path:
         conf_path = "confs"
         if colab: conf_path = "colab_confs"
@@ -262,6 +268,7 @@ def run(ctx, conf_path, base_conf, experiment,
                return
            args["config"] = False
            args["output_name"] = "" 
+           args["experiment"] = experiment 
            if cpu:
                args["cpu"] = True
                os.environ["CUDA_VISIBLE_DEVICES"] = ""
@@ -282,6 +289,8 @@ def run(ctx, conf_path, base_conf, experiment,
            Path(spath).mkdir(exist_ok=True, parents=True)
            if load_data:
                args["data_path"] = spath
+           if undone:
+               args["undone"] = True
            args["save_path"] = spath
            args["load_path"] = pretPath 
            _extra = ""
@@ -328,6 +337,7 @@ def run(ctx, conf_path, base_conf, experiment,
                inp_test_samples = args["test_samples"]
                if only_first:
                    tot_comb = [tot_comb[0]]
+               mlog.info("Total experiments:%s", len(tot_comb))
                for comb in tot_comb:
                    _output_name = output_name
                    __output_name = output_name
@@ -369,8 +379,8 @@ def run(ctx, conf_path, base_conf, experiment,
                            args["use_all_data"] = False
                            args["test_path"] = "test.tsv"
                            args["test_samples"] = inp_test_samples
-
-                   ctx.invoke(train, **args)
+                       args["exp_id"] = ii
+                       ctx.invoke(train, **args)
         else:
             confs = sorted(glob.glob(f"{_path}/*"))
             default_model = ""
@@ -415,6 +425,13 @@ def run(ctx, conf_path, base_conf, experiment,
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Training %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @cli.command()
+@click.option(
+    "--exp_id",
+    "-id",
+    default=1,
+    type=int,
+    help="A number for experiment showing its order"
+)
 @click.option(
     "--model_id",
     "-mid",
@@ -1048,15 +1065,21 @@ def run(ctx, conf_path, base_conf, experiment,
     type=int,
     help="The number of template for each relation"
 )
-def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, sample_samples, load_path, data_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, tag, skip, use_all_data, multi, temp_num):
+@click.option(
+    "--undone",
+    "-ud",
+    is_flag=True,
+    help="Only shows the path without running..."
+)
+def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, sample_samples, load_path, data_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone):
 
     #%% some hyper-parameters
 
     #bbbbbbbbbbb
     #underlying_model_name = "logs/atomic-mt5/last"
-    mlog.info("given load path: %s", load_path)
     vlog.info("given load path: %s", load_path)
-    mlog.info("given save path: %s", save_path)
+    vlog.info("given load path: %s", load_path)
+    vlog.info("given save path: %s", save_path)
     if "dlog" in print_log: # data logger
         dlog.addHandler(consoleHandler)
         dlog.setLevel(logging.DEBUG)
@@ -1069,7 +1092,7 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
 
     args = locals() # input parameters
 
-    mlog.info("========================= Version 8 ========================")
+    mlog.info(f"========================= {experiment}:{exp_id} ========================")
     if save_path == "":
         if "ahmad" or "pouramini" in home:
             save_path = os.path.join(home, "logs")
@@ -1161,12 +1184,9 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
 
     assert learning_rate > 0, "Learning rate is zero!"
     device = 'cuda' if not cpu else 'cpu'
-    mlog.info("Optimizer type %s:", opt_type)
-    mlog.info("learning rate %s:", learning_rate)
 
     log_dir = save_path
     set_device(device)
-    mlog.info("Output name: %s", output_name)
     save_path = os.path.join(log_dir, output_name)
     model_name = f"{learning_rate}_{cycle}_{train_samples}"
     checkpoint = None
@@ -1194,10 +1214,20 @@ def train(model_id, experiment, qtemp, anstemp, extemp, method, val_method, trai
         save_path = os.path.join(log_dir, overwrite)
         do_overwrite = True
     if Path(save_path).exists() and skip:
-        tsv_files = glob.glob(path + "/**/*.tsv", recursive = True)
+        tsv_files = glob.glob(save_path + "/**/*.tsv", recursive = True)
         if tsv_files:
-            mlog.info("Skiping.... the folder already exists!!")
+            print("Skiping.... the folder already exists!!")
             return
+    if undone: # only report it wasn't done
+        _ss = save_path.split("/")
+        for _mm in _ss:
+            if "=" in _mm:
+                print(_mm)
+        return
+
+    mlog.info("Optimizer type %s:", opt_type)
+    mlog.info("learning rate %s:", learning_rate)
+    mlog.info("Output name: %s", output_name)
     ii = 1
     while not do_overwrite and Path(save_path).exists() and not model_id=="test":
         if not no_confirm and not do_eval:
