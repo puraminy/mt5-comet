@@ -287,7 +287,7 @@ def show_df(df):
 
     def backit(df, sel_cols):
         back.append(df)
-        sels.append(sel_cols)
+        sels.append(sel_cols.copy())
         back_rows.append(sel_row)
     for _col in ["input_text","pred_text1","target_text"]:
         if _col in df:
