@@ -131,7 +131,7 @@ def show_df(df):
             mprint(row, text_win)
         refresh()
 
-   def save_df(df): 
+    def save_df(df): 
         s_rows = range(len(df))
         show_msg("Saving ...")
         for s_row in s_rows:
@@ -208,6 +208,7 @@ def show_df(df):
     #wwwwwwwwww
     colors = ['blue','orange','green', 'red', 'purple', 'brown', 'pink','gray','olive','cyan']
     ax = None
+    context = dfname
     font = ImageFont.truetype("/usr/share/vlc/skins2/fonts/FreeSans.ttf", 68)
     seq = ""
     search = ""
@@ -314,6 +315,8 @@ def show_df(df):
         left = max(left, 0)
         sel_row = min(sel_row, len(df) - 1)
         sel_row = max(sel_row, 0)
+        cur_col = min(cur_col, len(sel_cols) - 1)
+        cur_col = max(cur_col, 0)
         if not hotkey:
             if adjust:
                 _, col_widths = row_print(df, sel_row, col_widths={})
@@ -442,7 +445,7 @@ def show_df(df):
             if not canceled:
                 if not col in sel_cols:
                     sel_cols.insert(0, col)
-                    save_obj(sel_cols, "sel_cols", dfname)
+                    save_obj(sel_cols, "sel_cols", context)
         elif char in ["W"]:
             save_df(df)
         elif char in ["B", "N"]:
@@ -467,6 +470,10 @@ def show_df(df):
                 main_df.loc[eval(cond), "bert_score"] = tdf["bert_score"]
             df = main_df
             hotkey = "gG"
+        elif char == "h":
+            col = sel_cols[cur_col]
+            sel_cols.remove(col)
+            save_obj(sel_cols, "sel_cols", context)
         elif is_enter(ch) and not prev_char == "x":
             backit(df,sel_cols)
             exp=df.iloc[sel_row]["exp_id"]
@@ -635,11 +642,13 @@ def show_df(df):
             consts["path"] = path
         elif char in ["G"]:
             backit(df, sel_cols)
+            context = "grouped"
             col = FID
             left = 0
             _glist = [col, "prefix"]
-            cur_col = 0
-            sel_cols = ["exp_id","tag","method", "model", "n_preds","rouge_score", "steps", "opt_type", "pid", "plen", "prefix", "hscore", "bert_score", "br_score","nr_score", "learning_rate",  "num_targets", "num_inps", "num_records", "wrap", "frozen", "prefixed"]
+            sel_cols = load_obj("sel_cols", context, [])
+            if not sel_cols:
+                sel_cols = ["exp_id","tag","method", "model", "n_preds","rouge_score", "steps", "opt_type", "pid", "plen", "prefix", "hscore", "bert_score", "br_score","nr_score", "learning_rate",  "num_targets", "num_inps", "num_records", "wrap", "frozen", "prefixed"]
 
             num_targets = (df['prefix']+'_'+df['target_text']).groupby(df[col]).nunique()
             n_preds = (df['prefix']+'_'+df['pred_text1']).groupby(df[col]).nunique()
@@ -676,7 +685,7 @@ def show_df(df):
             sel_rows = []
             FID = "input_text"
             hotkey = "gG"
-        elif char in ["n", "p", "t", "i", "h"] and prev_cahr != "x":
+        elif char in ["n", "p", "t", "i"] and prev_cahr != "x":
             left = 0
             s_rows = sel_rows
             if not sel_rows:
@@ -922,7 +931,8 @@ def show_df(df):
                 ax = None
                 if "ahmad" in home:
                     subprocess.run(["eog", pname])
-        elif char == "R":
+
+        elif char == "R" and prev_char == "x":
             canceled, col,val = list_df_values(main_df, get_val=False)
             if not canceled:
                 new_name = rowinput(f"Rename {col}:")
@@ -1126,6 +1136,8 @@ def show_df(df):
             filter_df = main_df
             df = filter_df
             FID = sel_cols[cur_col]
+            sel_cols = []
+            save_obj("sel_cols", context, [])
             hotkey = "gG"
         if char == "r" and prev_char == "x":
             df = main_df
