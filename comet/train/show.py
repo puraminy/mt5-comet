@@ -135,7 +135,7 @@ def show_df(df):
         s_rows = range(len(df))
         show_msg("Saving ...")
         for s_row in s_rows:
-            exp=df.iloc[s_row]["fid"]
+            exp=df.iloc[s_row]["exp_id"]
             tdf = main_df[main_df["fid"] == exp]
             spath = tdf.iloc[0]["path"]
             tdf.to_csv(spath, sep="\t", index=False)
@@ -474,7 +474,7 @@ def show_df(df):
             col = sel_cols[cur_col]
             sel_cols.remove(col)
             save_obj(sel_cols, "sel_cols", context)
-        elif is_enter(ch) and not prev_char == "x":
+        elif char == "X" and not prev_char == "x":
             backit(df,sel_cols)
             exp=df.iloc[sel_row]["exp_id"]
             cond = f"(main_df['{FID}'] == '{exp}')"
@@ -861,8 +861,9 @@ def show_df(df):
                 y = cols[1]
                 #ax = df.plot.scatter(ax=ax, x=x, y=y)
                 ax = sns.regplot(df[x],df[y])
-        elif char in ["f", "F"]:
+        elif is_enter(ch) or char in ["f", "F"]:
             backit(df, sel_cols)
+            if is_enter(ch): char = "f"
             col = sel_cols[cur_col]
             canceled, col, val = list_df_values(filter_df, col, get_val=True)
             if not canceled:
