@@ -80,10 +80,10 @@ def find_common(df, main_df, on_col_list, s_rows, FID, char):
         mlog.info("%s == %s", FID, exp)
         cond = f"(main_df['{FID}'] == '{exp}')"
         tdf = main_df[main_df[FID] == exp]
-        tdf = tdf[["pred_text1", "exp_name", "id", "bert_score","query", "method", "rouge_score", "fid","prefix", "input_text","target_text"]]
+        tdf = tdf[["pred_text1", "exp_name", "id","hscore", "bert_score","query", "method", "rouge_score", "fid","prefix", "input_text","target_text"]]
         tdf = tdf.sort_values(by="rouge_score", ascending=False)
         if len(tdf) > 1:
-            tdf = tdf.groupby(on_col_list).agg({"exp_name":"first","query":"first","input_text":"first","target_text":"first", "method":"first", "rouge_score":"first","prefix":"first","pred_text1":"first", "fid":"first", "id":"count","bert_score":"first"}).reset_index(drop=True)
+            tdf = tdf.groupby(on_col_list).agg({"exp_name":"first","query":"first","input_text":"first","target_text":"first", "hscore":"first", "method":"first", "rouge_score":"first","prefix":"first","pred_text1":"first", "fid":"first", "id":"count","bert_score":"first"}).reset_index(drop=True)
             for on_col in on_col_list:
                 tdf[on_col] = tdf[on_col].astype(str).str.strip()
         dfs.append(tdf) #.copy())
@@ -131,6 +131,14 @@ def show_df(df):
             mprint(row, text_win)
         refresh()
 
+   def save_df(df): 
+        s_rows = range(len(df))
+        show_msg("Saving ...")
+        for s_row in s_rows:
+            exp=df.iloc[s_row]["fid"]
+            tdf = main_df[main_df["fid"] == exp]
+            spath = tdf.iloc[0]["path"]
+            tdf.to_csv(spath, sep="\t", index=False)
 
 
     if not col_widths:
@@ -139,8 +147,10 @@ def show_df(df):
     df['id']=df.index
     df = df.reset_index(drop=True)
     if not "tag" in df:
+        df["tag"] = np.NaN 
 
-        df["tag"] = "n/a"
+    if not "hscore" in df:
+        df["hscore"] = np.NaN 
 
     if not "pid" in df:
         df["pid"] = 0
@@ -377,6 +387,22 @@ def show_df(df):
             if _sw >= left + COLS - 10:
                 left = _sw - 10 
             adjust = False
+        if char in ["+","-","*","/"]:
+            _inp=df.iloc[sel_row]["input_text"]
+            _prefix=df.iloc[sel_row]["prefix"]
+            _pred_text=df.iloc[sel_row]["pred_text1"]
+            _fid=df.iloc[sel_row]["fid"]
+            cond = ((main_df["fid"] == _fid) & (main_df["input_text"] == _inp) &
+                    (main_df["prefix"] == _prefix) & (main_df["pred_text1"] == _pred_text))
+            if char == "+": _score = 1.
+            if char == "-": _score = 0.
+            if char == "/": _score = 0.4
+            if char == "*": _score = 0.7
+
+            main_df.loc[cond, "hscore"] = _score 
+            sel_exp = _fid
+            sel_row += 1
+            adjust = False
         if ch == DOWN:
             sel_row += 1
             adjust = False
@@ -418,14 +444,7 @@ def show_df(df):
                     sel_cols.insert(0, col)
                     save_obj(sel_cols, "sel_cols", dfname)
         elif char in ["W"]:
-            s_rows = range(len(df))
-            show_msg("Saving ...")
-            for s_row in s_rows:
-                exp=df.iloc[s_row]["fid"]
-                cond = f"(main_df['fid'] == '{exp}')"
-                tdf = main_df[main_df[FID] == exp]
-                spath = tdf.iloc[0]["path"]
-                tdf.to_csv(spath, sep="\t", index=False)
+            save_df(df)
         elif char in ["B", "N"]:
             s_rows = sel_rows
             from comet.train.eval import do_score
@@ -434,7 +453,7 @@ def show_df(df):
             if char == "N":
                 s_rows = range(len(df))
             for s_row in s_rows:
-                exp=df.iloc[s_row]["exp_id"]
+                exp=df.iloc[s_row]["fid"]
                 _score=df.iloc[s_row]["bert_score"]
                 if _score > 0:
                     continue
@@ -453,9 +472,9 @@ def show_df(df):
             exp=df.iloc[sel_row]["exp_id"]
             cond = f"(main_df['{FID}'] == '{exp}')"
             df = main_df[main_df[FID] == exp]
-            sel_cols=["prefix","input_text","target_text","pred_text1","bert_score"]
+            sel_cols=["fid","input_text","target_text","pred_text1", "hscore","bert_score","prefix"]
             df = df[sel_cols]
-            df = df.sort_values(by="bert_score", ascending=False)
+            df = df.sort_values(by="input_text", ascending=False)
         elif char in ["I"]:
             canceled, col, val = list_df_values(df, get_val=False)
             if not canceled:
@@ -596,6 +615,9 @@ def show_df(df):
             #tdf = df.groupby(['fid','prefix','input_text'],as_index=False).agg(target_text=('target_text','<br />'.join)).rename(columns={'target_text':'top_target'})
             #df = df.sort_values(score_col, ascending=False).drop_duplicates(['fid','prefix','input_text']).merge(tdf)
             df["rouge_score"] = df.groupby(['fid','prefix','input_text'])["rouge_score"].transform("max")
+            df["bert_score"] = df.groupby(['fid','prefix','input_text'])["bert_score"].transform("max")
+            df["hscore"] = df.groupby(['fid','prefix','input_text'])["hscore"].transform("max")
+            df["nr_score"] = df.groupby(['fid','prefix','input_text'])["nr_score"].transform("max")
             if not group_col in info_cols: info_cols.append(group_col)
             sel_cols.append("n_preds")
             consts["filter"].append("group predictions")
@@ -606,7 +628,7 @@ def show_df(df):
                 sel_rows.append(sel_row)
             adjust = False
         elif char == "?": 
-            exp=df.iloc[sel_row]["exp_id"]
+            exp=df.iloc[sel_row]["fid"]
             sel_exp = exp
             consts["exp"] = exp
             path = main_df.loc[main_df["fid"] == exp, "path"][0]
@@ -617,13 +639,13 @@ def show_df(df):
             left = 0
             _glist = [col, "prefix"]
             cur_col = 0
-            sel_cols = ["exp_id","tag","method", "model", "n_preds","rouge_score", "steps", "opt_type", "pid", "plen", "prefix", "bert_score", "br_score","nr_score", "learning_rate",  "num_targets", "num_inps", "num_records", "wrap", "frozen", "prefixed"]
+            sel_cols = ["exp_id","tag","method", "model", "n_preds","rouge_score", "steps", "opt_type", "pid", "plen", "prefix", "hscore", "bert_score", "br_score","nr_score", "learning_rate",  "num_targets", "num_inps", "num_records", "wrap", "frozen", "prefixed"]
 
             num_targets = (df['prefix']+'_'+df['target_text']).groupby(df[col]).nunique()
             n_preds = (df['prefix']+'_'+df['pred_text1']).groupby(df[col]).nunique()
             num_inps = (df['prefix']+'_'+df['input_text']).groupby(df[col]).nunique()
             _agg = "frist"
-            df = (df.groupby(col).agg({"tag":"first","prefix":"first", "learning_rate":"first", "opt_type":"first", "id":"count","rouge_score":"mean", "plen":"first", "pid":"first", "bert_score":"mean", "nr_score":"mean", "method":"first","model":"first", "wrap":"first", col:"first", "steps":"first", 
+            df = (df.groupby(col).agg({"tag":"first","prefix":"first", "learning_rate":"first", "opt_type":"first", "id":"count","rouge_score":"mean", "hscore":"mean", "plen":"first", "pid":"first", "bert_score":"mean", "nr_score":"mean", "method":"first","model":"first", "wrap":"first", col:"first", "steps":"first", 
                 "l1_decoder":"first", "l1_encoder":"first",
                 "cossim_decoder":"first", "cossim_encoder":"first",
                 "frozen":"first", "prefixed":"first"})
@@ -719,7 +741,7 @@ def show_df(df):
             sel_rows = []
             info_cols.append("sum_fid")
 
-        elif char == "M" and prev_char != "x":
+        elif char == "m" and prev_char != "x":
             left = 0
             if sel_exp and on_col_list:
                 backit(df, sel_cols)
@@ -727,8 +749,9 @@ def show_df(df):
                 _item=df.iloc[sel_row][_col]
                 sel_row = 0
                 df = main_df[(main_df[FID] == sel_exp) & (main_df[_col] == _item)]
-                df = df[["pred_text1","target_text","rouge_score","input_text", "prefix"]]
-                df = df.sort_values(by="rouge_score", ascending=False)
+                sel_cols = ["fid","input_text","pred_text1","target_text","bert_score", "hscore", "rouge_score", "prefix"]
+                df = df[sel_cols]
+                df = df.sort_values(by="bert_score", ascending=False)
         elif char == "D" and prev_char != "x":
             s_rows = sel_rows
             if FID == "fid":
@@ -829,7 +852,7 @@ def show_df(df):
                 y = cols[1]
                 #ax = df.plot.scatter(ax=ax, x=x, y=y)
                 ax = sns.regplot(df[x],df[y])
-        elif char in ["f", "F", "m"]:
+        elif char in ["f", "F"]:
             backit(df, sel_cols)
             col = sel_cols[cur_col]
             canceled, col, val = list_df_values(filter_df, col, get_val=True)
@@ -960,7 +983,10 @@ def show_df(df):
         elif char == "w":
             sel_rows = []
             adjust = True
-        elif char == "/":
+            tdf = main_df[main_df['fid'] == sel_exp]
+            spath = tdf.iloc[0]["path"]
+            tdf.to_csv(spath, sep="\t", index=False)
+        elif char == "/" and prev_char == "x":
             old_search = search
             search = rowinput("/", search)
             if search == old_search:
@@ -976,6 +1002,7 @@ def show_df(df):
             cmd = rowinput("Are you sure you want to exit? (y/n)")
             if cmd == "y":
                 ch = ord("q")
+                save_df(df)
             else:
                 ch = 0
         if cmd == "fix_types":
@@ -1067,6 +1094,7 @@ def show_df(df):
         if cmd.isnumeric():
             sel_row = int(cmd)
         elif cmd == "q":
+            save_df(df)
             ch = ord("q")
         elif not char in ["q", "S","r"]:
             pass
