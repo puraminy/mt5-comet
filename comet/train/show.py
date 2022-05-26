@@ -139,7 +139,9 @@ def show_df(df):
     df['id']=df.index
     df = df.reset_index(drop=True)
     if not "tag" in df:
+
         df["tag"] = "n/a"
+
     if not "pid" in df:
         df["pid"] = 0
     if not "l1_decoder" in df:
@@ -273,7 +275,7 @@ def show_df(df):
                        cell_color = TITLE_COLOR
                    else:
                        cell_color = _color
-                   rext = textwrap.shorten(text, width=37, placeholder="...")
+                   rext = textwrap.shorten(text, width=36, placeholder="...")
                    text = "{:<{x}}".format(content, x= _w)
                    if _print:
                        mprint(text, text_win, color = cell_color, end="") 
@@ -415,6 +417,15 @@ def show_df(df):
                 if not col in sel_cols:
                     sel_cols.insert(0, col)
                     save_obj(sel_cols, "sel_cols", dfname)
+        elif char in ["W"]:
+            s_rows = range(len(df))
+            show_msg("Saving ...")
+            for s_row in s_rows:
+                exp=df.iloc[s_row]["fid"]
+                cond = f"(main_df['fid'] == '{exp}')"
+                tdf = main_df[main_df[FID] == exp]
+                spath = tdf.iloc[0]["path"]
+                tdf.to_csv(spath, sep="\t", index=False)
         elif char in ["B", "N"]:
             s_rows = sel_rows
             from comet.train.eval import do_score
