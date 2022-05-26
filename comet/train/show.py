@@ -91,7 +91,7 @@ def find_common(df, main_df, on_col_list, s_rows, FID, char):
     if ii > 1:
         intersect = reduce(lambda  left,right: pd.merge(left,right,on=on_col_list,
                                     how='inner'), dfs)
-        if char == "a":
+        if char == "n":
             union = reduce(lambda  left,right: pd.merge(left,right,on=on_col_list,
                                     how='outer'), dfs)
             dfs_val["union"] = str(len(union))
@@ -236,6 +236,8 @@ def show_df(df):
            if ii == sel_row:
                 _color = CUR_ITEM_COLOR
            if _print:
+               mprint(text, text_win, color = _color, end="") 
+           if _print:
                _cols = sel_cols + info_cols
            else:
                _cols = sel_cols
@@ -302,6 +304,7 @@ def show_df(df):
             text = "{:<5}".format(sel_row)
             for i, sel_col in enumerate(sel_cols):
                if not sel_col in df:
+                   sel_cols.remove(sel_col)
                    continue
                head = sel_col 
                #head = textwrap.shorten(f"{i} {head}" , width=15, placeholder=".")
@@ -528,7 +531,7 @@ def show_df(df):
                     save_obj(sel_cols, "sel_cols", dfname)
         elif char in "56789" and prev_char == "\\":
             cmd = "top@" + str(int(char)/10)
-        elif char in ["A"]: 
+        elif char in ["a"]: 
             col = sel_cols[cur_col]
             FID = col 
             consts["FID"] = FID
@@ -611,7 +614,7 @@ def show_df(df):
             df["num_targets"] = num_targets
             df["num_inps"] = num_inps
             df = df.sort_values(by = ["rouge_score"], ascending=False)
-        elif char == "n":
+        elif char == ">":
             hotkey = "bNh"
         elif char == "u":
             left = 0
@@ -630,7 +633,7 @@ def show_df(df):
             sel_rows = []
             FID = "input_text"
             hotkey = "gG"
-        elif char in ["a", "p", "t", "i", "h"] and prev_cahr != "x":
+        elif char in ["n", "p", "t", "i", "h"] and prev_cahr != "x":
             left = 0
             s_rows = sel_rows
             if not sel_rows:
@@ -650,7 +653,7 @@ def show_df(df):
             on_col_list.extend(["prefix"])
             g_cols = []
             _rows = s_rows
-            if char == "a":
+            if char == "n":
                 dfs = []
                 all_rows = range(len(df))
                 for r1 in all_rows:
@@ -689,7 +692,7 @@ def show_df(df):
                 elif not _col in on_col_list and not _col in info_cols:
                     info_cols.append(_col)
             info_cols.append("prefix")
-            if char == "a":
+            if char == "n":
                 sel_cols = list(df.columns)
             sel_row = 0
             sel_rows = []
