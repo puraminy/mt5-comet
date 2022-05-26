@@ -266,12 +266,14 @@ def show_df(df):
                    col_widths[sel_col] = len(content) + 4
                if len(content) > col_widths[sel_col]:
                    col_widths[sel_col] = len(content) + 4
-               _w = col_widths[sel_col] if sel_col in col_widths else width
+               col_widths[sel_col] = min(col_widths[sel_col],40)
+               _w = col_widths[sel_col] 
                if sel_col in sel_cols:
                    if sel_col == sel_cols[cur_col] and ii != sel_row:
                        cell_color = TITLE_COLOR
                    else:
                        cell_color = _color
+                   rext = textwrap.shorten(text, width=37, placeholder="...")
                    text = "{:<{x}}".format(content, x= _w)
                    if _print:
                        mprint(text, text_win, color = cell_color, end="") 
@@ -351,6 +353,12 @@ def show_df(df):
         vals = []
         get_cmd = False
         adjust = True
+        if ch == SLEFT:
+            left -= 10
+            adjust = False
+        if ch == SRIGHT:
+            left += 10
+            adjust = False
         if ch == LEFT:
             cur_col -= 1
             cur_col = max(0, cur_col)
@@ -678,7 +686,7 @@ def show_df(df):
             sel_cols = on_col_list
             info_cols = []
             sel_cols.remove("prefix")
-            _from_cols = ["pred_text1", "id", "pred_text1_x", "pred_text1_y","query_x","query_y", "query", "method", "prefix", "input_text","target_text_x", "target_text", "fid_x", "fid_y", "rouge_score", "rouge_score_x","rouge_score_y", "bert_score", "bert_score_x", "bert_score_y"]
+            _from_cols = ["pred_text1", "id", "pred_text1_x", "pred_text1_y","query_x","query_y", "query", "method", "prefix", "input_text","target_text_x", "target_text", "rouge_score", "rouge_score_x","rouge_score_y", "bert_score", "bert_score_x", "bert_score_y", "exp_name_x", "exp_name_y"]
             if "exp_name_x" in df:
                 fid_x = df.iloc[0]["exp_name_x"]
                 fid_y = df.iloc[0]["exp_name_y"]
