@@ -80,10 +80,10 @@ def find_common(df, main_df, on_col_list, s_rows, FID, char):
         mlog.info("%s == %s", FID, exp)
         cond = f"(main_df['{FID}'] == '{exp}')"
         tdf = main_df[main_df[FID] == exp]
-        tdf = tdf[["pred_text1", "id", "bert_score","query", "method", "rouge_score", "fid","prefix", "input_text","target_text"]]
+        tdf = tdf[["pred_text1", "exp_name", "id", "bert_score","query", "method", "rouge_score", "fid","prefix", "input_text","target_text"]]
         tdf = tdf.sort_values(by="rouge_score", ascending=False)
         if len(tdf) > 1:
-            tdf = tdf.groupby(on_col_list).agg({"query":"first","input_text":"first","target_text":"first", "method":"first", "rouge_score":"first","prefix":"first","pred_text1":"first", "fid":"first", "id":"count","bert_score":"first"}).reset_index(drop=True)
+            tdf = tdf.groupby(on_col_list).agg({"exp_name":"first","query":"first","input_text":"first","target_text":"first", "method":"first", "rouge_score":"first","prefix":"first","pred_text1":"first", "fid":"first", "id":"count","bert_score":"first"}).reset_index(drop=True)
             for on_col in on_col_list:
                 tdf[on_col] = tdf[on_col].astype(str).str.strip()
         dfs.append(tdf) #.copy())
@@ -242,7 +242,9 @@ def show_df(df):
            else:
                _cols = sel_cols
            for sel_col in _cols: 
-               if not sel_col in row or sel_col in _sels:
+               if  sel_col in _sels:
+                   continue
+               if not sel_col in row: 
                    if sel_col in sel_cols:
                        sel_cols.remove(sel_col)
                    continue
@@ -677,11 +679,11 @@ def show_df(df):
             info_cols = []
             sel_cols.remove("prefix")
             _from_cols = ["pred_text1", "id", "pred_text1_x", "pred_text1_y","query_x","query_y", "query", "method", "prefix", "input_text","target_text_x", "target_text", "fid_x", "fid_y", "rouge_score", "rouge_score_x","rouge_score_y", "bert_score", "bert_score_x", "bert_score_y"]
-            if "fid_x" in df:
-                fid_x = df.iloc[0]["fid_x"]
-                fid_y = df.iloc[0]["fid_y"]
-                df["fid_x"] = "|".join(list(set(fid_x.split("@")) - set(fid_y.split("@"))))
-                df["fid_y"] = "|".join(list(set(fid_y.split("@")) - set(fid_x.split("@"))))
+            if "exp_name_x" in df:
+                fid_x = df.iloc[0]["exp_name_x"]
+                fid_y = df.iloc[0]["exp_name_y"]
+                df["exp_name_x"] = "|".join(list(set(fid_x.split("@")) - set(fid_y.split("@"))))
+                df["exp_name_y"] = "|".join(list(set(fid_y.split("@")) - set(fid_x.split("@"))))
             for _col in _from_cols:
                 if (_col.startswith("id") or
                     _col.startswith("pred_text1") or 
@@ -810,7 +812,8 @@ def show_df(df):
                 ax = sns.regplot(df[x],df[y])
         elif char in ["f", "F", "m"]:
             backit(df, sel_cols)
-            canceled, col, val = list_df_values(filter_df, get_val=True)
+            col = sel_cols[cur_col]
+            canceled, col, val = list_df_values(filter_df, col, get_val=True)
             if not canceled:
                if char == "F" and prev_char == "x":
                     cond = get_cond(filter_df, col, num=15)
