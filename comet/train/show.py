@@ -132,6 +132,7 @@ def show_df(df):
         refresh()
 
     def save_df(df): 
+        return
         s_rows = range(len(df))
         show_msg("Saving ...")
         for s_row in s_rows:
@@ -456,7 +457,7 @@ def show_df(df):
             if char == "N":
                 s_rows = range(len(df))
             for s_row in s_rows:
-                exp=df.iloc[s_row]["fid"]
+                exp=df.iloc[s_row]["exp_id"]
                 _score=df.iloc[s_row]["bert_score"]
                 if _score > 0:
                     continue
