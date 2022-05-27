@@ -74,19 +74,19 @@ def generate(model, tokenizer, batch, gen_token = "", gen_param = "greedy", at_m
         gen_param, skip_special = gen_param.split("@")
     if gen_param == "greedy":
         gen_kwargs = {
-            "max_length":60,
-            "num_beams":5,
+            "max_length":40,
+            "num_beams":8,
             "repetition_penalty":5.5,
             "num_return_sequences":1,
             "bad_words_ids": bad_words_ids
         }
     elif gen_param == "top_p" or gen_param == "top_k":
         gen_kwargs = {
-            "max_length":60,
+            "max_length":40,
             "do_sample":True, 
             "top_p":0.9, 
             "top_k":10,
-            "num_beams":5,
+            "num_beams":8,
             "temperature": 1.0,
             "num_return_sequences":1, 
             "repetition_penalty":5.5,
