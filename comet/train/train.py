@@ -919,7 +919,7 @@ def run(ctx, conf_path, base_conf, experiment,
 @click.option(
     "--gen_bs",
     "-gb",
-    default="30@10",
+    default="10@10",
     type=str,
     help="Batch sizes for generation."
 )

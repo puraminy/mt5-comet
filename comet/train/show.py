@@ -1017,6 +1017,25 @@ def show_df(df):
                 save_df(df)
             else:
                 ch = 0
+        if cmd == "export":
+            doc_dir = "/home/pouramini/Documents/Paper1/icml-kr"
+            with open(f"{doc_dir}/table.txt", "r") as f:
+                cont = f.read()
+            for rel in ["xAttr", "xNeed", "xIntent", "xReact"]:
+                out = open(f"{doc_dir}/{rel}.txt", "w")
+                for met in ["unsup-nat", "sup-nat", "sup"]:
+                    for mod in ["t5-v1", "t5-lmb", "t5-base"]:
+                        for sc in ["rouge_score", "bert_score", "hscore", "n_preds"]:
+                            cond = ((df['prefix'] == rel) &
+                                    (df["method"] == met) &
+                                    (df["model"] == mod))
+                            val = df.loc[cond, sc].max()
+                            val = round(val,2)
+                            val = "{:.2f}".format(val)
+                            cont = cont.replace(met + "@" + mod + "@" + sc, val)
+                out.write(cont)
+                out.close()
+
         if cmd == "fix_types":
             for col in ["target_text", "pred_text1"]: 
                 main_df[col] = main_df[col].astype(str)
