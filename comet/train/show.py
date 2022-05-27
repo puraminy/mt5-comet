@@ -1021,8 +1021,9 @@ def show_df(df):
             doc_dir = "/home/pouramini/Documents/Paper1/icml-kr/table"
             for samp in ["50x1x3", "100x1x3", "200x1x3"]:
                 with open(f"{doc_dir}/table.txt", "r") as f:
-                    cont = f.read()
+                    table_cont = f.read()
                 for rel in ["xAttr", "xNeed", "xIntent", "xReact"]:
+                    cont = table_cont
                     out = open(f"{doc_dir}/{rel}_{samp}.txt", "w")
                     for met in ["unsup-nat", "sup-nat", "sup"]:
                         for mod in ["t5-v1", "t5-lmb", "t5-base"]:

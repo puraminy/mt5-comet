@@ -991,10 +991,12 @@ class MyDataset(torch.utils.data.Dataset):
         if rel_filter and not rel_filter in self.sel_rels:
             self.sel_rels.append(rel_filter)
         self.methods = method.split("+")
+        if repeat < len(self.methods) - 1: 
+            repeat = len(self.methods)
         self.sampling = sampling
         self.limit_lang = limit_lang
-        if len(self.methods) > 1 and split_name == "validation":
-            self.methods = self.methods[0]
+        if len(self.methods) > 1 and split_name != "train":
+            self.methods = [self.methods[0]]
 
         self.split_df = split_df
         self.old_input = ""
@@ -1124,7 +1126,8 @@ class MyDataset(torch.utils.data.Dataset):
         gen_token = gen_tokens[targ_col]
         input_lang = "en" #langs[inp]
         target_lang = "en" #langs[targ_col]
-        mt = self.methods[0]
+        mt_idx = rep % len(self.methods)
+        mt = self.methods[mt_idx]
         if "-fa" in mt and input_lang == "fa":
             event = toPers(event)
         if "-fa" in mt and target_lang == "fa":
