@@ -993,11 +993,12 @@ class MyDataset(torch.utils.data.Dataset):
         self.methods = method.split("+")
         if repeat < len(self.methods) - 1: 
             repeat = len(self.methods)
-        self.sampling = sampling
-        self.limit_lang = limit_lang
         if len(self.methods) > 1 and split_name != "train":
             self.methods = [self.methods[0]]
+            repeat=1
 
+        self.sampling = sampling
+        self.limit_lang = limit_lang
         self.split_df = split_df
         self.old_input = ""
         self.si = 0

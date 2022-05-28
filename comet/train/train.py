@@ -333,8 +333,7 @@ def run(ctx, conf_path, base_conf, experiment,
                values = [x.split("=")[1].split("#") for x in all_vars]
                tot_comb = [dict(zip(var_names, comb)) for comb in itertools.product(*values)]
                ii = 0
-               inp_tag = args["tag"]
-               inp_test_samples = args["test_samples"]
+               orig_args = args.copy()
                if only_first:
                    tot_comb = [tot_comb[0]]
                mlog.info("Total experiments:%s", len(tot_comb))
@@ -350,6 +349,7 @@ def run(ctx, conf_path, base_conf, experiment,
                            if var_item.strip() == "True":
                                var_item = True
                            args[var_name]=var_item
+                           orig_args[var_name] = var_item
                        if not var_name in exclude_list:
                            _output_name +=  sep + var_name + "=" + str(var_item)
                        __output_name +=  sep + var_name + "=" + str(var_item)
@@ -370,15 +370,15 @@ def run(ctx, conf_path, base_conf, experiment,
                        args["use_all_data"] = True
                    else:
                        _dp = os.path.join(dataPath,"sel",args["rel_filter"] + ".tsv")
-                       args["data_path"] = ""
+                       args["data_path"] = orig_args["data_path"]
                        args["multi"] = False 
                        if Path(_dp).is_file():
                            args["test_samples"] = 0
                            args["test_path"] = _dp
                        else:
                            args["use_all_data"] = False
-                           args["test_path"] = "test.tsv"
-                           args["test_samples"] = inp_test_samples
+                           args["test_path"] = orig_args["test_path"]
+                           args["test_samples"] = orig_args["test_samples"] 
                        args["exp_id"] = ii
                        ctx.invoke(train, **args)
         else:
@@ -483,13 +483,6 @@ def run(ctx, conf_path, base_conf, experiment,
 @click.option(
     "--test_samples",
     "-tn",
-    default=0,
-    type=int,
-    help=""
-)
-@click.option(
-    "--sample_samples",
-    "-sn",
     default=0,
     type=int,
     help=""
@@ -699,13 +692,6 @@ def run(ctx, conf_path, base_conf, experiment,
     "--test_path",
     "-tep",
     default="test.tsv",
-    type=str,
-    help=""
-)
-@click.option(
-    "--sample_path",
-    "-sp",
-    default="val.tsv",
     type=str,
     help=""
 )
@@ -1071,7 +1057,7 @@ def run(ctx, conf_path, base_conf, experiment,
     is_flag=True,
     help="Only shows the path without running..."
 )
-def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, sample_samples, load_path, data_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone):
+def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone):
 
     #%% some hyper-parameters
 
@@ -1136,12 +1122,10 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         train_path = os.path.join(data_path, train_path) 
         test_path = os.path.join(data_path, test_path)
         val_path = os.path.join(data_path, val_path) 
-        sample_path = os.path.join(data_path, sample_path) 
     else:
         train_path = os.path.join(data_path, "train.tsv")
         test_path = os.path.join(data_path, "test.tsv")
         val_path = os.path.join(data_path, "val.tsv")
-        sample_path = os.path.join(data_path, "sample.tsv")
 
     if use_all_data:
         train_samples, test_samples = 0, 0
@@ -1345,8 +1329,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         length = [int(s) for s in str(prompt_length).split("-")]
         set_prompt_lengths(rel_filter, length)
 
-    num_samples = {"train": int(train_samples), "validation":int(val_samples), "sample":int(sample_samples), "test":int(test_samples)}
-    split_path = {"train":train_path, "validation":val_path, "sample":sample_path, "test":test_path}
+    num_samples = {"train": int(train_samples), "validation":int(val_samples), "test":int(test_samples)}
+    split_path = {"train":train_path, "validation":val_path, "test":test_path}
     save_ds_path = {}
     for split, _path in split_path.items():
         #_path = _path.replace(".tsv","_")
@@ -1435,21 +1419,15 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         val_records = myds[test_set].num_records
         train_records = 0
     else:
-        if show_samples:
-            ds_list = ["sample"]
-        else:
-            ds_list = ["train"]
-            #ds_list += ["validation"]
-            #ds_list += ["sample"]
+        ds_list = ["train"]
+        #ds_list += ["validation"]
+        #ds_list += ["sample"]
         myds = load_data(ds_list)
-        if "sample" in ds_list:
-            samples_iter = iter(myds["sample"])
+        if show_samples: 
+            samples_iter = iter(myds["train"])
             _sample = True
             generate_samples["sample"] = []
-            if not show_samples:
-                logger = dlog
-            else:
-                logger = mlog
+            logger = mlog
             logger.info("----------- SAMPLES -------------")
             while _sample:
                 _sample = next(samples_iter, None)
@@ -1716,6 +1694,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     #%% tttttt
     mlog.info(f"============== Exp id: {exp_id}\n")
     mlog.info(f"============== batch size: {batch_size} per node: {node_batch_size} | learning_rate: {learning_rate}\n")
+    mlog.info(f"============== train samples: {train_samples} test_samples: {test_samples} | repeat: {repeat}  epochs: {epochs_num}\n")
     mlog.info(f"============== wrap: {wrap} | prefixed: {prefix} | frozen: {frozen} {fz_parts}\n")
     mlog.info(f"============== rel_filter: {rel_filter} | method: {method} | model: {model_id} \n")
     epochs_num = int(epochs_num)
@@ -1889,8 +1868,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         training_args.per_device_train_batch_size=node_batch_size
         training_args.num_train_epochs=epochs_num
         training_args.save_strategy="steps"
-        training_args.save_stepsi=10000 
-        training_args.save_total_limiti=1 
+        training_args.save_steps=10000 
+        training_args.save_total_limit=1 
 
         #training_args.logging_steps=5
         #training_args.learning_rate=learning_rate
@@ -1912,7 +1891,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             #test_dataset=test_dataset,
         )
         train_result = trainer.train()
-    #vvv
+    #vvvvvv
     if test_set:
         if "@" in gen_bs:
             test_bs,_ = gen_bs.split("@")
