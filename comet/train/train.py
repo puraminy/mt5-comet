@@ -228,10 +228,11 @@ def cli():
     help=""
 )
 @click.option(
-    "--only_first",
-    "-of",
-    is_flag=True,
-    help="only run the first experiment",
+    "--num_exps",
+    "-ne",
+    default=0,
+    type=int,
+    help="number of experiments to be done, 0 means all"
 )
 @click.option(
     "--cpu",
@@ -250,7 +251,7 @@ def cli():
 def run(ctx, conf_path, base_conf, experiment, 
         exclude_conf, include_conf, overwrite_conf, var, 
         save_model, addto, rem, save_data, load_data, add_prefix, 
-        only_var, sep, only_first, cpu, undone):
+        only_var, sep, num_exps, cpu, undone):
      if not conf_path:
         conf_path = "confs"
         if colab: conf_path = "colab_confs"
@@ -334,8 +335,10 @@ def run(ctx, conf_path, base_conf, experiment,
                tot_comb = [dict(zip(var_names, comb)) for comb in itertools.product(*values)]
                ii = 0
                orig_args = args.copy()
-               if only_first:
-                   tot_comb = [tot_comb[0]]
+               inp_tag = args["tag"]
+               inp_test_samples = args["test_samples"]
+               if num_exps > 0:
+                   tot_comb = tot_comb[:num_exps]
                mlog.info("Total experiments:%s", len(tot_comb))
                for comb in tot_comb:
                    _output_name = output_name
@@ -391,7 +394,6 @@ def run(ctx, conf_path, base_conf, experiment,
                 if not experiment in fname:
                     mlog.info("Skipping .... This was not in experiments")
                     continue
-                if exclude_conf and exclude_conf in fname:
                     mlog.info("Skipping .... by exclude")
                     continue
                 if include_conf and not include_conf in fname:
