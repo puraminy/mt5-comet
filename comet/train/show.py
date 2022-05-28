@@ -1028,16 +1028,16 @@ def show_df(df):
                 save_df(df)
             else:
                 ch = 0
-        if cmd == "export":
+        if cmd == "report":
             doc_dir = os.path.join(home, "Documents/Paper1/icml-kr")
             with open(f"{doc_dir}/report.tex.temp", "r") as f:
                 report = f.read()
             table_dir = os.path.join(doc_dir, "table")
             all_steps = df['steps'].unique()
-            for samp in all_steps:
+            for rel in df['prefix'].unique(): 
                 with open(f"{table_dir}/table.txt", "r") as f:
                     table_cont = f.read()
-                for rel in ["xAttr", "xNeed", "xIntent", "xReact"]:
+                for samp in all_steps:
                     cont = table_cont
                     table_file = f"{table_dir}/{rel}_{samp}.txt"
                     out = open(table_file, "w")
