@@ -1029,14 +1029,18 @@ def show_df(df):
             else:
                 ch = 0
         if cmd == "export":
-            doc_dir = os.path.join(home, "Documents/Paper1/icml-kr/table")
+            doc_dir = os.path.join(home, "Documents/Paper1/icml-kr")
+            with open(f"{doc_dir}/report.tex.temp", "r") as f:
+                report = f.read()
+            table_dir = os.path.join(doc_dir, "table")
             all_steps = df['steps'].unique()
             for samp in all_steps:
-                with open(f"{doc_dir}/table.txt", "r") as f:
+                with open(f"{table_dir}/table.txt", "r") as f:
                     table_cont = f.read()
                 for rel in ["xAttr", "xNeed", "xIntent", "xReact"]:
                     cont = table_cont
-                    out = open(f"{doc_dir}/{rel}_{samp}.txt", "w")
+                    table_file = f"{table_dir}/{rel}_{samp}.txt"
+                    out = open(table_file, "w")
                     for met in df["method"].unique():
                         for mod in ["t5-v1", "t5-lmb", "t5-base"]:
                             for sc in ["rouge_score", "bert_score", "hscore", "n_preds"]:
@@ -1046,10 +1050,27 @@ def show_df(df):
                                         (df["model"] == mod))
                                 val = df.loc[cond, sc].max()
                                 val = round(val,2)
-                                val = "{:.2f}".format(val)
-                                cont = cont.replace(met + "@" + mod + "@" + sc, val)
+                                if sc != "n_preds":
+                                    val = "{:.2f}".format(val)
+                                else:
+                                    val = str(int(val))
+                                cont = cont.replace("@" + met + "@" + mod + "@" + sc, val)
                     out.write(cont)
                     out.close()
+                    lable = "results:" + rel + "_" + samp
+                    caption = f"{rel} for {samp}"
+                    table = """
+                        \\begin{{table*}}
+                            \centering
+                            \label{{{}}}
+                            \caption{{{}}}
+                            \input{{{}}}
+                        \end{{table*}}
+                        """
+                    table = table.format(lable, caption, table_file)
+                    report = report.replace("mytable", table +"\n\n" + "mytable")
+            with open(f"{doc_dir}/report.tex", "w") as f:
+                f.write(report)
 
         if cmd == "fix_types":
             for col in ["target_text", "pred_text1"]: 
