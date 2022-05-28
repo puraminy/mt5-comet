@@ -86,6 +86,7 @@ def find_common(df, main_df, on_col_list, s_rows, FID, char):
             tdf = tdf.groupby(on_col_list).agg({"exp_name":"first","query":"first","input_text":"first","target_text":"first", "hscore":"first", "method":"first", "rouge_score":"first","prefix":"first","pred_text1":"first", "fid":"first", "id":"count","bert_score":"first"}).reset_index(drop=True)
             for on_col in on_col_list:
                 tdf[on_col] = tdf[on_col].astype(str).str.strip()
+            #tdf = tdf.set_index(on_col_list)
         dfs.append(tdf) #.copy())
         ii += 1
     if ii > 1:
@@ -425,6 +426,12 @@ def show_df(df):
             sel_row -= ROWS - 4
         elif char == "l" and prev_char == "l":
             seq = ""
+        elif char == "=":
+            col = info_cols[-1]
+            sel_cols.insert(cur_col, col)
+        elif char == ">":
+            col = info_cols.pop()
+            sel_cols.insert(cur_col, col)
         elif char in "01234" and prev_char == "#":
             canceled, col, val = list_df_values(df, get_val=False)
             if not canceled:
@@ -471,7 +478,7 @@ def show_df(df):
                 #main_df.loc[eval(cond), "bert_score"] = tdf["bert_score"]
             df = main_df
             hotkey = "gG"
-        elif char == "h":
+        elif char == "<":
             col = sel_cols[cur_col]
             sel_cols.remove(col)
             info_cols.append(col)
@@ -588,11 +595,11 @@ def show_df(df):
             consts["FID"] = FID
             df = filter_df
             hotkey="gG"
-        elif char in "56789" and prev_char != "\\":
-            ii = int(char) - 5
+        elif char == "A":
             arr = ["prefix","fid","query","input_text","method"]
-            if ii < len(arr):
-                FID = arr[ii] 
+            canceled, col = list_values(arr)
+            if not canceled:
+                FID = col 
                 consts["FID"] = FID
                 df = filter_df
                 hotkey="gG"
@@ -671,8 +678,6 @@ def show_df(df):
             df["num_targets"] = num_targets
             df["num_inps"] = num_inps
             df = df.sort_values(by = ["rouge_score"], ascending=False)
-        elif char == ">":
-            hotkey = "bNh"
         elif char == "u":
             left = 0
             backit(df, sel_cols)
@@ -723,31 +728,38 @@ def show_df(df):
                 df = df.sort_values(by="int", ascending=False)
             else:
                 df, sel_exp = find_common(df, filter_df, on_col_list, _rows, FID, char)
-            if "pred_text1_x" in df:
+            if len(sel_rows) == 2:
                 _all = len(df)
                 df = df[df['pred_text1_x'].str.strip() != df['pred_text1_y'].str.strip()]
                 _dif = len(df)
                 _common = _all - _dif
                 consts["Common"] = _common
-
+                if "exp_name_x" in df:
+                    fid_x = df.iloc[0]["exp_name_x"]
+                    fid_y = df.iloc[0]["exp_name_y"]
+                    df["exp_name_x"] = "|".join(list(set(fid_x.split("@")) - set(fid_y.split("@"))))
+                    df["exp_name_y"] = "|".join(list(set(fid_y.split("@")) - set(fid_x.split("@"))))
             sel_cols = on_col_list
             info_cols = []
             sel_cols.remove("prefix")
-            _from_cols = ["pred_text1", "id", "pred_text1_x", "pred_text1_y","query_x","query_y", "query", "method", "prefix", "input_text","target_text_x", "target_text", "rouge_score", "rouge_score_x","rouge_score_y", "bert_score", "bert_score_x", "bert_score_y", "exp_name_x", "exp_name_y"]
-            if "exp_name_x" in df:
-                fid_x = df.iloc[0]["exp_name_x"]
-                fid_y = df.iloc[0]["exp_name_y"]
-                df["exp_name_x"] = "|".join(list(set(fid_x.split("@")) - set(fid_y.split("@"))))
-                df["exp_name_y"] = "|".join(list(set(fid_y.split("@")) - set(fid_x.split("@"))))
-            for _col in _from_cols:
-                if (_col.startswith("id") or
-                    _col.startswith("pred_text1") or 
-                    _col.startswith("rouge_score") or 
-                    _col=="target_text" or 
-                    _col.startswith("bert_score")):
-                    sel_cols.append(_col)
-                elif not _col in on_col_list and not _col in info_cols:
-                    info_cols.append(_col)
+            if len(sel_rows) > 2:
+                df = df.reset_index()
+                _from_cols = list(df.columns) 
+                sel_cols.append("target_text")
+                for _col in _from_cols:
+                    if _col.startswith("pred_text1"):
+                        info_cols.append(_col)
+            else:
+                _from_cols = ["pred_text1", "id", "pred_text1_x", "pred_text1_y","query_x","query_y", "query", "method", "prefix", "input_text","target_text_x", "target_text", "rouge_score", "rouge_score_x","rouge_score_y", "bert_score", "bert_score_x", "bert_score_y", "exp_name_x", "exp_name_y"]
+                for _col in _from_cols:
+                    if (_col.startswith("id") or
+                        _col.startswith("pred_text1") or 
+                        _col.startswith("rouge_score") or 
+                        _col=="target_text" or 
+                        _col.startswith("bert_score")):
+                        sel_cols.append(_col)
+                    elif not _col in on_col_list and not _col in info_cols:
+                        info_cols.append(_col)
             info_cols.append("prefix")
             if char == "n":
                 sel_cols = list(df.columns)
