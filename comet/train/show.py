@@ -197,13 +197,8 @@ def show_df(df):
     back = []
     sels = []
     filter_df = main_df
-    FID = "method"
     if "pred_text1" in df:
-        _glist = [FID]
-        #df["num_inps"] = df.groupby(_glist)[['input_text']].transform('nunique')
-        #df["num_records"] = df.groupby(_glist)[['input_text']].transform('count')
         br_col = df.loc[: , "bert_score":"rouge_score"]
-        #df['br_score'] = br_col.mean(axis=1)
         df['nr_score'] = df['rouge_score']
         df['nr_score'] = np.where((df['bert_score'] > 0.4) & (df['nr_score'] < 0.1), df['bert_score'], df['rouge_score'])
 
@@ -225,7 +220,8 @@ def show_df(df):
     if not "opt_type" in df:
         df["opt_type"] = "na"
     prev_cahr = ""
-    hotkey = "6"
+    FID = "fid"
+    hotkey = "gG"
     sel_exp = ""
     infos = []
     back_rows = []
@@ -595,7 +591,11 @@ def show_df(df):
             consts["FID"] = FID
             df = filter_df
             hotkey="gG"
-        elif char == "A":
+        elif char == "A": 
+            sel_rows = []
+            for i in range(len(df)):
+                sel_rows.append(i)
+        elif char == "A" and prev_char == 'x':
             arr = ["prefix","fid","query","input_text","method"]
             canceled, col = list_values(arr)
             if not canceled:
@@ -778,20 +778,27 @@ def show_df(df):
                 sel_cols = ["fid","input_text","pred_text1","target_text","bert_score", "hscore", "rouge_score", "prefix"]
                 df = df[sel_cols]
                 df = df.sort_values(by="bert_score", ascending=False)
-        elif char == "D" and prev_char != "x":
+        elif char == "D" or ch == cur.KEY_SDC or char == "d":
             s_rows = sel_rows
             if FID == "fid":
-                if not s_rows:
-                    s_rows = [sel_row]
-                for s_row in s_rows:
-                    exp=df.iloc[s_row]["exp_id"]
-                    cond = f"(main_df['fid'] == '{exp}')"
-                    tdf = main_df[main_df["fid"] == exp]
-                    spath = tdf.iloc[0]["path"]
-                    main_df = main_df.drop(main_df[eval(cond)].index)
-                    df = main_df
-                    hotkey = "gG"
-                    os.remove(spath)
+                mdf = main_df.groupby("fid", as_index=False).first()
+                mdf = mdf.copy()
+                sels = df["exp_id"]
+                for s_row, row in mdf.iterrows():
+                    exp=row["fid"]
+                    if char == "d":
+                        cond = main_df['fid'].isin(sels) 
+                    else:
+                        cond = ~main_df['fid'].isin(sels) 
+                    tdf = main_df[cond]
+                    if  ch == cur.KEY_SDC:
+                        spath = row["path"]
+                        os.remove(spath)
+                    main_df = main_df.drop(main_df[cond].index)
+                df = main_df
+                filter_df = main_df
+                sel_rows = []
+                hotkey = "gG"
         elif char == "D" and prev_char == "x":
             canceled, col,val = list_df_values(main_df, get_val=False)
             if not canceled:
@@ -965,7 +972,7 @@ def show_df(df):
 
 
 
-        elif char in ["d"]:
+        elif char in ["d"] and prev_char == "x":
             canceled, col, val = list_df_values(main_df)
             if not canceled:
                 main_df = main_df.drop(main_df[main_df[col] == val].index)
@@ -977,7 +984,7 @@ def show_df(df):
             col = sel_cols[cur_col]
             sel_cols.remove(col)
             save_obj(sel_cols, "sel_cols", context)
-        elif ch == cur.KEY_SDC:
+        elif ch == cur.KEY_SDC and prev_char == 'x':
             col = sel_cols[0]
             val = sel_dict[col]
             cmd = rowinput("Are you sure you want to delete {} == {} ".format(col,val))
@@ -1069,7 +1076,10 @@ def show_df(df):
                                 if sc != "n_preds":
                                     val = "{:.2f}".format(val)
                                 else:
-                                    val = str(int(val))
+                                    try:
+                                       val = str(int(val))
+                                    except:
+                                       val = "NA"
                                 cont = cont.replace("@" + met + "@" + mod + "@" + sc, val)
                     out.write(cont)
                     out.close()
