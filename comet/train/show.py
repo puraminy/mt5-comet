@@ -869,7 +869,10 @@ def show_df(df):
             backit(df, sel_cols)
             if is_enter(ch): char = "F"
             col = sel_cols[cur_col]
-            canceled, col, val = list_df_values(filter_df, col, get_val=True)
+            if char == "f":
+                canceled, col, val = list_df_values(main_df, col, get_val=True)
+            else:
+                canceled, col, val = list_df_values(filter_df, col, get_val=True)
             if not canceled:
                if char == "F" and prev_char == "x":
                     cond = get_cond(filter_df, col, num=15)
@@ -886,7 +889,8 @@ def show_df(df):
                    else:
                        df = filter_df
                    df = df[eval(cond)]
-                   df = df.reset_index()
+                   #df = df.reset_index()
+                   filter_df = df
                    if not "filter" in consts:
                         consts["filter"] = []
                    consts["filter"].append(cond)
@@ -1167,7 +1171,7 @@ def show_df(df):
         if char == "r" and prev_char != "x":
             filter_df = main_df
             df = filter_df
-            FID = sel_cols[cur_col]
+            FID = "fid" 
             sel_cols = []
             save_obj([], "sel_cols", context)
             save_obj([], "info_cols", context)
