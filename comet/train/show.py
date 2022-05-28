@@ -474,7 +474,9 @@ def show_df(df):
         elif char == "h":
             col = sel_cols[cur_col]
             sel_cols.remove(col)
+            info_cols.append(col)
             save_obj(sel_cols, "sel_cols", context)
+            save_obj(info_cols, "info_cols", context)
         elif char == "X" and not prev_char == "x":
             backit(df,sel_cols)
             exp=df.iloc[sel_row]["exp_id"]
@@ -648,6 +650,7 @@ def show_df(df):
             left = 0
             _glist = [col, "prefix"]
             sel_cols = load_obj("sel_cols", context, [])
+            info_cols = load_obj("info_cols", context, [])
             if not sel_cols:
                 sel_cols = ["exp_id","tag","method", "model", "n_preds","rouge_score", "steps", "opt_type", "pid", "plen", "prefix", "hscore", "bert_score", "br_score","nr_score", "learning_rate",  "num_targets", "num_inps", "num_records", "wrap", "frozen", "prefixed"]
 
@@ -864,7 +867,7 @@ def show_df(df):
                 ax = sns.regplot(df[x],df[y])
         elif is_enter(ch) or char in ["f", "F"]:
             backit(df, sel_cols)
-            if is_enter(ch): char = "f"
+            if is_enter(ch): char = "F"
             col = sel_cols[cur_col]
             canceled, col, val = list_df_values(filter_df, col, get_val=True)
             if not canceled:
@@ -954,6 +957,10 @@ def show_df(df):
                 if col in df:
                     df = df.drop(df[df[col] == val].index)
         elif ch == cur.KEY_DC:
+            col = sel_cols[cur_col]
+            sel_cols.remove(col)
+            save_obj(sel_cols, "sel_cols", context)
+        elif ch == cur.KEY_SDC:
             col = sel_cols[0]
             val = sel_dict[col]
             cmd = rowinput("Are you sure you want to delete {} == {} ".format(col,val))
@@ -1162,7 +1169,8 @@ def show_df(df):
             df = filter_df
             FID = sel_cols[cur_col]
             sel_cols = []
-            save_obj("sel_cols", context, [])
+            save_obj([], "sel_cols", context)
+            save_obj([], "info_cols", context)
             hotkey = "gG"
         if char == "r" and prev_char == "x":
             df = main_df
