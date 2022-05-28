@@ -478,6 +478,7 @@ def show_df(df):
             save_obj(sel_cols, "sel_cols", context)
             save_obj(info_cols, "info_cols", context)
         elif char == "X" and not prev_char == "x":
+            context = "exp_view"
             backit(df,sel_cols)
             exp=df.iloc[sel_row]["exp_id"]
             cond = f"(main_df['{FID}'] == '{exp}')"
@@ -989,8 +990,6 @@ def show_df(df):
             else:
                 df = df.set_index(['qid','model'])[['pred_text1', 'input_text','prefix']].unstack()
                 df.columns = list(map("_".join, df.columns))
-                for s in sel_cols:
-                    col_widths[s] = 35
         elif is_enter(ch) and prev_char == "x":
             col = sel_cols[0]
             val = sel_dict[col]
@@ -1028,6 +1027,11 @@ def show_df(df):
                 save_df(df)
             else:
                 ch = 0
+        if cmd.startswith("w="):
+            _,val = cmd.split("=")[1]
+            col = sel_cols[cur_col]
+            col_widths[col] = int(val)
+            adjust = False
         if cmd == "report":
             doc_dir = os.path.join(home, "Documents/Paper1/icml-kr")
             with open(f"{doc_dir}/report.tex.temp", "r") as f:
