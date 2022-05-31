@@ -181,7 +181,7 @@ def show_df(df):
     save_obj(dfname, "dfname", "")
     sel_cols = list(df.columns)
     for col in df.columns:
-        if "score" in col:
+        if col.endswith("score"):
             df[col] = pd.to_numeric(df[col])
     fav_path = os.path.join(base_dir, dfname + "_fav.tsv")
     if Path(fav_path).exists():
@@ -204,6 +204,7 @@ def show_df(df):
 
     #wwwwwwwwww
     colors = ['blue','orange','green', 'red', 'purple', 'brown', 'pink','gray','olive','cyan']
+    contexts = {"g":"grouped", "X":"view", "r":"main"}
     ax = None
     context = dfname
     font = ImageFont.truetype("/usr/share/vlc/skins2/fonts/FreeSans.ttf", 68)
@@ -366,6 +367,7 @@ def show_df(df):
         vals = []
         get_cmd = False
         adjust = True
+        context = contexts[char] if char in contexts else ""
         if ch == SLEFT:
             left -= 10
             adjust = False
@@ -489,7 +491,6 @@ def show_df(df):
             save_obj(sel_cols, "sel_cols", context)
             save_obj(info_cols, "info_cols", context)
         elif char == "X" and not prev_char == "x":
-            context = "exp_view"
             backit(df,sel_cols)
             exp=df.iloc[sel_row]["exp_id"]
             cond = f"(main_df['{FID}'] == '{exp}')"
@@ -497,13 +498,17 @@ def show_df(df):
             sel_cols=["fid","input_text","target_text","pred_text1", "hscore","bert_score","prefix"]
             df = df[sel_cols]
             df = df.sort_values(by="input_text", ascending=False)
-        elif char in ["I"]:
-            canceled, col, val = list_df_values(df, get_val=False)
+        elif char in ["I"] or ch == cur.KEY_IC:
+            if char == "I":
+                canceled, col, val = list_df_values(df, get_val=False)
+            else:
+                canceled, col, val = list_df_values(main_df, get_val=False)
             if not canceled:
-                if not col in info_cols: info_cols.append(col)
-                save_obj(info_cols, "info_cols", dfname)
-                if col in sel_cols:
-                    sel_cols.remove(col)
+                if not col in sel_cols: sel_cols.insert(cur_col, col)
+                save_obj(sel_cols, "sel_cols", context)
+                if col in info_cols:
+                    info_cols.remove(col)
+                    save_obj(info_cols, "info_cols", context)
         elif char == "x" and prev_char == "x":
             sel_df = sel_df.append(df.iloc[sel_row])
             mbeep()
@@ -672,27 +677,28 @@ def show_df(df):
             consts["path"] = path
         elif char in ["G"]:
             backit(df, sel_cols)
-            context = "grouped"
             if FID == "input_text":
                 context = "inp"
             col = FID
             left = 0
             _glist = [col, "prefix"]
-            sel_cols = [] # load_obj("sel_cols", context, [])
-            info_cols = [] #load_obj("info_cols", context, [])
+            sel_cols =  load_obj("sel_cols", context, [])
+            info_cols = load_obj("info_cols", context, [])
             if not sel_cols:
                sel_cols = ["prefix","method", "model", "n_preds", "avg_len","rouge_score", "steps",  "bert_score", "br_score","nr_score", "learning_rate",  "num_targets", "num_inps", "num_records", "wrap", "frozen", "prefixed"]
 
             num_targets = (df['prefix']+'_'+df['target_text']).groupby(df[col]).nunique()
             n_preds = (df['prefix']+'_'+df['pred_text1']).groupby(df[col]).nunique()
             num_inps = (df['prefix']+'_'+df['input_text']).groupby(df[col]).nunique()
-            avg_len = (df.groupby(col)["pred_text1"]
-                                                .apply(lambda x: np.mean(x.str.len()).round(2)))
-            _agg = "frist"
-            df = (df.groupby(col).agg({"tag":"first","prefix":"first", "learning_rate":"first", "opt_type":"first", "id":"count","rouge_score":"mean", "hscore":"mean", "plen":"first", "pid":"first", "bert_score":"mean", "nr_score":"mean", "method":"first","model":"first", "wrap":"first", col:"first", "steps":"first", 
-                "l1_decoder":"first", "l1_encoder":"first",
-                "cossim_decoder":"first", "cossim_encoder":"first",
-                "frozen":"first", "prefixed":"first"})
+            avg_len = 1 #(df.groupby(col)["pred_text1"]
+                        #                        .apply(lambda x: np.mean(x.str.len()).round(2)))
+            _agg = {}
+            for c in df.columns:
+                if c.endswith("score"):
+                    _agg[c] = "mean"
+                else:
+                    _agg[c] = "first"
+            df = (df.groupby(col).agg(_agg)
                    .rename(columns={col:'exp_id', 
                        'id':'num_records',
                        }))
@@ -1250,7 +1256,6 @@ def show_df(df):
             sel_cols = []
             save_obj([], "sel_cols", context)
             save_obj([], "info_cols", context)
-            context = "main"
             hotkey = "gG"
         if char == "r" and prev_char == "x":
             df = main_df

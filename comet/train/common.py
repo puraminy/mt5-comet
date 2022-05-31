@@ -100,8 +100,9 @@ rel_nat_maps = {
         "desc":"the person's attributes"
     },
     "xIntent":{ 
-        1:"Because of {event}, PersonX want {ph}",
-        2:"Because of {event}, PersonX want to {ph}",
+        1:"Because of {event}, they want {ph}",
+        2:"if {event}, then he want {ph}",
+        3:"Because of {event}, he want to {ph}",
         #2:"PersonX want {ph}  Therefore, {event}",
         "fa":"زیرا PersonX می خواست",
         "tokens":"<event> <agent> <before> <cause> <want>",
@@ -369,7 +370,7 @@ def fill_prompt(text, rel, place_holder, counter = 0, lang=""):
     #dlog.info("text: %s", text)
     return text
 
-def fill_consts(template, ex_temp, context,rel, row, rows=None, mask=-1, method=""):
+def fill_consts(template, ex_temp, context,rel, row, rows=None, mask=-1, method="", someone=False):
     #dlog.info("fill consts, input text: %s", template)
     text = fill_const_for_rel(template, row)
     #dlog.info("fill consts, input text: %s", text)
@@ -819,7 +820,7 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
        qtemp = ret_q
        return qtemp, anstemp, ex_qtemp, ex_anstemp, context
 
-def fill_vars(template, rel, event, resp, gen_token= "gen_en",  inp_lang="en", resp_lang="en", ph_num=3, temp_num = 1):
+def fill_vars(template, rel, event, resp, gen_token= "gen_en",  inp_lang="en", resp_lang="en", ph_num=3, temp_num = 1, someone=False):
     assert temp_num in rel_nat_maps[rel], rel + " for " + str(temp_num)
     rel_natural = rel_nat_maps[rel][temp_num]        
     rel_natural_tokens = rel_nat_maps[rel]["nat-tokens"]        
@@ -845,6 +846,10 @@ def fill_vars(template, rel, event, resp, gen_token= "gen_en",  inp_lang="en", r
     pattern2 = re.compile("|".join(rep2.keys()))
     text = pattern1.sub(lambda m: rep1[re.escape(m.group(0))], template)
     text = pattern2.sub(lambda m: rep2[re.escape(m.group(0))], text)
+    if someone:
+        text = text.replace("PersonX", "someone")
+        text = text.replace("PersonY", "someone else")
+        text = text.replace("PersonZ", "others")
     lang = resp_lang
     plen = relation_prompt_lengths[rel]
     if not rel in encoder_prompts:
@@ -884,7 +889,7 @@ class MyDataset(torch.utils.data.Dataset):
             save_ds_path="", repeat=1, pid=0, break_sent=False, 
             sort_key="event", replace_blanks = False, 
             tokenizer=None, ph_num=3, limit_lang = False, 
-            use_dif_templates=False, group_them=[], temp_num=1): 
+            use_dif_templates=False, group_them=[], temp_num=1, someone=False): 
         super(MyDataset).__init__()
         fingerprint = save_ds_path + "_" + split_name + "_"  + method + \
                 "_" + str(len(split_df)) + "_" + str(num_samples) 
@@ -893,6 +898,7 @@ class MyDataset(torch.utils.data.Dataset):
         self.sort_key = sort_key # sort index
         self.ph_num = ph_num
         self.temp_num = temp_num
+        self.someone = someone
 
         self.only_blanks = only_blanks
         self.samples_per_head = samples_per_head
@@ -1149,13 +1155,13 @@ class MyDataset(torch.utils.data.Dataset):
                 qtemp = qtemp[-1] 
         plen = relation_prompt_lengths[rel][0]
         mask = random.randint(0, plen-1)
-        _qtemp = fill_consts(qtemp, ex_qtemp, context, rel, d, context_df, mask=mask,method = mt)
-        _anstemp = fill_consts(anstemp, ex_anstemp, context,rel, d, context_df, mask=mask,method = mt)
+        _qtemp = fill_consts(qtemp, ex_qtemp, context, rel, d, context_df, mask=mask,method = mt, someone=self.someone)
+        _anstemp = fill_consts(anstemp, ex_anstemp, context,rel, d, context_df, mask=mask,method = mt, someone=self.someone)
         _query = fill_vars(_qtemp, rel, event, resp, gen_token, 
-                input_lang, target_lang, self.ph_num, self.temp_num) 
+                input_lang, target_lang, self.ph_num, self.temp_num, self.someone) 
         query = (index, _query)
         response = fill_vars(_anstemp, rel, event, resp, gen_token, 
-                input_lang, target_lang, self.ph_num, self.temp_num)
+                input_lang, target_lang, self.ph_num, self.temp_num, self.someone)
 
         __resp = response.replace(placeholder_token,"")
         _query = _query.strip()

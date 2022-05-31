@@ -297,6 +297,7 @@ def run(ctx, conf_path, base_conf, experiment,
            _extra = ""
            exclude_list = ["no_confirm", "follow_method", "method", "test_samples"]
            mlog.info("Extra args=%s", ctx.args)
+           run_args = {}
            for _item in ctx.args:
                 mlog.info("arg = %s", _item)
                 _key,_val = _item.split("=")
@@ -315,9 +316,11 @@ def run(ctx, conf_path, base_conf, experiment,
                         args[_key]= True
                     else:
                         args[_key]= _val
+                    run_args[_key] = args[_key]
                 else:
                    if _key in args:
                        del args[_key]
+                   run_args[_key] = "False"
            # oooooooooooooo
            if not var:
                output_name = base_conf + sep + args["method"] + sep + _extra
@@ -348,11 +351,13 @@ def run(ctx, conf_path, base_conf, experiment,
                        if var_item.strip() == "False": 
                            if var_name in args:
                                del args[var_name]
+                           run_args[var_name]= "False"
                        else:
                            if var_item.strip() == "True":
                                var_item = True
                            args[var_name]=var_item
                            orig_args[var_name] = var_item
+                           run_args[var_name] = var_item
                        if not var_name in exclude_list:
                            _output_name +=  sep + var_name + "=" + str(var_item)
                        __output_name +=  sep + var_name + "=" + str(var_item)
@@ -383,7 +388,7 @@ def run(ctx, conf_path, base_conf, experiment,
                            args["test_path"] = orig_args["test_path"]
                            args["test_samples"] = orig_args["test_samples"] 
                        args["exp_id"] = ii
-                       ctx.invoke(train, **args)
+                       ctx.invoke(train, **args, run_args = run_args)
         else:
             confs = sorted(glob.glob(f"{_path}/*"))
             default_model = ""
@@ -1059,7 +1064,20 @@ def run(ctx, conf_path, base_conf, experiment,
     is_flag=True,
     help="Only shows the path without running..."
 )
-def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone):
+@click.option(
+    "--someone",
+    "-so",
+    is_flag=True,
+    help=""
+)
+@click.option(
+    "--run_args",
+    "-ra",
+    default={},
+    type=dict,
+    help=""
+)
+def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args):
 
     #%% some hyper-parameters
 
@@ -1410,7 +1428,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                                 sampling, ex_type,
                                 tails_per_head, save_ds_path[split_name], _repeat, 
                                 int(pid), break_sent, sort, _replace_blanks, 
-                                None, int(ph_num), group_them = group_them, temp_num = int(temp_num)
+                                None, int(ph_num), group_them = group_them, temp_num = int(temp_num), someone=someone,
                         )
             if save_data:
                 myds[_name].save_data(os.path.join(save_data,_name + ".tsv"), merge=True)
@@ -1493,6 +1511,10 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                     "learning_rate":learning_rate,
                     "date":extra}
     exp_info["eval"] = do_eval
+    for k,v in run_args.items():
+        if not k in exp_info:
+            exp_info[k] = v
+
     if do_eval or (not wrap and frozen and modules_to_freeze is model):
         mlog.info("Evaluating the model...")
         model.to(device=device)
