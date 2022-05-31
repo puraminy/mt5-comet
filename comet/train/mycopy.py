@@ -56,19 +56,19 @@ def mycopy(fname, path, move, dest_dir, show_dirs, only_name, anywhere):
                 for _file in dirs:
                     root_file = os.path.join(root, _file)
                     if anywhere:
-                        if all(s in root_file for s in fname.split("+")):
+                        if all(s in root_file for s in fname.split("|")):
                             files.append(root_file)
                     else:
-                        if all(s in _file for s in fname.split("+")):
+                        if all(s in _file for s in fname.split("|")):
                             files.append(root_file)
             else:
                 for _file in _files:
                     root_file = os.path.join(root, _file)
                     if anywhere:
-                        if all(s in root_file for s in fname.split("+")):
+                        if all(s in root_file for s in fname.split("|")):
                             files.append(root_file)
                     else:
-                        if all(s in _file for s in fname.split("+")):
+                        if all(s in _file for s in fname.split("|")):
                             files.append(root_file)
     if not dest_dir: dest_dir = now
     for ii, file in enumerate(files):
