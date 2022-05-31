@@ -86,6 +86,7 @@ def find_common(df, main_df, on_col_list, s_rows, FID, char):
             tdf = tdf.groupby(on_col_list).agg({"exp_name":"first","query":"first","input_text":"first","target_text":"first", "hscore":"first", "method":"first", "rouge_score":"first","prefix":"first","pred_text1":"first", "fid":"first", "id":"count","bert_score":"first"}).reset_index(drop=True)
             for on_col in on_col_list:
                 tdf[on_col] = tdf[on_col].astype(str).str.strip()
+            #tdf = tdf.set_index(on_col_list)
         dfs.append(tdf) #.copy())
         ii += 1
     if ii > 1:
@@ -196,13 +197,8 @@ def show_df(df):
     back = []
     sels = []
     filter_df = main_df
-    FID = "method"
     if "pred_text1" in df:
-        _glist = [FID]
-        #df["num_inps"] = df.groupby(_glist)[['input_text']].transform('nunique')
-        #df["num_records"] = df.groupby(_glist)[['input_text']].transform('count')
         br_col = df.loc[: , "bert_score":"rouge_score"]
-        #df['br_score'] = br_col.mean(axis=1)
         df['nr_score'] = df['rouge_score']
         df['nr_score'] = np.where((df['bert_score'] > 0.4) & (df['nr_score'] < 0.1), df['bert_score'], df['rouge_score'])
 
@@ -224,7 +220,8 @@ def show_df(df):
     if not "opt_type" in df:
         df["opt_type"] = "na"
     prev_cahr = ""
-    hotkey = "6"
+    FID = "fid"
+    hotkey = "gG"
     sel_exp = ""
     infos = []
     back_rows = []
@@ -283,7 +280,7 @@ def show_df(df):
                col_widths[sel_col] = min(col_widths[sel_col],40)
                _w = col_widths[sel_col] 
                if sel_col in sel_cols:
-                   if sel_col == sel_cols[cur_col] and ii != sel_row:
+                   if cur_col < len(sel_cols) and sel_col == sel_cols[cur_col] and ii != sel_row:
                        cell_color = TITLE_COLOR
                    else:
                        cell_color = _color
@@ -408,11 +405,19 @@ def show_df(df):
             sel_row += 1
             adjust = False
         if ch == DOWN:
-            sel_row += 1
-            adjust = False
+            if context == "inp":
+                back_rows[-1] += 1
+                hotkey = "bp"
+            else:
+                sel_row += 1
+                adjust = False
         elif ch == UP: 
-            sel_row -= 1
-            adjust = False
+            if context == "inp":
+                back_rows[-1] -= 1
+                hotkey = "bp"
+            else:
+                sel_row -= 1
+                adjust = False
         elif ch == cur.KEY_NPAGE:
             sel_row += ROWS - 4
         elif ch == cur.KEY_HOME:
@@ -425,6 +430,12 @@ def show_df(df):
             sel_row -= ROWS - 4
         elif char == "l" and prev_char == "l":
             seq = ""
+        elif char == "=":
+            col = info_cols[-1]
+            sel_cols.insert(cur_col, col)
+        elif char == ">":
+            col = info_cols.pop()
+            sel_cols.insert(cur_col, col)
         elif char in "01234" and prev_char == "#":
             canceled, col, val = list_df_values(df, get_val=False)
             if not canceled:
@@ -471,13 +482,14 @@ def show_df(df):
                 #main_df.loc[eval(cond), "bert_score"] = tdf["bert_score"]
             df = main_df
             hotkey = "gG"
-        elif char == "h":
+        elif char == "<":
             col = sel_cols[cur_col]
             sel_cols.remove(col)
             info_cols.append(col)
             save_obj(sel_cols, "sel_cols", context)
             save_obj(info_cols, "info_cols", context)
         elif char == "X" and not prev_char == "x":
+            context = "exp_view"
             backit(df,sel_cols)
             exp=df.iloc[sel_row]["exp_id"]
             cond = f"(main_df['{FID}'] == '{exp}')"
@@ -587,20 +599,35 @@ def show_df(df):
             consts["FID"] = FID
             df = filter_df
             hotkey="gG"
-        elif char in "56789" and prev_char != "\\":
-            ii = int(char) - 5
+        elif char == "BB": 
+            sel_rows = []
+            for i in range(len(df)):
+                sel_rows.append(i)
+        elif char == "A":
+            sel_cols = ["method","pred_text1","target_text","input_text"]
+            info_cols = ["input_text"]
+            df = filter_df[sel_cols]
+            df = df.sort_values(by="input_text")
+        elif char == "AA":
+            gdf = filter_df.groupby("input_text")
+            rows = []
+            for group_name, df_group in gdf:
+                for row_index, row in df_group.iterrows():
+                    pass
             arr = ["prefix","fid","query","input_text","method"]
-            if ii < len(arr):
-                FID = arr[ii] 
+            canceled, col = list_values(arr)
+            if not canceled:
+                FID = col 
                 consts["FID"] = FID
                 df = filter_df
                 hotkey="gG"
         elif char == "s":
-            col = sel_cols[cur_col]
-            if col == sort:
-                asc = not asc
-            sort = col
-            df = df.sort_values(by=sort, ascending=asc)
+            if cur_col < len(sel_cols):
+                col = sel_cols[cur_col]
+                if col == sort:
+                    asc = not asc
+                sort = col
+                df = df.sort_values(by=sort, ascending=asc)
         elif char in ["c","C"] and prev_char == "c": 
             counts = {}
             for col in df:
@@ -646,17 +673,21 @@ def show_df(df):
         elif char in ["G"]:
             backit(df, sel_cols)
             context = "grouped"
+            if FID == "input_text":
+                context = "inp"
             col = FID
             left = 0
             _glist = [col, "prefix"]
-            sel_cols = load_obj("sel_cols", context, [])
-            info_cols = load_obj("info_cols", context, [])
+            sel_cols = [] # load_obj("sel_cols", context, [])
+            info_cols = [] #load_obj("info_cols", context, [])
             if not sel_cols:
-                sel_cols = ["exp_id","tag","method", "model", "n_preds","rouge_score", "steps", "opt_type", "pid", "plen", "prefix", "hscore", "bert_score", "br_score","nr_score", "learning_rate",  "num_targets", "num_inps", "num_records", "wrap", "frozen", "prefixed"]
+               sel_cols = ["prefix","method", "model", "n_preds", "avg_len","rouge_score", "steps",  "bert_score", "br_score","nr_score", "learning_rate",  "num_targets", "num_inps", "num_records", "wrap", "frozen", "prefixed"]
 
             num_targets = (df['prefix']+'_'+df['target_text']).groupby(df[col]).nunique()
             n_preds = (df['prefix']+'_'+df['pred_text1']).groupby(df[col]).nunique()
             num_inps = (df['prefix']+'_'+df['input_text']).groupby(df[col]).nunique()
+            avg_len = (df.groupby(col)["pred_text1"]
+                                                .apply(lambda x: np.mean(x.str.len()).round(2)))
             _agg = "frist"
             df = (df.groupby(col).agg({"tag":"first","prefix":"first", "learning_rate":"first", "opt_type":"first", "id":"count","rouge_score":"mean", "hscore":"mean", "plen":"first", "pid":"first", "bert_score":"mean", "nr_score":"mean", "method":"first","model":"first", "wrap":"first", col:"first", "steps":"first", 
                 "l1_decoder":"first", "l1_encoder":"first",
@@ -669,9 +700,8 @@ def show_df(df):
             df["n_preds"] = n_preds
             df["num_targets"] = num_targets
             df["num_inps"] = num_inps
+            df["avg_len"] = avg_len
             df = df.sort_values(by = ["rouge_score"], ascending=False)
-        elif char == ">":
-            hotkey = "bNh"
         elif char == "u":
             left = 0
             backit(df, sel_cols)
@@ -722,31 +752,38 @@ def show_df(df):
                 df = df.sort_values(by="int", ascending=False)
             else:
                 df, sel_exp = find_common(df, filter_df, on_col_list, _rows, FID, char)
-            if "pred_text1_x" in df:
+            if len(sel_rows) == 2:
                 _all = len(df)
                 df = df[df['pred_text1_x'].str.strip() != df['pred_text1_y'].str.strip()]
                 _dif = len(df)
                 _common = _all - _dif
                 consts["Common"] = _common
-
+                if "exp_name_x" in df:
+                    fid_x = df.iloc[0]["exp_name_x"]
+                    fid_y = df.iloc[0]["exp_name_y"]
+                    df["exp_name_x"] = "|".join(list(set(fid_x.split("@")) - set(fid_y.split("@"))))
+                    df["exp_name_y"] = "|".join(list(set(fid_y.split("@")) - set(fid_x.split("@"))))
             sel_cols = on_col_list
             info_cols = []
             sel_cols.remove("prefix")
-            _from_cols = ["pred_text1", "id", "pred_text1_x", "pred_text1_y","query_x","query_y", "query", "method", "prefix", "input_text","target_text_x", "target_text", "rouge_score", "rouge_score_x","rouge_score_y", "bert_score", "bert_score_x", "bert_score_y", "exp_name_x", "exp_name_y"]
-            if "exp_name_x" in df:
-                fid_x = df.iloc[0]["exp_name_x"]
-                fid_y = df.iloc[0]["exp_name_y"]
-                df["exp_name_x"] = "|".join(list(set(fid_x.split("@")) - set(fid_y.split("@"))))
-                df["exp_name_y"] = "|".join(list(set(fid_y.split("@")) - set(fid_x.split("@"))))
-            for _col in _from_cols:
-                if (_col.startswith("id") or
-                    _col.startswith("pred_text1") or 
-                    _col.startswith("rouge_score") or 
-                    _col=="target_text" or 
-                    _col.startswith("bert_score")):
-                    sel_cols.append(_col)
-                elif not _col in on_col_list and not _col in info_cols:
-                    info_cols.append(_col)
+            if len(sel_rows) > 2:
+                df = df.reset_index()
+                _from_cols = list(df.columns) 
+                sel_cols.append("target_text")
+                for _col in _from_cols:
+                    if _col.startswith("pred_text1"):
+                        info_cols.append(_col)
+            else:
+                _from_cols = ["pred_text1", "id", "pred_text1_x", "pred_text1_y","query_x","query_y", "query", "method", "prefix", "input_text","target_text_x", "target_text", "rouge_score", "rouge_score_x","rouge_score_y", "bert_score", "bert_score_x", "bert_score_y", "exp_name_x", "exp_name_y"]
+                for _col in _from_cols:
+                    if (_col.startswith("id") or
+                        _col.startswith("pred_text1") or 
+                        _col.startswith("rouge_score") or 
+                        _col=="target_text" or 
+                        _col.startswith("bert_score")):
+                        sel_cols.append(_col)
+                    elif not _col in on_col_list and not _col in info_cols:
+                        info_cols.append(_col)
             info_cols.append("prefix")
             if char == "n":
                 sel_cols = list(df.columns)
@@ -765,20 +802,27 @@ def show_df(df):
                 sel_cols = ["fid","input_text","pred_text1","target_text","bert_score", "hscore", "rouge_score", "prefix"]
                 df = df[sel_cols]
                 df = df.sort_values(by="bert_score", ascending=False)
-        elif char == "D" and prev_char != "x":
+        elif char == "D" or ch == cur.KEY_SDC or char == "d":
             s_rows = sel_rows
             if FID == "fid":
-                if not s_rows:
-                    s_rows = [sel_row]
-                for s_row in s_rows:
-                    exp=df.iloc[s_row]["exp_id"]
-                    cond = f"(main_df['fid'] == '{exp}')"
-                    tdf = main_df[main_df["fid"] == exp]
-                    spath = tdf.iloc[0]["path"]
-                    main_df = main_df.drop(main_df[eval(cond)].index)
-                    df = main_df
-                    hotkey = "gG"
-                    os.remove(spath)
+                mdf = main_df.groupby("fid", as_index=False).first()
+                mdf = mdf.copy()
+                _sels = df["exp_id"]
+                for s_row, row in mdf.iterrows():
+                    exp=row["fid"]
+                    if char == "d":
+                        cond = main_df['fid'].isin(_sels) 
+                    else:
+                        cond = ~main_df['fid'].isin(_sels) 
+                    tdf = main_df[cond]
+                    if  ch == cur.KEY_SDC:
+                        spath = row["path"]
+                        os.remove(spath)
+                    main_df = main_df.drop(main_df[cond].index)
+                df = main_df
+                filter_df = main_df
+                sel_rows = []
+                hotkey = "gG"
         elif char == "D" and prev_char == "x":
             canceled, col,val = list_df_values(main_df, get_val=False)
             if not canceled:
@@ -952,7 +996,7 @@ def show_df(df):
 
 
 
-        elif char in ["d"]:
+        elif char in ["d"] and prev_char == "x":
             canceled, col, val = list_df_values(main_df)
             if not canceled:
                 main_df = main_df.drop(main_df[main_df[col] == val].index)
@@ -964,7 +1008,7 @@ def show_df(df):
             col = sel_cols[cur_col]
             sel_cols.remove(col)
             save_obj(sel_cols, "sel_cols", context)
-        elif ch == cur.KEY_SDC:
+        elif ch == cur.KEY_SDC and prev_char == 'x':
             col = sel_cols[0]
             val = sel_dict[col]
             cmd = rowinput("Are you sure you want to delete {} == {} ".format(col,val))
@@ -989,8 +1033,6 @@ def show_df(df):
             else:
                 df = df.set_index(['qid','model'])[['pred_text1', 'input_text','prefix']].unstack()
                 df.columns = list(map("_".join, df.columns))
-                for s in sel_cols:
-                    col_widths[s] = 35
         elif is_enter(ch) and prev_char == "x":
             col = sel_cols[0]
             val = sel_dict[col]
@@ -1028,15 +1070,26 @@ def show_df(df):
                 save_df(df)
             else:
                 ch = 0
-        if cmd == "export":
-            doc_dir = os.path.join(home, "Documents/Paper1/icml-kr/table")
+        if cmd.startswith("w="):
+            _,val = cmd.split("=")[1]
+            col = sel_cols[cur_col]
+            col_widths[col] = int(val)
+            adjust = False
+        if cmd == "report":
+            doc_dir = os.path.join(home, "Documents/Paper1/icml-kr")
+            with open(f"{doc_dir}/report.tex.temp", "r") as f:
+                report = f.read()
+            table_dir = os.path.join(doc_dir, "table")
             all_steps = df['steps'].unique()
-            for samp in all_steps:
-                with open(f"{doc_dir}/table.txt", "r") as f:
+            for rel in df['prefix'].unique(): 
+                with open(f"{table_dir}/table.txt", "r") as f:
                     table_cont = f.read()
-                for rel in ["xAttr", "xNeed", "xIntent", "xReact"]:
+                for samp in all_steps:
                     cont = table_cont
-                    out = open(f"{doc_dir}/{rel}_{samp}.txt", "w")
+                    table_name = f"{rel}_{samp}.txt"
+                    table_file = f"{table_dir}/{table_name}"
+                    _input = f"table/{table_name}" 
+                    out = open(table_file, "w")
                     for met in df["method"].unique():
                         for mod in ["t5-v1", "t5-lmb", "t5-base"]:
                             for sc in ["rouge_score", "bert_score", "hscore", "n_preds"]:
@@ -1044,12 +1097,34 @@ def show_df(df):
                                         (df["method"] == met) &
                                         (df["steps"] == samp) &
                                         (df["model"] == mod))
-                                val = df.loc[cond, sc].max()
+                                val = df.loc[cond, sc].mean()
                                 val = round(val,2)
-                                val = "{:.2f}".format(val)
-                                cont = cont.replace(met + "@" + mod + "@" + sc, val)
+                                if sc != "n_preds":
+                                    val = "{:.2f}".format(val)
+                                else:
+                                    try:
+                                       val = str(int(val))
+                                    except:
+                                       val = "NA"
+                                cont = cont.replace("@" + met + "@" + mod + "@" + sc, val)
                     out.write(cont)
                     out.close()
+                    lable = "results:" + rel + "_" + samp
+                    caption = f"{rel} for {samp}"
+                    table = """
+                        \\begin{{table*}}
+                            \centering
+                            \label{{{}}}
+                            \caption{{{}}}
+                            \\begin{{tabular}}{{|c| c|c|c| c | c |}}
+                            \input{{{}}}
+                            \end{{tabular}}
+                        \end{{table*}}
+                        """
+                    table = table.format(lable, caption, _input)
+                    report = report.replace("mytable", table +"\n\n" + "mytable")
+            with open(f"{doc_dir}/report.tex", "w") as f:
+                f.write(report)
 
         if cmd == "fix_types":
             for col in ["target_text", "pred_text1"]: 
@@ -1175,6 +1250,7 @@ def show_df(df):
             sel_cols = []
             save_obj([], "sel_cols", context)
             save_obj([], "info_cols", context)
+            context = "main"
             hotkey = "gG"
         if char == "r" and prev_char == "x":
             df = main_df
