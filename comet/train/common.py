@@ -103,6 +103,7 @@ rel_nat_maps = {
         1:"Because of {event}, they want {ph}",
         2:"if {event}, then he want {ph}",
         3:"Because of {event}, he want to {ph}",
+        4:"Because of {event}, he want {ph}",
         #2:"PersonX want {ph}  Therefore, {event}",
         "fa":"زیرا PersonX می خواست",
         "tokens":"<event> <agent> <before> <cause> <want>",
