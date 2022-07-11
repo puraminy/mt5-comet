@@ -959,8 +959,8 @@ class MyDataset(torch.utils.data.Dataset):
         assert len(split_df) > 0, "Data frame is empty " + self.split_name
         self.num_records = self.num_samples
         rel_filter = rel_filter.strip()
-        assert rel_filter in all_rels, f"{rel_filter} is no in relations"
         if rel_filter:
+            assert rel_filter in all_rels, f"{rel_filter} is no in relations"
             split_df = split_df[split_df["prefix"] == rel_filter]
             dlog.info("len after relation filter: %s", len(split_df))
         if False:
@@ -973,16 +973,23 @@ class MyDataset(torch.utils.data.Dataset):
 
         if not rel_filter:
             split_df["freqs"] = split_df.groupby('input_text')['input_text'].transform('count')
+
         else:
             split_df["freqs"] = split_df.groupby(['prefix','input_text'])['input_text'].transform('count')
         split_df = split_df.sort_values(by=["freqs","input_text"], ascending=False)
         assert len(split_df) > 0, "Data frame is empty " + self.split_name + " " + str(self.num_samples)
         self.cats_num = cats_num = len(split_df["prefix"].unique())
         dlog.info("Num Samples: %s", self.num_samples)
+        mlog.info("Num Samples: %s", self.num_samples)
         mlog.info("Cats Num: %s", cats_num)
         self.num_per_cat = self.num_samples // cats_num if cats_num > 1 else self.num_samples
         mlog.info("Num per cat: %s", self.num_per_cat)
         dlog.info("Num per cat: %s", self.num_per_cat)
+        _spp = split_df[["prefix","input_text","target_text"]].groupby("prefix").count()
+        for row in _spp.iterrows():
+            mlog.info("%s : %s ", row[0], row[1].input_text)
+
+        input("Press any key")
         self.rel_counter = {}
         self.rel_filter = rel_filter
         self.lang_counter = {}
