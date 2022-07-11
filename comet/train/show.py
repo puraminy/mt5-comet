@@ -639,13 +639,8 @@ def show_df(df):
                counts[col] = df[col].nunique()
             df = pd.DataFrame(data=[counts], columns = df.columns)
         elif char == "U": 
-            if not count_col:
-                canceled, col, _ = list_df_values(df, get_val=False)
-                if not canceled:
-                    count_col = col
-                    consts["count col"] = col
-            if count_col:
-                df = df[col].value_counts(ascending=False).reset_index()
+            if sel_col:
+                df = df[sel_col].value_counts(ascending=False).reset_index()
                 sel_cols = list(df.columns)
                 col_widths["index"]=50
                 info_cols = []
