@@ -329,9 +329,10 @@ def show_df(df):
                if not sel_col in col_widths and not adjust:
                     _, col_widths = row_print(df, sel_row, col_widths={})
                     adjust = True
-               if len(head) + 5 > col_widths[sel_col]:
+               if sel_col in col_widths and len(head) + 5 > col_widths[sel_col]:
                    col_widths[sel_col] = len(head) + 5
-               _w = col_widths[sel_col] 
+               if sel_col in col_widths:
+                   _w = col_widths[sel_col] 
                text += "{:<{x}}".format(head, x=_w) 
             mprint(text, text_win) 
             #fffff
@@ -609,10 +610,12 @@ def show_df(df):
             for i in range(len(df)):
                 sel_rows.append(i)
         elif char == "=": 
-            exp=df.iloc[sel_row]["exp_id"]
-            mlog.info("%s == %s", FID, exp)
-            df = main_df[main_df[FID] == exp]
-            hotkey="gG"
+            col = sel_cols[cur_col]
+            exp=df.iloc[sel_row][col]
+            if col == "exp_id": col = FID
+            mlog.info("%s == %s", col, exp)
+            df = main_df[main_df[col] == exp]
+            hotkey = "gG"
         elif char == "A":
             col = sel_cols[cur_col]
             FID = col 
