@@ -27,8 +27,6 @@ sep = "<|SEP|>"
 pad_token = {"pad_token": "<|PAD|>"}
 sep_token = {"sep_token": sep}
 nli_map = ['contradiction', 'entailment', 'neutral']
-all_rels = ["xAttr","xIntent","xNeed","xReact","oReact", "xEffect", "oEffect", "xWant","oWant"]
-x_rels = ["xEffect","xIntent","xNeed","xReact","xAttr", "xWant"]
 rel_maps = {
     "oEffect":"<oEffect>",
     "oReact":"<oReact>",
@@ -38,9 +36,137 @@ rel_maps = {
     "xIntent":"<xIntent>",
     "xNeed":"<xNeed>",
     "xReact":"<xReact>",
-    "xWant":"<xWant>"
+    "xWant":"<xWant>",
+    'AtLocation':"<loc>", 
+    'ObjectUse':"<use>", 
+    'Desires': "<desire>",
+    'HasProperty':"<prop>", 
+    'NotDesires': "<no_desire>", 
+    'Causes':"<cause>", 
+    'HasSubEvent':"<has_sub>", 
+    'xReason':"<xReason>",
+    'CapableOf':"<capable>", 
+    'MadeUpOf':"<madeof>", 
+    'isAfter':"<isAfter>", 
+    'isBefore':"<isBefore>", 
+    'isFilledBy': "<isFilledBy>",
+    'HinderedBy':"<HinderedBy>"
 }
+all_rels = [key for key,val in rel_maps.items()] 
+x_rels = [key for key,val in rel_maps.items()]
 rel_nat_maps = {
+    "AtLocation":{ 
+        1:"{event} is located in {ph}.",
+        2:"{event} is found on {ph}",
+        "fa":"در نتیجه دیگران حس می کنند",
+        "tokens":"<state> <other> <after>",
+        "nat-tokens":"then, the state of others is ",
+        "desc":"other's reaction to the event"
+    },
+    "ObjectUse":{ 
+        1:"{event} is used for {ph}.",
+        2:"Others feel {ph} because {event}",
+        "fa":"در نتیجه دیگران حس می کنند",
+        "tokens":"<state> <other> <after>",
+        "nat-tokens":"then, the state of others is ",
+        "desc":"other's reaction to the event"
+    },
+    "Desires":{ 
+        1:"{event} desires {ph}.",
+        2:"Others feel {ph} because {event}",
+        "fa":"در نتیجه دیگران حس می کنند",
+        "tokens":"<state> <other> <after>",
+        "nat-tokens":"then, the state of others is ",
+        "desc":"other's reaction to the event"
+    },
+    "HasProperty":{ 
+        1:"{event} can be characterized by having {ph}.",
+        2:"Others feel {ph} because {event}",
+        "fa":"در نتیجه دیگران حس می کنند",
+        "tokens":"<state> <other> <after>",
+        "nat-tokens":"then, the state of others is ",
+        "desc":"other's reaction to the event"
+    },
+    "NotDesires":{ 
+        1:"{event} does not desire {ph}.",
+        2:"Others feel {ph} because {event}",
+        "fa":"در نتیجه دیگران حس می کنند",
+        "tokens":"<state> <other> <after>",
+        "nat-tokens":"then, the state of others is ",
+        "desc":"other's reaction to the event"
+    },
+    "Causes":{ 
+        1:"{event} causes {ph}.",
+        2:"Others feel {ph} because {event}",
+        "fa":"در نتیجه دیگران حس می کنند",
+        "tokens":"<state> <other> <after>",
+        "nat-tokens":"then, the state of others is ",
+        "desc":"other's reaction to the event"
+    },
+    "HasSubEvent":{ 
+        1:"{event} includes {ph}",
+        2:"Others feel {ph} because {event}",
+        "fa":"در نتیجه دیگران حس می کنند",
+        "tokens":"<state> <other> <after>",
+        "nat-tokens":"then, the state of others is ",
+        "desc":"other's reaction to the event"
+    },
+    "xReason":{ 
+        1:"{event} because {ph}",
+        2:"Others feel {ph} because {event}",
+        "fa":"در نتیجه دیگران حس می کنند",
+        "tokens":"<state> <other> <after>",
+        "nat-tokens":"then, the state of others is ",
+        "desc":"other's reaction to the event"
+    },
+    "CapableOf":{ 
+        1:"{event} is capable of {ph}",
+        2:"Others feel {ph} because {event}",
+        "fa":"در نتیجه دیگران حس می کنند",
+        "tokens":"<state> <other> <after>",
+        "nat-tokens":"then, the state of others is ",
+        "desc":"other's reaction to the event"
+    },
+    "MadeUpOf":{ 
+        1:"{event} is made up of {ph}",
+        2:"Others feel {ph} because {event}",
+        "fa":"در نتیجه دیگران حس می کنند",
+        "tokens":"<state> <other> <after>",
+        "nat-tokens":"then, the state of others is ",
+        "desc":"other's reaction to the event"
+    },
+    "isAfter":{ 
+        1:"{event} happens after {ph}",
+        2:"Others feel {ph} because {event}",
+        "fa":"در نتیجه دیگران حس می کنند",
+        "tokens":"<state> <other> <after>",
+        "nat-tokens":"then, the state of others is ",
+        "desc":"other's reaction to the event"
+    },
+    "isBefore":{ 
+        1:"{event} happens before {ph}",
+        2:"Others feel {ph} because {event}",
+        "fa":"در نتیجه دیگران حس می کنند",
+        "tokens":"<state> <other> <after>",
+        "nat-tokens":"then, the state of others is ",
+        "desc":"other's reaction to the event"
+    },
+    "isFilledBy":{ 
+        1:"{event} can be filled by {ph}",
+        2:"Others feel {ph} because {event}",
+        "fa":"در نتیجه دیگران حس می کنند",
+        "tokens":"<state> <other> <after>",
+        "nat-tokens":"then, the state of others is ",
+        "desc":"other's reaction to the event"
+    },
+    "HinderedBy":{ 
+        1:"{event} can be hindered by {ph}",
+        2:"Others feel {ph} because {event}",
+        "fa":"در نتیجه دیگران حس می کنند",
+        "tokens":"<state> <other> <after>",
+        "nat-tokens":"then, the state of others is ",
+        "desc":"other's reaction to the event"
+    },
     "oReact":{ 
         1:"As a result of {event}, others would feel {ph}.",
         2:"Others feel {ph} because {event}",
@@ -556,7 +682,8 @@ def fix_pos(qtemp, gen_pos, prompt_pos):
 def create_templates(method, gen_pos="end", prompt_pos="end"):
        ex_qtemp = ""
        ex_anstemp = ""
-       context = "{xIntent} {xAttr} {xNeed} {xReact} {oReact} {xWant} {oWant} {xEffect} {oEffect}"
+       ctx = ["{" + x + "}" for x in all_rels]
+       context = " ".join(ctx)
        if method == "bart":
            qtemp = "{event} {rel} [GEN]"
            anstemp = "{resp}"
@@ -989,7 +1116,7 @@ class MyDataset(torch.utils.data.Dataset):
         for row in _spp.iterrows():
             mlog.info("%s : %s ", row[0], row[1].input_text)
 
-        input("Press any key")
+        #input("Press any key")
         self.rel_counter = {}
         self.rel_filter = rel_filter
         self.lang_counter = {}

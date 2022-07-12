@@ -200,7 +200,7 @@ def show_df(df):
     if "pred_text1" in df:
         br_col = df.loc[: , "bert_score":"rouge_score"]
         df['nr_score'] = df['rouge_score']
-        df['nr_score'] = np.where((df['bert_score'] > 0.4) & (df['nr_score'] < 0.1), df['bert_score'], df['rouge_score'])
+        df['nr_score'] = np.where((df['bert_score'] > 0.3) & (df['nr_score'] < 0.1), df['bert_score'], df['rouge_score'])
 
     #wwwwwwwwww
     colors = ['blue','orange','green', 'red', 'purple', 'brown', 'pink','gray','olive','cyan']
@@ -609,10 +609,11 @@ def show_df(df):
             for i in range(len(df)):
                 sel_rows.append(i)
         elif char == "A":
-            sel_cols = ["method","pred_text1","target_text","input_text"]
-            info_cols = ["input_text"]
-            df = filter_df[sel_cols]
-            df = df.sort_values(by="input_text")
+            col = sel_cols[cur_col]
+            FID = col 
+            consts["FID"] = FID
+            df = main_df
+            hotkey="gG"
         elif char == "AA":
             gdf = filter_df.groupby("input_text")
             rows = []
@@ -673,14 +674,14 @@ def show_df(df):
         elif char in ["G"]:
             backit(df, sel_cols)
             if FID == "input_text":
-                context = "inp"
+                context = "inp2"
             col = FID
             left = 0
             _glist = [col, "prefix"]
             sel_cols =  load_obj("sel_cols", context, [])
             info_cols = load_obj("info_cols", context, [])
-            if not sel_cols:
-               sel_cols = ["prefix","method", "model", "n_preds", "avg_len","rouge_score", "steps",  "bert_score", "br_score","nr_score", "learning_rate",  "num_targets", "num_inps", "num_records", "wrap", "frozen", "prefixed"]
+            if True: #not sel_cols:
+               sel_cols = ["exp_id","prefix","method", "model", "n_preds", "avg_len","rouge_score", "steps",  "bert_score", "br_score","nr_score", "learning_rate",  "num_targets", "num_inps", "num_records", "wrap", "frozen", "prefixed"]
 
             num_targets = (df['prefix']+'_'+df['target_text']).groupby(df[col]).nunique()
             n_preds = (df['prefix']+'_'+df['pred_text1']).groupby(df[col]).nunique()
