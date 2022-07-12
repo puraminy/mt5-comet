@@ -153,7 +153,7 @@ rel_nat_maps = {
     },
     "isFilledBy":{ 
         1:"{event} can be filled by {ph}",
-        2:"Others feel {ph} because {event}",
+        2:"{event}",
         "fa":"در نتیجه دیگران حس می کنند",
         "tokens":"<state> <other> <after>",
         "nat-tokens":"then, the state of others is ",
@@ -1340,6 +1340,8 @@ class MyDataset(torch.utils.data.Dataset):
                 _query = _query.replace("___", "<extra_id_0>")
                 response = response.replace("<extra_id_0>", "<extra_id_1>")
                 response = "<extra_id_0> ___ " + response
+            else:
+                _query = _query.replace("___", "<extra_id_0>")
         #if not rel in self.data_split:
         #    self.data_split[rel] = {}
         #if not lang in self.data_split[rel]:
