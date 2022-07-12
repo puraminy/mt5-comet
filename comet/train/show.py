@@ -312,7 +312,7 @@ def show_df(df):
 
     adjust = True
     while ch != ord("q"):
-        text_win.erase()
+        text_win.clear()
         left = min(left, max_col  - width)
         left = max(left, 0)
         sel_row = min(sel_row, len(df) - 1)

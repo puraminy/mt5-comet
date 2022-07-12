@@ -853,9 +853,11 @@ def find(list, st, ch, default):
     _find = st + ch
     _find = _find.lower().strip()
     for i, item in enumerate(list):
+        item = str(item)
         if item.lower().startswith(_find): #or _find in item.lower() or item.lower() in _find: 
             return i, _find
     for i, item in enumerate(list):
+        item = str(item)
         if _find in item.lower(): 
             return i, _find
     return default, st
