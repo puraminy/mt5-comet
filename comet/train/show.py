@@ -432,7 +432,7 @@ def show_df(df):
             sel_row -= ROWS - 4
         elif char == "l" and prev_char == "l":
             seq = ""
-        elif char == "=":
+        elif char == "=" and prev_char == "x":
             col = info_cols[-1]
             sel_cols.insert(cur_col, col)
         elif char == ">":
@@ -608,6 +608,11 @@ def show_df(df):
             sel_rows = []
             for i in range(len(df)):
                 sel_rows.append(i)
+        elif char == "=": 
+            exp=df.iloc[sel_row]["exp_id"]
+            mlog.info("%s == %s", FID, exp)
+            df = main_df[main_df[FID] == exp]
+            hotkey="gG"
         elif char == "A":
             col = sel_cols[cur_col]
             FID = col 
@@ -655,7 +660,7 @@ def show_df(df):
             df["rouge_score"] = df.groupby(['fid','prefix','input_text'])["rouge_score"].transform("max")
             df["bert_score"] = df.groupby(['fid','prefix','input_text'])["bert_score"].transform("max")
             df["hscore"] = df.groupby(['fid','prefix','input_text'])["hscore"].transform("max")
-            df["nr_score"] = df.groupby(['fid','prefix','input_text'])["nr_score"].transform("max")
+            #df["nr_score"] = df.groupby(['fid','prefix','input_text'])["nr_score"].transform("max")
             if not group_col in info_cols: info_cols.append(group_col)
             sel_cols.append("n_preds")
             consts["filter"].append("group predictions")
@@ -681,7 +686,7 @@ def show_df(df):
             sel_cols =  load_obj("sel_cols", context, [])
             info_cols = load_obj("info_cols", context, [])
             if True: #not sel_cols:
-               sel_cols = ["exp_id","prefix","method", "model", "n_preds", "avg_len","rouge_score", "steps",  "bert_score", "br_score","nr_score", "learning_rate",  "num_targets", "num_inps", "num_records", "wrap", "frozen", "prefixed"]
+               sel_cols = ["exp_id","prefix","method", "model", "n_preds", "avg_len","rouge_score", "steps",  "bert_score", "br_score", "learning_rate",  "num_targets", "num_inps", "num_records", "wrap", "frozen", "prefixed"]
 
             num_targets = (df['prefix']+'_'+df['target_text']).groupby(df[col]).nunique()
             n_preds = (df['prefix']+'_'+df['pred_text1']).groupby(df[col]).nunique()
