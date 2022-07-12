@@ -281,8 +281,11 @@ def show_df(df):
                col_widths[sel_col] = min(col_widths[sel_col],40)
                _w = col_widths[sel_col] 
                if sel_col in sel_cols:
-                   if cur_col < len(sel_cols) and sel_col == sel_cols[cur_col] and ii != sel_row:
-                       cell_color = TITLE_COLOR
+                   if cur_col < len(sel_cols) and sel_col == sel_cols[cur_col]:
+                       if ii == sel_row:
+                          cell_color = HL_COLOR
+                       else:
+                           cell_color = TITLE_COLOR
                    else:
                        cell_color = _color
                    rext = textwrap.shorten(text, width=36, placeholder="...")
@@ -923,6 +926,7 @@ def show_df(df):
             backit(df, sel_cols)
             if is_enter(ch): char = "F"
             col = sel_cols[cur_col]
+            if col == "exp_id": col = FID
             if char == "f":
                 canceled, col, val = list_df_values(main_df, col, get_val=True)
             else:

@@ -739,9 +739,16 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            #qtemp = "{rel_natural_pure}" 
            qtemp = "{rel_natural}"
            anstemp = "{resp} {end}"
+       elif method == "sup-nat-tail":
+           #qtemp = "{rel_natural_pure}" 
+           qtemp = "{rel_natural}"
+           anstemp = "{ph} {resp} {end}"
        elif method == "unsup-nat":
            qtemp = "{rel_natural}"
            anstemp = "{ph} {resp} {end}"
+       elif method == "unsup-nat-head":
+           qtemp = "{rel_natural}"
+           anstemp = "{resp} {end}"
        elif method == "unsup-nat-n":
            qtemp = "{rel_nat_n}"
            anstemp = "{ph} {resp} {end}"
