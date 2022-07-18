@@ -285,7 +285,7 @@ def show_df(df):
                        cell_color = TITLE_COLOR
                    else:
                        cell_color = _color
-                   rext = textwrap.shorten(text, width=36, placeholder="...")
+                   text = textwrap.shorten(text, width=36, placeholder="...")
                    text = "{:<{x}}".format(content, x= _w)
                    if _print:
                        mprint(text, text_win, color = cell_color, end="") 
@@ -309,7 +309,7 @@ def show_df(df):
 
     adjust = True
     while ch != ord("q"):
-        text_win.erase()
+        text_win.clear()
         left = min(left, max_col  - width)
         left = max(left, 0)
         sel_row = min(sel_row, len(df) - 1)
