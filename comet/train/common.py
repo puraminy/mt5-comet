@@ -2,6 +2,7 @@ from pathlib import Path
 import math
 from termcolor import colored
 from transformers import AddedToken 
+from functools import lru_cache
 import pandas as pd
 from comet.utils.myutils import *
 from comet.transformers_ptuning import PTuningWrapper
@@ -1019,7 +1020,7 @@ class MyDataset(torch.utils.data.Dataset):
             targ_include="",
             targ_exclude="",
             pred_tresh=0,
-            nli_group="all", per_record=False, is_even=False, start=0, 
+            nli_group="all", per_record=False, per_prefix=False, is_even=False, start=0, 
             sampling=0, ex_type="",  samples_per_head=0, 
             save_ds_path="", repeat=1, pid=0, break_sent=False, 
             sort_key="event", replace_blanks = False, 
@@ -1047,9 +1048,11 @@ class MyDataset(torch.utils.data.Dataset):
         self.targ_exclude = targ_exclude
         self.ex_type = ex_type
         self.per_record = per_record
+        self.per_prefix = per_prefix
         self.is_even = is_even
         dlog.info("building query responses for {}".format(split_name))
         mlog.info(f"fill data input dataset len:{len(split_df)}")
+        dlog.info(f"fill data input dataset len:{len(split_df)}")
         self.natural = inp_include == "natural"
         self.split_name = split_name
         if split_name != "train":
@@ -1065,10 +1068,15 @@ class MyDataset(torch.utils.data.Dataset):
         if group_them:
             self.orig_df = split_df.copy()
             split_df = split_df.groupby(group_them, as_index=False).first()
+            dlog.info("*** Filtered for grouping_them %s ", group_them)
 
+        self.cats_num = cats_num = len(split_df["prefix"].unique())
+        if self.per_prefix:
+            self.num_samples = cats_num * num_samples
         if self.num_samples == 0: 
             self.num_samples = len(split_df)
             self.samples_per_head = 0
+            self.per_prefix = 0
         for col in targets:
             if col in split_df:
                 split_df[col] = split_df[col].astype(str)
@@ -1089,6 +1097,7 @@ class MyDataset(torch.utils.data.Dataset):
 
         if rel_filter == "all":
             rel_filter = ""
+        dlog.info(f"len after filtering:{len(split_df)}")
         mlog.info(f"len after filtering:{len(split_df)}")
         assert len(split_df) > 0, "Data frame is empty " + self.split_name
         self.num_records = self.num_samples
@@ -1105,14 +1114,9 @@ class MyDataset(torch.utils.data.Dataset):
                 dlog.info(f"NUM samples %s, %s", self.num_samples, len(split_df))
                 dlog.info(f"len after sampling:{len(split_df)}")
 
-        if not rel_filter:
-            split_df["freqs"] = split_df.groupby('input_text')['input_text'].transform('count')
-
-        else:
-            split_df["freqs"] = split_df.groupby(['prefix','input_text'])['input_text'].transform('count')
-        split_df = split_df.sort_values(by=["freqs","input_text"], ascending=False)
+        split_df["freqs"] = split_df.groupby(['prefix','input_text'])['input_text'].transform('count')
+        split_df = split_df.sort_values(by=["freqs","input_text", "prefix"], ascending=False)
         assert len(split_df) > 0, "Data frame is empty " + self.split_name + " " + str(self.num_samples)
-        self.cats_num = cats_num = len(split_df["prefix"].unique())
         dlog.info("Num Samples: %s", self.num_samples)
         mlog.info("Num Samples: %s", self.num_samples)
         mlog.info("Cats Num: %s", cats_num)
@@ -1123,7 +1127,6 @@ class MyDataset(torch.utils.data.Dataset):
         for row in _spp.iterrows():
             mlog.info("%s : %s ", row[0], row[1].input_text)
 
-        #input("Press any key")
         self.rel_counter = {}
         self.rel_filter = rel_filter
         self.lang_counter = {}
@@ -1170,7 +1173,12 @@ class MyDataset(torch.utils.data.Dataset):
                 if self.is_even:
                     _data = self.fill_all_data(_start, _end)
                 else:
-                    _data = self.fill_data(_start, _end)
+                    _data = self.fill_data(_start, _end, True, 
+                        "".join(self.methods), self.num_samples, self.split_name,
+                        self.cats_num, self.num_per_cat, self.ex_type, 
+                        self.samples_per_head, 
+                        self.inp_include, self.inp_exclude, 
+                        self.targ_include, self.targ_exclude)
             if self.sort_key == "rep":
                 _data = sorted(_data, key = lambda x:x[self.sort_key], reverse=True)
             elif self.sort_key != "none":
@@ -1247,7 +1255,11 @@ class MyDataset(torch.utils.data.Dataset):
             if self.is_even:
                 _data = self.fill_all_data(iter_start, iter_end)
             else:
-                _data = self.fill_data(iter_start, iter_end)
+               _data = self.fill_data(iter_start, iter_end, True, 
+                    "".join(self.methods), self.num_samples, self.split_name,
+                    self.cats_num, self.num_per_cat, self.ex_type, self.samples_per_head, 
+                    self.inp_include, self.inp_exclude, 
+                    self.targ_include, self.targ_exclude)
         mlog.info("Iter start: %s", iter_start)
         mlog.info("Iter end: %s", iter_end)
         self.flat_data = _data
@@ -1406,12 +1418,17 @@ class MyDataset(torch.utils.data.Dataset):
         self.flat_data.extend(flat_data)
         return flat_data
 
-    def fill_data(self, iter_start, iter_end, show_progress=True):
+    @lru_cache
+    def fill_data(self,  iter_start, iter_end, show_progress, 
+            method, num_samples, split_name,
+            cats_num, num_per_cat, ex_type, samples_per_head, 
+            inp_include, inp_exclude, targ_include, targ_exclude):
         flat_data = []
         #if iter_end < 0:
         #    iter_end = iter_start + self.num_samples
         kk = 0
         jj = 0
+        hh = 0
         dlog.info("==========NNNNN========= SPLIT: %s", self.split_name)
         dlog.info("get data from %s to %s", iter_start, iter_end)
         dlog.info("total rows: %s", len(self.split_df))
@@ -1424,7 +1441,10 @@ class MyDataset(torch.utils.data.Dataset):
             pbar.set_description("Preparing iterator "+ self.split_name)
 
         no_new_item_added = False
+        all_rows = len(self.split_df)
+        ii = 0
         for index, d in self.split_df.iterrows():
+            ii += 1 
             if kk < iter_start:
                 dlog.info("!!!!!!!!! before start %s", iter_start)
                 kk += 1
@@ -1432,18 +1452,18 @@ class MyDataset(torch.utils.data.Dataset):
             rel = d["prefix"]
             if not rel in self.rel_counter:
                 self.rel_counter[rel] = 0
-            dlog.info("rel counter %s -- %s", self.rel_counter, kk)
-            if len(filled_cat) == self.cats_num:
+            dlog.info("%s / %s --ii: %s, kk: %s jj:%s / %s )rel counter %s ", hh, self.num_samples, ii, kk, jj, all_rows, self.rel_counter)
+            if len(filled_cat) == cats_num:
                 dlog.info("all cats filled limit reached!")
                 self.flat_data.extend(flat_data)
                 return flat_data
 
             no_new_item_added = True
-            if self.num_per_cat > 0 and self.rel_counter[rel] > self.num_per_cat:
-                dlog.info("!!!!!!!!! number per cat limit reached %s for %s", rel, self.num_per_cat)
+            if num_per_cat > 0 and self.rel_counter[rel] >= num_per_cat:
+                dlog.info("!!!!!!!!! number per cat limit reached %s for %s", rel, num_per_cat)
                 filled_cat[rel] = True
                 continue 
-            if "other_rel" in self.ex_type:
+            if "other_rel" in ex_type:
                 if len(context_rows) >= len(self.sel_rels):
                     context_df = pd.DataFrame(data=context_rows)
                     self.ex_df = self.ex_df.append(context_df)
@@ -1460,12 +1480,12 @@ class MyDataset(torch.utils.data.Dataset):
                         self._sels.remove(rel)
                     dlog.info("!!!!!!!!! just for including in conext rows %s", len(context_rows))
                     continue
-            elif self.ex_type == "same_rel":
+            elif ex_type == "same_rel":
                 context_df = self.split_df[self.split_df["prefix"] == rel].sample(n=int(self.sampling))
                 clog.info("SAME rel for example type %s | %s ", self.sampling, len(context_df))
 
-            elif self.ex_type:
-                raise ValueError("Ex_type is invalid:" + self.ex_type)
+            elif ex_type:
+                raise ValueError("Ex_type is invalid:" + ex_type)
             eng_inp = d["input_text"]
             self.si += 1
             if eng_inp != self.old_input:
@@ -1473,33 +1493,36 @@ class MyDataset(torch.utils.data.Dataset):
                 self._sels = self.sel_rels.copy()
                 self.old_input = eng_inp
                 self.si = 0
-            elif self.samples_per_head > 0 and self.si >= self.samples_per_head:
-                dlog.info("!!!!!!!!! samples per head limit %s", self.samples_per_head)
+            elif samples_per_head > 0 and self.si >= samples_per_head:
+                dlog.info("!!!!!!!!! samples per head limit %s", samples_per_head)
                 continue
             for inp in inputs:
                 if not inp in d or len(d[inp]) <= 1:
                     dlog.info("!!!!!!!!! not in dataset %s", inp)
                     continue
-                if self.inp_include and not any(x in inp for x in self.inp_include.split("|")):
-                    dlog.info("!!!!!!!!! not included input col %s", self.inp_include)
+                if inp_include and not any(x in inp for x in inp_include.split("|")):
+                    dlog.info("!!!!!!!!! not included input col %s", inp_include)
                     continue
-                if self.inp_exclude and any(x in inp for x in self.inp_exclude.split("|")):
-                    dlog.info("!!!!!!!!! excluded input col %s", self.inp_exclude)
+                if inp_exclude and any(x in inp for x in inp_exclude.split("|")):
+                    dlog.info("!!!!!!!!! excluded input col %s", inp_exclude)
                     continue
                 input_lang = langs[inp]
                 for targ_col in targets:
                     if not targ_col in d or len(d[targ_col]) <= 1:
                         dlog.info("!!!!!!!!! not target lang %s", targ_col)
                         continue
-                    if self.targ_include and not any(x in targ_col for x in self.targ_include.split("|")):
-                        dlog.info("!!!!!!!!! not included target col %s", self.targ_include)
+                    if targ_include and not any(x in targ_col for x in targ_include.split("|")):
+                        dlog.info("!!!!!!!!! not included target col %s", targ_include)
                         continue
-                    if self.targ_exclude and any(x in targ_col for x in self.targ_exclude.split("|")):
-                        dlog.info("!!!!!!!!!  target exclude %s", self.targ_exclude)
+                    if targ_exclude and any(x in targ_col for x in targ_exclude.split("|")):
+                        dlog.info("!!!!!!!!!  target exclude %s", targ_exclude)
                         continue
                     event = d[inp]
                     if event != old_event:
                         self.rel_counter[rel] += 1
+                        hh += 1
+                        if show_progress:
+                            pbar.update()
                         old_event = event
                     resp = d[targ_col]
                     target_lang = langs[targ_col]
@@ -1527,8 +1550,6 @@ class MyDataset(torch.utils.data.Dataset):
                         n_item["rep"] = rr
                         flat_data.append(n_item)
                         jj += 1
-                    if show_progress:
-                        pbar.update()
                     kk += 1
                     if (iter_end > 0 and kk > iter_end):
                         dlog.info("record limit reached!")
@@ -1536,6 +1557,7 @@ class MyDataset(torch.utils.data.Dataset):
                         return flat_data
             
         self.flat_data.extend(flat_data)
+        dlog.info("!!! end of function %s %s %s", self.split_name, all_rows, self.num_samples)
 
         return flat_data
 

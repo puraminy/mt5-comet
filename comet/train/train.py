@@ -764,9 +764,15 @@ def run(ctx, conf_path, base_conf, experiment,
 )
 @click.option(
     "--per_record",
-    "-recs",
+    "-perrecs",
     is_flag=True,
     help="Show if train_samples are records or unique heads"
+)
+@click.option(
+    "--per_prefix",
+    "-perpre",
+    is_flag=True,
+    help="Show if train_samples are per relations (prefix) or all the samples"
 )
 @click.option(
     "--is_even",
@@ -821,6 +827,20 @@ def run(ctx, conf_path, base_conf, experiment,
     default=3,
     type=int,
     help=""
+)
+@click.option(
+    "--group_sets",
+    "-gs",
+    default="",
+    type=str,
+    help="The name of splits to group by columns specified in group_by (below)"
+)
+@click.option(
+    "--group_by",
+    "-gb",
+    default="prefix@input_text",
+    type=str,
+    help="The column name to do group_by on them"
 )
 @click.option(
     "--deep_log",
@@ -1077,7 +1097,7 @@ def run(ctx, conf_path, base_conf, experiment,
     type=dict,
     help=""
 )
-def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args):
+def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args):
 
     #%% some hyper-parameters
 
@@ -1389,14 +1409,16 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
 
             tails_per_head = int(samples_per_head)
             group_them = []
-            if "test" in split_name:
-                tails_per_head = 0
-                group_them = ["prefix", "input_text"]
+            if split_name in group_sets:
+                #tails_per_head = 3
+                #TODO why group them?
+                group_them = group_by
             #    _replace_blanks = False
             df_path = split_path[split_name]
             split_df = pd.read_table(df_path)
             mlog.info("Path of dataset for %s %s", split_name, split_path[split_name])
             dlog.info("Columns of %s\n  %s", split_name, "\n".join(list(split_df.columns)))
+            dlog.info("Len of %s\n  %s", split_name, len(split_df))
             dlog.info(split_df.head())
             slang = split_lang[split_name]
             if "2" in slang:
@@ -1424,7 +1446,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                                 inp_exclude,
                                 targ_include,
                                 targ_exclude,
-                                pred_tresh, nli_group, per_record, is_even, start, 
+                                pred_tresh, nli_group, 
+                                per_record, per_prefix, is_even, start, 
                                 sampling, ex_type,
                                 tails_per_head, save_ds_path[split_name], _repeat, 
                                 int(pid), break_sent, sort, _replace_blanks, 
