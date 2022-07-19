@@ -323,6 +323,8 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
             data["pred_text1"] = str(top_hyp)
             data["prefix"] = rel
             data["langs"] = lang
+            tail = re.sub(r'<extra_.*?>','',tail)
+            tail = tail.strip()
             if test_set.orig_df is None:
                 data["target_text"] = tail
             input_text = re.sub(r'<.*?>','##',query)
@@ -419,7 +421,9 @@ def do_score(df, scorers, save_path, reval=False):
             top_hyp = str(row["pred_text1"])
             preds = [top_hyp]
             inp = row["input_text"]
-            tails = [str(row["target_text"])]
+            tail = re.sub(r'<extra_.*?>','',str(row["target_text"]))
+            tail = tail.strip()
+            tails = [tail]
             all_predictions.append(top_hyp)
             all_golds.append(tails[0])
             hi, ri = 0, 0
