@@ -477,14 +477,14 @@ def show_df(df):
             for s_row in s_rows:
                 exp=df.iloc[s_row]["exp_id"]
                 _score=df.iloc[s_row]["bert_score"]
-                if _score > 0:
-                    continue
+                #if _score > 0:
+                #    continue
                 cond = f"(main_df['{FID}'] == '{exp}')"
                 tdf = main_df[main_df[FID] == exp]
                 #df = tdf[["pred_text1", "id", "bert_score","query", "method", "rouge_score", "fid","prefix", "input_text","target_text"]]
                 spath = tdf.iloc[0]["path"]
                 spath = str(Path(spath).parent)
-                tdf = do_score(tdf, "bert", spath, reval=True) 
+                tdf = do_score(tdf, "rouge-bert", spath, reval=True) 
                 tdf = tdf.reset_index()
                 #main_df.loc[eval(cond), "bert_score"] = tdf["bert_score"]
             df = main_df

@@ -1358,7 +1358,7 @@ class MyDataset(torch.utils.data.Dataset):
                 _query = _query.replace("<extra_id_0>", "<extra_id_1>")
                 _query = _query.replace("___", "<extra_id_0>")
                 response = response.replace("<extra_id_0>", "<extra_id_1>")
-                response = "<extra_id_0> ___ " + response
+                #response = "<extra_id_0> ___ " + response
             else:
                 _query = _query.replace("___", "<extra_id_0>")
         #if not rel in self.data_split:

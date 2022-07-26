@@ -742,6 +742,12 @@ def run(ctx, conf_path, base_conf, experiment,
     help=""
 )
 @click.option(
+    "--wandb",
+    "-wb",
+    is_flag=True,
+    help=""
+)
+@click.option(
     "--print_log",
     "-print",
     default="",
@@ -1097,7 +1103,7 @@ def run(ctx, conf_path, base_conf, experiment,
     type=dict,
     help=""
 )
-def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args):
+def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, wandb, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args):
 
     #%% some hyper-parameters
 
@@ -1106,6 +1112,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     vlog.info("given load path: %s", load_path)
     vlog.info("given load path: %s", load_path)
     vlog.info("given save path: %s", save_path)
+
     if "dlog" in print_log: # data logger
         dlog.addHandler(consoleHandler)
         dlog.setLevel(logging.DEBUG)
@@ -1920,6 +1927,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
 
         #training_args.logging_steps=5
         #training_args.learning_rate=learning_rate
+        training_args.report_to = ["wandb"] if wandb else []
         training_args.do_predict=True
         training_args.gradient_accumulation_steps=accumulation_tiny_steps
         train_dataset = myds["train"]#.map(tokenize)
