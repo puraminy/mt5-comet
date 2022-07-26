@@ -1103,7 +1103,14 @@ def run(ctx, conf_path, base_conf, experiment,
     type=dict,
     help=""
 )
-def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, wandb, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args):
+@click.option(
+    "--match",
+    "-match",
+    default="",
+    type=str,
+    help=""
+)
+def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, wandb, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args, match):
 
     #%% some hyper-parameters
 
@@ -1437,6 +1444,13 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             mlog.info("Creating dataset for %s", split_name)
             _method = method
             _only_blanks = only_blanks
+            _match = match
+            _match_split = "train"
+            if "@" in _match:
+                _match, match_split = match.split("@")
+            _match = _match if _match != "none" else ""
+            if _match_split != "both" and split_name != match_split:
+                _match = ""
             if "test" in split_name:
                 _method = val_method
                 #_only_blanks = True
@@ -1458,7 +1472,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                                 sampling, ex_type,
                                 tails_per_head, save_ds_path[split_name], _repeat, 
                                 int(pid), break_sent, sort, _replace_blanks, 
-                                None, int(ph_num), group_them = group_them, temp_num = int(temp_num), someone=someone,
+                                None, int(ph_num), group_them = group_them, temp_num = int(temp_num), someone=someone, match=_match
                         )
             if save_data:
                 myds[_name].save_data(os.path.join(save_data,_name + ".tsv"), merge=True)

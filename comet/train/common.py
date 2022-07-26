@@ -1025,7 +1025,7 @@ class MyDataset(torch.utils.data.Dataset):
             save_ds_path="", repeat=1, pid=0, break_sent=False, 
             sort_key="event", replace_blanks = False, 
             tokenizer=None, ph_num=3, limit_lang = False, 
-            use_dif_templates=False, group_them=[], temp_num=1, someone=False): 
+            use_dif_templates=False, group_them=[], temp_num=1, someone=False, match=""): 
         super(MyDataset).__init__()
         fingerprint = save_ds_path + "_" + split_name + "_"  + method + \
                 "_" + str(len(split_df)) + "_" + str(num_samples) 
@@ -1094,6 +1094,11 @@ class MyDataset(torch.utils.data.Dataset):
         if nli_group != "all" and "nli_group" in split_df:
             split_df = split_df[split_df["nli_group"] == nli_group]
             dlog.info("*** Filtered based on nli_group "+ nli_group)
+        if match: # and len(split_df) > num_rows:
+            #split_df = split_df[split_df["input_text"].str.contains('___')==False]
+            split_df = split_df[split_df["input_text"].str.match(match)]
+            mlog.info("*** Filtered for match %s ", match)
+
 
         if rel_filter == "all":
             rel_filter = ""

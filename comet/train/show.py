@@ -509,7 +509,11 @@ def show_df(df):
             else:
                 canceled, col, val = list_df_values(main_df, get_val=False)
             if not canceled:
-                if not col in sel_cols: sel_cols.insert(cur_col, col)
+                if not col in sel_cols: 
+                    sel_cols.insert(cur_col, col)
+                else:
+                    sel_cols.remove(col)
+                    sel_cols.insert(cur_col, col)
                 save_obj(sel_cols, "sel_cols", context)
                 if col in info_cols:
                     info_cols.remove(col)
@@ -695,7 +699,7 @@ def show_df(df):
             _glist = [col, "prefix"]
             sel_cols =  load_obj("sel_cols", context, [])
             info_cols = load_obj("info_cols", context, [])
-            if True: #not sel_cols:
+            if not sel_cols:
                sel_cols = ["exp_id","fid", "prefix","method", "model", "n_preds", "rouge_score", "steps",  "bert_score", "br_score", "learning_rate",  "num_targets", "num_inps", "num_records", "wrap", "frozen", "prefixed"]
 
             num_targets = (df['prefix']+'_'+df['target_text']).groupby(df[col]).nunique()
