@@ -235,6 +235,12 @@ def cli():
     help="number of experiments to be done, 0 means all"
 )
 @click.option(
+    "--one",
+    "-one",
+    is_flag=True,
+    help="only first experiment"
+)
+@click.option(
     "--cpu",
     "-cpu",
     is_flag=True,
@@ -251,7 +257,7 @@ def cli():
 def run(ctx, conf_path, base_conf, experiment, 
         exclude_conf, include_conf, overwrite_conf, var, 
         save_model, addto, rem, save_data, load_data, add_prefix, 
-        only_var, sep, num_exps, cpu, undone):
+        only_var, sep, num_exps, one, cpu, undone):
      if not conf_path:
         conf_path = "confs"
         if colab: conf_path = "colab_confs"
@@ -340,6 +346,7 @@ def run(ctx, conf_path, base_conf, experiment,
                orig_args = args.copy()
                inp_tag = args["tag"]
                inp_test_samples = args["test_samples"]
+               if one: num_exps = 1
                if num_exps > 0:
                    tot_comb = tot_comb[:num_exps]
                mlog.info("Total experiments:%s", len(tot_comb))
@@ -997,7 +1004,8 @@ def run(ctx, conf_path, base_conf, experiment,
 @click.option(
     "--break_sent",
     "-brk",
-    is_flag=True,
+    default="",
+    type=str,
     help="Break in input sentencet to input and target at different positions (based on how many times specified by repeat)"
 )
 @click.option(
@@ -1146,13 +1154,14 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     if "-wrap" in method and not wrap:
         mlog.info("Method %s is for wrapped models...", method)
         wrap = True
-        if wrap and not frozen and follow_method:
+        if wrap and not frozen and follow_method and not "-nfz" in method:
             frozen = True
-    if wrap and not frozen:
+    if wrap and not frozen and not "-nfz" in method:
          if not no_confirm:
              ans = input("Are you sure you want to wrap without freezing the model?")
              if ans != "y":
                  frozen = True
+    method = method.replace("-nfz", "")
     w_str = "wrapped" if wrap else "unwrapped"
     f_str = "freezed" if frozen else "unfreezed"
     if not output_name and not (cont or do_eval):
@@ -1207,7 +1216,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     lr_mt = {}
     if not frozen and learning_rate == 0: 
         if opt_type == "adam": 
-            learning_rate = lr_mt[method] if method in lr_mt else 6.25e-05  
+            learning_rate = lr_mt[method] if method in lr_mt else 3.25e-04  
         else:
             learning_rate = 1e-3
         if "gpt" in model_id:
@@ -1445,16 +1454,17 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             _method = method
             _only_blanks = only_blanks
             _match = match
-            _match_split = "train"
+            match_split = "train"
             if "@" in _match:
                 _match, match_split = match.split("@")
             _match = _match if _match != "none" else ""
-            if _match_split != "both" and split_name != match_split:
+            if match_split != "both" and split_name != match_split:
                 _match = ""
             if "test" in split_name:
                 _method = val_method
                 #_only_blanks = True
             _repeat = 1
+            _break_sent = break_sent if break_sent != "none" else ""
             if split_name == "train" or split_name == "sample":
                 _repeat = int(repeat)
             # dddddddddddddd
@@ -1471,8 +1481,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                                 per_record, per_prefix, is_even, start, 
                                 sampling, ex_type,
                                 tails_per_head, save_ds_path[split_name], _repeat, 
-                                int(pid), break_sent, sort, _replace_blanks, 
-                                None, int(ph_num), group_them = group_them, temp_num = int(temp_num), someone=someone, match=_match
+                                int(pid), _break_sent, sort, _replace_blanks, 
+                                None, int(ph_num), group_them = group_them, temp_num = temp_num, someone=someone, match=_match
                         )
             if save_data:
                 myds[_name].save_data(os.path.join(save_data,_name + ".tsv"), merge=True)

@@ -742,6 +742,7 @@ def show_df(df):
             hotkey = "gG"
         elif char in ["n", "p", "t", "i"] and prev_cahr != "x":
             left = 0
+            context= "comp"
             s_rows = sel_rows
             if not sel_rows:
                 s_rows = [sel_row]
@@ -1370,9 +1371,11 @@ def order(sel_cols, cols, pos=0):
 def change_info(infos):
     info_bar.erase()
     h,w = info_bar.getmaxyx()
+    w = 80
     for msg in infos:
-        msg = textwrap.shorten(msg, width=w, placeholder=".")
-        mprint(str(msg), info_bar, color=HL_COLOR)
+        lines = textwrap.wrap(msg, width=w, placeholder=".")
+        for line in lines: 
+            mprint(str(line), info_bar, color=HL_COLOR)
     rows,cols = std.getmaxyx()
     info_bar.refresh(0,0, rows -len(infos),0, rows-1, cols - 2)
 si_hash = {}
