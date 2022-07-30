@@ -235,6 +235,12 @@ def cli():
     help="number of experiments to be done, 0 means all"
 )
 @click.option(
+    "--one",
+    "-one",
+    is_flag=True,
+    help="only first experiment"
+)
+@click.option(
     "--cpu",
     "-cpu",
     is_flag=True,
@@ -251,7 +257,7 @@ def cli():
 def run(ctx, conf_path, base_conf, experiment, 
         exclude_conf, include_conf, overwrite_conf, var, 
         save_model, addto, rem, save_data, load_data, add_prefix, 
-        only_var, sep, num_exps, cpu, undone):
+        only_var, sep, num_exps, one, cpu, undone):
      if not conf_path:
         conf_path = "confs"
         if colab: conf_path = "colab_confs"
@@ -340,6 +346,7 @@ def run(ctx, conf_path, base_conf, experiment,
                orig_args = args.copy()
                inp_tag = args["tag"]
                inp_test_samples = args["test_samples"]
+               if one: num_exps = 1
                if num_exps > 0:
                    tot_comb = tot_comb[:num_exps]
                mlog.info("Total experiments:%s", len(tot_comb))
@@ -742,6 +749,12 @@ def run(ctx, conf_path, base_conf, experiment,
     help=""
 )
 @click.option(
+    "--wandb",
+    "-wb",
+    is_flag=True,
+    help=""
+)
+@click.option(
     "--print_log",
     "-print",
     default="",
@@ -764,9 +777,15 @@ def run(ctx, conf_path, base_conf, experiment,
 )
 @click.option(
     "--per_record",
-    "-recs",
+    "-perrecs",
     is_flag=True,
     help="Show if train_samples are records or unique heads"
+)
+@click.option(
+    "--per_prefix",
+    "-perpre",
+    is_flag=True,
+    help="Show if train_samples are per relations (prefix) or all the samples"
 )
 @click.option(
     "--is_even",
@@ -821,6 +840,20 @@ def run(ctx, conf_path, base_conf, experiment,
     default=3,
     type=int,
     help=""
+)
+@click.option(
+    "--group_sets",
+    "-gs",
+    default="",
+    type=str,
+    help="The name of splits to group by columns specified in group_by (below)"
+)
+@click.option(
+    "--group_by",
+    "-gb",
+    default="prefix@input_text",
+    type=str,
+    help="The column name to do group_by on them"
 )
 @click.option(
     "--deep_log",
@@ -971,7 +1004,8 @@ def run(ctx, conf_path, base_conf, experiment,
 @click.option(
     "--break_sent",
     "-brk",
-    is_flag=True,
+    default="",
+    type=str,
     help="Break in input sentencet to input and target at different positions (based on how many times specified by repeat)"
 )
 @click.option(
@@ -1077,7 +1111,14 @@ def run(ctx, conf_path, base_conf, experiment,
     type=dict,
     help=""
 )
-def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, training_round, epochs_num, per_record, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args):
+@click.option(
+    "--match",
+    "-match",
+    default="",
+    type=str,
+    help=""
+)
+def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, wandb, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args, match):
 
     #%% some hyper-parameters
 
@@ -1086,6 +1127,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     vlog.info("given load path: %s", load_path)
     vlog.info("given load path: %s", load_path)
     vlog.info("given save path: %s", save_path)
+
     if "dlog" in print_log: # data logger
         dlog.addHandler(consoleHandler)
         dlog.setLevel(logging.DEBUG)
@@ -1112,13 +1154,14 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     if "-wrap" in method and not wrap:
         mlog.info("Method %s is for wrapped models...", method)
         wrap = True
-        if wrap and not frozen and follow_method:
+        if wrap and not frozen and follow_method and not "-nfz" in method:
             frozen = True
-    if wrap and not frozen:
+    if wrap and not frozen and not "-nfz" in method:
          if not no_confirm:
              ans = input("Are you sure you want to wrap without freezing the model?")
              if ans != "y":
                  frozen = True
+    method = method.replace("-nfz", "")
     w_str = "wrapped" if wrap else "unwrapped"
     f_str = "freezed" if frozen else "unfreezed"
     if not output_name and not (cont or do_eval):
@@ -1173,7 +1216,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     lr_mt = {}
     if not frozen and learning_rate == 0: 
         if opt_type == "adam": 
-            learning_rate = lr_mt[method] if method in lr_mt else 6.25e-05  
+            learning_rate = lr_mt[method] if method in lr_mt else 3.25e-04  
         else:
             learning_rate = 1e-3
         if "gpt" in model_id:
@@ -1389,14 +1432,16 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
 
             tails_per_head = int(samples_per_head)
             group_them = []
-            if "test" in split_name:
-                tails_per_head = 0
-                group_them = ["prefix", "input_text"]
+            if split_name in group_sets:
+                #tails_per_head = 3
+                #TODO why group them?
+                group_them = group_by
             #    _replace_blanks = False
             df_path = split_path[split_name]
             split_df = pd.read_table(df_path)
             mlog.info("Path of dataset for %s %s", split_name, split_path[split_name])
             dlog.info("Columns of %s\n  %s", split_name, "\n".join(list(split_df.columns)))
+            dlog.info("Len of %s\n  %s", split_name, len(split_df))
             dlog.info(split_df.head())
             slang = split_lang[split_name]
             if "2" in slang:
@@ -1408,10 +1453,18 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             mlog.info("Creating dataset for %s", split_name)
             _method = method
             _only_blanks = only_blanks
+            _match = match
+            match_split = "train"
+            if "@" in _match:
+                _match, match_split = match.split("@")
+            _match = _match if _match != "none" else ""
+            if match_split != "both" and split_name != match_split:
+                _match = ""
             if "test" in split_name:
                 _method = val_method
                 #_only_blanks = True
             _repeat = 1
+            _break_sent = break_sent if break_sent != "none" else ""
             if split_name == "train" or split_name == "sample":
                 _repeat = int(repeat)
             # dddddddddddddd
@@ -1424,11 +1477,12 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                                 inp_exclude,
                                 targ_include,
                                 targ_exclude,
-                                pred_tresh, nli_group, per_record, is_even, start, 
+                                pred_tresh, nli_group, 
+                                per_record, per_prefix, is_even, start, 
                                 sampling, ex_type,
                                 tails_per_head, save_ds_path[split_name], _repeat, 
-                                int(pid), break_sent, sort, _replace_blanks, 
-                                None, int(ph_num), group_them = group_them, temp_num = int(temp_num), someone=someone,
+                                int(pid), _break_sent, sort, _replace_blanks, 
+                                None, int(ph_num), group_them = group_them, temp_num = temp_num, someone=someone, match=_match
                         )
             if save_data:
                 myds[_name].save_data(os.path.join(save_data,_name + ".tsv"), merge=True)
@@ -1897,6 +1951,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
 
         #training_args.logging_steps=5
         #training_args.learning_rate=learning_rate
+        training_args.report_to = ["wandb"] if wandb else []
         training_args.do_predict=True
         training_args.gradient_accumulation_steps=accumulation_tiny_steps
         train_dataset = myds["train"]#.map(tokenize)

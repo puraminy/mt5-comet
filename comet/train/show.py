@@ -211,6 +211,7 @@ def show_df(df):
     seq = ""
     search = ""
     on_col_list = []
+    sel_fid = "" 
     open_dfnames = [dfname]
     #if not "learning_rate" in df:
     #    df[['fid_no_lr', 'learning_rate']] = df['fid'].str.split('_lr_', 1, expand=True)
@@ -281,8 +282,11 @@ def show_df(df):
                col_widths[sel_col] = min(col_widths[sel_col],40)
                _w = col_widths[sel_col] 
                if sel_col in sel_cols:
-                   if cur_col < len(sel_cols) and sel_col == sel_cols[cur_col] and ii != sel_row:
-                       cell_color = TITLE_COLOR
+                   if cur_col < len(sel_cols) and sel_col == sel_cols[cur_col]:
+                       if ii == sel_row:
+                          cell_color = HL_COLOR
+                       else:
+                           cell_color = TITLE_COLOR
                    else:
                        cell_color = _color
                    text = textwrap.shorten(text, width=36, placeholder="...")
@@ -473,14 +477,14 @@ def show_df(df):
             for s_row in s_rows:
                 exp=df.iloc[s_row]["exp_id"]
                 _score=df.iloc[s_row]["bert_score"]
-                if _score > 0:
-                    continue
+                #if _score > 0:
+                #    continue
                 cond = f"(main_df['{FID}'] == '{exp}')"
                 tdf = main_df[main_df[FID] == exp]
                 #df = tdf[["pred_text1", "id", "bert_score","query", "method", "rouge_score", "fid","prefix", "input_text","target_text"]]
                 spath = tdf.iloc[0]["path"]
                 spath = str(Path(spath).parent)
-                tdf = do_score(tdf, "bert", spath, reval=True) 
+                tdf = do_score(tdf, "rouge-bert", spath, reval=True) 
                 tdf = tdf.reset_index()
                 #main_df.loc[eval(cond), "bert_score"] = tdf["bert_score"]
             df = main_df
@@ -505,7 +509,11 @@ def show_df(df):
             else:
                 canceled, col, val = list_df_values(main_df, get_val=False)
             if not canceled:
-                if not col in sel_cols: sel_cols.insert(cur_col, col)
+                if not col in sel_cols: 
+                    sel_cols.insert(cur_col, col)
+                else:
+                    sel_cols.remove(col)
+                    sel_cols.insert(cur_col, col)
                 save_obj(sel_cols, "sel_cols", context)
                 if col in info_cols:
                     info_cols.remove(col)
@@ -599,12 +607,6 @@ def show_df(df):
                     save_obj(sel_cols, "sel_cols", dfname)
         elif char in "56789" and prev_char == "\\":
             cmd = "top@" + str(int(char)/10)
-        elif char in ["a"]: 
-            col = sel_cols[cur_col]
-            FID = col 
-            consts["FID"] = FID
-            df = filter_df
-            hotkey="gG"
         elif char == "BB": 
             sel_rows = []
             for i in range(len(df)):
@@ -613,9 +615,18 @@ def show_df(df):
             col = sel_cols[cur_col]
             exp=df.iloc[sel_row][col]
             if col == "exp_id": col = FID
+            if col == "fid":
+                sel_fid = exp
             mlog.info("%s == %s", col, exp)
             df = main_df[main_df[col] == exp]
+            filter_df = df
             hotkey = "gG"
+        elif char  == "a": 
+            col = sel_cols[cur_col]
+            FID = col 
+            consts["FID"] = FID
+            df = filter_df
+            hotkey="gG"
         elif char == "A":
             col = sel_cols[cur_col]
             FID = col 
@@ -679,7 +690,7 @@ def show_df(df):
             consts["exp"] = exp
             path = main_df.loc[main_df["fid"] == exp, "path"][0]
             consts["path"] = path
-        elif char in ["G"]:
+        elif char == "G":
             backit(df, sel_cols)
             if FID == "input_text":
                 context = "inp2"
@@ -688,8 +699,8 @@ def show_df(df):
             _glist = [col, "prefix"]
             sel_cols =  load_obj("sel_cols", context, [])
             info_cols = load_obj("info_cols", context, [])
-            if True: #not sel_cols:
-               sel_cols = ["exp_id","prefix","method", "model", "n_preds", "avg_len","rouge_score", "steps",  "bert_score", "br_score", "learning_rate",  "num_targets", "num_inps", "num_records", "wrap", "frozen", "prefixed"]
+            if not sel_cols:
+               sel_cols = ["exp_id","fid", "prefix","method", "model", "n_preds", "rouge_score", "steps",  "bert_score", "br_score", "learning_rate",  "num_targets", "num_inps", "num_records", "wrap", "frozen", "prefixed"]
 
             num_targets = (df['prefix']+'_'+df['target_text']).groupby(df[col]).nunique()
             n_preds = (df['prefix']+'_'+df['pred_text1']).groupby(df[col]).nunique()
@@ -731,6 +742,7 @@ def show_df(df):
             hotkey = "gG"
         elif char in ["n", "p", "t", "i"] and prev_cahr != "x":
             left = 0
+            context= "comp"
             s_rows = sel_rows
             if not sel_rows:
                 s_rows = [sel_row]
@@ -784,11 +796,12 @@ def show_df(df):
                     if _col.startswith("pred_text1"):
                         info_cols.append(_col)
             else:
-                _from_cols = ["pred_text1", "id", "pred_text1_x", "pred_text1_y","query_x","query_y", "query", "method", "prefix", "input_text","target_text_x", "target_text", "rouge_score", "rouge_score_x","rouge_score_y", "bert_score", "bert_score_x", "bert_score_y", "exp_name_x", "exp_name_y"]
+                _from_cols = ["pred_text1","fid", "id", "pred_text1_x", "pred_text1_y","query_x","query_y", "query", "method", "prefix", "input_text","target_text_x", "target_text", "rouge_score", "rouge_score_x","rouge_score_y", "bert_score", "bert_score_x", "bert_score_y", "exp_name_x", "exp_name_y"]
                 for _col in _from_cols:
                     if (_col.startswith("id") or
                         _col.startswith("pred_text1") or 
                         _col.startswith("rouge_score") or 
+                        _col.startswith("fid") or 
                         _col=="target_text" or 
                         _col.startswith("bert_score")):
                         sel_cols.append(_col)
@@ -800,6 +813,7 @@ def show_df(df):
             sel_row = 0
             sel_rows = []
             info_cols.append("sum_fid")
+            consts["short_keys"] = "m: show group" 
 
         elif char == "m" and prev_char != "x":
             left = 0
@@ -808,7 +822,10 @@ def show_df(df):
                 _col = on_col_list[0]
                 _item=df.iloc[sel_row][_col]
                 sel_row = 0
-                df = main_df[(main_df[FID] == sel_exp) & (main_df[_col] == _item)]
+                if sel_fid:
+                    df = main_df[(main_df["fid"] == sel_fid) & (main_df[FID] == sel_exp) & (main_df[_col] == _item)]
+                else:
+                    df = main_df[(main_df[FID] == sel_exp) & (main_df[_col] == _item)]
                 sel_cols = ["fid","input_text","pred_text1","target_text","bert_score", "hscore", "rouge_score", "prefix"]
                 df = df[sel_cols]
                 df = df.sort_values(by="bert_score", ascending=False)
@@ -892,7 +909,7 @@ def show_df(df):
                     df = pd.concat([df, new_df], ignore_index=True)
                 else:
                     main_df = pd.concat([main_df, new_df], ignore_index=True)
-        elif char in ["t"]:
+        elif char == "t" and prev_char=="x":
             cols = get_cols(df,5)
             if cols:
                 tdf = df[cols].round(2)
@@ -923,6 +940,7 @@ def show_df(df):
             backit(df, sel_cols)
             if is_enter(ch): char = "F"
             col = sel_cols[cur_col]
+            if col == "exp_id": col = FID
             if char == "f":
                 canceled, col, val = list_df_values(main_df, col, get_val=True)
             else:
@@ -1353,9 +1371,11 @@ def order(sel_cols, cols, pos=0):
 def change_info(infos):
     info_bar.erase()
     h,w = info_bar.getmaxyx()
+    w = 80
     for msg in infos:
-        msg = textwrap.shorten(msg, width=w, placeholder=".")
-        mprint(str(msg), info_bar, color=HL_COLOR)
+        lines = textwrap.wrap(msg, width=w, placeholder=".")
+        for line in lines: 
+            mprint(str(line), info_bar, color=HL_COLOR)
     rows,cols = std.getmaxyx()
     info_bar.refresh(0,0, rows -len(infos),0, rows-1, cols - 2)
 si_hash = {}

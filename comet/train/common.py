@@ -2,6 +2,7 @@ from pathlib import Path
 import math
 from termcolor import colored
 from transformers import AddedToken 
+from functools import lru_cache
 import pandas as pd
 from comet.utils.myutils import *
 from comet.transformers_ptuning import PTuningWrapper
@@ -180,22 +181,16 @@ rel_nat_maps = {
         2:"Others feels {ph} because {event}",
         "fa":"در نتیجه PersonX حس می کند", 
         "tokens":"<state> <agent> <after>",
+        "n-tokens":"event {event}, agent state after is {ph}",
         "nat-tokens":"then, the state of the person is ",
         "desc":"the person's reaction to the event"
-    },
-    "xWant":{ 
-        1:"After {event}, PersonX would want {ph}. ",
-        2:"PersonX wants {ph} after {event}",
-        "fa":"بعد از آن PersonX می خواهد",
-        "tokens":"<event> <agent> <after> <want>",
-        "nat-tokens":"then, the person wants ",
-        "desc":"the person's decision after the event"
     },
     "oWant":{ 
         1:"After {event}, others would want {ph}. ",
         2:"Others want {ph} after {event}",
         "fa":"بعد از آن دیگران می خواهند",
         "tokens":"<event> <other> <after> <want>",
+        "n-tokens":"event {event}, other after want {ph}",
         "nat-tokens":"then, others want ",
         "desc":"other's decision after the event"
     },
@@ -204,6 +199,7 @@ rel_nat_maps = {
         2:"PersonX {ph} because {event}",
         "fa":"در نتیجه PersonX ",
         "tokens":"<event> <agent> <after> <effect>",
+        "n-tokens":"event {event}, agent after effect {ph}",
         "nat-tokens":"then, the effect on the person ",
         "desc":"the effect of event on the person"
     },
@@ -212,6 +208,7 @@ rel_nat_maps = {
         2:"Others {ph} because {event}",
         "fa":"در نتیجه دیگران ",
         "tokens":"<event> <other> <after> <effect>",
+        "n-tokens":"event {event}, other after effect {ph}",
         "nat-tokens":"then, the effect on others ",
         "desc":"the effect of the person on others"
     },
@@ -222,17 +219,32 @@ rel_nat_maps = {
         4:"PersonX is seen as {ph} because {event}",
         "fa":"مردم فکر می کنند PersonX ",
         "tokens":"<state> <agent> <static>",
+        "n-tokens":"event {event}, agent state static is {ph}",
         "nat-tokens":"always, the state of the person is",
         "desc":"the person's attributes"
+    },
+    "xWant":{ 
+        1:"After {event}, PersonX would want {ph}. ",
+        2:"PersonX wants {ph} after {event}",
+        "fa":"بعد از آن PersonX می خواهد",
+        "tokens":"<event> <agent> <after> <want>",
+        "n-tokens":"event {event}, agent after want {ph}",
+        "nat-tokens":"then, the person wants ",
+        "desc":"the person's decision after the event"
     },
     "xIntent":{ 
         1:"Because of {event}, they want {ph}",
         2:"if {event}, then he want {ph}",
         3:"Because of {event}, he want to {ph}",
         4:"Because of {event}, he want {ph}",
+        5:"Before {event}, PersonX would want {ph}. ",
         #2:"PersonX want {ph}  Therefore, {event}",
         "fa":"زیرا PersonX می خواست",
         "tokens":"<event> <agent> <before> <cause> <want>",
+        "tokens2":"<event> {event} <agent> <before> <cause> <want> {ph}",
+        "random":"event agent before cause  {event} want {ph}",
+        "random2":"event agent before cause want {event} {ph}",
+        "n-tokens":"event {event}, agent before cause want {ph}",
         "nat-tokens":"before, because the person want ",
         "desc":"the intention of the person"
     },
@@ -242,6 +254,10 @@ rel_nat_maps = {
         "en":"Before that, PersonX needs {ph} ",
         "fa":"قبل از آن PersonX نیاز دارد",
         "tokens":"<event> <agent> <before> <cause> <need>",
+        "tokens2":"<event> {event} <agent> <before> <cause> <need> {ph}",
+        "random":"event agent before cause  {event} need {ph}",
+        "random2":"event agent before cause need {event} {ph}",
+        "n-tokens":"event {event}, agent before cause need {ph}",
         "nat-tokens":"before, because the person needs ",
         "desc": "the requirements for the action"
     },
@@ -339,14 +355,33 @@ def extend_tokenizer(tokenizer, prompt_tokens = [], model_id=""):
     else:
         mlog.info("No new token was added")
 
+def fill_sample(mt, rel):
+    qtemp, anstemp, ex_qtemp, ex_anstemp, context = create_templates(mt,
+            gen_pos="end")
+    mask =1
+    context_df = None
+    d = {"prefix":rel}
+    event = "test event"
+    resp = "test answer"
+    input_lang = "en"
+    target_lang = "en"
+    gen_token = "gen_en"
+    qtemp = qtemp[0]
+    _qtemp = fill_consts(qtemp, ex_qtemp, context,rel, d, context_df, mask=mask,method = mt)
+    _anstemp = fill_consts(anstemp, ex_anstemp, context,rel, d, context_df, mask=mask,method = mt)
+    _query = fill_vars(_qtemp, rel, event, resp, gen_token,
+            input_lang, target_lang)
+    response = fill_vars(_anstemp, rel, event, resp, gen_token,
+            input_lang, target_lang)
+
 
 def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words=False, merge_prompts=False, method="", shared_embs =False):
     wrapped_model = None
     prompt_encoders = []
     offsets = []
     tokenize_relations(tokenizer)
-    #for rel in all_rels:
-    #    fill_sample(method, rel)
+    for rel in all_rels:
+        fill_sample(method, rel)
 
     for rel, prompt_tokens in encoder_prompts.items():
         mlog.info("******************* Wrapping model for %s", rel)
@@ -739,9 +774,16 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            #qtemp = "{rel_natural_pure}" 
            qtemp = "{rel_natural}"
            anstemp = "{resp} {end}"
+       elif method == "sup-nat-tail":
+           #qtemp = "{rel_natural_pure}" 
+           qtemp = "{rel_natural}"
+           anstemp = "{ph} {resp} {end}"
        elif method == "unsup-nat":
            qtemp = "{rel_natural}"
            anstemp = "{ph} {resp} {end}"
+       elif method == "unsup-nat-head":
+           qtemp = "{rel_natural}"
+           anstemp = "{resp} {end}"
        elif method == "unsup-nat-n":
            qtemp = "{rel_nat_n}"
            anstemp = "{ph} {resp} {end}"
@@ -949,6 +991,8 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
        return qtemp, anstemp, ex_qtemp, ex_anstemp, context
 
 def fill_vars(template, rel, event, resp, gen_token= "gen_en",  inp_lang="en", resp_lang="en", ph_num=3, temp_num = 1, someone=False):
+    if type(temp_num) == str and temp_num.isnumeric():
+        temp_num = int(temp_num)
     assert temp_num in rel_nat_maps[rel], rel + " for " + str(temp_num)
     rel_natural = rel_nat_maps[rel][temp_num]        
     rel_natural_tokens = rel_nat_maps[rel]["nat-tokens"]        
@@ -1012,12 +1056,12 @@ class MyDataset(torch.utils.data.Dataset):
             targ_include="",
             targ_exclude="",
             pred_tresh=0,
-            nli_group="all", per_record=False, is_even=False, start=0, 
+            nli_group="all", per_record=False, per_prefix=False, is_even=False, start=0, 
             sampling=0, ex_type="",  samples_per_head=0, 
-            save_ds_path="", repeat=1, pid=0, break_sent=False, 
+            save_ds_path="", repeat=1, pid=0, break_sent="", 
             sort_key="event", replace_blanks = False, 
             tokenizer=None, ph_num=3, limit_lang = False, 
-            use_dif_templates=False, group_them=[], temp_num=1, someone=False): 
+            use_dif_templates=False, group_them=[], temp_num=1, someone=False, match=""): 
         super(MyDataset).__init__()
         fingerprint = save_ds_path + "_" + split_name + "_"  + method + \
                 "_" + str(len(split_df)) + "_" + str(num_samples) 
@@ -1025,7 +1069,6 @@ class MyDataset(torch.utils.data.Dataset):
         self.data_split = {}
         self.sort_key = sort_key # sort index
         self.ph_num = ph_num
-        self.temp_num = temp_num
         self.someone = someone
 
         self.only_blanks = only_blanks
@@ -1040,9 +1083,11 @@ class MyDataset(torch.utils.data.Dataset):
         self.targ_exclude = targ_exclude
         self.ex_type = ex_type
         self.per_record = per_record
+        self.per_prefix = per_prefix
         self.is_even = is_even
         dlog.info("building query responses for {}".format(split_name))
         mlog.info(f"fill data input dataset len:{len(split_df)}")
+        dlog.info(f"fill data input dataset len:{len(split_df)}")
         self.natural = inp_include == "natural"
         self.split_name = split_name
         if split_name != "train":
@@ -1058,10 +1103,31 @@ class MyDataset(torch.utils.data.Dataset):
         if group_them:
             self.orig_df = split_df.copy()
             split_df = split_df.groupby(group_them, as_index=False).first()
+            dlog.info("*** Filtered for grouping_them %s ", group_them)
 
+        if rel_filter == "all":
+            rel_filter = ""
+        if "@" in rel_filter:
+            rel_filter, temp_num = rel_filter.split("@")
+        self.temp_num = temp_num
+        rel_filter = rel_filter.strip()
+        if rel_filter:
+            cond = ""
+            op = "|"
+            col = "prefix"
+            for val in rel_filter.split("-"):
+                assert val in all_rels, f"{val} is not in relations"
+                cond += f"{op} (split_df['{col}'] == '{val}') "
+            cond = cond.strip(op)
+            split_df = split_df[eval(cond)]
+            dlog.info("len after relation filter: %s", len(split_df))
+        self.cats_num = cats_num = len(split_df["prefix"].unique())
+        if self.per_prefix:
+            self.num_samples = cats_num * num_samples
         if self.num_samples == 0: 
             self.num_samples = len(split_df)
             self.samples_per_head = 0
+            self.per_prefix = 0
         for col in targets:
             if col in split_df:
                 split_df[col] = split_df[col].astype(str)
@@ -1079,17 +1145,16 @@ class MyDataset(torch.utils.data.Dataset):
         if nli_group != "all" and "nli_group" in split_df:
             split_df = split_df[split_df["nli_group"] == nli_group]
             dlog.info("*** Filtered based on nli_group "+ nli_group)
+        if match: # and len(split_df) > num_rows:
+            #split_df = split_df[split_df["input_text"].str.contains('___')==False]
+            split_df = split_df[split_df["input_text"].str.match(match)]
+            mlog.info("*** Filtered for match %s ", match)
 
-        if rel_filter == "all":
-            rel_filter = ""
+
+        dlog.info(f"len after filtering:{len(split_df)}")
         mlog.info(f"len after filtering:{len(split_df)}")
         assert len(split_df) > 0, "Data frame is empty " + self.split_name
         self.num_records = self.num_samples
-        rel_filter = rel_filter.strip()
-        if rel_filter:
-            assert rel_filter in all_rels, f"{rel_filter} is no in relations"
-            split_df = split_df[split_df["prefix"] == rel_filter]
-            dlog.info("len after relation filter: %s", len(split_df))
         if False:
             if self.num_samples < len(split_df) and not is_even: 
                 #TODO 
@@ -1098,14 +1163,9 @@ class MyDataset(torch.utils.data.Dataset):
                 dlog.info(f"NUM samples %s, %s", self.num_samples, len(split_df))
                 dlog.info(f"len after sampling:{len(split_df)}")
 
-        if not rel_filter:
-            split_df["freqs"] = split_df.groupby('input_text')['input_text'].transform('count')
-
-        else:
-            split_df["freqs"] = split_df.groupby(['prefix','input_text'])['input_text'].transform('count')
-        split_df = split_df.sort_values(by=["freqs","input_text"], ascending=False)
+        split_df["freqs"] = split_df.groupby(['prefix','input_text'])['input_text'].transform('count')
+        split_df = split_df.sort_values(by=["freqs","input_text", "prefix"], ascending=False)
         assert len(split_df) > 0, "Data frame is empty " + self.split_name + " " + str(self.num_samples)
-        self.cats_num = cats_num = len(split_df["prefix"].unique())
         dlog.info("Num Samples: %s", self.num_samples)
         mlog.info("Num Samples: %s", self.num_samples)
         mlog.info("Cats Num: %s", cats_num)
@@ -1116,7 +1176,6 @@ class MyDataset(torch.utils.data.Dataset):
         for row in _spp.iterrows():
             mlog.info("%s : %s ", row[0], row[1].input_text)
 
-        #input("Press any key")
         self.rel_counter = {}
         self.rel_filter = rel_filter
         self.lang_counter = {}
@@ -1163,7 +1222,12 @@ class MyDataset(torch.utils.data.Dataset):
                 if self.is_even:
                     _data = self.fill_all_data(_start, _end)
                 else:
-                    _data = self.fill_data(_start, _end)
+                    _data = self.fill_data(_start, _end, True, 
+                        "".join(self.methods), self.num_samples, self.split_name,
+                        self.cats_num, self.num_per_cat, self.ex_type, 
+                        self.samples_per_head, 
+                        self.inp_include, self.inp_exclude, 
+                        self.targ_include, self.targ_exclude)
             if self.sort_key == "rep":
                 _data = sorted(_data, key = lambda x:x[self.sort_key], reverse=True)
             elif self.sort_key != "none":
@@ -1240,7 +1304,11 @@ class MyDataset(torch.utils.data.Dataset):
             if self.is_even:
                 _data = self.fill_all_data(iter_start, iter_end)
             else:
-                _data = self.fill_data(iter_start, iter_end)
+               _data = self.fill_data(iter_start, iter_end, True, 
+                    "".join(self.methods), self.num_samples, self.split_name,
+                    self.cats_num, self.num_per_cat, self.ex_type, self.samples_per_head, 
+                    self.inp_include, self.inp_exclude, 
+                    self.targ_include, self.targ_exclude)
         mlog.info("Iter start: %s", iter_start)
         mlog.info("Iter end: %s", iter_end)
         self.flat_data = _data
@@ -1305,7 +1373,7 @@ class MyDataset(torch.utils.data.Dataset):
         sent_split = sent.split(" ")
         if rep > 0 and self.break_sent:
             br = 0
-            if False: #rep == 1:
+            if self.break_sent == "person":
                 indexes = [i for i,x in enumerate(sent_split) if x == "PersonX" or x == "others" or x == "PersonY"]
                 if indexes:
                     br = indexes[-1]
@@ -1313,12 +1381,22 @@ class MyDataset(torch.utils.data.Dataset):
                     response = placeholder_token + " " + sent_split[br]
                     clog.info(">>>>>>>>>>>>>>>>>>>>=== rep:%s br:%s index:%s ========", rep, br, index)
 
-            if br == 0:
+            if (br == 0 and self.break_sent == "person") or self.break_sent == "random":  
                 br = random.randint(len(sent_split)//2, len(sent_split)-1)
                 if br > 0 and br < len(sent_split):
                     _query = " ".join(sent_split[:br]) + " " + placeholder_token
                     response = placeholder_token + " " + " ".join(sent_split[br:])
                     clog.info("================== rep:%s br:%s index:%s ========", rep, br, index)
+            elif self.break_sent == "random_word":  
+                _word = random.choice(sent_split)
+                _query = _query.replace(_word, placeholder_token, 1)
+                response = placeholder_token + " " + _word 
+            elif self.break_sent == "random_span":  
+                _start = random.randint(len(sent_split)//2, len(sent_split)-1)
+                _end = random.randint(_start + 1, len(sent_split)-1)
+                _phrase = " ".join(sent_split[_start:_end])
+                _query = _query.replace(_phrase, placeholder_token, 1)
+                response = placeholder_token + " " + _phrase 
             _q = _query.replace(">",">\n") 
             clog.info(_q)
             clog.info(response)
@@ -1339,7 +1417,7 @@ class MyDataset(torch.utils.data.Dataset):
                 _query = _query.replace("<extra_id_0>", "<extra_id_1>")
                 _query = _query.replace("___", "<extra_id_0>")
                 response = response.replace("<extra_id_0>", "<extra_id_1>")
-                response = "<extra_id_0> ___ " + response
+                #response = "<extra_id_0> ___ " + response
             else:
                 _query = _query.replace("___", "<extra_id_0>")
         #if not rel in self.data_split:
@@ -1399,12 +1477,17 @@ class MyDataset(torch.utils.data.Dataset):
         self.flat_data.extend(flat_data)
         return flat_data
 
-    def fill_data(self, iter_start, iter_end, show_progress=True):
+    @lru_cache
+    def fill_data(self,  iter_start, iter_end, show_progress, 
+            method, num_samples, split_name,
+            cats_num, num_per_cat, ex_type, samples_per_head, 
+            inp_include, inp_exclude, targ_include, targ_exclude):
         flat_data = []
         #if iter_end < 0:
         #    iter_end = iter_start + self.num_samples
         kk = 0
         jj = 0
+        hh = 0
         dlog.info("==========NNNNN========= SPLIT: %s", self.split_name)
         dlog.info("get data from %s to %s", iter_start, iter_end)
         dlog.info("total rows: %s", len(self.split_df))
@@ -1417,7 +1500,10 @@ class MyDataset(torch.utils.data.Dataset):
             pbar.set_description("Preparing iterator "+ self.split_name)
 
         no_new_item_added = False
+        all_rows = len(self.split_df)
+        ii = 0
         for index, d in self.split_df.iterrows():
+            ii += 1 
             if kk < iter_start:
                 dlog.info("!!!!!!!!! before start %s", iter_start)
                 kk += 1
@@ -1425,18 +1511,18 @@ class MyDataset(torch.utils.data.Dataset):
             rel = d["prefix"]
             if not rel in self.rel_counter:
                 self.rel_counter[rel] = 0
-            dlog.info("rel counter %s -- %s", self.rel_counter, kk)
-            if len(filled_cat) == self.cats_num:
+            dlog.info("%s / %s --ii: %s, kk: %s jj:%s / %s )rel counter %s ", hh, self.num_samples, ii, kk, jj, all_rows, self.rel_counter)
+            if len(filled_cat) == cats_num:
                 dlog.info("all cats filled limit reached!")
                 self.flat_data.extend(flat_data)
                 return flat_data
 
             no_new_item_added = True
-            if self.num_per_cat > 0 and self.rel_counter[rel] > self.num_per_cat:
-                dlog.info("!!!!!!!!! number per cat limit reached %s for %s", rel, self.num_per_cat)
+            if num_per_cat > 0 and self.rel_counter[rel] >= num_per_cat:
+                dlog.info("!!!!!!!!! number per cat limit reached %s for %s", rel, num_per_cat)
                 filled_cat[rel] = True
                 continue 
-            if "other_rel" in self.ex_type:
+            if "other_rel" in ex_type:
                 if len(context_rows) >= len(self.sel_rels):
                     context_df = pd.DataFrame(data=context_rows)
                     self.ex_df = self.ex_df.append(context_df)
@@ -1453,12 +1539,12 @@ class MyDataset(torch.utils.data.Dataset):
                         self._sels.remove(rel)
                     dlog.info("!!!!!!!!! just for including in conext rows %s", len(context_rows))
                     continue
-            elif self.ex_type == "same_rel":
+            elif ex_type == "same_rel":
                 context_df = self.split_df[self.split_df["prefix"] == rel].sample(n=int(self.sampling))
                 clog.info("SAME rel for example type %s | %s ", self.sampling, len(context_df))
 
-            elif self.ex_type:
-                raise ValueError("Ex_type is invalid:" + self.ex_type)
+            elif ex_type:
+                raise ValueError("Ex_type is invalid:" + ex_type)
             eng_inp = d["input_text"]
             self.si += 1
             if eng_inp != self.old_input:
@@ -1466,33 +1552,36 @@ class MyDataset(torch.utils.data.Dataset):
                 self._sels = self.sel_rels.copy()
                 self.old_input = eng_inp
                 self.si = 0
-            elif self.samples_per_head > 0 and self.si >= self.samples_per_head:
-                dlog.info("!!!!!!!!! samples per head limit %s", self.samples_per_head)
+            elif samples_per_head > 0 and self.si >= samples_per_head:
+                dlog.info("!!!!!!!!! samples per head limit %s", samples_per_head)
                 continue
             for inp in inputs:
                 if not inp in d or len(d[inp]) <= 1:
                     dlog.info("!!!!!!!!! not in dataset %s", inp)
                     continue
-                if self.inp_include and not any(x in inp for x in self.inp_include.split("|")):
-                    dlog.info("!!!!!!!!! not included input col %s", self.inp_include)
+                if inp_include and not any(x in inp for x in inp_include.split("|")):
+                    dlog.info("!!!!!!!!! not included input col %s", inp_include)
                     continue
-                if self.inp_exclude and any(x in inp for x in self.inp_exclude.split("|")):
-                    dlog.info("!!!!!!!!! excluded input col %s", self.inp_exclude)
+                if inp_exclude and any(x in inp for x in inp_exclude.split("|")):
+                    dlog.info("!!!!!!!!! excluded input col %s", inp_exclude)
                     continue
                 input_lang = langs[inp]
                 for targ_col in targets:
                     if not targ_col in d or len(d[targ_col]) <= 1:
                         dlog.info("!!!!!!!!! not target lang %s", targ_col)
                         continue
-                    if self.targ_include and not any(x in targ_col for x in self.targ_include.split("|")):
-                        dlog.info("!!!!!!!!! not included target col %s", self.targ_include)
+                    if targ_include and not any(x in targ_col for x in targ_include.split("|")):
+                        dlog.info("!!!!!!!!! not included target col %s", targ_include)
                         continue
-                    if self.targ_exclude and any(x in targ_col for x in self.targ_exclude.split("|")):
-                        dlog.info("!!!!!!!!!  target exclude %s", self.targ_exclude)
+                    if targ_exclude and any(x in targ_col for x in targ_exclude.split("|")):
+                        dlog.info("!!!!!!!!!  target exclude %s", targ_exclude)
                         continue
                     event = d[inp]
                     if event != old_event:
                         self.rel_counter[rel] += 1
+                        hh += 1
+                        if show_progress:
+                            pbar.update()
                         old_event = event
                     resp = d[targ_col]
                     target_lang = langs[targ_col]
@@ -1520,8 +1609,6 @@ class MyDataset(torch.utils.data.Dataset):
                         n_item["rep"] = rr
                         flat_data.append(n_item)
                         jj += 1
-                    if show_progress:
-                        pbar.update()
                     kk += 1
                     if (iter_end > 0 and kk > iter_end):
                         dlog.info("record limit reached!")
@@ -1529,6 +1616,7 @@ class MyDataset(torch.utils.data.Dataset):
                         return flat_data
             
         self.flat_data.extend(flat_data)
+        dlog.info("!!! end of function %s %s %s", self.split_name, all_rows, self.num_samples)
 
         return flat_data
 
