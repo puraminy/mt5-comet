@@ -357,6 +357,29 @@ def do_score(df, scorers, save_path, reval=False):
     #    mlog.info(f"using nltk from: {nltk_path}")
     #except LookupError:
     #    nltk.download('punkt')
+
+
+# Pause the program until a remote debugger is attached
+    debugpy.wait_for_client()
+
+
+    def run_sts_benchmark(batch):
+      sts_encode1 = tf.nn.l2_normalize(embed(tf.constant(batch['sent_1'].tolist())), axis=1)
+      sts_encode2 = tf.nn.l2_normalize(embed(tf.constant(batch['sent_2'].tolist())), axis=1)
+      cosine_similarities = tf.reduce_sum(tf.multiply(sts_encode1, sts_encode2), axis=1)
+      clip_cosine_similarities = tf.clip_by_value(cosine_similarities, -1.0, 1.0)
+      scores = 1.0 - tf.acos(clip_cosine_similarities) / math.pi
+      """Returns the similarity scores"""
+      return scores
+
+    sts_dev = sts_dev[[isinstance(s, str) for s in sts_dev['sent_2']]]
+    sts_data = sts_dev
+    dev_scores = sts_data['sim'].tolist()
+    scores = []
+    for batch in np.array_split(sts_data, 10):
+      scores.extend(run_sts_benchmark(batch))
+
+
     base_path = "/content/drive/MyDrive/pret"
     if not colab:
         base_path = os.path.join(home, "pret")

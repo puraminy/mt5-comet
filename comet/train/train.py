@@ -1,4 +1,5 @@
 #%% load libraries
+import debugpy
 from comet.train.common import *
 import itertools, collections
 import shutil
@@ -1118,10 +1119,21 @@ def run(ctx, conf_path, base_conf, experiment,
     type=str,
     help=""
 )
-def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, wandb, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args, match):
+@click.option(
+    "--debugpy",
+    "-dpy",
+    default="",
+    type=str,
+    help=""
+)
+def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, wandb, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args, match, debugpy):
 
     #%% some hyper-parameters
 
+
+# Allow other computers to attach to debugpy at this IP address and port.
+    if debugpy:
+        debugpy.listen(('localhost', 5678))
     #bbbbbbbbbbb
     #underlying_model_name = "logs/atomic-mt5/last"
     vlog.info("given load path: %s", load_path)
