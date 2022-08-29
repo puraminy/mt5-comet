@@ -121,6 +121,7 @@ def generate(model, tokenizer, batch, gen_token = "", gen_param = "greedy", at_m
                 decoder_start_token_id=gen_token_id)
         hyps = tokenizer.batch_decode(hyps,skip_special_tokens=False)
     else:
+        #breakpoint()
         hyps = model.generate(
                 batch["input_ids"],
                 attention_mask=batch["attention_mask"],
@@ -216,6 +217,7 @@ def chunks(lst, n):
     for i in range(0, len(lst), n):
         yield lst[i : i + n]
 
+import debugpy
 # vvvvvvvvvvvvvvv
 def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="greedy", scorers="rouge", batch_size="20@5", model = None, tokenizer = None, preds_file = "", set_name = "test", rewrite_info = False):  
     if rewrite_info:
@@ -282,6 +284,7 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
         dl_iter = iter(dataloader)
     iid  = 0
     old_query = ""
+    #breakpoint()
     for batch_list in batches: 
         if exit_loop:
             break
@@ -291,6 +294,8 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
                 hyps = batch_generate(model, tokenizer, queries, batch_size = gen_bs, gen_param=gen_param)
             else:
                 batch = next(dl_iter)
+                if type(batch) == list:
+                    batch = batch[0]
                 hyps = generate(model, tokenizer, batch, gen_param=gen_param)
         else:
             #hyps = islice(infile, len(queries))

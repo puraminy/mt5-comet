@@ -173,6 +173,7 @@ class PTuningWrapper(torch.nn.Module):
         ll = self.ll # log level
         wlog.log(ll, "wrapper forward was called")
         wlog.log(ll, "Prompt ids:{}".format(pids))
+        breakpoint()
         # find masks based on the range of prompt ids (offset_id < X < offset_id + prompt_length)
         #Because this wrapper only deals with a single prompt, the length should be the same, you can use masked_select to reshape 
         prompt_masks = self.prompt_token_fn(input_ids)
