@@ -2,6 +2,7 @@
 from itertools import islice
 from comet.train.common import *
 import nltk
+import math
 from nltk.tokenize import word_tokenize
 from nltk.translate.bleu_score import SmoothingFunction, sentence_bleu
 from sentence_transformers import SentenceTransformer, util
@@ -120,6 +121,7 @@ def generate(model, tokenizer, batch, gen_token = "", gen_param = "greedy", at_m
                 decoder_start_token_id=gen_token_id)
         hyps = tokenizer.batch_decode(hyps,skip_special_tokens=False)
     else:
+        #breakpoint()
         hyps = model.generate(
                 batch["input_ids"],
                 attention_mask=batch["attention_mask"],
@@ -215,6 +217,7 @@ def chunks(lst, n):
     for i in range(0, len(lst), n):
         yield lst[i : i + n]
 
+import debugpy
 # vvvvvvvvvvvvvvv
 def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="greedy", scorers="rouge", batch_size="20@5", model = None, tokenizer = None, preds_file = "", set_name = "test", rewrite_info = False):  
     if rewrite_info:
@@ -281,6 +284,7 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
         dl_iter = iter(dataloader)
     iid  = 0
     old_query = ""
+    #breakpoint()
     for batch_list in batches: 
         if exit_loop:
             break
@@ -290,6 +294,8 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
                 hyps = batch_generate(model, tokenizer, queries, batch_size = gen_bs, gen_param=gen_param)
             else:
                 batch = next(dl_iter)
+                if type(batch) == list:
+                    batch = batch[0]
                 hyps = generate(model, tokenizer, batch, gen_param=gen_param)
         else:
             #hyps = islice(infile, len(queries))
@@ -351,12 +357,67 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
 
     do_score(df, scorers, save_path)
 
+import click
+from comet.utils.find_files import *
+
+@click.command()
+@click.option(
+    "--df_name",
+    "-df",
+    default="full",
+    type=str,
+    help="partial part of the filename (pattern)"
+)
+@click.option(
+    "--path",
+    envvar="PWD",
+    #    multiple=True,
+    type=click.Path(),
+    help="The current path (it is set by system)"
+)
+@click.option(
+    "--scorers",
+    "-sc",
+    default="st",
+    type=str,
+    help="the name of scorers like rouge, bert or roug-bert to include both"
+)
+def do_score_w(df_name, path, scorers):
+    files = find_files(df_name, path)
+    for f in files:
+        print(f)
+        #r = input(f + " score?")
+        if True: #r == "y":
+           df = pd.read_table(f, low_memory=False)
+           do_score(df, scorers, f)
+
+import numpy as np
+import tensorflow as tf
 def do_score(df, scorers, save_path, reval=False):
     #try:
     #    nltk_path = str(nltk.data.find("tokenizers/punkt"))
     #    mlog.info(f"using nltk from: {nltk_path}")
     #except LookupError:
     #    nltk.download('punkt')
+
+
+# Pause the program until a remote debugger is attached
+    #debugpy.wait_for_client()
+    if "st" in scorers:
+        embed = tf.saved_model.load("/home/pouramini/pret/sm")
+
+
+    def run_sts_benchmark(batch):
+      sts_encode1 = tf.nn.l2_normalize(embed(tf.constant(batch['top'].tolist())), axis=1)
+      sts_encode2 = tf.nn.l2_normalize(embed(tf.constant(batch['top_pred'].tolist())), axis=1)
+      cosine_similarities = tf.reduce_sum(tf.multiply(sts_encode1, sts_encode2), axis=1)
+      clip_cosine_similarities = tf.clip_by_value(cosine_similarities, -1.0, 1.0)
+      scores = 1.0 - tf.acos(clip_cosine_similarities) / math.pi
+      """Returns the similarity scores"""
+      return scores
+
+
+
     base_path = "/content/drive/MyDrive/pret"
     if not colab:
         base_path = os.path.join(home, "pret")
@@ -488,14 +549,43 @@ def do_score(df, scorers, save_path, reval=False):
             rows.append(data)
 
     df2 = pd.DataFrame(rows)
+    if "st" in scorers:
+        sts_data = df2[["top","top_pred"]]
+        preds = df2["top_pred"].to_list()
+        tails = df2["top"].to_list()
+        berts = [0]*len(preds)
+        rouges = [0]*len(preds)
+        if "bert" in scorers:
+            berts = df2["bert_score"].to_list()
+        if "rouge" in scorers:
+            rouges = df2["rouge_score"].to_list()
+        scores = []
+        for batch in np.array_split(sts_data, 10):
+          scores.extend(run_sts_benchmark(batch))
+
+        df2["st_score"] = ["{:.2f}".format(float(x)) for x in scores]
+        res = zip(scores, berts, rouges, preds, tails)
+        for s, b, r, p, t in res:
+            print("{:<5.2f} {:<5.2f} {:<5.2f}{:<20} {:<20}".format(float(s),float(b),float(r),p,t))
+
+        print("mean st score: %s", np.mean(scores))
+        print("mean bert score: %s", np.mean(berts))
+        print("mean rouge score: %s", np.mean(rouges))
+
     if not reval:
         df = pd.concat([df, df2], axis=1)
 
     mlog.info("Saving results %s", save_path)
-    save_path = os.path.join(save_path, "full_results.tsv")
+    print("Saving results %s", save_path)
+    if not Path(save_path).is_file():
+        save_path = os.path.join(save_path, "full_results.tsv")
     df.to_csv(save_path, index=False, sep="\t")
     return df
-    # %%%%%%%%%%%%%%%%%%
+    
+
+
+# %%%%%%%%%%%%%%%%%% old savings
+
     _info = "_".join([str(x) for x in list(exp_info.values())])
     #metric_list = ["rouge", "meteor", "bertscore"]
     #summary = calc_metrics(all_predictions, all_golds, metric_list)
@@ -619,3 +709,7 @@ def calc_metrics(preds, golds, metric_list):
             else:
                 summary[metric_name] = res[metric_name]
     return summary
+
+
+if __name__ == "__main__":
+    do_score_w()
