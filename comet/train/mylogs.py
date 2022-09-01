@@ -14,7 +14,7 @@ if not colab:
     logPath = os.path.join(home, "logs")
     resPath = os.path.join(home, "results") 
     pretPath = os.path.join(home, "pret") 
-    dataPath = os.path.join(home, "atomic") 
+    dataPath = os.path.join(home, "mydata") 
     confPath = os.path.join(home, "base_confs") 
 else:
     home = "/content/drive/MyDrive/pouramini"

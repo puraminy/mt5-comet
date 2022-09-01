@@ -12,11 +12,14 @@ from transformers.trainer_seq2seq import Seq2SeqTrainer
 from transformers.optimization import Adafactor, AdafactorSchedule
 from transformers import TrainingArguments
 from comet.train.model import *
+from comet.data_utils import *
 import torch
 import re
 import json
 import glob
 from torch.utils.tensorboard import SummaryWriter
+from torch.utils.data import DataLoader, SequentialSampler, BatchSampler
+from comet.samplers import RandomSampler
 import os,time
 import argparse
 from tqdm import tqdm
@@ -24,6 +27,7 @@ from pathlib import Path
 import pandas as pd
 import click
 from tqdm import tqdm
+
 
 #gggggggggggggg
 class MyCollator(object):
@@ -34,7 +38,24 @@ class MyCollator(object):
         self.prefix = prefix
         self.model_type = model_type
     def __call__(self, batch):
-        queries,inputs, responses,rel,index,rep = zip(*batch)
+        #return {"query":_query, "event":event, "resp":response, "rel":rel, "index":index, "rep":rep}
+        mbp("")
+        queries = []
+        inputs = []
+        responses = []
+        rel = []
+        index = []
+        rep = []
+        for b in batch:
+            queries.append(b["query"])
+            responses.append(b["resp"].strip())
+            rel.append(b["rel"])
+            inputs.append(b["event"].strip())
+            index.append(b["index"])
+            rep.append(b["rep"])
+
+        #queries,inputs, responses,rel,index,rep = zip(*batch)
+        no_model_batch = {}
         tokenizer = self.tokenizer
         rels = list(rel)
         desc = ["Predict the {}:".format(rel_nat_maps[x]["desc"]) for x in rels] 
@@ -49,21 +70,25 @@ class MyCollator(object):
             new_batch['description_attention_mask'] = torch.LongTensor(tokenized_description.data["attention_mask"])
             new_batch['knowledge_input_ids'] = torch.LongTensor(tokenized_knowledge.data["input_ids"])
             new_batch['knowledge_attention_mask'] = torch.LongTensor(tokenized_knowledge.data["attention_mask"])
-        if self.ds_type == "train": # or self.prefix:
+        if True: #self.ds_type == "train": # or self.prefix:
             with tokenizer.as_target_tokenizer():
                 tokenized_outputs = tokenizer(list(responses),return_tensors='pt',
                         padding='longest', 
                         #truncation=True, max_length=50
                         )
                 labels = tokenized_outputs['input_ids']
+                no_model_batch['labels']= labels.clone()
                 labels[labels==tokenizer.pad_token_id] = -100
                 new_batch['labels']=labels
+                #mbp(True)
                 if not self.prefix:
-                    new_batch['decoder_input_ids'] = self.model.prepare_decoder_input_ids_from_labels(
+                    pid = self.model.prepare_decoder_input_ids_from_labels(
                         tokenized_outputs['input_ids']
                     )
+                    new_batch['decoder_input_ids'] = pid 
                     new_batch['decoder_attention_mask'] = tokenized_outputs['attention_mask']
-        return new_batch
+        return new_batch, no_model_batch
+
         def tokenize(self, batch):
             queries,inputs, responses,rel,index,rep = batch
             #queries = list(queries)
@@ -1142,7 +1167,41 @@ def run(ctx, conf_path, base_conf, experiment,
     is_flag=True,
     help="Enables remote debugging"
 )
-def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, wandb, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args, match, dpy):
+@click.option(
+    "--prompt_tune",
+    "-ptune",
+    is_flag=True,
+    help=""
+)
+@click.option(
+    "--prompt_config_file",
+    "-pcf",
+    default="",
+    type=str,
+    help=""
+)
+@click.option(
+    "--load_prompt",
+    "-lpropmpt",
+    default="",
+    type=str,
+    help=""
+)
+@click.option(
+    "--data_name",
+    "-dn",
+    default="",
+    type=str,
+    help=""
+)
+@click.option(
+    "--seed",
+    "-seed",
+    default=1,
+    type=int,
+    help=""
+)
+def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, wandb, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args, match, dpy, prompt_tune, prompt_config_file, load_prompt, data_name, seed):
 
     #%% some hyper-parameters
 
@@ -1210,20 +1269,22 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
 
         mlog.info("Config %s was created at %s", output_name + ".json", conf_path)
         return
-    if not data_path:
-        data_path = dataPath
-        train_path = os.path.join(data_path, train_path) 
-        test_path = os.path.join(data_path, test_path)
-        val_path = os.path.join(data_path, val_path) 
-    else:
-        train_path = os.path.join(data_path, "train.tsv")
-        test_path = os.path.join(data_path, "test.tsv")
-        val_path = os.path.join(data_path, "val.tsv")
+    if not data_name:
+        if not data_path:
+            data_path = dataPath
+            train_path = os.path.join(data_path, train_path) 
+            test_path = os.path.join(data_path, test_path)
+            val_path = os.path.join(data_path, val_path) 
+        else:
+            train_path = os.path.join(data_path, "train.tsv")
+            test_path = os.path.join(data_path, "test.tsv")
+            val_path = os.path.join(data_path, "val.tsv")
+
+        assert Path(train_path).is_file(), f"Train path {train_path} is not!"
 
     if use_all_data:
         train_samples, test_samples = 0, 0
 
-    assert Path(train_path).is_file(), f"Train path {train_path} is not!"
     if not load_path:
         load_path = os.path.join(home, "pret")
 
@@ -1522,7 +1583,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         myds = load_data([test_set])
         val_records = myds[test_set].num_records
         train_records = 0
-    else:
+    elif not data_name:
         ds_list = ["train"]
         #ds_list += ["validation"]
         #ds_list += ["sample"]
@@ -1542,6 +1603,68 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             logger.info("Preparing samples: %s ", len(generate_samples["sample"]))
     if model_id == "test" or show_samples:
         return
+
+    prompt_config = None
+    if prompt_tune:
+        with open(prompt_config_file, "r") as f:
+            prompt_config = json.load(f)
+            if load_prompt is not None:
+                prompt_config["load_prompt"] = load_prompt
+            for t in ["enc", "dec"]:
+                prompt_config[t]["init_ids"] = tokenizer.encode(prompt_config[t]["init_tokens"])
+                pad_num = prompt_config[t]["prompt_len"] - len(prompt_config[t]["init_ids"])
+                prompt_config[t]["init_ids"].extend(tokenizer.convert_tokens_to_ids([prompt_config[t]["default_init_token"] for _ in range(pad_num)]))
+                prompt_config[t]["init_ids"] = torch.tensor(prompt_config[t]["init_ids"], dtype=torch.long).to(device)
+
+
+    def load_data2(data_path, data_type, tokenizer, prompt_config=None, ratio=1, num=-1, drop_last=True, do_infer=False):
+        data_path = os.path.join(data_path, data_type + ".jsonl") 
+
+        # Data parallel arguments.
+        #debugpy.breakpoint()  # or debugpy.breakpoint()
+        world_size = 1 
+        rank = 0 
+        args = dotdict({})
+        args.log_file = os.path.join(logPath, "ppt.log")
+        args.batch_size = batch_size
+        args.dev_batch_size = batch_size*2
+        args.eval_batch_size = batch_size*2
+        if data_type == "train":
+            global_batch_size = args.batch_size * world_size
+        elif data_type == "valid":
+            global_batch_size = args.dev_batch_size * world_size
+        else:
+            global_batch_size = args.eval_batch_size * world_size
+
+        dataset = DATA_CONFIG[data_name]["dataset"](
+            args,
+            tokenizer,
+            data_path,
+            data_type,
+            ratio=ratio,
+            num=num,
+            prefix=args.data_prefix,
+            do_infer=do_infer,
+            prompt_config=prompt_config)
+
+        if data_type == "train":
+            sampler = RandomSampler(dataset)
+            sampler.set_seed(seed)
+        else:
+            sampler = SequentialSampler(dataset)
+        batch_sampler = BatchSampler(sampler=sampler,
+                                    batch_size=global_batch_size,
+                                    drop_last=drop_last)
+
+        data_loader = DataLoader(dataset,
+                                 batch_sampler=batch_sampler,
+                                 num_workers=num_workers,
+                                 pin_memory=True,
+                                 collate_fn=dataset.collate)
+
+        # Torch dataloader.
+        return data_loader, dataset, sampler
+
     if not fz_parts or fz_parts == "all":
         modules_to_freeze = [model]
     else:
@@ -1633,29 +1756,41 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
 
 # ggggggggg
     #%% build dataloader
-    if "gpt" in model_id: 
-        tokenizer.add_special_tokens(pad_token)
-        tokenizer.add_special_tokens(sep_token)
-        mlog.info("pad token id: %s", tokenizer.pad_token_id)
-        data_collator = MyCollator(tokenizer, model, ds_type="train", model_type="gpt")
-    else:
-        data_collator = MyCollator(tokenizer, model, ds_type="train", prefix=prefix)
+    if data_name:
+        train_ratio = 1
+        dataset_path = os.path.join(data_path, data_name)
+        train_dataloader, train_dataset, random_sampler = load_data2(dataset_path, "train", tokenizer, prompt_config, ratio=train_ratio, num=int(train_samples))
+        for s in ["train","test","valid"]:
+            load_data2(dataset_path, s, tokenizer, prompt_config, ratio=train_ratio, num=int(train_samples))
 
-    train_dataset = myds["train"]#.map(tokenize)
-    train_dataloader = torch.utils.data.DataLoader(train_dataset,
-        batch_size=node_batch_size,shuffle=shuffle, num_workers=num_workers,
-        collate_fn=data_collator,
-    )
-    do_valid = "validation" in myds
-    if do_valid: 
-        dev_dataset = myds["validation"]#.map(tokenize)
-        dev_dataloader = torch.utils.data.DataLoader(dev_dataset,
-            batch_size=node_batch_size,shuffle=shuffle,
+        assert False, "creating data"
+
+        train_records = int(train_samples)
+        do_valid = False
+    else:
+        if "gpt" in model_id: 
+            tokenizer.add_special_tokens(pad_token)
+            tokenizer.add_special_tokens(sep_token)
+            mlog.info("pad token id: %s", tokenizer.pad_token_id)
+            data_collator = MyCollator(tokenizer, model, ds_type="train", model_type="gpt")
+        else:
+            data_collator = MyCollator(tokenizer, model, ds_type="train", prefix=prefix)
+
+        train_dataset = myds["train"]#.map(tokenize)
+        train_dataloader = torch.utils.data.DataLoader(train_dataset,
+            batch_size=node_batch_size,shuffle=shuffle, num_workers=num_workers,
             collate_fn=data_collator,
         )
+        do_valid = "validation" in myds
+        if do_valid: 
+            dev_dataset = myds["validation"]#.map(tokenize)
+            dev_dataloader = torch.utils.data.DataLoader(dev_dataset,
+                batch_size=node_batch_size,shuffle=shuffle,
+                collate_fn=data_collator,
+            )
     #torch.utils.data.DataLoader(myds['validation'],
     #    batch_size=node_batch_size,shuffle=shuffle,collate_fn=data_collator)
-    train_records = myds["train"].num_records
+        train_records = train_dataset.num_records
     assert train_records != 0, "There is no data to train!!!!!!!!"
     for logger in [mlog, clog, vlog]:
         logger.info("Train records: %s", train_records)
@@ -1798,6 +1933,34 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     def consume(iterator, n):
         '''Advance the iterator n-steps ahead. If n is none, consume entirely.'''
         collections.deque(itertools.islice(iterator, n), maxlen=0)
+    # ffffffffffff
+    def forward_step(model, batch, no_model_batch, accumulation_tiny_steps=1):
+        result = model(**batch)
+        logits = result["logits"]
+        forw_out = {
+            "logits": logits
+        }
+        if False: #"loss" in result: # and not "loss_mask" in no_model_batch:
+            loss = result['loss']/accumulation_tiny_steps
+        else:
+            mbp("")
+            losses = torch.nn.functional.cross_entropy(
+                result['logits'].reshape(-1,result['logits'].size(2)),
+                batch['labels'].reshape(-1,),
+                reduction='none'
+            ).reshape(result['logits'].size(0),-1)
+            if "loss_mask" in no_model_batch:
+                loss_mask = no_model_batch["loss_mask"]
+                loss_mask = loss_mask.to(device)
+                losses = (losses * loss_mask).sum(-1) / loss_mask.sum(-1)
+                loss = losses.mean()
+            else:
+                loss = losses.mean()
+            forw_out["loss_batch"] = losses
+
+        forw_out["loss"] = loss
+    
+        return forw_out
 
     #%% tttttt
     mlog.info(f"============== Exp id: {exp_id}\n")
@@ -1909,26 +2072,18 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                     batch_loss = torch.tensor(0.)
                     for tiny_step in range(accumulation_tiny_steps):
                         try:
-                            batch = next(train_iter)
+                            batch, no_model_batch = next(train_iter)
                         except StopIteration:
                             tlog.info("Stop Iteration occured at %s", step)
                             train_iter = iter(train_dataloader)
-                            batch = next(train_iter)
+                            batch, no_model_batch = next(train_iter)
                         batch = {k:v.to(device=device) for k,v in batch.items()}
                         if wrap:
-                            result = wrapped_model(**batch)
+                            _model = wrapped_model
                         else:
-                            result = model(**batch)
-                        if "loss" in result:
-                            loss = result['loss']/accumulation_tiny_steps
-                        else:
-                            loss = torch.nn.functional.cross_entropy(
-                                result['logits'].reshape(-1,result['logits'].size(2)),
-                                batch['labels'].reshape(-1,),
-                                reduction='none'
-                            ).reshape(result['logits'].size(0),-1)
-                            #loss /= accumulation_tiny_steps
-                            loss = loss.mean()
+                            _model = model
+                        out = forward_step(_model, batch, no_model_batch, accumulation_tiny_steps)
+                        loss = out["loss"]
                         loss.backward()
                         #tlog.info("Original embedding grads:%s",model.get_input_embeddings().weight.grad)
                         if wrap:
@@ -1949,8 +2104,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                     tlog.info("{:<5}: {:6.2f} > {:6.2f}".format(step, bloss, mean_loss))
                     pbar.set_description(f'training ...[loss:{bloss:.2f} ({mean_loss:.2f}) best:{best_eval_step} {best_dev_loss:.2f}]')
                     pbar.update()
-                    del result
-                    del loss
+                    #del result
+                    #del loss
                 except KeyboardInterrupt:
                     mlog.info("exiting while ...")
                     break
@@ -2000,8 +2155,87 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             #test_dataset=test_dataset,
         )
         train_result = trainer.train()
+
+    # vvvv
+    #111111
+    def evaluate1(tokenizer, eval_dataset, eval_data_loader, model, device, prompt_config, mode="dev", save_res=False):
+        """Evaluation."""
+
+        # Turn on evaluation mode which disables dropout.
+        model.eval()
+
+        total_loss = 0.0
+        step = 0
+
+        all_idx = []
+        all_preds = []
+        all_labels = []
+        decs = []
+        tail_decs = []
+
+        with torch.no_grad():
+            for model_batch, no_model_batch in eval_data_loader:
+                for k in model_batch:
+                    model_batch[k] = model_batch[k].to(device)
+                for k in no_model_batch:
+                    no_model_batch[k] = no_model_batch[k].to(device)
+                forw_out = forward_step(model, model_batch, no_model_batch)
+                loss = forw_out["loss"].item() if "loss" in forw_out else 0
+                total_loss += loss
+                mbp("")
+
+                logits_list = forw_out["logits"]
+                pred_token_logits = logits_list[:, 1, :]
+                preds = torch.argmax(pred_token_logits, dim=-1)
+                all_preds.extend(preds)
+                # my code
+                preds_list = preds.tolist()
+                hyps = tokenizer.convert_ids_to_tokens(preds_list)
+                decs.extend(hyps)
+
+                if "idx" in no_model_batch: 
+                    gathered_idx = no_model_batch["idx"]
+                    all_idx.extend(gathered_idx)
+
+                #labels = no_model_batch["labels"][:, 1]
+                # my code
+                labels = no_model_batch["labels"][:, :]
+                breakpoint()
+                tails_list = labels.tolist()
+                for tail in tails_list:
+                   target = tokenizer.convert_ids_to_tokens(tail)
+                   tail_decs.extend(target)
+                
+                gathered_labels = labels 
+                all_labels.extend(gathered_labels)
+
+                step += 1
+
+        total_loss /= step
+
+        all_idx = torch.cat(all_idx, dim=0).cpu().tolist()
+        all_preds = torch.cat(all_preds, dim=0).cpu().tolist()
+        all_labels = torch.cat(all_labels, dim=0).cpu().tolist()
+
+        if args.data_name in ["cb", "cb_uni"]:
+            eval_metric = acc_f1_metric
+        else:
+            eval_metric = acc_metric
+            
+        res = eval_metric(args, tokenizer, all_preds, all_labels, save_res=save_res)
+
+        return total_loss, res
+
     #vvvvvv
-    if test_set:
+    if data_name:
+        test_ratio = 1
+        _set = "test"
+        dataset_path = os.path.join(data_path, data_name)
+        test_dataloader, test_dataset, random_sampler = load_data2(dataset_path, "test", tokenizer, prompt_config, ratio=test_ratio, num=int(test_samples))
+        val_records = int(test_samples)
+        #evaluate1(tokenizer, test_dataset, test_dataloader, model, device, prompt_config, mode="test", save_res=False)
+        evaluate(test_dataset, test_dataloader, save_path, exp_info, val_records, gen_param, scorers = scorers, batch_size=gen_bs, model=model, tokenizer=tokenizer, set_name=_set)  
+    elif test_set:
         if "@" in gen_bs:
             test_bs,_ = gen_bs.split("@")
         else:
@@ -2019,6 +2253,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             mlog.info("Evaluating ... %s", _set)
             val_records = myds[_set].num_records
             exp_info["test_set"] = _set
+            #evaluate1(tokenizer, test_dataset, test_dataloader, model, device, prompt_config, mode="test", save_res=False)
             evaluate(test_dataset, test_dataloader, save_path, exp_info, val_records, gen_param, scorers = scorers, batch_size=gen_bs, model=model, tokenizer=tokenizer, set_name=_set)  
     else:
         mlog.info("Test set was not provided.... skip testing...")

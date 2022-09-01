@@ -1,4 +1,5 @@
 from pathlib import Path
+
 import math
 from termcolor import colored
 from transformers import AddedToken 
@@ -18,6 +19,11 @@ import json
 from comet.train.mylogs import *
 import pickle5 as pickle
 
+def mbp(m="bp"):
+    if m: print(m)
+    if m:
+        breakpoint()
+
 SPECIAL_TOKENS  = { "bos_token": "<|BOS|>",
                     "eos_token": "</s>",
                     "unk_token": "<|UNK|>",
@@ -29,6 +35,7 @@ pad_token = {"pad_token": "<|PAD|>"}
 sep_token = {"sep_token": sep}
 nli_map = ['contradiction', 'entailment', 'neutral']
 rel_maps = {
+    "cb":"<cb>",
     "oEffect":"<oEffect>",
     "oReact":"<oReact>",
     "oWant":"<oWant>",
@@ -56,6 +63,13 @@ rel_maps = {
 all_rels = [key for key,val in rel_maps.items()] 
 x_rels = [key for key,val in rel_maps.items()]
 rel_nat_maps = {
+    "cb":{ 
+        1:"{event}. The relation is {ph}.",
+        2:"{event1}? {ph} {event2}",
+        "tokens":"<state> <other> <after>",
+        "nat-tokens":"the entailment is",
+        "fa":"رابطه میان دو جمله",
+        },
     "AtLocation":{ 
         1:"{event} is located in {ph}.",
         2:"{event} is found on {ph}",
@@ -304,6 +318,13 @@ for key, val in rel_nat_maps.items():
 
 def get_prompt_token_fn(id_offset):
     return lambda x: (x>=id_offset) #&(x<id_offset+length)
+
+
+class dotdict(dict):
+    """dot.notation access to dictionary attributes"""
+    __getattr__ = dict.get
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
 
 encoder_relation_mappings = {}
 decoder_relation_mappings = {}
@@ -994,6 +1015,9 @@ def fill_vars(template, rel, event, resp, gen_token= "gen_en",  inp_lang="en", r
     if type(temp_num) == str and temp_num.isnumeric():
         temp_num = int(temp_num)
     assert temp_num in rel_nat_maps[rel], rel + " for " + str(temp_num)
+    event1, event2= "",""
+    if "{@@@}" in template:
+        event1, event2 = template.split("{@@@}")
     rel_natural = rel_nat_maps[rel][temp_num]        
     rel_natural_tokens = rel_nat_maps[rel]["nat-tokens"]        
     rel_natural_pure = rel_natural.replace("{ph}", "")
@@ -1009,9 +1033,14 @@ def fill_vars(template, rel, event, resp, gen_token= "gen_en",  inp_lang="en", r
             "{rel_natural_pure}":rel_natural_pure,
             "{rel_nat_n}":rel_nat_n,
             "{nat_toekns}":rel_natural_tokens,
+            "{@@@}":" ",
             "{gen}":gen_token}
-    rep2  = {"{event}":event, 
-            "{resp}":resp}
+    rep2  = {
+            "{event}":event, 
+            "{event1}":event1, 
+            "{event2}":event2, 
+            "{resp}":resp
+            }
     rep1 = dict((re.escape(k), v) for k, v in rep1.items()) 
     rep2 = dict((re.escape(k), v) for k, v in rep2.items()) 
     pattern1 = re.compile("|".join(rep1.keys()))
@@ -1368,6 +1397,7 @@ class MyDataset(torch.utils.data.Dataset):
 
         __resp = response.replace(placeholder_token,"")
         _query = _query.strip()
+        mbp(m=_query)
         _q_len = len(_query.split(" "))
         sent = _query.replace(placeholder_token, __resp.strip())
         sent_split = sent.split(" ")
@@ -1428,8 +1458,8 @@ class MyDataset(torch.utils.data.Dataset):
         #    self.data_split[rel][lang].append({query:[response]})
         #else:
         #    self.data_split[rel][lang][query].append(response)
-        # return {"event":_query, "resp":response, "rel":rel, "index":index, "rep":rep}
-        return (_query, event, response, rel, index, rep)
+        return {"query":_query, "event":event, "resp":response, "rel":rel, "index":index, "rep":rep}
+        #return (_query, event, response, rel, index, rep)
 
 
     def fill_all_data(self, iter_start, iter_end, show_progress=True):
