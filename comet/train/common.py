@@ -20,8 +20,8 @@ from comet.train.mylogs import *
 import pickle5 as pickle
 
 def mbp(m="bp"):
-    if m: print(m)
-    if m:
+    if m: 
+        mlog.info(m)
         breakpoint()
 
 SPECIAL_TOKENS  = { "bos_token": "<|BOS|>",
@@ -64,7 +64,7 @@ all_rels = [key for key,val in rel_maps.items()]
 x_rels = [key for key,val in rel_maps.items()]
 rel_nat_maps = {
     "cb":{ 
-        1:"{event}. The relation is {ph}.",
+        1:"sentence1: {event1}. sentence2: {event2}. The relation is {ph}.",
         2:"{event1}? {ph} {event2}",
         "tokens":"<state> <other> <after>",
         "nat-tokens":"the entailment is",
@@ -1016,8 +1016,9 @@ def fill_vars(template, rel, event, resp, gen_token= "gen_en",  inp_lang="en", r
         temp_num = int(temp_num)
     assert temp_num in rel_nat_maps[rel], rel + " for " + str(temp_num)
     event1, event2= "",""
-    if "{@@@}" in template:
-        event1, event2 = template.split("{@@@}")
+    if "{@@@}" in event:
+        event1, event2 = event.split("{@@@}")
+        event = event.replace("{@@@}"," ")
     rel_natural = rel_nat_maps[rel][temp_num]        
     rel_natural_tokens = rel_nat_maps[rel]["nat-tokens"]        
     rel_natural_pure = rel_natural.replace("{ph}", "")
@@ -1033,7 +1034,6 @@ def fill_vars(template, rel, event, resp, gen_token= "gen_en",  inp_lang="en", r
             "{rel_natural_pure}":rel_natural_pure,
             "{rel_nat_n}":rel_nat_n,
             "{nat_toekns}":rel_natural_tokens,
-            "{@@@}":" ",
             "{gen}":gen_token}
     rep2  = {
             "{event}":event, 
@@ -1397,7 +1397,7 @@ class MyDataset(torch.utils.data.Dataset):
 
         __resp = response.replace(placeholder_token,"")
         _query = _query.strip()
-        mbp(m=_query)
+        #mbp(_query)
         _q_len = len(_query.split(" "))
         sent = _query.replace(placeholder_token, __resp.strip())
         sent_split = sent.split(" ")

@@ -57,12 +57,12 @@ class MyCollator(object):
         #queries,inputs, responses,rel,index,rep = zip(*batch)
         no_model_batch = {}
         tokenizer = self.tokenizer
-        rels = list(rel)
-        desc = ["Predict the {}:".format(rel_nat_maps[x]["desc"]) for x in rels] 
         new_batch = tokenizer(list(queries),return_tensors='pt',padding='longest', 
                                 #truncation=True, max_length=50
                              )
         if self.prefix:
+            rels = list(rel)
+            desc = ["Predict the {}:".format(rel_nat_maps[x]["desc"]) for x in rels] 
             tokenized_description = tokenizer(desc,return_tensors='pt',padding='longest')
             tokenized_knowledge = tokenizer(rels,return_tensors='pt',padding='longest')
 
@@ -78,14 +78,19 @@ class MyCollator(object):
                         )
                 labels = tokenized_outputs['input_ids']
                 no_model_batch['labels']= labels.clone()
+                loss_mask = labels.clone()
+                loss_mask[loss_mask!=tokenizer.pad_token_id] = 1
+                loss_mask[loss_mask==tokenizer.pad_token_id] = 0
+                no_model_batch['loss_mask'] = loss_mask
+                mbp("")
                 labels[labels==tokenizer.pad_token_id] = -100
                 new_batch['labels']=labels
                 #mbp(True)
                 if not self.prefix:
                     pid = self.model.prepare_decoder_input_ids_from_labels(
-                        tokenized_outputs['input_ids']
+                        tokenized_outputs['input_ids'] 
                     )
-                    new_batch['decoder_input_ids'] = pid 
+                    new_batch['decoder_input_ids'] = pid
                     new_batch['decoder_attention_mask'] = tokenized_outputs['attention_mask']
         return new_batch, no_model_batch
 
@@ -1742,7 +1747,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     if start > 0 and training_round == 1:
         training_round += 1
 
-    accumulation_tiny_steps = 2 
+    accumulation_tiny_steps = 1 
     batch_size = int(batch_size)
     if "gpt" in model_id:
         accumulation_tiny_steps = 1
@@ -1940,7 +1945,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         forw_out = {
             "logits": logits
         }
-        if False: #"loss" in result: # and not "loss_mask" in no_model_batch:
+        if True: #"loss" in result and not "loss_mask" in no_model_batch:
             loss = result['loss']/accumulation_tiny_steps
         else:
             mbp("")

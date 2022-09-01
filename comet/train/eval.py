@@ -314,6 +314,7 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
             repid = b["rep"]
             mlog.info("\n%s/%s) query: %s", step, len(test_set), query)
             mlog.info("\nhyp: %s",top_hyp)
+            mlog.info("\ntail: %s",tail)
             mbp()
             data = {}
             if query != old_query:

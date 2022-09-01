@@ -29,8 +29,10 @@ Path(logPath).mkdir(exist_ok=True, parents=True)
 
 logFilename = os.path.join(logPath, "all.log") #app_path + '/log_file.log'
 FORMAT = logging.Formatter("[%(filename)s:%(lineno)s - %(funcName)10s() ] %(message)s")
+FORMAT2 = logging.Formatter("%(message)s")
 logging.basicConfig(filename=logFilename)
 consoleHandler = logging.StreamHandler()
+consoleHandler.setFormatter(FORMAT2)
 mlog = logging.getLogger("comet.main")
 mlog.setLevel(logging.INFO)
 mlog.addHandler(consoleHandler)
