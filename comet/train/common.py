@@ -20,7 +20,7 @@ from comet.train.mylogs import *
 import pickle5 as pickle
 
 def mbp(m="bp"):
-    if m: 
+    if m.strip(): 
         mlog.info(m)
         breakpoint()
 
@@ -64,8 +64,9 @@ all_rels = [key for key,val in rel_maps.items()]
 x_rels = [key for key,val in rel_maps.items()]
 rel_nat_maps = {
     "cb":{ 
-        1:"sentence1: {event1}. sentence2: {event2}. The relation is {ph}.",
-        2:"{event1}? {ph} {event2}",
+        1:"{event1}? {ph}. {event2}",
+        2:"{event1}? {ph}. {event2}",
+        3:"sentence1: {event1}. sentence2: {event2}. The relation is {ph}.",
         "tokens":"<state> <other> <after>",
         "nat-tokens":"the entailment is",
         "fa":"رابطه میان دو جمله",
@@ -816,6 +817,9 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            anstemp = "{ph} {resp} {end}"
        elif method == "unsup-wrap-nat":
            qtemp = "{rel_i} {rel_natural}"
+           anstemp = "{ph} {resp} {end}"
+       elif method == "unsup-wrap-nat-end":
+           qtemp = "{rel_natural} {rel_i}"
            anstemp = "{ph} {resp} {end}"
        elif method == "unsup-wrap-nat-mid":
            qtemp = "{event} {rel_i} {rel_natural} {rel_i} {ph}" 

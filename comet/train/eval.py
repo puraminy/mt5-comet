@@ -7,6 +7,7 @@ from nltk.tokenize import word_tokenize
 from nltk.translate.bleu_score import SmoothingFunction, sentence_bleu
 from sentence_transformers import SentenceTransformer, util
 from sentence_transformers import CrossEncoder
+from sklearn.metrics import f1_score
 from rouge import Rouge
 #%% Aggregate instances of queries and corresponding responses
 # (str)split_name -> (dict) query -> (list) response 
@@ -69,6 +70,7 @@ def generate(model, tokenizer, batch, gen_token = "", gen_param = "greedy", at_m
     #verb = get_verb(query)
     #vlog.info("Ignoring verb %s", verb)
     bad_words_ids = None
+    #extra_id_0 = tokenizer.convert_tokens_to_ids(["<extra_id_0>"])[0]
     #if verb:
     #    bad_words_ids = tokenizer(verb).input_ids
     if "@" in gen_param:
@@ -714,7 +716,7 @@ def calc_metrics(preds, golds, metric_list):
                 summary[metric_name] = res[metric_name]
     return summary
 
-def acc_metric(args, tokenizer, all_preds, all_labels, save_res=False, save_path=""):
+def acc_metric(tokenizer, all_preds, all_labels, save_res=False, save_path=""):
     acc = sum([int(p == l) for p, l in zip(all_preds, all_labels)]) / len(all_preds)
     
     if save_res:
@@ -728,7 +730,7 @@ def acc_metric(args, tokenizer, all_preds, all_labels, save_res=False, save_path
     return acc
 
 
-def acc_f1_metric(args, tokenizer, all_preds, all_labels, save_res=False, save_path=""):
+def acc_f1_metric(tokenizer, all_preds, all_labels, save_res=False, save_path=""):
     f1_macro = f1_score(all_labels, all_preds, average="macro")
     acc = sum([int(p == l) for p, l in zip(all_preds, all_labels)]) / len(all_preds)
 

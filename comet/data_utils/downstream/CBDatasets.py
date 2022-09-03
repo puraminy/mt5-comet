@@ -45,8 +45,8 @@ class CBDataset(EncDecDataset):
                 "idx": d["id"] if self.do_infer else self.idx,  
                 "index": d["id"] if self.do_infer else self.idx,  
                 "enc_input_ids": context,
-                "dec_input_ids": target[:-1],
-                "label_ids": target[1:],
+                "dec_input_ids": target[:-1], # not including label id
+                "label_ids": target[1:], # not including leadnig zero
                 "query": d["hypothesis"] + "? <extra_id_0>." + d["premise"],
                 "event": d["hypothesis"],
                 "resp": d["label"],

@@ -26,10 +26,12 @@ def mbp():
     #breakpoint()
 
 def winfo(text, *arg, **kwargs):
-    print((text, *arg))
+    pass
+    #print((text, *arg))
 
 def embinfo(text, *arg, **kwargs):
-    print((text, *arg))
+    pass
+    #print((text, *arg))
 
 def getFname(name):
     if "ahmad" in home or "pouramini" in home:
@@ -187,7 +189,7 @@ class PTuningWrapper(torch.nn.Module):
     def add_prompt_encoder(self, encoder):
         self.prompt_encoders.append(encoder)
 
-    def forward(self,input_ids, labels, decoder_input_ids=None,pids=None,**kwargs):
+    def forward(self,input_ids, pids=None, **kwargs):
         ll = self.ll # log level
         wlog.log(ll, "wrapper forward was called")
         wlog.log(ll, "Prompt ids:{}".format(pids))
@@ -253,7 +255,8 @@ class PTuningWrapper(torch.nn.Module):
                     winfo("Merge dict: %s", merge_dict)
         else:
             inputs_embeds = self.model_embeddings(input_ids)
-        
+
+        decoder_input_ids = kwargs.setdefault("decoder_input_ids", None) 
         if decoder_input_ids is not None:
             if self.decoder_prompt_encoder is not None:
                 wlog.log(ll, "prompt decoder exists")
@@ -281,13 +284,10 @@ class PTuningWrapper(torch.nn.Module):
                     decoder_inputs_embeds = self.model_decoder_embeddings(
                         decoder_input_ids
                     )
-                return self.underlying_model(inputs_embeds=inputs_embeds,
-                    decoder_inputs_embeds=decoder_inputs_embeds, labels=labels,**kwargs
-                )
+                return self.underlying_model(inputs_embeds=inputs_embeds,**kwargs)
             else: #decoder_prompt_encoder is not defined, so decoder_originical_embedding is not set.
                 self.ll = logging.DEBUG
-                return self.underlying_model(inputs_embeds=inputs_embeds,
-                    decoder_input_ids=decoder_input_ids, labels=labels,**kwargs)
+                return self.underlying_model(inputs_embeds=inputs_embeds, **kwargs)
         else:
             self.ll = logging.DEBUG
             return self.underlying_model(inputs_embeds=inputs_embeds,**kwargs)

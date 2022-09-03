@@ -29,7 +29,6 @@ import click
 from tqdm import tqdm
 
 
-#gggggggggggggg
 class MyCollator(object):
     def __init__(self, tokenizer, model, ds_type="train", prefix=False, model_type="t5"):
         self.tokenizer = tokenizer
@@ -37,6 +36,48 @@ class MyCollator(object):
         self.ds_type = ds_type 
         self.prefix = prefix
         self.model_type = model_type
+        self.prompt_config = None
+
+#gggggggggggggg
+    def collate(self, queries, responses):
+        bs = len(queries)
+        q_len = [len(i) for i in queries]
+        max_enc_len = max(q_len)
+        r_len = [len(i) for i in responses]
+        max_dec_len = max(r_len) - 1 
+        pad_id = self.tokenizer.pad_token_id
+        model_data = {
+            "input_ids": torch.ones(bs, max_enc_len, dtype=torch.long) * pad_id,
+            "attention_mask": torch.zeros(bs, max_enc_len),
+            #"decoder_attention_mask": torch.zeros(bs, max_dec_len),
+            #"cross_attention_mask": torch.zeros(bs, 1, max_dec_len, max_enc_len),
+            #"decoder_input_ids": torch.ones(bs, max_dec_len, dtype=torch.long) * pad_id,
+            "labels": torch.ones(bs, max_dec_len, dtype=torch.long) * -100,
+        }
+        no_model_data = {
+            #"idx": torch.zeros(bs, dtype=torch.long),
+            "labels": torch.ones(bs, max_dec_len, dtype=torch.long) * pad_id,
+            "loss_mask": torch.zeros(bs, max_dec_len)
+        }
+        mbp("")
+        for i, (q, r) in enumerate(zip(queries, responses)):
+            dec_ids = [pad_id] + r #+ [self.tokenizer.eos_token_id]
+            label = r[:-1] #+ [self.tokenizer.eos_token_id]
+            model_data["input_ids"][i][:len(q)] = torch.tensor(q, dtype=torch.long)
+            #model_data["decoder_input_ids"][i][:len(dec_ids)] = torch.tensor(dec_ids, dtype=torch.long)
+            model_data["attention_mask"][i][:len(q)] = 1.0
+            #model_data["decoder_attention_mask"][i][:len(dec_ids)] = 1.0 
+            #model_data["cross_attention_mask"][i][0, :dec_len, :enc_len] = 1.0 
+            #no_model_data["idx"][i] = samp["idx"]
+            model_data["labels"][i][:len(label)] = torch.tensor(label, dtype=torch.long)
+            no_model_data["labels"][i][:len(label)] = torch.tensor(label, dtype=torch.long)
+            if self.prompt_config is not None:
+                no_model_data["loss_mask"][i][self.prompt_config["dec"]["prompt_len"]:len(label)] = 1.0
+            else:
+                no_model_data["loss_mask"][i][:len(label)] = 1.0
+
+        return model_data, no_model_data
+
     def __call__(self, batch):
         #return {"query":_query, "event":event, "resp":response, "rel":rel, "index":index, "rep":rep}
         mbp("")
@@ -46,15 +87,24 @@ class MyCollator(object):
         rel = []
         index = []
         rep = []
+        dec_starts = []
+        enc_queries = []
+        enc_responses = []
         for b in batch:
+            enc_query = self.tokenizer.encode(b["query"])
             queries.append(b["query"])
+            enc_queries.append(enc_query)
+            enc_resp = self.tokenizer.encode(b["resp"].strip())
             responses.append(b["resp"].strip())
+            enc_responses.append(enc_resp)
             rel.append(b["rel"])
             inputs.append(b["event"].strip())
             index.append(b["index"])
             rep.append(b["rep"])
 
+        return self.collate(enc_queries, enc_responses)
         #queries,inputs, responses,rel,index,rep = zip(*batch)
+        #mbp("b")
         no_model_batch = {}
         tokenizer = self.tokenizer
         new_batch = tokenizer(list(queries),return_tensors='pt',padding='longest', 
@@ -77,15 +127,16 @@ class MyCollator(object):
                         #truncation=True, max_length=50
                         )
                 labels = tokenized_outputs['input_ids']
-                no_model_batch['labels']= labels.clone()
+                #no_model_batch['labels']= labels.clone()
                 loss_mask = labels.clone()
                 loss_mask[loss_mask!=tokenizer.pad_token_id] = 1
                 loss_mask[loss_mask==tokenizer.pad_token_id] = 0
                 no_model_batch['loss_mask'] = loss_mask
                 mbp("")
                 labels[labels==tokenizer.pad_token_id] = -100
-                new_batch['labels']=labels
-                #mbp(True)
+                #mbp("b")
+                new_batch['labels']=labels#[:,:-1]
+                no_model_batch['labels']=labels#[:,:-1]
                 if not self.prefix:
                     pid = self.model.prepare_decoder_input_ids_from_labels(
                         tokenized_outputs['input_ids'] 
@@ -321,7 +372,7 @@ def run(ctx, conf_path, base_conf, experiment,
            else:
                mlog.info(f"%s doesn't exists ...", conf)
                return
-           args["config"] = False
+           args["config"] = ""
            args["output_name"] = "" 
            args["experiment"] = experiment 
            if cpu:
@@ -538,7 +589,7 @@ def run(ctx, conf_path, base_conf, experiment,
 @click.option(
     "--val_samples",
     "-vn",
-    default=150,
+    default=0,
     type=int,
     help=""
 )
@@ -746,7 +797,7 @@ def run(ctx, conf_path, base_conf, experiment,
 @click.option(
     "--val_path",
     "-vp",
-    default="val.tsv",
+    default="valid.tsv",
     type=str,
     help=""
 )
@@ -766,7 +817,7 @@ def run(ctx, conf_path, base_conf, experiment,
 @click.option(
     "--cycle",
     "-c",
-    default=0,
+    default=10,
     type=int,
     help=""
 )
@@ -780,7 +831,8 @@ def run(ctx, conf_path, base_conf, experiment,
 @click.option(
     "--config",
     "-cfg",
-    is_flag=True,
+    default="",
+    type=str,
     help="Only create a configuration file from input parameters"
 )
 @click.option(
@@ -919,7 +971,7 @@ def run(ctx, conf_path, base_conf, experiment,
 @click.option(
     "--encoder_type",
     "-et",
-    default="mlp",
+    default="lstm",
     type=str,
     help=""
 )
@@ -1206,7 +1258,13 @@ def run(ctx, conf_path, base_conf, experiment,
     type=int,
     help=""
 )
-def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, wandb, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args, match, dpy, prompt_tune, prompt_config_file, load_prompt, data_name, seed):
+@click.option(
+    "--do_valid",
+    "-do_valid",
+    is_flag=True,
+    help=""
+)
+def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, wandb, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args, match, dpy, prompt_tune, prompt_config_file, load_prompt, data_name, seed, do_valid):
 
     #%% some hyper-parameters
 
@@ -1267,12 +1325,12 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     if config:
         conf_path = confPath 
         Path(conf_path).mkdir(exist_ok=True, parents=True)
-        args["config"] = False
+        args["config"] = ""
         args["output_name"] = ""
-        with open(os.path.join(conf_path, f'{output_name}.json'), 'w') as outfile:
+        with open(os.path.join(conf_path, f'{config}.json'), 'w') as outfile:
             json.dump(args, outfile, indent=4)
 
-        mlog.info("Config %s was created at %s", output_name + ".json", conf_path)
+        mlog.info("Config %s was created at %s", config + ".json", conf_path)
         return
     if not data_name:
         if not data_path:
@@ -1283,7 +1341,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         else:
             train_path = os.path.join(data_path, "train.tsv")
             test_path = os.path.join(data_path, "test.tsv")
-            val_path = os.path.join(data_path, "val.tsv")
+            val_path = os.path.join(data_path, "valid.tsv")
 
         assert Path(train_path).is_file(), f"Train path {train_path} is not!"
 
@@ -1590,7 +1648,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         train_records = 0
     elif not data_name:
         ds_list = ["train"]
-        #ds_list += ["validation"]
+        if do_valid:
+            ds_list += ["validation"]
         #ds_list += ["sample"]
         myds = load_data(ds_list)
         if show_samples: 
@@ -1771,7 +1830,6 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         assert False, "creating data"
 
         train_records = int(train_samples)
-        do_valid = False
     else:
         if "gpt" in model_id: 
             tokenizer.add_special_tokens(pad_token)
@@ -1786,7 +1844,6 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             batch_size=node_batch_size,shuffle=shuffle, num_workers=num_workers,
             collate_fn=data_collator,
         )
-        do_valid = "validation" in myds
         if do_valid: 
             dev_dataset = myds["validation"]#.map(tokenize)
             dev_dataloader = torch.utils.data.DataLoader(dev_dataset,
@@ -1938,25 +1995,111 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     def consume(iterator, n):
         '''Advance the iterator n-steps ahead. If n is none, consume entirely.'''
         collections.deque(itertools.islice(iterator, n), maxlen=0)
+    #11111111111
+    def evaluate1(tokenizer, eval_dataset, eval_data_loader, model, device, prompt_config, mode="dev", save_res=False):
+        """Evaluation."""
+
+        # Turn on evaluation mode which disables dropout.
+        model.eval()
+
+        total_loss = 0.0
+        step = 0
+
+        all_idx = []
+        all_preds = []
+        all_labels = []
+        mbp("")
+        with torch.no_grad():
+            for model_batch, no_model_batch in eval_data_loader:
+                for k in model_batch:
+                    model_batch[k] = model_batch[k].to(device)
+                for k in no_model_batch:
+                    no_model_batch[k] = no_model_batch[k].to(device)
+                forw_out = forward_step(model, model_batch, no_model_batch, mode="test")
+                loss = forw_out["loss"].item() if "loss" in forw_out else 0
+                total_loss += loss
+
+                logits_list = forw_out["logits"]
+                seq_len = logits_list.size()[1]
+                seq_preds = []
+                for i in range(seq_len):
+                    pred_token_logits = logits_list[:, i, :]
+                    preds = torch.argmax(pred_token_logits, dim=-1)
+                    seq_preds.append(preds.tolist())
+                _seq_preds = list(zip(*seq_preds))
+                mbp("b")
+                all_preds.extend(_seq_preds)
+                decs = generate(model, tokenizer, model_batch)
+
+                if "idx" in no_model_batch: 
+                    gathered_idx = no_model_batch["idx"]
+                    all_idx.extend(gathered_idx)
+
+                #labels = no_model_batch["labels"][:, 1]
+                # my code
+                labels = model_batch["labels"][:, 1]
+                gathered_labels = labels.tolist() 
+                all_labels.extend(gathered_labels)
+
+                step += 1
+
+        total_loss /= step
+
+        #all_idx = torch.cat(all_idx, dim=0).cpu().tolist()
+        #all_preds = torch.cat(all_preds, dim=0).cpu().tolist()
+        #all_labels = torch.cat(all_labels, dim=0).cpu().tolist()
+        preds_decs = []
+        for p in all_preds:
+            dec = tokenizer.convert_ids_to_tokens(p)
+            preds_decs.append(dec)
+        labels_decs = tokenizer.convert_ids_to_tokens(all_labels)
+        c = 0
+        _preds = []
+        i = 0
+        for p,l in zip(preds_decs, labels_decs):
+            _preds.append(p[1].lower())
+            if l.lower() in p:
+                c +=1
+                print("{}) {}--{} {}".format(i,l,p, c))
+            else:
+                print("{}) {}--{} ".format(i,l,p))
+            i += 1
+
+        print("{:.2f} = {} / {}".format(c/len(preds_decs), c, len(preds_decs)))
+
+        if rel_filter in ["cb", "cb_uni"]:
+            eval_metric = acc_f1_metric
+        else:
+            eval_metric = acc_metric
+        res = eval_metric(tokenizer, _preds, labels_decs, save_res=save_res)
+        print(res)
+        mbp("b")    
+
+        return total_loss, res
+
     # ffffffffffff
-    def forward_step(model, batch, no_model_batch, accumulation_tiny_steps=1):
+    def forward_step(model, batch, no_model_batch, accumulation_tiny_steps=1, mode="train"):
+        for k in no_model_batch:
+            no_model_batch[k] = no_model_batch[k].to(device)
+
+        #mbp("b")
         result = model(**batch)
         logits = result["logits"]
         forw_out = {
             "logits": logits
         }
-        if True: #"loss" in result and not "loss_mask" in no_model_batch:
+        if "loss" in result: # and not "loss_mask" in no_model_batch:
             loss = result['loss']/accumulation_tiny_steps
         else:
-            mbp("")
+            #mbp(mode)
             losses = torch.nn.functional.cross_entropy(
                 result['logits'].reshape(-1,result['logits'].size(2)),
-                batch['labels'].reshape(-1,),
+                no_model_batch['labels'].reshape(-1,),
                 reduction='none'
             ).reshape(result['logits'].size(0),-1)
             if "loss_mask" in no_model_batch:
                 loss_mask = no_model_batch["loss_mask"]
-                loss_mask = loss_mask.to(device)
+                #loss_mask = loss_mask.to(device)
                 losses = (losses * loss_mask).sum(-1) / loss_mask.sum(-1)
                 loss = losses.mean()
             else:
@@ -1976,6 +2119,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     epochs_num = int(epochs_num)
     def train_loop(epochs_num):
         train_iter = iter(train_dataloader)
+        global_step = 0
         step = 0
         best_dev_loss = 100
         best_eval_step = 0
@@ -1999,63 +2143,15 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                 step = train_start
             while step < iterations-1:
                 try:
-                    if do_valid and cycle > 0 and (step % cycle == 0 and step > 0): #validation
-                        with torch.no_grad():
-                            if wrap:
+                    if do_valid and cycle > 0 and (global_step % cycle == 0 and global_step > 0): #validation
+                        if wrap:
+                            with torch.no_grad():
+                                mlog.info("Updating the model weights before evaluaton...")
                                 wrapped_model.update_model_weight()
-                            model.eval()
-                            pbar.set_description(f'validating on {cycle}...')
-                            vlog.info(f'validating on {cycle}...')
-                            dev_allset_micro_loss = 0.
-                            dev_token_loss = 0.
-                            dev_token_count = 0
-                            dev_sample_loss = 0. #avg on sample
-                            dev_sample_count = 0
-                            for batch in tqdm(dev_dataloader,desc=f'validating...',leave=True):
-                                if dev_sample_count>=validation_size:
-                                    break
-                                batch = {k:v.to(device=device) for k,v in batch.items()}
-                                result = model(**batch)
-                                loss = torch.nn.functional.cross_entropy(
-                                    result['logits'].reshape(-1,result['logits'].size(2)),
-                                    batch['labels'].reshape(-1,),
-                                    reduction='none'
-                                ).reshape(result['logits'].size(0),-1)
-                                labels_mask = (batch['labels'] != -100) 
-                                dev_token_loss += loss.sum().item()
-                                dev_token_count += labels_mask.sum().item()
-                                dev_sample_loss += (loss.sum(dim=-1)/labels_mask.sum(dim=-1)).sum().item()
-                                dev_sample_count += result['logits'].size(0)
-                                del result
-                                del loss
-                                del labels_mask
-                            dev_micro_avg_loss = dev_token_loss/dev_token_count
-                            dev_macro_avg_loss = dev_sample_loss/dev_sample_count
-                            sw.add_scalar('dev/micro_avg_loss',dev_micro_avg_loss,step)
-                            vlog.info('dev/micro_avg_loss: %s-%s',dev_micro_avg_loss,step)
-                            mlog.info('dev/micro_avg_loss: %s-%s',dev_micro_avg_loss,step)
-                            sw.add_scalar('dev/macro_avg_loss',dev_macro_avg_loss,step)
-                            vlog.info('dev/macro_avg_loss: %s-%s',dev_macro_avg_loss,step)
-                            mlog.info('dev/macro_avg_loss: %s-%s',dev_macro_avg_loss,step)
-                            if dev_micro_avg_loss < best_dev_loss:
-                                best_dev_loss = dev_micro_avg_loss
-                                best_eval_step = step
-                                tlog.info("epoch %s, best_eval_step: %s", epoch, best_eval_step)
-                                save_checkpoint(model, tokenizer, optimizer, scheduler, step, 
-                                                best_eval_step, best_dev_loss,
-                                                os.path.join(save_path, "best_model"))
-
-                                generation_results = \
-                                "|Queries|Generation Results|\n"\
-                                "|-|-|\n"
-                                for i,(_q,_target) in enumerate(generate_samples['sample']):
-                                    if i==validation_num_generation:
-                                        break
-                                    results = generate(model, tokenizer, [_q.strip()]) 
-                                    vlog.info("%02d) %-50s | %-50s | %-40s", i, _q.strip(), 
-                                            results, _target.strip())
-                                    generation_results+=f"|`{_q},{_target}`|`{str(results)}`|\n"
-                                sw.add_text('dev/generation_samples',generation_results,step)
+                        dev_loss, dev_acc = evaluate1(tokenizer, dev_dataset, dev_dataloader, model, device, prompt_config, mode="dev", save_res=True)
+                        log_string = "dev_loss: " + str(dev_loss) + " | dev acc(mrr, f1): " + str(dev_acc) 
+                        mlog.info(log_string)
+                        mbp("")
                     #if unfreez_step > 0 and step > unfreez_step and froze:
                     #    mlog.info("unfreezing the model")
                     #    unfreez_step = 0
@@ -2094,14 +2190,18 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                         if wrap:
                             #tlog.info("Merge embedding grads:%s", wrapped_model.merge_encoder.embedding.weight.grad)
                             for encoder in wrapped_model.prompt_encoders:
-                                if encoder.name == "xIntent":
-                                    timelog.info("---------------- %s ---------------", encoder.name)
-                                    timelog.info("Prompt embedding grads:%s", encoder.embedding.weight.grad)
+                                if encoder.name == "cb":
+                                    #mlog.info("---------------- %s ---------------", encoder.name)
+                                    #mlog.info("Prompt embedding grads:%s", encoder.embedding.weight.grad)
+                                    #mlog.info("Norm: %s", torch.linalg.norm(encoder.embedding.weight.grad))
+                                    mbp("")
+                                    break
 
                         batch_loss += loss.item()
                     optimizer.step()
                     scheduler.step()
                     step+=1
+                    global_step+=1
                     bloss = batch_loss.item()
                     tot_loss += bloss
                     mean_loss = tot_loss/(step-train_start)
@@ -2113,6 +2213,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                     #del loss
                 except KeyboardInterrupt:
                     mlog.info("exiting while ...")
+                    raise KeyboardInterrupt
                     break
         # end train while
         pbar.close()
@@ -2162,75 +2263,6 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         train_result = trainer.train()
 
     # vvvv
-    #111111
-    def evaluate1(tokenizer, eval_dataset, eval_data_loader, model, device, prompt_config, mode="dev", save_res=False):
-        """Evaluation."""
-
-        # Turn on evaluation mode which disables dropout.
-        model.eval()
-
-        total_loss = 0.0
-        step = 0
-
-        all_idx = []
-        all_preds = []
-        all_labels = []
-        decs = []
-        tail_decs = []
-
-        with torch.no_grad():
-            for model_batch, no_model_batch in eval_data_loader:
-                for k in model_batch:
-                    model_batch[k] = model_batch[k].to(device)
-                for k in no_model_batch:
-                    no_model_batch[k] = no_model_batch[k].to(device)
-                forw_out = forward_step(model, model_batch, no_model_batch)
-                loss = forw_out["loss"].item() if "loss" in forw_out else 0
-                total_loss += loss
-                mbp("")
-
-                logits_list = forw_out["logits"]
-                pred_token_logits = logits_list[:, 1, :]
-                preds = torch.argmax(pred_token_logits, dim=-1)
-                all_preds.extend(preds)
-                # my code
-                preds_list = preds.tolist()
-                hyps = tokenizer.convert_ids_to_tokens(preds_list)
-                decs.extend(hyps)
-
-                if "idx" in no_model_batch: 
-                    gathered_idx = no_model_batch["idx"]
-                    all_idx.extend(gathered_idx)
-
-                #labels = no_model_batch["labels"][:, 1]
-                # my code
-                labels = no_model_batch["labels"][:, :]
-                breakpoint()
-                tails_list = labels.tolist()
-                for tail in tails_list:
-                   target = tokenizer.convert_ids_to_tokens(tail)
-                   tail_decs.extend(target)
-                
-                gathered_labels = labels 
-                all_labels.extend(gathered_labels)
-
-                step += 1
-
-        total_loss /= step
-
-        all_idx = torch.cat(all_idx, dim=0).cpu().tolist()
-        all_preds = torch.cat(all_preds, dim=0).cpu().tolist()
-        all_labels = torch.cat(all_labels, dim=0).cpu().tolist()
-
-        if args.data_name in ["cb", "cb_uni"]:
-            eval_metric = acc_f1_metric
-        else:
-            eval_metric = acc_metric
-            
-        res = eval_metric(args, tokenizer, all_preds, all_labels, save_res=save_res)
-
-        return total_loss, res
-
     #vvvvvv
     if data_name:
         test_ratio = 1
@@ -2258,7 +2290,9 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             mlog.info("Evaluating ... %s", _set)
             val_records = myds[_set].num_records
             exp_info["test_set"] = _set
-            #evaluate1(tokenizer, test_dataset, test_dataloader, model, device, prompt_config, mode="test", save_res=False)
+            l, r = evaluate1(tokenizer, test_dataset, test_dataloader, model, device, prompt_config, mode="test", save_res=False)
+            mlog.info("total loss: %s, res: %s", l, r)
+            mbp("before evaluation")
             evaluate(test_dataset, test_dataloader, save_path, exp_info, val_records, gen_param, scorers = scorers, batch_size=gen_bs, model=model, tokenizer=tokenizer, set_name=_set)  
     else:
         mlog.info("Test set was not provided.... skip testing...")
@@ -2345,7 +2379,7 @@ def exp(experiment, model_ids, keep, server, exclude, include, save_model):
         return
     var_list = []
     args["experiment"] = experiment
-    args["cycle"] = 0
+    #args["cycle"] = 0
     args["no_save_model"] = not save_model
     args["load_path"] = pretPath
     args["train_path"] = "atomic/train.tsv"
@@ -2353,7 +2387,7 @@ def exp(experiment, model_ids, keep, server, exclude, include, save_model):
     args["save_path"] = save_path
 
     args["cpu"] = False 
-    args["config"] = False 
+    args["config"] = "" 
     args["gen_param"] = "top_p" 
     langs = {"en":True}
     args["test_samples"] = 1000 
