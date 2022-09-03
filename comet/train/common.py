@@ -66,6 +66,8 @@ rel_nat_maps = {
     "cb":{ 
         1:"{event1}? {ph}. {event2}",
         2:"{event1}? {ph}. {event2}",
+        "rel_qtemp": "{rel_i} {event2}. {rel_i} {event1}? {ph} {resp} ",
+        "rel_anstemp":"{ph} {resp}",
         3:"sentence1: {event1}. sentence2: {event2}. The relation is {ph}.",
         "tokens":"<state> <other> <after>",
         "nat-tokens":"the entailment is",
@@ -378,8 +380,15 @@ def extend_tokenizer(tokenizer, prompt_tokens = [], model_id=""):
         mlog.info("No new token was added")
 
 def fill_sample(mt, rel):
-    qtemp, anstemp, ex_qtemp, ex_anstemp, context = create_templates(mt,
-            gen_pos="end")
+    mbp("")
+    #qtemp, anstemp, ex_qtemp, ex_anstemp, context = create_templates(mt,
+    #        gen_pos="end")
+    #qtemp = qtemp[0]
+    qtemp = "{rel_i} {rel_natural}"
+    anstemp = "{ph} {resp} {end}"
+    ex_qtemp = ""
+    ex_anstemp = ""
+    context = ""
     mask =1
     context_df = None
     d = {"prefix":rel}
@@ -388,7 +397,6 @@ def fill_sample(mt, rel):
     input_lang = "en"
     target_lang = "en"
     gen_token = "gen_en"
-    qtemp = qtemp[0]
     _qtemp = fill_consts(qtemp, ex_qtemp, context,rel, d, context_df, mask=mask,method = mt)
     _anstemp = fill_consts(anstemp, ex_anstemp, context,rel, d, context_df, mask=mask,method = mt)
     _query = fill_vars(_qtemp, rel, event, resp, gen_token,
@@ -432,7 +440,7 @@ def create_encoder(name, model, tokenizer, prompt_tokens, encoder_type="lstm",
     mlog.info("** rel tokens : %s", rel_tokens)
     cur_list = tokenizer.additional_special_tokens
     my_specials = [x for x in cur_list if not "<extra_id"  in x]
-    mlog.info("** cur tokens : %s", my_specials)
+    #mlog.info("** cur tokens : %s", my_specials)
 
 
     enc_plen =len(rel_tokens) 
@@ -556,6 +564,12 @@ def fill_prompt(text, rel, place_holder, counter = 0, lang=""):
 
 def fill_consts(template, ex_temp, context,rel, row, rows=None, mask=-1, method="", someone=False):
     #dlog.info("fill consts, input text: %s", template)
+    if template == "rel_qtemp" and "rel_qtemp" in rel_nat_maps[rel]:
+        template = rel_nat_maps[rel]["rel_qtemp"]        
+
+    if template == "rel_anstemp" and "rel_anstemp" in rel_nat_maps[rel]:
+        template = rel_nat_maps[rel]["rel_anstemp"]        
+
     text = fill_const_for_rel(template, row)
     #dlog.info("fill consts, input text: %s", text)
     plen = relation_prompt_lengths[rel]
@@ -741,6 +755,13 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
        ex_anstemp = ""
        ctx = ["{" + x + "}" for x in all_rels]
        context = " ".join(ctx)
+       anstemp = "{resp}"
+       if "custom" in method:
+           qtemp = "rel_qtemp"
+           anstemp = "rel_anstemp"
+       if "unsup" in method:
+           anstemp = "{ph} {resp}"
+
        if method == "bart":
            qtemp = "{event} {rel} [GEN]"
            anstemp = "{resp}"
@@ -998,7 +1019,7 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
        elif method == "unsup-wrap-3":
            qtemp = "{rel_i} {gen_start} {event} {rel_i} {gen_end} {ph}"
            anstemp = "{ph} {dec_token} {resp} {end}"
-       else:
+       elif not "custom" in method:
            raise ValueError("not supprted method: " + method)
        
        if not type(qtemp) == list:
@@ -1032,7 +1053,7 @@ def fill_vars(template, rel, event, resp, gen_token= "gen_en",  inp_lang="en", r
         rel_n += "<extra_id_" + str(i) + "> "
     rel_nat_n = rel_natural.replace("{ph}", rel_n)
     rel_natural = rel_natural.replace("{ph}", placeholder_token)
-    
+
     rep1  = {
             "{rel_natural}":rel_natural,
             "{rel_natural_pure}":rel_natural_pure,

@@ -39,12 +39,12 @@ class MyCollator(object):
         self.prompt_config = None
 
 #gggggggggggggg
-    def collate(self, queries, responses):
-        bs = len(queries)
-        q_len = [len(i) for i in queries]
+    def collate(self, enc_qs, enc_resps, queries, resps):
+        bs = len(enc_qs)
+        q_len = [len(i) for i in enc_qs]
         max_enc_len = max(q_len)
-        r_len = [len(i) for i in responses]
-        max_dec_len = max(r_len) - 1 
+        r_len = [len(i) for i in enc_resps]
+        max_dec_len = max(r_len) + 2 
         pad_id = self.tokenizer.pad_token_id
         model_data = {
             "input_ids": torch.ones(bs, max_enc_len, dtype=torch.long) * pad_id,
@@ -54,13 +54,16 @@ class MyCollator(object):
             #"decoder_input_ids": torch.ones(bs, max_dec_len, dtype=torch.long) * pad_id,
             "labels": torch.ones(bs, max_dec_len, dtype=torch.long) * -100,
         }
+        mbp("")
         no_model_data = {
             #"idx": torch.zeros(bs, dtype=torch.long),
             "labels": torch.ones(bs, max_dec_len, dtype=torch.long) * pad_id,
-            "loss_mask": torch.zeros(bs, max_dec_len)
+            "loss_mask": torch.zeros(bs, max_dec_len),
+            "query":[""]*bs,
+            "resp":[""]*bs
         }
         mbp("")
-        for i, (q, r) in enumerate(zip(queries, responses)):
+        for i, (q, r, query, resp) in enumerate(zip(enc_qs, enc_resps, queries, resps)):
             dec_ids = [pad_id] + r #+ [self.tokenizer.eos_token_id]
             label = r[:-1] #+ [self.tokenizer.eos_token_id]
             model_data["input_ids"][i][:len(q)] = torch.tensor(q, dtype=torch.long)
@@ -71,6 +74,8 @@ class MyCollator(object):
             #no_model_data["idx"][i] = samp["idx"]
             model_data["labels"][i][:len(label)] = torch.tensor(label, dtype=torch.long)
             no_model_data["labels"][i][:len(label)] = torch.tensor(label, dtype=torch.long)
+            no_model_data["query"][i] = query 
+            no_model_data["resp"][i] = resp
             if self.prompt_config is not None:
                 no_model_data["loss_mask"][i][self.prompt_config["dec"]["prompt_len"]:len(label)] = 1.0
             else:
@@ -102,7 +107,7 @@ class MyCollator(object):
             index.append(b["index"])
             rep.append(b["rep"])
 
-        return self.collate(enc_queries, enc_responses)
+        return self.collate(enc_queries, enc_responses, queries, responses)
         #queries,inputs, responses,rel,index,rep = zip(*batch)
         #mbp("b")
         no_model_batch = {}
@@ -347,12 +352,18 @@ def cli():
     type=str,
     help="port for debugpy"
 )
+@click.option(
+    "--stop",
+    "-stop",
+    is_flag=True,
+    help=""
+)
 @click.pass_context
 #rrrrrrrrrrr
 def run(ctx, conf_path, base_conf, experiment, 
         exclude_conf, include_conf, overwrite_conf, var, 
         save_model, addto, rem, save_data, load_data, add_prefix, 
-        only_var, sep, num_exps, one, cpu, undone, dpy, port):
+        only_var, sep, num_exps, one, cpu, undone, dpy, port, stop):
      if dpy:
         debugpy.listen(('0.0.0.0', int(port)))
         print("Waiting for client at run...port:", port)
@@ -375,6 +386,8 @@ def run(ctx, conf_path, base_conf, experiment,
            args["config"] = ""
            args["output_name"] = "" 
            args["experiment"] = experiment 
+           if stop:
+               args["stop_on_breakpoint"] = True
            if cpu:
                args["cpu"] = True
                os.environ["CUDA_VISIBLE_DEVICES"] = ""
@@ -1264,7 +1277,13 @@ def run(ctx, conf_path, base_conf, experiment,
     is_flag=True,
     help=""
 )
-def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, wandb, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args, match, dpy, prompt_tune, prompt_config_file, load_prompt, data_name, seed, do_valid):
+@click.option(
+    "--stop_on_breakpoint",
+    "-stbr",
+    is_flag=True,
+    help=""
+)
+def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, wandb, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args, match, dpy, prompt_tune, prompt_config_file, load_prompt, data_name, seed, do_valid, stop_on_breakpoint):
 
     #%% some hyper-parameters
 
@@ -2008,13 +2027,17 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         all_idx = []
         all_preds = []
         all_labels = []
+        all_gens = []
+        all_resps = []
+        all_queries = []
         mbp("")
         with torch.no_grad():
             for model_batch, no_model_batch in eval_data_loader:
                 for k in model_batch:
                     model_batch[k] = model_batch[k].to(device)
                 for k in no_model_batch:
-                    no_model_batch[k] = no_model_batch[k].to(device)
+                    if k not in  ["resp", "query"]:
+                        no_model_batch[k] = no_model_batch[k].to(device)
                 forw_out = forward_step(model, model_batch, no_model_batch, mode="test")
                 loss = forw_out["loss"].item() if "loss" in forw_out else 0
                 total_loss += loss
@@ -2027,9 +2050,9 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                     preds = torch.argmax(pred_token_logits, dim=-1)
                     seq_preds.append(preds.tolist())
                 _seq_preds = list(zip(*seq_preds))
-                mbp("b")
                 all_preds.extend(_seq_preds)
                 decs = generate(model, tokenizer, model_batch)
+                all_gens.extend(decs)
 
                 if "idx" in no_model_batch: 
                     gathered_idx = no_model_batch["idx"]
@@ -2037,9 +2060,12 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
 
                 #labels = no_model_batch["labels"][:, 1]
                 # my code
-                labels = model_batch["labels"][:, 1]
+                labels = model_batch["labels"]#[:, 1]
                 gathered_labels = labels.tolist() 
                 all_labels.extend(gathered_labels)
+
+                all_queries.extend(no_model_batch["query"])
+                all_resps.extend(no_model_batch["resp"])
 
                 step += 1
 
@@ -2052,17 +2078,26 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         for p in all_preds:
             dec = tokenizer.convert_ids_to_tokens(p)
             preds_decs.append(dec)
-        labels_decs = tokenizer.convert_ids_to_tokens(all_labels)
-        c = 0
+        labels_decs = []
+        for l in all_labels:
+            l = [0 if x == -100 else x for x in l] 
+            dec = tokenizer.convert_ids_to_tokens(l)
+            labels_decs.append(dec)
         _preds = []
+        _labels = []
+        c = 0
         i = 0
-        for p,l in zip(preds_decs, labels_decs):
+        for p,l,r, g, q in zip(preds_decs, labels_decs, all_resps, all_gens, all_queries):
             _preds.append(p[1].lower())
-            if l.lower() in p:
+            _labels.append(l[1].lower())
+            print("-"*80)
+            print("{}) {}".format(i, q))
+            print("")
+            if any(x in l for x in p):
                 c +=1
-                print("{}) {}--{} {}".format(i,l,p, c))
-            else:
-                print("{}) {}--{} ".format(i,l,p))
+            print(" "*10,"True:",r)
+            print(" "*10,"Pred:",p)
+            print(" "*10,"Gen:",g)
             i += 1
 
         print("{:.2f} = {} / {}".format(c/len(preds_decs), c, len(preds_decs)))
@@ -2071,16 +2106,18 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             eval_metric = acc_f1_metric
         else:
             eval_metric = acc_metric
-        res = eval_metric(tokenizer, _preds, labels_decs, save_res=save_res)
+        res = eval_metric(tokenizer, _preds, _labels, save_res=save_res)
         print(res)
-        mbp("b")    
+        if stop_on_breakpoint:
+            mbp("b")    
 
         return total_loss, res
 
     # ffffffffffff
     def forward_step(model, batch, no_model_batch, accumulation_tiny_steps=1, mode="train"):
         for k in no_model_batch:
-            no_model_batch[k] = no_model_batch[k].to(device)
+            if k not in  ["resp", "query"]:
+                no_model_batch[k] = no_model_batch[k].to(device)
 
         #mbp("b")
         result = model(**batch)
