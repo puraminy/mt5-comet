@@ -12,11 +12,25 @@ def _isin(tensor:torch.Tensor,values:torch.Tensor):
 import logging
 import os
 from os.path import expanduser
+from comet.train.mylogs import mbp
+
 home = expanduser("~")
 wlog = logging.getLogger("comet.wrapper")
 emblog = logging.getLogger("comet.embedding")
+consoleHandler = logging.StreamHandler()
+wlog.addHandler(consoleHandler)
+emblog.addHandler(consoleHandler)
 tlog = logging.getLogger("comet.time")
 FORMAT = logging.Formatter("[%(filename)s:%(lineno)s - %(funcName)10s() ] %(message)s")
+
+def winfo(text, *arg, **kwargs):
+    pass
+    #print((text, *arg))
+
+def embinfo(text, *arg, **kwargs):
+    pass
+    #print((text, *arg))
+
 def getFname(name):
     if "ahmad" in home or "pouramini" in home:
         logFilename = os.path.join(home, f"logs/{name}.log")
@@ -32,8 +46,8 @@ emblog.addHandler(eHandler)
 tHandler = logging.FileHandler(getFname("time"), mode='w')
 tHandler.setFormatter(FORMAT)
 tlog.addHandler(tHandler)
-emblog.info("Embedding log")
-wlog.info("Wrapper log")
+embinfo("Embedding log")
+winfo("Wrapper log")
 wlog.setLevel(logging.INFO)
 emblog.setLevel(logging.INFO)
 tlog.setLevel(logging.INFO)
@@ -70,22 +84,23 @@ class PTuningWrapper(torch.nn.Module):
                 embedding layer of the transformer model.
         """
         super().__init__()
+        mbp("")
         self.testing = True
         if not do_log or not "ahmad" in home:
             wlog.disabled = False
             self.testing = False
         self.ll = logging.INFO
         if self.testing:
-            wlog.info("%%%%%%%%%%%%%%%%%%% testing is ON %%%%%%%%%%%%%%%%%%")
-        wlog.info("%%%%%%%%%%%%%%%%%%%%%%%% Wrapper log %%%%%%%%%%%%%%%%%%")
+            winfo("%%%%%%%%%%%%%%%%%%% testing is ON %%%%%%%%%%%%%%%%%%")
+        winfo("%%%%%%%%%%%%%%%%%%%%%%%% Wrapper log %%%%%%%%%%%%%%%%%%")
         tlog.info("%%%%%%%%%%%%%%%%%%%%%%%% Time log %%%%%%%%%%%%%%%%%%")
         self.underlying_model = model
         self.model_embeddings = model.get_input_embeddings()
-        wlog.info("self.model embedding:{}".format(self.model_embeddings))
+        winfo("self.model embedding:{}".format(self.model_embeddings))
         model_embeddings_size = model.get_input_embeddings().num_embeddings
-        wlog.info("model embedding_size:{}".format(model_embeddings_size))
+        winfo("model embedding_size:{}".format(model_embeddings_size))
         self.prompt_encoders = torch.nn.ModuleList(prompt_encoders)
-        wlog.info("num of encoders %s:", len(self.prompt_encoders))
+        winfo("num of encoders %s:", len(self.prompt_encoders))
         self.embedding_dim = model.config.hidden_size
         self.mlp = torch.nn.Sequential(
             torch.nn.Linear(self.embedding_dim, self.embedding_dim),
@@ -102,7 +117,7 @@ class PTuningWrapper(torch.nn.Module):
                     self.merge_prompt_ids.append(_id)
 
             _offset = min(_ids)
-            wlog.info("** existing encoder ids for %s: %s", encoder.name, _ids)
+            winfo("** existing encoder ids for %s: %s", encoder.name, _ids)
             rel_ids_tensor = torch.LongTensor(_ids)
             embs = self.model_embeddings
             rel_embs = embs(rel_ids_tensor)
@@ -111,13 +126,14 @@ class PTuningWrapper(torch.nn.Module):
                    encoder.embedding.weight[i] = e #.detach()
 
         self.merge_offset = min(self.merge_prompt_ids)
-        wlog.info("Merge ids: %s,", self.merge_prompt_ids)
-        wlog.info("Merge ids len: %s,", len(self.merge_prompt_ids))
-        wlog.info("Sum len: %s,", sum_len)
-        wlog.info("Offset: %s,", self.merge_offset)
+        winfo("Merge ids: %s,", self.merge_prompt_ids)
+        winfo("Merge ids len: %s,", len(self.merge_prompt_ids))
+        winfo("Sum len: %s,", sum_len)
+        winfo("Offset: %s,", self.merge_offset)
 
         self.merge_encoder = None 
         self.merge_embedding = None
+        mbp("")
         if merge_prompts:
             _enc_type = merge_prompts.split("@")
             num_layers = 1
@@ -140,11 +156,12 @@ class PTuningWrapper(torch.nn.Module):
 
 
         self.decoder_prompt_encoder = decoder_prompt_encoder
+        self.decoder_prompt_flag = False
+        self.encoder_prompt_flag = False
         self.replacing_token_id = replacing_token_id
-        wlog.info("REP id:{}".format(replacing_token_id))
-        if self.decoder_prompt_encoder:
-            self.model_decoder_embeddings = model.decoder.embed_tokens
-            wlog.debug("DECODER model embd:{}".format(self.model_decoder_embeddings))
+        winfo("REP id:{}".format(replacing_token_id))
+        self.model_decoder_embeddings = model.decoder.embed_tokens
+        wlog.debug("DECODER model embd:{}".format(self.model_decoder_embeddings))
         if prompt_token_fn is not None:
             assert prompt_token_id is None and prompt_token_ids is None, \
                 "Use one of prompt_token_fn, prompt_token_id, prompt_token_ids"
@@ -166,21 +183,24 @@ class PTuningWrapper(torch.nn.Module):
             self.prompt_token_fn = lambda t:(t>=self.model_embeddings_size)
             
             #Default: All token ids beyond num_embeddings are seen as prompt token
+        mbp("")
+
     def add_prompt_encoder(self, encoder):
         self.prompt_encoders.append(encoder)
 
-    def forward(self,input_ids, labels, decoder_input_ids=None,pids=None,**kwargs):
+    def forward(self,input_ids, pids=None, **kwargs):
         ll = self.ll # log level
         wlog.log(ll, "wrapper forward was called")
         wlog.log(ll, "Prompt ids:{}".format(pids))
-        breakpoint()
+        mbp("")
         # find masks based on the range of prompt ids (offset_id < X < offset_id + prompt_length)
         #Because this wrapper only deals with a single prompt, the length should be the same, you can use masked_select to reshape 
         prompt_masks = self.prompt_token_fn(input_ids)
         if prompt_masks.any():
+            self.encoder_prompt_flag = True
             wlog.log(ll, "promp masks:{}".format(prompt_masks))
             input_ids_ = input_ids.clone()
-            wlog.info("inpu ids :{}".format(input_ids))
+            winfo("inpu ids :{}".format(input_ids))
             if self.replacing_token_id is not None:
                 # replace prompt ids in input_ids with replacing token
                 input_ids_[prompt_masks]=self.replacing_token_id
@@ -188,8 +208,8 @@ class PTuningWrapper(torch.nn.Module):
             inputs_embeds = self.model_embeddings(input_ids_)
             device=inputs_embeds.device
             all_prompts_input_ids = input_ids[prompt_masks]
-            wlog.info("All prompts input ids: %s", all_prompts_input_ids)
-            wlog.info("Len All prompts input ids: %s", len(all_prompts_input_ids))
+            winfo("All prompts input ids: %s", all_prompts_input_ids)
+            winfo("Len All prompts input ids: %s", len(all_prompts_input_ids))
             if self.merge_encoder:
                 prompt_embds = self.merge_encoder(all_prompts_input_ids,pids).to(device)
                 inputs_embeds[prompt_masks]=prompt_embds
@@ -198,15 +218,15 @@ class PTuningWrapper(torch.nn.Module):
                 merge_dict = {}
                 for encoder in self.prompt_encoders:
                     #encoder = self.prompt_encoders[0]
-                    wlog.info("********** offset: %s, length: %s", encoder.id_offset, encoder.length)
+                    winfo("********** offset: %s, length: %s", encoder.id_offset, encoder.length)
                     prompt_token_fn = encoder.get_prompt_token_fn()
                     encoder_masks = prompt_token_fn(input_ids)
-                    wlog.info("Encoder masks: %s", encoder_masks)
+                    winfo("Encoder masks: %s", encoder_masks)
                     if encoder_masks.any():
                         #find input ids for prompt tokens
                         prompt_input_ids = input_ids[encoder_masks]
-                        wlog.info("Prompt Input ids: %s", prompt_input_ids)
-                        wlog.info("Len Prompt Input ids: %s", len(prompt_input_ids))
+                        winfo("Prompt Input ids: %s", prompt_input_ids)
+                        winfo("Len Prompt Input ids: %s", len(prompt_input_ids))
                         # call forwards on prompt encoder whose outputs are prompt embeddings
                         prompt_embeds = encoder(prompt_input_ids,\
                             pids).to(device)
@@ -218,76 +238,99 @@ class PTuningWrapper(torch.nn.Module):
                                 
                             embeds_list.append(prompt_embeds)
                         # replace prompt_embeddings calculated by prompt encoder in input embeddings
-                        wlog.info("Prompt Embeds size: %s", prompt_embeds.size())
-                        wlog.info("Encoder mask: %s", encoder_masks.size())
+                        winfo("Prompt Embeds size: %s", prompt_embeds.size())
+                        winfo("Encoder mask: %s", encoder_masks.size())
                         inputs_embeds[encoder_masks]=prompt_embeds
                 if self.testing:
                     for key,val in merge_dict.items():
-                        wlog.info("Merge dict item %s, len: %s",key, len(val))
+                        winfo("Merge dict item %s, len: %s",key, len(val))
                         if val:
                             merge_dict[key] = self.mlp(torch.stack(val))
-                    wlog.info("embeds list: %s", len(embeds_list))
+                    winfo("embeds list: %s", len(embeds_list))
                     res_embeds = self.mlp(torch.cat(embeds_list))
-                    wlog.info("REES embeds: %s", res_embeds)
-                    wlog.info("REES embeds size: %s", res_embeds.size())
-                    wlog.info("All prompts input ids: %s", all_prompts_input_ids)
-                    wlog.info("PROMPT MASKS: %s", prompt_masks)
-                    wlog.info("Merge dict: %s", merge_dict)
+                    winfo("REES embeds: %s", res_embeds)
+                    winfo("REES embeds size: %s", res_embeds.size())
+                    winfo("All prompts input ids: %s", all_prompts_input_ids)
+                    winfo("PROMPT MASKS: %s", prompt_masks)
+                    winfo("Merge dict: %s", merge_dict)
         else:
             inputs_embeds = self.model_embeddings(input_ids)
-        
+
+        decoder_input_ids = kwargs.pop("decoder_input_ids", None) 
         if decoder_input_ids is not None:
-            if self.decoder_prompt_encoder is not None:
-                wlog.log(ll, "prompt decoder exists")
-                decoder_prompt_masks = self.prompt_token_fn(decoder_input_ids)
-                if decoder_prompt_masks.any():
-                    wlog.log(ll,"decoder prompt mask:{}".format(decoder_prompt_masks))
-                    wlog.log(ll,f"decoder mask, replacing token id: {self.replacing_token_id}")
-                    decoder_input_ids_ = decoder_input_ids.clone()
-                    if self.replacing_token_id is not None:
-                        decoder_input_ids_[decoder_prompt_masks] = \
-                            self.replacing_token_id
-                    decoder_inputs_embeds = self.model_decoder_embeddings(
-                        decoder_input_ids_
-                    )
-                    wlog.log(ll,f"decoder input ids {decoder_input_ids}")
-                    decoder_prompt_embeds = self.decoder_prompt_encoder(
-                        decoder_input_ids[decoder_prompt_masks],pids).to\
-                        (device=decoder_inputs_embeds.device)
-                    decoder_inputs_embeds[decoder_prompt_masks] = \
-                        decoder_prompt_embeds
-                    decoder_labels_masks = self.prompt_token_fn(labels)
-                    labels[decoder_labels_masks] = 0
-                    wlog.log(ll, labels)
+            mbp("")
+            prompt_masks = self.prompt_token_fn(decoder_input_ids)
+            if prompt_masks.any():
+                self.decoder_prompt_flag = True
+                labels = kwargs.pop("labels", None) 
+                wlog.log(ll, "promp masks:{}".format(prompt_masks))
+                decoder_input_ids_ = decoder_input_ids.clone()
+                winfo("inpu ids :{}".format(decoder_input_ids))
+                if self.replacing_token_id is not None:
+                    # replace prompt ids in input_ids with replacing token
+                    decoder_input_ids_[prompt_masks] = \
+                        self.replacing_token_id
+                # find the model embeddings of input ids except for prompt tokens
+                decoder_inputs_embeds = self.model_decoder_embeddings(
+                    decoder_input_ids_
+                )
+                all_prompts_input_ids = decoder_input_ids[prompt_masks]
+                for encoder in self.prompt_encoders:
+                    #encoder = self.prompt_encoders[0]
+                    winfo("********** offset: %s, length: %s", encoder.id_offset, encoder.length)
+                    prompt_token_fn = encoder.get_prompt_token_fn()
+                    encoder_masks = prompt_token_fn(decoder_input_ids)
+                    winfo("Encoder masks: %s", encoder_masks)
+                    if encoder_masks.any():
+                        #find input ids for prompt tokens
+                        prompt_input_ids = decoder_input_ids[encoder_masks]
+                        winfo("Prompt Input ids: %s", prompt_input_ids)
+                        winfo("Len Prompt Input ids: %s", len(prompt_input_ids))
+                        # call forwards on prompt encoder whose outputs are prompt embeddings
+                        device=decoder_input_ids.device
+                        decoder_prompt_embeds = encoder(prompt_input_ids,\
+                            pids).to(device)
+
+                        decoder_inputs_embeds[encoder_masks] = \
+                            decoder_prompt_embeds
+                    
+                        decoder_labels_masks = self.prompt_token_fn(labels)
+                        labels[decoder_labels_masks] = -100
+                        wlog.log(ll, labels)
+                        break
                 else:
                     decoder_inputs_embeds = self.model_decoder_embeddings(
                         decoder_input_ids
                     )
-                return self.underlying_model(inputs_embeds=inputs_embeds,
-                    decoder_inputs_embeds=decoder_inputs_embeds, labels=labels,**kwargs
-                )
-            else: #decoder_prompt_encoder is not defined, so decoder_originical_embedding is not set.
+                return self.underlying_model(inputs_embeds=inputs_embeds, decoder_inputs_embeds=decoder_inputs_embeds, labels=labels, **kwargs)
+            else: 
                 self.ll = logging.DEBUG
-                return self.underlying_model(inputs_embeds=inputs_embeds,
-                    decoder_input_ids=decoder_input_ids, labels=labels,**kwargs)
+                return self.underlying_model(inputs_embeds=inputs_embeds, **kwargs)
         else:
             self.ll = logging.DEBUG
             return self.underlying_model(inputs_embeds=inputs_embeds,**kwargs)
     def update_model_weight(self):
-        wlog.info(f"Updating model weights")
+        winfo(f"Updating model weights")
         self.cur_embeddings = self.underlying_model.get_input_embeddings()
         if self.merge_encoder:
             self.merge_encoder.dump_embedding(self.cur_embeddings.weight)
-        else:
+        elif self.encoder_prompt_flag:
             for encoder in self.prompt_encoders:
-                wlog.info(f"the wrapper has prompt encoder")
+                winfo(f"the wrapper has prompt encoder")
                 # fill the current embeddings with weights of encoder
                 encoder.dump_embedding(self.cur_embeddings.weight)
                 #self.prompt_encoder.dump_embedding(self.model_embeddings.weight)
         if self.decoder_prompt_encoder in self.prompt_encoders:
-            wlog.info(f"Encoder and Decoder are the same")
+            winfo(f"Encoder and Decoder are the same")
             pass
-        elif self.decoder_prompt_encoder:
+        if self.decoder_prompt_flag:
+            for encoder in self.prompt_encoders:
+                winfo(f"the wrapper has prompt encoder")
+                # fill the current embeddings with weights of encoder
+                encoder.dump_embedding(
+                                       self.model_decoder_embeddings.weight)
+                #self.prompt_encoder.dump_embedding(self.model_embeddings.weight)
+        if self.decoder_prompt_encoder:
             self.decoder_prompt_encoder.dump_embedding(
                 self.model_decoder_embeddings.weight)
 
@@ -301,8 +344,8 @@ class PromptEncoder(torch.nn.Module):
         self.prompt_ids = prompt_ids
         self.input_ids = torch.nn.parameter.Parameter(torch.tensor(prompt_ids),
              requires_grad=False)
-        emblog.info("=========================== %s ===================", name)
-        emblog.info("prompt ids: %s", prompt_ids)
+        embinfo("=========================== %s ===================", name)
+        embinfo("prompt ids: %s", prompt_ids)
         self.embedding_dim = embedding_dim
         self.id_offset = id_offset
         self.embedding = torch.nn.Embedding(length,embedding_dim)
@@ -312,7 +355,7 @@ class PromptEncoder(torch.nn.Module):
                 for _id,emb in init_embs.items():
                     if _id < len(self.embedding.weight):
                         self.embedding.weight[_id] = emb
-                        emblog.info("%s : %s", _id, emb)
+                        embinfo("%s : %s", _id, emb)
 
     def isin(self, ar1, ar2):
         return (ar1[..., None] == ar2).any(-1)
@@ -330,30 +373,30 @@ class EmbeddingPromptEncoder(PromptEncoder):
         super().__init__(name, length,embedding_dim,id_offset, init_embs, prompt_ids)
     
     def forward(self,prompt_token_ids,pids=None):
-        emblog.info("=========================== Forward ===================")
-        emblog.info("=========================== %s ===================", self.name)
-        emblog.info("Before prompt token ids: %s", prompt_token_ids)
-        #emblog.info("id offset: %s", self.id_offset)
-        #emblog.info("id length: %s", self.length)
+        embinfo("=========================== Forward ===================")
+        embinfo("=========================== %s ===================", self.name)
+        embinfo("Before prompt token ids: %s", prompt_token_ids)
+        #embinfo("id offset: %s", self.id_offset)
+        #embinfo("id length: %s", self.length)
         if self.id_offset > 0:
             prompt_token_ids = prompt_token_ids - self.id_offset
         else:
             prompt_token_ids = (prompt_token_ids.view(-1,1) == self.input_ids).int().argmax(dim=1)
-        emblog.info("self input ids: %s", self.input_ids)
-        emblog.info("After prompt token ids: %s", prompt_token_ids)
-        emblog.info(self.embedding.weight)
+        embinfo("self input ids: %s", self.input_ids)
+        embinfo("After prompt token ids: %s", prompt_token_ids)
+        embinfo(self.embedding.weight)
         ret_embs = self.embedding(prompt_token_ids)
-        emblog.info("ret embs %s", ret_embs)
-        emblog.info("=========================== Forward end ===================")
+        embinfo("ret embs %s", ret_embs)
+        embinfo("=========================== Forward end ===================")
         return ret_embs
 
     def dump_embedding(self, weight):
-        wlog.info("Dump embeddings")
-        emblog.info("=========================== %s ===================", self.name)
-        emblog.info("input weights: %s", weight)
+        winfo("Dump embeddings")
+        embinfo("=========================== %s ===================", self.name)
+        embinfo("input weights: %s", weight)
         detached_embeddings = self.embedding.weight.detach()
-        emblog.info("Dump embeddings: %s", detached_embeddings)
-        emblog.info("on this ids: %s", self.prompt_ids)
+        embinfo("Dump embeddings: %s", detached_embeddings)
+        embinfo("on this ids: %s", self.prompt_ids)
         weight[self.prompt_ids,:]=detached_embeddings
 
 class MLPPromptEncoder(PromptEncoder):
@@ -376,33 +419,33 @@ class MLPPromptEncoder(PromptEncoder):
             )
     
     def forward(self,prompt_token_ids,pids=None):
-        emblog.info("=========================== Forward ===================")
-        emblog.info("=========================== %s ===================", self.name)
-        emblog.info("Before prompt token ids: %s", prompt_token_ids)
-        #emblog.info("id offset: %s", self.id_offset)
-        #emblog.info("id length: %s", self.length)
+        embinfo("=========================== Forward ===================")
+        embinfo("=========================== %s ===================", self.name)
+        embinfo("Before prompt token ids: %s", prompt_token_ids)
+        #embinfo("id offset: %s", self.id_offset)
+        #embinfo("id length: %s", self.length)
         if self.id_offset > 0:
             prompt_token_ids = prompt_token_ids - self.id_offset
         else:
             prompt_token_ids = (prompt_token_ids.view(-1,1) == self.input_ids).int().argmax(dim=1)
-        emblog.info("self input ids: %s", self.input_ids)
-        emblog.info("After prompt token ids: %s", prompt_token_ids)
-        emblog.info(self.embedding.weight)
+        embinfo("self input ids: %s", self.input_ids)
+        embinfo("After prompt token ids: %s", prompt_token_ids)
+        embinfo(self.embedding.weight)
         embs = self.embedding(prompt_token_ids)
         ret_embs = self.mlp(embs)
-        emblog.info("ret embs %s", ret_embs)
-        emblog.info("=========================== Forward end ===================")
+        embinfo("ret embs %s", ret_embs)
+        embinfo("=========================== Forward end ===================")
         return ret_embs
 
     def dump_embedding(self, weight):
-        wlog.info("Dump embeddings")
-        emblog.info("=========================== %s ===================", self.name)
+        winfo("Dump embeddings")
+        embinfo("=========================== %s ===================", self.name)
         with torch.no_grad():
             embs = self.forward(self.input_ids)
-        emblog.info("input weights: %s", weight)
+        embinfo("input weights: %s", weight)
         detached_embeddings = embs.detach()
-        emblog.info("Dump embeddings: %s", detached_embeddings)
-        emblog.info("on this ids: %s", self.prompt_ids)
+        embinfo("Dump embeddings: %s", detached_embeddings)
+        embinfo("on this ids: %s", self.prompt_ids)
         weight[self.prompt_ids,:]=detached_embeddings
 
 class LSTMEmbeddingPromptEncoder(PromptEncoder):
@@ -436,21 +479,21 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
 
  #### llllllf
     def forward(self,prompt_token_ids,pids=None):
-        emblog.info("=========================== Forward begin ===================")
-        emblog.info("=========================== %s ===================", self.name)
-        emblog.info("before prompt token ids:{}".format(prompt_token_ids))
-        emblog.info("self input ids: %s", self.input_ids)
-        emblog.info("NETTTTT inps:{}".format(self.net_inps))
+        embinfo("=========================== Forward begin ===================")
+        embinfo("=========================== %s ===================", self.name)
+        embinfo("before prompt token ids:{}".format(prompt_token_ids))
+        embinfo("self input ids: %s", self.input_ids)
+        embinfo("NETTTTT inps:{}".format(self.net_inps))
         # find zero based ids 
         net_inputs = self.net_inps
         if self.id_offset > 0:
-            emblog.info("------------------- case id offset > 0 ----------------")
+            embinfo("------------------- case id offset > 0 ----------------")
             net_inputs = self.input_ids - self.id_offset
             #index_list = [((net_inputs == x).nonzero(as_tuple=True)[0]) for x in prompt_token_ids_2]
         index_list = (prompt_token_ids.view(-1,1) == self.input_ids).int().argmax(dim=1)
-        emblog.info("after prompt token ids:  %s", prompt_token_ids)
-        emblog.info("after net inputs:  %s", net_inputs)
-        emblog.info("index list:  %s", index_list)
+        embinfo("after prompt token ids:  %s", prompt_token_ids)
+        embinfo("after net inputs:  %s", net_inputs)
+        embinfo("index list:  %s", index_list)
         # create embedding vectors for input ids
         embeds = self.embedding(net_inputs)
         # do forward calculations
@@ -461,37 +504,37 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
             tlog.info("lstm embeds: %s",embeds)
 
         x = self.lstm(embeds.unsqueeze(0))
-        #emblog.info("XXXXXXXXXXXXXXXXX: %s",x)
-        #emblog.info("XXXXXXXXXXXXXXXXX[0]: %s",x[0])
-        #emblog.info("XXXXXXXXXXXXXXXXX size: %s",x[0].size())
-        emblog.info("lstml embeds: %s",embeds)
+        #embinfo("XXXXXXXXXXXXXXXXX: %s",x)
+        #embinfo("XXXXXXXXXXXXXXXXX[0]: %s",x[0])
+        #embinfo("XXXXXXXXXXXXXXXXX size: %s",x[0].size())
+        embinfo("lstml embeds: %s",embeds)
 
         running_weight = self.mlp(x[0]).squeeze(0)
         if self.counter < 5:
-            emblog.info("--------------------")
-            emblog.info("running weights: %s",running_weight)
-            emblog.info("running weights size: %s",running_weight.size())
+            embinfo("--------------------")
+            embinfo("running weights: %s",running_weight)
+            embinfo("running weights size: %s",running_weight.size())
             self.counter += 1
 
         # return weights for prompt_token_ids 
         ret_embeds = F.embedding(index_list,running_weight)
-        emblog.info("ret embeds size %s", ret_embeds.size())
-        emblog.info("ret embeds %s", ret_embeds)
-        emblog.info("=========================== Forward end ===================")
+        embinfo("ret embeds size %s", ret_embeds.size())
+        embinfo("ret embeds %s", ret_embeds)
+        embinfo("=========================== Forward end ===================")
         return ret_embeds
     def dump_embedding(self, weight):
         # get embedding weights as the output of forward pass
-        emblog.info("%%%%%%%%%%%%%%%%%%%%%%%%%% dump embeddings start %%%%%%%%%%%%%%%%")
-        emblog.info("=========================== %s ===================", self.name)
-        emblog.info("Dump embeddings: %s", weight)
-        emblog.info("Input ids: %s", self.input_ids)
+        embinfo("%%%%%%%%%%%%%%%%%%%%%%%%%% dump embeddings start %%%%%%%%%%%%%%%%")
+        embinfo("=========================== %s ===================", self.name)
+        embinfo("Dump embeddings: %s", weight)
+        embinfo("Input ids: %s", self.input_ids)
         with torch.no_grad():
             embeddings = self.forward(self.input_ids)
         cur_embeds = weight[self.prompt_ids,:].detach()
-        emblog.info("cur embeddings: %s", cur_embeds)
+        embinfo("cur embeddings: %s", cur_embeds)
         new_embeds = embeddings.detach()
         weight[self.prompt_ids,:]=new_embeds 
-        emblog.info("%%%%%%%%%%%%%%%%%%%%%%%%%% dump embeddings end %%%%%%%%%%%%%%%%%%")
+        embinfo("%%%%%%%%%%%%%%%%%%%%%%%%%% dump embeddings end %%%%%%%%%%%%%%%%%%")
 
 
 

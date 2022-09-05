@@ -1,4 +1,5 @@
 from pathlib import Path
+
 import math
 from termcolor import colored
 from transformers import AddedToken 
@@ -29,6 +30,7 @@ pad_token = {"pad_token": "<|PAD|>"}
 sep_token = {"sep_token": sep}
 nli_map = ['contradiction', 'entailment', 'neutral']
 rel_maps = {
+    "cb":"<cb>",
     "oEffect":"<oEffect>",
     "oReact":"<oReact>",
     "oWant":"<oWant>",
@@ -56,6 +58,29 @@ rel_maps = {
 all_rels = [key for key,val in rel_maps.items()] 
 x_rels = [key for key,val in rel_maps.items()]
 rel_nat_maps = {
+    "cb":{ 
+        1:"{event1}? {ph}. {event2}",
+        2:"{event1}? {ph}. {event2}",
+        "rel_qtemp": "{event2}. {cibi_4} {rel_3} {event1}? ",
+        "rel_anstemp":"{rel_1} {resp}",
+        3:"sentence1: {event1}. sentence2: {event2}. The relation is {ph}.",
+        "tokens":"<state> <other> <after>",
+        "nat-tokens":"the entailment is",
+        "fa":"رابطه میان دو جمله",
+        },
+    "xAttr":{ 
+        1:"{event}, So PersonX is seen as {ph}.",
+        2:"{event}, So PersonX is seen as a {ph} person.",
+        3:"{event}, PersonX is seen as {ph}.",
+        4:"PersonX is seen as {ph} because {event}",
+        "rel_qtemp": "{event}. {rel_5} PersonX is seen as {ph}",
+        "rel_anstemp":"{ph} {resp} {end}",
+        "fa":"مردم فکر می کنند PersonX ",
+        "tokens":"<state> <agent> <static>",
+        "n-tokens":"event {event}, agent state static is {ph}",
+        "nat-tokens":"always, the state of the person is",
+        "desc":"the person's attributes"
+    },
     "AtLocation":{ 
         1:"{event} is located in {ph}.",
         2:"{event} is found on {ph}",
@@ -212,17 +237,6 @@ rel_nat_maps = {
         "nat-tokens":"then, the effect on others ",
         "desc":"the effect of the person on others"
     },
-    "xAttr":{ 
-        1:"{event}, So PersonX is seen as {ph}.",
-        2:"{event}, So PersonX is seen as a {ph} person.",
-        3:"{event}, PersonX is seen as {ph}.",
-        4:"PersonX is seen as {ph} because {event}",
-        "fa":"مردم فکر می کنند PersonX ",
-        "tokens":"<state> <agent> <static>",
-        "n-tokens":"event {event}, agent state static is {ph}",
-        "nat-tokens":"always, the state of the person is",
-        "desc":"the person's attributes"
-    },
     "xWant":{ 
         1:"After {event}, PersonX would want {ph}. ",
         2:"PersonX wants {ph} after {event}",
@@ -295,7 +309,7 @@ targets = ["target_text"] #, "target_text_fa", "pred_text1", "all_preds", "pred_
 inputs = ["input_text"] #, "input_text_fa", "natural_input_text", "natural_input_text_fa"]
 
 placeholder_token = "<extra_id_0>"
-end_token = "" #SPECIAL_TOKENS['eos_token']  #"</s>"
+end_token = SPECIAL_TOKENS['eos_token']  #"</s>"
 # %%
 relation_prompt_lengths = {"com":[3]}
 
@@ -304,6 +318,13 @@ for key, val in rel_nat_maps.items():
 
 def get_prompt_token_fn(id_offset):
     return lambda x: (x>=id_offset) #&(x<id_offset+length)
+
+
+class dotdict(dict):
+    """dot.notation access to dictionary attributes"""
+    __getattr__ = dict.get
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
 
 encoder_relation_mappings = {}
 decoder_relation_mappings = {}
@@ -356,8 +377,15 @@ def extend_tokenizer(tokenizer, prompt_tokens = [], model_id=""):
         mlog.info("No new token was added")
 
 def fill_sample(mt, rel):
-    qtemp, anstemp, ex_qtemp, ex_anstemp, context = create_templates(mt,
-            gen_pos="end")
+    mbp("")
+    #qtemp, anstemp, ex_qtemp, ex_anstemp, context = create_templates(mt,
+    #        gen_pos="end")
+    #qtemp = qtemp[0]
+    qtemp = "{rel_i} {rel_natural}"
+    anstemp = "{ph} {resp} {end}"
+    ex_qtemp = ""
+    ex_anstemp = ""
+    context = ""
     mask =1
     context_df = None
     d = {"prefix":rel}
@@ -366,7 +394,6 @@ def fill_sample(mt, rel):
     input_lang = "en"
     target_lang = "en"
     gen_token = "gen_en"
-    qtemp = qtemp[0]
     _qtemp = fill_consts(qtemp, ex_qtemp, context,rel, d, context_df, mask=mask,method = mt)
     _anstemp = fill_consts(anstemp, ex_anstemp, context,rel, d, context_df, mask=mask,method = mt)
     _query = fill_vars(_qtemp, rel, event, resp, gen_token,
@@ -410,7 +437,7 @@ def create_encoder(name, model, tokenizer, prompt_tokens, encoder_type="lstm",
     mlog.info("** rel tokens : %s", rel_tokens)
     cur_list = tokenizer.additional_special_tokens
     my_specials = [x for x in cur_list if not "<extra_id"  in x]
-    mlog.info("** cur tokens : %s", my_specials)
+    #mlog.info("** cur tokens : %s", my_specials)
 
 
     enc_plen =len(rel_tokens) 
@@ -489,23 +516,38 @@ def fill_const_for_rel(template, row):
         val = str(value)
         text = text.replace("{" + key + "}", val)
     return text
+
 common_tokens = []
-def fill_prompt(text, rel, place_holder, counter = 0, lang=""):
+def fill_prompt_regex(text, regex):
+    m = re.search(regex, text)
+    while m:
+        rel = m.groups()[0]
+        plen = m.groups()[1]
+        num_holder = "_" + plen
+        place_holder = "{" + rel + "_" + plen + "}"
+        plen = [int(plen)]
+        text = fill_prompt(text, rel, place_holder, plen=plen, num_holder=num_holder)
+        m = re.search(regex, text)
+    return text
+
+def fill_prompt(text, rel, place_holder, counter = 0, lang="", plen = 0, num_holder="_i"):
     pi = 0
-    plen = relation_prompt_lengths[rel]
+    if plen==0 and rel in relation_prompt_lengths:
+        plen = relation_prompt_lengths[rel]
     _pholder = place_holder
+   
     place_holder = place_holder.replace("{", "<")  
     place_holder = place_holder.replace("}", ">")  
     place_holder = place_holder.replace("rel", rel)  
     place_holder = place_holder.replace("lang", lang)  
     #dlog.info("text: %s", text)
     while _pholder in text:
-        if "_i" in _pholder:
+        if num_holder in _pholder:
             enc_plen = plen[pi] if pi < len(plen) else plen[-1] 
             prompt = ""
             for i in range(counter, counter + enc_plen):
                 token = place_holder
-                token = token.replace("_i", "_" + str(i))  
+                token = token.replace(num_holder, "_" + str(i))  
                 prompt += " " + token
         elif _pholder == "{tokens}": 
             prompt = rel_nat_maps[rel]["tokens"]
@@ -534,6 +576,12 @@ def fill_prompt(text, rel, place_holder, counter = 0, lang=""):
 
 def fill_consts(template, ex_temp, context,rel, row, rows=None, mask=-1, method="", someone=False):
     #dlog.info("fill consts, input text: %s", template)
+    if template == "rel_qtemp" and "rel_qtemp" in rel_nat_maps[rel]:
+        template = rel_nat_maps[rel]["rel_qtemp"]        
+
+    if template == "rel_anstemp" and "rel_anstemp" in rel_nat_maps[rel]:
+        template = rel_nat_maps[rel]["rel_anstemp"]        
+
     text = fill_const_for_rel(template, row)
     #dlog.info("fill consts, input text: %s", text)
     plen = relation_prompt_lengths[rel]
@@ -615,6 +663,7 @@ def fill_consts(template, ex_temp, context,rel, row, rows=None, mask=-1, method=
         counter += enc_plen 
         pi += 1
     text = fill_prompt(text, rel, "{rel_i}")
+    text = fill_prompt_regex(text,"{([a-zA-Z]+)_(\d+)}")
     text = fill_prompt(text, "com", "{com_i}")
     text = fill_prompt(text, rel, "{tokens}")
     text = fill_prompt(text, rel, "{tokens-rand}")
@@ -719,6 +768,13 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
        ex_anstemp = ""
        ctx = ["{" + x + "}" for x in all_rels]
        context = " ".join(ctx)
+       anstemp = "{resp}"
+       if "custom" in method:
+           qtemp = "rel_qtemp"
+           anstemp = "rel_anstemp"
+       if "unsup" in method:
+           anstemp = "{ph} {resp}"
+
        if method == "bart":
            qtemp = "{event} {rel} [GEN]"
            anstemp = "{resp}"
@@ -795,6 +851,9 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
            anstemp = "{ph} {resp} {end}"
        elif method == "unsup-wrap-nat":
            qtemp = "{rel_i} {rel_natural}"
+           anstemp = "{ph} {resp} {end}"
+       elif method == "unsup-wrap-nat-end":
+           qtemp = "{rel_natural} {rel_i}"
            anstemp = "{ph} {resp} {end}"
        elif method == "unsup-wrap-nat-mid":
            qtemp = "{event} {rel_i} {rel_natural} {rel_i} {ph}" 
@@ -973,7 +1032,7 @@ def create_templates(method, gen_pos="end", prompt_pos="end"):
        elif method == "unsup-wrap-3":
            qtemp = "{rel_i} {gen_start} {event} {rel_i} {gen_end} {ph}"
            anstemp = "{ph} {dec_token} {resp} {end}"
-       else:
+       elif not "custom" in method:
            raise ValueError("not supprted method: " + method)
        
        if not type(qtemp) == list:
@@ -994,6 +1053,10 @@ def fill_vars(template, rel, event, resp, gen_token= "gen_en",  inp_lang="en", r
     if type(temp_num) == str and temp_num.isnumeric():
         temp_num = int(temp_num)
     assert temp_num in rel_nat_maps[rel], rel + " for " + str(temp_num)
+    event1, event2= "",""
+    if "{@@@}" in event:
+        event1, event2 = event.split("{@@@}")
+        event = event.replace("{@@@}"," ")
     rel_natural = rel_nat_maps[rel][temp_num]        
     rel_natural_tokens = rel_nat_maps[rel]["nat-tokens"]        
     rel_natural_pure = rel_natural.replace("{ph}", "")
@@ -1003,15 +1066,19 @@ def fill_vars(template, rel, event, resp, gen_token= "gen_en",  inp_lang="en", r
         rel_n += "<extra_id_" + str(i) + "> "
     rel_nat_n = rel_natural.replace("{ph}", rel_n)
     rel_natural = rel_natural.replace("{ph}", placeholder_token)
-    
+
     rep1  = {
             "{rel_natural}":rel_natural,
             "{rel_natural_pure}":rel_natural_pure,
             "{rel_nat_n}":rel_nat_n,
             "{nat_toekns}":rel_natural_tokens,
             "{gen}":gen_token}
-    rep2  = {"{event}":event, 
-            "{resp}":resp}
+    rep2  = {
+            "{event}":event, 
+            "{event1}":event1, 
+            "{event2}":event2, 
+            "{resp}":resp
+            }
     rep1 = dict((re.escape(k), v) for k, v in rep1.items()) 
     rep2 = dict((re.escape(k), v) for k, v in rep2.items()) 
     pattern1 = re.compile("|".join(rep1.keys()))
@@ -1368,6 +1435,7 @@ class MyDataset(torch.utils.data.Dataset):
 
         __resp = response.replace(placeholder_token,"")
         _query = _query.strip()
+        #mbp(_query)
         _q_len = len(_query.split(" "))
         sent = _query.replace(placeholder_token, __resp.strip())
         sent_split = sent.split(" ")
@@ -1428,8 +1496,8 @@ class MyDataset(torch.utils.data.Dataset):
         #    self.data_split[rel][lang].append({query:[response]})
         #else:
         #    self.data_split[rel][lang][query].append(response)
-        # return {"event":_query, "resp":response, "rel":rel, "index":index, "rep":rep}
-        return (_query, event, response, rel, index, rep)
+        return {"query":_query, "event":event, "resp":response, "rel":rel, "index":index, "rep":rep}
+        #return (_query, event, response, rel, index, rep)
 
 
     def fill_all_data(self, iter_start, iter_end, show_progress=True):

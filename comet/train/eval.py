@@ -7,6 +7,7 @@ from nltk.tokenize import word_tokenize
 from nltk.translate.bleu_score import SmoothingFunction, sentence_bleu
 from sentence_transformers import SentenceTransformer, util
 from sentence_transformers import CrossEncoder
+from sklearn.metrics import f1_score
 from rouge import Rouge
 #%% Aggregate instances of queries and corresponding responses
 # (str)split_name -> (dict) query -> (list) response 
@@ -69,6 +70,7 @@ def generate(model, tokenizer, batch, gen_token = "", gen_param = "greedy", at_m
     #verb = get_verb(query)
     #vlog.info("Ignoring verb %s", verb)
     bad_words_ids = None
+    #extra_id_0 = tokenizer.convert_tokens_to_ids(["<extra_id_0>"])[0]
     #if verb:
     #    bad_words_ids = tokenizer(verb).input_ids
     if "@" in gen_param:
@@ -93,9 +95,9 @@ def generate(model, tokenizer, batch, gen_token = "", gen_param = "greedy", at_m
             "repetition_penalty":5.5,
             "bad_words_ids": bad_words_ids
         }
-    batch.to(device)
-    if "labels" in batch:
-        gen_kwargs["labels"] = batch["labels"]
+    #batch.to(device)
+    #if "labels" in batch:
+    #    gen_kwargs["labels"] = batch["labels"]
     if "description_input_ids" in batch:
         gen_kwargs["description_input_ids"] = batch["description_input_ids"]
     if "description_attention_mask" in batch:
@@ -107,24 +109,27 @@ def generate(model, tokenizer, batch, gen_token = "", gen_param = "greedy", at_m
     if "task_ids" in batch:
         gen_kwargs["task_ids"] = batch["task_ids"]
 
-    #input_batch = {}
-    #input_batch["input_ids"] = batch["input_ids"]
-    #input_batch["attention_mask"] = batch["attention_mask"]
-    #input_ids, attention_mask = trim_batch(**input_batch, pad_token_id=tokenizer.pad_token_id)
+    mbp("")
+    input_batch = {}
+    input_batch["input_ids"] = batch["input_ids"]
+    input_batch["attention_mask"] = batch["attention_mask"]
+    input_ids, attention_mask = trim_batch(**input_batch, pad_token_id=tokenizer.pad_token_id)
     decs = []
+    input_ids = input_ids.to(device)
+    attention_mask = attention_mask.to(device)
     if False: #gen_token != "":
         gen_token_id = tokenizer.convert_tokens_to_ids(gen_token)
         hyps = model.generate(
-                batch["input_ids"],
-                attention_mask=batch["attention_mask"],
+                input_ids,
+                attention_mask=attention_mask,
                 **gen_kwargs,
                 decoder_start_token_id=gen_token_id)
         hyps = tokenizer.batch_decode(hyps,skip_special_tokens=False)
     else:
         #breakpoint()
         hyps = model.generate(
-                batch["input_ids"],
-                attention_mask=batch["attention_mask"],
+                input_ids,
+                attention_mask=attention_mask,
                 **gen_kwargs,
                 )
         hyps = tokenizer.batch_decode(hyps,skip_special_tokens=skip_special == "True")
@@ -219,6 +224,7 @@ def chunks(lst, n):
 
 import debugpy
 # vvvvvvvvvvvvvvv
+
 def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="greedy", scorers="rouge", batch_size="20@5", model = None, tokenizer = None, preds_file = "", set_name = "test", rewrite_info = False):  
     if rewrite_info:
         save_path = os.path.join(save_path, "full_results.tsv")
@@ -284,7 +290,6 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
         dl_iter = iter(dataloader)
     iid  = 0
     old_query = ""
-    #breakpoint()
     for batch_list in batches: 
         if exit_loop:
             break
@@ -293,7 +298,7 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
                 queries = [x[0] for x in batch_list]
                 hyps = batch_generate(model, tokenizer, queries, batch_size = gen_bs, gen_param=gen_param)
             else:
-                batch = next(dl_iter)
+                batch,_ = next(dl_iter)
                 if type(batch) == list:
                     batch = batch[0]
                 hyps = generate(model, tokenizer, batch, gen_param=gen_param)
@@ -302,9 +307,17 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
             hyps = lines[l_count: l_count + bs]
             l_count += bs 
         pbar.update(bs)
-        for (query, inp, tail, rel, qid, repid), top_hyp in zip(batch_list, hyps):
+        for b, top_hyp in zip(batch_list, hyps):
+            query = b["query"]
+            inp = b["event"]
+            tail = b["resp"]
+            rel = b["rel"]
+            qid = b["index"]
+            repid = b["rep"]
             mlog.info("\n%s/%s) query: %s", step, len(test_set), query)
             mlog.info("\nhyp: %s",top_hyp)
+            mlog.info("\ntail: %s",tail)
+            mbp()
             data = {}
             if query != old_query:
                 old_query = query
@@ -331,8 +344,9 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
             data["langs"] = lang
             tail = re.sub(r'<extra_.*?>','',tail)
             tail = tail.strip()
-            if test_set.orig_df is None:
-                data["target_text"] = tail
+            data["target_text"] = tail
+            #if test_set.orig_df is None:
+            #    data["target_text"] = tail
             input_text = re.sub(r'<.*?>','##',query)
             input_text = input_text.replace("\n", "")
             #if blank:
@@ -580,12 +594,47 @@ def do_score(df, scorers, save_path, reval=False):
     if not Path(save_path).is_file():
         save_path = os.path.join(save_path, "full_results.tsv")
     df.to_csv(save_path, index=False, sep="\t")
-    return df
     
+    for metric in [mean_rouge, mean_bert, mean_match, mean_bleu]:
+        s =0 
+        ii = 0
+        jj = 0
+        for key,val in metric.items():
+            metric[key] = str(val) + "--" + str(counter[key])
+            s += float(val)
+            ii += 1
+            jj += counter[key]
+        metric["AVG"] = "{:.2f}--{}".format(s/ii, jj)
 
+    mean_bert_str = json.dumps(mean_bert, indent=2)
+    mean_rouge_str = json.dumps(mean_rouge, indent=2)
+    mean_bleu_str = json.dumps(mean_bleu, indent=2)
+    mean_match_str = json.dumps(mean_match, indent=2)
+    mlog.info("-----------------------------------------------------")
+    pbar.close()
+    pred_counts = df['pred_text1'].unique()
+    mlog.info("Pred counts")
+    vlog.info("Pred counts")
+    if len(pred_counts) < 100:
+        for  r in pred_counts:
+            mlog.info(r)
+            vlog.info(r)
 
-# %%%%%%%%%%%%%%%%%% old savings
+    df_mean_rouge = df["rouge_score"].mean()
+    for logger in [mlog, vlog, clog]:
+        logger.info("Len data frame: {}".format(len(df)))
+        logger.info("Rouge:{} ".format(mean_rouge_str)) 
+        logger.info("DF mean Rouge Score: {}".format(df_mean_rouge))
+        if "bert" in scorers:
+            logger.info("BERT:{} ".format(mean_bert_str)) 
+            logger.info("DF mean Bert Score: {}".format(df["bert_score"].mean()))
+        #logger.info("nli_counter: {}".format(nli_counter))
+        #logger.info("hyp_counter: {}".format(hyp_counter))
+        logger.info("Distinct preds:{}".format(len(pred_counts)))
 
+    return df
+
+def write_results(exp_info, save_path, df): 
     _info = "_".join([str(x) for x in list(exp_info.values())])
     #metric_list = ["rouge", "meteor", "bertscore"]
     #summary = calc_metrics(all_predictions, all_golds, metric_list)
@@ -624,49 +673,6 @@ def do_score(df, scorers, save_path, reval=False):
             for ans in answers.split("<br />"):
                 mlog.info("{:<60}:".format(ans))
 
-
-
-    for metric in [mean_rouge, mean_bert, mean_match, mean_bleu]:
-        s =0 
-        ii = 0
-        jj = 0
-        for key,val in metric.items():
-            metric[key] = str(val) + "--" + str(counter[key])
-            s += float(val)
-            ii += 1
-            jj += counter[key]
-        metric["AVG"] = "{:.2f}--{}".format(s/ii, jj)
-
-    mean_bert_str = json.dumps(mean_bert, indent=2)
-    mean_rouge_str = json.dumps(mean_rouge, indent=2)
-    mean_bleu_str = json.dumps(mean_bleu, indent=2)
-    mean_match_str = json.dumps(mean_match, indent=2)
-    with open(out, "a") as f: 
-        print("{:<40}:".format(mean_rouge_str), file = f)
-        print("{:<40}:".format(mean_bert_str), file = f)
-        print("{:<40}:".format(mean_bleu_str), file = f)
-        print("{:<40}:".format(mean_match_str), file = f)
-    mlog.info("-----------------------------------------------------")
-    pbar.close()
-    pred_counts = df['pred_text1'].unique()
-    mlog.info("Pred counts")
-    vlog.info("Pred counts")
-    if len(pred_counts) < 100:
-        for  r in pred_counts:
-            mlog.info(r)
-            vlog.info(r)
-
-    df_mean_rouge = df["rouge_score"].mean()
-    for logger in [mlog, vlog, clog]:
-        logger.info("Len data frame: {}".format(len(df)))
-        logger.info("Rouge:{} ".format(mean_rouge_str)) 
-        logger.info("DF mean Rouge Score: {}".format(df_mean_rouge))
-        if "bert" in scorers:
-            logger.info("BERT:{} ".format(mean_bert_str)) 
-            logger.info("DF mean Bert Score: {}".format(df["bert_score"].mean()))
-        #logger.info("nli_counter: {}".format(nli_counter))
-        #logger.info("hyp_counter: {}".format(hyp_counter))
-        logger.info("Distinct preds:{}".format(len(pred_counts)))
 
 
 def bert_score2(metric, preds, golds):
@@ -709,6 +715,34 @@ def calc_metrics(preds, golds, metric_list):
             else:
                 summary[metric_name] = res[metric_name]
     return summary
+
+def acc_metric(tokenizer, all_preds, all_labels, save_res=False, save_path=""):
+    acc = sum([int(p == l) for p, l in zip(all_preds, all_labels)]) / len(all_preds)
+    
+    if save_res:
+        with open(os.path.join(save_path, "{}.txt".format(acc)), "w") as f:
+            for p, l in zip(all_preds, all_labels):
+                f.write(str(p) + "\t\t" + str(l) + "\n")
+                if isinstance(p, list):
+                    f.write(tokenizer.decode(p) + "\t\t" + tokenizer.decode(l) + "\n")
+                f.write("\n")
+
+    return acc
+
+
+def acc_f1_metric(tokenizer, all_preds, all_labels, save_res=False, save_path=""):
+    f1_macro = f1_score(all_labels, all_preds, average="macro")
+    acc = sum([int(p == l) for p, l in zip(all_preds, all_labels)]) / len(all_preds)
+
+    if save_res:
+        with open(os.path.join(save_path, "{}.txt".format(f1_macro)), "w") as f:
+            for p, l in zip(all_preds, all_labels):
+                f.write(str(p) + "\t\t" + str(l) + "\n")
+                if isinstance(p, list):
+                    f.write(tokenizer.decode(p) + "\t\t" + tokenizer.decode(l) + "\n")
+                f.write("\n")
+
+    return [acc, f1_macro]
 
 
 if __name__ == "__main__":

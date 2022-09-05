@@ -14,7 +14,7 @@ if not colab:
     logPath = os.path.join(home, "logs")
     resPath = os.path.join(home, "results") 
     pretPath = os.path.join(home, "pret") 
-    dataPath = os.path.join(home, "atomic") 
+    dataPath = os.path.join(home, "mydata") 
     confPath = os.path.join(home, "base_confs") 
 else:
     home = "/content/drive/MyDrive/pouramini"
@@ -29,8 +29,10 @@ Path(logPath).mkdir(exist_ok=True, parents=True)
 
 logFilename = os.path.join(logPath, "all.log") #app_path + '/log_file.log'
 FORMAT = logging.Formatter("[%(filename)s:%(lineno)s - %(funcName)10s() ] %(message)s")
+FORMAT2 = logging.Formatter("%(message)s")
 logging.basicConfig(filename=logFilename)
 consoleHandler = logging.StreamHandler()
+consoleHandler.setFormatter(FORMAT2)
 mlog = logging.getLogger("comet.main")
 mlog.setLevel(logging.INFO)
 mlog.addHandler(consoleHandler)
@@ -39,6 +41,11 @@ dlog = logging.getLogger("comet.data")
 vlog = logging.getLogger("comet.eval")
 tlog = logging.getLogger("comet.train")
 timelog = logging.getLogger("comet.time")
+
+def mbp(m="bp"):
+    if m.strip(): 
+        mlog.info(m)
+        breakpoint()
 
 
 mlog.info(now)
