@@ -42,6 +42,11 @@ vlog = logging.getLogger("comet.eval")
 tlog = logging.getLogger("comet.train")
 timelog = logging.getLogger("comet.time")
 
+def mbp(m="bp"):
+    if m.strip(): 
+        mlog.info(m)
+        breakpoint()
+
 
 mlog.info(now)
 

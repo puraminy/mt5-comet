@@ -49,9 +49,9 @@ class MyCollator(object):
         model_data = {
             "input_ids": torch.ones(bs, max_enc_len, dtype=torch.long) * pad_id,
             "attention_mask": torch.zeros(bs, max_enc_len),
-            #"decoder_attention_mask": torch.zeros(bs, max_dec_len),
+            "decoder_attention_mask": torch.zeros(bs, max_dec_len),
             #"cross_attention_mask": torch.zeros(bs, 1, max_dec_len, max_enc_len),
-            #"decoder_input_ids": torch.ones(bs, max_dec_len, dtype=torch.long) * pad_id,
+            "decoder_input_ids": torch.ones(bs, max_dec_len, dtype=torch.long) * pad_id,
             "labels": torch.ones(bs, max_dec_len, dtype=torch.long) * -100,
         }
         mbp("")
@@ -67,9 +67,9 @@ class MyCollator(object):
             dec_ids = [pad_id] + r #+ [self.tokenizer.eos_token_id]
             label = r[:-1] #+ [self.tokenizer.eos_token_id]
             model_data["input_ids"][i][:len(q)] = torch.tensor(q, dtype=torch.long)
-            #model_data["decoder_input_ids"][i][:len(dec_ids)] = torch.tensor(dec_ids, dtype=torch.long)
+            model_data["decoder_input_ids"][i][:len(dec_ids)] = torch.tensor(dec_ids, dtype=torch.long)
             model_data["attention_mask"][i][:len(q)] = 1.0
-            #model_data["decoder_attention_mask"][i][:len(dec_ids)] = 1.0 
+            model_data["decoder_attention_mask"][i][:len(dec_ids)] = 1.0 
             #model_data["cross_attention_mask"][i][0, :dec_len, :enc_len] = 1.0 
             #no_model_data["idx"][i] = samp["idx"]
             model_data["labels"][i][:len(label)] = torch.tensor(label, dtype=torch.long)
@@ -353,8 +353,14 @@ def cli():
     help="port for debugpy"
 )
 @click.option(
-    "--stop",
-    "-stop",
+    "--wrap",
+    "-wrap",
+    is_flag=True,
+    help=""
+)
+@click.option(
+    "--no_stop",
+    "-ns",
     is_flag=True,
     help=""
 )
@@ -362,8 +368,8 @@ def cli():
 #rrrrrrrrrrr
 def run(ctx, conf_path, base_conf, experiment, 
         exclude_conf, include_conf, overwrite_conf, var, 
-        save_model, addto, rem, save_data, load_data, add_prefix, 
-        only_var, sep, num_exps, one, cpu, undone, dpy, port, stop):
+        save_model, addto, rem, save_data, load_data, add_prefix, wrap, 
+        only_var, sep, num_exps, one, cpu, undone, dpy, port, no_stop):
      if dpy:
         debugpy.listen(('0.0.0.0', int(port)))
         print("Waiting for client at run...port:", port)
@@ -386,8 +392,9 @@ def run(ctx, conf_path, base_conf, experiment,
            args["config"] = ""
            args["output_name"] = "" 
            args["experiment"] = experiment 
-           if stop:
-               args["stop_on_breakpoint"] = True
+           args["stop_on_breakpoint"] = True
+           if no_stop:
+               args["stop_on_breakpoint"] = False
            if cpu:
                args["cpu"] = True
                os.environ["CUDA_VISIBLE_DEVICES"] = ""
@@ -488,6 +495,8 @@ def run(ctx, conf_path, base_conf, experiment,
                        args["overwrite"] = args["method"] + sep + rel_folder + sep + _output_name \
                            + sep + _extra 
                    args["no_save_model"] = not save_model
+                   if wrap:
+                       args["method"] += "-wrap"
                    if save_data: 
                        args["save_data"] = spath
                    if args["rel_filter"] == "multi":
@@ -830,7 +839,7 @@ def run(ctx, conf_path, base_conf, experiment,
 @click.option(
     "--cycle",
     "-c",
-    default=10,
+    default=30,
     type=int,
     help=""
 )
@@ -2015,9 +2024,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         '''Advance the iterator n-steps ahead. If n is none, consume entirely.'''
         collections.deque(itertools.islice(iterator, n), maxlen=0)
     #11111111111
-    def evaluate1(tokenizer, eval_dataset, eval_data_loader, model, device, prompt_config, mode="dev", save_res=False):
+    def evaluate1(tokenizer, eval_dataset, eval_data_loader, model, device, prompt_config, mode="dev", save_res=False, wrap =False):
         """Evaluation."""
-
         # Turn on evaluation mode which disables dropout.
         model.eval()
 
@@ -2030,6 +2038,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         all_gens = []
         all_resps = []
         all_queries = []
+        gen_model = model
+        if wrap: gen_model = model.underlying_model
         mbp("")
         with torch.no_grad():
             for model_batch, no_model_batch in eval_data_loader:
@@ -2038,6 +2048,10 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                 for k in no_model_batch:
                     if k not in  ["resp", "query"]:
                         no_model_batch[k] = no_model_batch[k].to(device)
+
+                decs = generate(gen_model, tokenizer, model_batch)
+                all_gens.extend(decs)
+
                 forw_out = forward_step(model, model_batch, no_model_batch, mode="test")
                 loss = forw_out["loss"].item() if "loss" in forw_out else 0
                 total_loss += loss
@@ -2051,8 +2065,6 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                     seq_preds.append(preds.tolist())
                 _seq_preds = list(zip(*seq_preds))
                 all_preds.extend(_seq_preds)
-                decs = generate(model, tokenizer, model_batch)
-                all_gens.extend(decs)
 
                 if "idx" in no_model_batch: 
                     gathered_idx = no_model_batch["idx"]
@@ -2119,7 +2131,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             if k not in  ["resp", "query"]:
                 no_model_batch[k] = no_model_batch[k].to(device)
 
-        #mbp("b")
+        mbp("")
         result = model(**batch)
         logits = result["logits"]
         forw_out = {
@@ -2154,6 +2166,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     mlog.info(f"============== wrap: {wrap} | prefixed: {prefix} | frozen: {frozen} {fz_parts}\n")
     mlog.info(f"============== rel_filter: {rel_filter} | method: {method} | model: {model_id} \n")
     epochs_num = int(epochs_num)
+    cycle = int(cycle)
     def train_loop(epochs_num):
         train_iter = iter(train_dataloader)
         global_step = 0
@@ -2181,11 +2194,14 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             while step < iterations-1:
                 try:
                     if do_valid and cycle > 0 and (global_step % cycle == 0 and global_step > 0): #validation
+                        _model = model
                         if wrap:
+                            _model = wrapped_model
                             with torch.no_grad():
                                 mlog.info("Updating the model weights before evaluaton...")
+                                mbp("")
                                 wrapped_model.update_model_weight()
-                        dev_loss, dev_acc = evaluate1(tokenizer, dev_dataset, dev_dataloader, model, device, prompt_config, mode="dev", save_res=True)
+                        dev_loss, dev_acc = evaluate1(tokenizer, dev_dataset, dev_dataloader, _model, device, prompt_config, mode="dev", save_res=True, wrap = wrap)
                         log_string = "dev_loss: " + str(dev_loss) + " | dev acc(mrr, f1): " + str(dev_acc) 
                         mlog.info(log_string)
                         mbp("")
@@ -2204,6 +2220,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                     model.train()
                     if wrap:
                         tlog.info("Wrap model zero grad")
+                        wrapped_model.train()
                         wrapped_model.zero_grad()
                     else:
                         optimizer.zero_grad()

@@ -19,11 +19,6 @@ import json
 from comet.train.mylogs import *
 import pickle5 as pickle
 
-def mbp(m="bp"):
-    if m.strip(): 
-        mlog.info(m)
-        breakpoint()
-
 SPECIAL_TOKENS  = { "bos_token": "<|BOS|>",
                     "eos_token": "</s>",
                     "unk_token": "<|UNK|>",
@@ -66,13 +61,26 @@ rel_nat_maps = {
     "cb":{ 
         1:"{event1}? {ph}. {event2}",
         2:"{event1}? {ph}. {event2}",
-        "rel_qtemp": "{rel_i} {event2}. {rel_i} {event1}? {ph} {resp} ",
-        "rel_anstemp":"{ph} {resp}",
+        "rel_qtemp": "{event2}. {cibi_4} {rel_3} {event1}? ",
+        "rel_anstemp":"{rel_1} {resp}",
         3:"sentence1: {event1}. sentence2: {event2}. The relation is {ph}.",
         "tokens":"<state> <other> <after>",
         "nat-tokens":"the entailment is",
         "fa":"رابطه میان دو جمله",
         },
+    "xAttr":{ 
+        1:"{event}, So PersonX is seen as {ph}.",
+        2:"{event}, So PersonX is seen as a {ph} person.",
+        3:"{event}, PersonX is seen as {ph}.",
+        4:"PersonX is seen as {ph} because {event}",
+        "rel_qtemp": "{event}. {rel_5} PersonX is seen as {ph}",
+        "rel_anstemp":"{ph} {resp} {end}",
+        "fa":"مردم فکر می کنند PersonX ",
+        "tokens":"<state> <agent> <static>",
+        "n-tokens":"event {event}, agent state static is {ph}",
+        "nat-tokens":"always, the state of the person is",
+        "desc":"the person's attributes"
+    },
     "AtLocation":{ 
         1:"{event} is located in {ph}.",
         2:"{event} is found on {ph}",
@@ -229,17 +237,6 @@ rel_nat_maps = {
         "nat-tokens":"then, the effect on others ",
         "desc":"the effect of the person on others"
     },
-    "xAttr":{ 
-        1:"{event}, So PersonX is seen as {ph}.",
-        2:"{event}, So PersonX is seen as a {ph} person.",
-        3:"{event}, PersonX is seen as {ph}.",
-        4:"PersonX is seen as {ph} because {event}",
-        "fa":"مردم فکر می کنند PersonX ",
-        "tokens":"<state> <agent> <static>",
-        "n-tokens":"event {event}, agent state static is {ph}",
-        "nat-tokens":"always, the state of the person is",
-        "desc":"the person's attributes"
-    },
     "xWant":{ 
         1:"After {event}, PersonX would want {ph}. ",
         2:"PersonX wants {ph} after {event}",
@@ -312,7 +309,7 @@ targets = ["target_text"] #, "target_text_fa", "pred_text1", "all_preds", "pred_
 inputs = ["input_text"] #, "input_text_fa", "natural_input_text", "natural_input_text_fa"]
 
 placeholder_token = "<extra_id_0>"
-end_token = "" #SPECIAL_TOKENS['eos_token']  #"</s>"
+end_token = SPECIAL_TOKENS['eos_token']  #"</s>"
 # %%
 relation_prompt_lengths = {"com":[3]}
 
@@ -519,23 +516,38 @@ def fill_const_for_rel(template, row):
         val = str(value)
         text = text.replace("{" + key + "}", val)
     return text
+
 common_tokens = []
-def fill_prompt(text, rel, place_holder, counter = 0, lang=""):
+def fill_prompt_regex(text, regex):
+    m = re.search(regex, text)
+    while m:
+        rel = m.groups()[0]
+        plen = m.groups()[1]
+        num_holder = "_" + plen
+        place_holder = "{" + rel + "_" + plen + "}"
+        plen = [int(plen)]
+        text = fill_prompt(text, rel, place_holder, plen=plen, num_holder=num_holder)
+        m = re.search(regex, text)
+    return text
+
+def fill_prompt(text, rel, place_holder, counter = 0, lang="", plen = 0, num_holder="_i"):
     pi = 0
-    plen = relation_prompt_lengths[rel]
+    if plen==0 and rel in relation_prompt_lengths:
+        plen = relation_prompt_lengths[rel]
     _pholder = place_holder
+   
     place_holder = place_holder.replace("{", "<")  
     place_holder = place_holder.replace("}", ">")  
     place_holder = place_holder.replace("rel", rel)  
     place_holder = place_holder.replace("lang", lang)  
     #dlog.info("text: %s", text)
     while _pholder in text:
-        if "_i" in _pholder:
+        if num_holder in _pholder:
             enc_plen = plen[pi] if pi < len(plen) else plen[-1] 
             prompt = ""
             for i in range(counter, counter + enc_plen):
                 token = place_holder
-                token = token.replace("_i", "_" + str(i))  
+                token = token.replace(num_holder, "_" + str(i))  
                 prompt += " " + token
         elif _pholder == "{tokens}": 
             prompt = rel_nat_maps[rel]["tokens"]
@@ -651,6 +663,7 @@ def fill_consts(template, ex_temp, context,rel, row, rows=None, mask=-1, method=
         counter += enc_plen 
         pi += 1
     text = fill_prompt(text, rel, "{rel_i}")
+    text = fill_prompt_regex(text,"{([a-zA-Z]+)_(\d+)}")
     text = fill_prompt(text, "com", "{com_i}")
     text = fill_prompt(text, rel, "{tokens}")
     text = fill_prompt(text, rel, "{tokens-rand}")
