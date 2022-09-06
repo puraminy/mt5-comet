@@ -22,7 +22,8 @@ class MyDataset(torch.utils.data.Dataset):
             save_ds_path="", repeat=1, pid=0, break_sent="", 
             sort_key="event", replace_blanks = False, 
             tokenizer=None, ph_num=3, limit_lang = False, 
-            use_dif_templates=False, group_them=[], temp_num=1, someone=False, match=""): 
+            use_dif_templates=False, group_them=[], temp_num=1, 
+            someone=False, match="", batch_size=0): 
         super(MyDataset).__init__()
         fingerprint = save_ds_path + "_" + split_name + "_"  + method + \
                 "_" + str(len(split_df)) + "_" + str(num_samples) 
@@ -51,6 +52,8 @@ class MyDataset(torch.utils.data.Dataset):
         dlog.info(f"fill data input dataset len:{len(split_df)}")
         self.natural = inp_include == "natural"
         self.split_name = split_name
+        self.rec_counter = 1
+        self.method_index = 0
         if split_name != "train":
             self.start = 0
         if self.natural and split_name != "train": 
@@ -159,6 +162,7 @@ class MyDataset(torch.utils.data.Dataset):
             repeat=1
 
         self.sampling = sampling
+        self.batch_size = batch_size
         self.limit_lang = limit_lang
         self.split_df = split_df
         self.old_input = ""
@@ -304,7 +308,8 @@ class MyDataset(torch.utils.data.Dataset):
         if "-fa" in mt and target_lang == "fa":
             resp = toPers(resp)
 
-        qtemp, anstemp, ex_qtemp, ex_anstemp, context = self.create_templates(mt, 
+        qtemp, anstemp, ex_qtemp, ex_anstemp, context, flags = self.create_templates(
+                mt, index, 
                 gen_pos="end", prompt_pos=self.prompt_pos, rel=rel)
         assert type(qtemp) == list, "qtemp must be a list"
         if self.use_dif_templates:
@@ -327,8 +332,7 @@ class MyDataset(torch.utils.data.Dataset):
         query = (index, _query)
         response = self.fill_vars(_anstemp, rel, event, resp, gen_token, 
                 input_lang, target_lang, self.ph_num, self.temp_num, self.someone)
-        has_prompt = len(encoder_prompts) > 0
-
+        mbp("")
         __resp = response.replace(placeholder_token,"")
         _query = _query.strip()
         #mbp(_query)
@@ -392,7 +396,7 @@ class MyDataset(torch.utils.data.Dataset):
         #    self.data_split[rel][lang].append({query:[response]})
         #else:
         #    self.data_split[rel][lang][query].append(response)
-        return {"query":_query, "event":event, "resp":response, "rel":rel, "index":index, "rep":rep, "has_prompt":has_prompt}
+        return {"query":_query, "event":event, "resp":response, "rel":rel, "index":self.rec_counter, "rep":rep, "flag":flags}
         #return (_query, event, response, rel, index, rep)
 
 
@@ -428,7 +432,7 @@ class MyDataset(torch.utils.data.Dataset):
                     "targ_col":targ_col, 
                     "row":d,
                     "context_df":context_df,
-                    "index": index,
+                    "index": kk,
                     "rep":0,
                     "rel":rel}
             for rr in range(self.repeat):
@@ -565,7 +569,7 @@ class MyDataset(torch.utils.data.Dataset):
                             "targ_col":targ_col, 
                             "row":d,
                             "context_df":context_df,
-                            "index": index,
+                            "index": kk,
                             "rep":0,
                             "rel":rel}
                     for rr in range(self.repeat):
@@ -585,7 +589,7 @@ class MyDataset(torch.utils.data.Dataset):
         return flat_data
 
 #tttttttttt
-    def get_template(self, method, gen_pos="end", prompt_pos="end"):
+    def get_template(self, method, index, gen_pos="end", prompt_pos="end"):
            ex_qtemp = ""
            ex_anstemp = ""
            qtemp = "{event}"
@@ -849,13 +853,21 @@ class MyDataset(torch.utils.data.Dataset):
                anstemp = "{ph} {dec_token} {resp} {end}"
            else:
                raise ValueError("not supprted method: " + method)
-           return qtemp, anstemp, ex_qtemp, ex_anstemp
+           flags = {
+                   "method":method,
+                   "wrap":"wrap" in method,
+                   "freeze":"wrap" in method,
+                   "unfreeze":False,
+                   }
+           return qtemp, anstemp, ex_qtemp, ex_anstemp, flags
            
-    def create_templates(self, method, gen_pos="end", prompt_pos="end", rel=""):
+    def create_templates(self, method, index, gen_pos="end", prompt_pos="end", rel=""):
            ctx = ["{" + x + "}" for x in all_rels]
            context = " ".join(ctx)
-           qtemp, anstemp, ex_qtemp, ex_anstemp = self.get_templates(method, 
-                    gen_pos=gen_pos, prompt_pos=prompt_pos)
+           mbp("")
+           qtemp, anstemp, ex_qtemp, ex_anstemp, flags = self.get_templates(method, 
+                    self.rec_counter, gen_pos=gen_pos, prompt_pos=prompt_pos)
+           self.rec_counter += 1
            if not type(qtemp) == list:
                qtemp = [qtemp]
            ret_q = []
@@ -868,7 +880,7 @@ class MyDataset(torch.utils.data.Dataset):
                q = fix_pos(q, gen_pos, prompt_pos)
                ret_q.append(q)
            qtemp = ret_q
-           return qtemp, anstemp, ex_qtemp, ex_anstemp, context
+           return qtemp, anstemp, ex_qtemp, ex_anstemp, context, flags
 
     def fill_consts(self, template, ex_temp, context,rel, row, rows=None, mask=-1, method="", someone=False):
         #dlog.info("fill consts, input text: %s", template)
@@ -960,6 +972,7 @@ class MyDataset(torch.utils.data.Dataset):
         assert temp_num in rel_nat_maps[rel], rel + " for " + str(temp_num)
         event1, event2= "",""
         if "{@@@}" in event:
+            #mbp("b")
             event1, event2 = event.split("{@@@}")
             event = event.replace("{@@@}"," ")
         rel_natural = rel_nat_maps[rel][temp_num]        

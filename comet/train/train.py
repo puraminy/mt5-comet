@@ -41,7 +41,7 @@ class MyCollator(object):
         self.prompt_config = None
 
 #gggggggggggggg
-    def collate(self, enc_qs, enc_resps, queries, resps):
+    def collate(self, enc_qs, enc_resps, queries, resps, flags):
         bs = len(enc_qs)
         q_len = [len(i) for i in enc_qs]
         max_enc_len = max(q_len)
@@ -62,10 +62,14 @@ class MyCollator(object):
             "labels": torch.ones(bs, max_dec_len, dtype=torch.long) * pad_id,
             "loss_mask": torch.zeros(bs, max_dec_len),
             "query":[""]*bs,
-            "resp":[""]*bs
+            "resp":[""]*bs,
+            "wrap":[False]*bs,
+            "freeze":[False]*bs,
+            "unfreeze":[False]*bs,
+            "method":[""]*bs
         }
         mbp("")
-        for i, (q, r, query, resp) in enumerate(zip(enc_qs, enc_resps, queries, resps)):
+        for i, (q, r, query, resp, flag) in enumerate(zip(enc_qs, enc_resps, queries, resps, flags)):
             dec_ids = [pad_id] + r #+ [self.tokenizer.eos_token_id]
             label = r[:-1] #+ [self.tokenizer.eos_token_id]
             model_data["input_ids"][i][:len(q)] = torch.tensor(q, dtype=torch.long)
@@ -77,6 +81,10 @@ class MyCollator(object):
             model_data["labels"][i][:len(label)] = torch.tensor(label, dtype=torch.long)
             no_model_data["labels"][i][:len(label)] = torch.tensor(label, dtype=torch.long)
             no_model_data["query"][i] = query 
+            no_model_data["wrap"][i] = flag["wrap"] 
+            no_model_data["freeze"][i] = flag["freeze"] 
+            no_model_data["unfreeze"][i] = flag["unfreeze"] 
+            no_model_data["method"][i] = flag["method"] 
             no_model_data["resp"][i] = resp
             if self.prompt_config is not None:
                 no_model_data["loss_mask"][i][self.prompt_config["dec"]["prompt_len"]:len(label)] = 1.0
@@ -97,6 +105,7 @@ class MyCollator(object):
         dec_starts = []
         enc_queries = []
         enc_responses = []
+        flags = []
         for b in batch:
             enc_query = self.tokenizer.encode(b["query"])
             queries.append(b["query"])
@@ -108,8 +117,9 @@ class MyCollator(object):
             inputs.append(b["event"].strip())
             index.append(b["index"])
             rep.append(b["rep"])
+            flags.append(b["flag"])
 
-        return self.collate(enc_queries, enc_responses, queries, responses)
+        return self.collate(enc_queries, enc_responses, queries, responses, flags)
         #queries,inputs, responses,rel,index,rep = zip(*batch)
         #mbp("b")
         no_model_batch = {}
@@ -741,11 +751,18 @@ def run(ctx, conf_path, base_conf, experiment,
     help="filter by predicted nli group"
 )
 @click.option(
+    "--pl_learning_rate",
+    "-plr",
+    default=0,
+    type=float,
+    help="prompt tuning learning rate"
+)
+@click.option(
     "--learning_rate",
     "-lr",
     default=0,
     type=float,
-    help="learning rate"
+    help="fine tuning learning rate"
 )
 @click.option(
     "--do_eval",
@@ -1294,7 +1311,7 @@ def run(ctx, conf_path, base_conf, experiment,
     is_flag=True,
     help=""
 )
-def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, wandb, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args, match, dpy, prompt_tune, prompt_config_file, load_prompt, data_name, seed, do_valid, stop_on_breakpoint):
+def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, pl_learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, wandb, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args, match, dpy, prompt_tune, prompt_config_file, load_prompt, data_name, seed, do_valid, stop_on_breakpoint):
 
     #%% some hyper-parameters
 
@@ -1398,22 +1415,23 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     validation_num_generation = 20
     learning_rate = float(learning_rate)
     lr_mt = {}
-    if not frozen and learning_rate == 0: 
+    if learning_rate == 0: 
         if opt_type == "adam": 
             learning_rate = lr_mt[method] if method in lr_mt else 3.25e-04  
         else:
             learning_rate = 1e-3
         if "gpt" in model_id:
             learning_rate = 1e-5
-    if frozen and learning_rate == 0: 
+    if pl_learning_rate == 0: 
         if encoder_type == "lstm":
-            learning_rate = 0.05  
+            pl_learning_rate = 0.05  
         elif encoder_type == "emb":
-            learning_rate = 0.1  
+            pl_learning_rate = 0.1  
         else:
-            learning_rate = 0.01  
+            pl_learning_rate = 0.01  
 
     assert learning_rate > 0, "Learning rate is zero!"
+    assert pl_learning_rate > 0, "Prompt tuning Learning rate is zero!"
     device = 'cuda' if not cpu else 'cpu'
 
     log_dir = save_path
@@ -1458,6 +1476,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
 
     mlog.info("Optimizer type %s:", opt_type)
     mlog.info("learning rate %s:", learning_rate)
+    mlog.info("pl learning rate %s:", pl_learning_rate)
     mlog.info("Output name: %s", output_name)
     ii = 1
     while not do_overwrite and Path(save_path).exists() and not model_id=="test":
@@ -1670,7 +1689,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                                 sampling, ex_type,
                                 tails_per_head, save_ds_path[split_name], _repeat, 
                                 int(pid), _break_sent, sort, _replace_blanks, 
-                                None, int(ph_num), group_them = group_them, temp_num = temp_num, someone=someone, match=_match
+                                None, int(ph_num), group_them = group_them, temp_num = temp_num, someone=someone, match=_match, batch_size=batch_size
                         )
             if save_data:
                 myds[_name].save_data(os.path.join(save_data,_name + ".tsv"), merge=True)
@@ -1694,7 +1713,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             logger = mlog
             logger.info("----------- SAMPLES -------------")
             mbp("")
-            while _sample and ii < 5:
+            while _sample and ii < 12:
                 _sample = next(samples_iter, None)
                 if _sample["rep"] > 0:
                     continue
@@ -1821,6 +1840,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                     "opt_type":opt_type,
                     "trial":trial,
                     "learning_rate":learning_rate,
+                    "pl_learning_rate":pl_learning_rate,
                     "date":extra}
     exp_info["eval"] = do_eval
     for k,v in run_args.items():
@@ -1916,34 +1936,33 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     sw = SummaryWriter(save_path, flush_secs=1)
     no_decay = ['bias', 'LayerNorm.weight']
     wrapped_model = None
-    if wrap:
-        if not load_prompt_path and Path(os.path.join(load_path, model_id, "prompt")).exists():
-            load_prompt_path = os.path.join(load_path, model_id, "prompt")
-            mlog.info("prompt path:%s ", load_prompt_path)
-        mlog.info("Wrapping the model ...")
-        model_to_wrap = model
-        if prefix:
-            model_to_wrap = model.pretrain_model
-        wrapped_model = wrap_model(model_to_wrap, tokenizer, encoder_type, load_prompt_path, from_words = from_words, merge_prompts=merge_prompts, method = method, shared_embs= shared_embs) 
+
+    if not load_prompt_path and Path(os.path.join(load_path, model_id, "prompt")).exists():
+        load_prompt_path = os.path.join(load_path, model_id, "prompt")
+        mlog.info("prompt path:%s ", load_prompt_path)
+    mlog.info("Wrapping the model ...")
+    model_to_wrap = model
+    if prefix:
+        model_to_wrap = model.pretrain_model
+
+    wrapped_model = wrap_model(model_to_wrap, tokenizer, encoder_type, load_prompt_path, from_words = from_words, merge_prompts=merge_prompts, method = method, shared_embs= shared_embs) 
     if wrapped_model:
         wrapped_model.to(device=device)
         wrapped_model.prompt_encoders.to(device=device)
         mlog.info("len tokenizer after wrapping %s", len(tokenizer))
+
+    if learning_rate > 0.0001:
+        #raise "Learning rate should be smaller"
+        pass
+    extend_tokenizer(tokenizer)
+    mlog.info("len tokenizer after extending %s", len(tokenizer))
+    if not prefix:
+        model.resize_token_embeddings(len(tokenizer))
     else:
-        wrap = False
-        if learning_rate > 0.0001:
-            #raise "Learning rate should be smaller"
-            pass
-        extend_tokenizer(tokenizer)
-        mlog.info("len tokenizer after extending %s", len(tokenizer))
-        if not prefix:
-            model.resize_token_embeddings(len(tokenizer))
-        else:
-            model.pretrain_model.resize_token_embeddings(len(tokenizer))
-        model.to(device=device)
+        model.pretrain_model.resize_token_embeddings(len(tokenizer))
+    model.to(device=device)
 
-
-    if wrap:
+    if wrapped_model:
         #model.get_input_embeddings().weight.requires_grad = False
         rgrad = [p for p in wrapped_model.parameters() if p.requires_grad]
         nrgrad = [p for p in wrapped_model.parameters() if not p.requires_grad]
@@ -1969,16 +1988,18 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         tokenizer.save_pretrained(save_path)
     def get_optimizer(model, learning_rate, wrap, opt_type):
         if wrap:
+            _lr = pl_learning_rate
             optimizer_grouped_parameters = [
                 {"params":[p for p in wrapped_model.parameters() if p.requires_grad]}
             ]
         else:
+            _lr = learning_rate
             optimizer_grouped_parameters = [
                 {'params': [p for n, p in model.named_parameters() if p.requires_grad and not any(nd in n for nd in no_decay)], 'weight_decay': weight_decay},
                 {'params': [p for n, p in model.named_parameters() if p.requires_grad and any(nd in n for nd in no_decay)], 'weight_decay': 0.0}
             ]
         if opt_type == "adam":
-            optimizer = AdamW(optimizer_grouped_parameters,lr=learning_rate,eps=1e-8)
+            optimizer = AdamW(optimizer_grouped_parameters,lr=_lr,eps=1e-8)
             scheduler = get_linear_schedule_with_warmup(optimizer,warm_up_steps,iterations)
         elif opt_type == "ada_no_lr":
             optimizer = Adafactor(optimizer_grouped_parameters, 
@@ -2059,7 +2080,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                 for k in model_batch:
                     model_batch[k] = model_batch[k].to(device)
                 for k in no_model_batch:
-                    if k not in  ["resp", "query"]:
+                    if k not in  ["resp", "query", "wrap", "freeze", "unfreeze", "method"]:
                         no_model_batch[k] = no_model_batch[k].to(device)
 
                 decs = generate(gen_model, tokenizer, model_batch)
@@ -2141,10 +2162,9 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     # ffffffffffff
     def forward_step(model, batch, no_model_batch, accumulation_tiny_steps=1, mode="train"):
         for k in no_model_batch:
-            if k not in  ["resp", "query"]:
+            if k not in  ["resp", "query", "wrap", "freeze", "unfreeze", "method"]:
                 no_model_batch[k] = no_model_batch[k].to(device)
 
-        mbp("")
         result = model(**batch)
         logits = result["logits"]
         forw_out = {
@@ -2180,12 +2200,16 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     mlog.info(f"============== rel_filter: {rel_filter} | method: {method} | model: {model_id} \n")
     epochs_num = int(epochs_num)
     cycle = int(cycle)
-    def train_loop(epochs_num):
+    def train_loop(epochs_num, wrap, optimizer, scheduler):
+        mbp("b")
         train_iter = iter(train_dataloader)
         global_step = 0
         step = 0
         best_dev_loss = 100
         best_eval_step = 0
+        is_freezed = frozen
+        freeze_it = False
+        unfreeze_it = False
         if epochs_num == 0 or (not wrap and frozen and modules_to_freeze is model):
             mlog.info("Skip training...")
         elif step <= iterations and (wrap or not frozen or modules_to_freeze is not model):
@@ -2218,18 +2242,32 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                         log_string = "dev_loss: " + str(dev_loss) + " | dev acc(mrr, f1): " + str(dev_acc) 
                         mlog.info(log_string)
                         mbp("")
-                    #if unfreez_step > 0 and step > unfreez_step and froze:
-                    #    mlog.info("unfreezing the model")
-                    #    unfreez_step = 0
-                    #    freeze(modules_to_freeze, True)
-                    #    last_lr = scheduler.get_last_lr()[0]
-                    #    optimizer, scheduler = get_optimizer(model, last_lr, wrap, opt_type)
-                    #if freez_step > 0 and step > freez_step and not frozen:
-                    #    mlog.info("freezing the model")
-                    #    freez_step = 0
-                    #    freeze(modules_to_freeze)
-                    #    last_lr = scheduler.get_last_lr()[0]
-                    #    optimizer, scheduler = get_optimizer(model, last_lr, wrap, opt_type)
+
+                    try:
+                        batch, no_model_batch = next(train_iter)
+                    except StopIteration:
+                        tlog.info("Stop Iteration occured at %s", step)
+                        train_iter = iter(train_dataloader)
+                        batch, no_model_batch = next(train_iter)
+                    batch = {k:v.to(device=device) for k,v in batch.items()}
+                    mbp("")
+                    wrap = no_model_batch["wrap"][0]
+                    freeze_it = no_model_batch["freeze"][0]
+                    unfreeze_it = no_model_batch["unfreeze"][0]
+                    if  unfreeze_it and is_freezed:
+                        mlog.info("unfreezing the model")
+                        is_freezed = False
+                        freeze(modules_to_freeze, True)
+                        last_lr = scheduler.get_last_lr()[0]
+                        optimizer, scheduler = get_optimizer(model, last_lr, wrap, opt_type)
+
+                    if freeze_it and not is_freezed:
+                        mlog.info("freezing the model")
+                        is_freezed = True
+                        freeze(modules_to_freeze)
+                        last_lr = scheduler.get_last_lr()[0]
+                        optimizer, scheduler = get_optimizer(model, last_lr, wrap, opt_type)
+
                     model.train()
                     if wrap:
                         tlog.info("Wrap model zero grad")
@@ -2237,39 +2275,27 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                         wrapped_model.zero_grad()
                     else:
                         optimizer.zero_grad()
-                    batch_loss = torch.tensor(0.)
-                    for tiny_step in range(accumulation_tiny_steps):
-                        try:
-                            batch, no_model_batch = next(train_iter)
-                        except StopIteration:
-                            tlog.info("Stop Iteration occured at %s", step)
-                            train_iter = iter(train_dataloader)
-                            batch, no_model_batch = next(train_iter)
-                        batch = {k:v.to(device=device) for k,v in batch.items()}
-                        if wrap:
-                            _model = wrapped_model
-                        else:
-                            _model = model
-                        out = forward_step(_model, batch, no_model_batch, accumulation_tiny_steps)
-                        loss = out["loss"]
-                        loss.backward()
-                        #tlog.info("Original embedding grads:%s",model.get_input_embeddings().weight.grad)
-                        if wrap:
-                            #tlog.info("Merge embedding grads:%s", wrapped_model.merge_encoder.embedding.weight.grad)
-                            for encoder in wrapped_model.prompt_encoders:
-                                if encoder.name == "cb":
-                                    #mlog.info("---------------- %s ---------------", encoder.name)
-                                    #mlog.info("Prompt embedding grads:%s", encoder.embedding.weight.grad)
-                                    #mlog.info("Norm: %s", torch.linalg.norm(encoder.embedding.weight.grad))
-                                    mbp("")
-                                    break
+                    if wrap:
+                        _model = wrapped_model
+                    else:
+                        _model = model
+                    out = forward_step(_model, batch, no_model_batch)
+                    loss = out["loss"]
+                    loss.backward()
+                    if wrap:
+                        for encoder in wrapped_model.prompt_encoders:
+                            if encoder.name == "cb":
+                                #mlog.info("---------------- %s ---------------", encoder.name)
+                                #mlog.info("Prompt embedding grads:%s", encoder.embedding.weight.grad)
+                                #mlog.info("Norm: %s", torch.linalg.norm(encoder.embedding.weight.grad))
+                                mbp("")
+                                break
 
-                        batch_loss += loss.item()
                     optimizer.step()
                     scheduler.step()
                     step+=1
                     global_step+=1
-                    bloss = batch_loss.item()
+                    bloss = loss.item()
                     tot_loss += bloss
                     mean_loss = tot_loss/(step-train_start)
                     sw.add_scalar('train/loss',bloss,global_step=step)
@@ -2277,7 +2303,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                     pbar.set_description(f'training ...[loss:{bloss:.2f} ({mean_loss:.2f}) best:{best_eval_step} {best_dev_loss:.2f}]')
                     pbar.update()
                     #del result
-                    #del loss
+                    del loss
                 except KeyboardInterrupt:
                     mlog.info("exiting while ...")
                     raise KeyboardInterrupt
@@ -2298,7 +2324,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             mlog.info("No save model is on!!")
     #% vvvv
     if loop: #not prefix:
-       train_loop(epochs_num)
+       train_loop(epochs_num, wrap, optimizer, scheduler)
     else:
         training_args = TrainingArguments(output_dir=save_path)
         training_args.per_device_train_batch_size=node_batch_size
