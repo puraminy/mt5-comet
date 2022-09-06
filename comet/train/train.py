@@ -1,6 +1,8 @@
 #%% load libraries
 import debugpy
 from comet.train.common import *
+from comet.train.dataset import *
+from comet.train.data import *
 import itertools, collections
 import shutil
 from comet.train.eval import *
@@ -1582,7 +1584,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         save_ds_path[split] = os.path.join(underlying_model_name, split)
     #tokenize_relations(tokenizer)
     atomic_query_responses = {"train":[], "validation":[]}
-    generate_samples = {}
+    generated_samples = {}
     mlog.info("Perparing data ...")
     if model_id in ["t5-large","t5-small", "t5-base", "gpt2"]:
         lang = "en"
@@ -1650,7 +1652,11 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             if split_name == "train" or split_name == "sample":
                 _repeat = int(repeat)
             # dddddddddddddd
-            myds[_name] = MyDataset(split_df, split_name,
+            dataset_class = MyDataset
+            if rel_filter and rel_filter in data_conf:
+               dataset_class = data_conf[rel_filter]
+
+            myds[_name] = dataset_class(split_df, split_name,
                                 _method, prompt_pos, rel_filter,
                                 num_samples[split_name], 
                                 ignore_blanks,
@@ -1680,19 +1686,26 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             ds_list += ["validation"]
         #ds_list += ["sample"]
         myds = load_data(ds_list)
-        if show_samples: 
+        if True: #wrap or show_samples: 
             samples_iter = iter(myds["train"])
+            ii = 0
             _sample = True
-            generate_samples["sample"] = []
+            generated_samples["sample"] = []
             logger = mlog
             logger.info("----------- SAMPLES -------------")
-            while _sample:
+            mbp("")
+            while _sample and ii < 5:
                 _sample = next(samples_iter, None)
+                if _sample["rep"] > 0:
+                    continue
+                ii += 1
                 logger.info(_sample)
                 if False: #_sample:
-                    generate_samples["sample"].append((_sample[0], _sample[1]))
+                    generated_samples["sample"].append((_sample[0], _sample[1]))
             logger.info("--------------------------------")
-            logger.info("Preparing samples: %s ", len(generate_samples["sample"]))
+            logger.info("Preparing samples: %s ", len(generated_samples["sample"]))
+            if stop_on_breakpoint:
+                mbp("b")
     if model_id == "test" or show_samples:
         return
 
