@@ -1689,7 +1689,9 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                                 sampling, ex_type,
                                 tails_per_head, save_ds_path[split_name], _repeat, 
                                 int(pid), _break_sent, sort, _replace_blanks, 
-                                None, int(ph_num), group_them = group_them, temp_num = temp_num, someone=someone, match=_match, batch_size=batch_size
+                                None, int(ph_num), group_them = group_them, 
+                                temp_num = temp_num, someone=someone, 
+                                match=_match, batch_size=int(batch_size)
                         )
             if save_data:
                 myds[_name].save_data(os.path.join(save_data,_name + ".tsv"), merge=True)
@@ -1706,7 +1708,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         #ds_list += ["sample"]
         myds = load_data(ds_list)
         if True: #wrap or show_samples: 
-            samples_iter = iter(myds["train"])
+            samples_iter = iter(myds["validation"])
             ii = 0
             _sample = True
             generated_samples["sample"] = []
@@ -2250,7 +2252,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                         train_iter = iter(train_dataloader)
                         batch, no_model_batch = next(train_iter)
                     batch = {k:v.to(device=device) for k,v in batch.items()}
-                    mbp("")
+                    mbp("b")
                     wrap = no_model_batch["wrap"][0]
                     freeze_it = no_model_batch["freeze"][0]
                     unfreeze_it = no_model_batch["unfreeze"][0]

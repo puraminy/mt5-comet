@@ -292,6 +292,7 @@ class MyDataset(torch.utils.data.Dataset):
         d = data["row"] if "row" in data else None
         context_df = data["context_df"] if "context_df" in data else None
         index = data["index"]
+        _counter = self.rec_counter
         rep = data["rep"]
         rel_token = rel_maps[rel]
         if self.natural:
@@ -396,7 +397,7 @@ class MyDataset(torch.utils.data.Dataset):
         #    self.data_split[rel][lang].append({query:[response]})
         #else:
         #    self.data_split[rel][lang][query].append(response)
-        return {"query":_query, "event":event, "resp":response, "rel":rel, "index":self.rec_counter, "rep":rep, "flag":flags}
+        return {"query":_query, "event":event, "resp":response, "rel":rel, "index":_counter, "rep":rep, "flag":flags}
         #return (_query, event, response, rel, index, rep)
 
 
