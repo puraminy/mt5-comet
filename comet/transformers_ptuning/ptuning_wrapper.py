@@ -125,11 +125,12 @@ class PTuningWrapper(torch.nn.Module):
                for i, e in enumerate(rel_embs):
                    encoder.embedding.weight[i] = e #.detach()
 
-        self.merge_offset = min(self.merge_prompt_ids)
+        if self.prompt_encoders:
+            self.merge_offset = min(self.merge_prompt_ids)
+            winfo("Offset: %s,", self.merge_offset)
         winfo("Merge ids: %s,", self.merge_prompt_ids)
         winfo("Merge ids len: %s,", len(self.merge_prompt_ids))
         winfo("Sum len: %s,", sum_len)
-        winfo("Offset: %s,", self.merge_offset)
 
         self.merge_encoder = None 
         self.merge_embedding = None

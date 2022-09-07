@@ -423,14 +423,14 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words
         encoder, offset = create_encoder(rel, model, tokenizer, prompt_tokens, encoder_type, from_words, wrapped_model)
         prompt_encoders.append(encoder)
         offsets.append(offset)
-
+    
+    id_offset = len(tokenizer)
     if prompt_encoders:
         id_offset = min(offsets)
-        mlog.info("ID OFFSET: %s", id_offset)
-        wrapped_model = PTuningWrapper(model, prompt_encoders, prompt_token_fn=get_prompt_token_fn(id_offset), merge_prompts=merge_prompts, shared_embs = shared_embs)
-        return wrapped_model
-    else:
-        return None
+
+    mlog.info("ID OFFSET: %s", id_offset)
+    wrapped_model = PTuningWrapper(model, prompt_encoders, prompt_token_fn=get_prompt_token_fn(id_offset), merge_prompts=merge_prompts, shared_embs = shared_embs)
+    return wrapped_model
 
 def create_encoder(name, model, tokenizer, prompt_tokens, encoder_type="lstm", 
         from_words=False, wrapped_model = None):

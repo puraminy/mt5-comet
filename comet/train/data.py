@@ -13,6 +13,8 @@ class xAttrDataset(MyDataset):
 
 class CBDataset(MyDataset):
     def get_templates(self, method, index, **kwargs):
+       if self.split_name != "train" and method == "mix":
+           method = "unsup-wrap"
        ex_qtemp = ""
        ex_anstemp = ""
        qtemp = "{event}"
