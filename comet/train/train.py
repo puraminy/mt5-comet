@@ -1809,10 +1809,16 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         decx_parts = _parts[2]
         freeze_cross_att(modules_to_freeze, decx_parts, model.decoder)
 
-    def freeze(modules_to_freeze, fz=False):
+    def freeze(modules_to_freeze):
         for module in modules_to_freeze:
             for param in module.parameters():
-                param.requires_grad = fz  # Actual freezing operation
+                param.requires_grad = False  # Actual freezing operation
+
+    def unfreeze(modules_to_freeze):
+        for module in modules_to_freeze:
+            for param in module.parameters():
+                param.requires_grad = True  # Actual freezing operation
+
     if frozen:
         freeze(modules_to_freeze)
 
@@ -1948,23 +1954,17 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         model_to_wrap = model.pretrain_model
 
     wrapped_model = wrap_model(model_to_wrap, tokenizer, encoder_type, load_prompt_path, from_words = from_words, merge_prompts=merge_prompts, method = method, shared_embs= shared_embs) 
-    if wrapped_model:
-        wrapped_model.to(device=device)
-        wrapped_model.prompt_encoders.to(device=device)
-        mlog.info("len tokenizer after wrapping %s", len(tokenizer))
 
-    if learning_rate > 0.0001:
-        #raise "Learning rate should be smaller"
-        pass
     extend_tokenizer(tokenizer)
     mlog.info("len tokenizer after extending %s", len(tokenizer))
     if not prefix:
         model.resize_token_embeddings(len(tokenizer))
     else:
         model.pretrain_model.resize_token_embeddings(len(tokenizer))
-    model.to(device=device)
-    mbp("b")
 
+    wrapped_model.to(device=device)
+    wrapped_model.prompt_encoders.to(device=device)
+    mlog.info("len tokenizer after wrapping %s", len(tokenizer))
     if wrapped_model:
         #model.get_input_embeddings().weight.requires_grad = False
         rgrad = [p for p in wrapped_model.parameters() if p.requires_grad]
@@ -1986,31 +1986,29 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     if not no_save_model:
         tokenizer.save_pretrained(save_path)
     def get_optimizer(model, learning_rate, opt_type):
+        _lr = learning_rate
         optimizer_grouped_parameters = [
-            {'params': [p for n, p in model.named_parameters() if p.requires_grad and not any(nd in n for nd in no_decay)], 'weight_decay': weight_decay},
-            {'params': [p for n, p in model.named_parameters() if p.requires_grad and any(nd in n for nd in no_decay)], 'weight_decay': 0.0}
+            {'params': [p for n, p in model.underlying_model.named_parameters() if p.requires_grad and not any(nd in n for nd in no_decay)], 'weight_decay': weight_decay},
+            {'params': [p for n, p in model.underlying_model.named_parameters() if p.requires_grad and any(nd in n for nd in no_decay)], 'weight_decay': 0.0},
+            {"params": model.mlp.parameters(), "lr": pl_learning_rate},
         ]
         if opt_type == "adam":
             optimizer = AdamW(optimizer_grouped_parameters,lr=_lr,eps=1e-8)
+            for encoder in model.prompt_encoders:
+                optimizer.add_param_group({'params': [p for p in encoder.parameters() if p.requires_grad ], "lr":pl_learning_rate})
             scheduler = get_linear_schedule_with_warmup(optimizer,warm_up_steps,iterations)
         elif opt_type == "ada_no_lr":
             optimizer = Adafactor(optimizer_grouped_parameters, 
                     scale_parameter=True, 
                     relative_step=True, warmup_init=True, lr=None)
+            for encoder in model.prompt_encoders:
+                optimizer.add_param_group({'params': [p for p in encoder.parameters() if p.requires_grad ], "lr":pl_learning_rate})
             scheduler = AdafactorSchedule(optimizer)
         elif opt_type == "ada":
             mlog.info("Ada Factor")
             # replace AdamW with Adafactor
-#AdafactorOptimizer.beta1 = 0.0
-#AdafactorOptimizer.clipping_threshold = 1.0
-#AdafactorOptimizer.decay_rate = None
-#AdafactorOptimizer.epsilon1 = 1e-30
-#AdafactorOptimizer.epsilon2 = 0.001
-#AdafactorOptimizer.factored = True
-#AdafactorOptimizer.min_dim_size_to_factor = 128
-#AdafactorOptimizer.multiply_by_parameter_scale = True
             optimizer = Adafactor(
-                model.parameters(),
+                optimizer_grouped_parameters,
                 lr=1e-3,
                 eps=(1e-30, 1e-3),
                 clip_threshold=1.0,
@@ -2021,6 +2019,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                 scale_parameter=False,
                 warmup_init=False,
 		    ) 
+            for encoder in model.prompt_encoders:
+                optimizer.add_param_group({'params': [p for p in encoder.parameters() if p.requires_grad ], "lr":pl_learning_rate})
         #optimizer = Adafactor(
         #        model.parameters(),
         #        lr=1e-3,
@@ -2050,7 +2050,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         '''Advance the iterator n-steps ahead. If n is none, consume entirely.'''
         collections.deque(itertools.islice(iterator, n), maxlen=0)
     #11111111111
-    def evaluate1(tokenizer, eval_dataset, eval_data_loader, model, device, prompt_config, mode="dev", save_res=False, wrap =False):
+    def evaluate1(tokenizer, eval_dataset, eval_data_loader, model, device, prompt_config, mode="dev", save_res=False):
         """Evaluation."""
         # Turn on evaluation mode which disables dropout.
         model.eval()
@@ -2064,8 +2064,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         all_gens = []
         all_resps = []
         all_queries = []
-        gen_model = model
-        if wrap: gen_model = model.underlying_model
+        gen_model = model.underlying_model
         mbp("")
         with torch.no_grad():
             for model_batch, no_model_batch in eval_data_loader:
@@ -2229,7 +2228,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                             mlog.info("Updating the model weights before evaluaton...")
                             mbp("b")
                             wrapped_model.update_model_weight()
-                        dev_loss, dev_acc = evaluate1(tokenizer, dev_dataset, dev_dataloader, _model, device, prompt_config, mode="dev", save_res=True, wrap = wrap)
+                        dev_loss, dev_acc = evaluate1(tokenizer, dev_dataset, dev_dataloader, _model, device, prompt_config, mode="dev", save_res=True)
                         log_string = "dev_loss: " + str(dev_loss) + " | dev acc(mrr, f1): " + str(dev_acc) 
                         mlog.info(log_string)
                         mbp("")
@@ -2242,13 +2241,12 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                         batch, no_model_batch = next(train_iter)
                     batch = {k:v.to(device=device) for k,v in batch.items()}
                     mbp("")
-                    wrap = no_model_batch["wrap"][0]
                     freeze_it = no_model_batch["freeze"][0]
                     unfreeze_it = no_model_batch["unfreeze"][0]
                     if  unfreeze_it and is_freezed:
                         mlog.info("unfreezing the model")
                         is_freezed = False
-                        freeze(modules_to_freeze, True)
+                        unfreeze(modules_to_freeze)
                         last_lr = scheduler.get_last_lr()[0]
                         optimizer, scheduler = get_optimizer(wrapped_model, last_lr, opt_type)
 
@@ -2259,28 +2257,21 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                         last_lr = scheduler.get_last_lr()[0]
                         optimizer, scheduler = get_optimizer(wrapped_model, last_lr, opt_type)
 
-                    model.train()
-                    if wrap:
-                        tlog.info("Wrap model zero grad")
-                        wrapped_model.train()
-                        wrapped_model.zero_grad()
-                    else:
-                        optimizer.zero_grad()
-                    if wrap:
-                        _model = wrapped_model
-                    else:
-                        _model = model
+                    tlog.info("Wrap model zero grad")
+                    wrapped_model.train()
+                    wrapped_model.zero_grad()
+                    optimizer.zero_grad()
+                    _model = wrapped_model
                     out = forward_step(_model, batch, no_model_batch)
                     loss = out["loss"]
                     loss.backward()
-                    if wrap:
-                        for encoder in wrapped_model.prompt_encoders:
-                            if encoder.name == "cb":
-                                #mlog.info("---------------- %s ---------------", encoder.name)
-                                #mlog.info("Prompt embedding grads:%s", encoder.embedding.weight.grad)
-                                #mlog.info("Norm: %s", torch.linalg.norm(encoder.embedding.weight.grad))
-                                mbp("")
-                                break
+                    for encoder in wrapped_model.prompt_encoders:
+                        if encoder.name == "cb":
+                            #mlog.info("---------------- %s ---------------", encoder.name)
+                            #mlog.info("Prompt embedding grads:%s", encoder.embedding.weight.grad)
+                            #mlog.info("Norm: %s", torch.linalg.norm(encoder.embedding.weight.grad))
+                            mbp("")
+                            break
 
                     optimizer.step()
                     scheduler.step()
@@ -2302,10 +2293,9 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         # end train while
         pbar.close()
         sw.close()
-        if wrap:
-            with torch.no_grad():
-                mlog.info("Updating the model weights before evaluaton...")
-                wrapped_model.update_model_weight()
+        with torch.no_grad():
+            mlog.info("Updating the model weights before evaluaton...")
+            wrapped_model.update_model_weight()
         model.eval()
         if not no_save_model:
             save_checkpoint(model, tokenizer, optimizer, scheduler, step, 
@@ -2374,7 +2364,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             mlog.info("Evaluating ... %s", _set)
             val_records = myds[_set].num_records
             exp_info["test_set"] = _set
-            l, r = evaluate1(tokenizer, test_dataset, test_dataloader, model, device, prompt_config, mode="test", save_res=False)
+            l, r = evaluate1(tokenizer, test_dataset, test_dataloader, wrapped_model, device, prompt_config, mode="test", save_res=False)
             mlog.info("total loss: %s, res: %s", l, r)
             mbp("before evaluation")
             evaluate(test_dataset, test_dataloader, save_path, exp_info, val_records, gen_param, scorers = scorers, batch_size=gen_bs, model=model, tokenizer=tokenizer, set_name=_set)  
