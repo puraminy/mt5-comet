@@ -608,7 +608,7 @@ def get_input(msg):
 
 def save_checkpoint(model, tokenizer, optimizer, scheduler, step, 
                    best_eval_step, best_dev_loss, save_path):
-    if "temp" in save_path:
+    if "/temp/" in save_path:
         mlog.info("Saves in temp are skipped ")
         return
 
@@ -619,8 +619,8 @@ def save_checkpoint(model, tokenizer, optimizer, scheduler, step,
     model.save_pretrained(save_path)
     tokenizer.save_pretrained(save_path)
 
-    #torch.save(model.state_dict(), os.path.join(save_path,"state_dict"))
-    #torch.save(model, os.path.join(save_path,"mymodel"))
+    torch.save(model.state_dict(), os.path.join(save_path,"state_dict"))
+#    torch.save(model, os.path.join(save_path,"mymodel"))
 #    torch.save({
 #            'step': step,
 #            'eval_step': best_eval_step,
@@ -628,7 +628,7 @@ def save_checkpoint(model, tokenizer, optimizer, scheduler, step,
 #            'optimizer_state_dict': optimizer.state_dict(),
 #            'scheduler_state_dict': scheduler.state_dict(),
 #            }, os.path.join(save_path, "saved_states"))
-#
+
 
 def get_input(msg):
     while True:

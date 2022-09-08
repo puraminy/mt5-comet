@@ -225,7 +225,7 @@ def chunks(lst, n):
 import debugpy
 # vvvvvvvvvvvvvvv
 
-def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="greedy", scorers="rouge", batch_size="20@5", model = None, tokenizer = None, preds_file = "", set_name = "test", rewrite_info = False):  
+def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="greedy", scorers="rouge", batch_size="20@5", model = None, tokenizer = None, preds_file = "", set_name = "test", rewrite_info = False, stop_level=0):  
     if rewrite_info:
         save_path = os.path.join(save_path, "full_results.tsv")
         if Path(sav_path).is_file() and rewrite:
@@ -317,7 +317,8 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
             mlog.info("\n%s/%s) query: %s", step, len(test_set), query)
             mlog.info("\nhyp: %s",top_hyp)
             mlog.info("\ntail: %s",tail)
-            mbp()
+            if stop_level > 0:
+                mbp("b")
             data = {}
             if query != old_query:
                 old_query = query
@@ -342,7 +343,7 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
             data["pred_text1"] = str(top_hyp)
             data["prefix"] = rel
             data["langs"] = lang
-            tail = re.sub(r'<extra_.*?>','',tail)
+            tail = re.sub(r'<.*?>','',tail)
             tail = tail.strip()
             data["target_text"] = tail
             #if test_set.orig_df is None:
@@ -407,6 +408,15 @@ def do_score_w(df_name, path, scorers):
 
 import numpy as np
 import tensorflow as tf
+def run_sts_benchmark(batch, embed):
+  sts_encode1 = tf.nn.l2_normalize(embed(tf.constant(batch['top'].tolist())), axis=1)
+  sts_encode2 = tf.nn.l2_normalize(embed(tf.constant(batch['top_pred'].tolist())), axis=1)
+  cosine_similarities = tf.reduce_sum(tf.multiply(sts_encode1, sts_encode2), axis=1)
+  clip_cosine_similarities = tf.clip_by_value(cosine_similarities, -1.0, 1.0)
+  scores = 1.0 - tf.acos(clip_cosine_similarities) / math.pi
+  """Returns the similarity scores"""
+  return scores
+
 def do_score(df, scorers, save_path, reval=False):
     #try:
     #    nltk_path = str(nltk.data.find("tokenizers/punkt"))
@@ -419,18 +429,6 @@ def do_score(df, scorers, save_path, reval=False):
     #debugpy.wait_for_client()
     if "st" in scorers:
         embed = tf.saved_model.load("/home/pouramini/pret/sm")
-
-
-    def run_sts_benchmark(batch):
-      sts_encode1 = tf.nn.l2_normalize(embed(tf.constant(batch['top'].tolist())), axis=1)
-      sts_encode2 = tf.nn.l2_normalize(embed(tf.constant(batch['top_pred'].tolist())), axis=1)
-      cosine_similarities = tf.reduce_sum(tf.multiply(sts_encode1, sts_encode2), axis=1)
-      clip_cosine_similarities = tf.clip_by_value(cosine_similarities, -1.0, 1.0)
-      scores = 1.0 - tf.acos(clip_cosine_similarities) / math.pi
-      """Returns the similarity scores"""
-      return scores
-
-
 
     base_path = "/content/drive/MyDrive/pret"
     if not colab:
@@ -575,7 +573,7 @@ def do_score(df, scorers, save_path, reval=False):
             rouges = df2["rouge_score"].to_list()
         scores = []
         for batch in np.array_split(sts_data, 10):
-          scores.extend(run_sts_benchmark(batch))
+          scores.extend(run_sts_benchmark(batch, embed))
 
         df2["st_score"] = ["{:.2f}".format(float(x)) for x in scores]
         res = zip(scores, berts, rouges, preds, tails)

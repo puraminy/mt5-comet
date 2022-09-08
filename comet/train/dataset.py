@@ -590,7 +590,7 @@ class MyDataset(torch.utils.data.Dataset):
         return flat_data
 
 #tttttttttt
-    def get_template(self, method, index, gen_pos="end", prompt_pos="end"):
+    def get_templates(self, method, index, gen_pos="end", prompt_pos="end"):
            ex_qtemp = ""
            ex_anstemp = ""
            qtemp = "{event}"
