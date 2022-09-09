@@ -349,6 +349,21 @@ def set_prompt_lengths(rel, length):
 
 def extend_tokenizer(tokenizer, prompt_tokens = [], model_id=""):
     cur_list = tokenizer.additional_special_tokens
+    num_added_toks: dict = {}
+    if tokenizer.bos_token is None:
+        num_added_toks['bos_token'] = "<s>"
+    if tokenizer.eos_token is None:
+        num_added_toks['eos_token'] = "</s>"
+    if tokenizer.pad_token is None:
+        num_added_toks['pad_token'] = "<pad>"
+    if tokenizer.sep_token is None:
+        num_added_toks['sep_token'] = "<sep>"
+    if tokenizer.cls_token is None:
+        num_added_toks['cls_token'] = "<cls>"
+    if tokenizer.mask_token is None:
+        num_added_toks['mask_token'] = "<mask>"
+
+    num_new_tokens: int = tokenizer.add_special_tokens(num_added_toks)
     rels_tokens = []
     for x,t in rel_nat_maps.items():
         rels_tokens += t["tokens"].split()
@@ -356,9 +371,9 @@ def extend_tokenizer(tokenizer, prompt_tokens = [], model_id=""):
     rels_tokens = list(set(rels_tokens))
 
     mlog.info("RELS %s", rels_tokens)
-    new_tokens = tokens.t5_tokens + \
-                 list(rel_maps.values())+ \
-                 list(gen_tokens.values()) + rels_tokens
+    #new_tokens = tokens.t5_tokens + \
+    new_tokens = list(set(rel_maps.values()))+ \
+                 list(set(gen_tokens.values())) + rels_tokens 
     if prompt_tokens:
         new_tokens += prompt_tokens
 
@@ -619,7 +634,7 @@ def save_checkpoint(model, tokenizer, optimizer, scheduler, step,
     model.save_pretrained(save_path)
     tokenizer.save_pretrained(save_path)
 
-    torch.save(model.state_dict(), os.path.join(save_path,"state_dict"))
+#    torch.save(model.state_dict(), os.path.join(save_path,"state_dict"))
 #    torch.save(model, os.path.join(save_path,"mymodel"))
 #    torch.save({
 #            'step': step,
