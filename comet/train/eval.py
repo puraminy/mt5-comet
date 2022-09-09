@@ -380,13 +380,13 @@ import debugpy
 def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="greedy", scorers="rouge", batch_size="20@5", model = None, tokenizer = None, preds_file = "", set_name = "test", rewrite_info = False, stop_level=0):  
     if rewrite_info:
         save_path = os.path.join(save_path, "full_results.tsv")
-        if Path(sav_path).is_file() and rewrite:
-            df = pd.read_table(path)
+        if Path(save_path).is_file() and rewrite:
+            df = pd.read_table(save_path)
 
         for key, info in exp_info.items():
             df[key] = info
 
-        mlog.info("Saving results %s", path)
+        mlog.info("Saving results %s", save_path)
         df.to_csv(save_path, index=False, sep="\t")
         return
 

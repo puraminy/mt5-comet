@@ -193,7 +193,6 @@ class PTuningWrapper(torch.nn.Module):
         ll = self.ll # log level
         wlog.log(ll, "wrapper forward was called")
         wlog.log(ll, "Prompt ids:{}".format(pids))
-        mbp("")
         # find masks based on the range of prompt ids (offset_id < X < offset_id + prompt_length)
         #Because this wrapper only deals with a single prompt, the length should be the same, you can use masked_select to reshape 
         prompt_masks = self.prompt_token_fn(input_ids)
@@ -314,13 +313,13 @@ class PTuningWrapper(torch.nn.Module):
         winfo(f"Updating model weights")
         self.cur_embeddings = self.underlying_model.get_input_embeddings()
         if self.merge_encoder:
-            self.merge_encoder.dump_embedding(self.cur_embeddings.weight)
+            self.merge_encoder.dump_embeddings_into(self.cur_embeddings.weight)
         elif self.encoder_prompt_flag:
             for encoder in self.prompt_encoders:
                 winfo(f"the wrapper has prompt encoder")
                 # fill the current embeddings with weights of encoder
-                encoder.dump_embedding(self.cur_embeddings.weight)
-                #self.prompt_encoder.dump_embedding(self.model_embeddings.weight)
+                encoder.dump_embeddings_into(self.cur_embeddings.weight)
+                #self.prompt_encoder.dump_embeddings_into(self.model_embeddings.weight)
         if self.decoder_prompt_encoder in self.prompt_encoders:
             winfo(f"Encoder and Decoder are the same")
             pass
@@ -328,11 +327,11 @@ class PTuningWrapper(torch.nn.Module):
             for encoder in self.prompt_encoders:
                 winfo(f"the wrapper has prompt encoder")
                 # fill the current embeddings with weights of encoder
-                encoder.dump_embedding(
+                encoder.dump_embeddings_into(
                                        self.model_decoder_embeddings.weight)
-                #self.prompt_encoder.dump_embedding(self.model_embeddings.weight)
+                #self.prompt_encoder.dump_embeddings_into(self.model_embeddings.weight)
         if self.decoder_prompt_encoder:
-            self.decoder_prompt_encoder.dump_embedding(
+            self.decoder_prompt_encoder.dump_embeddings_into(
                 self.model_decoder_embeddings.weight)
 
 
@@ -365,7 +364,7 @@ class PromptEncoder(torch.nn.Module):
             return lambda x: self.isin(x, self.input_ids)
         else:
             return lambda x: (x>=self.id_offset)&(x<self.id_offset+self.length)
-    def dump_embedding(self,weight):
+    def dump_embeddings_into(self,weight):
         raise NotImplementedError
 
 
@@ -391,7 +390,7 @@ class EmbeddingPromptEncoder(PromptEncoder):
         embinfo("=========================== Forward end ===================")
         return ret_embs
 
-    def dump_embedding(self, weight):
+    def dump_embeddings_into(self, weight):
         winfo("Dump embeddings")
         embinfo("=========================== %s ===================", self.name)
         embinfo("input weights: %s", weight)
@@ -438,7 +437,7 @@ class MLPPromptEncoder(PromptEncoder):
         embinfo("=========================== Forward end ===================")
         return ret_embs
 
-    def dump_embedding(self, weight):
+    def dump_embeddings_into(self, weight):
         winfo("Dump embeddings")
         embinfo("=========================== %s ===================", self.name)
         with torch.no_grad():
@@ -523,7 +522,7 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
         embinfo("ret embeds %s", ret_embeds)
         embinfo("=========================== Forward end ===================")
         return ret_embeds
-    def dump_embedding(self, weight):
+    def dump_embeddings_into(self, weight):
         # get embedding weights as the output of forward pass
         embinfo("%%%%%%%%%%%%%%%%%%%%%%%%%% dump embeddings start %%%%%%%%%%%%%%%%")
         embinfo("=========================== %s ===================", self.name)

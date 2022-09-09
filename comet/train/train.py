@@ -536,7 +536,7 @@ def run(ctx, conf_path, base_conf, experiment,
                        args["exp_id"] = ii
                        ow = args["overwrite"]
                        if reval_bests:
-                           lp = os.path.join(ow, "best_model")
+                           lp = os.path.join(spath, ow, "best_model")
                            if not Path(lp).exists():
                                mlog.info("Skipping reval, no saved model")
                                continue
@@ -545,6 +545,7 @@ def run(ctx, conf_path, base_conf, experiment,
                                args["do_eval"] = True
                                args["test_set"] = "validation" 
                                args["load_path"] = lp
+                               args["trial"] += "-reval"
                        ctx.invoke(train, **args, run_args = run_args)
         else:
             confs = sorted(glob.glob(f"{_path}/*"))
@@ -1426,6 +1427,9 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         underlying_model_name = path
     elif Path(load_path).exists():
         bins = glob.glob(f"{load_path}/*.bin")
+        if not bins and do_eval:
+            print("Skipping.... the folder contains no model (*.bin) !!")
+            return
         underlying_model_name = f"{load_path}/{model_id}" if not bins else load_path
         if not Path(underlying_model_name).exists():
             underlying_model_name = model_id        
@@ -1610,6 +1614,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             translate(model, tokenizer, trans_df, "input_text@fa@5000", path, logger, start, load_path) 
         return
     
+    mlog.info("Loading from %s", underlying_model_name)
     model, tokenizer, underlying_model_name = load_model(model_id, underlying_model_name)
     extend_tokenizer(tokenizer)
     if from_words and from_words != "rel" and from_words != "none":
@@ -1883,7 +1888,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         if not k in exp_info:
             exp_info[k] = v
 
-    def eval_test():
+    def eval_test(model, tokenizer, result_fname=""):
         if "@" in gen_bs:
             test_bs,_ = gen_bs.split("@")
         else:
@@ -1901,11 +1906,15 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             mlog.info("Evaluating ... %s", _set)
             val_records = myds[_set].num_records
             exp_info["test_set"] = _set
-            a1, a2, s1, r = evaluate1(tokenizer, test_dataloader, wrapped_model, device, prompt_config, mode="test", save_path=save_path)
-            mlog.info("total acc1: %s, acc2: %s, sts, res: %s", a1, a2, s1, r)
+            a1, a2, s1, r = evaluate1(tokenizer, test_dataloader, model, device, prompt_config, mode="test", save_path=save_path, wrap=False)
+            mlog.info("acc1: %s, acc2: %s, sts: %s, res: %s", a1, a2, s1, r)
             if stop_level > 0:
                 mbp("before evaluation")
-            evaluate(test_dataset, test_dataloader, save_path, exp_info, val_records, gen_param, scorers = scorers, batch_size=gen_bs, model=model, tokenizer=tokenizer, set_name=_set)  
+            if not result_fname:
+                _save_path = save_path
+            else:
+                _save_path = os.path.join(save_path, result_fname)
+            evaluate(test_dataset, test_dataloader, _save_path, exp_info, val_records, gen_param, scorers = scorers, batch_size=gen_bs, model=model, tokenizer=tokenizer, set_name=_set)  
     if do_eval or (not wrap and frozen and modules_to_freeze is model):
         mlog.info("Evaluating the model...")
         model.to(device=device)
@@ -1918,7 +1927,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         a1, a2, s1, dev_loss = evaluate1(tokenizer, dev_dataloader, model, device, prompt_config, mode="dev", save_path=save_path, wrap=False)
         log_string = "dev_loss: " + str(dev_loss) + " | dev acc({}, {} st:{}): ".format(a1, a2, s1) 
         mlog.info(log_string)
-        eval_test()
+        eval_test(model, tokenizer, "reval_full.tsv")
         return
     #%% tokenizer & model
     allowed_out_token_length = len(tokenizer)
@@ -2131,6 +2140,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         step = 0
         best_dev_loss = 100
         best_eval_step = 0
+        best_step = 0
         is_freezed = frozen
         freeze_it = False
         unfreeze_it = False
@@ -2162,12 +2172,12 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                             mlog.info("Updating the model weights before evaluaton...")
                             wrapped_model.update_model_weight()
                         a1, a2, s1, dev_loss = evaluate1(tokenizer, dev_dataloader, _model, device, prompt_config, mode="dev", save_path=save_path)
-                        log_string =  "dev acc({}, {} st:{}): dev_loss:{}  | best_dev_loss:{}   best_step: {} ".format(a1, a2, s1, dev_loss, best_dev_loss, exp_info["best_step"]) 
+                        log_string =  "dev acc({}, {} st:{}): dev_loss:{}  | best_dev_loss:{}   best_step: {} ".format(a1, a2, s1, dev_loss, best_dev_loss, best_step) 
                         if dev_loss <= best_dev_loss: 
                             max_acc = a2
                             best_dev_loss = dev_loss
                             exp_info["max_acc"] = max_acc
-                            exp_info["best_step"] = str(epoch) + "x" + str(step)
+                            exp_info["best_step"] = best_step = str(epoch) + "x" + str(step)
                             mlog.info(log_string)
                             if not no_save_best:
                                 best_path = os.path.join(save_path, "best_model")
@@ -2304,7 +2314,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         evaluate1(tokenizer, test_dataloader, model, device, prompt_config, mode="test", save_path="")
         evaluate(test_dataset, test_dataloader, save_path, exp_info, val_records, gen_param, scorers = scorers, batch_size=gen_bs, model=model, tokenizer=tokenizer, set_name=_set, stop_level=stop_level)  
     elif test_set:
-        eval_test()
+        eval_test(model, tokenizer)
     else:
         mlog.info("Test set was not provided.... skip testing...")
         
