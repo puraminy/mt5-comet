@@ -29,7 +29,6 @@ def forward_step(model, batch, no_model_batch, accumulation_tiny_steps=1, mode="
     if "loss" in result: # and not "loss_mask" in no_model_batch:
         loss = result['loss']/accumulation_tiny_steps
     else:
-        #mbp(mode)
         losses = torch.nn.functional.cross_entropy(
             result['logits'].reshape(-1,result['logits'].size(2)),
             no_model_batch['labels'].reshape(-1,),
@@ -64,7 +63,6 @@ def evaluate1(tokenizer, eval_data_loader, model, device, prompt_config, mode="d
     all_resps = []
     all_queries = []
     gen_model = model.underlying_model if wrap else model
-    mbp("")
     with torch.no_grad():
         for model_batch, no_model_batch in eval_data_loader:
             for k in model_batch:
@@ -261,7 +259,6 @@ def generate(model, tokenizer, batch, gen_token = "", gen_param = "greedy", at_m
     if "task_ids" in batch:
         gen_kwargs["task_ids"] = batch["task_ids"]
 
-    mbp("")
     input_batch = {}
     input_batch["input_ids"] = batch["input_ids"]
     input_batch["attention_mask"] = batch["attention_mask"]
@@ -469,8 +466,7 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
             mlog.info("\n%s/%s) query: %s", step, len(test_set), query)
             mlog.info("\nhyp: %s",top_hyp)
             mlog.info("\ntail: %s",tail)
-            if stop_level > 0:
-                mbp("b")
+            mbp(1)
             data = {}
             if query != old_query:
                 old_query = query
@@ -741,7 +737,7 @@ def do_score(df, scorers, save_path, reval=False):
 
     mlog.info("Saving results %s", save_path)
     print("Saving results %s", save_path)
-    if not Path(save_path).is_file():
+    if not save_path.endswith("tsv"):
         save_path = os.path.join(save_path, "full_results.tsv")
     df.to_csv(save_path, index=False, sep="\t")
     

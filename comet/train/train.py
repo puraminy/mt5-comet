@@ -56,7 +56,6 @@ class MyCollator(object):
             "decoder_input_ids": torch.ones(bs, max_dec_len, dtype=torch.long) * pad_id,
             "labels": torch.ones(bs, max_dec_len, dtype=torch.long) * -100,
         }
-        mbp("")
         no_model_data = {
             #"idx": torch.zeros(bs, dtype=torch.long),
             "labels": torch.ones(bs, max_dec_len, dtype=torch.long) * pad_id,
@@ -68,7 +67,6 @@ class MyCollator(object):
             "unfreeze":[False]*bs,
             "method":[""]*bs
         }
-        mbp("")
         for i, (q, r, query, resp, flag) in enumerate(zip(enc_qs, enc_resps, queries, resps, flags)):
             dec_ids = [pad_id] + r #+ [self.tokenizer.eos_token_id]
             label = r[:-1] #+ [self.tokenizer.eos_token_id]
@@ -95,7 +93,6 @@ class MyCollator(object):
 
     def __call__(self, batch):
         #return {"query":_query, "event":event, "resp":response, "rel":rel, "index":index, "rep":rep}
-        mbp("")
         queries = []
         inputs = []
         responses = []
@@ -121,7 +118,6 @@ class MyCollator(object):
 
         return self.collate(enc_queries, enc_responses, queries, responses, flags)
         #queries,inputs, responses,rel,index,rep = zip(*batch)
-        #mbp("b")
         no_model_batch = {}
         tokenizer = self.tokenizer
         new_batch = tokenizer(list(queries),return_tensors='pt',padding='longest', 
@@ -149,9 +145,7 @@ class MyCollator(object):
                 loss_mask[loss_mask!=tokenizer.pad_token_id] = 1
                 loss_mask[loss_mask==tokenizer.pad_token_id] = 0
                 no_model_batch['loss_mask'] = loss_mask
-                mbp("")
                 labels[labels==tokenizer.pad_token_id] = -100
-                #mbp("b")
                 new_batch['labels']=labels#[:,:-1]
                 no_model_batch['labels']=labels#[:,:-1]
                 if not self.prefix:
@@ -371,10 +365,11 @@ def cli():
     help=""
 )
 @click.option(
-    "--no_stop",
-    "-ns",
-    is_flag=True,
-    help=""
+    "--stop_level",
+    "-sl",
+    default=2,
+    type=str,
+    help="Stop on breakpoints equal to the value"
 )
 @click.option(
     "--reval_bests",
@@ -382,12 +377,22 @@ def cli():
     is_flag=True,
     help=""
 )
+@click.option(
+    "--trial",
+    "-t",
+    default="1",
+    type=str,
+    help="You can set it for repeating experiments with different identities"
+)
 @click.pass_context
 #rrrrrrrrrrr
 def run(ctx, conf_path, base_conf, experiment, 
         exclude_conf, include_conf, overwrite_conf, var, 
         save_model, addto, rem, save_data, load_data, add_prefix, wrap, 
-        only_var, sep, num_exps, one, cpu, undone, dpy, port, no_stop, reval_bests):
+        only_var, sep, num_exps, one, cpu, undone, 
+        dpy, port, stop_level, reval_bests, trial):
+
+     global SL
      if dpy:
         debugpy.listen(('0.0.0.0', int(port)))
         print("Waiting for client at run...port:", port)
@@ -410,9 +415,8 @@ def run(ctx, conf_path, base_conf, experiment,
            args["config"] = ""
            args["output_name"] = "" 
            args["experiment"] = experiment 
-           args["stop_level"] = 1
-           if no_stop:
-               args["stop_level"] =0 
+           args["stop_level"] = sl 
+           SL = sl
            if cpu:
                args["cpu"] = True
                os.environ["CUDA_VISIBLE_DEVICES"] = ""
@@ -437,6 +441,7 @@ def run(ctx, conf_path, base_conf, experiment,
                args["undone"] = True
            args["save_path"] = spath
            args["load_path"] = pretPath 
+           args["trial"] = trial
            _extra = ""
            exclude_list = ["no_confirm", "follow_method", "method", "test_samples"]
            mlog.info("Extra args=%s", ctx.args)
@@ -471,7 +476,7 @@ def run(ctx, conf_path, base_conf, experiment,
                args["no_save_model"] = not save_model
                ctx.invoke(train, **args)
            else:
-               output_name = ""
+               output_name = "trial=" + args["trial"]
                var = var.replace("all_rels","#".join(all_rels))
                var = var.replace("x_rels","#".join(x_rels))
                all_vars = var.split("--")
@@ -545,7 +550,7 @@ def run(ctx, conf_path, base_conf, experiment,
                                args["do_eval"] = True
                                args["test_set"] = "validation" 
                                args["load_path"] = lp
-                               args["trial"] += "-reval"
+                               args["trial"] = "reval"
                        ctx.invoke(train, **args, run_args = run_args)
         else:
             confs = sorted(glob.glob(f"{_path}/*"))
@@ -1340,6 +1345,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
 
     #%% some hyper-parameters
 
+    global SL
+    SL = stop_level
 
 # Allow other computers to attach to debugpy at this IP address and port.
     if dpy:
@@ -1362,8 +1369,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         clog.addHandler(consoleHandler)
         clog.setLevel(logging.DEBUG)
 
-    args = locals() # input parameters
-
+    args = run_args # input parameters
     mlog.info(f"========================= {experiment}:{exp_id} ========================")
     if save_path == "":
         if "ahmad" or "pouramini" in home:
@@ -1746,7 +1752,6 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             generated_samples["sample"] = []
             logger = mlog
             logger.info("----------- SAMPLES -------------")
-            mbp("")
             while _sample and ii < int(batch_size):
                 _sample = next(samples_iter, None)
                 if _sample["rep"] > 0:
@@ -1757,8 +1762,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                     generated_samples["sample"].append((_sample[0], _sample[1]))
             logger.info("--------------------------------")
             logger.info("Preparing samples: %s ", len(generated_samples["sample"]))
-            if stop_level > 0:
-                mbp("b")
+            mbp(1)
     if model_id == "test" or show_samples:
         return
 
@@ -1908,8 +1912,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             exp_info["test_set"] = _set
             a1, a2, s1, r = evaluate1(tokenizer, test_dataloader, model, device, prompt_config, mode="test", save_path=save_path, wrap=False)
             mlog.info("acc1: %s, acc2: %s, sts: %s, res: %s", a1, a2, s1, r)
-            if stop_level > 0:
-                mbp("before evaluation")
+            mbp(2)
             if not result_fname:
                 _save_path = save_path
             else:
@@ -1954,50 +1957,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         accumulation_tiny_steps = 1
         node_batch_size = 1
 
-
-
-# ggggggggg
-    #%% build dataloader
-    if data_name:
-        train_ratio = 1
-        dataset_path = os.path.join(data_path, data_name)
-        train_dataloader, train_dataset, random_sampler = load_data2(dataset_path, "train", tokenizer, prompt_config, ratio=train_ratio, num=int(train_samples))
-        for s in ["train","test","valid"]:
-            load_data2(dataset_path, s, tokenizer, prompt_config, ratio=train_ratio, num=int(train_samples))
-
-        assert False, "creating data"
-
-        train_records = int(train_samples)
-    else:
-        if "gpt" in model_id: 
-            tokenizer.add_special_tokens(pad_token)
-            tokenizer.add_special_tokens(sep_token)
-            mlog.info("pad token id: %s", tokenizer.pad_token_id)
-            data_collator = MyCollator(tokenizer, model, ds_type="train", model_type="gpt")
-        else:
-            data_collator = MyCollator(tokenizer, model, ds_type="train", prefix=prefix)
-
-        train_dataset = myds["train"]#.map(tokenize)
-        train_dataloader = torch.utils.data.DataLoader(train_dataset,
-            batch_size=node_batch_size,shuffle=shuffle, num_workers=num_workers,
-            collate_fn=data_collator,
-        )
-        if do_valid: 
-            dev_dataset = myds["validation"]#.map(tokenize)
-            dev_dataloader = torch.utils.data.DataLoader(dev_dataset,
-                batch_size=node_batch_size,shuffle=shuffle,
-                collate_fn=data_collator,
-            )
-    #torch.utils.data.DataLoader(myds['validation'],
-    #    batch_size=node_batch_size,shuffle=shuffle,collate_fn=data_collator)
-        train_records = train_dataset.num_records
-    assert train_records != 0, "There is no data to train!!!!!!!!"
-    for logger in [mlog, clog, vlog]:
-        logger.info("Train records: %s", train_records)
-    iterations = train_records//batch_size
-    
-    for logger in [mlog, tlog]:
-        logger.info("Iterations:"  + str(iterations))
+    iterations = (int(train_samples)*int(epochs_num)*int(repeat))//batch_size
     warm_up_steps = 0.002*iterations
     #ppppppppppppppp
     if prefix:
@@ -2050,8 +2010,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         mlog.info("_sum: %s", _sum)
         mlog.info("Wrapped model require grad %s, ", len(rgrad))
         mlog.info("Wrapped model not require grad %s, ", len(nrgrad))
-    if stop_level > 0:
-        mbp("b")
+    mbp(1)
 
     if not no_save_model:
         tokenizer.save_pretrained(save_path)
@@ -2117,7 +2076,47 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         best_eval_step = checkpoint['best_eval_step']
         best_dev_loss = checkpoint['best_dev_loss']
 
+    #%% build dataloader
+    if data_name:
+        train_ratio = 1
+        dataset_path = os.path.join(data_path, data_name)
+        train_dataloader, train_dataset, random_sampler = load_data2(dataset_path, "train", tokenizer, prompt_config, ratio=train_ratio, num=int(train_samples))
+        for s in ["train","test","valid"]:
+            load_data2(dataset_path, s, tokenizer, prompt_config, ratio=train_ratio, num=int(train_samples))
 
+        assert False, "creating data"
+
+        train_records = int(train_samples)
+    else:
+        if "gpt" in model_id: 
+            tokenizer.add_special_tokens(pad_token)
+            tokenizer.add_special_tokens(sep_token)
+            mlog.info("pad token id: %s", tokenizer.pad_token_id)
+            data_collator = MyCollator(tokenizer, model, ds_type="train", model_type="gpt")
+        else:
+            data_collator = MyCollator(tokenizer, model, ds_type="train", prefix=prefix)
+
+        train_dataset = myds["train"]#.map(tokenize)
+        train_dataloader = torch.utils.data.DataLoader(train_dataset,
+            batch_size=node_batch_size,shuffle=shuffle, num_workers=num_workers,
+            collate_fn=data_collator,
+        )
+        if do_valid: 
+            dev_dataset = myds["validation"]#.map(tokenize)
+            dev_dataloader = torch.utils.data.DataLoader(dev_dataset,
+                batch_size=node_batch_size,shuffle=shuffle,
+                collate_fn=data_collator,
+            )
+    #torch.utils.data.DataLoader(myds['validation'],
+    #    batch_size=node_batch_size,shuffle=shuffle,collate_fn=data_collator)
+        train_records = train_dataset.num_records
+    assert train_records != 0, "There is no data to train!!!!!!!!"
+    for logger in [mlog, clog, vlog]:
+        logger.info("Train records: %s", train_records)
+    iterations = train_records//batch_size
+    
+    for logger in [mlog, tlog]:
+        logger.info("Iterations:"  + str(iterations))
     #st_embed = tf.saved_model.load("/home/pouramini/pret/sm")
     def consume(iterator, n):
         '''Advance the iterator n-steps ahead. If n is none, consume entirely.'''
@@ -2144,8 +2143,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         is_freezed = frozen
         freeze_it = False
         unfreeze_it = False
-        if stop_level > 1:
-            mbp("2")
+        mbp(2)
         if epochs_num == 0 or (not wrap and frozen and modules_to_freeze is model):
             mlog.info("Skip training...")
         elif step <= iterations and (wrap or not frozen or modules_to_freeze is not model):
@@ -2187,8 +2185,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                                         global_step, max_acc,
                                         best_path)
 
-                            if stop_level > 1:
-                                mbp("b")
+                            mbp(2)
 
                     try:
                         batch, no_model_batch = next(train_iter)
@@ -2197,7 +2194,6 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                         train_iter = iter(train_dataloader)
                         batch, no_model_batch = next(train_iter)
                     batch = {k:v.to(device=device) for k,v in batch.items()}
-                    mbp("")
                     freeze_it = no_model_batch["freeze"][0]
                     unfreeze_it = no_model_batch["unfreeze"][0]
                     if  unfreeze_it and is_freezed:
@@ -2227,7 +2223,6 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                             #mlog.info("---------------- %s ---------------", encoder.name)
                             #mlog.info("Prompt embedding grads:%s", encoder.embedding.weight.grad)
                             #mlog.info("Norm: %s", torch.linalg.norm(encoder.embedding.weight.grad))
-                            mbp("")
                             break
 
                     optimizer.step()
@@ -2253,7 +2248,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         with torch.no_grad():
             mlog.info("Updating the model weights before evaluaton...")
             wrapped_model.update_model_weight()
-        if True: #not no_save_model:
+        if False: #not no_save_model:
             model.eval()
             save_checkpoint(wrapped_model.underlying_model, tokenizer, 
                     optimizer, scheduler, step, 
@@ -2298,7 +2293,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     if not no_save_best:
         mlog.info("loading best model")
         best_path = os.path.join(save_path, "best_model")
-        model, tokenizer, _ = load_model(model_id, best_path) 
+        #model, tokenizer, _ = load_model(model_id, best_path) 
         if no_save_model:
             shutil.rmtree(best_path)
         model.to(device)
@@ -2310,7 +2305,6 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         dataset_path = os.path.join(data_path, data_name)
         test_dataloader, test_dataset, random_sampler = load_data2(dataset_path, "test", tokenizer, prompt_config, ratio=test_ratio, num=int(test_samples))
         val_records = int(test_samples)
-        mbp("b")
         evaluate1(tokenizer, test_dataloader, model, device, prompt_config, mode="test", save_path="")
         evaluate(test_dataset, test_dataloader, save_path, exp_info, val_records, gen_param, scorers = scorers, batch_size=gen_bs, model=model, tokenizer=tokenizer, set_name=_set, stop_level=stop_level)  
     elif test_set:
