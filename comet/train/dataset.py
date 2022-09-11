@@ -397,7 +397,7 @@ class MyDataset(torch.utils.data.Dataset):
         #    self.data_split[rel][lang].append({query:[response]})
         #else:
         #    self.data_split[rel][lang][query].append(response)
-        return {"query":_query, "event":event, "resp":response, "rel":rel, "index":_counter, "rep":rep, "flag":flags}
+        return {"query":_query, "event":event, "resp":response, "target":resp, "rel":rel, "index":_counter, "rep":rep, "flag":flags}
         #return (_query, event, response, rel, index, rep)
 
 
@@ -854,13 +854,17 @@ class MyDataset(torch.utils.data.Dataset):
                anstemp = "{ph} {dec_token} {resp} {end}"
            else:
                raise ValueError("not supprted method: " + method)
+           flags = self.get_flags(method)
+           return qtemp, anstemp, ex_qtemp, ex_anstemp, flags
+
+    def get_flags(self, method):
            flags = {
                    "method":method,
                    "wrap":"wrap" in method,
                    "freeze":"wrap" in method,
                    "unfreeze":False,
                    }
-           return qtemp, anstemp, ex_qtemp, ex_anstemp, flags
+           return flags
            
     def create_templates(self, method, index, gen_pos="end", prompt_pos="end", rel=""):
            ctx = ["{" + x + "}" for x in all_rels]
@@ -893,7 +897,7 @@ class MyDataset(torch.utils.data.Dataset):
         counter = 0
         pi = 0
         text = fill_prompt(text, rel, "{rel_i}")
-        text = fill_prompt_regex(text, rel, "{([a-zA-Z]+)_(\d+)}")
+        text = fill_prompt_regex(text, rel, "{([a-z_A-Z]+)_(\d+)}")
         text = fill_prompt(text, "com", "{com_i}")
         text = fill_prompt(text, rel, "{tokens}")
         text = fill_prompt(text, rel, "{tokens-rand}")

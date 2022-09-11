@@ -246,9 +246,9 @@ rel_nat_maps = {
     },
     "xIntent":{ 
         1:"Because of {event}, they want {ph}",
-        2:"if {event}, then he want {ph}",
-        3:"Because of {event}, he want to {ph}",
-        4:"Because of {event}, he want {ph}",
+        2:"if {event}, then he wants {ph}",
+        3:"Because of {event}, he wants to {ph}",
+        4:"Because of {event}, he wants {ph}",
         5:"Before {event}, PersonX would want {ph}. ",
         #2:"PersonX want {ph}  Therefore, {event}",
         "fa":"زیرا PersonX می خواست",
@@ -424,6 +424,7 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words
     #    mbp("b")
     #    fill_sample(method, rel)
 
+    cur_embeddings = model.get_input_embeddings()
     for rel, prompt_tokens in encoder_prompts.items():
         mlog.info("******************* Wrapping model for %s", rel)
         mlog.info("******************* from_words %s", from_words)
@@ -452,17 +453,26 @@ def create_encoder(name, model, tokenizer, prompt_tokens, encoder_type="lstm",
     embedding_dim = model.config.hidden_size
     enc_plen = len(prompt_tokens)
 
-    rel_tokens = prompt_tokens + common_tokens
+    rel_tokens = prompt_tokens #+ common_tokens
     mlog.info("** rel tokens : %s", rel_tokens)
     cur_list = tokenizer.additional_special_tokens
     my_specials = [x for x in cur_list if not "<extra_id"  in x]
     #mlog.info("** cur tokens : %s", my_specials)
 
-
     enc_plen =len(rel_tokens) 
     mlog.info("** len tokenizer before extend: %s", len(tokenizer))
     extend_tokenizer(tokenizer, rel_tokens)
     rel_ids = tokenizer.convert_tokens_to_ids(rel_tokens)
+    init_embs = {}
+    for p in rel_tokens:
+        if p.startswith("<emb_"):
+           p = p.strip("<").strip(">")
+           w = p.split("_")[1]
+           wid = tokenizer.convert_tokens_to_ids([w])[0]
+           emb = cur_embeddings.weight[wid,:].detach().clone() 
+           pid = tokenizer.convert_tokens_to_ids([p])[0]
+           init_embs[pid] = emb
+
     mlog.info("** final rel ids: %s", rel_ids)
     id_offset = min(rel_ids) 
     prompt_encoder = None
@@ -483,13 +493,13 @@ def create_encoder(name, model, tokenizer, prompt_tokens, encoder_type="lstm",
         if enc_plen > 0:
             mlog.info("Prompt Encoder defined : %s", enc_plen)
             prompt_encoder = MLPPromptEncoder(name, enc_plen,
-                    embedding_dim,id_offset = -1, prompt_ids=rel_ids, num_layers=num_layers, hidden_size=hidden_size)
+                    embedding_dim,id_offset = -1, prompt_ids=rel_ids, init_embs=init_embs, num_layers=num_layers, hidden_size=hidden_size)
     elif encoder_type.startswith("emb"):
         mlog.info("in Emb %s", encoder_type)
         if enc_plen > 0:
             mlog.info("Prompt Encoder defined : %s", enc_plen)
             prompt_encoder = EmbeddingPromptEncoder(name, enc_plen,
-                    embedding_dim,id_offset = -1, prompt_ids=rel_ids)
+                    embedding_dim,id_offset = -1, prompt_ids=rel_ids, init_embs=init_embs)
     else:
         if enc_plen > 0:
             _enc_type = encoder_type.split("@")
@@ -501,7 +511,7 @@ def create_encoder(name, model, tokenizer, prompt_tokens, encoder_type="lstm",
                 hidden_size = int(_enc_type[2])
             mlog.info("Prompt Encoder defined : %s", enc_plen)
             prompt_encoder = LSTMEmbeddingPromptEncoder(name, enc_plen,embedding_dim,
-                    id_offset = -1, prompt_ids=rel_ids, num_layers=num_layers, hidden_size=hidden_size)
+                    id_offset = -1, prompt_ids=rel_ids, init_embs=init_embs, num_layers=num_layers, hidden_size=hidden_size)
 
     model.resize_token_embeddings(len(tokenizer))
 

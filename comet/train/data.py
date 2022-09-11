@@ -8,8 +8,40 @@ import random
 
 
 class xAttrDataset(MyDataset):
-    pass
+    def get_templates(self, method, index, **kwargs):
+       ex_qtemp = ""
+       ex_anstemp = ""
+       qtemp = "{event} {ph}"
+       anstemp = "{ph} {resp} {end}"
+       flags = self.get_flags(method)
+       if method == "unsup-wrap-nat":
+           qtemp = "{rel_8} {event}, So PersonX is seen as {ph}."
+       else:
+          return super().get_templates(method, **kwargs)
+       return qtemp, anstemp, ex_qtemp, ex_anstemp, flags 
 
+class xIntentDataset(MyDataset):
+    def get_templates(self, method, index, **kwargs):
+       ex_qtemp = ""
+       ex_anstemp = ""
+       qtemp = "{event}"
+       anstemp = "{ph} {resp} {end}"
+       flags = self.get_flags(method)
+       if method == "unsup-nat":
+           if self.temp_num == 1:
+               qtemp = "Why does {event}? {ph}"
+               anstemp = "{ph} Because he wants {resp} {end}."
+           elif self.temp_num == 2:
+               qtemp = "Why does {event}? Because he wants {ph}"
+               anstemp = "{ph} {resp} {end}"
+       elif method == "sup-nat":
+           qtemp = "Why does {event}?"
+           anstemp = "Because he wants {resp} {end}"
+       elif method == "unsup-wrap-nat":
+           qtemp = "{emb_because_1} {emb_test_2} Because of {event}, they want {ph}"
+       else:
+          return super().get_templates(method, **kwargs)
+       return qtemp, anstemp, ex_qtemp, ex_anstemp, flags 
 
 class CBDataset(MyDataset):
     def get_templates(self, method, index, **kwargs):
@@ -51,5 +83,7 @@ class CBDataset(MyDataset):
        return qtemp, anstemp, ex_qtemp, ex_anstemp, flags 
 
 data_conf = {
-        "cb": CBDataset
+        "cb": CBDataset,
+        "xIntent":xIntentDataset,
+        "xAttr":xAttrDataset 
         }

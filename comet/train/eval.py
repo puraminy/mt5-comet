@@ -459,7 +459,8 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
         for b, top_hyp in zip(batch_list, hyps):
             query = b["query"]
             inp = b["event"]
-            tail = b["resp"]
+            tail = b["target"]
+            resp = b["resp"]
             rel = b["rel"]
             qid = b["index"]
             repid = b["rep"]
@@ -481,7 +482,9 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
                 blank, top_hyp = top_hyp.split("<extra_id_1>")
                 if not blank: blank = "EMPT"
             mlog.info("hyp: %s",top_hyp)
-            for const in resp_const_parts:
+            mbp(0)
+            resp_prefix = resp.replace(tail, "")
+            for const in resp_const_parts + [resp_prefix]:
                 top_hyp = top_hyp.replace(const, "")
                 blank = blank.replace(const, "")
             mlog.info("hyp: %s", top_hyp)

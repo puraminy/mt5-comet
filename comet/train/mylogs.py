@@ -42,14 +42,28 @@ vlog = logging.getLogger("comet.eval")
 tlog = logging.getLogger("comet.train")
 timelog = logging.getLogger("comet.time")
 
-SL = 0
-def mbp(m=-1):
-    if m == SL: 
-        mlog.info(m)
+import inspect
+import sys
+STOP_LEVEL = 0
+def mbp(sl=-1):
+    if sl == STOP_LEVEL or sl == 0: 
+        fname = sys._getframe().f_back.f_code.co_name
+        line = sys._getframe().f_back.f_lineno
+        mlog.info("break point at %s line %s",fname, line)
         breakpoint()
 
+def trace(frame, event, arg):
+    if event == "call":
+        filename = frame.f_code.co_filename
+        if filename.endswith("train/train.py"):
+            lineno = frame.f_lineno
+            # Here I'm printing the file and line number,
+            # but you can examine the frame, locals, etc too.
+            print("%s @ %s" % (filename, lineno))
+    return trace
 
 mlog.info(now)
+#sys.settrace(trace)
 
 for logger, fname in zip([mlog,dlog,clog,vlog,tlog,timelog], ["all_main","all_data","all_cfg","all_eval","all_train", "all_time"]):
     logger.setLevel(logging.INFO)

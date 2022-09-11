@@ -1,5 +1,6 @@
 #%% load libraries
 import debugpy
+import comet.train.mylogs as mylogs 
 from comet.train.common import *
 from comet.train.dataset import *
 from comet.train.data import *
@@ -41,7 +42,7 @@ class MyCollator(object):
         self.prompt_config = None
 
 #gggggggggggggg
-    def collate(self, enc_qs, enc_resps, queries, resps, flags):
+    def collate(self, enc_qs, enc_resps, queries, resps, targets, flags):
         bs = len(enc_qs)
         q_len = [len(i) for i in enc_qs]
         max_enc_len = max(q_len)
@@ -61,13 +62,14 @@ class MyCollator(object):
             "labels": torch.ones(bs, max_dec_len, dtype=torch.long) * pad_id,
             "loss_mask": torch.zeros(bs, max_dec_len),
             "query":[""]*bs,
+            "target":[""]*bs,
             "resp":[""]*bs,
             "wrap":[False]*bs,
             "freeze":[False]*bs,
             "unfreeze":[False]*bs,
             "method":[""]*bs
         }
-        for i, (q, r, query, resp, flag) in enumerate(zip(enc_qs, enc_resps, queries, resps, flags)):
+        for i, (q, r, query, resp, target, flag) in enumerate(zip(enc_qs, enc_resps, queries, resps, targets, flags)):
             dec_ids = [pad_id] + r #+ [self.tokenizer.eos_token_id]
             label = r[:-1] #+ [self.tokenizer.eos_token_id]
             model_data["input_ids"][i][:len(q)] = torch.tensor(q, dtype=torch.long)
@@ -79,6 +81,7 @@ class MyCollator(object):
             model_data["labels"][i][:len(label)] = torch.tensor(label, dtype=torch.long)
             no_model_data["labels"][i][:len(label)] = torch.tensor(label, dtype=torch.long)
             no_model_data["query"][i] = query 
+            no_model_data["target"][i] = target 
             no_model_data["wrap"][i] = flag["wrap"] 
             no_model_data["freeze"][i] = flag["freeze"] 
             no_model_data["unfreeze"][i] = flag["unfreeze"] 
@@ -102,6 +105,7 @@ class MyCollator(object):
         dec_starts = []
         enc_queries = []
         enc_responses = []
+        targets = []
         flags = []
         for b in batch:
             enc_query = self.tokenizer.encode(b["query"])
@@ -112,11 +116,12 @@ class MyCollator(object):
             enc_responses.append(enc_resp)
             rel.append(b["rel"])
             inputs.append(b["event"].strip())
+            targets.append(b["target"].strip())
             index.append(b["index"])
             rep.append(b["rep"])
             flags.append(b["flag"])
 
-        return self.collate(enc_queries, enc_responses, queries, responses, flags)
+        return self.collate(enc_queries, enc_responses, queries, responses, targets, flags)
         #queries,inputs, responses,rel,index,rep = zip(*batch)
         no_model_batch = {}
         tokenizer = self.tokenizer
@@ -392,7 +397,6 @@ def run(ctx, conf_path, base_conf, experiment,
         only_var, sep, num_exps, one, cpu, undone, 
         dpy, port, stop_level, reval_bests, trial):
 
-     global SL
      if dpy:
         debugpy.listen(('0.0.0.0', int(port)))
         print("Waiting for client at run...port:", port)
@@ -415,8 +419,8 @@ def run(ctx, conf_path, base_conf, experiment,
            args["config"] = ""
            args["output_name"] = "" 
            args["experiment"] = experiment 
-           args["stop_level"] = sl 
-           SL = sl
+           args["stop_level"] = stop_level 
+           mylogs.STOP_LEVEL = stop_level
            if cpu:
                args["cpu"] = True
                os.environ["CUDA_VISIBLE_DEVICES"] = ""
@@ -1345,9 +1349,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
 
     #%% some hyper-parameters
 
-    global SL
-    SL = stop_level
-
+    mylogs.STOP_LEVEL = stop_level
 # Allow other computers to attach to debugpy at this IP address and port.
     if dpy:
         debugpy.listen(('0.0.0.0', 5678))
@@ -1745,7 +1747,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             ds_list += ["validation"]
         #ds_list += ["sample"]
         myds = load_data(ds_list)
-        if True: #wrap or show_samples: 
+        if True: #wrap or show_samples: It's required to retrive prompt tokens
             samples_iter = iter(myds["train"])
             ii = 0
             _sample = True
@@ -1762,7 +1764,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                     generated_samples["sample"].append((_sample[0], _sample[1]))
             logger.info("--------------------------------")
             logger.info("Preparing samples: %s ", len(generated_samples["sample"]))
-            mbp(1)
+            mbp("data")
+    extend_tokenizer(tokenizer)
     if model_id == "test" or show_samples:
         return
 
@@ -1984,7 +1987,6 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
 
     wrapped_model = wrap_model(model_to_wrap, tokenizer, encoder_type, load_prompt_path, from_words = from_words, merge_prompts=merge_prompts, method = method, shared_embs= shared_embs) 
 
-    extend_tokenizer(tokenizer)
     mlog.info("len tokenizer after extending %s", len(tokenizer))
     if not prefix:
         model.resize_token_embeddings(len(tokenizer))
@@ -2143,7 +2145,6 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         is_freezed = frozen
         freeze_it = False
         unfreeze_it = False
-        mbp(2)
         if epochs_num == 0 or (not wrap and frozen and modules_to_freeze is model):
             mlog.info("Skip training...")
         elif step <= iterations and (wrap or not frozen or modules_to_freeze is not model):
@@ -2185,7 +2186,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                                         global_step, max_acc,
                                         best_path)
 
-                            mbp(2)
+                            mbp(1)
 
                     try:
                         batch, no_model_batch = next(train_iter)
