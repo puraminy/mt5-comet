@@ -18,7 +18,7 @@ import nltk
 
 def forward_step(model, batch, no_model_batch, accumulation_tiny_steps=1, mode="train"):
     for k in no_model_batch:
-        if k not in  ["resp", "query", "wrap", "freeze", "unfreeze", "method"]:
+        if k not in  ["resp", "query", "target", "wrap", "freeze", "unfreeze", "method"]:
             no_model_batch[k] = no_model_batch[k].to(device)
 
     result = model(**batch)
@@ -68,7 +68,7 @@ def evaluate1(tokenizer, eval_data_loader, model, device, prompt_config, mode="d
             for k in model_batch:
                 model_batch[k] = model_batch[k].to(device)
             for k in no_model_batch:
-                if k not in  ["resp", "query", "wrap", "freeze", "unfreeze", "method"]:
+                if k not in  ["resp", "query", "target", "wrap", "freeze", "unfreeze", "method"]:
                     no_model_batch[k] = no_model_batch[k].to(device)
 
             decs = generate(gen_model, tokenizer, model_batch)
@@ -393,8 +393,8 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
 
     #local_path = f"{base_path}/paraphrase-multilingual-MiniLM-L12-v2"        
     #df = df.groupby(['prefix','input_text'],as_index=False)[target].agg({"target_text":'<br />'.join})
-    #resp_const_parts = re.split("{.*}", anstemp)
-    resp_const_parts = ["<pad>","<extra_id_0>", "<extra_id_1>", "<extra_id_2>", "</s>", "."]
+    #resp_cost_toks = re.split("{.*}", anstemp)
+    resp_cost_toks = ["<pad>","<extra_id_0>", "<extra_id_1>", "<extra_id_2>", "</s>", "."]
     if model is not None: model.eval()
     rows = []
     sel_rows = []
@@ -482,13 +482,22 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
                 blank, top_hyp = top_hyp.split("<extra_id_1>")
                 if not blank: blank = "EMPT"
             mlog.info("hyp: %s",top_hyp)
-            mbp(0)
-            resp_prefix = resp.replace(tail, "")
-            for const in resp_const_parts + [resp_prefix]:
+            resp_const = resp.split(tail)
+            # constant words in target template
+            affixes = []
+            for rp in resp_const:
+                affix = rp
+                for const in resp_cost_toks:
+                    affix = affix.replace(const, "")
+                if affix:
+                    affixes.append(affix.strip())
+
+            for const in resp_cost_toks + affixes:
                 top_hyp = top_hyp.replace(const, "")
                 blank = blank.replace(const, "")
             mlog.info("hyp: %s", top_hyp)
-            if not top_hyp.strip():
+            top_hyp = top_hyp.strip()
+            if not top_hyp:
                 top_hyp = "EMPT"
             data["blank"] = blank
             data["pred_text1"] = str(top_hyp)
@@ -508,6 +517,7 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
             #    query = query.replace("<extra_id_0>", ">>" + top_hyp)
             data["input_text"] = inp
             data["query"] = query 
+            data["resp"] = resp
             _q = query.replace("<", "\n<", 1)
             _q = _q.replace(">", ">\n")
             data["prompt"] = _q

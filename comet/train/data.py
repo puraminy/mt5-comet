@@ -28,10 +28,10 @@ class xIntentDataset(MyDataset):
        anstemp = "{ph} {resp} {end}"
        flags = self.get_flags(method)
        if method == "unsup-nat":
-           if self.temp_num == 1:
+           if int(self.temp_num) == 1:
                qtemp = "Why does {event}? {ph}"
                anstemp = "{ph} Because he wants {resp} {end}."
-           elif self.temp_num == 2:
+           elif int(self.temp_num) == 2:
                qtemp = "Why does {event}? Because he wants {ph}"
                anstemp = "{ph} {resp} {end}"
        elif method == "sup-nat":

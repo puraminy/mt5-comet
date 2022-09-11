@@ -80,10 +80,10 @@ def find_common(df, main_df, on_col_list, s_rows, FID, char):
         mlog.info("%s == %s", FID, exp)
         cond = f"(main_df['{FID}'] == '{exp}')"
         tdf = main_df[main_df[FID] == exp]
-        tdf = tdf[["pred_text1", "exp_name", "id","hscore", "bert_score","query", "method", "rouge_score", "fid","prefix", "input_text","target_text"]]
+        tdf = tdf[["pred_text1", "exp_name", "id","hscore", "bert_score","query", "resp", "method", "rouge_score", "fid","prefix", "input_text","target_text"]]
         tdf = tdf.sort_values(by="rouge_score", ascending=False)
         if len(tdf) > 1:
-            tdf = tdf.groupby(on_col_list).agg({"exp_name":"first","query":"first","input_text":"first","target_text":"first", "hscore":"first", "method":"first", "rouge_score":"first","prefix":"first","pred_text1":"first", "fid":"first", "id":"count","bert_score":"first"}).reset_index(drop=True)
+            tdf = tdf.groupby(on_col_list).agg({"exp_name":"first","query":"first", "resp":"first","input_text":"first","target_text":"first", "hscore":"first", "method":"first", "rouge_score":"first","prefix":"first","pred_text1":"first", "fid":"first", "id":"count","bert_score":"first"}).reset_index(drop=True)
             for on_col in on_col_list:
                 tdf[on_col] = tdf[on_col].astype(str).str.strip()
             #tdf = tdf.set_index(on_col_list)
@@ -312,6 +312,7 @@ def show_df(df):
             df[_col] = df[_col].astype(str)
 
     adjust = True
+    show_consts = True
     while ch != ord("q"):
         text_win.clear()
         left = min(left, max_col  - width)
@@ -352,10 +353,11 @@ def show_df(df):
         infos.append("-------------------------")
         infos.append(f"hotkey:{hotkey}")
         consts["len"] = str(len(df))
-        for key,val in consts.items():
-            if type(val) == list:
-                val = "-".join(val)
-            infos.append("{:<5}:{}".format(key,val))
+        if show_consts:
+            for key,val in consts.items():
+                if type(val) == list:
+                    val = "-".join(val)
+                infos.append("{:<5}:{}".format(key,val))
         change_info(infos)
 
         prev_char = chr(ch)
@@ -699,6 +701,8 @@ def show_df(df):
             _glist = [col, "prefix"]
             sel_cols =  load_obj("sel_cols", context, [])
             info_cols = load_obj("info_cols", context, [])
+            if True:
+                info_cols = ["query", "resp"]
             if True: #not sel_cols:
                sel_cols = ["exp_trial", "prefix","method", "n_preds", "rouge_score", "steps","max_acc","best_step",  "bert_score", "st_score", "learning_rate",  "num_targets", "num_inps", "num_records", "wrap", "frozen", "prefixed"]
 
@@ -787,6 +791,7 @@ def show_df(df):
                     df["exp_name_y"] = "|".join(list(set(fid_y.split("@")) - set(fid_x.split("@"))))
             sel_cols = on_col_list
             info_cols = []
+            show_consts = False
             sel_cols.remove("prefix")
             if len(sel_rows) > 2:
                 df = df.reset_index()
@@ -796,7 +801,7 @@ def show_df(df):
                     if _col.startswith("pred_text1"):
                         info_cols.append(_col)
             else:
-                _from_cols = ["pred_text1","fid", "id", "pred_text1_x", "pred_text1_y","query_x","query_y", "query", "method", "prefix", "input_text","target_text_x", "target_text", "rouge_score", "rouge_score_x","rouge_score_y", "bert_score", "bert_score_x", "bert_score_y", "exp_name_x", "exp_name_y"]
+                _from_cols = ["pred_text1","fid", "id", "pred_text1_x", "pred_text1_y","query_x","query_y", "query", "resp", "resp_x", "resp_y", "method", "prefix", "input_text","target_text_x", "target_text", "rouge_score", "rouge_score_x","rouge_score_y", "bert_score", "bert_score_x", "bert_score_y", "exp_name_x", "exp_name_y"]
                 for _col in _from_cols:
                     if (_col.startswith("id") or
                         _col.startswith("pred_text1") or 

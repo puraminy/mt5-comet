@@ -2294,7 +2294,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     if not no_save_best:
         mlog.info("loading best model")
         best_path = os.path.join(save_path, "best_model")
-        #model, tokenizer, _ = load_model(model_id, best_path) 
+        model, tokenizer, _ = load_model(model_id, best_path) 
         if no_save_model:
             shutil.rmtree(best_path)
         model.to(device)
