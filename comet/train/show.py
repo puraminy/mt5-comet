@@ -318,6 +318,8 @@ def show_df(df):
             }
     adjust = True
     show_consts = True
+    show_extra = False
+    extra = {}
     while ch != ord("q"):
         text_win.clear()
         left = min(left, max_col  - width)
@@ -356,10 +358,15 @@ def show_df(df):
                 _info = f"Mean {c}:" + "{:.2f}".format(mean)
                 infos.append(_info)
         infos.append("-------------------------")
-        infos.append(f"hotkey:{hotkey}")
-        consts["len"] = str(len(df))
         if show_consts:
+            consts["len"] = str(len(df))
             for key,val in consts.items():
+                if type(val) == list:
+                    val = "-".join(val)
+                infos.append("{:<5}:{}".format(key,val))
+        if show_extra:
+            show_extra = False
+            for key,val in extra.items():
                 if type(val) == list:
                     val = "-".join(val)
                 infos.append("{:<5}:{}".format(key,val))
@@ -692,11 +699,13 @@ def show_df(df):
                 sel_rows.append(sel_row)
             adjust = False
         elif char == "?": 
-            exp=df.iloc[sel_row]["fid"]
-            sel_exp = exp
-            consts["exp"] = exp
-            path = main_df.loc[main_df["fid"] == exp, "path"][0]
-            consts["path"] = path
+            if "fid" in df.iloc[sel_row]:
+                exp=df.iloc[sel_row]["fid"]
+                sel_exp = exp
+                consts["exp"] = exp
+                path = main_df.loc[main_df["fid"] == exp, "path"][0]
+                extra["path"] = path
+            show_extra = True
         elif char == "G":
             backit(df, sel_cols)
             if FID == "input_text":
@@ -731,6 +740,18 @@ def show_df(df):
             df["num_targets"] = num_targets
             df["num_inps"] = num_inps
             df["avg_len"] = avg_len
+            _infos =""
+            for c in sel_cols:
+                _count = 0
+                try:
+                    _count = df[c].nunique()
+                    _first = df[c].iloc[0]
+                except:
+                    continue
+                if _count == 1:
+                    sel_cols.remove(c)
+                    _infos += f"{c}:{_first}  |  "
+            extra["common"] = _infos
             df = df.sort_values(by = ["rouge_score"], ascending=False)
         elif char == "u":
             left = 0
@@ -1382,12 +1403,14 @@ def change_info(infos):
     info_bar.erase()
     h,w = info_bar.getmaxyx()
     w = 80
+    lnum = 0
     for msg in infos:
         lines = textwrap.wrap(msg, width=w, placeholder=".")
         for line in lines: 
             mprint(str(line), info_bar, color=HL_COLOR)
+            lnum += 1
     rows,cols = std.getmaxyx()
-    info_bar.refresh(0,0, rows -len(infos),0, rows-1, cols - 2)
+    info_bar.refresh(0,0, rows -lnum - 1,0, rows-1, cols - 2)
 si_hash = {}
 def list_values(vals,si=0, sels=[]):
     tag_win = cur.newwin(15, 70, 3, 5)

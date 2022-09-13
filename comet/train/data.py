@@ -61,10 +61,14 @@ class xIntentDataset(MyDataset):
                qtemp = "Why does {event}? Because "
                anstemp = "he intends {resp} {end}"
        elif method == "unsup-wrap-nat":
-           if tn == 1:
-               qtemp = "{emb_because_1} {emb_test_2} Because of {event}, they want {ph}"
-           elif tn == 6:
+           if tn == 6:
                qtemp = "{emb_because_1} {emb_of_1} {event}, {emb_they_1} {emb_want_1} {ph}"
+           elif tn == 61:
+               qtemp = "{because_1} {of_1} {event}, {they_1} {want_1} {ph}"
+           elif tn == 62:
+               qtemp = "{rel_4} {event}, {ph}"
+           elif tn == 63:
+               qtemp = "{rel_4} Because of {event}, they want {ph}"
        else:
           return super().get_templates(method, **kwargs)
        return qtemp, anstemp, ex_qtemp, ex_anstemp, flags 

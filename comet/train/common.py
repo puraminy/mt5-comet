@@ -365,15 +365,15 @@ def extend_tokenizer(tokenizer, prompt_tokens = [], model_id=""):
 
     num_new_tokens: int = tokenizer.add_special_tokens(num_added_toks)
     rels_tokens = []
-    for x,t in rel_nat_maps.items():
-        rels_tokens += t["tokens"].split()
+    #for x,t in rel_nat_maps.items():
+    #    rels_tokens += t["tokens"].split()
 
-    rels_tokens = list(set(rels_tokens))
+    #rels_tokens = list(set(rels_tokens))
 
-    mlog.info("RELS %s", rels_tokens)
+    #mlog.info("RELS %s", rels_tokens)
     #new_tokens = tokens.t5_tokens + \
     new_tokens = list(set(rel_maps.values()))+ \
-                 list(set(gen_tokens.values())) + rels_tokens 
+                 list(set(gen_tokens.values())) #+ rels_tokens 
     if prompt_tokens:
         new_tokens += prompt_tokens
 

@@ -2006,8 +2006,12 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         model.pretrain_model.resize_token_embeddings(len(tokenizer))
 
     wrapped_model.to(device=device)
+    mlog.info("Number of encoders: %s", len(wrapped_model.prompt_encoders))
+    for encoder in wrapped_model.prompt_encoders:
+        mlog.info("encoder %s", encoder.name)
     wrapped_model.prompt_encoders.to(device=device)
     mlog.info("len tokenizer after wrapping %s", len(tokenizer))
+    mbp("wrap")
     if wrapped_model:
         #model.get_input_embeddings().weight.requires_grad = False
         rgrad = [p for p in wrapped_model.parameters() if p.requires_grad]
@@ -2024,7 +2028,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         mlog.info("_sum: %s", _sum)
         mlog.info("Wrapped model require grad %s, ", len(rgrad))
         mlog.info("Wrapped model not require grad %s, ", len(nrgrad))
-    mbp(1)
+        mbp("wrap")
 
     if not no_save_model:
         tokenizer.save_pretrained(save_path)
