@@ -424,7 +424,6 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words
     #    mbp("b")
     #    fill_sample(method, rel)
 
-    cur_embeddings = model.get_input_embeddings()
     for rel, prompt_tokens in encoder_prompts.items():
         mlog.info("******************* Wrapping model for %s", rel)
         mlog.info("******************* from_words %s", from_words)
@@ -463,6 +462,7 @@ def create_encoder(name, model, tokenizer, prompt_tokens, encoder_type="lstm",
     mlog.info("** len tokenizer before extend: %s", len(tokenizer))
     extend_tokenizer(tokenizer, rel_tokens)
     rel_ids = tokenizer.convert_tokens_to_ids(rel_tokens)
+    cur_embeddings = model.get_input_embeddings()
     init_embs = {}
     for p in rel_tokens:
         if p.startswith("<emb_"):

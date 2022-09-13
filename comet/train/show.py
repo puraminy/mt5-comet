@@ -311,6 +311,11 @@ def show_df(df):
         if _col in df:
             df[_col] = df[_col].astype(str)
 
+    map_cols = {
+            "epochs_num":"epn",
+            "exp_trial":"exp",
+            "temp_num":"tn",
+            }
     adjust = True
     show_consts = True
     while ch != ord("q"):
@@ -329,7 +334,7 @@ def show_df(df):
                if not sel_col in df:
                    sel_cols.remove(sel_col)
                    continue
-               head = sel_col 
+               head = sel_col if not sel_col in map_cols else map_cols[sel_col] 
                #head = textwrap.shorten(f"{i} {head}" , width=15, placeholder=".")
                if not sel_col in col_widths and not adjust:
                     _, col_widths = row_print(df, sel_row, col_widths={})
@@ -704,7 +709,7 @@ def show_df(df):
             if True:
                 info_cols = ["query", "resp"]
             if True: #not sel_cols:
-               sel_cols = ["exp_trial", "prefix","method", "n_preds", "rouge_score", "steps","max_acc","best_step",  "bert_score", "st_score", "learning_rate",  "num_targets", "num_inps", "num_records", "wrap", "frozen", "prefixed"]
+               sel_cols = ["exp_trial","temp_num", "prefix","method", "n_preds", "rouge_score", "steps","max_acc","best_step",  "bert_score", "st_score", "learning_rate",  "num_targets", "num_inps", "num_records", "wrap", "frozen", "prefixed"]
 
             num_targets = (df['prefix']+'_'+df['target_text']).groupby(df[col]).nunique()
             n_preds = (df['prefix']+'_'+df['pred_text1']).groupby(df[col]).nunique()

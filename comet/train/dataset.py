@@ -974,13 +974,15 @@ class MyDataset(torch.utils.data.Dataset):
     def fill_vars(self, template, rel, event, resp, gen_token= "gen_en",  inp_lang="en", resp_lang="en", ph_num=3, temp_num = 1, someone=False):
         if type(temp_num) == str and temp_num.isnumeric():
             temp_num = int(temp_num)
-        assert temp_num in rel_nat_maps[rel], rel + " for " + str(temp_num)
         event1, event2= "",""
         if "{@@@}" in event:
             #mbp("b")
             event1, event2 = event.split("{@@@}")
             event = event.replace("{@@@}"," ")
-        rel_natural = rel_nat_maps[rel][temp_num]        
+        if temp_num in rel_nat_maps[rel]:
+            rel_natural = rel_nat_maps[rel][temp_num]        
+        else:
+            rel_natural = rel_nat_maps[rel][1]        
         rel_natural_tokens = rel_nat_maps[rel]["nat-tokens"]        
         rel_natural_pure = rel_natural.replace("{ph}", "")
         rel_natural_pure = rel_natural_pure.replace(".", "")

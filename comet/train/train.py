@@ -389,13 +389,19 @@ def cli():
     type=str,
     help="You can set it for repeating experiments with different identities"
 )
+@click.option(
+    "--show_samples",
+    "-ss",
+    is_flag=True,
+    help=""
+)
 @click.pass_context
 #rrrrrrrrrrr
 def run(ctx, conf_path, base_conf, experiment, 
         exclude_conf, include_conf, overwrite_conf, var, 
         save_model, addto, rem, save_data, load_data, add_prefix, wrap, 
         only_var, sep, num_exps, one, cpu, undone, 
-        dpy, port, stop_level, reval_bests, trial):
+        dpy, port, stop_level, reval_bests, trial, show_samples):
 
      if dpy:
         debugpy.listen(('0.0.0.0', int(port)))
@@ -419,6 +425,9 @@ def run(ctx, conf_path, base_conf, experiment,
            args["config"] = ""
            args["output_name"] = "" 
            args["experiment"] = experiment 
+           args["show_samples"] = show_samples 
+           if show_samples:
+               stop_level = "data"
            args["stop_level"] = stop_level 
            mylogs.STOP_LEVEL = stop_level
            if cpu:
@@ -1754,7 +1763,10 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             generated_samples["sample"] = []
             logger = mlog
             logger.info("----------- SAMPLES -------------")
+            logger.info(f"----------- {method} -------------")
+            logger.info("----------- SAMPLES -------------")
             while _sample and ii < int(batch_size):
+                logger.info(f"----------- {method} -------------")
                 _sample = next(samples_iter, None)
                 if _sample["rep"] > 0:
                     continue
@@ -1765,9 +1777,9 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             logger.info("--------------------------------")
             logger.info("Preparing samples: %s ", len(generated_samples["sample"]))
             mbp("data")
-    extend_tokenizer(tokenizer)
     if model_id == "test" or show_samples:
         return
+    extend_tokenizer(tokenizer)
 
     prompt_config = None
     if prompt_tune:
@@ -2291,14 +2303,14 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         train_result = trainer.train()
 
     # vvvv
-    if not no_save_best:
+    if do_valid and not no_save_best:
         mlog.info("loading best model")
         best_path = os.path.join(save_path, "best_model")
         model, tokenizer, _ = load_model(model_id, best_path) 
         if no_save_model:
             shutil.rmtree(best_path)
         model.to(device)
-        model.eval()
+    model.eval()
     #vvvvvv
     if data_name:
         test_ratio = 1
