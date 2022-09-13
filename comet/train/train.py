@@ -496,6 +496,10 @@ def run(ctx, conf_path, base_conf, experiment,
                #all_vars = sorted(all_vars)
                var_names = [x.split("=")[0] for x in all_vars]
                values = [x.split("=")[1].split("#") for x in all_vars]
+               if "rel_filter" in var_names:
+                   index = var_names.index("rel_filter")
+                   if "multi" in values[index]:
+                       save_data = True
                tot_comb = [dict(zip(var_names, comb)) for comb in itertools.product(*values)]
                ii = 0
                orig_args = args.copy()
@@ -536,10 +540,12 @@ def run(ctx, conf_path, base_conf, experiment,
                    if save_data: 
                        args["save_data"] = spath
                    if args["rel_filter"] == "multi":
+                       mbp("multi")
                        args["data_path"] = spath
                        args["rel_filter"] = "" 
                        args["multi"]= True
                        args["use_all_data"] = True
+                       args["save_data"] = False
                    else:
                        _dp = os.path.join(dataPath,"sel",args["rel_filter"] + ".tsv")
                        args["data_path"] = orig_args["data_path"]
@@ -551,20 +557,20 @@ def run(ctx, conf_path, base_conf, experiment,
                            args["use_all_data"] = False
                            args["test_path"] = orig_args["test_path"]
                            args["test_samples"] = orig_args["test_samples"] 
-                       args["exp_id"] = ii
-                       ow = args["overwrite"]
-                       if reval_bests:
-                           lp = os.path.join(spath, ow, "best_model")
-                           if not Path(lp).exists():
-                               mlog.info("Skipping reval, no saved model")
-                               continue
-                           else:
-                               mlog.info("Loading model from %s", lp)
-                               args["do_eval"] = True
-                               args["test_set"] = "validation" 
-                               args["load_path"] = lp
-                               args["trial"] = "reval"
-                       ctx.invoke(train, **args, run_args = run_args)
+                   args["exp_id"] = ii
+                   ow = args["overwrite"]
+                   if reval_bests:
+                       lp = os.path.join(spath, ow, "best_model")
+                       if not Path(lp).exists():
+                           mlog.info("Skipping reval, no saved model")
+                           continue
+                       else:
+                           mlog.info("Loading model from %s", lp)
+                           args["do_eval"] = True
+                           args["test_set"] = "validation" 
+                           args["load_path"] = lp
+                           args["trial"] = "reval"
+                   ctx.invoke(train, **args, run_args = run_args)
         else:
             confs = sorted(glob.glob(f"{_path}/*"))
             default_model = ""
@@ -1925,6 +1931,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             mlog.info("Evaluating ... %s", _set)
             val_records = myds[_set].num_records
             exp_info["test_set"] = _set
+            exp_info["val_records"] = val_records 
             a1, a2, s1, r = evaluate1(tokenizer, test_dataloader, model, device, prompt_config, mode="test", save_path=save_path, wrap=False)
             mlog.info("acc1: %s, acc2: %s, sts: %s, res: %s", a1, a2, s1, r)
             mbp(2)
@@ -2150,6 +2157,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     epochs_num = int(epochs_num)
     cycle = int(cycle)
     wrap = True
+    exp_info["train_records"] = train_dataset.num_records
+    exp_info["iterations"] = iterations 
     def train_loop(epochs_num, wrap, optimizer, scheduler):
         train_iter = iter(train_dataloader)
         global_step = 0

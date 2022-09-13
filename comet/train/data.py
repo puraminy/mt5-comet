@@ -27,7 +27,7 @@ class xAttrDataset(MyDataset):
            elif tn == 5:
                qtemp = "{rel_2} {event}, {emp_so_1} {emp_person_1} is {emb_seen_1} as {ph}."
            elif tn == 6:
-               qtemp = "{event}, {emp_so_1} {emp_person_1} is {emb_seen_1} as {ph}."
+               qtemp = "{event}, {emp_so_1} {emp_they_1} are {emb_seen_1} as {ph}."
        else:
           return super().get_templates(method, **kwargs)
        return qtemp, anstemp, ex_qtemp, ex_anstemp, flags 

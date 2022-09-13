@@ -222,6 +222,9 @@ class MyDataset(torch.utils.data.Dataset):
     def save_data(self, save_path, merge=True):
         mlog.info("Saving data set in dataframe ...")
         df1 = None
+        save_dir = save_path
+        if save_path.endswith(".tsv"):
+            save_dir = Path(save_path).parent
         if merge and Path(save_path).is_file():
             df1 = pd.read_table(save_path)
         rows = []
@@ -238,6 +241,7 @@ class MyDataset(torch.utils.data.Dataset):
                  (df1["target_text"] == row["target_text"])).any():
                 rows.append(data)
         df = pd.DataFrame(rows)
+        #df.to_csv(os.path.join(save_dir, self.rel_filter + "_" + self.split_name + ".tsv"), sep="\t", index=False)
         if merge and df1 is not None:
             df = pd.concat([df1, df])
         df.to_csv(save_path, sep="\t", index=False)

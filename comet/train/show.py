@@ -7,6 +7,7 @@ import click
 import numpy as np
 from glob import glob
 import six
+import debugpy
 import os, shutil
 import re
 import seaborn as sns
@@ -177,7 +178,7 @@ def show_df(df):
     main_df = df
     edit_col = ""
     count_col = ""
-    consts = {"filter":[], "inp":""}
+    extra = {"filter":[], "inp":""}
     save_obj(dfname, "dfname", "")
     sel_cols = list(df.columns)
     for col in df.columns:
@@ -319,7 +320,8 @@ def show_df(df):
     adjust = True
     show_consts = True
     show_extra = False
-    extra = {}
+    consts = {}
+    extra = {"filter":[]}
     while ch != ord("q"):
         text_win.clear()
         left = min(left, max_col  - width)
@@ -380,7 +382,7 @@ def show_df(df):
         else:
             ch, hotkey = ord(hotkey[0]), hotkey[1:]
         char = chr(ch)
-        consts["inp"] = char
+        extra["inp"] = char
 
         seq += char
         vals = []
@@ -466,7 +468,7 @@ def show_df(df):
                 canceled, col, val = list_df_values(df, get_val=False)
                 if not canceled:
                     edit_col = col
-                    consts["edit col"] = edit_col
+                    extra["edit col"] = edit_col
                     refresh()
             if edit_col:
                 new_val = rowinput()
@@ -638,13 +640,13 @@ def show_df(df):
         elif char  == "a": 
             col = sel_cols[cur_col]
             FID = col 
-            consts["FID"] = FID
+            extra["FID"] = FID
             df = filter_df
             hotkey="gG"
         elif char == "A":
             col = sel_cols[cur_col]
             FID = col 
-            consts["FID"] = FID
+            extra["FID"] = FID
             df = main_df
             hotkey="gG"
         elif char == "AA":
@@ -657,7 +659,7 @@ def show_df(df):
             canceled, col = list_values(arr)
             if not canceled:
                 FID = col 
-                consts["FID"] = FID
+                extra["FID"] = FID
                 df = filter_df
                 hotkey="gG"
         elif char == "s":
@@ -690,8 +692,8 @@ def show_df(df):
             df["hscore"] = df.groupby(['fid','prefix','input_text'])["hscore"].transform("max")
             #df["nr_score"] = df.groupby(['fid','prefix','input_text'])["nr_score"].transform("max")
             if not group_col in info_cols: info_cols.append(group_col)
-            sel_cols.append("n_preds")
-            consts["filter"].append("group predictions")
+            sel_cols.append("num_preds")
+            extra["filter"].append("group predictions")
         elif char == " ":
             if sel_row in sel_rows:
                 sel_rows.remove(sel_row)
@@ -702,9 +704,9 @@ def show_df(df):
             if "fid" in df.iloc[sel_row]:
                 exp=df.iloc[sel_row]["fid"]
                 sel_exp = exp
-                consts["exp"] = exp
-                path = main_df.loc[main_df["fid"] == exp, "path"][0]
-                extra["path"] = path
+                extra["exp"] = exp
+                #path = main_df.loc[main_df["fid"] == exp, "path"][0]
+                #extra["path"] = path
             show_extra = True
         elif char == "G":
             backit(df, sel_cols)
@@ -717,11 +719,11 @@ def show_df(df):
             info_cols = load_obj("info_cols", context, [])
             if True:
                 info_cols = ["query", "resp"]
-            if True: #not sel_cols:
-               sel_cols = ["exp_trial","temp_num", "prefix","method", "n_preds", "rouge_score", "steps","max_acc","best_step",  "bert_score", "st_score", "learning_rate",  "num_targets", "num_inps", "num_records", "wrap", "frozen", "prefixed"]
+            if True: #col == "fid":
+               sel_cols = ["exp_id","exp_trial", "temp_num", "prefix","method", "num_preds", "rouge_score", "steps","max_acc","best_step",  "bert_score", "st_score", "learning_rate",  "num_targets", "num_inps", "train_records", "train_records_nunique", "group_records", "wrap", "frozen", "prefixed"]
 
             num_targets = (df['prefix']+'_'+df['target_text']).groupby(df[col]).nunique()
-            n_preds = (df['prefix']+'_'+df['pred_text1']).groupby(df[col]).nunique()
+            num_preds = (df['prefix']+'_'+df['pred_text1']).groupby(df[col]).nunique()
             num_inps = (df['prefix']+'_'+df['input_text']).groupby(df[col]).nunique()
             avg_len = 1 #(df.groupby(col)["pred_text1"]
                         #                        .apply(lambda x: np.mean(x.str.len()).round(2)))
@@ -730,27 +732,47 @@ def show_df(df):
                 if c.endswith("score"):
                     _agg[c] = "mean"
                 else:
-                    _agg[c] = "first"
-            df = (df.groupby(col).agg(_agg)
-                   .rename(columns={col:'exp_id', 
-                       'id':'num_records',
-                       }))
+                    _agg[c] = ["first", "nunique"]
+            gb = df.groupby(col)
+            counts = gb.size().to_frame(name='group_records')
+            df = (counts.join(gb.agg(_agg)))
+            df.columns = [ '_'.join(str(i) for i in col) for col in df.columns]
+            ren = {}
+            for c in df.columns:
+                if c == col + "_first":
+                    ren[c] = "exp_id"
+                elif c.endswith("_mean"):
+                    ren[c] = c.replace("_mean","")
+                elif c.endswith("_first"):
+                    ren[c] = c.replace("_first","")
+            df = df.rename(columns=ren)
             #df = df.reset_index()
-            df["n_preds"] = n_preds
+            df["num_preds"] = num_preds
             df["num_targets"] = num_targets
             df["num_inps"] = num_inps
             df["avg_len"] = avg_len
             _infos =""
-            for c in sel_cols:
-                _count = 0
-                try:
-                    _count = df[c].nunique()
-                    _first = df[c].iloc[0]
-                except:
-                    continue
-                if _count == 1:
-                    sel_cols.remove(c)
-                    _infos += f"{c}:{_first}  |  "
+            if True:
+                _sel_cols = []
+                for c in sel_cols:
+                    if "train_" in c:
+                        mbp("sel")
+                    _count = 0
+                    try:
+                        _count = df[c].nunique()
+                        _first = df[c].iloc[0]
+                    except:
+                        continue
+                    if _count == 1 and c != "exp_id":
+                        _infos += f"{c}:{_first}  |  "
+                    elif c in df and c + "_nunique" in df:
+                        _gn = df[c + "_nunique"].iloc[0]
+                        if _gn == 1 or c == "exp_id":
+                            _sel_cols.append(c)
+                    else:
+                        _sel_cols.append(c)
+                sel_cols = _sel_cols
+
             extra["common"] = _infos
             df = df.sort_values(by = ["rouge_score"], ascending=False)
         elif char == "u":
@@ -844,7 +866,7 @@ def show_df(df):
             sel_row = 0
             sel_rows = []
             info_cols.append("sum_fid")
-            consts["short_keys"] = "m: show group" 
+            extra["short_keys"] = "m: show group" 
 
         elif char == "m" and prev_char != "x":
             left = 0
@@ -934,7 +956,7 @@ def show_df(df):
             if not canceled:
                 open_dfnames.append(_file)
                 _file = os.path.join(base_dir, _file + ".tsv")
-                consts["files"] = open_dfnames
+                extra["files"] = open_dfnames
                 new_df = pd.read_table(_file)
                 if char == "o":
                     df = pd.concat([df, new_df], ignore_index=True)
@@ -994,9 +1016,9 @@ def show_df(df):
                    df = df[eval(cond)]
                    #df = df.reset_index()
                    filter_df = df
-                   if not "filter" in consts:
-                        consts["filter"] = []
-                   consts["filter"].append(cond)
+                   if not "filter" in extra:
+                        extra["filter"] = []
+                   extra["filter"].append(cond)
                    sel_row = 0
                    if char == "F" or char == "f":
                        hotkey = "gG"
@@ -1019,9 +1041,9 @@ def show_df(df):
                      name += key + "_"
                ax.set_xticks(df["steps"].unique())
                ax.set_title(name)
-               if not "filter" in consts:
-                   consts["filter"] = []
-               consts["filter"].append("group by " + name)
+               if not "filter" in extra:
+                   extra["filter"] = []
+               extra["filter"].append("group by " + name)
                char = "H"
         if char == "H":
             name = ax.get_title()
@@ -1095,9 +1117,9 @@ def show_df(df):
         elif is_enter(ch) and prev_char == "x":
             col = sel_cols[0]
             val = sel_dict[col]
-            if not "filter" in consts:
-                consts["filter"] = []
-            consts["filter"].append("{} == {}".format(col,val))
+            if not "filter" in extra:
+                extra["filter"] = []
+            extra["filter"].append("{} == {}".format(col,val))
             df = filter_df[filter_df[col] == val]
             df = df.reset_index()
             if char == "F":
@@ -1151,14 +1173,14 @@ def show_df(df):
                     out = open(table_file, "w")
                     for met in df["method"].unique():
                         for mod in ["t5-v1", "t5-lmb", "t5-base"]:
-                            for sc in ["rouge_score", "bert_score", "hscore", "n_preds"]:
+                            for sc in ["rouge_score", "bert_score", "hscore", "num_preds"]:
                                 cond = ((df['prefix'] == rel) &
                                         (df["method"] == met) &
                                         (df["steps"] == samp) &
                                         (df["model"] == mod))
                                 val = df.loc[cond, sc].mean()
                                 val = round(val,2)
-                                if sc != "n_preds":
+                                if sc != "num_preds":
                                     val = "{:.2f}".format(val)
                                 else:
                                     try:
@@ -1314,7 +1336,7 @@ def show_df(df):
             df = main_df
             sel_cols = list(df.columns)
             save_obj(sel_cols,"sel_cols",dfname)
-            consts["filter"] = []
+            extra["filter"] = []
             info_cols = []
         if char == "b" and back:
             if back:
@@ -1324,8 +1346,8 @@ def show_df(df):
                 left = 0
             else:
                 mbeep()
-            if consts["filter"]:
-                consts["filter"].pop()
+            if extra["filter"]:
+                extra["filter"].pop()
 
 def render_mpl_table(data, wrate, col_width=3.0, row_height=0.625, font_size=14,
                      header_color='#40466e', row_colors=['#f1f1f2', 'w'], edge_color='w',
@@ -1571,7 +1593,18 @@ def start(stdscr):
     type=str,
     help=""
 )
-def main(fname, path, fid, ftype):
+@click.option(
+    "--dpy",
+    "-dpy",
+    is_flag=True,
+    help=""
+)
+def main(fname, path, fid, ftype, dpy):
+    if dpy:
+        port = 2030
+        debugpy.listen(('0.0.0.0', int(port)))
+        print("Waiting for client at run...port:", port)
+        debugpy.wait_for_client()  # blocks execution until client is attached
     global dfname,dfpath,file_id,dftype
     file_id = fid
     if not fname:
