@@ -330,6 +330,7 @@ decoder_relation_mappings = {}
 def tokenize_relations(tokenizer, map_lengths=False):
     for rel,phrase in rel_nat_maps.items():
         natural_rel = phrase[1]
+        natural_rel = re.sub(r'{.*?}','', natural_rel)
         #dlog.info("rel ids ***: %s", natural_rel)
         rel_tokens = tokenizer.tokenize(natural_rel)
         rel_nat_maps[rel]["rel_tokens"] = rel_tokens

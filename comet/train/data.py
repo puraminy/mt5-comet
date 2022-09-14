@@ -1,13 +1,13 @@
 
 from comet.train.common import *
-from comet.train.dataset import *
+from comet.train.template import *
 import pandas as pd
 from datetime import datetime
 from pathlib import Path
 import random
 
 
-class xAttrDataset(MyDataset):
+class xAttrTemplate(RelTemplate):
     def get_templates(self, method, index, **kwargs):
        ex_qtemp = ""
        ex_anstemp = ""
@@ -32,7 +32,7 @@ class xAttrDataset(MyDataset):
           return super().get_templates(method, **kwargs)
        return qtemp, anstemp, ex_qtemp, ex_anstemp, flags 
 
-class xIntentDataset(MyDataset):
+class xIntentTemplate(RelTemplate):
     def get_templates(self, method, index, **kwargs):
        ex_qtemp = ""
        ex_anstemp = ""
@@ -73,7 +73,7 @@ class xIntentDataset(MyDataset):
           return super().get_templates(method, **kwargs)
        return qtemp, anstemp, ex_qtemp, ex_anstemp, flags 
 
-class CBDataset(MyDataset):
+class CBTemplate(RelTemplate):
     def get_templates(self, method, index, **kwargs):
        if self.split_name != "train" and method == "mix":
            method = "unsup-wrap"
@@ -112,8 +112,8 @@ class CBDataset(MyDataset):
                }
        return qtemp, anstemp, ex_qtemp, ex_anstemp, flags 
 
-data_conf = {
-        "cb": CBDataset,
-        "xIntent":xIntentDataset,
-        "xAttr":xAttrDataset 
+template_conf = {
+        "cb": CBTemplate,
+        "xIntent":xIntentTemplate,
+        "xAttr":xAttrTemplate, 
         }

@@ -357,6 +357,12 @@ def cli():
     help="List undone experiments"
 )
 @click.option(
+    "--repeat",
+    "-rep",
+    is_flag=True,
+    help="Repeat done expriments (not skip them)"
+)
+@click.option(
     "--port",
     "-p",
     default="1234",
@@ -400,7 +406,7 @@ def cli():
 def run(ctx, conf_path, base_conf, experiment, 
         exclude_conf, include_conf, overwrite_conf, var, 
         save_model, addto, rem, save_data, load_data, add_prefix, wrap, 
-        only_var, sep, num_exps, one, cpu, undone, 
+        only_var, sep, num_exps, one, cpu, undone, repeat, 
         dpy, port, stop_level, reval_bests, trial, show_samples):
 
      if dpy:
@@ -426,15 +432,7 @@ def run(ctx, conf_path, base_conf, experiment,
            args["output_name"] = "" 
            args["experiment"] = experiment 
            args["show_samples"] = show_samples 
-           if show_samples:
-               stop_level = "data"
-           args["stop_level"] = stop_level 
-           mylogs.STOP_LEVEL = stop_level
-           if cpu:
-               args["cpu"] = True
-               os.environ["CUDA_VISIBLE_DEVICES"] = ""
-           if add_prefix:
-               args["tag"] = "experiment"
+           args["skip"] = True # skip experiment
            if addto:
                spath = os.path.join(logPath, addto)
            else:
@@ -448,10 +446,6 @@ def run(ctx, conf_path, base_conf, experiment,
                     shutil.rmtree(d)
 
            Path(spath).mkdir(exist_ok=True, parents=True)
-           if load_data:
-               args["data_path"] = spath
-           if undone:
-               args["undone"] = True
            args["save_path"] = spath
            args["load_path"] = pretPath 
            args["trial"] = trial
@@ -535,6 +529,22 @@ def run(ctx, conf_path, base_conf, experiment,
                        args["overwrite"] = args["method"] + sep + rel_folder + sep + _output_name \
                            + sep + _extra 
                    args["no_save_model"] = not save_model
+                   if load_data:
+                       args["data_path"] = spath
+                       args["use_all_data"] = True
+                   if undone:
+                       args["undone"] = True
+                   if repeat:
+                       args["skip"] = False
+                   if show_samples:
+                       stop_level = "data"
+                   args["stop_level"] = stop_level 
+                   mylogs.STOP_LEVEL = stop_level
+                   if cpu:
+                       args["cpu"] = True
+                       os.environ["CUDA_VISIBLE_DEVICES"] = ""
+                   if add_prefix:
+                       args["tag"] = "experiment"
                    if wrap:
                        args["method"] += "-wrap"
                    if save_data: 
@@ -548,12 +558,13 @@ def run(ctx, conf_path, base_conf, experiment,
                        args["save_data"] = False
                    else:
                        _dp = os.path.join(dataPath,"sel",args["rel_filter"] + ".tsv")
-                       args["data_path"] = orig_args["data_path"]
+                       if not load_data:
+                           args["data_path"] = orig_args["data_path"]
                        args["multi"] = False 
                        if Path(_dp).is_file():
                            args["test_samples"] = 0
                            args["test_path"] = _dp
-                       else:
+                       elif not load_data:
                            args["use_all_data"] = False
                            args["test_path"] = orig_args["test_path"]
                            args["test_samples"] = orig_args["test_samples"] 
@@ -888,6 +899,13 @@ def run(ctx, conf_path, base_conf, experiment,
     "--test_path",
     "-tep",
     default="test.tsv",
+    type=str,
+    help=""
+)
+@click.option(
+    "--sample_path",
+    "-samp",
+    default="sample.tsv",
     type=str,
     help=""
 )
@@ -1360,7 +1378,7 @@ def run(ctx, conf_path, base_conf, experiment,
     type=int,
     help=""
 )
-def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, pl_learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, wandb, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, no_save_best, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args, match, dpy, prompt_tune, prompt_config_file, load_prompt, data_name, seed, do_valid, stop_level):
+def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, pl_learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, wandb, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, no_save_best, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args, match, dpy, prompt_tune, prompt_config_file, load_prompt, data_name, seed, do_valid, stop_level):
 
     #%% some hyper-parameters
 
@@ -1371,6 +1389,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         print("Waiting for client... at train")
         debugpy.wait_for_client()  # blocks execution until client is attached
     #bbbbbbbbbbb
+    mbp("start")
     #underlying_model_name = "logs/atomic-mt5/last"
     vlog.info("given load path: %s", load_path)
     vlog.info("given load path: %s", load_path)
@@ -1433,10 +1452,12 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             train_path = os.path.join(data_path, train_path) 
             test_path = os.path.join(data_path, test_path)
             val_path = os.path.join(data_path, val_path) 
+            sample_path = os.path.join(data_path, sample_path) 
         else:
             train_path = os.path.join(data_path, "train.tsv")
             test_path = os.path.join(data_path, "test.tsv")
             val_path = os.path.join(data_path, "valid.tsv")
+            sample_path = os.path.join(data_path, "sample.tsv")
 
         assert Path(train_path).is_file(), f"Train path {train_path} is not!"
 
@@ -1650,8 +1671,9 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         length = [int(s) for s in str(prompt_length).split("-")]
         set_prompt_lengths(rel_filter, length)
 
-    num_samples = {"train": int(train_samples), "validation":int(val_samples), "test":int(test_samples)}
-    split_path = {"train":train_path, "validation":val_path, "test":test_path}
+    sample_samples = 0
+    num_samples = {"train": int(train_samples), "validation":int(val_samples), "test":int(test_samples), "sample":int(sample_samples)}
+    split_path = {"train":train_path, "validation":val_path, "test":test_path, "sample":sample_path}
     save_ds_path = {}
     for split, _path in split_path.items():
         #_path = _path.replace(".tsv","_")
@@ -1696,6 +1718,9 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                 group_them = group_by
             #    _replace_blanks = False
             df_path = split_path[split_name]
+            if split_name == "sample" and not Path(df_path).is_file():
+                mlog.info("No sample was provided! %s ", df_path)
+                continue
             split_df = pd.read_table(df_path)
             mlog.info("Path of dataset for %s %s", split_name, split_path[split_name])
             dlog.info("Columns of %s\n  %s", split_name, "\n".join(list(split_df.columns)))
@@ -1726,11 +1751,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             if split_name == "train" or split_name == "sample":
                 _repeat = int(repeat)
             # dddddddddddddd
-            dataset_class = MyDataset
-            if rel_filter and rel_filter in data_conf:
-               dataset_class = data_conf[rel_filter]
 
-            myds[_name] = dataset_class(split_df, split_name,
+            myds[_name] = MyDataset(split_df, split_name,
                                 _method, prompt_pos, rel_filter,
                                 num_samples[split_name], 
                                 ignore_blanks,
@@ -1750,6 +1772,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                         )
             if save_data:
                 myds[_name].save_data(os.path.join(save_data,_name + ".tsv"), merge=True)
+                if _name == "train":
+                    myds[_name].save_data(os.path.join(save_data, "sample.tsv"), merge=True, sample=10)
         return myds
 
     if do_eval:
@@ -1760,10 +1784,16 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         ds_list = ["train"]
         if do_valid:
             ds_list += ["validation"]
-        #ds_list += ["sample"]
+        ds_list += ["sample"]
         myds = load_data(ds_list)
         if True: #wrap or show_samples: It's required to retrive prompt tokens
-            samples_iter = iter(myds["train"])
+            if "sample" in myds:
+                mbp("sample")
+                samples_iter = iter(myds["sample"])
+                sample_limit = myds["sample"].num_records
+            else:
+                samples_iter = iter(myds["train"])
+                sample_limit =  int(batch_size)
             ii = 0
             _sample = True
             generated_samples["sample"] = []
@@ -1771,9 +1801,11 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             logger.info("----------- SAMPLES -------------")
             logger.info(f"----------- {method} -------------")
             logger.info("----------- SAMPLES -------------")
-            while _sample and ii < int(batch_size):
+            while _sample and ii < sample_limit: 
                 logger.info(f"----------- {method} -------------")
                 _sample = next(samples_iter, None)
+                if not _sample:
+                    break
                 if _sample["rep"] > 0:
                     continue
                 ii += 1
@@ -1785,6 +1817,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             mbp("data")
     if model_id == "test" or show_samples:
         return
+    mbp("start")
     extend_tokenizer(tokenizer)
 
     prompt_config = None
@@ -1913,6 +1946,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         if not k in exp_info:
             exp_info[k] = v
 
+    mbp("start")
     def eval_test(model, tokenizer, result_fname=""):
         if "@" in gen_bs:
             test_bs,_ = gen_bs.split("@")
@@ -1932,8 +1966,10 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             val_records = myds[_set].num_records
             exp_info["test_set"] = _set
             exp_info["val_records"] = val_records 
+            mbp("start")
             a1, a2, s1, r = evaluate1(tokenizer, test_dataloader, model, device, prompt_config, mode="test", save_path=save_path, wrap=False)
             mlog.info("acc1: %s, acc2: %s, sts: %s, res: %s", a1, a2, s1, r)
+            mbp("start")
             mbp(2)
             if not result_fname:
                 _save_path = save_path
@@ -1996,6 +2032,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     no_decay = ['bias', 'LayerNorm.weight']
     wrapped_model = None
 
+    mbp("start")
     if not load_prompt_path and Path(os.path.join(load_path, model_id, "prompt")).exists():
         load_prompt_path = os.path.join(load_path, model_id, "prompt")
         mlog.info("prompt path:%s ", load_prompt_path)
@@ -2019,6 +2056,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     wrapped_model.prompt_encoders.to(device=device)
     mlog.info("len tokenizer after wrapping %s", len(tokenizer))
     mbp("wrap")
+    mbp("start")
     if wrapped_model:
         #model.get_input_embeddings().weight.requires_grad = False
         rgrad = [p for p in wrapped_model.parameters() if p.requires_grad]
@@ -2092,6 +2130,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             raise ValueError(opt_type + " must be one of adam, ada, ada_no_lr")
         return optimizer, scheduler
 
+    mbp("start")
     optimizer, scheduler = get_optimizer(wrapped_model, learning_rate, opt_type) 
     if checkpoint:
         mlog.info("Restoring optimizer and scheduler")
@@ -2150,6 +2189,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     # ffffffffffff
     #%% tttttt
     mlog.info(f"============== Exp id: {exp_id}\n")
+    mlog.info(f"============== Data Path: {data_path}\n")
     mlog.info(f"============== batch size: {batch_size} per node: {node_batch_size} | learning_rate: {learning_rate}\n")
     mlog.info(f"============== train samples: {train_samples} test_samples: {test_samples} | repeat: {repeat}  epochs: {epochs_num}\n")
     mlog.info(f"============== wrap: {wrap} | prefixed: {prefix} | frozen: {frozen} {fz_parts}\n")
@@ -2159,6 +2199,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     wrap = True
     exp_info["train_records"] = train_dataset.num_records
     exp_info["iterations"] = iterations 
+    mbp("start")
     def train_loop(epochs_num, wrap, optimizer, scheduler):
         train_iter = iter(train_dataloader)
         global_step = 0
@@ -2285,6 +2326,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     #% vvvv
     if loop: #not prefix:
        train_loop(epochs_num, wrap, optimizer, scheduler)
+       mbp("start")
     else:
         training_args = TrainingArguments(output_dir=save_path)
         training_args.per_device_train_batch_size=node_batch_size

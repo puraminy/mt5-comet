@@ -191,14 +191,14 @@ class PTuningWrapper(torch.nn.Module):
 
     def forward(self,input_ids, pids=None, **kwargs):
         ll = self.ll # log level
-        wlog.log(ll, "wrapper forward was called")
-        wlog.log(ll, "Prompt ids:{}".format(pids))
+        winfo("wrapper forward was called")
+        winfo("Prompt ids:{}".format(pids))
         # find masks based on the range of prompt ids (offset_id < X < offset_id + prompt_length)
         #Because this wrapper only deals with a single prompt, the length should be the same, you can use masked_select to reshape 
         prompt_masks = self.prompt_token_fn(input_ids)
         if prompt_masks.any():
             self.encoder_prompt_flag = True
-            wlog.log(ll, "promp masks:{}".format(prompt_masks))
+            winfo("promp masks:{}".format(prompt_masks))
             input_ids_ = input_ids.clone()
             winfo("inpu ids :{}".format(input_ids))
             if self.replacing_token_id is not None:
@@ -263,7 +263,7 @@ class PTuningWrapper(torch.nn.Module):
             if prompt_masks.any():
                 self.decoder_prompt_flag = True
                 labels = kwargs.pop("labels", None) 
-                wlog.log(ll, "promp masks:{}".format(prompt_masks))
+                winfo("promp masks:{}".format(prompt_masks))
                 decoder_input_ids_ = decoder_input_ids.clone()
                 winfo("inpu ids :{}".format(decoder_input_ids))
                 if self.replacing_token_id is not None:
@@ -296,7 +296,7 @@ class PTuningWrapper(torch.nn.Module):
                     
                         decoder_labels_masks = self.prompt_token_fn(labels)
                         labels[decoder_labels_masks] = -100
-                        wlog.log(ll, labels)
+                        winfo(labels)
                         break
                 else:
                     decoder_inputs_embeds = self.model_decoder_embeddings(

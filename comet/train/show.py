@@ -714,7 +714,7 @@ def show_df(df):
                 context = "inp2"
             col = FID
             left = 0
-            _glist = [col, "prefix"]
+            col = [col, "prefix"]
             sel_cols =  load_obj("sel_cols", context, [])
             info_cols = load_obj("info_cols", context, [])
             if True:
@@ -722,11 +722,6 @@ def show_df(df):
             if True: #col == "fid":
                sel_cols = ["exp_id","exp_trial", "temp_num", "prefix","method", "num_preds", "rouge_score", "steps","max_acc","best_step",  "bert_score", "st_score", "learning_rate",  "num_targets", "num_inps", "train_records", "train_records_nunique", "group_records", "wrap", "frozen", "prefixed"]
 
-            num_targets = (df['prefix']+'_'+df['target_text']).groupby(df[col]).nunique()
-            num_preds = (df['prefix']+'_'+df['pred_text1']).groupby(df[col]).nunique()
-            num_inps = (df['prefix']+'_'+df['input_text']).groupby(df[col]).nunique()
-            avg_len = 1 #(df.groupby(col)["pred_text1"]
-                        #                        .apply(lambda x: np.mean(x.str.len()).round(2)))
             _agg = {}
             for c in df.columns:
                 if c.endswith("score"):
@@ -737,9 +732,17 @@ def show_df(df):
             counts = gb.size().to_frame(name='group_records')
             df = (counts.join(gb.agg(_agg)))
             df.columns = [ '_'.join(str(i) for i in col) for col in df.columns]
-            ren = {}
+
+            #num_targets = (df['prefix']+'_'+df['target_text']).groupby(df[col]).nunique()
+            avg_len = 1 #(df.groupby(col)["pred_text1"]
+                        #   .apply(lambda x: np.mean(x.str.len()).round(2)))
+            ren = {
+                    "target_text_nunique":"num_targets",
+                    "pred_text1_nunique":"num_preds",
+                    "input_text_nunique":"num_inps",
+                    }
             for c in df.columns:
-                if c == col + "_first":
+                if c == FID + "_first":
                     ren[c] = "exp_id"
                 elif c.endswith("_mean"):
                     ren[c] = c.replace("_mean","")
@@ -747,9 +750,6 @@ def show_df(df):
                     ren[c] = c.replace("_first","")
             df = df.rename(columns=ren)
             #df = df.reset_index()
-            df["num_preds"] = num_preds
-            df["num_targets"] = num_targets
-            df["num_inps"] = num_inps
             df["avg_len"] = avg_len
             _infos =""
             if True:
