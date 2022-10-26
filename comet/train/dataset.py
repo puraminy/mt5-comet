@@ -90,10 +90,12 @@ class MyDataset(torch.utils.data.Dataset):
         self.cats_num = cats_num = len(split_df["prefix"].unique())
         if self.per_prefix:
             self.num_samples = cats_num * num_samples
+        use_all_data = False
         if self.num_samples == 0: 
             self.num_samples = len(split_df)
             self.samples_per_head = 0
             self.per_prefix = 0
+            use_all_data = True
         for col in targets:
             if col in split_df:
                 split_df[col] = split_df[col].astype(str)
@@ -186,7 +188,7 @@ class MyDataset(torch.utils.data.Dataset):
             if self.flat_data:
                 _data = self.flat_data
             else:
-                if self.is_even:
+                if self.is_even or use_all_data:
                     _data = self.fill_all_data(_start, _end)
                 else:
                     _data = self.fill_data(_start, _end, True, 

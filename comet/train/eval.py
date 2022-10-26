@@ -16,12 +16,14 @@ from datasets import load_metric
 import nltk
 
 
-def forward_step(model, batch, no_model_batch, accumulation_tiny_steps=1, mode="train"):
+def forward_step(model, batch, no_model_batch, accumulation_tiny_steps=1, mode="train", task_ids=None):
     for k in no_model_batch:
         if k not in  ["resp", "query", "target", "wrap", "freeze", "unfreeze", "method"]:
             no_model_batch[k] = no_model_batch[k].to(device)
-
-    result = model(**batch)
+    if task_ids is not None:
+        result =  model.forward(task_ids, add_prior=True, **batch)
+    else:
+        result = model(**batch)
     logits = result["logits"]
     forw_out = {
         "logits": logits
@@ -48,13 +50,14 @@ def forward_step(model, batch, no_model_batch, accumulation_tiny_steps=1, mode="
     return forw_out
 
 
-def evaluate1(tokenizer, eval_data_loader, model, device, prompt_config, mode="dev", save_path="", wrap=True):
+def evaluate1(tokenizer, eval_data_loader, model, device, seed =0, mode="dev", save_path="", wrap=True, task_ids=None):
     """Evaluation."""
     # Turn on evaluation mode which disables dropout.
     model.eval()
 
     total_loss = 0.0
     step = 0
+    #set_random_seed(seed)
 
     all_idx = []
     all_preds = []
@@ -71,7 +74,7 @@ def evaluate1(tokenizer, eval_data_loader, model, device, prompt_config, mode="d
                 if k not in  ["resp", "query", "target", "wrap", "freeze", "unfreeze", "method"]:
                     no_model_batch[k] = no_model_batch[k].to(device)
 
-            decs = generate(gen_model, tokenizer, model_batch)
+            decs = generate(gen_model, tokenizer, model_batch, task_ids)
             all_gens.extend(decs)
 
             forw_out = forward_step(model, model_batch, no_model_batch, mode="test")
@@ -215,7 +218,7 @@ def trim_batch(
     else:
         return (input_ids[:, keep_column_mask], attention_mask[:, keep_column_mask])
 
-def generate(model, tokenizer, batch, gen_token = "", gen_param = "greedy", at_mask=None):
+def generate(model, tokenizer, batch, gen_token = "", gen_param = "greedy", at_mask=None, task_ids=None):
     skip_special = "True"
     #verb = get_verb(query)
     #vlog.info("Ignoring verb %s", verb)
@@ -276,11 +279,18 @@ def generate(model, tokenizer, batch, gen_token = "", gen_param = "greedy", at_m
         hyps = tokenizer.batch_decode(hyps,skip_special_tokens=False)
     else:
         #breakpoint()
-        hyps = model.generate(
-                input_ids,
-                attention_mask=attention_mask,
-                **gen_kwargs,
-                )
+        if task_ids is not None:
+            hyps = model.generate(task_ids, 
+                    input_ids=input_ids,
+                    attention_mask=attention_mask,
+                    **gen_kwargs,
+                    )
+        else:
+            hyps = model.generate(
+                    input_ids,
+                    attention_mask=attention_mask,
+                    **gen_kwargs,
+                    )
         hyps = tokenizer.batch_decode(hyps,skip_special_tokens=skip_special == "True")
         decs.extend(hyps)
     return decs
@@ -374,7 +384,7 @@ def chunks(lst, n):
 import debugpy
 # vvvvvvvvvvvvvvv
 
-def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="greedy", scorers="rouge", batch_size="20@5", model = None, tokenizer = None, preds_file = "", set_name = "test", rewrite_info = False, stop_level=0):  
+def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="greedy", scorers="rouge", batch_size="20@5", model = None, tokenizer = None, preds_file = "", set_name = "test", rewrite_info = False, stop_level=0, seed=0, task_ids=None):  
     if rewrite_info:
         save_path = os.path.join(save_path, "full_results.tsv")
         if Path(save_path).is_file() and rewrite:
@@ -390,6 +400,7 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
 
     mlog.info("Loading models for evaluation ..")
     mlog.info("%s", save_path)
+    #set_random_seed(seed)
 
     #local_path = f"{base_path}/paraphrase-multilingual-MiniLM-L12-v2"        
     #df = df.groupby(['prefix','input_text'],as_index=False)[target].agg({"target_text":'<br />'.join})
@@ -450,7 +461,7 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
                 batch,_ = next(dl_iter)
                 if type(batch) == list:
                     batch = batch[0]
-                hyps = generate(model, tokenizer, batch, gen_param=gen_param)
+                hyps = generate(model, tokenizer, batch, gen_param=gen_param, task_ids=task_ids)
         else:
             #hyps = islice(infile, len(queries))
             hyps = lines[l_count: l_count + bs]

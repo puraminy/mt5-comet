@@ -5,9 +5,12 @@ from termcolor import colored
 from transformers import AddedToken 
 from functools import lru_cache
 import pandas as pd
+import numpy as np
+import tensorflow as tf
 from comet.utils.myutils import *
 from comet.transformers_ptuning import PTuningWrapper
 from comet.transformers_ptuning.ptuning_wrapper import LSTMEmbeddingPromptEncoder, EmbeddingPromptEncoder, MLPPromptEncoder
+from comet.polytropon import SkilledMixin
 from tqdm import tqdm
 import logging, sys
 import random
@@ -327,6 +330,14 @@ class dotdict(dict):
 encoder_relation_mappings = {}
 decoder_relation_mappings = {}
 
+def set_random_seed(seed):
+    if seed is not None and seed > 0:
+        random.seed(seed)
+        np.random.seed(seed)
+        tf.random.set_seed(seed)
+        torch.manual_seed(seed)
+        torch.cuda.manual_seed(seed)
+
 def tokenize_relations(tokenizer, map_lengths=False):
     for rel,phrase in rel_nat_maps.items():
         natural_rel = phrase[1]
@@ -416,7 +427,7 @@ def fill_sample(mt, rel):
             input_lang, target_lang)
 
 
-def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words=False, merge_prompts=False, method="", shared_embs =False):
+def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words=False, merge_prompts=False, method="", shared_embs =False, skilled_variant=""):
     wrapped_model = None
     prompt_encoders = []
     offsets = []
@@ -445,7 +456,13 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words
         id_offset = min(offsets)
 
     mlog.info("ID OFFSET: %s", id_offset)
-    wrapped_model = PTuningWrapper(model, prompt_encoders, prompt_token_fn=get_prompt_token_fn(id_offset), merge_prompts=merge_prompts, shared_embs = shared_embs)
+    if skilled_variant:
+       wrapped_model = SkilledMixin(model, n_tasks=2, n_skills=2, 
+               skilled_variant=skilled_variant,
+               prompt_encoders=prompt_encoders, prompt_token_fn=get_prompt_token_fn(id_offset), merge_prompts=merge_prompts, shared_embs = shared_embs)
+    else:
+        wrapped_model = PTuningWrapper(model, 
+                prompt_encoders, prompt_token_fn=get_prompt_token_fn(id_offset), merge_prompts=merge_prompts, shared_embs = shared_embs)
     return wrapped_model
 
 def create_encoder(name, model, tokenizer, prompt_tokens, encoder_type="lstm", 

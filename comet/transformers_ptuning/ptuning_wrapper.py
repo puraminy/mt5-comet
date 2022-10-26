@@ -6,6 +6,7 @@ import transformers
 import numpy as np
 from copy import deepcopy
 import torch
+from torch import nn
 import torch.nn.functional as F
 def _isin(tensor:torch.Tensor,values:torch.Tensor):
     return (tensor[..., None] == values).any(-1)
@@ -184,7 +185,25 @@ class PTuningWrapper(torch.nn.Module):
             self.prompt_token_fn = lambda t:(t>=self.model_embeddings_size)
             
             #Default: All token ids beyond num_embeddings are seen as prompt token
-        mbp("")
+        #self.router = nn.Parameter(data=torch.empty((
+        #    prefix_config['n_tasks'],
+            # config.num_hidden_layers,
+        #    prefix_config['n_prompts']
+        #)).uniform_(-1e-3, 1e-3))
+
+        #self.z = nn.Parameter(data=torch.empty((
+        #    config.num_hidden_layers,
+        #    prefix_config['n_prompts'],
+        #    prefix_config['intrinsic_dim']
+        #)).uniform_(-1e-3, 1e-3))
+
+#        bound = 1 / math.sqrt(prefix_config['n_prompt_tokens'] * config.hidden_size)
+#        self.A = nn.Parameter(data=torch.empty((
+#            config.num_hidden_layers,
+#            prefix_config['intrinsic_dim'],
+#            prefix_config['n_prompt_tokens'] * config.hidden_size
+#        )).uniform_(-bound, bound))
+
 
     def add_prompt_encoder(self, encoder):
         self.prompt_encoders.append(encoder)

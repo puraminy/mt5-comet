@@ -10,12 +10,13 @@ from comet.train.eval import *
 from comet.utils.dataset import TokenizedDataset
 from comet.utils.configue import Configure
 import comet.utils.tool as ut
-from comet.models.unified.prefixtuning import Model
+#from comet.models.unified.prefixtuning import Model
 from transformers.trainer_seq2seq import Seq2SeqTrainer
 from transformers.optimization import Adafactor, AdafactorSchedule
 from transformers import TrainingArguments
 from comet.train.model import *
 from comet.data_utils import *
+from polytropon import SkilledMixin
 import torch
 import re
 import json
@@ -1361,7 +1362,7 @@ def run(ctx, conf_path, base_conf, experiment,
 @click.option(
     "--seed",
     "-seed",
-    default=1,
+    default=0,
     type=int,
     help=""
 )
@@ -1378,7 +1379,14 @@ def run(ctx, conf_path, base_conf, experiment,
     type=int,
     help=""
 )
-def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, pl_learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, wandb, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, no_save_best, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args, match, dpy, prompt_tune, prompt_config_file, load_prompt, data_name, seed, do_valid, stop_level):
+@click.option(
+    "--skilled_variant",
+    "-sv",
+    default="",
+    type=str,
+    help=""
+)
+def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, pl_learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, wandb, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, no_save_best, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args, match, dpy, prompt_tune, prompt_config_file, load_prompt, data_name, seed, do_valid, stop_level, skilled_variant):
 
     #%% some hyper-parameters
 
@@ -1394,6 +1402,10 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     vlog.info("given load path: %s", load_path)
     vlog.info("given load path: %s", load_path)
     vlog.info("given save path: %s", save_path)
+
+
+    seed = int(seed)
+    set_random_seed(seed)
 
     if "dlog" in print_log: # data logger
         dlog.addHandler(consoleHandler)
@@ -1619,7 +1631,11 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                 assert False, "loading from dir"
                 tpath = f"{load_path}/{model_id}"
             tokenizer = AutoTokenizer.from_pretrained(tpath)
-            model = T5ForConditionalGeneration.from_pretrained(underlying_model_name) 
+            model = T5ForConditionalGeneration.from_pretrained(underlying_model_name, 
+                                                           output_attentions = False, 
+                                           # Whether the model returns attentions weights.
+                                                           output_hidden_states = False,
+                                                           return_dict=True) 
 
         if underlying_model_name == model_id:
             mlog.info("Saving model on local %s", load_path)
@@ -1967,15 +1983,18 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             exp_info["test_set"] = _set
             exp_info["val_records"] = val_records 
             mbp("start")
-            a1, a2, s1, r = evaluate1(tokenizer, test_dataloader, model, device, prompt_config, mode="test", save_path=save_path, wrap=False)
-            mlog.info("acc1: %s, acc2: %s, sts: %s, res: %s", a1, a2, s1, r)
+            #a1, a2, s1, r = evaluate1(tokenizer, test_dataloader, model, device, seed, mode="test", save_path=save_path, wrap=False, task_ids=task_ids)
+            #mlog.info("acc1: %s, acc2: %s, sts: %s, res: %s", a1, a2, s1, r)
             mbp("start")
             mbp(2)
+            _model = model
+            if task_ids is not None:
+                _model = wrapped_model 
             if not result_fname:
                 _save_path = save_path
             else:
                 _save_path = os.path.join(save_path, result_fname)
-            evaluate(test_dataset, test_dataloader, _save_path, exp_info, val_records, gen_param, scorers = scorers, batch_size=gen_bs, model=model, tokenizer=tokenizer, set_name=_set)  
+            evaluate(test_dataset, test_dataloader, _save_path, exp_info, val_records, gen_param, scorers = scorers, batch_size=gen_bs, model=_model, tokenizer=tokenizer, set_name=_set, seed=seed, task_ids=task_ids)  
     if do_eval or (not wrap and frozen and modules_to_freeze is model):
         mlog.info("Evaluating the model...")
         model.to(device=device)
@@ -1985,7 +2004,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             batch_size=batch_size,shuffle=False,
             collate_fn=data_collator,
         )
-        a1, a2, s1, dev_loss = evaluate1(tokenizer, dev_dataloader, model, device, prompt_config, mode="dev", save_path=save_path, wrap=False)
+        a1, a2, s1, dev_loss = evaluate1(tokenizer, dev_dataloader, model, device, seed, mode="dev", save_path=save_path, wrap=False)
         log_string = "dev_loss: " + str(dev_loss) + " | dev acc({}, {} st:{}): ".format(a1, a2, s1) 
         mlog.info(log_string)
         eval_test(model, tokenizer, "reval_full.tsv")
@@ -2015,7 +2034,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         accumulation_tiny_steps = 1
         node_batch_size = 1
 
-    iterations = (int(train_samples)*int(epochs_num)*int(repeat))//batch_size
+    train_dataset = myds["train"]#.map(tokenize)
+    iterations = train_dataset.num_records//batch_size
     warm_up_steps = 0.002*iterations
     #ppppppppppppppp
     if prefix:
@@ -2041,7 +2061,10 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     if prefix:
         model_to_wrap = model.pretrain_model
 
-    wrapped_model = wrap_model(model_to_wrap, tokenizer, encoder_type, load_prompt_path, from_words = from_words, merge_prompts=merge_prompts, method = method, shared_embs= shared_embs) 
+    task_ids = None
+    if skilled_variant:
+       task_ids = torch.LongTensor([0, 1])
+    wrapped_model = wrap_model(model_to_wrap, tokenizer, encoder_type, load_prompt_path, from_words = from_words, merge_prompts=merge_prompts, method = method, shared_embs= shared_embs, skilled_variant=skilled_variant) 
 
     mlog.info("len tokenizer after extending %s", len(tokenizer))
     if not prefix:
@@ -2236,7 +2259,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                         with torch.no_grad():
                             mlog.info("Updating the model weights before evaluaton...")
                             wrapped_model.update_model_weight()
-                        a1, a2, s1, dev_loss = evaluate1(tokenizer, dev_dataloader, _model, device, prompt_config, mode="dev", save_path=save_path)
+                        a1, a2, s1, dev_loss = evaluate1(tokenizer, dev_dataloader, _model, device, seed, mode="dev", save_path=save_path, task_ids=task_ids)
                         log_string =  "dev acc({}, {} st:{}): dev_loss:{}  | best_dev_loss:{}   best_step: {} ".format(a1, a2, s1, dev_loss, best_dev_loss, best_step) 
                         if dev_loss <= best_dev_loss: 
                             max_acc = a2
@@ -2282,7 +2305,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                     wrapped_model.zero_grad()
                     optimizer.zero_grad()
                     _model = wrapped_model
-                    out = forward_step(_model, batch, no_model_batch)
+                    out = forward_step(_model, batch, no_model_batch, task_ids=task_ids)
                     loss = out["loss"]
                     loss.backward()
                     for encoder in wrapped_model.prompt_encoders:
@@ -2341,6 +2364,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         training_args.do_predict=True
         training_args.gradient_accumulation_steps=accumulation_tiny_steps
         train_dataset = myds["train"]#.map(tokenize)
+        if seed > 0:
+            training_args.seed = seed
         #test_dataset = myds["test"]
         trainer = Seq2SeqTrainer(
             args=training_args,
@@ -2373,8 +2398,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         dataset_path = os.path.join(data_path, data_name)
         test_dataloader, test_dataset, random_sampler = load_data2(dataset_path, "test", tokenizer, prompt_config, ratio=test_ratio, num=int(test_samples))
         val_records = int(test_samples)
-        evaluate1(tokenizer, test_dataloader, model, device, prompt_config, mode="test", save_path="")
-        evaluate(test_dataset, test_dataloader, save_path, exp_info, val_records, gen_param, scorers = scorers, batch_size=gen_bs, model=model, tokenizer=tokenizer, set_name=_set, stop_level=stop_level)  
+        evaluate1(tokenizer, test_dataloader, model, device, prompt_config, mode="test", save_path="", task_ids=task_ids)
+        evaluate(test_dataset, test_dataloader, save_path, exp_info, val_records, gen_param, scorers = scorers, batch_size=gen_bs, model=model, tokenizer=tokenizer, set_name=_set, stop_level=stop_level, seed=seed, task_ids=task_ids)  
     elif test_set:
         eval_test(model, tokenizer)
     else:
