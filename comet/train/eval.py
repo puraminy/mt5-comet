@@ -15,6 +15,159 @@ from rouge import Rouge
 from datasets import load_metric
 import nltk
 
+
+def forward_step(model, batch, no_model_batch, accumulation_tiny_steps=1, mode="train", task_ids=None):
+    for k in no_model_batch:
+        if k not in  ["resp", "query", "target", "wrap", "freeze", "unfreeze", "method"]:
+            no_model_batch[k] = no_model_batch[k].to(device)
+    if task_ids is not None:
+        result =  model.forward(task_ids, add_prior=True, **batch)
+    else:
+        result = model(**batch)
+    logits = result["logits"]
+    forw_out = {
+        "logits": logits
+    }
+    if "loss" in result: # and not "loss_mask" in no_model_batch:
+        loss = result['loss']/accumulation_tiny_steps
+    else:
+        losses = torch.nn.functional.cross_entropy(
+            result['logits'].reshape(-1,result['logits'].size(2)),
+            no_model_batch['labels'].reshape(-1,),
+            reduction='none'
+        ).reshape(result['logits'].size(0),-1)
+        if "loss_mask" in no_model_batch:
+            loss_mask = no_model_batch["loss_mask"]
+            #loss_mask = loss_mask.to(device)
+            losses = (losses * loss_mask).sum(-1) / loss_mask.sum(-1)
+            loss = losses.mean()
+        else:
+            loss = losses.mean()
+        forw_out["loss_batch"] = losses
+
+    forw_out["loss"] = loss
+
+    return forw_out
+
+
+def evaluate1(tokenizer, eval_data_loader, model, device, seed =0, mode="dev", save_path="", wrap=True, task_ids=None):
+    """Evaluation."""
+    # Turn on evaluation mode which disables dropout.
+    model.eval()
+
+    total_loss = 0.0
+    step = 0
+    #set_random_seed(seed)
+
+    all_idx = []
+    all_preds = []
+    all_labels = []
+    all_gens = []
+    all_resps = []
+    all_queries = []
+    gen_model = model.underlying_model if wrap else model
+    with torch.no_grad():
+        for model_batch, no_model_batch in eval_data_loader:
+            for k in model_batch:
+                model_batch[k] = model_batch[k].to(device)
+            for k in no_model_batch:
+                if k not in  ["resp", "query", "target", "wrap", "freeze", "unfreeze", "method"]:
+                    no_model_batch[k] = no_model_batch[k].to(device)
+
+            decs = generate(gen_model, tokenizer, model_batch, task_ids)
+            all_gens.extend(decs)
+
+            forw_out = forward_step(model, model_batch, no_model_batch, mode="test")
+            loss = forw_out["loss"].item() if "loss" in forw_out else 0
+            total_loss += loss
+
+            logits_list = forw_out["logits"]
+            seq_len = logits_list.size()[1]
+            seq_preds = []
+            for i in range(seq_len):
+                pred_token_logits = logits_list[:, i, :]
+                preds = torch.argmax(pred_token_logits, dim=-1)
+                seq_preds.append(preds.tolist())
+            _seq_preds = list(zip(*seq_preds))
+            all_preds.extend(_seq_preds)
+
+            if "idx" in no_model_batch: 
+                gathered_idx = no_model_batch["idx"]
+                all_idx.extend(gathered_idx)
+
+            #labels = no_model_batch["labels"][:, 1]
+            # my code
+            labels = model_batch["labels"]#[:, 1]
+            gathered_labels = labels.tolist() 
+            all_labels.extend(gathered_labels)
+
+            all_queries.extend(no_model_batch["query"])
+            all_resps.extend(no_model_batch["resp"])
+
+            step += 1
+
+    total_loss /= step
+
+    #all_idx = torch.cat(all_idx, dim=0).cpu().tolist()
+    #all_preds = torch.cat(all_preds, dim=0).cpu().tolist()
+    #all_labels = torch.cat(all_labels, dim=0).cpu().tolist()
+    preds_decs = []
+    for p in all_preds:
+        dec = tokenizer.convert_ids_to_tokens(p)
+        preds_decs.append(dec)
+    labels_decs = []
+    for l in all_labels:
+        l = [0 if x == -100 else x for x in l] 
+        dec = tokenizer.convert_ids_to_tokens(l)
+        labels_decs.append(dec)
+    _preds = []
+    _labels = []
+    _gens = []
+    c = 0
+    i = 0
+    inps = 0
+    inp = ""
+    rows = []
+    for p,l,r, g, q in zip(preds_decs, labels_decs, all_resps, all_gens, all_queries):
+        _gens.append(g)
+        _preds.append(p[1].lower())
+        _labels.append(l[1].lower())
+        resp = re.sub(r'<.*?>','', r)
+        resp = resp.strip()
+        if q != inp:
+            inps +=1
+            inp = q
+        dd = {"top": resp, "top_pred": g}
+        rows.append(dd)
+        print("-"*80)
+        print("{}) {}".format(i, q))
+        print("")
+        if any(x in resp.split() for x in g.split()):
+            c +=1
+        print(" "*10,"True:",r, " | ", resp)
+        print(" "*10,"Pred:",p)
+        print(" "*10,"Gen:",g)
+        i += 1
+    acc1 = c/i
+    acc2 = c/inps
+    print("{:.2f} = {}/{} | {:.2f} = {}/{}".format(acc1,c,i, acc2, c, inps))
+    batch = pd.DataFrame(data=rows)
+    batch.to_csv(os.path.join(save_path, "{:.3f}".format(acc1)+".tsv"), sep="\t", index=False)
+    #st_score = run_sts_benchmark(batch, st_embed)
+    metric_list = ["rouge", "meteor", "bertscore"]
+    metric_list = ["bertscore"]
+    #summary = calc_metrics(batch["top_pred"].tolist(), batch["top"].tolist(), metric_list)
+    bscore = 0.0 #summary["bertscore_f1"]
+    #eval_metric = acc_f1_metric
+    eval_metric = acc_metric
+    res = eval_metric(tokenizer, _preds, _labels, save_path=save_path)
+    print(res)
+
+    return acc1, acc2, bscore, total_loss 
+
+
+
+
 #  the code below refers to the https://github.com/Yale-LILY/FeTaQA/blob/main/end2end/train.py
 def postprocess_text(preds, labels, metric_name):
     preds = [pred.strip() for pred in preds]
@@ -65,7 +218,7 @@ def trim_batch(
     else:
         return (input_ids[:, keep_column_mask], attention_mask[:, keep_column_mask])
 
-def generate(model, tokenizer, batch, gen_token = "", gen_param = "greedy", at_mask=None):
+def generate(model, tokenizer, batch, gen_token = "", gen_param = "greedy", at_mask=None, task_ids=None):
     skip_special = "True"
     #verb = get_verb(query)
     #vlog.info("Ignoring verb %s", verb)
@@ -109,7 +262,6 @@ def generate(model, tokenizer, batch, gen_token = "", gen_param = "greedy", at_m
     if "task_ids" in batch:
         gen_kwargs["task_ids"] = batch["task_ids"]
 
-    mbp("")
     input_batch = {}
     input_batch["input_ids"] = batch["input_ids"]
     input_batch["attention_mask"] = batch["attention_mask"]
@@ -127,11 +279,18 @@ def generate(model, tokenizer, batch, gen_token = "", gen_param = "greedy", at_m
         hyps = tokenizer.batch_decode(hyps,skip_special_tokens=False)
     else:
         #breakpoint()
-        hyps = model.generate(
-                input_ids,
-                attention_mask=attention_mask,
-                **gen_kwargs,
-                )
+        if task_ids is not None:
+            hyps = model.generate(task_ids, 
+                    input_ids=input_ids,
+                    attention_mask=attention_mask,
+                    **gen_kwargs,
+                    )
+        else:
+            hyps = model.generate(
+                    input_ids,
+                    attention_mask=attention_mask,
+                    **gen_kwargs,
+                    )
         hyps = tokenizer.batch_decode(hyps,skip_special_tokens=skip_special == "True")
         decs.extend(hyps)
     return decs
@@ -225,27 +384,28 @@ def chunks(lst, n):
 import debugpy
 # vvvvvvvvvvvvvvv
 
-def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="greedy", scorers="rouge", batch_size="20@5", model = None, tokenizer = None, preds_file = "", set_name = "test", rewrite_info = False):  
+def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="greedy", scorers="rouge", batch_size="20@5", model = None, tokenizer = None, preds_file = "", set_name = "test", rewrite_info = False, stop_level=0, seed=0, task_ids=None):  
     if rewrite_info:
         save_path = os.path.join(save_path, "full_results.tsv")
-        if Path(sav_path).is_file() and rewrite:
-            df = pd.read_table(path)
+        if Path(save_path).is_file() and rewrite:
+            df = pd.read_table(save_path)
 
         for key, info in exp_info.items():
             df[key] = info
 
-        mlog.info("Saving results %s", path)
+        mlog.info("Saving results %s", save_path)
         df.to_csv(save_path, index=False, sep="\t")
         return
 
 
     mlog.info("Loading models for evaluation ..")
     mlog.info("%s", save_path)
+    #set_random_seed(seed)
 
     #local_path = f"{base_path}/paraphrase-multilingual-MiniLM-L12-v2"        
     #df = df.groupby(['prefix','input_text'],as_index=False)[target].agg({"target_text":'<br />'.join})
-    #resp_const_parts = re.split("{.*}", anstemp)
-    resp_const_parts = ["<pad>","<extra_id_0>", "<extra_id_1>", "<extra_id_2>", "</s>", "."]
+    #resp_cost_toks = re.split("{.*}", anstemp)
+    resp_cost_toks = ["<pad>","<extra_id_0>", "<extra_id_1>", "<extra_id_2>", "</s>", "."]
     if model is not None: model.eval()
     rows = []
     sel_rows = []
@@ -301,7 +461,7 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
                 batch,_ = next(dl_iter)
                 if type(batch) == list:
                     batch = batch[0]
-                hyps = generate(model, tokenizer, batch, gen_param=gen_param)
+                hyps = generate(model, tokenizer, batch, gen_param=gen_param, task_ids=task_ids)
         else:
             #hyps = islice(infile, len(queries))
             hyps = lines[l_count: l_count + bs]
@@ -310,14 +470,15 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
         for b, top_hyp in zip(batch_list, hyps):
             query = b["query"]
             inp = b["event"]
-            tail = b["resp"]
+            tail = b["target"]
+            resp = b["resp"]
             rel = b["rel"]
             qid = b["index"]
             repid = b["rep"]
             mlog.info("\n%s/%s) query: %s", step, len(test_set), query)
             mlog.info("\nhyp: %s",top_hyp)
             mlog.info("\ntail: %s",tail)
-            mbp()
+            mbp(1)
             data = {}
             if query != old_query:
                 old_query = query
@@ -332,17 +493,28 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
                 blank, top_hyp = top_hyp.split("<extra_id_1>")
                 if not blank: blank = "EMPT"
             mlog.info("hyp: %s",top_hyp)
-            for const in resp_const_parts:
+            resp_const = resp.split(tail)
+            # constant words in target template
+            affixes = []
+            for rp in resp_const:
+                affix = rp
+                for const in resp_cost_toks:
+                    affix = affix.replace(const, "")
+                if affix:
+                    affixes.append(affix.strip())
+
+            for const in resp_cost_toks + affixes:
                 top_hyp = top_hyp.replace(const, "")
                 blank = blank.replace(const, "")
             mlog.info("hyp: %s", top_hyp)
-            if not top_hyp.strip():
+            top_hyp = top_hyp.strip()
+            if not top_hyp:
                 top_hyp = "EMPT"
             data["blank"] = blank
             data["pred_text1"] = str(top_hyp)
             data["prefix"] = rel
             data["langs"] = lang
-            tail = re.sub(r'<extra_.*?>','',tail)
+            tail = re.sub(r'<.*?>','',tail)
             tail = tail.strip()
             data["target_text"] = tail
             #if test_set.orig_df is None:
@@ -356,6 +528,7 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
             #    query = query.replace("<extra_id_0>", ">>" + top_hyp)
             data["input_text"] = inp
             data["query"] = query 
+            data["resp"] = resp
             _q = query.replace("<", "\n<", 1)
             _q = _q.replace(">", ">\n")
             data["prompt"] = _q
@@ -407,6 +580,15 @@ def do_score_w(df_name, path, scorers):
 
 import numpy as np
 import tensorflow as tf
+def run_sts_benchmark(batch, embed):
+  sts_encode1 = tf.nn.l2_normalize(embed(tf.constant(batch['top'].tolist())), axis=1)
+  sts_encode2 = tf.nn.l2_normalize(embed(tf.constant(batch['top_pred'].tolist())), axis=1)
+  cosine_similarities = tf.reduce_sum(tf.multiply(sts_encode1, sts_encode2), axis=1)
+  clip_cosine_similarities = tf.clip_by_value(cosine_similarities, -1.0, 1.0)
+  scores = 1.0 - tf.acos(clip_cosine_similarities) / math.pi
+  """Returns the similarity scores"""
+  return scores
+
 def do_score(df, scorers, save_path, reval=False):
     #try:
     #    nltk_path = str(nltk.data.find("tokenizers/punkt"))
@@ -419,18 +601,6 @@ def do_score(df, scorers, save_path, reval=False):
     #debugpy.wait_for_client()
     if "st" in scorers:
         embed = tf.saved_model.load("/home/pouramini/pret/sm")
-
-
-    def run_sts_benchmark(batch):
-      sts_encode1 = tf.nn.l2_normalize(embed(tf.constant(batch['top'].tolist())), axis=1)
-      sts_encode2 = tf.nn.l2_normalize(embed(tf.constant(batch['top_pred'].tolist())), axis=1)
-      cosine_similarities = tf.reduce_sum(tf.multiply(sts_encode1, sts_encode2), axis=1)
-      clip_cosine_similarities = tf.clip_by_value(cosine_similarities, -1.0, 1.0)
-      scores = 1.0 - tf.acos(clip_cosine_similarities) / math.pi
-      """Returns the similarity scores"""
-      return scores
-
-
 
     base_path = "/content/drive/MyDrive/pret"
     if not colab:
@@ -575,7 +745,7 @@ def do_score(df, scorers, save_path, reval=False):
             rouges = df2["rouge_score"].to_list()
         scores = []
         for batch in np.array_split(sts_data, 10):
-          scores.extend(run_sts_benchmark(batch))
+          scores.extend(run_sts_benchmark(batch, embed))
 
         df2["st_score"] = ["{:.2f}".format(float(x)) for x in scores]
         res = zip(scores, berts, rouges, preds, tails)
@@ -591,7 +761,7 @@ def do_score(df, scorers, save_path, reval=False):
 
     mlog.info("Saving results %s", save_path)
     print("Saving results %s", save_path)
-    if not Path(save_path).is_file():
+    if not save_path.endswith("tsv"):
         save_path = os.path.join(save_path, "full_results.tsv")
     df.to_csv(save_path, index=False, sep="\t")
     
@@ -716,10 +886,10 @@ def calc_metrics(preds, golds, metric_list):
                 summary[metric_name] = res[metric_name]
     return summary
 
-def acc_metric(tokenizer, all_preds, all_labels, save_res=False, save_path=""):
+def acc_metric(tokenizer, all_preds, all_labels, save_path=""):
     acc = sum([int(p == l) for p, l in zip(all_preds, all_labels)]) / len(all_preds)
     
-    if save_res:
+    if save_path:
         with open(os.path.join(save_path, "{}.txt".format(acc)), "w") as f:
             for p, l in zip(all_preds, all_labels):
                 f.write(str(p) + "\t\t" + str(l) + "\n")
@@ -730,11 +900,11 @@ def acc_metric(tokenizer, all_preds, all_labels, save_res=False, save_path=""):
     return acc
 
 
-def acc_f1_metric(tokenizer, all_preds, all_labels, save_res=False, save_path=""):
+def acc_f1_metric(tokenizer, all_preds, all_labels, save_path=""):
     f1_macro = f1_score(all_labels, all_preds, average="macro")
     acc = sum([int(p == l) for p, l in zip(all_preds, all_labels)]) / len(all_preds)
 
-    if save_res:
+    if save_path:
         with open(os.path.join(save_path, "{}.txt".format(f1_macro)), "w") as f:
             for p, l in zip(all_preds, all_labels):
                 f.write(str(p) + "\t\t" + str(l) + "\n")

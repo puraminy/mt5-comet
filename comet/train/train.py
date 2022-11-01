@@ -1,18 +1,22 @@
 #%% load libraries
 import debugpy
+import comet.train.mylogs as mylogs 
 from comet.train.common import *
+from comet.train.dataset import *
+from comet.train.data import *
 import itertools, collections
 import shutil
 from comet.train.eval import *
 from comet.utils.dataset import TokenizedDataset
 from comet.utils.configue import Configure
 import comet.utils.tool as ut
-from comet.models.unified.prefixtuning import Model
+#from comet.models.unified.prefixtuning import Model
 from transformers.trainer_seq2seq import Seq2SeqTrainer
 from transformers.optimization import Adafactor, AdafactorSchedule
 from transformers import TrainingArguments
 from comet.train.model import *
 from comet.data_utils import *
+from polytropon import SkilledMixin
 import torch
 import re
 import json
@@ -39,7 +43,7 @@ class MyCollator(object):
         self.prompt_config = None
 
 #gggggggggggggg
-    def collate(self, enc_qs, enc_resps, queries, resps):
+    def collate(self, enc_qs, enc_resps, queries, resps, targets, flags):
         bs = len(enc_qs)
         q_len = [len(i) for i in enc_qs]
         max_enc_len = max(q_len)
@@ -54,16 +58,19 @@ class MyCollator(object):
             "decoder_input_ids": torch.ones(bs, max_dec_len, dtype=torch.long) * pad_id,
             "labels": torch.ones(bs, max_dec_len, dtype=torch.long) * -100,
         }
-        mbp("")
         no_model_data = {
             #"idx": torch.zeros(bs, dtype=torch.long),
             "labels": torch.ones(bs, max_dec_len, dtype=torch.long) * pad_id,
             "loss_mask": torch.zeros(bs, max_dec_len),
             "query":[""]*bs,
-            "resp":[""]*bs
+            "target":[""]*bs,
+            "resp":[""]*bs,
+            "wrap":[False]*bs,
+            "freeze":[False]*bs,
+            "unfreeze":[False]*bs,
+            "method":[""]*bs
         }
-        mbp("")
-        for i, (q, r, query, resp) in enumerate(zip(enc_qs, enc_resps, queries, resps)):
+        for i, (q, r, query, resp, target, flag) in enumerate(zip(enc_qs, enc_resps, queries, resps, targets, flags)):
             dec_ids = [pad_id] + r #+ [self.tokenizer.eos_token_id]
             label = r[:-1] #+ [self.tokenizer.eos_token_id]
             model_data["input_ids"][i][:len(q)] = torch.tensor(q, dtype=torch.long)
@@ -75,6 +82,11 @@ class MyCollator(object):
             model_data["labels"][i][:len(label)] = torch.tensor(label, dtype=torch.long)
             no_model_data["labels"][i][:len(label)] = torch.tensor(label, dtype=torch.long)
             no_model_data["query"][i] = query 
+            no_model_data["target"][i] = target 
+            no_model_data["wrap"][i] = flag["wrap"] 
+            no_model_data["freeze"][i] = flag["freeze"] 
+            no_model_data["unfreeze"][i] = flag["unfreeze"] 
+            no_model_data["method"][i] = flag["method"] 
             no_model_data["resp"][i] = resp
             if self.prompt_config is not None:
                 no_model_data["loss_mask"][i][self.prompt_config["dec"]["prompt_len"]:len(label)] = 1.0
@@ -85,7 +97,6 @@ class MyCollator(object):
 
     def __call__(self, batch):
         #return {"query":_query, "event":event, "resp":response, "rel":rel, "index":index, "rep":rep}
-        mbp("")
         queries = []
         inputs = []
         responses = []
@@ -95,6 +106,8 @@ class MyCollator(object):
         dec_starts = []
         enc_queries = []
         enc_responses = []
+        targets = []
+        flags = []
         for b in batch:
             enc_query = self.tokenizer.encode(b["query"])
             queries.append(b["query"])
@@ -104,12 +117,13 @@ class MyCollator(object):
             enc_responses.append(enc_resp)
             rel.append(b["rel"])
             inputs.append(b["event"].strip())
+            targets.append(b["target"].strip())
             index.append(b["index"])
             rep.append(b["rep"])
+            flags.append(b["flag"])
 
-        return self.collate(enc_queries, enc_responses, queries, responses)
+        return self.collate(enc_queries, enc_responses, queries, responses, targets, flags)
         #queries,inputs, responses,rel,index,rep = zip(*batch)
-        #mbp("b")
         no_model_batch = {}
         tokenizer = self.tokenizer
         new_batch = tokenizer(list(queries),return_tensors='pt',padding='longest', 
@@ -137,9 +151,7 @@ class MyCollator(object):
                 loss_mask[loss_mask!=tokenizer.pad_token_id] = 1
                 loss_mask[loss_mask==tokenizer.pad_token_id] = 0
                 no_model_batch['loss_mask'] = loss_mask
-                mbp("")
                 labels[labels==tokenizer.pad_token_id] = -100
-                #mbp("b")
                 new_batch['labels']=labels#[:,:-1]
                 no_model_batch['labels']=labels#[:,:-1]
                 if not self.prefix:
@@ -346,6 +358,12 @@ def cli():
     help="List undone experiments"
 )
 @click.option(
+    "--repeat",
+    "-rep",
+    is_flag=True,
+    help="Repeat done expriments (not skip them)"
+)
+@click.option(
     "--port",
     "-p",
     default="1234",
@@ -359,8 +377,28 @@ def cli():
     help=""
 )
 @click.option(
-    "--no_stop",
-    "-ns",
+    "--stop_level",
+    "-sl",
+    default=2,
+    type=str,
+    help="Stop on breakpoints equal to the value"
+)
+@click.option(
+    "--reval_bests",
+    "-best",
+    is_flag=True,
+    help=""
+)
+@click.option(
+    "--trial",
+    "-t",
+    default="1",
+    type=str,
+    help="You can set it for repeating experiments with different identities"
+)
+@click.option(
+    "--show_samples",
+    "-ss",
     is_flag=True,
     help=""
 )
@@ -369,7 +407,9 @@ def cli():
 def run(ctx, conf_path, base_conf, experiment, 
         exclude_conf, include_conf, overwrite_conf, var, 
         save_model, addto, rem, save_data, load_data, add_prefix, wrap, 
-        only_var, sep, num_exps, one, cpu, undone, dpy, port, no_stop):
+        only_var, sep, num_exps, one, cpu, undone, repeat, 
+        dpy, port, stop_level, reval_bests, trial, show_samples):
+
      if dpy:
         debugpy.listen(('0.0.0.0', int(port)))
         print("Waiting for client at run...port:", port)
@@ -392,14 +432,8 @@ def run(ctx, conf_path, base_conf, experiment,
            args["config"] = ""
            args["output_name"] = "" 
            args["experiment"] = experiment 
-           args["stop_on_breakpoint"] = True
-           if no_stop:
-               args["stop_on_breakpoint"] = False
-           if cpu:
-               args["cpu"] = True
-               os.environ["CUDA_VISIBLE_DEVICES"] = ""
-           if add_prefix:
-               args["tag"] = "experiment"
+           args["show_samples"] = show_samples 
+           args["skip"] = True # skip experiment
            if addto:
                spath = os.path.join(logPath, addto)
            else:
@@ -413,12 +447,9 @@ def run(ctx, conf_path, base_conf, experiment,
                     shutil.rmtree(d)
 
            Path(spath).mkdir(exist_ok=True, parents=True)
-           if load_data:
-               args["data_path"] = spath
-           if undone:
-               args["undone"] = True
            args["save_path"] = spath
            args["load_path"] = pretPath 
+           args["trial"] = trial
            _extra = ""
            exclude_list = ["no_confirm", "follow_method", "method", "test_samples"]
            mlog.info("Extra args=%s", ctx.args)
@@ -453,13 +484,17 @@ def run(ctx, conf_path, base_conf, experiment,
                args["no_save_model"] = not save_model
                ctx.invoke(train, **args)
            else:
-               output_name = ""
+               output_name = "trial=" + args["trial"]
                var = var.replace("all_rels","#".join(all_rels))
                var = var.replace("x_rels","#".join(x_rels))
                all_vars = var.split("--")
                #all_vars = sorted(all_vars)
                var_names = [x.split("=")[0] for x in all_vars]
                values = [x.split("=")[1].split("#") for x in all_vars]
+               if "rel_filter" in var_names:
+                   index = var_names.index("rel_filter")
+                   if "multi" in values[index]:
+                       save_data = True
                tot_comb = [dict(zip(var_names, comb)) for comb in itertools.product(*values)]
                ii = 0
                orig_args = args.copy()
@@ -495,28 +530,59 @@ def run(ctx, conf_path, base_conf, experiment,
                        args["overwrite"] = args["method"] + sep + rel_folder + sep + _output_name \
                            + sep + _extra 
                    args["no_save_model"] = not save_model
+                   if load_data:
+                       args["data_path"] = spath
+                       args["use_all_data"] = True
+                   if undone:
+                       args["undone"] = True
+                   if repeat:
+                       args["skip"] = False
+                   if show_samples:
+                       stop_level = "data"
+                   args["stop_level"] = stop_level 
+                   mylogs.STOP_LEVEL = stop_level
+                   if cpu:
+                       args["cpu"] = True
+                       os.environ["CUDA_VISIBLE_DEVICES"] = ""
+                   if add_prefix:
+                       args["tag"] = "experiment"
                    if wrap:
                        args["method"] += "-wrap"
                    if save_data: 
                        args["save_data"] = spath
                    if args["rel_filter"] == "multi":
+                       mbp("multi")
                        args["data_path"] = spath
                        args["rel_filter"] = "" 
                        args["multi"]= True
                        args["use_all_data"] = True
+                       args["save_data"] = False
                    else:
                        _dp = os.path.join(dataPath,"sel",args["rel_filter"] + ".tsv")
-                       args["data_path"] = orig_args["data_path"]
+                       if not load_data:
+                           args["data_path"] = orig_args["data_path"]
                        args["multi"] = False 
                        if Path(_dp).is_file():
                            args["test_samples"] = 0
                            args["test_path"] = _dp
-                       else:
+                       elif not load_data:
                            args["use_all_data"] = False
                            args["test_path"] = orig_args["test_path"]
                            args["test_samples"] = orig_args["test_samples"] 
-                       args["exp_id"] = ii
-                       ctx.invoke(train, **args, run_args = run_args)
+                   args["exp_id"] = ii
+                   ow = args["overwrite"]
+                   if reval_bests:
+                       lp = os.path.join(spath, ow, "best_model")
+                       if not Path(lp).exists():
+                           mlog.info("Skipping reval, no saved model")
+                           continue
+                       else:
+                           mlog.info("Loading model from %s", lp)
+                           args["do_eval"] = True
+                           args["test_set"] = "validation" 
+                           args["load_path"] = lp
+                           args["trial"] = "reval"
+                   ctx.invoke(train, **args, run_args = run_args)
         else:
             confs = sorted(glob.glob(f"{_path}/*"))
             default_model = ""
@@ -739,11 +805,18 @@ def run(ctx, conf_path, base_conf, experiment,
     help="filter by predicted nli group"
 )
 @click.option(
+    "--pl_learning_rate",
+    "-plr",
+    default=0,
+    type=float,
+    help="prompt tuning learning rate"
+)
+@click.option(
     "--learning_rate",
     "-lr",
     default=0,
     type=float,
-    help="learning rate"
+    help="fine tuning learning rate"
 )
 @click.option(
     "--do_eval",
@@ -827,6 +900,13 @@ def run(ctx, conf_path, base_conf, experiment,
     "--test_path",
     "-tep",
     default="test.tsv",
+    type=str,
+    help=""
+)
+@click.option(
+    "--sample_path",
+    "-samp",
+    default="sample.tsv",
     type=str,
     help=""
 )
@@ -1065,6 +1145,12 @@ def run(ctx, conf_path, base_conf, experiment,
     help=""
 )
 @click.option(
+    "--no_save_best",
+    "-nsb",
+    is_flag=True,
+    help=""
+)
+@click.option(
     "--gen_bs",
     "-gb",
     default="10@10",
@@ -1276,7 +1362,7 @@ def run(ctx, conf_path, base_conf, experiment,
 @click.option(
     "--seed",
     "-seed",
-    default=1,
+    default=0,
     type=int,
     help=""
 )
@@ -1287,26 +1373,39 @@ def run(ctx, conf_path, base_conf, experiment,
     help=""
 )
 @click.option(
-    "--stop_on_breakpoint",
+    "--stop_level",
     "-stbr",
-    is_flag=True,
+    default=0,
+    type=int,
     help=""
 )
-def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, wandb, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args, match, dpy, prompt_tune, prompt_config_file, load_prompt, data_name, seed, do_valid, stop_on_breakpoint):
+@click.option(
+    "--skilled_variant",
+    "-sv",
+    default="",
+    type=str,
+    help=""
+)
+def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, pl_learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, wandb, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, no_save_best, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args, match, dpy, prompt_tune, prompt_config_file, load_prompt, data_name, seed, do_valid, stop_level, skilled_variant):
 
     #%% some hyper-parameters
 
-
+    mylogs.STOP_LEVEL = stop_level
 # Allow other computers to attach to debugpy at this IP address and port.
     if dpy:
         debugpy.listen(('0.0.0.0', 5678))
         print("Waiting for client... at train")
         debugpy.wait_for_client()  # blocks execution until client is attached
     #bbbbbbbbbbb
+    mbp("start")
     #underlying_model_name = "logs/atomic-mt5/last"
     vlog.info("given load path: %s", load_path)
     vlog.info("given load path: %s", load_path)
     vlog.info("given save path: %s", save_path)
+
+
+    seed = int(seed)
+    set_random_seed(seed)
 
     if "dlog" in print_log: # data logger
         dlog.addHandler(consoleHandler)
@@ -1318,8 +1417,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         clog.addHandler(consoleHandler)
         clog.setLevel(logging.DEBUG)
 
-    args = locals() # input parameters
-
+    args = run_args # input parameters
     mlog.info(f"========================= {experiment}:{exp_id} ========================")
     if save_path == "":
         if "ahmad" or "pouramini" in home:
@@ -1366,10 +1464,12 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             train_path = os.path.join(data_path, train_path) 
             test_path = os.path.join(data_path, test_path)
             val_path = os.path.join(data_path, val_path) 
+            sample_path = os.path.join(data_path, sample_path) 
         else:
             train_path = os.path.join(data_path, "train.tsv")
             test_path = os.path.join(data_path, "test.tsv")
             val_path = os.path.join(data_path, "valid.tsv")
+            sample_path = os.path.join(data_path, "sample.tsv")
 
         assert Path(train_path).is_file(), f"Train path {train_path} is not!"
 
@@ -1382,7 +1482,11 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     if from_dir:
         underlying_model_name = path
     elif Path(load_path).exists():
-        underlying_model_name = f"{load_path}/{model_id}"
+        bins = glob.glob(f"{load_path}/*.bin")
+        if not bins and do_eval:
+            print("Skipping.... the folder contains no model (*.bin) !!")
+            return
+        underlying_model_name = f"{load_path}/{model_id}" if not bins else load_path
         if not Path(underlying_model_name).exists():
             underlying_model_name = model_id        
     else:
@@ -1396,22 +1500,23 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     validation_num_generation = 20
     learning_rate = float(learning_rate)
     lr_mt = {}
-    if not frozen and learning_rate == 0: 
+    if learning_rate == 0: 
         if opt_type == "adam": 
             learning_rate = lr_mt[method] if method in lr_mt else 3.25e-04  
         else:
             learning_rate = 1e-3
         if "gpt" in model_id:
             learning_rate = 1e-5
-    if frozen and learning_rate == 0: 
+    if pl_learning_rate == 0: 
         if encoder_type == "lstm":
-            learning_rate = 0.05  
+            pl_learning_rate = 0.03  
         elif encoder_type == "emb":
-            learning_rate = 0.1  
+            pl_learning_rate = 0.1  
         else:
-            learning_rate = 0.01  
+            pl_learning_rate = 0.01  
 
     assert learning_rate > 0, "Learning rate is zero!"
+    assert pl_learning_rate > 0, "Prompt tuning Learning rate is zero!"
     device = 'cuda' if not cpu else 'cpu'
 
     log_dir = save_path
@@ -1442,10 +1547,10 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     if overwrite:
         save_path = os.path.join(log_dir, overwrite)
         do_overwrite = True
-    if Path(save_path).exists() and skip:
+    if Path(save_path).exists() and skip and not do_eval:
         tsv_files = glob.glob(save_path + "/**/*.tsv", recursive = True)
         if tsv_files:
-            print("Skiping.... the folder already exists!!")
+            print("Skipping.... the folder already exists!!")
             return
     if undone: # only report it wasn't done
         _ss = save_path.split("/")
@@ -1456,6 +1561,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
 
     mlog.info("Optimizer type %s:", opt_type)
     mlog.info("learning rate %s:", learning_rate)
+    mlog.info("pl learning rate %s:", pl_learning_rate)
     mlog.info("Output name: %s", output_name)
     ii = 1
     while not do_overwrite and Path(save_path).exists() and not model_id=="test":
@@ -1522,9 +1628,14 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         else:
             tpath = underlying_model_name 
             if from_dir:
+                assert False, "loading from dir"
                 tpath = f"{load_path}/{model_id}"
             tokenizer = AutoTokenizer.from_pretrained(tpath)
-            model = T5ForConditionalGeneration.from_pretrained(underlying_model_name) 
+            model = T5ForConditionalGeneration.from_pretrained(underlying_model_name, 
+                                                           output_attentions = False, 
+                                           # Whether the model returns attentions weights.
+                                                           output_hidden_states = False,
+                                                           return_dict=True) 
 
         if underlying_model_name == model_id:
             mlog.info("Saving model on local %s", load_path)
@@ -1563,7 +1674,9 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             translate(model, tokenizer, trans_df, "input_text@fa@5000", path, logger, start, load_path) 
         return
     
+    mlog.info("Loading from %s", underlying_model_name)
     model, tokenizer, underlying_model_name = load_model(model_id, underlying_model_name)
+    extend_tokenizer(tokenizer)
     if from_words and from_words != "rel" and from_words != "none":
         fw_tokens = tokenizer.tokenize(from_words)
         mlog.info("from words ids ***: %s", fw_tokens)
@@ -1574,15 +1687,16 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         length = [int(s) for s in str(prompt_length).split("-")]
         set_prompt_lengths(rel_filter, length)
 
-    num_samples = {"train": int(train_samples), "validation":int(val_samples), "test":int(test_samples)}
-    split_path = {"train":train_path, "validation":val_path, "test":test_path}
+    sample_samples = 0
+    num_samples = {"train": int(train_samples), "validation":int(val_samples), "test":int(test_samples), "sample":int(sample_samples)}
+    split_path = {"train":train_path, "validation":val_path, "test":test_path, "sample":sample_path}
     save_ds_path = {}
     for split, _path in split_path.items():
         #_path = _path.replace(".tsv","_")
         save_ds_path[split] = os.path.join(underlying_model_name, split)
     #tokenize_relations(tokenizer)
     atomic_query_responses = {"train":[], "validation":[]}
-    generate_samples = {}
+    generated_samples = {}
     mlog.info("Perparing data ...")
     if model_id in ["t5-large","t5-small", "t5-base", "gpt2"]:
         lang = "en"
@@ -1620,6 +1734,9 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                 group_them = group_by
             #    _replace_blanks = False
             df_path = split_path[split_name]
+            if split_name == "sample" and not Path(df_path).is_file():
+                mlog.info("No sample was provided! %s ", df_path)
+                continue
             split_df = pd.read_table(df_path)
             mlog.info("Path of dataset for %s %s", split_name, split_path[split_name])
             dlog.info("Columns of %s\n  %s", split_name, "\n".join(list(split_df.columns)))
@@ -1650,6 +1767,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             if split_name == "train" or split_name == "sample":
                 _repeat = int(repeat)
             # dddddddddddddd
+
             myds[_name] = MyDataset(split_df, split_name,
                                 _method, prompt_pos, rel_filter,
                                 num_samples[split_name], 
@@ -1664,10 +1782,14 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                                 sampling, ex_type,
                                 tails_per_head, save_ds_path[split_name], _repeat, 
                                 int(pid), _break_sent, sort, _replace_blanks, 
-                                None, int(ph_num), group_them = group_them, temp_num = temp_num, someone=someone, match=_match
+                                None, int(ph_num), group_them = group_them, 
+                                temp_num = temp_num, someone=someone, 
+                                match=_match, batch_size=int(batch_size)
                         )
             if save_data:
                 myds[_name].save_data(os.path.join(save_data,_name + ".tsv"), merge=True)
+                if _name == "train":
+                    myds[_name].save_data(os.path.join(save_data, "sample.tsv"), merge=True, sample=10)
         return myds
 
     if do_eval:
@@ -1678,23 +1800,41 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         ds_list = ["train"]
         if do_valid:
             ds_list += ["validation"]
-        #ds_list += ["sample"]
+        ds_list += ["sample"]
         myds = load_data(ds_list)
-        if show_samples: 
-            samples_iter = iter(myds["train"])
+        if True: #wrap or show_samples: It's required to retrive prompt tokens
+            if "sample" in myds:
+                mbp("sample")
+                samples_iter = iter(myds["sample"])
+                sample_limit = myds["sample"].num_records
+            else:
+                samples_iter = iter(myds["train"])
+                sample_limit =  int(batch_size)
+            ii = 0
             _sample = True
-            generate_samples["sample"] = []
+            generated_samples["sample"] = []
             logger = mlog
             logger.info("----------- SAMPLES -------------")
-            while _sample:
+            logger.info(f"----------- {method} -------------")
+            logger.info("----------- SAMPLES -------------")
+            while _sample and ii < sample_limit: 
+                logger.info(f"----------- {method} -------------")
                 _sample = next(samples_iter, None)
+                if not _sample:
+                    break
+                if _sample["rep"] > 0:
+                    continue
+                ii += 1
                 logger.info(_sample)
                 if False: #_sample:
-                    generate_samples["sample"].append((_sample[0], _sample[1]))
+                    generated_samples["sample"].append((_sample[0], _sample[1]))
             logger.info("--------------------------------")
-            logger.info("Preparing samples: %s ", len(generate_samples["sample"]))
+            logger.info("Preparing samples: %s ", len(generated_samples["sample"]))
+            mbp("data")
     if model_id == "test" or show_samples:
         return
+    mbp("start")
+    extend_tokenizer(tokenizer)
 
     prompt_config = None
     if prompt_tune:
@@ -1775,10 +1915,16 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         decx_parts = _parts[2]
         freeze_cross_att(modules_to_freeze, decx_parts, model.decoder)
 
-    def freeze(modules_to_freeze, fz=False):
+    def freeze(modules_to_freeze):
         for module in modules_to_freeze:
             for param in module.parameters():
-                param.requires_grad = fz  # Actual freezing operation
+                param.requires_grad = False  # Actual freezing operation
+
+    def unfreeze(modules_to_freeze):
+        for module in modules_to_freeze:
+            for param in module.parameters():
+                param.requires_grad = True  # Actual freezing operation
+
     if frozen:
         freeze(modules_to_freeze)
 
@@ -1795,7 +1941,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         else:
             _tag += "|" + _t  
     tag = _tag
-    exp_info = {"exp":experiment, "model":model_id, "lang": lang, 
+    exp_info = {"exp":experiment + "-" + str(exp_id), "model":model_id, "lang": lang, 
                     "method":method, 
                     "wrap": w_str + ("-" + encoder_type if wrap else ""),
                     "frozen":f_str, 
@@ -1807,17 +1953,61 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                     "plen":prompt_length,
                     "opt_type":opt_type,
                     "trial":trial,
+                    "exp_trial":str(experiment) + "-" + str(exp_id)+ "-" + str(trial),
                     "learning_rate":learning_rate,
+                    "pl_learning_rate":pl_learning_rate,
                     "date":extra}
     exp_info["eval"] = do_eval
     for k,v in run_args.items():
         if not k in exp_info:
             exp_info[k] = v
 
+    mbp("start")
+    def eval_test(model, tokenizer, result_fname=""):
+        if "@" in gen_bs:
+            test_bs,_ = gen_bs.split("@")
+        else:
+            test_bs = int(gen_bs)
+
+        test_bs = int(test_bs)
+        for _set in test_set.split("@"):
+            myds = load_data([_set])
+            test_dataset = myds[_set]
+            data_collator = MyCollator(tokenizer, model, ds_type="test", prefix=prefix)
+            test_dataloader = torch.utils.data.DataLoader(test_dataset,
+                batch_size=test_bs,shuffle=False, 
+                collate_fn=data_collator,
+            )
+            mlog.info("Evaluating ... %s", _set)
+            val_records = myds[_set].num_records
+            exp_info["test_set"] = _set
+            exp_info["val_records"] = val_records 
+            mbp("start")
+            #a1, a2, s1, r = evaluate1(tokenizer, test_dataloader, model, device, seed, mode="test", save_path=save_path, wrap=False, task_ids=task_ids)
+            #mlog.info("acc1: %s, acc2: %s, sts: %s, res: %s", a1, a2, s1, r)
+            mbp("start")
+            mbp(2)
+            _model = model
+            if task_ids is not None:
+                _model = wrapped_model 
+            if not result_fname:
+                _save_path = save_path
+            else:
+                _save_path = os.path.join(save_path, result_fname)
+            evaluate(test_dataset, test_dataloader, _save_path, exp_info, val_records, gen_param, scorers = scorers, batch_size=gen_bs, model=_model, tokenizer=tokenizer, set_name=_set, seed=seed, task_ids=task_ids)  
     if do_eval or (not wrap and frozen and modules_to_freeze is model):
         mlog.info("Evaluating the model...")
         model.to(device=device)
-        evaluate(myds[test_set], underlying_model_name, exp_info, val_records, gen_param, scorers=scorers, batch_size=gen_bs, model=model, tokenizer=tokenizer)  
+        dev_dataset = myds[test_set]#.map(tokenize)
+        data_collator = MyCollator(tokenizer, model, ds_type=test_set, prefix=prefix)
+        dev_dataloader = torch.utils.data.DataLoader(dev_dataset,
+            batch_size=batch_size,shuffle=False,
+            collate_fn=data_collator,
+        )
+        a1, a2, s1, dev_loss = evaluate1(tokenizer, dev_dataloader, model, device, seed, mode="dev", save_path=save_path, wrap=False)
+        log_string = "dev_loss: " + str(dev_loss) + " | dev acc({}, {} st:{}): ".format(a1, a2, s1) 
+        mlog.info(log_string)
+        eval_test(model, tokenizer, "reval_full.tsv")
         return
     #%% tokenizer & model
     allowed_out_token_length = len(tokenizer)
@@ -1844,9 +2034,135 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         accumulation_tiny_steps = 1
         node_batch_size = 1
 
+    train_dataset = myds["train"]#.map(tokenize)
+    iterations = train_dataset.num_records//batch_size
+    warm_up_steps = 0.002*iterations
+    #ppppppppppppppp
+    if prefix:
+        pre_args = Configure.Get("pl5.cfg")
+        #mlog.info("prefix conf: %s", pre_args)
 
+        pre_args.prefix_tuning.prefix_sequence_length = int(prompt_length)
+        pre_args.model.knowledge_usage = 'separate' if know=="s" else "concatenate"
+        model = Model(tokenizer, model, args=pre_args)
+        model_tokenizer = model.tokenizer
+        #model = ut.get_model(pre_args.model.name)(pre_args)
+    # %% prepare for training
+    sw = SummaryWriter(save_path, flush_secs=1)
+    no_decay = ['bias', 'LayerNorm.weight']
+    wrapped_model = None
 
-# ggggggggg
+    mbp("start")
+    if not load_prompt_path and Path(os.path.join(load_path, model_id, "prompt")).exists():
+        load_prompt_path = os.path.join(load_path, model_id, "prompt")
+        mlog.info("prompt path:%s ", load_prompt_path)
+    mlog.info("Wrapping the model ...")
+    model_to_wrap = model
+    if prefix:
+        model_to_wrap = model.pretrain_model
+
+    task_ids = None
+    if skilled_variant:
+       task_ids = torch.LongTensor([0, 1])
+    wrapped_model = wrap_model(model_to_wrap, tokenizer, encoder_type, load_prompt_path, from_words = from_words, merge_prompts=merge_prompts, method = method, shared_embs= shared_embs, skilled_variant=skilled_variant) 
+
+    mlog.info("len tokenizer after extending %s", len(tokenizer))
+    if not prefix:
+        model.resize_token_embeddings(len(tokenizer))
+    else:
+        model.pretrain_model.resize_token_embeddings(len(tokenizer))
+
+    wrapped_model.to(device=device)
+    mlog.info("Number of encoders: %s", len(wrapped_model.prompt_encoders))
+    for encoder in wrapped_model.prompt_encoders:
+        mlog.info("encoder %s", encoder.name)
+    wrapped_model.prompt_encoders.to(device=device)
+    mlog.info("len tokenizer after wrapping %s", len(tokenizer))
+    mbp("wrap")
+    mbp("start")
+    if wrapped_model:
+        #model.get_input_embeddings().weight.requires_grad = False
+        rgrad = [p for p in wrapped_model.parameters() if p.requires_grad]
+        nrgrad = [p for p in wrapped_model.parameters() if not p.requires_grad]
+
+        _sum = 0
+        for encoder in wrapped_model.prompt_encoders:
+            enc_rgrad = [p for p in encoder.parameters() if p.requires_grad]
+            mlog.info("len Encoder require grad %s: %s",encoder.name, len(enc_rgrad))
+            mlog.info("Encoder prompt ids: %s", encoder.prompt_ids)
+            _sum += len(encoder.prompt_ids)
+            mlog.info("len prompt ids %s: %s",encoder.name, len(encoder.prompt_ids))
+
+        mlog.info("_sum: %s", _sum)
+        mlog.info("Wrapped model require grad %s, ", len(rgrad))
+        mlog.info("Wrapped model not require grad %s, ", len(nrgrad))
+        mbp("wrap")
+
+    if not no_save_model:
+        tokenizer.save_pretrained(save_path)
+    def get_optimizer(model, learning_rate, opt_type):
+        _lr = learning_rate
+        optimizer_grouped_parameters = [
+            {'params': [p for n, p in model.underlying_model.named_parameters() if p.requires_grad and not any(nd in n for nd in no_decay)], 'weight_decay': weight_decay},
+            {'params': [p for n, p in model.underlying_model.named_parameters() if p.requires_grad and any(nd in n for nd in no_decay)], 'weight_decay': 0.0},
+            {"params": model.mlp.parameters(), "lr": pl_learning_rate},
+        ]
+        if opt_type == "adam":
+            optimizer = AdamW(optimizer_grouped_parameters,lr=_lr,eps=1e-8)
+            for encoder in model.prompt_encoders:
+                optimizer.add_param_group({'params': [p for p in encoder.parameters() if p.requires_grad ], "lr":pl_learning_rate})
+            scheduler = get_linear_schedule_with_warmup(optimizer,warm_up_steps,iterations)
+        elif opt_type == "ada_no_lr":
+            optimizer = Adafactor(optimizer_grouped_parameters, 
+                    scale_parameter=True, 
+                    relative_step=True, warmup_init=True, lr=None)
+            for encoder in model.prompt_encoders:
+                optimizer.add_param_group({'params': [p for p in encoder.parameters() if p.requires_grad ], "lr":pl_learning_rate})
+            scheduler = AdafactorSchedule(optimizer)
+        elif opt_type == "ada":
+            mlog.info("Ada Factor")
+            # replace AdamW with Adafactor
+            optimizer = Adafactor(
+                optimizer_grouped_parameters,
+                lr=1e-3,
+                eps=(1e-30, 1e-3),
+                clip_threshold=1.0,
+                decay_rate=-0.8,
+                beta1=None,
+                weight_decay=0.0,
+                relative_step=False,
+                scale_parameter=False,
+                warmup_init=False,
+		    ) 
+            for encoder in model.prompt_encoders:
+                optimizer.add_param_group({'params': [p for p in encoder.parameters() if p.requires_grad ], "lr":pl_learning_rate})
+        #optimizer = Adafactor(
+        #        model.parameters(),
+        #        lr=1e-3,
+        #        eps=(1e-30, 1e-3),
+        #        clip_threshold=1.0,
+        #        decay_rate=-0.8,
+        #        beta1=0.0,
+        #        weight_decay=0.0,
+        #        relative_step=False,
+        #        scale_parameter=True,
+        #        warmup_init=False
+        #    )
+            scheduler = AdafactorSchedule(optimizer)
+        else:
+            raise ValueError(opt_type + " must be one of adam, ada, ada_no_lr")
+        return optimizer, scheduler
+
+    mbp("start")
+    optimizer, scheduler = get_optimizer(wrapped_model, learning_rate, opt_type) 
+    if checkpoint:
+        mlog.info("Restoring optimizer and scheduler")
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
+        step = checkpoint['step']
+        best_eval_step = checkpoint['best_eval_step']
+        best_dev_loss = checkpoint['best_dev_loss']
+
     #%% build dataloader
     if data_name:
         train_ratio = 1
@@ -1888,291 +2204,36 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     
     for logger in [mlog, tlog]:
         logger.info("Iterations:"  + str(iterations))
-    warm_up_steps = 0.002*iterations
-    #ppppppppppppppp
-    if prefix:
-        pre_args = Configure.Get("pl5.cfg")
-        #mlog.info("prefix conf: %s", pre_args)
-
-        pre_args.prefix_tuning.prefix_sequence_length = int(prompt_length)
-        pre_args.model.knowledge_usage = 'separate' if know=="s" else "concatenate"
-        model = Model(tokenizer, model, args=pre_args)
-        model_tokenizer = model.tokenizer
-        #model = ut.get_model(pre_args.model.name)(pre_args)
-    # %% prepare for training
-    sw = SummaryWriter(save_path, flush_secs=1)
-    no_decay = ['bias', 'LayerNorm.weight']
-    wrapped_model = None
-    if wrap:
-        if not load_prompt_path and Path(os.path.join(load_path, model_id, "prompt")).exists():
-            load_prompt_path = os.path.join(load_path, model_id, "prompt")
-            mlog.info("prompt path:%s ", load_prompt_path)
-        mlog.info("Wrapping the model ...")
-        model_to_wrap = model
-        if prefix:
-            model_to_wrap = model.pretrain_model
-        wrapped_model = wrap_model(model_to_wrap, tokenizer, encoder_type, load_prompt_path, from_words = from_words, merge_prompts=merge_prompts, method = method, shared_embs= shared_embs) 
-    if wrapped_model:
-        wrapped_model.to(device=device)
-        wrapped_model.prompt_encoders.to(device=device)
-        mlog.info("len tokenizer after wrapping %s", len(tokenizer))
-    else:
-        wrap = False
-        if learning_rate > 0.0001:
-            #raise "Learning rate should be smaller"
-            pass
-        extend_tokenizer(tokenizer)
-        mlog.info("len tokenizer after extending %s", len(tokenizer))
-        if not prefix:
-            model.resize_token_embeddings(len(tokenizer))
-        else:
-            model.pretrain_model.resize_token_embeddings(len(tokenizer))
-        model.to(device=device)
-
-
-    if wrap:
-        #model.get_input_embeddings().weight.requires_grad = False
-        rgrad = [p for p in wrapped_model.parameters() if p.requires_grad]
-        nrgrad = [p for p in wrapped_model.parameters() if not p.requires_grad]
-
-        _sum = 0
-        for encoder in wrapped_model.prompt_encoders:
-            enc_rgrad = [p for p in encoder.parameters() if p.requires_grad]
-            tlog.info("Encoder require grad %s: %s",encoder.name,enc_rgrad)
-            tlog.info("len Encoder require grad %s: %s",encoder.name,len(enc_rgrad))
-            tlog.info("Encoder prompt ids: %s", encoder.prompt_ids)
-            _sum += len(encoder.prompt_ids)
-            tlog.info("len prompt ids %s: %s",encoder.name, len(encoder.prompt_ids))
-
-        tlog.info("_sum: %s", _sum)
-        tlog.info("Wrapped model require grad %s, ", len(rgrad))
-        tlog.info("Wrapped model not require grad %s, ", len(nrgrad))
-
-    model_rgrad = [p for p in model.parameters() if p.requires_grad]
-    model_nrgrad = [p for p in model.parameters() if not p.requires_grad]
-    mlog.info("Model require grad %s, ", len(model_rgrad))
-    mlog.info("Model not require grad %s, ", len(model_nrgrad))
-    if not no_save_model:
-        tokenizer.save_pretrained(save_path)
-    def get_optimizer(model, learning_rate, wrap, opt_type):
-        if wrap:
-            optimizer_grouped_parameters = [
-                {"params":[p for p in wrapped_model.parameters() if p.requires_grad]}
-            ]
-        else:
-            optimizer_grouped_parameters = [
-                {'params': [p for n, p in model.named_parameters() if p.requires_grad and not any(nd in n for nd in no_decay)], 'weight_decay': weight_decay},
-                {'params': [p for n, p in model.named_parameters() if p.requires_grad and any(nd in n for nd in no_decay)], 'weight_decay': 0.0}
-            ]
-        if opt_type == "adam":
-            optimizer = AdamW(optimizer_grouped_parameters,lr=learning_rate,eps=1e-8)
-            scheduler = get_linear_schedule_with_warmup(optimizer,warm_up_steps,iterations)
-        elif opt_type == "ada_no_lr":
-            optimizer = Adafactor(optimizer_grouped_parameters, 
-                    scale_parameter=True, 
-                    relative_step=True, warmup_init=True, lr=None)
-            scheduler = AdafactorSchedule(optimizer)
-        elif opt_type == "ada":
-            mlog.info("Ada Factor")
-            # replace AdamW with Adafactor
-#AdafactorOptimizer.beta1 = 0.0
-#AdafactorOptimizer.clipping_threshold = 1.0
-#AdafactorOptimizer.decay_rate = None
-#AdafactorOptimizer.epsilon1 = 1e-30
-#AdafactorOptimizer.epsilon2 = 0.001
-#AdafactorOptimizer.factored = True
-#AdafactorOptimizer.min_dim_size_to_factor = 128
-#AdafactorOptimizer.multiply_by_parameter_scale = True
-            optimizer = Adafactor(
-                model.parameters(),
-                lr=1e-3,
-                eps=(1e-30, 1e-3),
-                clip_threshold=1.0,
-                decay_rate=-0.8,
-                beta1=None,
-                weight_decay=0.0,
-                relative_step=False,
-                scale_parameter=False,
-                warmup_init=False,
-		    ) 
-        #optimizer = Adafactor(
-        #        model.parameters(),
-        #        lr=1e-3,
-        #        eps=(1e-30, 1e-3),
-        #        clip_threshold=1.0,
-        #        decay_rate=-0.8,
-        #        beta1=0.0,
-        #        weight_decay=0.0,
-        #        relative_step=False,
-        #        scale_parameter=True,
-        #        warmup_init=False
-        #    )
-            scheduler = AdafactorSchedule(optimizer)
-        else:
-            raise ValueError(opt_type + " must be one of adam, ada, ada_no_lr")
-        return optimizer, scheduler
-
-    optimizer, scheduler = get_optimizer(model, learning_rate, wrap, opt_type) 
-    if checkpoint:
-        mlog.info("Restoring optimizer and scheduler")
-        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-        scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
-        step = checkpoint['step']
-        best_eval_step = checkpoint['best_eval_step']
-        best_dev_loss = checkpoint['best_dev_loss']
+    #st_embed = tf.saved_model.load("/home/pouramini/pret/sm")
     def consume(iterator, n):
         '''Advance the iterator n-steps ahead. If n is none, consume entirely.'''
         collections.deque(itertools.islice(iterator, n), maxlen=0)
     #11111111111
-    def evaluate1(tokenizer, eval_dataset, eval_data_loader, model, device, prompt_config, mode="dev", save_res=False, wrap =False):
-        """Evaluation."""
-        # Turn on evaluation mode which disables dropout.
-        model.eval()
-
-        total_loss = 0.0
-        step = 0
-
-        all_idx = []
-        all_preds = []
-        all_labels = []
-        all_gens = []
-        all_resps = []
-        all_queries = []
-        gen_model = model
-        if wrap: gen_model = model.underlying_model
-        mbp("")
-        with torch.no_grad():
-            for model_batch, no_model_batch in eval_data_loader:
-                for k in model_batch:
-                    model_batch[k] = model_batch[k].to(device)
-                for k in no_model_batch:
-                    if k not in  ["resp", "query"]:
-                        no_model_batch[k] = no_model_batch[k].to(device)
-
-                decs = generate(gen_model, tokenizer, model_batch)
-                all_gens.extend(decs)
-
-                forw_out = forward_step(model, model_batch, no_model_batch, mode="test")
-                loss = forw_out["loss"].item() if "loss" in forw_out else 0
-                total_loss += loss
-
-                logits_list = forw_out["logits"]
-                seq_len = logits_list.size()[1]
-                seq_preds = []
-                for i in range(seq_len):
-                    pred_token_logits = logits_list[:, i, :]
-                    preds = torch.argmax(pred_token_logits, dim=-1)
-                    seq_preds.append(preds.tolist())
-                _seq_preds = list(zip(*seq_preds))
-                all_preds.extend(_seq_preds)
-
-                if "idx" in no_model_batch: 
-                    gathered_idx = no_model_batch["idx"]
-                    all_idx.extend(gathered_idx)
-
-                #labels = no_model_batch["labels"][:, 1]
-                # my code
-                labels = model_batch["labels"]#[:, 1]
-                gathered_labels = labels.tolist() 
-                all_labels.extend(gathered_labels)
-
-                all_queries.extend(no_model_batch["query"])
-                all_resps.extend(no_model_batch["resp"])
-
-                step += 1
-
-        total_loss /= step
-
-        #all_idx = torch.cat(all_idx, dim=0).cpu().tolist()
-        #all_preds = torch.cat(all_preds, dim=0).cpu().tolist()
-        #all_labels = torch.cat(all_labels, dim=0).cpu().tolist()
-        preds_decs = []
-        for p in all_preds:
-            dec = tokenizer.convert_ids_to_tokens(p)
-            preds_decs.append(dec)
-        labels_decs = []
-        for l in all_labels:
-            l = [0 if x == -100 else x for x in l] 
-            dec = tokenizer.convert_ids_to_tokens(l)
-            labels_decs.append(dec)
-        _preds = []
-        _labels = []
-        c = 0
-        i = 0
-        for p,l,r, g, q in zip(preds_decs, labels_decs, all_resps, all_gens, all_queries):
-            _preds.append(p[1].lower())
-            _labels.append(l[1].lower())
-            print("-"*80)
-            print("{}) {}".format(i, q))
-            print("")
-            if any(x in l for x in p):
-                c +=1
-            print(" "*10,"True:",r)
-            print(" "*10,"Pred:",p)
-            print(" "*10,"Gen:",g)
-            i += 1
-
-        print("{:.2f} = {} / {}".format(c/len(preds_decs), c, len(preds_decs)))
-
-        if rel_filter in ["cb", "cb_uni"]:
-            eval_metric = acc_f1_metric
-        else:
-            eval_metric = acc_metric
-        res = eval_metric(tokenizer, _preds, _labels, save_res=save_res)
-        print(res)
-        if stop_on_breakpoint:
-            mbp("b")    
-
-        return total_loss, res
-
     # ffffffffffff
-    def forward_step(model, batch, no_model_batch, accumulation_tiny_steps=1, mode="train"):
-        for k in no_model_batch:
-            if k not in  ["resp", "query"]:
-                no_model_batch[k] = no_model_batch[k].to(device)
-
-        mbp("")
-        result = model(**batch)
-        logits = result["logits"]
-        forw_out = {
-            "logits": logits
-        }
-        if "loss" in result: # and not "loss_mask" in no_model_batch:
-            loss = result['loss']/accumulation_tiny_steps
-        else:
-            #mbp(mode)
-            losses = torch.nn.functional.cross_entropy(
-                result['logits'].reshape(-1,result['logits'].size(2)),
-                no_model_batch['labels'].reshape(-1,),
-                reduction='none'
-            ).reshape(result['logits'].size(0),-1)
-            if "loss_mask" in no_model_batch:
-                loss_mask = no_model_batch["loss_mask"]
-                #loss_mask = loss_mask.to(device)
-                losses = (losses * loss_mask).sum(-1) / loss_mask.sum(-1)
-                loss = losses.mean()
-            else:
-                loss = losses.mean()
-            forw_out["loss_batch"] = losses
-
-        forw_out["loss"] = loss
-    
-        return forw_out
-
     #%% tttttt
     mlog.info(f"============== Exp id: {exp_id}\n")
+    mlog.info(f"============== Data Path: {data_path}\n")
     mlog.info(f"============== batch size: {batch_size} per node: {node_batch_size} | learning_rate: {learning_rate}\n")
     mlog.info(f"============== train samples: {train_samples} test_samples: {test_samples} | repeat: {repeat}  epochs: {epochs_num}\n")
     mlog.info(f"============== wrap: {wrap} | prefixed: {prefix} | frozen: {frozen} {fz_parts}\n")
     mlog.info(f"============== rel_filter: {rel_filter} | method: {method} | model: {model_id} \n")
     epochs_num = int(epochs_num)
     cycle = int(cycle)
-    def train_loop(epochs_num):
+    wrap = True
+    exp_info["train_records"] = train_dataset.num_records
+    exp_info["iterations"] = iterations 
+    mbp("start")
+    def train_loop(epochs_num, wrap, optimizer, scheduler):
         train_iter = iter(train_dataloader)
         global_step = 0
+        max_acc = 0
         step = 0
         best_dev_loss = 100
         best_eval_step = 0
+        best_step = 0
+        is_freezed = frozen
+        freeze_it = False
+        unfreeze_it = False
         if epochs_num == 0 or (not wrap and frozen and modules_to_freeze is model):
             mlog.info("Skip training...")
         elif step <= iterations and (wrap or not frozen or modules_to_freeze is not model):
@@ -2194,69 +2255,71 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             while step < iterations-1:
                 try:
                     if do_valid and cycle > 0 and (global_step % cycle == 0 and global_step > 0): #validation
-                        _model = model
-                        if wrap:
-                            _model = wrapped_model
-                            with torch.no_grad():
-                                mlog.info("Updating the model weights before evaluaton...")
-                                mbp("")
-                                wrapped_model.update_model_weight()
-                        dev_loss, dev_acc = evaluate1(tokenizer, dev_dataset, dev_dataloader, _model, device, prompt_config, mode="dev", save_res=True, wrap = wrap)
-                        log_string = "dev_loss: " + str(dev_loss) + " | dev acc(mrr, f1): " + str(dev_acc) 
-                        mlog.info(log_string)
-                        mbp("")
-                    #if unfreez_step > 0 and step > unfreez_step and froze:
-                    #    mlog.info("unfreezing the model")
-                    #    unfreez_step = 0
-                    #    freeze(modules_to_freeze, True)
-                    #    last_lr = scheduler.get_last_lr()[0]
-                    #    optimizer, scheduler = get_optimizer(model, last_lr, wrap, opt_type)
-                    #if freez_step > 0 and step > freez_step and not frozen:
-                    #    mlog.info("freezing the model")
-                    #    freez_step = 0
-                    #    freeze(modules_to_freeze)
-                    #    last_lr = scheduler.get_last_lr()[0]
-                    #    optimizer, scheduler = get_optimizer(model, last_lr, wrap, opt_type)
-                    model.train()
-                    if wrap:
-                        tlog.info("Wrap model zero grad")
-                        wrapped_model.train()
-                        wrapped_model.zero_grad()
-                    else:
-                        optimizer.zero_grad()
-                    batch_loss = torch.tensor(0.)
-                    for tiny_step in range(accumulation_tiny_steps):
-                        try:
-                            batch, no_model_batch = next(train_iter)
-                        except StopIteration:
-                            tlog.info("Stop Iteration occured at %s", step)
-                            train_iter = iter(train_dataloader)
-                            batch, no_model_batch = next(train_iter)
-                        batch = {k:v.to(device=device) for k,v in batch.items()}
-                        if wrap:
-                            _model = wrapped_model
-                        else:
-                            _model = model
-                        out = forward_step(_model, batch, no_model_batch, accumulation_tiny_steps)
-                        loss = out["loss"]
-                        loss.backward()
-                        #tlog.info("Original embedding grads:%s",model.get_input_embeddings().weight.grad)
-                        if wrap:
-                            #tlog.info("Merge embedding grads:%s", wrapped_model.merge_encoder.embedding.weight.grad)
-                            for encoder in wrapped_model.prompt_encoders:
-                                if encoder.name == "cb":
-                                    #mlog.info("---------------- %s ---------------", encoder.name)
-                                    #mlog.info("Prompt embedding grads:%s", encoder.embedding.weight.grad)
-                                    #mlog.info("Norm: %s", torch.linalg.norm(encoder.embedding.weight.grad))
-                                    mbp("")
-                                    break
+                        _model = wrapped_model
+                        with torch.no_grad():
+                            mlog.info("Updating the model weights before evaluaton...")
+                            wrapped_model.update_model_weight()
+                        a1, a2, s1, dev_loss = evaluate1(tokenizer, dev_dataloader, _model, device, seed, mode="dev", save_path=save_path, task_ids=task_ids)
+                        log_string =  "dev acc({}, {} st:{}): dev_loss:{}  | best_dev_loss:{}   best_step: {} ".format(a1, a2, s1, dev_loss, best_dev_loss, best_step) 
+                        if dev_loss <= best_dev_loss: 
+                            max_acc = a2
+                            best_dev_loss = dev_loss
+                            exp_info["max_acc"] = max_acc
+                            exp_info["best_step"] = best_step = str(epoch) + "x" + str(step)
+                            mlog.info(log_string)
+                            if not no_save_best:
+                                best_path = os.path.join(save_path, "best_model")
+                                save_checkpoint(wrapped_model.underlying_model, 
+                                        tokenizer, 
+                                        optimizer, scheduler, step, 
+                                        global_step, max_acc,
+                                        best_path)
 
-                        batch_loss += loss.item()
+                            mbp(1)
+
+                    try:
+                        batch, no_model_batch = next(train_iter)
+                    except StopIteration:
+                        tlog.info("Stop Iteration occured at %s", step)
+                        train_iter = iter(train_dataloader)
+                        batch, no_model_batch = next(train_iter)
+                    batch = {k:v.to(device=device) for k,v in batch.items()}
+                    freeze_it = no_model_batch["freeze"][0]
+                    unfreeze_it = no_model_batch["unfreeze"][0]
+                    if  unfreeze_it and is_freezed:
+                        mlog.info("unfreezing the model")
+                        is_freezed = False
+                        unfreeze(modules_to_freeze)
+                        last_lr = scheduler.get_last_lr()[0]
+                        optimizer, scheduler = get_optimizer(wrapped_model, last_lr, opt_type)
+
+                    if freeze_it and not is_freezed:
+                        mlog.info("freezing the model")
+                        is_freezed = True
+                        freeze(modules_to_freeze)
+                        last_lr = scheduler.get_last_lr()[0]
+                        optimizer, scheduler = get_optimizer(wrapped_model, last_lr, opt_type)
+
+                    tlog.info("Wrap model zero grad")
+                    wrapped_model.train()
+                    wrapped_model.zero_grad()
+                    optimizer.zero_grad()
+                    _model = wrapped_model
+                    out = forward_step(_model, batch, no_model_batch, task_ids=task_ids)
+                    loss = out["loss"]
+                    loss.backward()
+                    for encoder in wrapped_model.prompt_encoders:
+                        if encoder.name == "cb":
+                            #mlog.info("---------------- %s ---------------", encoder.name)
+                            #mlog.info("Prompt embedding grads:%s", encoder.embedding.weight.grad)
+                            #mlog.info("Norm: %s", torch.linalg.norm(encoder.embedding.weight.grad))
+                            break
+
                     optimizer.step()
                     scheduler.step()
                     step+=1
                     global_step+=1
-                    bloss = batch_loss.item()
+                    bloss = loss.item()
                     tot_loss += bloss
                     mean_loss = tot_loss/(step-train_start)
                     sw.add_scalar('train/loss',bloss,global_step=step)
@@ -2264,7 +2327,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                     pbar.set_description(f'training ...[loss:{bloss:.2f} ({mean_loss:.2f}) best:{best_eval_step} {best_dev_loss:.2f}]')
                     pbar.update()
                     #del result
-                    #del loss
+                    del loss
                 except KeyboardInterrupt:
                     mlog.info("exiting while ...")
                     raise KeyboardInterrupt
@@ -2272,20 +2335,21 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         # end train while
         pbar.close()
         sw.close()
-        if wrap:
-            with torch.no_grad():
-                mlog.info("Updating the model weights before evaluaton...")
-                wrapped_model.update_model_weight()
-        model.eval()
-        if not no_save_model:
-            save_checkpoint(model, tokenizer, optimizer, scheduler, step, 
-                            best_eval_step, best_dev_loss,
-                            save_path)
+        with torch.no_grad():
+            mlog.info("Updating the model weights before evaluaton...")
+            wrapped_model.update_model_weight()
+        if False: #not no_save_model:
+            model.eval()
+            save_checkpoint(wrapped_model.underlying_model, tokenizer, 
+                    optimizer, scheduler, step, 
+                    best_eval_step, best_dev_loss,
+                    save_path)
         else:
             mlog.info("No save model is on!!")
     #% vvvv
     if loop: #not prefix:
-       train_loop(epochs_num)
+       train_loop(epochs_num, wrap, optimizer, scheduler)
+       mbp("start")
     else:
         training_args = TrainingArguments(output_dir=save_path)
         training_args.per_device_train_batch_size=node_batch_size
@@ -2300,6 +2364,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         training_args.do_predict=True
         training_args.gradient_accumulation_steps=accumulation_tiny_steps
         train_dataset = myds["train"]#.map(tokenize)
+        if seed > 0:
+            training_args.seed = seed
         #test_dataset = myds["test"]
         trainer = Seq2SeqTrainer(
             args=training_args,
@@ -2317,6 +2383,14 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         train_result = trainer.train()
 
     # vvvv
+    if do_valid and not no_save_best:
+        mlog.info("loading best model")
+        best_path = os.path.join(save_path, "best_model")
+        model, tokenizer, _ = load_model(model_id, best_path) 
+        if no_save_model:
+            shutil.rmtree(best_path)
+        model.to(device)
+    model.eval()
     #vvvvvv
     if data_name:
         test_ratio = 1
@@ -2324,30 +2398,10 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         dataset_path = os.path.join(data_path, data_name)
         test_dataloader, test_dataset, random_sampler = load_data2(dataset_path, "test", tokenizer, prompt_config, ratio=test_ratio, num=int(test_samples))
         val_records = int(test_samples)
-        #evaluate1(tokenizer, test_dataset, test_dataloader, model, device, prompt_config, mode="test", save_res=False)
-        evaluate(test_dataset, test_dataloader, save_path, exp_info, val_records, gen_param, scorers = scorers, batch_size=gen_bs, model=model, tokenizer=tokenizer, set_name=_set)  
+        evaluate1(tokenizer, test_dataloader, model, device, prompt_config, mode="test", save_path="", task_ids=task_ids)
+        evaluate(test_dataset, test_dataloader, save_path, exp_info, val_records, gen_param, scorers = scorers, batch_size=gen_bs, model=model, tokenizer=tokenizer, set_name=_set, stop_level=stop_level, seed=seed, task_ids=task_ids)  
     elif test_set:
-        if "@" in gen_bs:
-            test_bs,_ = gen_bs.split("@")
-        else:
-            test_bs = int(gen_bs)
-
-        test_bs = int(test_bs)
-        for _set in test_set.split("@"):
-            myds = load_data([_set])
-            test_dataset = myds[_set]
-            data_collator = MyCollator(tokenizer, model, ds_type="test", prefix=prefix)
-            test_dataloader = torch.utils.data.DataLoader(test_dataset,
-                batch_size=test_bs,shuffle=False, 
-                collate_fn=data_collator,
-            )
-            mlog.info("Evaluating ... %s", _set)
-            val_records = myds[_set].num_records
-            exp_info["test_set"] = _set
-            l, r = evaluate1(tokenizer, test_dataset, test_dataloader, model, device, prompt_config, mode="test", save_res=False)
-            mlog.info("total loss: %s, res: %s", l, r)
-            mbp("before evaluation")
-            evaluate(test_dataset, test_dataloader, save_path, exp_info, val_records, gen_param, scorers = scorers, batch_size=gen_bs, model=model, tokenizer=tokenizer, set_name=_set)  
+        eval_test(model, tokenizer)
     else:
         mlog.info("Test set was not provided.... skip testing...")
         
