@@ -427,7 +427,7 @@ def fill_sample(mt, rel):
             input_lang, target_lang)
 
 
-def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words=False, merge_prompts=False, method="", shared_embs =False, skilled_variant=""):
+def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words=False, merge_prompts=False, method="", shared_embs =False, skilled_variant="", prefix_config=None):
     wrapped_model = None
     prompt_encoders = []
     offsets = []
@@ -435,7 +435,6 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words
     #for rel in all_rels:
     #    mbp("b")
     #    fill_sample(method, rel)
-
     for rel, prompt_tokens in encoder_prompts.items():
         mlog.info("******************* Wrapping model for %s", rel)
         mlog.info("******************* from_words %s", from_words)
@@ -459,10 +458,10 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words
     if skilled_variant:
        wrapped_model = SkilledMixin(model, n_tasks=2, n_skills=2, 
                skilled_variant=skilled_variant,
-               prompt_encoders=prompt_encoders, prompt_token_fn=get_prompt_token_fn(id_offset), merge_prompts=merge_prompts, shared_embs = shared_embs)
+               prompt_encoders=prompt_encoders, prompt_token_fn=get_prompt_token_fn(id_offset), merge_prompts=merge_prompts, shared_embs = shared_embs, prefix_config= prefix_config)
     else:
         wrapped_model = PTuningWrapper(model, 
-                prompt_encoders, prompt_token_fn=get_prompt_token_fn(id_offset), merge_prompts=merge_prompts, shared_embs = shared_embs)
+                prompt_encoders, prompt_token_fn=get_prompt_token_fn(id_offset), merge_prompts=merge_prompts, shared_embs = shared_embs, prefix_config = prefix_config)
     return wrapped_model
 
 def create_encoder(name, model, tokenizer, prompt_tokens, encoder_type="lstm", 

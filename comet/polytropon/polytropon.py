@@ -29,7 +29,7 @@ class SkilledMixin(PTuningWrapper):
         n_tasks: int,
         n_skills: int,
         skilled_variant: str = "learned",
-        freeze: bool = False,
+        freeze: bool = True,
         custom_skills: str = None,
         state_dict = None, **kwargs,
     ):
@@ -72,7 +72,8 @@ class SkilledMixin(PTuningWrapper):
 
     def forward(self, task_ids, *args, add_prior=False, **kwargs):
         inform_layers(self.underlying_model, self.adapter_class, task_ids)
-        outputs = self.underlying_model.forward(*args, **kwargs)
+        #outputs = self.underlying_model.forward(*args, **kwargs)
+        outputs = super().forward(*args, **kwargs)
 
         if self.training and self.skilled_variant == "learned" and add_prior:
             aux_loss = [self.neg_log_IBP(p) for n, p in self.underlying_model.named_parameters() if "skill_logits" in n]
