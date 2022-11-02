@@ -20,8 +20,9 @@ else:
     logPath = "/content/"
     resPath = "/content/drive/MyDrive/pouramini/results"
 
-dataPath = "data" 
-confPath = "train/base_confs" 
+pp = Path(__file__).parent.parent.resolve()
+dataPath = os.path.join(pp, "data", "atomic2020")
+confPath = "base_confs" 
 
 Path(resPath).mkdir(exist_ok=True, parents=True)
 Path(logPath).mkdir(exist_ok=True, parents=True)

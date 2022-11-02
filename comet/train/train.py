@@ -425,8 +425,9 @@ def run(ctx, conf_path, base_conf, experiment,
      if ctx.invoked_subcommand is None:
         mlog.info("Reading from conf %s", conf_path)
         _path = os.path.join(confPath, conf_path, experiment)
+        pp = Path(__file__).parent.resolve()
         if not Path(_path).exists():
-           conf = os.path.join(confPath, base_conf + ".json") # default conf
+           conf = os.path.join(pp, confPath, base_conf + ".json") # default conf
            mlog.info("NEW experiment! Reading from conf %s", conf)
            if Path(conf).exists():
                with open(conf, 'r') as f:
@@ -2522,6 +2523,7 @@ def exp(experiment, model_ids, keep, server, exclude, include, save_model):
     save_path = os.path.join(base_dir, "mt5-comet/comet/train/")
     if not is_colab:
         conf_path = os.path.join(save_path,"confs",experiment)
+        assert False, conf_path
     else:
         conf_path = os.path.join(save_path,"colab_confs",experiment)
     mlog.info("Creating configurations...%s ", conf_path)

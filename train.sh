@@ -25,7 +25,7 @@ cp train.sh ..
 # different models
 #runlite run -exp $path -bc base -ov $1 -var model_id=t5-v1--method=unsup-nat--rel_filter=xIntent#xNeed--train_samples=20#50--epochs_num=1#2--repeat=1#2--pid=0#1--learning_rate=1e-4#1e-5 -test_samples=300 --loop=True $extra --skip=True --follow_method=True 
 
-runlite run -cpu -exp $path -bc base -ov $g1 -var model_id=t5-small--method=unsup-wrap-nat#unsup#unsup-wrap-nat--rel_filter=xIntent--train_samples=50--epochs_num=1--repeat=4--temp_num=6--loop=True--test_samples=100 --follow_method=True --scorers="rouge-bert" --data_path=data/atomic --do_valid=False --val_samples=10 --encoder_type=lstml --cycle=100 $g2 --seed=123 --batch_size=2 --merge_prompts=mlp 
+runlite run -cpu -exp $path -bc base -ov $g1 -var model_id=t5-small--method=unsup-wrap-nat#unsup#unsup-wrap-nat--rel_filter=xIntent--train_samples=50--epochs_num=1--repeat=4--temp_num=6--loop=True--test_samples=100 --follow_method=True --scorers="rouge-bert" --data_path=data/atomic2020 --do_valid=False --val_samples=10 --encoder_type=lstml --cycle=100 $g2 --seed=123 --batch_size=2 --merge_prompts=mlp 
 
 
 
