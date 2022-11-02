@@ -6,13 +6,12 @@ from comet.transformers_ptuning.ptuning_wrapper import *
 import torch
 from torch import nn
 
-from polytropon.adapters import (
+from comet.polytropon.adapters import (
     HyperLoRALinear,
     SkilledLoRALinear,
     SkilledLTSFTLinear,
 )
-from polytropon.utils import replace_layers, inform_layers
-
+from comet.polytropon.utils import replace_layers, inform_layers
 
 logger = logging.getLogger(__name__)
 

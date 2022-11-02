@@ -579,7 +579,7 @@ def do_score_w(df_name, path, scorers):
            do_score(df, scorers, f)
 
 import numpy as np
-import tensorflow as tf
+#import tensorflow as tf
 def run_sts_benchmark(batch, embed):
   sts_encode1 = tf.nn.l2_normalize(embed(tf.constant(batch['top'].tolist())), axis=1)
   sts_encode2 = tf.nn.l2_normalize(embed(tf.constant(batch['top_pred'].tolist())), axis=1)

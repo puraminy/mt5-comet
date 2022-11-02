@@ -17,7 +17,7 @@ from torch.optim import SparseAdam
 from transformers import TrainingArguments
 from comet.train.model import *
 from comet.data_utils import *
-from polytropon import SkilledMixin
+from comet.polytropon import SkilledMixin
 import torch
 import re
 import json
@@ -1460,7 +1460,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         clog.addHandler(consoleHandler)
         clog.setLevel(logging.DEBUG)
 
-    args = run_args # input parameters
+    args = locals() #run_args # input parameters
     mlog.info(f"========================= {experiment}:{exp_id} ========================")
     if save_path == "":
         if "ahmad" or "pouramini" in home:
@@ -1496,6 +1496,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         Path(conf_path).mkdir(exist_ok=True, parents=True)
         args["config"] = ""
         args["output_name"] = ""
+        del args["run_args"]
         with open(os.path.join(conf_path, f'{config}.json'), 'w') as outfile:
             json.dump(args, outfile, indent=4)
 

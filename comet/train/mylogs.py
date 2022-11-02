@@ -14,15 +14,14 @@ if not colab:
     logPath = os.path.join(home, "logs")
     resPath = os.path.join(home, "results") 
     pretPath = os.path.join(home, "pret") 
-    dataPath = os.path.join(home, "mydata") 
-    confPath = os.path.join(home, "base_confs") 
 else:
     home = "/content/drive/MyDrive/pouramini"
     pretPath = "/content/drive/MyDrive/pret"
     logPath = "/content/"
     resPath = "/content/drive/MyDrive/pouramini/results"
-    dataPath = "atomic" 
-    confPath = "base_confs" 
+
+dataPath = "data" 
+confPath = "train/base_confs" 
 
 Path(resPath).mkdir(exist_ok=True, parents=True)
 Path(logPath).mkdir(exist_ok=True, parents=True)

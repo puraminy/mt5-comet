@@ -9,16 +9,10 @@
             "type": "python",
             "request": "attach",
             "connect": {
-                "host": "172.16.143.8",
-                "port": 2050
+                "host": "localhost",
+                "port": 5678
             },
-            "pathMappings": [
-                {
-                    "localRoot": "${workspaceFolder}",
-                    "remoteRoot": "."
-                }
-            ],
-            "justMyCode": true
+           "justMyCode": true
         }
     ]
 }

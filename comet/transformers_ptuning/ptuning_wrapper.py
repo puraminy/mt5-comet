@@ -189,6 +189,13 @@ class PTuningWrapper(torch.nn.Module):
             self.model_embeddings_size = self.underlying_model.config.vocab_size
             self.prompt_token_fn = lambda t:(t>=self.model_embeddings_size)
             
+        if prefix_config is None:
+            prefix_config = {
+                  "temperature": 0.3,
+                  "n_prompts": len(merge_prompt_ids),
+                  "n_prompt_tokens": 3,
+                  "intrinsic_dim": 300,
+            }
         self.prefix_config = prefix_config
         if prefix_config is not None:
             self.temperature = self.prefix_config['temperature']
@@ -217,8 +224,6 @@ class PTuningWrapper(torch.nn.Module):
 
     def forward(self,input_ids, pids=None, **kwargs):
         ll = self.ll # log level
-        assert False, input_ids
-        task_ids = kwargs["task"]
         winfo("wrapper forward was called")
         winfo("Prompt ids:{}".format(pids))
         # find masks based on the range of prompt ids (offset_id < X < offset_id + prompt_length)
@@ -239,8 +244,10 @@ class PTuningWrapper(torch.nn.Module):
             all_prompts_input_ids = input_ids[prompt_masks]
             winfo("All prompts input ids: %s", all_prompts_input_ids)
             winfo("Len All prompts input ids: %s", len(all_prompts_input_ids))
-            if self.prefix_config:
-                assert False, len
+            if self.merge_encoder:
+                prompt_embds = self.merge_encoder(all_prompts_input_ids,pids).to(device)
+                inputs_embeds[prompt_masks]=prompt_embds
+            elif self.prefix_config:
                 router = self.router[0].squeeze()  # layer * n_prompts
                 if self.training:
                     router = RelaxedBernoulli(temperature=self.temperature, logits=router).rsample()  # layer * n_prompts
@@ -251,9 +258,6 @@ class PTuningWrapper(torch.nn.Module):
                 #prompt_embedding = torch.bmm(router, prompt).view(self.config.num_hidden_layers, -1, self.config.hidden_size)  # layer * n_prompt_token * hidden
                 prompt_embeds = torch.mm(torch.t(router), prompt).view(-1, self.config.hidden_size)  # layer * n_prompt_token * hidden
                 inputs_embeds[prompt_masks]=prompt_embeds
-            elif self.merge_encoder:
-                prompt_embds = self.merge_encoder(all_prompts_input_ids,pids).to(device)
-                inputs_embeds[prompt_masks]=prompt_embds
             else:
                 embeds_list = []
                 merge_dict = {}

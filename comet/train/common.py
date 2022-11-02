@@ -6,7 +6,7 @@ from transformers import AddedToken
 from functools import lru_cache
 import pandas as pd
 import numpy as np
-import tensorflow as tf
+#import tensorflow as tf
 from comet.utils.myutils import *
 from comet.transformers_ptuning import PTuningWrapper
 from comet.transformers_ptuning.ptuning_wrapper import LSTMEmbeddingPromptEncoder, EmbeddingPromptEncoder, MLPPromptEncoder
@@ -334,7 +334,7 @@ def set_random_seed(seed):
     if seed is not None and seed > 0:
         random.seed(seed)
         np.random.seed(seed)
-        tf.random.set_seed(seed)
+        #tf.random.set_seed(seed)
         torch.manual_seed(seed)
         torch.cuda.manual_seed(seed)
 
