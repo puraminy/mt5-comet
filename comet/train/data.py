@@ -29,7 +29,7 @@ class xAttrTemplate(RelTemplate):
            elif tn == 6:
                qtemp = "{event}, {emp_so_1} {emp_they_1} are {emb_seen_1} as {ph}."
        else:
-          return super().get_templates(method, **kwargs)
+          return super().get_templates(method, index, **kwargs)
        return qtemp, anstemp, ex_qtemp, ex_anstemp, flags 
 
 class xIntentTemplate(RelTemplate):
@@ -70,7 +70,7 @@ class xIntentTemplate(RelTemplate):
            elif tn == 63:
                qtemp = "{rel_4} Because of {event}, they want {ph}"
        else:
-          return super().get_templates(method, **kwargs)
+          return super().get_templates(method, index, **kwargs)
        return qtemp, anstemp, ex_qtemp, ex_anstemp, flags 
 
 class CBTemplate(RelTemplate):
@@ -103,7 +103,7 @@ class CBTemplate(RelTemplate):
           freeze = True
           unfreeze = False
        else: 
-          return super().get_templates(method, **kwargs)
+          return super().get_templates(method, index, **kwargs)
        flags = {
                "method":method,
                "wrap": wrap,

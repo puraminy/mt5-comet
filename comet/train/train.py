@@ -13,6 +13,7 @@ import comet.utils.tool as ut
 #from comet.models.unified.prefixtuning import Model
 from transformers.trainer_seq2seq import Seq2SeqTrainer
 from transformers.optimization import Adafactor, AdafactorSchedule
+from torch.optim import SparseAdam
 from transformers import TrainingArguments
 from comet.train.model import *
 from comet.data_utils import *
@@ -43,7 +44,7 @@ class MyCollator(object):
         self.prompt_config = None
 
 #gggggggggggggg
-    def collate(self, enc_qs, enc_resps, queries, resps, targets, flags):
+    def collate(self, enc_qs, enc_resps, queries, resps, targets, flags, tasks):
         bs = len(enc_qs)
         q_len = [len(i) for i in enc_qs]
         max_enc_len = max(q_len)
@@ -57,6 +58,7 @@ class MyCollator(object):
             #"cross_attention_mask": torch.zeros(bs, 1, max_dec_len, max_enc_len),
             "decoder_input_ids": torch.ones(bs, max_dec_len, dtype=torch.long) * pad_id,
             "labels": torch.ones(bs, max_dec_len, dtype=torch.long) * -100,
+            "task":torch.zeros(bs),
         }
         no_model_data = {
             #"idx": torch.zeros(bs, dtype=torch.long),
@@ -64,19 +66,22 @@ class MyCollator(object):
             "loss_mask": torch.zeros(bs, max_dec_len),
             "query":[""]*bs,
             "target":[""]*bs,
-            "resp":[""]*bs,
+            "task":torch.zeros(bs),
+            "resp":[-1]*bs,
             "wrap":[False]*bs,
             "freeze":[False]*bs,
             "unfreeze":[False]*bs,
             "method":[""]*bs
         }
-        for i, (q, r, query, resp, target, flag) in enumerate(zip(enc_qs, enc_resps, queries, resps, targets, flags)):
+        for i, (q, r, query, resp, target, flag, task) in enumerate(zip(enc_qs, enc_resps, queries, resps, targets, flags, tasks)):
             dec_ids = [pad_id] + r #+ [self.tokenizer.eos_token_id]
             label = r[:-1] #+ [self.tokenizer.eos_token_id]
             model_data["input_ids"][i][:len(q)] = torch.tensor(q, dtype=torch.long)
             model_data["decoder_input_ids"][i][:len(dec_ids)] = torch.tensor(dec_ids, dtype=torch.long)
             model_data["attention_mask"][i][:len(q)] = 1.0
             model_data["decoder_attention_mask"][i][:len(dec_ids)] = 1.0 
+            model_data["task"][i] = 1.0 
+            no_model_data["task"][i] = 1.0 
             #model_data["cross_attention_mask"][i][0, :dec_len, :enc_len] = 1.0 
             #no_model_data["idx"][i] = samp["idx"]
             model_data["labels"][i][:len(label)] = torch.tensor(label, dtype=torch.long)
@@ -100,7 +105,7 @@ class MyCollator(object):
         queries = []
         inputs = []
         responses = []
-        rel = []
+        tasks = []
         index = []
         rep = []
         dec_starts = []
@@ -115,14 +120,14 @@ class MyCollator(object):
             enc_resp = self.tokenizer.encode(b["resp"].strip())
             responses.append(b["resp"].strip())
             enc_responses.append(enc_resp)
-            rel.append(b["rel"])
+            tasks.append(b["rel"])
             inputs.append(b["event"].strip())
             targets.append(b["target"].strip())
             index.append(b["index"])
             rep.append(b["rep"])
             flags.append(b["flag"])
 
-        return self.collate(enc_queries, enc_responses, queries, responses, targets, flags)
+        return self.collate(enc_queries, enc_responses, queries, responses, targets, flags, tasks)
         #queries,inputs, responses,rel,index,rep = zip(*batch)
         no_model_batch = {}
         tokenizer = self.tokenizer
@@ -478,6 +483,7 @@ def run(ctx, conf_path, base_conf, experiment,
                        del args[_key]
                    run_args[_key] = "False"
            # oooooooooooooo
+           multi_only = False
            if not var:
                output_name = base_conf + sep + args["method"] + sep + _extra
                args["overwrite"] = output_name
@@ -493,8 +499,11 @@ def run(ctx, conf_path, base_conf, experiment,
                values = [x.split("=")[1].split("#") for x in all_vars]
                if "rel_filter" in var_names:
                    index = var_names.index("rel_filter")
-                   if "multi" in values[index]:
+                   if "multi" in values[index] or "multi-only" in values[index]:
                        save_data = True
+                   if "multi-only" in values[index]:
+                       multi_only = True
+
                tot_comb = [dict(zip(var_names, comb)) for comb in itertools.product(*values)]
                ii = 0
                orig_args = args.copy()
@@ -550,7 +559,7 @@ def run(ctx, conf_path, base_conf, experiment,
                        args["method"] += "-wrap"
                    if save_data: 
                        args["save_data"] = spath
-                   if args["rel_filter"] == "multi":
+                   if "multi" in args["rel_filter"]:
                        mbp("multi")
                        args["data_path"] = spath
                        args["rel_filter"] = "" 
@@ -558,6 +567,9 @@ def run(ctx, conf_path, base_conf, experiment,
                        args["use_all_data"] = True
                        args["save_data"] = False
                    else:
+                       if multi_only: 
+                           args["show_samples"] = True
+                           args["save_data"] = spath
                        _dp = os.path.join(dataPath,"sel",args["rel_filter"] + ".tsv")
                        if not load_data:
                            args["data_path"] = orig_args["data_path"]
@@ -1386,7 +1398,38 @@ def run(ctx, conf_path, base_conf, experiment,
     type=str,
     help=""
 )
-def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, pl_learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, wandb, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, no_save_best, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args, match, dpy, prompt_tune, prompt_config_file, load_prompt, data_name, seed, do_valid, stop_level, skilled_variant):
+@click.option(
+    "--int_dim",
+    default=10,
+    type=int,
+    help=""
+)
+@click.option(
+    "--init_temperature",
+    default=0.3,
+    type=float,
+    help=""
+)
+@click.option(
+    "--prompt_token_num",
+    default=5,
+    type=int,
+    help=""
+)
+@click.option(
+    "--n_prompts",
+    default=5,
+    type=int,
+    help=""
+)
+@click.option(
+    "--n_tasks",
+    "-ntasks",
+    default=2,
+    type=int,
+    help=""
+)
+def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, pl_learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, wandb, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, no_save_best, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args, match, dpy, prompt_tune, prompt_config_file, load_prompt, data_name, seed, do_valid, stop_level, skilled_variant, int_dim, prompt_token_num, n_tasks, n_prompts, init_temperature):
 
     #%% some hyper-parameters
 
@@ -1628,7 +1671,6 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         else:
             tpath = underlying_model_name 
             if from_dir:
-                assert False, "loading from dir"
                 tpath = f"{load_path}/{model_id}"
             tokenizer = AutoTokenizer.from_pretrained(tpath)
             model = T5ForConditionalGeneration.from_pretrained(underlying_model_name, 
@@ -2064,7 +2106,14 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     task_ids = None
     if skilled_variant:
        task_ids = torch.LongTensor([0, 1])
-    wrapped_model = wrap_model(model_to_wrap, tokenizer, encoder_type, load_prompt_path, from_words = from_words, merge_prompts=merge_prompts, method = method, shared_embs= shared_embs, skilled_variant=skilled_variant) 
+    prefix_config = {
+        'intrinsic_dim': int_dim,
+        'n_prompt_tokens': prompt_token_num,
+        'n_tasks': n_tasks,
+        'n_prompts': n_prompts,
+        'temperature': init_temperature,
+    }
+    wrapped_model = wrap_model(model_to_wrap, tokenizer, encoder_type, load_prompt_path, from_words = from_words, merge_prompts=merge_prompts, method = method, shared_embs= shared_embs, skilled_variant=skilled_variant, prefix_config=prefix_config) 
 
     mlog.info("len tokenizer after extending %s", len(tokenizer))
     if not prefix:
@@ -2107,7 +2156,12 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             {'params': [p for n, p in model.underlying_model.named_parameters() if p.requires_grad and any(nd in n for nd in no_decay)], 'weight_decay': 0.0},
             {"params": model.mlp.parameters(), "lr": pl_learning_rate},
         ]
-        if opt_type == "adam":
+        if opt_type == "adam_sparse":
+            optimizer = SparseAdam(optimizer_grouped_parameters,lr=_lr,eps=1e-8)
+            for encoder in model.prompt_encoders:
+                optimizer.add_param_group({'params': [p for p in encoder.parameters() if p.requires_grad ], "lr":pl_learning_rate})
+            scheduler = get_linear_schedule_with_warmup(optimizer,warm_up_steps,iterations)
+        elif opt_type == "adam":
             optimizer = AdamW(optimizer_grouped_parameters,lr=_lr,eps=1e-8)
             for encoder in model.prompt_encoders:
                 optimizer.add_param_group({'params': [p for p in encoder.parameters() if p.requires_grad ], "lr":pl_learning_rate})
@@ -2170,9 +2224,6 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         train_dataloader, train_dataset, random_sampler = load_data2(dataset_path, "train", tokenizer, prompt_config, ratio=train_ratio, num=int(train_samples))
         for s in ["train","test","valid"]:
             load_data2(dataset_path, s, tokenizer, prompt_config, ratio=train_ratio, num=int(train_samples))
-
-        assert False, "creating data"
-
         train_records = int(train_samples)
     else:
         if "gpt" in model_id: 

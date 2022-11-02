@@ -18,7 +18,7 @@ import nltk
 
 def forward_step(model, batch, no_model_batch, accumulation_tiny_steps=1, mode="train", task_ids=None):
     for k in no_model_batch:
-        if k not in  ["resp", "query", "target", "wrap", "freeze", "unfreeze", "method"]:
+        if k not in  ["resp", "query", "target", "wrap", "freeze", "unfreeze", "method", "task"]:
             no_model_batch[k] = no_model_batch[k].to(device)
     if task_ids is not None:
         result =  model.forward(task_ids, add_prior=True, **batch)
