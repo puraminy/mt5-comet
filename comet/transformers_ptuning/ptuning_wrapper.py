@@ -247,7 +247,7 @@ class PTuningWrapper(torch.nn.Module):
             if self.merge_encoder:
                 prompt_embds = self.merge_encoder(all_prompts_input_ids,pids).to(device)
                 inputs_embeds[prompt_masks]=prompt_embds
-            elif self.prefix_config:
+            elif False: #self.prefix_config:
                 router = self.router[0].squeeze()  # layer * n_prompts
                 if self.training:
                     router = RelaxedBernoulli(temperature=self.temperature, logits=router).rsample()  # layer * n_prompts
