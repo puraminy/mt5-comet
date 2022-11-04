@@ -246,7 +246,7 @@ class PTuningWrapper(torch.nn.Module):
             if self.merge_encoder:
                 prompt_embds = self.merge_encoder(all_prompts_input_ids,pids).to(device)
                 inputs_embeds[prompt_masks]=prompt_embds
-            elif self.prefix_config is not None:
+            elif False: #self.prefix_config is not None:
                 hidden_shape = hidden_states.shape
                 router = self.router[self.task_id]  # layer * n_prompts
                 if self.training:
