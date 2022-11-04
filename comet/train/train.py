@@ -2266,7 +2266,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     #%% tttttt
     mlog.info(f"============== Exp id: {exp_id}\n")
     mlog.info(f"============== Data Path: {data_path}\n")
-    mlog.info(f"============== batch size: {batch_size} per node: {node_batch_size} | learning_rate: {learning_rate}\n")
+    mlog.info(f"============== batch size: {batch_size} per node: {node_batch_size} | learning_rate: {learning_rate} | prompt_lr: {pl_learning_rate} \n")
     mlog.info(f"============== train samples: {train_samples} test_samples: {test_samples} | repeat: {repeat}  epochs: {epochs_num}\n")
     mlog.info(f"============== wrap: {wrap} | prefixed: {prefix} | frozen: {frozen} {fz_parts}\n")
     mlog.info(f"============== rel_filter: {rel_filter} | method: {method} | model: {model_id} \n")

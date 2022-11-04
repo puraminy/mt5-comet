@@ -61,7 +61,9 @@ class xIntentTemplate(RelTemplate):
                qtemp = "Why does {event}? Because "
                anstemp = "he intends {resp} {end}"
        elif method == "unsup-wrap-nat":
-           if tn == 6:
+           if tn == 5:
+               qtemp = "{rel_1} {event}, {ph}"
+           elif tn == 6:
                qtemp = "{emb_because_1} {emb_of_1} {event}, {emb_they_1} {emb_want_1} {ph}"
            elif tn == 61:
                qtemp = "{because_1} {of_1} {event}, {they_1} {want_1} {ph}"
