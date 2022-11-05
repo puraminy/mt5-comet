@@ -1595,7 +1595,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     if Path(save_path).exists() and skip and not do_eval:
         tsv_files = glob.glob(save_path + "/**/*.tsv", recursive = True)
         if tsv_files:
-            print("Skipping.... the folder already exists!!")
+            print(save_path + ") Skipping.... the folder already exists!!")
             return
     if undone: # only report it wasn't done
         _ss = save_path.split("/")
