@@ -8,6 +8,50 @@ from transformers import (
     get_linear_schedule_with_warmup
 )
 
+class Optim:
+    def __init__(self, para1, para2, lr1, lr2):
+        self.optimizer1 = AdamW(para1, lr=lr1, betas=(0.9, 0.999))
+        self.optimizer2 = AdamW(para2, lr=lr2, betas=(0.9, 0.999))
+
+    def step(self):
+        self.optimizer1.step()
+        self.optimizer2.step()
+
+    def zero_grad(self):
+        self.optimizer1.zero_grad()
+        self.optimizer2.zero_grad()
+
+    def state_dict(self):
+        return {
+            'optimizer1': self.optimizer1.state_dict(),
+            'optimizer2': self.optimizer2.state_dict()
+        }
+
+    def load_state_dict(self, state_dict):
+        self.optimizer1.load_state_dict(state_dict['optimizer1'])
+        self.optimizer2.load_state_dict(state_dict['optimizer2'])
+
+    def cuda(self):
+        for state in self.optimizer1.state.values():
+            for k, v in state.items():
+                if isinstance(v, torch.Tensor):
+                    state[k] = v.cuda()
+
+        for state in self.optimizer2.state.values():
+            for k, v in state.items():
+                if isinstance(v, torch.Tensor):
+                    state[k] = v.cuda()
+
+class Scheduler:
+    def __init__(self, optim, step1=10000, step2=10000, gamma1=.1, gamma2=.1):
+        self.scheduler1 = torch.optim.lr_scheduler.StepLR(optim.optimizer1, step1, gamma1)
+        self.scheduler2 = torch.optim.lr_scheduler.StepLR(optim.optimizer2, step2, gamma2)
+
+    def step(self):
+        self.scheduler1.step()
+        self.scheduler2.step()
+
+
 def freeze_self_att(modules_to_freeze, part, ed, decoder=False):
     if part == "none":
        return

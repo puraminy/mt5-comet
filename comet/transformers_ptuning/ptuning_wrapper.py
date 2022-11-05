@@ -192,8 +192,9 @@ class PTuningWrapper(torch.nn.Module):
         if prefix_config is None:
             prefix_config = {
                   "temperature": 0.3,
-                  "n_prompts": len(merge_prompt_ids),
-                  "n_prompt_tokens": 3,
+                  "n_tasks": len(prompt_encoders),
+                  "n_prompts": len(self.merge_prompt_ids),
+                  "n_prompt_tokens": len(self.merge_prompt_ids),
                   "intrinsic_dim": 300,
             }
         self.prefix_config = prefix_config
@@ -228,6 +229,7 @@ class PTuningWrapper(torch.nn.Module):
         # find masks based on the range of prompt ids (offset_id < X < offset_id + prompt_length)
         #Because this wrapper only deals with a single prompt, the length should be the same, you can use masked_select to reshape 
         tids = kwargs.pop("task", None)
+        tids = tids.long()
         prompt_masks = self.prompt_token_fn(input_ids)
         if prompt_masks.any():
             self.encoder_prompt_flag = True
@@ -244,25 +246,29 @@ class PTuningWrapper(torch.nn.Module):
             winfo("All prompts input ids: %s", all_prompts_input_ids)
             winfo("Len All prompts input ids: %s", len(all_prompts_input_ids))
             if self.merge_encoder:
-                prompt_embds = self.merge_encoder(all_prompts_input_ids,pids).to(device)
-                inputs_embeds[prompt_masks]=prompt_embds
-            elif False: #self.prefix_config is not None:
-                hidden_shape = hidden_states.shape
-                router = self.router[self.task_id]  # layer * n_prompts
-                if self.training:
-                    router = RelaxedBernoulli(temperature=self.temperature, logits=router).rsample()  # layer * n_prompts
+                merge_output = self.merge_encoder(all_prompts_input_ids,pids).to(device)
+                if self.prefix_config is None:
+                    inputs_embeds[prompt_masks]=merge_output
                 else:
-                    router = torch.sigmoid(router)  # layer * n_prompts
-                router = (router / (router.sum(dim=-1, keepdim=True) + 1e-12))  # layer * 1 * n_prompts
-                z = torch.mm(self.z, self.A) if not hasattr(self, 'prompt') else self.prompt
-                prompt_embedding = torch.matmul(router.unsqueeze(0), z).view(-1, self.config.hidden_size).tile(hidden_shape[0], 1, 1)
+                    router = torch.index_select(self.router, 0, tids)
+                    if self.training:
+                        router = RelaxedBernoulli(temperature=self.temperature, logits=router).rsample()  # layer * n_prompts
+                    else:
+                        router = torch.sigmoid(router)  # layer * n_prompts
+                    router = (router / (router.sum(dim=-1, keepdim=True) + 1e-12))  # layer * 1 * n_prompts
+                    z = torch.mm(self.z, self.A) if not hasattr(self, 'prompt') else self.prompt
+                    #prompt_embeds = torch.matmul(router.unsqueeze(0), z).view(-1, self.config.hidden_size)
+                    prompt_embeds = torch.matmul(router.view(1, -1), merge_output).view(-1, self.config.hidden_size)
 
-                prompt_padding = torch.zeros(size=(hidden_shape[0], hidden_shape[1] - self.prefix_config['n_prompt_tokens'] - 1, self.config.hidden_size), device='cuda:0')
-                extended_prompt_embedding = torch.cat([prompt_embedding, prompt_padding], dim=1)
-                pre_padding = torch.zeros(size=(hidden_shape[0], 1, self.config.hidden_size), device='cuda:0')
-                extended_prompt_embedding = torch.cat([pre_padding, extended_prompt_embedding], dim=1)  # for <CLS>
+
+                    inputs_embeds[prompt_masks]=merge_output
+                #prompt_padding = torch.zeros(size=(hidden_shape[0], hidden_shape[1] - self.prefix_config['n_prompt_tokens'] - 1, self.config.hidden_size), device=device)
+
+                #extended_prompt_embedding = torch.cat([prompt_embedding, prompt_padding], dim=1)
+                #pre_padding = torch.zeros(size=(hidden_shape[0], 1, self.config.hidden_size), device=device)
+                #extended_prompt_embedding = torch.cat([pre_padding, extended_prompt_embedding], dim=1)  # for <CLS>
                 # extended_prompt_embedding = extended_prompt_embedding.repeat(input_shape[0], 1, 1)
-                hidden_states = hidden_states + extended_prompt_embedding
+                #hidden_states = hidden_states + extended_prompt_embedding
             else:
                 embeds_list = []
                 merge_dict = {}

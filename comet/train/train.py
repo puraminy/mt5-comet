@@ -58,7 +58,7 @@ class MyCollator(object):
             #"cross_attention_mask": torch.zeros(bs, 1, max_dec_len, max_enc_len),
             "decoder_input_ids": torch.ones(bs, max_dec_len, dtype=torch.long) * pad_id,
             "labels": torch.ones(bs, max_dec_len, dtype=torch.long) * -100,
-            "task":torch.zeros(bs),
+            "task":torch.ones(bs)*-1,
         }
         no_model_data = {
             #"idx": torch.zeros(bs, dtype=torch.long),
@@ -66,7 +66,7 @@ class MyCollator(object):
             "loss_mask": torch.zeros(bs, max_dec_len),
             "query":[""]*bs,
             "target":[""]*bs,
-            "task":torch.zeros(bs),
+            "task":torch.ones(bs)*-1,
             "resp":[-1]*bs,
             "wrap":[False]*bs,
             "freeze":[False]*bs,
@@ -80,8 +80,8 @@ class MyCollator(object):
             model_data["decoder_input_ids"][i][:len(dec_ids)] = torch.tensor(dec_ids, dtype=torch.long)
             model_data["attention_mask"][i][:len(q)] = 1.0
             model_data["decoder_attention_mask"][i][:len(dec_ids)] = 1.0 
-            model_data["task"][i] = 1.0 
-            no_model_data["task"][i] = 1.0 
+            model_data["task"][i] = 0 
+            no_model_data["task"][i] = 0 
             #model_data["cross_attention_mask"][i][0, :dec_len, :enc_len] = 1.0 
             #no_model_data["idx"][i] = samp["idx"]
             model_data["labels"][i][:len(label)] = torch.tensor(label, dtype=torch.long)
@@ -2115,6 +2115,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         'n_prompts': n_prompts,
         'temperature': init_temperature,
     }
+    prefix_config = None
     wrapped_model = wrap_model(model_to_wrap, tokenizer, encoder_type, load_prompt_path, from_words = from_words, merge_prompts=merge_prompts, method = method, shared_embs= shared_embs, skilled_variant=skilled_variant, prefix_config=prefix_config) 
 
     mlog.info("len tokenizer after extending %s", len(tokenizer))
@@ -2153,10 +2154,15 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         tokenizer.save_pretrained(save_path)
     def get_optimizer(model, learning_rate, opt_type):
         _lr = learning_rate
+        router_learning_rate = 0.0005
+        Az_learning_rate = 0.0001
         optimizer_grouped_parameters = [
             {'params': [p for n, p in model.underlying_model.named_parameters() if p.requires_grad and not any(nd in n for nd in no_decay)], 'weight_decay': weight_decay},
             {'params': [p for n, p in model.underlying_model.named_parameters() if p.requires_grad and any(nd in n for nd in no_decay)], 'weight_decay': 0.0},
             {"params": model.mlp.parameters(), "lr": pl_learning_rate},
+            #{"params": model.router, "lr": router_learning_rate},
+            #{"params": model.A, "lr": Az_learning_rate},
+            #{"params": model.z, "lr": Az_learning_rate},
         ]
         if opt_type == "adam_sparse":
             optimizer = SparseAdam(optimizer_grouped_parameters,lr=_lr,eps=1e-8)
@@ -2167,6 +2173,9 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             optimizer = AdamW(optimizer_grouped_parameters,lr=_lr,eps=1e-8)
             for encoder in model.prompt_encoders:
                 optimizer.add_param_group({'params': [p for p in encoder.parameters() if p.requires_grad ], "lr":pl_learning_rate})
+            optimizer.add_param_group({'params': model.A, "lr":Az_learning_rate})
+            optimizer.add_param_group({'params': model.z, "lr":Az_learning_rate})
+            optimizer.add_param_group({'params': model.router, "lr":router_learning_rate})
             scheduler = get_linear_schedule_with_warmup(optimizer,warm_up_steps,iterations)
         elif opt_type == "ada_no_lr":
             optimizer = Adafactor(optimizer_grouped_parameters, 
