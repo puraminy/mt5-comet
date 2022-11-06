@@ -10,8 +10,7 @@ for i in "$@"; do
    esac
 done
 
-home=/home/ahmad
-alias runlite="python ${home}/mt5-comet/comet/train/train.py"
+alias runlite="python ~/mt5-comet/comet/train/train.py"
 # wrap experiments
 path=${PWD##*/}          
 cp train.sh ..
@@ -25,7 +24,8 @@ cp train.sh ..
 
 # different models
 #runlite run -exp $path -bc base -ov $1 -var model_id=t5-v1--method=unsup-nat--rel_filter=xIntent#xNeed--train_samples=20#50--epochs_num=1#2--repeat=1#2--pid=0#1--learning_rate=1e-4#1e-5 -test_samples=300 --loop=True $extra --skip=True --follow_method=True 
-runlite run -cpu -exp $path -bc base -ov $g1 -var model_id=t5-small--method=unsup-wrap-nat--rel_filter=xIntent-xAttr--train_samples=200--epochs_num=2--repeat=4--temp_num=64--loop=True--test_samples=100--merge_prompts=lstm --follow_method=True --scorers="rouge-bert" --data_path=${home}/mt5-comet/comet/data/atomic2020 --do_valid=False --val_samples=10 --encoder_type=lstml --cycle=100 $g2 --seed=123 --batch_size=8  
+
+runlite run -cpu -exp $path -bc base -ov $g1 -var model_id=t5-small--method=unsup-wrap-nat--rel_filter=xIntent#xAttr#multi--train_samples=200--epochs_num=2--repeat=4--temp_num=5--loop=True--test_samples=100 --follow_method=True --scorers="rouge-bert" --data_path=/home/ahmad/mt5-comet/comet/data/atomic2020 --do_valid=False --val_samples=10 --encoder_type=lstml --cycle=100 $g2 --seed=123 --batch_size=8 --merge_prompts=lstm 
 
 
 

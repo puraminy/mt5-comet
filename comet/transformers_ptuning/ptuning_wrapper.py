@@ -247,7 +247,7 @@ class PTuningWrapper(torch.nn.Module):
             winfo("Len All prompts input ids: %s", len(all_prompts_input_ids))
             if self.merge_encoder:
                 merge_output = self.merge_encoder(all_prompts_input_ids,pids).to(device)
-                if True: #self.prefix_config is None:
+                if self.prefix_config is None:
                     inputs_embeds[prompt_masks]=merge_output
                 else:
                     router = torch.index_select(self.router, 0, tids)

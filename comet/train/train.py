@@ -1846,6 +1846,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             ds_list += ["validation"]
         ds_list += ["sample"]
         myds = load_data(ds_list)
+        example = ""
         if True: #wrap or show_samples: It's required to retrive prompt tokens
             if "sample" in myds:
                 mbp("sample")
@@ -1864,6 +1865,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             while _sample and ii < sample_limit: 
                 logger.info(f"----------- {method} -------------")
                 _sample = next(samples_iter, None)
+                if not example:
+                    example = _sample
                 if not _sample:
                     break
                 if _sample["rep"] > 0:
@@ -2115,7 +2118,6 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         'n_prompts': n_prompts,
         'temperature': init_temperature,
     }
-    prefix_config = None
     wrapped_model = wrap_model(model_to_wrap, tokenizer, encoder_type, load_prompt_path, from_words = from_words, merge_prompts=merge_prompts, method = method, shared_embs= shared_embs, skilled_variant=skilled_variant, prefix_config=prefix_config) 
 
     mlog.info("len tokenizer after extending %s", len(tokenizer))
@@ -2273,6 +2275,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     #11111111111
     # ffffffffffff
     #%% tttttt
+    mlog.info(f"============== Example : {example}\n")
     mlog.info(f"============== Exp id: {exp_id}\n")
     mlog.info(f"============== Save path: {save_path}\n")
     mlog.info(f"============== Data Path: {data_path}\n")
