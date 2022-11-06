@@ -152,7 +152,7 @@ class PTuningWrapper(torch.nn.Module):
             if merge_prompts.startswith("mlp"):
                 self.merge_encoder = MLPPromptEncoder("wrap_all", len(self.merge_prompt_ids), self.embedding_dim, self.merge_offset, prompt_ids=self.merge_prompt_ids, num_layers=num_layers, hidden_size=hidden_size)
             elif merge_prompts.startswith("lstm"):
-                self.merge_encoder = MLPPromptEncoder("wrap_all", len(self.merge_prompt_ids), self.embedding_dim, self.merge_offset, prompt_ids=self.merge_prompt_ids, num_layers=num_layers, hidden_size=hidden_size)
+                self.merge_encoder = LSTMEmbeddingPromptEncoder("wrap_all", len(self.merge_prompt_ids), self.embedding_dim, self.merge_offset, prompt_ids=self.merge_prompt_ids, num_layers=num_layers, hidden_size=hidden_size)
         else:
             if shared_embs:
                 self.merge_embedding = torch.nn.Embedding(len(self.merge_prompt_ids), self.embedding_dim)
@@ -247,7 +247,7 @@ class PTuningWrapper(torch.nn.Module):
             winfo("Len All prompts input ids: %s", len(all_prompts_input_ids))
             if self.merge_encoder:
                 merge_output = self.merge_encoder(all_prompts_input_ids,pids).to(device)
-                if self.prefix_config is None:
+                if True: #self.prefix_config is None:
                     inputs_embeds[prompt_masks]=merge_output
                 else:
                     router = torch.index_select(self.router, 0, tids)
