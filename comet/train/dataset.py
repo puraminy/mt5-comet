@@ -462,7 +462,6 @@ class MyDataset(torch.utils.data.Dataset):
         self.flat_data.extend(flat_data)
         return flat_data
 
-    @lru_cache
     def fill_data(self,  iter_start, iter_end, show_progress, 
             method, num_samples, split_name,
             cats_num, num_per_cat, ex_type, samples_per_head, 
