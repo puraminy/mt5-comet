@@ -2274,6 +2274,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     # ffffffffffff
     #%% tttttt
     mlog.info(f"============== Exp id: {exp_id}\n")
+    mlog.info(f"============== Save path: {save_path}\n")
     mlog.info(f"============== Data Path: {data_path}\n")
     mlog.info(f"============== batch size: {batch_size} per node: {node_batch_size} | learning_rate: {learning_rate} | prompt_lr: {pl_learning_rate} \n")
     mlog.info(f"============== train samples: {train_samples} test_samples: {test_samples} | repeat: {repeat}  epochs: {epochs_num}\n")

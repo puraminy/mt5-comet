@@ -17,8 +17,8 @@ if not colab:
 else:
     home = "/content/drive/MyDrive/pouramini"
     pretPath = "/content/drive/MyDrive/pret"
-    logPath = "/content/"
-    resPath = "/content/drive/MyDrive/pouramini/results"
+    logPath = "/content/drive/MyDrive/logs"
+    resPath = "/content/drive/MyDrive/logs/results"
 
 pp = Path(__file__).parent.parent.resolve()
 dataPath = os.path.join(pp, "data", "atomic2020")
@@ -46,6 +46,7 @@ import inspect
 import sys
 STOP_LEVEL = 0
 def mbp(sl=-1):
+    if colab: return
     if sl == STOP_LEVEL or sl == 0: 
         fname = sys._getframe().f_back.f_code.co_name
         line = sys._getframe().f_back.f_lineno
