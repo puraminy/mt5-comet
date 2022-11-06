@@ -1,16 +1,47 @@
 
 #!/bin/sh
 
+
 g1=""
 g2=""
-for i in "$@"; do
-   case $i in
-       *) g1="${g1} $i";;
-       --*) g2="${g2} $i";;
-   esac
-done
+for i in $@
+do
 
-home=/content
+   echo $i
+   case $i in
+       
+       # -- option
+       --*) g1="${g1} $i"; g=1;;
+       
+       # - option
+       -*) g2="${g2} $i"; g=2;;
+       
+       # Parameter 
+       *) p=$i
+          if [ "$g" = 1 ]
+          then
+            g1="${g1} $p"
+            g=0
+          elif [ "$g" = 2 ]
+          then
+            g2="${g2} $p"
+            g=0
+          else
+            others="$others $p"
+          fi
+      ;;
+ 
+   esac
+
+done
+echo g1=$g1
+echo g2=$g2
+echo others=$others
+home=$others
+if [ -z $home ]; then
+   home=/home/ahmad
+fi 
+echo $home
 alias runlite="python ${home}/mt5-comet/comet/train/train.py"
 # wrap experiments
 path=${PWD##*/}          
@@ -25,7 +56,7 @@ cp train.sh ..
 
 # different models
 #runlite run -exp $path -bc base -ov $1 -var model_id=t5-v1--method=unsup-nat--rel_filter=xIntent#xNeed--train_samples=20#50--epochs_num=1#2--repeat=1#2--pid=0#1--learning_rate=1e-4#1e-5 -test_samples=300 --loop=True $extra --skip=True --follow_method=True 
-runlite run -exp $path -bc base -ov $g1 -var model_id=t5-large--method=unsup-wrap-nat--rel_filter=xIntent#xAttr#multi--train_samples=200--epochs_num=2--repeat=4--temp_num=66--loop=True--test_samples=100--merge_prompts=lstm#none --follow_method=True --scorers="rouge-bert" --data_path=${home}/mt5-comet/comet/data/atomic2020 --do_valid=False --val_samples=10 --encoder_type=lstml --cycle=100 $g2 --seed=123 --batch_size=8  
+runlite run -exp $path -bc base -ov $g2 -var model_id=t5-small--method=unsup-wrap-nat--rel_filter=xIntent#xAttr#multi--train_samples=200--epochs_num=2--repeat=4--temp_num=64--loop=True--test_samples=100--merge_prompts=lstm#mlp --follow_method=True --scorers="rouge-bert" --data_path=${home}/mt5-comet/comet/data/atomic2020 --do_valid=False --val_samples=10 --encoder_type=lstm --cycle=100 $g1 --seed=123 --batch_size=8  
 
 
 
