@@ -151,7 +151,7 @@ class PTuningWrapper(torch.nn.Module):
                 hidden_size = int(_enc_type[2])
             if merge_prompts.startswith("mlp"):
                 self.merge_encoder = MLPPromptEncoder("wrap_all", len(self.merge_prompt_ids), self.embedding_dim, self.merge_offset, prompt_ids=self.merge_prompt_ids, num_layers=num_layers, hidden_size=hidden_size)
-            elif merge_prompts.startswith("lstml"):
+            elif merge_prompts.startswith("lstm"):
                 self.merge_encoder = MLPPromptEncoder("wrap_all", len(self.merge_prompt_ids), self.embedding_dim, self.merge_offset, prompt_ids=self.merge_prompt_ids, num_layers=num_layers, hidden_size=hidden_size)
         else:
             if shared_embs:
@@ -563,7 +563,7 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
         #embinfo("XXXXXXXXXXXXXXXXX: %s",x)
         #embinfo("XXXXXXXXXXXXXXXXX[0]: %s",x[0])
         #embinfo("XXXXXXXXXXXXXXXXX size: %s",x[0].size())
-        embinfo("lstml embeds: %s",embeds)
+        embinfo("lstm embeds: %s",embeds)
 
         running_weight = self.mlp(x[0]).squeeze(0)
         if self.counter < 5:

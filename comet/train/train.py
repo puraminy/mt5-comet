@@ -2118,6 +2118,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         'n_prompts': n_prompts,
         'temperature': init_temperature,
     }
+    prefix_config = None
     wrapped_model = wrap_model(model_to_wrap, tokenizer, encoder_type, load_prompt_path, from_words = from_words, merge_prompts=merge_prompts, method = method, shared_embs= shared_embs, skilled_variant=skilled_variant, prefix_config=prefix_config) 
 
     mlog.info("len tokenizer after extending %s", len(tokenizer))
