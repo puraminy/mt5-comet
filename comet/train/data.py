@@ -28,6 +28,10 @@ class xAttrTemplate(RelTemplate):
                qtemp = "{rel_2} {event}, {emp_so_1} {emp_person_1} is {emb_seen_1} as {ph}."
            elif tn == 6:
                qtemp = "{event}, {emp_so_1} {emp_they_1} are {emb_seen_1} as {ph}."
+           elif tn == 64:
+               qtemp = "{emb_because_1} {emb_of_1} {event}, {emb_they_1} {emb_seen_1} as {ph}"
+           elif tn == 65:
+               qtemp = "{because_1} {of_1} {event}, {they_1} {seen_1} as {ph}"
        else:
           return super().get_templates(method, index, **kwargs)
        return qtemp, anstemp, ex_qtemp, ex_anstemp, flags 
@@ -71,6 +75,10 @@ class xIntentTemplate(RelTemplate):
                qtemp = "{rel_4} {event}, {ph}"
            elif tn == 63:
                qtemp = "{rel_4} Because of {event}, they want {ph}"
+           elif tn == 64:
+               qtemp = "{emb_because_1} {emb_of_1} {event}, {emb_they_1} {emb_want_1} {ph}"
+           elif tn == 65:
+               qtemp = "{because_1} {of_1} {event}, {they_1} {want_1} {ph}"
        else:
           return super().get_templates(method, index, **kwargs)
        return qtemp, anstemp, ex_qtemp, ex_anstemp, flags 
