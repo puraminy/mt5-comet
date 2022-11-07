@@ -764,9 +764,7 @@ def do_score(df, scorers, save_path, reval=False):
     if not save_path.endswith("tsv"):
         save_path = os.path.join(save_path, save_fname) 
     print("Saving results %s", save_path)
-    breakpoint()
     df.to_csv(save_path, index=False, sep="\t")
-    breakpoint()
     
     for metric in [mean_rouge, mean_bert, mean_match, mean_bleu]:
         s =0 
