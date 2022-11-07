@@ -2,3 +2,4 @@ sentence_transformers
 pickle5
 rouge
 datasets
+bert_score
