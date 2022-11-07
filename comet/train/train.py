@@ -2172,7 +2172,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         optimizer_grouped_parameters = [
             {'params': [p for n, p in model.underlying_model.named_parameters() if p.requires_grad and not any(nd in n for nd in no_decay)], 'weight_decay': weight_decay},
             {'params': [p for n, p in model.underlying_model.named_parameters() if p.requires_grad and any(nd in n for nd in no_decay)], 'weight_decay': 0.0},
-            {"params": model.mlp.parameters(), "lr": pl_learning_rate},
+            #{"params": model.mlp.parameters(), "lr": pl_learning_rate},
             #{"params": model.router, "lr": router_learning_rate},
             #{"params": model.A, "lr": Az_learning_rate},
             #{"params": model.z, "lr": Az_learning_rate},
@@ -2186,6 +2186,9 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             optimizer = AdamW(optimizer_grouped_parameters,lr=_lr,eps=1e-8)
             for encoder in model.prompt_encoders:
                 optimizer.add_param_group({'params': [p for p in encoder.parameters() if p.requires_grad ], "lr":pl_learning_rate})
+            if model.merge_encoder is not None:
+                optimizer.add_param_group({'params': model.merge_encoder, "lr":pl_learning_rate})
+            optimizer.add_param_group({'params': model.A, "lr":Az_learning_rate})
             optimizer.add_param_group({'params': model.A, "lr":Az_learning_rate})
             optimizer.add_param_group({'params': model.z, "lr":Az_learning_rate})
             optimizer.add_param_group({'params': model.router, "lr":router_learning_rate})
@@ -2196,6 +2199,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                     relative_step=True, warmup_init=True, lr=None)
             for encoder in model.prompt_encoders:
                 optimizer.add_param_group({'params': [p for p in encoder.parameters() if p.requires_grad ], "lr":pl_learning_rate})
+            if model.merge_encoder is not None:
+                optimizer.add_param_group({'params': model.merge_encoder, "lr":pl_learning_rate})
             scheduler = AdafactorSchedule(optimizer)
         elif opt_type == "ada":
             mlog.info("Ada Factor")
@@ -2214,6 +2219,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
 		    ) 
             for encoder in model.prompt_encoders:
                 optimizer.add_param_group({'params': [p for p in encoder.parameters() if p.requires_grad ], "lr":pl_learning_rate})
+            if model.merge_encoder is not None:
+                optimizer.add_param_group({'params': model.merge_encoder, "lr":pl_learning_rate})
         #optimizer = Adafactor(
         #        model.parameters(),
         #        lr=1e-3,

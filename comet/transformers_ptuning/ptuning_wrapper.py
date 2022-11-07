@@ -90,6 +90,7 @@ class PTuningWrapper(torch.nn.Module):
         super().__init__()
         mbp("")
         self.testing = False
+        if merge_prompts == "none": merge_prompts = ""
         if not do_log or not "ahmad" in home:
             wlog.disabled = False
             self.testing = False
