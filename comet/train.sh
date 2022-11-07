@@ -42,11 +42,12 @@ cp train.sh ..
 test=100
 train=200
 exp=merge
+log=${home}/logs/${exp}
 
-runlite run -exp $exp -lp $home/$exp -bc base -ov $g2 -var method=unsup-wrap-nat--rel_filter=xIntent#xAttr#multi--train_samples=$train--epochs_num=2--repeat=4--temp_num=64--loop=True--test_samples=$test--merge_prompts=lstm#mlp#none --follow_method=True --scorers="rouge-bert" --data_path=${home}/mt5-comet/comet/data/atomic2020 --do_valid=False --val_samples=10 --encoder_type=lstm --cycle=100 $g1 --seed=123 --batch_size=8  
+runlite run -exp $exp -lp ${log} -bc base -ov $g2 -var method=unsup-wrap-nat--rel_filter=xIntent#xAttr#multi--train_samples=$train--epochs_num=2--repeat=4--temp_num=64--loop=True--test_samples=$test--merge_prompts=lstm#mlp#none --follow_method=True --scorers="rouge-bert" --data_path=${home}/mt5-comet/comet/data/atomic2020 --do_valid=False --val_samples=10 --encoder_type=lstm --cycle=100 $g1 --seed=123 --batch_size=8  
 
-tar -czvf ${home}/{$exp}.tar.gz ${home}/${exp} 
-
+tar -czvf ${home}/${exp}.tar.gz ${log}
+cp ${home}/${exp}.tar.gz ${home}/drive/MyDrive/logs2 
 
 # learning rate for supervised and unsupervised learning for t5-v1
 #runlite run -exp learning-rate -bc base -ov -sm $1 --model_id=t5-v1 -var train_samples=100#200#300--learning_rate=0.0001#0.00001--method=sup#sup-nat#unsup-nat  --rel_filter=xIntent --train_samples=100  --test_samples=300 --repeat=3 --loop=True $extra --skip=True 
