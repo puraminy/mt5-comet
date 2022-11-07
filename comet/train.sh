@@ -6,7 +6,7 @@ g1=""
 g2=""
 for a in $@
 do
-   $i=$a | xargs
+   i=$a | xargs
    echo $i
    case $i in
        
