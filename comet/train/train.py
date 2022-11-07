@@ -2187,8 +2187,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             for encoder in model.prompt_encoders:
                 optimizer.add_param_group({'params': [p for p in encoder.parameters() if p.requires_grad ], "lr":pl_learning_rate})
             if model.merge_encoder is not None:
-                optimizer.add_param_group({'params': model.merge_encoder, "lr":pl_learning_rate})
-            optimizer.add_param_group({'params': model.A, "lr":Az_learning_rate})
+                optimizer.add_param_group({'params': [p for p in model.merge_encoder.parameters() if p.requires_grad], "lr":pl_learning_rate})
             optimizer.add_param_group({'params': model.A, "lr":Az_learning_rate})
             optimizer.add_param_group({'params': model.z, "lr":Az_learning_rate})
             optimizer.add_param_group({'params': model.router, "lr":router_learning_rate})
@@ -2200,7 +2199,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             for encoder in model.prompt_encoders:
                 optimizer.add_param_group({'params': [p for p in encoder.parameters() if p.requires_grad ], "lr":pl_learning_rate})
             if model.merge_encoder is not None:
-                optimizer.add_param_group({'params': model.merge_encoder, "lr":pl_learning_rate})
+                optimizer.add_param_group({'params': [p for p in model.merge_encoder.parameters() if p.requires_grad], "lr":pl_learning_rate})
             scheduler = AdafactorSchedule(optimizer)
         elif opt_type == "ada":
             mlog.info("Ada Factor")
@@ -2220,7 +2219,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             for encoder in model.prompt_encoders:
                 optimizer.add_param_group({'params': [p for p in encoder.parameters() if p.requires_grad ], "lr":pl_learning_rate})
             if model.merge_encoder is not None:
-                optimizer.add_param_group({'params': model.merge_encoder, "lr":pl_learning_rate})
+                optimizer.add_param_group({'params': [p for p in model.merge_encoder.parameters() if p.requires_grad], "lr":pl_learning_rate})
         #optimizer = Adafactor(
         #        model.parameters(),
         #        lr=1e-3,
