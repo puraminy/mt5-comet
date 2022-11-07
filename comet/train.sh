@@ -4,9 +4,9 @@
 
 g1=""
 g2=""
-for i in $@
+for a in $@
 do
-
+   $i=$a | xargs
    echo $i
    case $i in
        
