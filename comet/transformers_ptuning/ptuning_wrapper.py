@@ -89,7 +89,7 @@ class PTuningWrapper(torch.nn.Module):
         """
         super().__init__()
         mbp("")
-        self.testing = True
+        self.testing = False
         if not do_log or not "ahmad" in home:
             wlog.disabled = False
             self.testing = False
@@ -153,6 +153,7 @@ class PTuningWrapper(torch.nn.Module):
                 self.merge_encoder = MLPPromptEncoder("wrap_all", len(self.merge_prompt_ids), self.embedding_dim, self.merge_offset, prompt_ids=self.merge_prompt_ids, num_layers=num_layers, hidden_size=hidden_size)
             elif merge_prompts.startswith("lstm"):
                 self.merge_encoder = LSTMEmbeddingPromptEncoder("wrap_all", len(self.merge_prompt_ids), self.embedding_dim, self.merge_offset, prompt_ids=self.merge_prompt_ids, num_layers=num_layers, hidden_size=hidden_size)
+            assert self.merge_encoder != None, "merge encoder for " + merge_prompts + " is none"
         else:
             if shared_embs:
                 self.merge_embedding = torch.nn.Embedding(len(self.merge_prompt_ids), self.embedding_dim)
