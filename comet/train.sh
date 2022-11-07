@@ -4,10 +4,8 @@
 
 g1=""
 g2=""
-for a in $@
+for i in $@
 do
-   i=$a | xargs
-   echo $i
    case $i in
        
        # -- option
@@ -34,10 +32,7 @@ do
    esac
 
 done
-echo g1=$g1
-echo g2=$g2
-echo others=$others
-home=$others
+home=$(echo $others | xargs)
 if [ -z $home ]; then
    home=/home/ahmad
 fi 
