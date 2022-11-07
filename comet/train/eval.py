@@ -760,11 +760,13 @@ def do_score(df, scorers, save_path, reval=False):
         df = pd.concat([df, df2], axis=1)
 
     mlog.info("Saving results %s", save_path)
-    print("Saving results %s", save_path)
     save_fname = now + "_full_results.tsv"
     if not save_path.endswith("tsv"):
         save_path = os.path.join(save_path, save_fname) 
-    df.to_csv(save_fname, index=False, sep="\t")
+    print("Saving results %s", save_path)
+    breakpoint()
+    df.to_csv(save_path, index=False, sep="\t")
+    breakpoint()
     
     for metric in [mean_rouge, mean_bert, mean_match, mean_bleu]:
         s =0 
