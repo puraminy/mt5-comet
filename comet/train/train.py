@@ -407,12 +407,19 @@ def cli():
     is_flag=True,
     help=""
 )
+@click.option(
+    "--log_path",
+    "-lp",
+    default="",
+    type=str,
+    help=""
+)
 @click.pass_context
 #rrrrrrrrrrr
 def run(ctx, conf_path, base_conf, experiment, 
         exclude_conf, include_conf, overwrite_conf, var, 
         save_model, addto, rem, save_data, load_data, add_prefix, wrap, 
-        only_var, sep, num_exps, one, cpu, undone, repeat, 
+        only_var, sep, num_exps, one, cpu, undone, repeat, log_path, 
         dpy, port, stop_level, reval_bests, trial, show_samples):
 
      if dpy:
@@ -440,6 +447,9 @@ def run(ctx, conf_path, base_conf, experiment,
            args["experiment"] = experiment 
            args["show_samples"] = show_samples 
            args["skip"] = True # skip experiment
+           global logPath
+           if log_path:
+               logPath = log_path
            if addto:
                spath = os.path.join(logPath, addto)
            else:
