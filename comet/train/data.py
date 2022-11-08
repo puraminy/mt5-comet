@@ -79,9 +79,9 @@ class xIntentTemplate(RelTemplate):
            elif tn == 63:
                qtemp = "{rel_4} Because of {event}, they want {ph}"
            elif tn == 64:
-               qtemp = "{emb_because_1} {emb_of_1} {event}, {emb_they_1} {emb_want_1} {ph}"
+               qtemp = "{emb_because_1} {emb_of_1} {event}, {emb_they_1} {emb_want_1} to {ph}"
            elif tn == 65:
-               qtemp = "{because_1} {of_1} {event}, {they_1} {want_1} {ph}"
+               qtemp = "{because_1} {of_1} {event}, {they_1} {want_1} to {ph}"
            elif tn == 66:
                qtemp = "{because_1} {of_1} {event}, {they_1} {want_1} {resp}"
                anstemp = "{rel_1}"

@@ -41,10 +41,10 @@ cp train.sh ..
 
 test=100
 train=200
-exp=xint3
+exp=multi
 log=${home}/logs/${exp}
 
-runlite run -exp $exp -lp ${log} -bc base -ov $g2 -var method=unsup-wrap-nat--rel_filter=xIntent--train_samples=$train--epochs_num=2--repeat=4--temp_num=1#64--loop=True--test_samples=$test--merge_prompts=lstm#none --follow_method=True --scorers="rouge-bert" --data_path=${home}/mt5-comet/comet/data/atomic2020 --do_valid=False --val_samples=10 --encoder_type=lstm --cycle=100 $g1 --seed=123 --batch_size=8  
+runlite run -exp $exp -lp ${log} -bc base -ov $g2 -var method=unsup-wrap-nat--rel_filter=xIntent#xAttr#multi--train_samples=$train--epochs_num=2--repeat=4--temp_num=1#64#65--loop=True--test_samples=$test--merge_prompts=lstm#none --follow_method=True --scorers="rouge-bert" --data_path=${home}/mt5-comet/comet/data/atomic2020 --do_valid=False --val_samples=10 --encoder_type=lstm --cycle=100 $g1 --seed=123 --batch_size=8  
 
 if [ $home = "/content" ]; then
 	tar -czvf ${home}/${exp}.tar.gz ${log}
