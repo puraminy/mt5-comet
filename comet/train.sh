@@ -40,7 +40,7 @@ folder=${PWD##*/}
 cp train.sh ..
 
 test=100
-train=100
+train=80
 exp=xint2
 log=${home}/logs/${exp}
 
