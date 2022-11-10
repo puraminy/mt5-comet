@@ -15,6 +15,7 @@ wandb/*
 runs/*
 logs/*
 **/**/logs/*
+**/**/output/*
 **/**/images/*
 **/**/tmp_*/*
 **/**/plogs/*
