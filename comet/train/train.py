@@ -2132,7 +2132,16 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     if merge_prompts == "none": merge_prompts = ""
     assert merge_prompts != "none"
     wrapped_model = wrap_model(model_to_wrap, tokenizer, encoder_type, load_prompt_path, from_words = from_words, merge_prompts=merge_prompts, method = method, shared_embs= shared_embs, skilled_variant=skilled_variant, prefix_config=prefix_config) 
-
+    fname = "output/" + str(experiment) + "-" + str(exp_id) + "-" + merge_prompts + ".txt"
+    with open(fname, "w") as f:
+        if wrapped_model.merge_encoder:
+            print(wrapped_model.merge_encoder.id_offset, file=f)
+            print(wrapped_model.merge_encoder.prompt_ids, file=f)
+            print(wrapped_model.merge_encoder.input_ids, file=f)
+        for encoder in wrapped_model.prompt_encoders:
+            print(encoder.id_offset, file=f)
+            print(encoder.prompt_ids, file=f)
+            print(encoder.input_ids, file=f)
     mlog.info("len tokenizer after extending %s", len(tokenizer))
     if not prefix:
         model.resize_token_embeddings(len(tokenizer))

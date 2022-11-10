@@ -224,6 +224,25 @@ class PTuningWrapper(torch.nn.Module):
     def add_prompt_encoder(self, encoder):
         self.prompt_encoders.append(encoder)
 
+    def encoder_forward(self, encoder, input_ids, inputs_embeds):
+        #encoder = self.prompt_encoders[0]
+        device=inputs_embeds.device
+        winfo("********** offset: %s, length: %s", encoder.id_offset, encoder.length)
+        prompt_token_fn = encoder.get_prompt_token_fn()
+        encoder_masks = prompt_token_fn(input_ids)
+        winfo("Encoder masks: %s", encoder_masks)
+        if encoder_masks.any():
+            #find input ids for prompt tokens
+            prompt_input_ids = input_ids[encoder_masks]
+            winfo("Prompt Input ids: %s", prompt_input_ids)
+            winfo("Len Prompt Input ids: %s", len(prompt_input_ids))
+            # call forwards on prompt encoder whose outputs are prompt embeddings
+            prompt_embeds = encoder(prompt_input_ids,\
+                pids=None).to(device)
+            winfo("Prompt Embeds size: %s", prompt_embeds.size())
+            winfo("Encoder mask: %s", encoder_masks.size())
+            inputs_embeds[encoder_masks]=prompt_embeds
+
     def forward(self,input_ids, pids=None, **kwargs):
         ll = self.ll # log level
         winfo("wrapper forward was called")
@@ -248,9 +267,10 @@ class PTuningWrapper(torch.nn.Module):
             winfo("All prompts input ids: %s", all_prompts_input_ids)
             winfo("Len All prompts input ids: %s", len(all_prompts_input_ids))
             if self.merge_encoder:
-                merge_output = self.merge_encoder(all_prompts_input_ids,pids).to(device)
+                #merge_output = self.merge_encoder(all_prompts_input_ids,pids).to(device)
                 if True: #self.prefix_config is None:
-                    inputs_embeds[prompt_masks]=merge_output
+                    #inputs_embeds[prompt_masks]=merge_output
+                    self.encoder_forward(self.merge_encoder, input_ids, inputs_embeds)
                 else:
                     router = torch.index_select(self.router, 0, tids)
                     if self.training:
@@ -275,30 +295,15 @@ class PTuningWrapper(torch.nn.Module):
                 embeds_list = []
                 merge_dict = {}
                 for encoder in self.prompt_encoders:
-                    #encoder = self.prompt_encoders[0]
-                    winfo("********** offset: %s, length: %s", encoder.id_offset, encoder.length)
-                    prompt_token_fn = encoder.get_prompt_token_fn()
-                    encoder_masks = prompt_token_fn(input_ids)
-                    winfo("Encoder masks: %s", encoder_masks)
-                    if encoder_masks.any():
-                        #find input ids for prompt tokens
-                        prompt_input_ids = input_ids[encoder_masks]
-                        winfo("Prompt Input ids: %s", prompt_input_ids)
-                        winfo("Len Prompt Input ids: %s", len(prompt_input_ids))
-                        # call forwards on prompt encoder whose outputs are prompt embeddings
-                        prompt_embeds = encoder(prompt_input_ids,\
-                            pids).to(device)
-                        if self.testing:
-                            for _id,_embed in zip(prompt_input_ids.numpy(),prompt_embeds):
-                                _key = encoder.name + "_" + str(_id)
-                                if not _key in merge_dict:
-                                    merge_dict[_key] = [_embed]
-                                
-                            embeds_list.append(prompt_embeds)
-                        # replace prompt_embeddings calculated by prompt encoder in input embeddings
-                        winfo("Prompt Embeds size: %s", prompt_embeds.size())
-                        winfo("Encoder mask: %s", encoder_masks.size())
-                        inputs_embeds[encoder_masks]=prompt_embeds
+                    self.encoder_forward(encoder, input_ids, inputs_embeds)
+                    if self.testing:
+                        for _id,_embed in zip(prompt_input_ids.numpy(),prompt_embeds):
+                            _key = encoder.name + "_" + str(_id)
+                            if not _key in merge_dict:
+                                merge_dict[_key] = [_embed]
+                            
+                        embeds_list.append(prompt_embeds)
+                    # replace prompt_embeddings calculated by prompt encoder in input embeddings
                 if self.testing:
                     for key,val in merge_dict.items():
                         winfo("Merge dict item %s, len: %s",key, len(val))
