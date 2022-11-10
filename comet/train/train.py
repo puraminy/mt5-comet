@@ -2138,10 +2138,11 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             print(wrapped_model.merge_encoder.id_offset, file=f)
             print(wrapped_model.merge_encoder.prompt_ids, file=f)
             print(wrapped_model.merge_encoder.input_ids, file=f)
-        for encoder in wrapped_model.prompt_encoders:
-            print(encoder.id_offset, file=f)
-            print(encoder.prompt_ids, file=f)
-            print(encoder.input_ids, file=f)
+        if wrapped_model.prompt_encoders:
+            for encoder in wrapped_model.prompt_encoders:
+                print(encoder.id_offset, file=f)
+                print(encoder.prompt_ids, file=f)
+                print(encoder.input_ids, file=f)
     mlog.info("len tokenizer after extending %s", len(tokenizer))
     if not prefix:
         model.resize_token_embeddings(len(tokenizer))
@@ -2149,10 +2150,11 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         model.pretrain_model.resize_token_embeddings(len(tokenizer))
 
     wrapped_model.to(device=device)
-    mlog.info("Number of encoders: %s", len(wrapped_model.prompt_encoders))
-    for encoder in wrapped_model.prompt_encoders:
-        mlog.info("encoder %s", encoder.name)
-    wrapped_model.prompt_encoders.to(device=device)
+    if wrapped_model.prompt_encoders:
+        mlog.info("Number of encoders: %s", len(wrapped_model.prompt_encoders))
+        for encoder in wrapped_model.prompt_encoders:
+            mlog.info("encoder %s", encoder.name)
+        wrapped_model.prompt_encoders.to(device=device)
     mlog.info("len tokenizer after wrapping %s", len(tokenizer))
     mbp("wrap")
     mbp("start")
@@ -2188,12 +2190,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             #{"params": model.A, "lr": Az_learning_rate},
             #{"params": model.z, "lr": Az_learning_rate},
         ]
-        if opt_type == "adam_sparse":
-            optimizer = SparseAdam(optimizer_grouped_parameters,lr=_lr,eps=1e-8)
-            for encoder in model.prompt_encoders:
-                optimizer.add_param_group({'params': [p for p in encoder.parameters() if p.requires_grad ], "lr":pl_learning_rate})
-            scheduler = get_linear_schedule_with_warmup(optimizer,warm_up_steps,iterations)
-        elif opt_type == "adam":
+        if opt_type == "adam":
             optimizer = AdamW(optimizer_grouped_parameters,lr=_lr,eps=1e-8)
             for encoder in model.prompt_encoders:
                 optimizer.add_param_group({'params': [p for p in encoder.parameters() if p.requires_grad ], "lr":pl_learning_rate})

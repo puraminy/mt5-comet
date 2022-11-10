@@ -451,17 +451,62 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words
         offsets.append(offset)
     
     id_offset = len(tokenizer)
+    embedding_dim = model.config.hidden_size
     if prompt_encoders:
         id_offset = min(offsets)
+#################
+        merge_prompt_ids = []
+        sum_len = 0
+        for encoder in prompt_encoders:
+            _ids = encoder.prompt_ids
+            sum_len += len(_ids)
+            for _id in _ids:
+                if not _id in merge_prompt_ids:
+                    merge_prompt_ids.append(_id)
 
+            _offset = min(_ids)
+            rel_ids_tensor = torch.LongTensor(_ids)
+            embs = model.get_input_embeddings()
+            rel_embs = embs(rel_ids_tensor)
+            with torch.no_grad():
+               for i, e in enumerate(rel_embs):
+                   encoder.embedding.weight[i] = e #.detach()
+
+        if prompt_encoders:
+            merge_offset = min(merge_prompt_ids)
+            if shared_embs:
+                merge_embedding = torch.nn.Embedding(len(merge_prompt_ids), embedding_dim)
+                for encoder in prompt_encoders:
+                    encoder.embedding = merge_embedding
+                    encoder.id_offset= merge_offset
+                    encoder.length= len(merge_prompt_ids)
+
+        merge_encoder = None 
+        merge_embedding = None
+        n_prompt_tokens = len(merge_prompt_ids)
+        mbp("")
+        if merge_prompts:
+            _enc_type = merge_prompts.split("@")
+            num_layers = 1
+            if len(_enc_type) > 1:
+                num_layers = int(_enc_type[1])
+            hidden_size = -1
+            if len(_enc_type) > 2:
+                hidden_size = int(_enc_type[2])
+            if merge_prompts.startswith("mlp"):
+                merge_encoder = MLPPromptEncoder("wrap_all", len(merge_prompt_ids), embedding_dim, merge_offset, prompt_ids=merge_prompt_ids, num_layers=num_layers, hidden_size=hidden_size)
+            elif merge_prompts.startswith("lstm"):
+                merge_encoder = LSTMEmbeddingPromptEncoder("wrap_all", len(merge_prompt_ids), embedding_dim, merge_offset, prompt_ids=merge_prompt_ids, num_layers=num_layers, hidden_size=hidden_size)
+            assert merge_encoder != None, "merge encoder for " + merge_prompts + " is none"
+####################
     mlog.info("ID OFFSET: %s", id_offset)
     if skilled_variant:
        wrapped_model = SkilledMixin(model, n_tasks=2, n_skills=2, 
                skilled_variant=skilled_variant,
-               prompt_encoders=prompt_encoders, prompt_token_fn=get_prompt_token_fn(id_offset), merge_prompts=merge_prompts, shared_embs = shared_embs, prefix_config= prefix_config)
+               prompt_encoders=prompt_encoders, prompt_token_fn=get_prompt_token_fn(id_offset), merge_encoder=merge_encoder, prefix_config= prefix_config)
     else:
         wrapped_model = PTuningWrapper(model, 
-                prompt_encoders, prompt_token_fn=get_prompt_token_fn(id_offset), merge_prompts=merge_prompts, shared_embs = shared_embs, prefix_config = prefix_config)
+                prompt_encoders, prompt_token_fn=get_prompt_token_fn(id_offset), merge_encoder=merge_encoder, prefix_config = prefix_config)
     return wrapped_model
 
 def create_encoder(name, model, tokenizer, prompt_tokens, encoder_type="lstm", 
