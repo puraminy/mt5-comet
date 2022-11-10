@@ -2144,7 +2144,6 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                 print(encoder.prompt_ids, file=f)
                 print(encoder.input_ids, file=f)
     mlog.info("len tokenizer after extending %s", len(tokenizer))
-    return
     if not prefix:
         model.resize_token_embeddings(len(tokenizer))
     else:
