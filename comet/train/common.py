@@ -435,6 +435,7 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words
     #for rel in all_rels:
     #    mbp("b")
     #    fill_sample(method, rel)
+    merge_prompt_tokens = []
     for rel, prompt_tokens in encoder_prompts.items():
         mlog.info("******************* Wrapping model for %s", rel)
         mlog.info("******************* from_words %s", from_words)
@@ -446,6 +447,10 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words
             prompt_tokens = rel_nat_maps[rel]["rel_tokens"]
         if not prompt_tokens:
             continue
+        for p in prompt_tokens:
+            if not p in merge_prompt_tokens:
+                merge_prompt_tokens.append(p)
+
         encoder, offset = create_encoder(rel, model, tokenizer, prompt_tokens, encoder_type, from_words, wrapped_model)
         prompt_encoders.append(encoder)
         offsets.append(offset)
@@ -455,48 +460,27 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words
     if prompt_encoders:
         id_offset = min(offsets)
 #################
-        merge_prompt_ids = []
-        sum_len = 0
-        for encoder in prompt_encoders:
-            _ids = encoder.prompt_ids
-            sum_len += len(_ids)
-            for _id in _ids:
-                if not _id in merge_prompt_ids:
-                    merge_prompt_ids.append(_id)
-
-            _offset = min(_ids)
-            rel_ids_tensor = torch.LongTensor(_ids)
-            embs = model.get_input_embeddings()
-            rel_embs = embs(rel_ids_tensor)
-            with torch.no_grad():
-               for i, e in enumerate(rel_embs):
-                   encoder.embedding.weight[i] = e #.detach()
-
+        merge_prompt_ids = tokenizer.convert_tokens_to_ids(merge_prompt_tokens)
         if prompt_encoders:
-            merge_offset = min(merge_prompt_ids)
             if shared_embs:
-                merge_embedding = torch.nn.Embedding(len(merge_prompt_ids), embedding_dim)
-                for encoder in prompt_encoders:
+               merge_embedding = torch.nn.Embedding(len(merge_prompt_tokens), embedding_dim)
+               _ids_tensor = torch.LongTensor(merge_prompt_ids)
+               embs = model.get_input_embeddings()
+               merge_embs = embs(_ids_tensor)
+               with torch.no_grad():
+                   for i, e in enumerate(merge_embs):
+                       merge_embedding.weight[i] = e #.detach()
+               for encoder in prompt_encoders:
                     encoder.embedding = merge_embedding
-                    encoder.id_offset= merge_offset
-                    encoder.length= len(merge_prompt_ids)
+                    #encoder.id_offset= -1
+                    #encoder.length= len(merge_prompt_tokens)
 
         merge_encoder = None 
         merge_embedding = None
-        n_prompt_tokens = len(merge_prompt_ids)
+        n_prompt_tokens = len(merge_prompt_tokens)
         mbp("")
         if merge_prompts:
-            _enc_type = merge_prompts.split("@")
-            num_layers = 1
-            if len(_enc_type) > 1:
-                num_layers = int(_enc_type[1])
-            hidden_size = -1
-            if len(_enc_type) > 2:
-                hidden_size = int(_enc_type[2])
-            if merge_prompts.startswith("mlp"):
-                merge_encoder = MLPPromptEncoder("wrap_all", len(merge_prompt_ids), embedding_dim, merge_offset, prompt_ids=merge_prompt_ids, num_layers=num_layers, hidden_size=hidden_size)
-            elif merge_prompts.startswith("lstm"):
-                merge_encoder = LSTMEmbeddingPromptEncoder("wrap_all", len(merge_prompt_ids), embedding_dim, merge_offset, prompt_ids=merge_prompt_ids, num_layers=num_layers, hidden_size=hidden_size)
+            merge_encoder = create_encoder("merge", model, tokenizer, merge_prompt_tokens, merge_prompts, from_words, wrapped_model)
             assert merge_encoder != None, "merge encoder for " + merge_prompts + " is none"
 ####################
     mlog.info("ID OFFSET: %s", id_offset)
@@ -523,6 +507,7 @@ def create_encoder(name, model, tokenizer, prompt_tokens, encoder_type="lstm",
     enc_plen =len(rel_tokens) 
     mlog.info("** len tokenizer before extend: %s", len(tokenizer))
     extend_tokenizer(tokenizer, rel_tokens)
+    model.resize_token_embeddings(len(tokenizer))
     rel_ids = tokenizer.convert_tokens_to_ids(rel_tokens)
     cur_embeddings = model.get_input_embeddings()
     init_embs = {}
@@ -534,7 +519,10 @@ def create_encoder(name, model, tokenizer, prompt_tokens, encoder_type="lstm",
            emb = cur_embeddings.weight[wid,:].detach().clone() 
            pid = tokenizer.convert_tokens_to_ids([p])[0]
            init_embs[pid] = emb
-
+        else:
+           pid = tokenizer.convert_tokens_to_ids([p])[0]
+           emb = cur_embeddings.weight[pid,:].detach().clone() 
+           init_embs[pid] = emb
     mlog.info("** final rel ids: %s", rel_ids)
     id_offset = min(rel_ids) 
     prompt_encoder = None
@@ -575,7 +563,6 @@ def create_encoder(name, model, tokenizer, prompt_tokens, encoder_type="lstm",
             prompt_encoder = LSTMEmbeddingPromptEncoder(name, enc_plen,embedding_dim,
                     id_offset = -1, prompt_ids=rel_ids, init_embs=init_embs, num_layers=num_layers, hidden_size=hidden_size)
 
-    model.resize_token_embeddings(len(tokenizer))
 
     return prompt_encoder, id_offset
 

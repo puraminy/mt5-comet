@@ -90,6 +90,8 @@ class PTuningWrapper(torch.nn.Module):
         super().__init__()
         mbp("")
         self.merge_encoder = merge_encoder
+        if merge_encoder:
+            self.merge_prompt_ids = merge_encoder.prompt_ids
         self.testing = False
         if not do_log or not "ahmad" in home:
             wlog.disabled = False
