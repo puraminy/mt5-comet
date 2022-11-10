@@ -190,6 +190,7 @@ class PTuningWrapper(torch.nn.Module):
                 pids=None).to(device)
             winfo("Prompt Embeds size: %s", prompt_embeds.size())
             winfo("Encoder mask: %s", encoder_masks.size())
+            inputs_embeds[encoder_masks]=prompt_embeds
             return prompt_embeds
         return None
 
@@ -220,7 +221,8 @@ class PTuningWrapper(torch.nn.Module):
                 #merge_output = self.merge_encoder(all_prompts_input_ids,pids).to(device)
                 merge_output = self.encoder_forward(self.merge_encoder, input_ids, inputs_embeds)
                 if True: #self.prefix_config is None:
-                    inputs_embeds[prompt_masks]=merge_output
+                    #inputs_embeds[prompt_masks]=merge_output
+                    pass
                 else:
                     router = torch.index_select(self.router, 0, tids)
                     if self.training:
@@ -246,7 +248,7 @@ class PTuningWrapper(torch.nn.Module):
                 merge_dict = {}
                 for encoder in self.prompt_encoders:
                     prompt_embeds = self.encoder_forward(encoder, input_ids, inputs_embeds)
-                    inputs_embeds[encoder_masks]=prompt_embeds
+                    #inputs_embeds[encoder_masks]=prompt_embeds
                     if self.testing:
                         for _id,_embed in zip(prompt_input_ids.numpy(),prompt_embeds):
                             _key = encoder.name + "_" + str(_id)
