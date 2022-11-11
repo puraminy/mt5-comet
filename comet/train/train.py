@@ -426,6 +426,10 @@ def run(ctx, conf_path, base_conf, experiment,
         debugpy.listen(('0.0.0.0', int(port)))
         print("Waiting for client at run...port:", port)
         debugpy.wait_for_client()  # blocks execution until client is attached
+     if colab and cpu:
+         ans = input("Are you sure you want to use CPU?")
+         if ans == "n":
+             return
      if not conf_path:
         conf_path = "confs"
         if colab: conf_path = "colab_confs"
