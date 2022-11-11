@@ -343,7 +343,7 @@ class PTuningWrapper(torch.nn.Module):
             pass
         if self.decoder_prompt_flag:
             for encoder in self.prompt_encoders:
-                winfo(f"the wrapper has prompt encoder")
+                winfo(f"the wrapper has prompt encoder for decoder part")
                 # fill the current embeddings with weights of encoder
                 encoder.dump_embeddings_into(
                                        self.model_decoder_embeddings.weight)

@@ -1461,6 +1461,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     vlog.info("given load path: %s", load_path)
     vlog.info("given save path: %s", save_path)
 
+    if int(test_samples) < 0:
+        test_set = "" 
 
     seed = int(seed)
     set_random_seed(seed)
@@ -2139,15 +2141,21 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     fname = "output/" + str(experiment) + "-" + str(exp_id) + "-" + merge_prompts + ".txt"
     Path("output").mkdir(exist_ok = True)
     with open(fname, "w") as f:
+        print("Number of prompts:" + str(len(wrapped_model.prompt_encoders)), file=f)
         if wrapped_model.merge_encoder:
             print(wrapped_model.merge_encoder.id_offset, file=f)
             print(wrapped_model.merge_encoder.prompt_ids, file=f)
             print(wrapped_model.merge_encoder.input_ids, file=f)
+            print(wrapped_model.merge_encoder, file=f)
         if wrapped_model.prompt_encoders:
             for encoder in wrapped_model.prompt_encoders:
                 print(encoder.id_offset, file=f)
                 print(encoder.prompt_ids, file=f)
                 print(encoder.input_ids, file=f)
+                print(encoder, file=f)
+        print(model, file=f)
+        jargs = json.dumps(args, indent=2)
+        print(jargs, file=f)
     mlog.info("len tokenizer after extending %s", len(tokenizer))
     if not prefix:
         model.resize_token_embeddings(len(tokenizer))
