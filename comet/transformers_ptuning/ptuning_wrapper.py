@@ -371,6 +371,7 @@ class PromptEncoder(torch.nn.Module):
         self.embedding_dim = embedding_dim
         self.id_offset = id_offset
         self.embedding = torch.nn.Embedding(length,embedding_dim)
+        self.init_embs = init_embs
         #self.embedding.weight.requires_grad = False
         if init_embs:
             with torch.no_grad():

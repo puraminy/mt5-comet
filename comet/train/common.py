@@ -461,17 +461,26 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words
     if prompt_encoders:
         id_offset = min(offsets)
 #################
-        merge_prompt_ids = tokenizer.convert_tokens_to_ids(merge_prompt_tokens)
+        merge_prompt_ids = []
         if prompt_encoders:
            merge_embedding = torch.nn.Embedding(len(merge_prompt_tokens), embedding_dim)
-           _ids_tensor = torch.LongTensor(merge_prompt_ids)
-           embs = model.get_input_embeddings()
-           merge_embs = embs(_ids_tensor)
-           with torch.no_grad():
-               for i, e in enumerate(merge_embs):
-                   merge_embedding.weight[i] = e #.detach()
-           mlog.info("Merge_ids: %s", merge_prompt_ids)
+           p_index = 0
+           mlog.info("len merge tokens: %s", len(merge_prompt_tokens))
+           for encoder in prompt_encoders:
+               for pid in encoder.prompt_ids:
+                   if not pid in merge_prompt_ids:
+                      with torch.no_grad():
+                        merge_prompt_ids.append(pid)
+                        merge_embedding.weight[p_index] = encoder.init_embs[pid] #.detach()
+                        p_index += 1
+           #_ids_tensor = torch.LongTensor(merge_prompt_ids)
+           #embs = model.get_input_embeddings()
+           #merge_embs = embs(_ids_tensor)
+           #with torch.no_grad():
+           #    for i, e in enumerate(merge_embs):
+           #        merge_embedding.weight[i] = e #.detach()
            if shared_embs:
+               mlog.info("Merge_ids: %s", merge_prompt_ids)
                for encoder in prompt_encoders:
                     encoder.embedding = merge_embedding
                     #encoder.id_offset= -1
