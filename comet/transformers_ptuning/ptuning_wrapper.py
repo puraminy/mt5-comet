@@ -90,7 +90,7 @@ class PTuningWrapper(torch.nn.Module):
         super().__init__()
         mbp("")
         self.merge_encoder = merge_encoder
-        assert merge_encoder == None, "merege_encoder was set"
+        #assert merge_encoder == None, "merege_encoder was set"
         if merge_encoder:
             self.merge_prompt_ids = merge_encoder.prompt_ids
         self.testing = False

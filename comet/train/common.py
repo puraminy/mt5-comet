@@ -482,7 +482,8 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words
         if merge_prompts:
             _encoder, _ = create_encoder("merge", model, tokenizer, merge_prompt_tokens, merge_prompts, from_words, wrapped_model)
             #assert merge_encoder != None, "merge encoder for " + merge_prompts + " is none"
-            prompt_encoders = [_encoder]
+            merge_encoder = prompt_encoders[0]
+            prompt_encoders = []
 ####################
     mlog.info("ID OFFSET: %s", id_offset)
     if skilled_variant:

@@ -991,6 +991,13 @@ def run(ctx, conf_path, base_conf, experiment,
     help=""
 )
 @click.option(
+    "--log_per_exp",
+    "-lfe",
+    default="",
+    type=str,
+    help="save disticnt log for experiments in output (good for comparison)"
+)
+@click.option(
     "--epochs_num",
     "-eps",
     default=1,
@@ -1444,7 +1451,7 @@ def run(ctx, conf_path, base_conf, experiment,
     type=int,
     help=""
 )
-def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, pl_learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, wandb, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, no_save_best, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args, match, dpy, prompt_tune, prompt_config_file, load_prompt, data_name, seed, do_valid, stop_level, skilled_variant, int_dim, prompt_token_num, n_tasks, n_prompts, init_temperature):
+def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, pl_learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, log_per_exp, wandb, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, no_save_best, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args, match, dpy, prompt_tune, prompt_config_file, load_prompt, data_name, seed, do_valid, stop_level, skilled_variant, int_dim, prompt_token_num, n_tasks, n_prompts, init_temperature):
 
     #%% some hyper-parameters
 
@@ -1467,6 +1474,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     seed = int(seed)
     set_random_seed(seed)
 
+    args = locals() #run_args # input parameters
     if "dlog" in print_log: # data logger
         dlog.addHandler(consoleHandler)
         dlog.setLevel(logging.DEBUG)
@@ -1477,7 +1485,14 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         clog.addHandler(consoleHandler)
         clog.setLevel(logging.DEBUG)
 
-    args = locals() #run_args # input parameters
+
+    if log_per_exp:
+        for logger, fname in zip([mlog,dlog,clog,vlog,tlog,timelog], ["main","data","cfg","eval","train", "time"]):
+            logger.setLevel(logging.INFO)
+            logFilename = os.path.join("output", str(exp_id) + "_" + fname + ".log")
+            handler = logging.FileHandler(logFilename, mode="w")
+            handler.setFormatter(FORMAT)
+            logger.addHandler(handler)
     mlog.info(f"========================= {experiment}:{exp_id} ========================")
     if save_path == "":
         if "ahmad" or "pouramini" in home:
@@ -2157,6 +2172,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         jargs = json.dumps(args, indent=2)
         print(jargs, file=f)
     mlog.info("len tokenizer after extending %s", len(tokenizer))
+    # ooooooooooooo
+    # return
     if not prefix:
         model.resize_token_embeddings(len(tokenizer))
     else:
