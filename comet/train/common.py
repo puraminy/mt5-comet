@@ -471,6 +471,7 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words
                with torch.no_grad():
                    for i, e in enumerate(merge_embs):
                        merge_embedding.weight[i] = e #.detach()
+               mlog.info("Merge_ids: %s", merge_prompt_ids)
                for encoder in prompt_encoders:
                     encoder.embedding = merge_embedding
                     #encoder.id_offset= -1
