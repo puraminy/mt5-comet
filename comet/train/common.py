@@ -335,7 +335,7 @@ def set_random_seed(seed):
         random.seed(seed)
         np.random.seed(seed)
         #tf.random.set_seed(seed)
-        torch.use_deterministic_algorithms(True)
+        #torch.use_deterministic_algorithms(True)
         torch.manual_seed(seed)
         torch.cuda.manual_seed(seed)
 
