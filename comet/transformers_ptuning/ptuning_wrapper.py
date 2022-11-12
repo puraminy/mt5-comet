@@ -21,45 +21,31 @@ home = expanduser("~")
 wlog = logging.getLogger("comet.wrapper")
 emblog = logging.getLogger("comet.embedding")
 consoleHandler = logging.StreamHandler()
-wlog.addHandler(consoleHandler)
-emblog.addHandler(consoleHandler)
+#wlog.addHandler(consoleHandler)
+#emblog.addHandler(consoleHandler)
 tlog = logging.getLogger("comet.time")
 FORMAT = logging.Formatter("[%(filename)s:%(lineno)s - %(funcName)10s() ] %(message)s")
 
-def winfo(text, *arg, **kwargs):
-    pass
-    #print((text, *arg))
+def winfo(text, *args, **kwargs):
+    wlog.info(text, *args)
+    #print((text, *args))
 
-def embinfo(text, *arg, **kwargs):
-    pass
-    #print((text, *arg))
+def embinfo(text, *args, **kwargs):
+    emblog.info(text, *args)
+    #print((text, *args))
 
 def getFname(name):
     if "ahmad" in home or "pouramini" in home:
-        logFilename = os.path.join(home, f"logs/{name}.log")
+        logFilename = os.path.join(home, "mt5-comet", "comet", f"output/{name}.log")
     else:
         logFilename = f"{name}.log"
     return logFilename
-wHandler = logging.FileHandler(getFname("wrapper"), mode='w')
-wHandler.setFormatter(FORMAT)
-wlog.addHandler(wHandler)
-eHandler = logging.FileHandler(getFname("embedding"), mode='w')
-eHandler.setFormatter(FORMAT)
-emblog.addHandler(eHandler)
-tHandler = logging.FileHandler(getFname("time"), mode='w')
-tHandler.setFormatter(FORMAT)
-tlog.addHandler(tHandler)
-embinfo("Embedding log")
-winfo("Wrapper log")
-wlog.setLevel(logging.INFO)
-emblog.setLevel(logging.INFO)
-tlog.setLevel(logging.INFO)
 
 class PTuningWrapper(torch.nn.Module):
     def __init__(self,model,prompt_encoders,decoder_prompt_encoder=None,
         prompt_token_fn=None, prompt_token_id=None, prompt_token_ids=None,
         replacing_token_id=0, do_log=True, 
-        merge_encoder = None, prefix_config=None):
+        merge_encoder = None, prefix_config=None, exp_id=""):
         """
         PTuningWrapper for Huggingface transformer models (Encoder Models).
         It will replace the prompt token embeddings with ones from prompt encoder.
@@ -87,6 +73,23 @@ class PTuningWrapper(torch.nn.Module):
                 one so that the input_ids can be passed into the model 
                 embedding layer of the transformer model.
         """
+
+        wHandler = logging.FileHandler(getFname(str(exp_id) + "_wrapper"), mode='w')
+        wHandler.setFormatter(FORMAT)
+        wlog.addHandler(wHandler)
+        eHandler = logging.FileHandler(getFname(str(exp_id) + "_embedding"), mode='w')
+        eHandler.setFormatter(FORMAT)
+        emblog.addHandler(eHandler)
+        tHandler = logging.FileHandler(getFname(str(exp_id) + "_time"), mode='w')
+        tHandler.setFormatter(FORMAT)
+        tlog.addHandler(tHandler)
+        embinfo("Embedding log")
+        winfo("Wrapper log")
+        wlog.setLevel(logging.INFO)
+        emblog.setLevel(logging.INFO)
+        tlog.setLevel(logging.INFO)
+
+
         super().__init__()
         mbp("")
         self.merge_encoder = merge_encoder

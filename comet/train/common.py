@@ -335,6 +335,7 @@ def set_random_seed(seed):
         random.seed(seed)
         np.random.seed(seed)
         #tf.random.set_seed(seed)
+        torch.use_deterministic_algorithms(True)
         torch.manual_seed(seed)
         torch.cuda.manual_seed(seed)
 
@@ -427,7 +428,7 @@ def fill_sample(mt, rel):
             input_lang, target_lang)
 
 
-def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words=False, merge_prompts=False, method="", shared_embs =False, skilled_variant="", prefix_config=None):
+def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words=False, merge_prompts=False, method="", shared_embs =False, skilled_variant="", prefix_config=None, exp_id=""):
     wrapped_model = None
     prompt_encoders = []
     offsets = []
@@ -450,10 +451,10 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words
         for p in prompt_tokens:
             if not p in merge_prompt_tokens:
                 merge_prompt_tokens.append(p)
-
-        encoder, offset = create_encoder(rel, model, tokenizer, prompt_tokens, encoder_type, from_words, wrapped_model)
-        prompt_encoders.append(encoder)
-        offsets.append(offset)
+        if not merge_prompts:
+            encoder, offset = create_encoder(rel, model, tokenizer, prompt_tokens, encoder_type, from_words, wrapped_model)
+            prompt_encoders.append(encoder)
+            offsets.append(offset)
     
     id_offset = len(tokenizer)
     embedding_dim = model.config.hidden_size
@@ -475,15 +476,15 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words
                     #encoder.id_offset= -1
                     #encoder.length= len(merge_prompt_tokens)
 
-        merge_encoder = None 
-        merge_embedding = None
-        n_prompt_tokens = len(merge_prompt_tokens)
-        mbp("")
-        if merge_prompts:
-            _encoder, _ = create_encoder("merge", model, tokenizer, merge_prompt_tokens, merge_prompts, from_words, wrapped_model)
-            #assert merge_encoder != None, "merge encoder for " + merge_prompts + " is none"
-            merge_encoder = prompt_encoders[0]
-            prompt_encoders = []
+    merge_encoder = None 
+    merge_embedding = None
+    n_prompt_tokens = len(merge_prompt_tokens)
+    mbp("")
+    if merge_prompts:
+        merge_encoder, _ = create_encoder("merge", model, tokenizer, merge_prompt_tokens, merge_prompts, from_words, wrapped_model)
+        #assert merge_encoder != None, "merge encoder for " + merge_prompts + " is none"
+        #merge_encoder = _encoder # prompt_encoders[0]
+        #prompt_encoders = [_encoder]
 ####################
     mlog.info("ID OFFSET: %s", id_offset)
     if skilled_variant:
@@ -492,7 +493,7 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words
                prompt_encoders=prompt_encoders, prompt_token_fn=get_prompt_token_fn(id_offset), merge_encoder=merge_encoder, prefix_config= prefix_config)
     else:
         wrapped_model = PTuningWrapper(model, 
-                prompt_encoders, prompt_token_fn=get_prompt_token_fn(id_offset), merge_encoder=merge_encoder, prefix_config = prefix_config)
+                prompt_encoders, prompt_token_fn=get_prompt_token_fn(id_offset), merge_encoder=merge_encoder, prefix_config = prefix_config, exp_id=exp_id)
     return wrapped_model
 
 def create_encoder(name, model, tokenizer, prompt_tokens, encoder_type="lstm", 

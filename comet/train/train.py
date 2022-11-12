@@ -1492,6 +1492,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             logFilename = os.path.join("output", str(exp_id) + "_" + fname + ".log")
             handler = logging.FileHandler(logFilename, mode="w")
             handler.setFormatter(FORMAT)
+            logger.handlers.clear()
             logger.addHandler(handler)
     mlog.info(f"========================= {experiment}:{exp_id} ========================")
     if save_path == "":
@@ -2152,7 +2153,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     #prefix_config = None
     if merge_prompts == "none": merge_prompts = ""
     assert merge_prompts != "none"
-    wrapped_model = wrap_model(model_to_wrap, tokenizer, encoder_type, load_prompt_path, from_words = from_words, merge_prompts=merge_prompts, method = method, shared_embs= shared_embs, skilled_variant=skilled_variant, prefix_config=prefix_config) 
+    wrapped_model = wrap_model(model_to_wrap, tokenizer, encoder_type, load_prompt_path, from_words = from_words, merge_prompts=merge_prompts, method = method, shared_embs= shared_embs, skilled_variant=skilled_variant, prefix_config=prefix_config, exp_id=exp_id) 
     fname = "output/" + str(experiment) + "-" + str(exp_id) + "-" + merge_prompts + ".txt"
     Path("output").mkdir(exist_ok = True)
     with open(fname, "w") as f:
