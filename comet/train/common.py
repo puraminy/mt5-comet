@@ -463,15 +463,15 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words
 #################
         merge_prompt_ids = tokenizer.convert_tokens_to_ids(merge_prompt_tokens)
         if prompt_encoders:
-               merge_embedding = torch.nn.Embedding(len(merge_prompt_tokens), embedding_dim)
-               _ids_tensor = torch.LongTensor(merge_prompt_ids)
-               embs = model.get_input_embeddings()
-               merge_embs = embs(_ids_tensor)
-               with torch.no_grad():
-                   for i, e in enumerate(merge_embs):
-                       merge_embedding.weight[i] = e #.detach()
-               mlog.info("Merge_ids: %s", merge_prompt_ids)
-            if shared_embs:
+           merge_embedding = torch.nn.Embedding(len(merge_prompt_tokens), embedding_dim)
+           _ids_tensor = torch.LongTensor(merge_prompt_ids)
+           embs = model.get_input_embeddings()
+           merge_embs = embs(_ids_tensor)
+           with torch.no_grad():
+               for i, e in enumerate(merge_embs):
+                   merge_embedding.weight[i] = e #.detach()
+           mlog.info("Merge_ids: %s", merge_prompt_ids)
+           if shared_embs:
                for encoder in prompt_encoders:
                     encoder.embedding = merge_embedding
                     #encoder.id_offset= -1
