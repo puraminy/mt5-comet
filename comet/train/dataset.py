@@ -70,6 +70,10 @@ class MyDataset(torch.utils.data.Dataset):
             self.orig_df = split_df.copy()
             split_df = split_df.groupby(group_them, as_index=False).first()
             dlog.info("*** Filtered for grouping_them %s ", group_them)
+        for col in targets:
+            if col in split_df:
+                split_df[col] = split_df[col].astype(str)
+        split_df["freqs"] = split_df.groupby(['prefix','input_text'])['input_text'].transform('count')
 
         if rel_filter == "all":
             rel_filter = ""
@@ -96,9 +100,6 @@ class MyDataset(torch.utils.data.Dataset):
             self.samples_per_head = 0
             self.per_prefix = 0
             use_all_data = True
-        for col in targets:
-            if col in split_df:
-                split_df[col] = split_df[col].astype(str)
         if ignore_blanks: # and len(split_df) > num_rows:
             #split_df = split_df[split_df["input_text"].str.contains('___')==False]
             split_df = split_df[split_df["target_text"] != "none"]
@@ -131,7 +132,6 @@ class MyDataset(torch.utils.data.Dataset):
                 dlog.info(f"NUM samples %s, %s", self.num_samples, len(split_df))
                 dlog.info(f"len after sampling:{len(split_df)}")
 
-        split_df["freqs"] = split_df.groupby(['prefix','input_text'])['input_text'].transform('count')
         split_df = split_df.sort_values(by=["freqs","input_text", "prefix"], ascending=False)
         assert len(split_df) > 0, "Data frame is empty " + self.split_name + " " + str(self.num_samples)
         dlog.info("Num Samples: %s", self.num_samples)
@@ -171,6 +171,7 @@ class MyDataset(torch.utils.data.Dataset):
         self.split_df = split_df
         self.old_input = ""
         self.si = 0
+        self.prompts = {}
         self.example_counter = 0
         self.use_dif_templates = use_dif_templates
         self.repeat = repeat
@@ -350,6 +351,10 @@ class MyDataset(torch.utils.data.Dataset):
         response = rt.fill_vars(_anstemp, rel, event, resp, gen_token, 
                 input_lang, target_lang, self.ph_num, self.temp_num, self.someone)
         mbp("")
+
+        for rr, prompt in rt.encoder_prompts.items():
+            self.prompts[rr] = prompt
+
         __resp = response.replace(placeholder_token,"")
         _query = _query.strip()
         #mbp(_query)

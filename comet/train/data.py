@@ -69,7 +69,7 @@ class xIntentTemplate(RelTemplate):
                anstemp = "he intends {resp} {end}"
        elif method == "unsup-wrap-nat":
            if tn == 1:
-               qtemp = "{rel_8} {event}, {ph}"
+               qtemp = "{rel_5} {event}, {ph}"
            elif tn == 6:
                qtemp = "{emb_because_1} {emb_of_1} {event}, {emb_they_1} {emb_want_1} {ph}"
            elif tn == 61:
@@ -77,9 +77,9 @@ class xIntentTemplate(RelTemplate):
            elif tn == 62:
                qtemp = "{rel_4} {event}, {ph}"
            elif tn == 63:
-               qtemp = "{rel_8} Because of {event}, they want {ph}"
+               qtemp = "{rel_5} Because of {event}, they want {ph}"
            elif tn == 64:
-               qtemp = "{emb_because_1} {emb_of_1} {event}, {emb_they_1} {emb_want_1} to {ph}"
+               qtemp = "{a_because_1} {a_of_1} {event}, {b_they_1} {b_want_1} to {ph}"
            elif tn == 65:
                qtemp = "{because_1} {of_1} {event}, {they_1} {want_1} to {ph}"
            elif tn == 66:

@@ -402,59 +402,26 @@ def extend_tokenizer(tokenizer, prompt_tokens = [], model_id=""):
     else:
         mlog.info("No new token was added")
 
-def fill_sample(mt, rel):
-    mbp("")
-    #qtemp, anstemp, ex_qtemp, ex_anstemp, context = create_templates(mt,
-    #        gen_pos="end")
-    #qtemp = qtemp[0]
-    qtemp = "{rel_i} {rel_natural}"
-    anstemp = "{ph} {resp} {end}"
-    ex_qtemp = ""
-    ex_anstemp = ""
-    context = ""
-    mask =1
-    context_df = None
-    d = {"prefix":rel}
-    event = "test event"
-    resp = "test answer"
-    input_lang = "en"
-    target_lang = "en"
-    gen_token = "gen_en"
-    _qtemp = fill_consts(qtemp, ex_qtemp, context,rel, d, context_df, mask=mask,method = mt)
-    _anstemp = fill_consts(anstemp, ex_anstemp, context,rel, d, context_df, mask=mask,method = mt)
-    _query = fill_vars(_qtemp, rel, event, resp, gen_token,
-            input_lang, target_lang)
-    response = fill_vars(_anstemp, rel, event, resp, gen_token,
-            input_lang, target_lang)
 
-
-def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words=False, merge_prompts=False, method="", shared_embs =False, skilled_variant="", prefix_config=None, exp_id=""):
+def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", merge_prompts=False, method="", shared_embs =False, skilled_variant="", prefix_config=None, exp_id="", encoder_prompts={}):
     wrapped_model = None
     prompt_encoders = []
     offsets = []
     tokenize_relations(tokenizer)
-    #for rel in all_rels:
-    #    mbp("b")
-    #    fill_sample(method, rel)
     merge_prompt_tokens = []
+    ii = 1
     for rel, prompt_tokens in encoder_prompts.items():
-        mlog.info("******************* Wrapping model for %s", rel)
-        mlog.info("******************* from_words %s", from_words)
+        mlog.info("%s )******************* Wrapping model for %s", ii, rel)
         if rel == "com":
-            continue
-        if from_words == "rel":
-            from_words = rel_nat_maps[rel][1]
-        if from_words == "rel_tokens":
-            prompt_tokens = rel_nat_maps[rel]["rel_tokens"]
-        if not prompt_tokens:
             continue
         for p in prompt_tokens:
             if not p in merge_prompt_tokens:
                 merge_prompt_tokens.append(p)
         if not merge_prompts:
-            encoder, offset = create_encoder(rel, model, tokenizer, prompt_tokens, encoder_type, from_words, wrapped_model)
+            encoder, offset = create_encoder(rel, model, tokenizer, prompt_tokens, encoder_type, wrapped_model)
             prompt_encoders.append(encoder)
             offsets.append(offset)
+            ii += 1
     
     id_offset = len(tokenizer)
     embedding_dim = model.config.hidden_size
@@ -467,11 +434,11 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words
            p_index = 0
            mlog.info("len merge tokens: %s", len(merge_prompt_tokens))
            for encoder in prompt_encoders:
-               for pid in encoder.prompt_ids:
+               for pid, emb in encoder.init_embs.items():
                    if not pid in merge_prompt_ids:
                       with torch.no_grad():
                         merge_prompt_ids.append(pid)
-                        merge_embedding.weight[p_index] = encoder.init_embs[pid] #.detach()
+                        merge_embedding.weight[p_index] = emb #.detach()
                         p_index += 1
            #_ids_tensor = torch.LongTensor(merge_prompt_ids)
            #embs = model.get_input_embeddings()
@@ -491,7 +458,7 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words
     n_prompt_tokens = len(merge_prompt_tokens)
     mbp("")
     if merge_prompts:
-        merge_encoder, _ = create_encoder("merge", model, tokenizer, merge_prompt_tokens, merge_prompts, from_words, wrapped_model)
+        merge_encoder, _ = create_encoder("merge", model, tokenizer, merge_prompt_tokens, merge_prompts, wrapped_model)
         #assert merge_encoder != None, "merge encoder for " + merge_prompts + " is none"
         #merge_encoder = _encoder # prompt_encoders[0]
         #prompt_encoders = [_encoder]
@@ -507,7 +474,7 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", from_words
     return wrapped_model
 
 def create_encoder(name, model, tokenizer, prompt_tokens, encoder_type="lstm", 
-        from_words=False, wrapped_model = None):
+        wrapped_model = None):
     embedding_dim = model.config.hidden_size
     enc_plen = len(prompt_tokens)
 
@@ -525,7 +492,7 @@ def create_encoder(name, model, tokenizer, prompt_tokens, encoder_type="lstm",
     cur_embeddings = model.get_input_embeddings()
     init_embs = {}
     for p in rel_tokens:
-        if p.startswith("<emb_"):
+        if "_" in p:
            p = p.strip("<").strip(">")
            w = p.split("_")[1]
            wid = tokenizer.convert_tokens_to_ids([w])[0]
@@ -578,97 +545,6 @@ def create_encoder(name, model, tokenizer, prompt_tokens, encoder_type="lstm",
 
 
     return prompt_encoder, id_offset
-
-encoder_prompts = {} 
-decoder_prompts = {}
-def fill_const_for_rel(template, row):
-    text = template
-    if row is None:
-        return text
-    #dlog.debug("fill const for: %s", text)
-    rel = row["prefix"]
-    rel_token = rel_maps[rel]        
-    rel_natural_en_postfix = rel_nat_maps[rel][1]        
-    rel_natural_en_prefix = rel_nat_maps[rel][2]        
-    rel_natural_fa = rel_nat_maps[rel]["fa"]        
-    rep  = {"{rel}":rel, 
-            "{rel_token}":rel_token,
-            "{rel_natural_en}":rel_natural_en_postfix,
-            "{rel_natural_en_pre}":rel_natural_en_prefix,
-            "{rel_natural_fa}":rel_natural_fa,
-            "{gen_fa}":gen_token_fa,
-            "{sep}":sep,
-            "{gen_en}":gen_token_en,
-            "{end}":end_token}
-    rep = dict((re.escape(k), v) for k, v in rep.items()) 
-    pattern = re.compile("|".join(rep.keys()))
-    text = pattern.sub(lambda m: rep[re.escape(m.group(0))], template)
-    for key,value in row.items():
-        val = str(value)
-        text = text.replace("{" + key + "}", val)
-    return text
-
-common_tokens = []
-def fill_prompt_regex(text, row_rel, regex):
-    m = re.search(regex, text)
-    while m:
-        rel = m.groups()[0]
-        plen = m.groups()[1]
-        num_holder = "_" + plen
-        place_holder = "{" + rel + "_" + plen + "}"
-        plen = [int(plen)]
-        if rel == "rel":
-            rel = row_rel
-        text = fill_prompt(text, rel, place_holder, plen=plen, num_holder=num_holder)
-        m = re.search(regex, text)
-    return text
-
-def fill_prompt(text, rel, place_holder, counter = 0, lang="", plen = 0, num_holder="_i"):
-    pi = 0
-    if plen==0 and rel in relation_prompt_lengths:
-        plen = relation_prompt_lengths[rel]
-    _pholder = place_holder
-   
-    place_holder = place_holder.replace("{", "<")  
-    place_holder = place_holder.replace("}", ">")  
-    place_holder = place_holder.replace("rel", rel)  
-    place_holder = place_holder.replace("lang", lang)  
-    #dlog.info("text: %s", text)
-    while _pholder in text:
-        if num_holder in _pholder:
-            enc_plen = plen[pi] if pi < len(plen) else plen[-1] 
-            prompt = ""
-            for i in range(counter, counter + enc_plen):
-                token = place_holder
-                if num_holder != "_1":
-                    token = token.replace(num_holder, "_" + str(i))  
-                else:
-                    token = token.replace(num_holder, "")  
-                prompt += " " + token
-        elif _pholder == "{tokens}": 
-            prompt = rel_nat_maps[rel]["tokens"]
-        elif _pholder == "{tokens-rand}": 
-            permute = rel_nat_maps[rel]["tokens"].split()
-            random.shuffle(permute)
-            prompt = " ".join(permute)
-        else:
-            mlog.info("************** using tokens of pholder %s",_pholder)
-            prompt = place_holder
-        prompt = prompt.strip()
-        enc_plen = len(prompt.split())
-        for token in prompt.split():
-            if rel == "com" and not token in common_tokens:
-                common_tokens.append(token)
-            else:
-                if not rel in encoder_prompts:
-                    encoder_prompts[rel] = []
-                if not token in encoder_prompts[rel]:
-                    encoder_prompts[rel].append(token)
-        text = text.replace(_pholder,prompt, 1)
-        counter += enc_plen 
-        pi += 1
-    #dlog.info("text: %s", text)
-    return text
 
 def filter_inputs(include, exclude, lang):
    if lang == "en":

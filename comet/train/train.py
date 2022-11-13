@@ -1112,13 +1112,6 @@ def run(ctx, conf_path, base_conf, experiment,
     help=""
 )
 @click.option(
-    "--from_words",
-    "-fw",
-    default="",
-    type=str,
-    help="initialize encoder embeddings from words"
-)
-@click.option(
     "--rel_filter",
     "-rel",
     default="xIntent",
@@ -1451,7 +1444,7 @@ def run(ctx, conf_path, base_conf, experiment,
     type=int,
     help=""
 )
-def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, pl_learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, log_per_exp, wandb, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, from_words,rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, no_save_best, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args, match, dpy, prompt_tune, prompt_config_file, load_prompt, data_name, seed, do_valid, stop_level, skilled_variant, int_dim, prompt_token_num, n_tasks, n_prompts, init_temperature):
+def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, pl_learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, log_per_exp, wandb, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, no_save_best, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args, match, dpy, prompt_tune, prompt_config_file, load_prompt, data_name, seed, do_valid, stop_level, skilled_variant, int_dim, prompt_token_num, n_tasks, n_prompts, init_temperature):
 
     #%% some hyper-parameters
 
@@ -1475,6 +1468,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     set_random_seed(seed)
 
     args = locals() #run_args # input parameters
+
+
     if "dlog" in print_log: # data logger
         dlog.addHandler(consoleHandler)
         dlog.setLevel(logging.DEBUG)
@@ -1753,13 +1748,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     mlog.info("Loading from %s", underlying_model_name)
     model, tokenizer, underlying_model_name = load_model(model_id, underlying_model_name)
     extend_tokenizer(tokenizer)
-    if from_words and from_words != "rel" and from_words != "none":
-        fw_tokens = tokenizer.tokenize(from_words)
-        mlog.info("from words ids ***: %s", fw_tokens)
-        length = [len(fw_tokens)]
-        mlog.info("length got from words ids ***: %s", length)
-        set_prompt_lengths(rel_filter, length)
-    elif prompt_length:
+    if prompt_length:
         length = [int(s) for s in str(prompt_length).split("-")]
         set_prompt_lengths(rel_filter, length)
 
@@ -1792,6 +1781,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         val_method = method
     def load_data(split_names):
         myds = {}
+        # Reset some global variables
         for _name in split_names:
             name_opts = _name.split("+")
             split_name = name_opts[0]
@@ -1914,7 +1904,6 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         return
     mbp("start")
     extend_tokenizer(tokenizer)
-
     prompt_config = None
     if prompt_tune:
         with open(prompt_config_file, "r") as f:
@@ -2153,7 +2142,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     #prefix_config = None
     if merge_prompts == "none": merge_prompts = ""
     assert merge_prompts != "none"
-    wrapped_model = wrap_model(model_to_wrap, tokenizer, encoder_type, load_prompt_path, from_words = from_words, merge_prompts=merge_prompts, method = method, shared_embs= shared_embs, skilled_variant=skilled_variant, prefix_config=prefix_config, exp_id=exp_id) 
+    wrapped_model = wrap_model(model_to_wrap, tokenizer, encoder_type, load_prompt_path, merge_prompts=merge_prompts, method = method, shared_embs= shared_embs, skilled_variant=skilled_variant, prefix_config=prefix_config, exp_id=exp_id, encoder_prompts=train_dataset.prompts) 
     fname = "output/" + str(experiment) + "-" + str(exp_id) + "-" + merge_prompts + ".txt"
     Path("output").mkdir(exist_ok = True)
     with open(fname, "w") as f:
@@ -2162,6 +2151,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             print(wrapped_model.merge_encoder.id_offset, file=f)
             print(wrapped_model.merge_encoder.prompt_ids, file=f)
             print(wrapped_model.merge_encoder.input_ids, file=f)
+            print("Merge Encoder:", file=f)
             print(wrapped_model.merge_encoder, file=f)
         if wrapped_model.prompt_encoders:
             for encoder in wrapped_model.prompt_encoders:
@@ -2174,7 +2164,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         print(jargs, file=f)
     mlog.info("len tokenizer after extending %s", len(tokenizer))
     # ooooooooooooo
-    # return
+    return
     if not prefix:
         model.resize_token_embeddings(len(tokenizer))
     else:

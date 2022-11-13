@@ -8,6 +8,9 @@ class RelTemplate:
         self.rel = rel
         self.temp_num = temp_num
         self.rec_counter = 1
+        self.encoder_prompts = {} 
+        self.decoder_prompts = {}
+        self.common_tokens = []
 
     def get_templates(self, method, index, gen_pos="end", prompt_pos="end"):
            ex_qtemp = ""
@@ -308,18 +311,19 @@ class RelTemplate:
 
     def fill_consts(self, template, ex_temp, context,rel, row, rows=None, mask=-1, method="", someone=False):
         #dlog.info("fill consts, input text: %s", template)
-        text = fill_const_for_rel(template, row)
+        text = self.fill_const_for_rel(template, row)
         #dlog.info("fill consts, input text: %s", text)
         plen = relation_prompt_lengths[rel]
         text = text.replace("{ph}", placeholder_token)
         #dlog.info("fill consts, input text: %s", context)
         counter = 0
         pi = 0
-        text = fill_prompt(text, rel, "{rel_i}")
-        text = fill_prompt_regex(text, rel, "{([a-z_A-Z]+)_(\d+)}")
-        text = fill_prompt(text, "com", "{com_i}")
-        text = fill_prompt(text, rel, "{tokens}")
-        text = fill_prompt(text, rel, "{tokens-rand}")
+        text = self.fill_prompt(text, rel, "{rel_i}")
+        text = self.fill_prompt_regex(text, rel, "{([a-zA-Z]+)_(\d+)}")
+        text = self.fill_prompt_regex(text, rel, "{([a-zA-Z]+)_([a-zA-Z]+)_(\d+)}")
+        text = self.fill_prompt(text, "com", "{com_i}")
+        text = self.fill_prompt(text, rel, "{tokens}")
+        text = self.fill_prompt(text, rel, "{tokens-rand}")
         if "{examples}" in text:
             examples = ""
             assert rows is not None and len(rows) > 0, "Since there are examples in template, rows must be provided"
@@ -333,10 +337,10 @@ class RelTemplate:
                 #dlog.info("example: %s", _row)
                 if "{rel_i}" in ex_temp:
                     assert enc_prompt != "", "Prompt was not set!"
-                example = fill_const_for_rel(example, _row)
-                example = fill_prompt(example, rel, "{rel_i}")
-                example = fill_prompt(example, rel, "{tokens}")
-                example = fill_prompt(example, rel, "{tokens-rand}")
+                example = self.fill_const_for_rel(example, _row)
+                example = self.fill_prompt(example, rel, "{rel_i}")
+                example = self.fill_prompt(example, rel, "{tokens}")
+                example = self.fill_prompt(example, rel, "{tokens-rand}")
                 for key,value in _row.items():
                     val = str(value)
                     if "fa" in method and "_fa" in key:
@@ -363,9 +367,9 @@ class RelTemplate:
                     example = example.replace("{num}", "")
                 if "{rel_i}" in ex_temp:
                     assert enc_prompt != "", "Prompt was not set!"
-                example = fill_const_for_rel(example, _row)
-                example = fill_prompt(example, relation, "{rel_i}")
-                example = fill_prompt(example, "com", "{com_i}")
+                example = self.fill_const_for_rel(example, _row)
+                example = self.fill_prompt(example, relation, "{rel_i}")
+                example = self.fill_prompt(example, "com", "{com_i}")
                 for key,value in _row.items():
                     val = str(value)
                     if "fa" in method and "_fa" in key:
@@ -435,7 +439,102 @@ class RelTemplate:
             text = text.replace("PersonZ", "others")
         lang = resp_lang
         plen = relation_prompt_lengths[rel]
-        text = fill_prompt(text, rel, "{rel_lang_i}", lang=lang)
-        text = fill_prompt(text, rel, "{gen_lang}", lang=lang)
+        text = self.fill_prompt(text, rel, "{rel_lang_i}", lang=lang)
+        text = self.fill_prompt(text, rel, "{gen_lang}", lang=lang)
+        return text
+
+
+    def fill_const_for_rel(self, template, row):
+        text = template
+        if row is None:
+            return text
+        #dlog.debug("fill const for: %s", text)
+        rel = row["prefix"]
+        rel_token = rel_maps[rel]        
+        rel_natural_en_postfix = rel_nat_maps[rel][1]        
+        rel_natural_en_prefix = rel_nat_maps[rel][2]        
+        rel_natural_fa = rel_nat_maps[rel]["fa"]        
+        rep  = {"{rel}":rel, 
+                "{rel_token}":rel_token,
+                "{rel_natural_en}":rel_natural_en_postfix,
+                "{rel_natural_en_pre}":rel_natural_en_prefix,
+                "{rel_natural_fa}":rel_natural_fa,
+                "{gen_fa}":gen_token_fa,
+                "{sep}":sep,
+                "{gen_en}":gen_token_en,
+                "{end}":end_token}
+        rep = dict((re.escape(k), v) for k, v in rep.items()) 
+        pattern = re.compile("|".join(rep.keys()))
+        text = pattern.sub(lambda m: rep[re.escape(m.group(0))], template)
+        for key,value in row.items():
+            val = str(value)
+            text = text.replace("{" + key + "}", val)
+        return text
+
+    def fill_prompt_regex(self, text, row_rel, regex):
+        m = re.search(regex, text)
+        while m: 
+            if len(m.groups()) == 2:
+                rel = m.groups()[0]
+                plen = m.groups()[1]
+                num_holder = "_" + plen
+                place_holder = "{" + rel + "_" + plen + "}"
+            elif len(m.groups()) == 3:
+                rel = m.groups()[0]
+                emb = m.groups()[1]
+                plen = m.groups()[2]
+                num_holder = "_" + plen
+                place_holder = "{" + rel + "_" + emb + "_" + plen + "}"
+            plen = [int(plen)]
+            if rel == "rel":
+                rel = row_rel
+            text = self.fill_prompt(text, rel, place_holder, plen=plen, num_holder=num_holder)
+            m = re.search(regex, text)
+        return text
+
+    def fill_prompt(self, text, rel, place_holder, counter = 0, lang="", plen = 0, num_holder="_i"):
+        pi = 0
+        if plen==0 and rel in relation_prompt_lengths:
+            plen = relation_prompt_lengths[rel]
+        _pholder = place_holder
+        place_holder = place_holder.replace("{", "<")  
+        place_holder = place_holder.replace("}", ">")  
+        place_holder = place_holder.replace("rel", rel)  
+        place_holder = place_holder.replace("lang", lang)  
+        #dlog.info("text: %s", text)
+        while _pholder in text:
+            if num_holder in _pholder:
+                enc_plen = plen[pi] if pi < len(plen) else plen[-1] 
+                prompt = ""
+                for i in range(counter, counter + enc_plen):
+                    token = place_holder
+                    if num_holder != "_1":
+                        token = token.replace(num_holder, "_" + str(i))  
+                    else:
+                        token = token.replace(num_holder, "")  
+                    prompt += " " + token
+            elif _pholder == "{tokens}": 
+                prompt = rel_nat_maps[rel]["tokens"]
+            elif _pholder == "{tokens-rand}": 
+                permute = rel_nat_maps[rel]["tokens"].split()
+                random.shuffle(permute)
+                prompt = " ".join(permute)
+            else:
+                mlog.info("************** using tokens of pholder %s",_pholder)
+                prompt = place_holder
+            prompt = prompt.strip()
+            enc_plen = len(prompt.split())
+            for token in prompt.split():
+                if rel == "com" and not token in common_tokens:
+                    common_tokens.append(token)
+                else:
+                    if not rel in self.encoder_prompts:
+                        self.encoder_prompts[rel] = []
+                    if not token in self.encoder_prompts[rel]:
+                        self.encoder_prompts[rel].append(token)
+            text = text.replace(_pholder,prompt, 1)
+            counter += enc_plen 
+            pi += 1
+        #dlog.info("text: %s", text)
         return text
 
