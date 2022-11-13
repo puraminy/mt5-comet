@@ -523,7 +523,7 @@ class RelTemplate:
                 random.shuffle(permute)
                 prompt = " ".join(permute)
             else:
-                mlog.info("************** using tokens of pholder %s",_pholder)
+                #mlog.info("************** using tokens of pholder %s",_pholder)
                 prompt = place_holder
             prompt = prompt.strip()
             enc_plen = len(prompt.split())
