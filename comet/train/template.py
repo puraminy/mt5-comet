@@ -320,7 +320,7 @@ class RelTemplate:
         pi = 0
         text = self.fill_prompt(text, rel, "{rel_i}")
         text = self.fill_prompt_regex(text, rel, "{([a-zA-Z]+)_(\d+)}")
-        text = self.fill_prompt_regex(text, rel, "{([a-zA-Z]+)_([a-zA-Z]+)_(\d+)}")
+        text = self.fill_prompt_regex(text, rel, "{([a-zA-Z]+)_([a-zA-Z]+)}")
         text = self.fill_prompt(text, "com", "{com_i}")
         text = self.fill_prompt(text, rel, "{tokens}")
         text = self.fill_prompt(text, rel, "{tokens-rand}")
@@ -476,9 +476,12 @@ class RelTemplate:
         while m: 
             if len(m.groups()) == 2:
                 rel = m.groups()[0]
-                plen = m.groups()[1]
+                emb = m.groups()[1]
+                plen = "1"
+                if emb.isdigit():
+                    plen = emb
+                place_holder = "{" + rel + "_" + emb + "}"
                 num_holder = "_" + plen
-                place_holder = "{" + rel + "_" + plen + "}"
             elif len(m.groups()) == 3:
                 rel = m.groups()[0]
                 emb = m.groups()[1]

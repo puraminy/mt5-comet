@@ -402,8 +402,8 @@ def cli():
     help="You can set it for repeating experiments with different identities"
 )
 @click.option(
-    "--show_samples",
-    "-ss",
+    "--preview",
+    "-pv",
     is_flag=True,
     help=""
 )
@@ -420,7 +420,7 @@ def run(ctx, conf_path, base_conf, experiment,
         exclude_conf, include_conf, overwrite_conf, var, 
         save_model, addto, rem, save_data, load_data, add_prefix, wrap, 
         only_var, sep, num_exps, one, cpu, undone, repeat, log_path, 
-        dpy, port, stop_level, reval_bests, trial, show_samples):
+        dpy, port, stop_level, reval_bests, trial, preview):
 
      if dpy:
         debugpy.listen(('0.0.0.0', int(port)))
@@ -449,7 +449,7 @@ def run(ctx, conf_path, base_conf, experiment,
            args["config"] = ""
            args["output_name"] = "" 
            args["experiment"] = experiment 
-           args["show_samples"] = show_samples 
+           args["preview"] = preview 
            args["skip"] = True # skip experiment
            global logPath
            if log_path:
@@ -561,7 +561,7 @@ def run(ctx, conf_path, base_conf, experiment,
                        args["undone"] = True
                    if repeat:
                        args["skip"] = False
-                   if show_samples:
+                   if preview:
                        stop_level = "data"
                    args["stop_level"] = stop_level 
                    mylogs.STOP_LEVEL = stop_level
@@ -583,7 +583,7 @@ def run(ctx, conf_path, base_conf, experiment,
                        args["save_data"] = False
                    else:
                        if multi_only: 
-                           args["show_samples"] = True
+                           args["preview"] = True
                            args["save_data"] = spath
                        _dp = os.path.join(dataPath,"sel",args["rel_filter"] + ".tsv")
                        if not load_data:
@@ -1276,10 +1276,10 @@ def run(ctx, conf_path, base_conf, experiment,
     help=""
 )
 @click.option(
-    "--show_samples",
-    "-ss",
+    "--preview",
+    "-pv",
     is_flag=True,
-    help=""
+    help="Don't run the trainer and just show initial settings"
 )
 @click.option(
     "--ph_num",
@@ -1444,7 +1444,7 @@ def run(ctx, conf_path, base_conf, experiment,
     type=int,
     help=""
 )
-def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, pl_learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, log_per_exp, wandb, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, no_save_best, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, show_samples, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args, match, dpy, prompt_tune, prompt_config_file, load_prompt, data_name, seed, do_valid, stop_level, skilled_variant, int_dim, prompt_token_num, n_tasks, n_prompts, init_temperature):
+def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, pl_learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, log_per_exp, wandb, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, no_save_best, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, preview, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args, match, dpy, prompt_tune, prompt_config_file, load_prompt, data_name, seed, do_valid, stop_level, skilled_variant, int_dim, prompt_token_num, n_tasks, n_prompts, init_temperature):
 
     #%% some hyper-parameters
 
@@ -1869,7 +1869,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         ds_list += ["sample"]
         myds = load_data(ds_list)
         example = ""
-        if True: #wrap or show_samples: It's required to retrive prompt tokens
+        if True: #wrap or preview: It's required to retrive prompt tokens
             if "sample" in myds:
                 mbp("sample")
                 samples_iter = iter(myds["sample"])
@@ -1899,10 +1899,6 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                     generated_samples["sample"].append((_sample[0], _sample[1]))
             logger.info("--------------------------------")
             logger.info("Preparing samples: %s ", len(generated_samples["sample"]))
-            mbp("data")
-    if model_id == "test" or show_samples:
-        return
-    mbp("start")
     extend_tokenizer(tokenizer)
     prompt_config = None
     if prompt_tune:
@@ -2164,7 +2160,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         print(jargs, file=f)
     mlog.info("len tokenizer after extending %s", len(tokenizer))
     # ooooooooooooo
-    # return
+    if preview:
+        return
     if not prefix:
         model.resize_token_embeddings(len(tokenizer))
     else:
