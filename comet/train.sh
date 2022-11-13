@@ -43,7 +43,7 @@ test=100
 train=200
 #test=-1
 #train=2
-exp=xint-rel-want
+exp=xint-rel-want2
 trial=1
 log=${home}/logs/${exp}
 
