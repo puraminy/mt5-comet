@@ -43,11 +43,11 @@ test=100
 train=200
 #test=-1
 #train=2
-exp=xint-rel-want2
+exp=xint-rel-want3
 trial=2
 log=${home}/logs/${exp}
 
-runlite run -exp $exp -lp ${log} -bc base -ov $g2 -var trial=$trial--method=unsup-wrap-nat--rel_filter=xIntent--train_samples=$train--epochs_num=2--repeat=4--temp_num=642#652--loop=True--test_samples=$test--merge_prompts=none--shared_embs=False --follow_method=True --scorers="rouge-bert" --data_path=${home}/mt5-comet/comet/data/atomic2020 --do_valid=False --val_samples=10 --encoder_type=lstm --cycle=100 $g1 --seed=123 --batch_size=16 
+runlite run -exp $exp -lp ${log} -bc base -ov $g2 -var method=unsup-wrap-nat--rel_filter=xIntent--train_samples=$train--epochs_num=2--repeat=4--temp_num=642#652--loop=True--test_samples=$test--merge_prompts=none--shared_embs=False --follow_method=True --scorers="rouge-bert" --data_path=${home}/mt5-comet/comet/data/atomic2020 --do_valid=False --val_samples=10 --encoder_type=lstm --cycle=100 $g1 --seed=123 --batch_size=16 --trial=$trial 
 
 if [ $home = "/content" ]; then
 	tar -czvf ${home}/${exp}.tar.gz ${log}
