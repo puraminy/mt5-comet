@@ -2164,7 +2164,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         print(jargs, file=f)
     mlog.info("len tokenizer after extending %s", len(tokenizer))
     # ooooooooooooo
-    return
+    # return
     if not prefix:
         model.resize_token_embeddings(len(tokenizer))
     else:
