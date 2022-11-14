@@ -602,7 +602,7 @@ def show_df(df):
         elif char == "l" and prev_char == "x":
             df = main_df.groupby(["l1_decoder", "method", "model", "prefix"], as_index=False).first()
             sel_cols = ["l1_decoder", "method", "model", "prefix"]
-        elif char == "z":
+        elif char == "z" and prev_char == "x":
             fav_df = fav_df.append(df.iloc[sel_row])
             mbeep()
             fav_df.to_csv(fav_path, sep="\t", index=False)
@@ -708,6 +708,9 @@ def show_df(df):
                 #path = main_df.loc[main_df["fid"] == exp, "path"][0]
                 #extra["path"] = path
             show_extra = True
+        elif char == "z":
+            sel_cols =  load_obj("sel_cols", context, [])
+            info_cols = load_obj("info_cols", context, [])
         elif char == "G":
             backit(df, sel_cols)
             if FID == "input_text":
@@ -719,8 +722,8 @@ def show_df(df):
             info_cols = load_obj("info_cols", context, [])
             if True:
                 info_cols = ["query", "resp"]
-            #if True: #col == "fid":
-            #   sel_cols = ["exp_id","exp_trial", "temp_num", "prefix","method", "num_preds", "rouge_score", "steps","max_acc","best_step",  "bert_score", "st_score", "learning_rate",  "num_targets", "num_inps", "train_records", "train_records_nunique", "group_records", "wrap", "frozen", "prefixed"]
+            if True: #col == "fid":
+               sel_cols = ["exp_id","exp_trial", "temp_num", "prefix","method", "num_preds", "rouge_score", "steps","max_acc","best_step",  "bert_score", "st_score", "learning_rate",  "num_targets", "num_inps", "train_records", "train_records_nunique", "group_records", "wrap", "frozen", "prefixed"]
 
             _agg = {}
             for c in df.columns:
