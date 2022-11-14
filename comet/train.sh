@@ -43,8 +43,8 @@ test=100
 train=200
 #test=-1
 #train=2
-exp=xint-multi-merge
-trial=2
+exp=xint-multi-merge2
+trial=1
 seed=346
 log=${home}/logs/${exp}
 
