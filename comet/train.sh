@@ -41,9 +41,9 @@ cp train.sh ..
 
 test=100
 train=200
-test=-1
-train=2
-exp=xint-multi-merge3
+#test=-1
+#train=2
+exp=xint-multi-merge4
 trial=1
 seed=346
 log=${home}/logs/${exp}
