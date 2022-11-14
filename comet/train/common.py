@@ -495,10 +495,11 @@ def create_encoder(name, model, tokenizer, prompt_tokens, encoder_type="lstm",
         if "_" in p:
            p = p.strip("<").strip(">")
            w = p.split("_")[1]
-           wid = tokenizer.convert_tokens_to_ids([w])[0]
-           emb = cur_embeddings.weight[wid,:].detach().clone() 
-           pid = tokenizer.convert_tokens_to_ids([p])[0]
-           init_embs[pid] = emb
+           if not w.isdigit():
+               wid = tokenizer.convert_tokens_to_ids([w])[0]
+               emb = cur_embeddings.weight[wid,:].detach().clone() 
+               pid = tokenizer.convert_tokens_to_ids([p])[0]
+               init_embs[pid] = emb
         else:
            pid = tokenizer.convert_tokens_to_ids([p])[0]
            emb = cur_embeddings.weight[pid,:].detach().clone() 
