@@ -47,13 +47,13 @@ exp=xint-merge
 trial=1
 m=1
 seed=346
-log=${home}/drive/MyDrive/logs/${exp}
+log=${home}/logs/${exp}
 
 runlite run -exp $exp -lp ${log} -bc base -ov $g2 -var method=unsup-wrap-nat--rel_filter=xIntent--train_samples=$train--epochs_num=2--repeat=4--temp_num=64--loop=True--test_samples=$test--merge_prompts=none#lstm--shared_embs=False --follow_method=True --scorers="rouge-bert" --data_path=${home}/mt5-comet/comet/data/atomic2020 --do_valid=False --val_samples=10 --encoder_type=lstm --cycle=100 $g1 --seed=$seed --batch_size=16 --trial=$trial 
 
-if [ $home = "/content" ]; then
-	tar -czvf ${home}/${exp}-$m.tar.gz ${log}
-	cp ${home}/${exp}-$m.tar.gz ${home}/drive/MyDrive/logs 
+if [ $home = "/content/drive/MyDrive" ]; then
+	tar -czvf /content/${exp}-$m.tar.gz ${log}
+	cp /content/${exp}-$m.tar.gz ${home}/logs 
 fi
 
 # learning rate for supervised and unsupervised learning for t5-v1
