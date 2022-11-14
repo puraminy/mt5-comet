@@ -1869,14 +1869,17 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         ds_list += ["sample"]
         myds = load_data(ds_list)
         example = ""
+        sample_dataset = None
         if True: #wrap or preview: It's required to retrive prompt tokens
             if "sample" in myds:
                 mbp("sample")
                 samples_iter = iter(myds["sample"])
                 sample_limit = myds["sample"].num_records
+                sample_dataset= myds["sample"]
             else:
                 samples_iter = iter(myds["train"])
                 sample_limit =  int(batch_size)
+                sample_dataset= myds["train"]
             ii = 0
             _sample = True
             generated_samples["sample"] = []
@@ -2138,11 +2141,12 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     #prefix_config = None
     if merge_prompts == "none": merge_prompts = ""
     assert merge_prompts != "none"
-    wrapped_model = wrap_model(model_to_wrap, tokenizer, encoder_type, load_prompt_path, merge_prompts=merge_prompts, method = method, shared_embs= shared_embs, skilled_variant=skilled_variant, prefix_config=prefix_config, exp_id=exp_id, encoder_prompts=train_dataset.prompts) 
+    wrapped_model = wrap_model(model_to_wrap, tokenizer, encoder_type, load_prompt_path, merge_prompts=merge_prompts, method = method, shared_embs= shared_embs, skilled_variant=skilled_variant, prefix_config=prefix_config, exp_id=exp_id, encoder_prompts=sample_dataset.prompts) 
     fname = "output/" + str(experiment) + "-" + str(exp_id) + "-" + merge_prompts + ".txt"
     Path("output").mkdir(exist_ok = True)
     with open(fname, "w") as f:
         print("Number of prompts:" + str(len(wrapped_model.prompt_encoders)), file=f)
+        print("Train prompts:", sample_dataset.prompts, file=f) 
         if wrapped_model.merge_encoder:
             print(wrapped_model.merge_encoder.id_offset, file=f)
             print(wrapped_model.merge_encoder.prompt_ids, file=f)

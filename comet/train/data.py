@@ -29,7 +29,7 @@ class xAttrTemplate(RelTemplate):
            elif tn == 6:
                qtemp = "{event}, {emp_so_1} {emp_they_1} are {emb_seen_1} as {ph}."
            elif tn == 64:
-               qtemp = "{a_because} {a_of} {event}, {a_they} seen as {ph}"
+               qtemp = "{a_because} {a_of} {event}, {b_3} {b_they} seen as {ph}"
            elif tn == 65:
                qtemp = "{because_1} {of_1} {event}, {they_1} {seen_1} as {ph}"
            elif tn == 66:
