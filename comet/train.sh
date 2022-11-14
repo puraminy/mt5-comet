@@ -44,7 +44,7 @@ train=200
 #test=-1
 #train=2
 exp=xint-rel-multi2
-trial=1
+trial=2
 seed=346
 log=${home}/logs/${exp}
 
