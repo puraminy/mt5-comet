@@ -45,7 +45,6 @@ cp train.sh ..
 
 test=100
 train=200
-exp=xint-multi3
 trial=1
 if [ -z $m ]; then
    m=1
@@ -62,9 +61,11 @@ filter=xIntent#xAttr#multi
 merge=none #lstm
 tn=6411#6431
 shared=False
+exp=xint-multi_11
 
 runlite run -exp $exp -lp ${log} -bc base -ov $g2 -var method=unsup-wrap-nat--rel_filter=$filter--train_samples=$train--epochs_num=2--repeat=4--temp_num=$tn--loop=True--test_samples=$test--merge_prompts=$merge--shared_embs=$shared--seed=123 --follow_method=True --scorers="rouge-bert" --data_path=${home}/mt5-comet/comet/data/atomic2020 --do_valid=False --val_samples=10 --encoder_type=lstm --cycle=100 $g1 --batch_size=16 --trial=$trial 
 
+cp train.sh ${log}
 if [ $home = "/content/drive/MyDrive" ]; then
 	tar -czvf /content/${exp}-$m.tar.gz ${log}
 	cp /content/${exp}-$m.tar.gz ${home}/logs 
