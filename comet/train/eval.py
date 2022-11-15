@@ -719,7 +719,7 @@ def do_score(df, scorers, save_path, reval=False):
                 omit = rel_target_omits[rel]
                 m_top_hyp = top_hyp.replace(omit, "") 
                 m_tails = m_tails.replace(omit,"")
-            if rouge_scorer:
+            if rouge_scorer and m_top_hyp.strip() and m_tails.strip():
                 rouge_score = rouge_scorer.get_scores(m_top_hyp, m_tails, 
                                                 avg=True, ignore_empty=True)
                 rouge_score = rouge_score["rouge-l"]["f"]
