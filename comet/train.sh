@@ -52,7 +52,6 @@ if [ -z $trial ]; then
    trial=4
 fi
 echo "trial: ${trial}"
-exit
 m=${trial}1
 seed=123
 log=${home}/logs/${exp}
