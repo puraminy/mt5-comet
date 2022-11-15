@@ -1,7 +1,6 @@
 
 #!/bin/sh
 
-
 g1=""
 g2=""
 for i in $@
@@ -10,6 +9,7 @@ do
        # -- option
        --*) g1="${g1} $i"; g=1;;
        
+       -t) echo "------"; g=3;;
        # - option
        -*) g2="${g2} $i"; g=2;;
        
@@ -22,6 +22,10 @@ do
           elif [ "$g" = 2 ]
           then
             g2="${g2} $p"
+            g=0
+          elif [ "$g" = 3 ]
+          then
+            trial=$p 
             g=0
           else
             others="$others $p"
@@ -44,13 +48,17 @@ train=200
 #test=-1
 #train=2
 exp=xint-multi1
-trial=3
+if [ -z $trial ]; then
+   trial=4
+fi
+echo "trial: ${trial}"
+exit
 m=${trial}1
 seed=123
 log=${home}/logs/${exp}
 filter=xIntent#xAttr#multi
 merge=none #lstm
-tn=641#642
+tn=641
 
 runlite run -exp $exp -lp ${log} -bc base -ov $g2 -var method=unsup-wrap-nat--rel_filter=$filter--train_samples=$train--epochs_num=2--repeat=4--temp_num=$tn--loop=True--test_samples=$test--merge_prompts=$merge--shared_embs=False--seed=123 --follow_method=True --scorers="rouge-bert" --data_path=${home}/mt5-comet/comet/data/atomic2020 --do_valid=False --val_samples=10 --encoder_type=lstm --cycle=100 $g1 --batch_size=16 --trial=$trial 
 

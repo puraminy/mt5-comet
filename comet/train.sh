@@ -1,7 +1,6 @@
 
 #!/bin/sh
 
-
 g1=""
 g2=""
 for i in $@
@@ -10,6 +9,7 @@ do
        # -- option
        --*) g1="${g1} $i"; g=1;;
        
+       -t) echo "------"; g=3;;
        # - option
        -*) g2="${g2} $i"; g=2;;
        
@@ -22,6 +22,10 @@ do
           elif [ "$g" = 2 ]
           then
             g2="${g2} $p"
+            g=0
+          elif [ "$g" = 3 ]
+          then
+            trial=$p 
             g=0
           else
             others="$others $p"
@@ -44,7 +48,11 @@ train=200
 #test=-1
 #train=2
 exp=xint-multi1
-trial=4
+if [ -z $trial ]; then
+   trial=4
+fi
+echo "trial: ${trial}"
+exit
 m=${trial}1
 seed=123
 log=${home}/logs/${exp}
