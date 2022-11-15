@@ -28,8 +28,10 @@ class xAttrTemplate(RelTemplate):
                qtemp = "{rel_2} {event}, {emp_so_1} {emp_person_1} is {emb_seen_1} as {ph}."
            elif tn == 6:
                qtemp = "{event}, {emp_so_1} {emp_they_1} are {emb_seen_1} as {ph}."
-           elif tn == 64:
-               qtemp = "{c_6} {rel_4} {a_because} {a_of} {event}, {b_they} seen as {ph}"
+           elif tn == 641:
+               qtemp = "{c_6} {rel_4} {event}, {b_they} seen as {ph}"
+           elif tn == 642:
+               qtemp = "{da_6} {rel_4} {event}, {b_they} seen as {ph}"
            elif tn == 65:
                qtemp = "{because_1} {of_1} {event}, {they_1} {seen_1} as {ph}"
            elif tn == 66:
@@ -78,8 +80,10 @@ class xIntentTemplate(RelTemplate):
                qtemp = "{rel_4} {event}, {ph}"
            elif tn == 63:
                qtemp = "{rel_5} Because of {event}, they want {ph}"
-           elif tn == 64:
-               qtemp = "{c_6} {rel_4} {a_because} {a_of} {event}, {b_they} want {ph}"
+           elif tn == 641:
+               qtemp = "{c_6} {rel_4} {event}, {b_they} want {ph}"
+           elif tn == 642:
+               qtemp = "{db_6} {rel_4} {event}, {b_they} want {ph}"
            elif tn == 652:
                qtemp = "{because_1} {of_1} {event}, {rel_4} want {ph}"
            elif tn == 653:

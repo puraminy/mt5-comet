@@ -77,10 +77,11 @@ def find_common(df, main_df, on_col_list, s_rows, FID, char):
     dfs_val = {}
     for s_row in s_rows:
         exp=df.iloc[s_row]["exp_id"]
+        prefix=df.iloc[s_row]["prefix"]
         dfs_val["exp" + str(ii)] = exp
         mlog.info("%s == %s", FID, exp)
-        cond = f"(main_df['{FID}'] == '{exp}')"
-        tdf = main_df[main_df[FID] == exp]
+        cond = f"(main_df['{FID}'] == '{exp}') & (main_df['prefix'] == '{prefix}')"
+        tdf = main_df[(main_df[FID] == exp) & (main_df['prefix'] == prefix)]
         tdf = tdf[["pred_text1", "exp_name", "id","hscore", "bert_score","query", "resp", "method", "rouge_score", "fid","prefix", "input_text","target_text"]]
         tdf = tdf.sort_values(by="rouge_score", ascending=False)
         if len(tdf) > 1:

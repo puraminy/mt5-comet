@@ -58,6 +58,10 @@ rel_maps = {
     'isFilledBy': "<isFilledBy>",
     'HinderedBy':"<HinderedBy>"
 }
+# omit some words from target for better rouge score calculation
+rel_target_omits = {
+    "xIntent":"to",
+}
 all_rels = [key for key,val in rel_maps.items()] 
 x_rels = [key for key,val in rel_maps.items()]
 rel_nat_maps = {
