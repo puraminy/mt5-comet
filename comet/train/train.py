@@ -2333,6 +2333,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     epochs_num = int(epochs_num)
     cycle = int(cycle)
     wrap = True
+    exp_info["enc_num"] = len(wrapped_model.prompt_encoders) 
     exp_info["train_records"] = train_dataset.num_records
     exp_info["iterations"] = iterations 
     mbp("start")
