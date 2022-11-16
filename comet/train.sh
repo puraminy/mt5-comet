@@ -44,7 +44,7 @@ folder=${PWD##*/}
 cp train.sh ..
 
 test=200
-train=100
+train=200
 trial=2
 if [ -z $m ]; then
    m=1
@@ -57,7 +57,7 @@ if [ "$m" -eq "0" ]; then
 fi
 seed=123
 
-exp=xint-multi_14
+exp=xint-multi_15
 log=${home}/logs/${exp}
 echo "log: ${log}"
 filter=xIntent#xAttr#multi
