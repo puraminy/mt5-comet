@@ -17,11 +17,12 @@ class RelTemplate:
            ex_anstemp = ""
            qtemp = "{event}"
            anstemp = "{resp}"
+           tn = int(self.temp_num)
            if method == "bart":
                qtemp = "{event} {rel} [GEN]"
                anstemp = "{resp}"
            elif method == "blank":
-               qtemp = "{event} {rel_natural} {resp}"
+               qtemp = "{event} {rel-natural} {resp}"
                anstemp = "blank"
            elif method == "pred-emb":
                qtemp = "{enc_token_rest}"
@@ -37,7 +38,7 @@ class RelTemplate:
                anstemp = "{ph} {rel_i}"
            elif method == "rel-mask":
                qtemp = "{event} {ph} {resp}"
-               anstemp = "{ph} {rel_natural}"
+               anstemp = "{ph} {rel-natural}"
            elif method == "unsup-rel":
                qtemp = "{event} {ph} {resp}"
                anstemp = "{ph} {prefix}"
@@ -46,9 +47,9 @@ class RelTemplate:
                anstemp = "{prefix}"
            elif method == "rel-mask-wrap":
                qtemp = "{enc_com_token} {event} {ph} {resp}"
-               anstemp = "{ph} {rel_natural}"
+               anstemp = "{ph} {rel-natural}"
            elif method == "rel-unsup":
-               qtemp = "{event} {rel_natural} {ph} "
+               qtemp = "{event} {rel-natural} {ph} "
                anstemp = "{ph} {resp}"
            elif method == "sup-pred-enfa":
                qtemp = "{input_text} {rel_i} {gen_fa}"
@@ -60,45 +61,46 @@ class RelTemplate:
                qtemp = "{input_text} {rel_i} {target_text} {gen}"
                anstemp = "{event} {dec_token} {gen} {resp}"
            elif method == "unsup-nat-gen":
-               qtemp = "{rel_i} {event} {rel_natural} {gen} {ph}" 
+               qtemp = "{rel_i} {event} {rel-natural} {gen} {ph}" 
                anstemp = "{ph} {resp} {end}"
            elif method == "sup-nat-tokens":
-               qtemp = "{event} {nat_tokens}" 
+               qtemp = "{event} {nat-tokens}" 
                anstemp = "{resp} {end}"
            elif method == "unsup-nat-tokens":
-               qtemp = "{event} {nat_tokens} {ph}" 
+               qtemp = "{event} {nat-tokens} {ph}" 
                anstemp = "{ph} {resp} {end}"
            elif method == "sup-nat":
-               #qtemp = "{rel_natural_pure}" 
-               qtemp = "{rel_natural}"
+               #qtemp = "{rel-natural-pure}" 
+               qtemp = "{rel-natural}"
                anstemp = "{resp} {end}"
            elif method == "sup-nat-tail":
-               #qtemp = "{rel_natural_pure}" 
-               qtemp = "{rel_natural}"
+               #qtemp = "{rel-natural-pure}" 
+               qtemp = "{rel-natural}"
                anstemp = "{ph} {resp} {end}"
            elif method == "unsup-nat":
-               qtemp = "{rel_natural}"
+               qtemp = "{rel-natural}"
                anstemp = "{ph} {resp} {end}"
            elif method == "unsup-nat-head":
-               qtemp = "{rel_natural}"
+               qtemp = "{rel-natural}"
                anstemp = "{resp} {end}"
            elif method == "unsup-nat-n":
-               qtemp = "{rel_nat_n}"
+               qtemp = "{rel-nat-n}"
                anstemp = "{ph} {resp} {end}"
            elif method == "enc-unsup-nat":
-               qtemp = "{rel_i} {event} {rel_natural} {ph}" 
+               qtemp = "{rel_i} {event} {rel-natural} {ph}" 
                anstemp = "{ph} {resp} {end}"
            elif method == "unsup-nat-fa":
                qtemp = "{event} {rel_natural_fa} {ph}" 
                anstemp = "{ph} {resp} {end}"
            elif method == "unsup-wrap-nat":
-               qtemp = "{rel_i} {rel_natural}"
+               #qtemp = "{rel_i} {rel-natural} {ph}"
+               qtemp = "{c_6} {rel_4} {rel-natural}"
                anstemp = "{ph} {resp} {end}"
            elif method == "unsup-wrap-nat-end":
-               qtemp = "{rel_natural} {rel_i}"
+               qtemp = "{rel-natural} {rel_i}"
                anstemp = "{ph} {resp} {end}"
            elif method == "unsup-wrap-nat-mid":
-               qtemp = "{event} {rel_i} {rel_natural} {rel_i} {ph}" 
+               qtemp = "{event} {rel_i} {rel-natural} {rel_i} {ph}" 
                anstemp = "{ph} {resp} {end}"
            elif method == "unsup-wrap-lang":
                qtemp = "{rel_i} {event} {rel_lang_i} {ph}" 
@@ -110,7 +112,7 @@ class RelTemplate:
                qtemp = "{rel_i_start} {event} {rel_i_end} {gen}"
                anstemp = "{resp} {end}"
            elif method == "sup-wrap-nat":
-               qtemp = "{rel_i} {rel_natural}"
+               qtemp = "{rel_i} {rel-natural}"
                anstemp = "{resp} {end}"
            elif method == "sup-no-gen":
                qtemp = "{event}"
@@ -119,13 +121,13 @@ class RelTemplate:
                qtemp = "{gen}"
                anstemp = "{resp}"
            elif method == "pred-enfa":
-               qtemp = "{rel_i_start} {gen_start} {input_text} {rel_natural_en} {gen_en} {ph} {event} {rel_natural} {rel_i_end} {gen_end} <extra_id_1>"
+               qtemp = "{rel_i_start} {gen_start} {input_text} {rel_natural_en} {gen_en} {ph} {event} {rel-natural} {rel_i_end} {gen_end} <extra_id_1>"
                anstemp = "{ph} {target_text} <extra_id_1> {resp} <extra_id_2>"
            elif method == "context-en":
-               qtemp = "{rel_i_start} {gen_start} {input_text} {rel_natural_en} {gen_en} {target_text} {rel_i_start} {event} {rel_natural} {rel_i_end} {gen_end} {ph}"
+               qtemp = "{rel_i_start} {gen_start} {input_text} {rel_natural_en} {gen_en} {target_text} {rel_i_start} {event} {rel-natural} {rel_i_end} {gen_end} {ph}"
                anstemp = "{ph} {resp} {end}"
            elif method == "context-faen":
-               qtemp = "{rel_i_start} {gen_start} {input_text_fa} {rel_natural_fa} {gen_en} {target_text} {event} {rel_natural} {rel_i_end} {gen_end} {ph}"
+               qtemp = "{rel_i_start} {gen_start} {input_text_fa} {rel_natural_fa} {gen_en} {target_text} {event} {rel-natural} {rel_i_end} {gen_end} {ph}"
                anstemp = "{ph} {resp} {end}"
            elif method == "unsup-wrap-n-example":
                qtemp = "{examples} {event} {rel_i} {gen} {ph}"
@@ -139,22 +141,22 @@ class RelTemplate:
                ex_qtemp = "{gen} {input_text} {end} \n"
                anstemp = "{ph} {event} {end}"
            elif method == "story-wrap":
-               qtemp = "{rel_i} {event} {rel_natural} {ph}"
+               qtemp = "{rel_i} {event} {rel-natural} {ph}"
                context = "{xAttr} {xIntent} {xReact}"
                ex_qtemp = "{rel_enc_token} {rel_natural_en} {target_text} {end}"
                anstemp = "{ph} {resp} {end}"
            elif method == "event-resp-n-wrap":
-               qtemp = "{event} {examples} {rel_i} {event} {rel_natural} {ph}"
+               qtemp = "{event} {examples} {rel_i} {event} {rel-natural} {ph}"
                ex_qtemp = "{rel_natural_en} {target_text} {end} \n"
                anstemp = "{ph} {resp} {end}"
            elif method == "gpt-event-resp-n-wrap":
                qtemp = "{examples} {rel_i}"
                ex_qtemp = "{rel_i} {input_text} {rel_natural_en} {target_text} {sep} \n"
-               anstemp = "{event} {rel_natural} {resp} {end}"
+               anstemp = "{event} {rel-natural} {resp} {end}"
            elif method == "fa-gpt-event-resp-n-wrap":
                qtemp = "{examples} {rel_i}"
                ex_qtemp = "{rel_i} {input_text_fa} {rel_natural_fa} {target_text_fa} {sep} \n"
-               anstemp = "{event} {rel_natural} {resp} {end}"
+               anstemp = "{event} {rel-natural} {resp} {end}"
            elif method == "unsup-wrap-n-example-fa":
                qtemp = "{examples} {gen} {ph}"
                ex_qtemp = "{gen} {input_text_fa} {end} \n"
@@ -169,11 +171,11 @@ class RelTemplate:
                anstemp = "{event} {end}"
            elif method == "unsup-wrap-nat-example":
                qtemp = "{examples} {event} {rel_i} {ph}"
-               ex_qtemp = "{input_text} {rel_natural} {target_text}. {end} \n"
+               ex_qtemp = "{input_text} {rel-natural} {target_text}. {end} \n"
                anstemp = "{ph} {resp} {end}"
            elif method == "gpt-n-example":
-               qtemp = "{examples} {event} {rel_natural}"
-               ex_qtemp = "{input_text} {rel_natural} {target_text} {end}"
+               qtemp = "{examples} {event} {rel-natural}"
+               ex_qtemp = "{input_text} {rel-natural} {target_text} {end}"
                anstemp = "{resp} {end}"
            elif method == "gpt-wrap-n-example":
                qtemp = "{examples} {event} {rel_i}"
@@ -184,10 +186,10 @@ class RelTemplate:
                ex_qtemp = "{input_text} {target_text} {end}"
                anstemp = "{examples} {ph} {resp} {end}"
            elif method == "unsup-wrap-context-enfa":
-               qtemp = "{rel_i_start} {gen_start} {input_text} {rel_natural_en} {gen_fa} {target_text_fa} {rel_i_start} {event} {rel_natural} {rel_i_end} {gen_end} {ph}"
+               qtemp = "{rel_i_start} {gen_start} {input_text} {rel_natural_en} {gen_fa} {target_text_fa} {rel_i_start} {event} {rel-natural} {rel_i_end} {gen_end} {ph}"
                anstemp = "{ph} {resp} {end}"
            elif method == "unsup-wrap-context-fa":
-               qtemp = "{rel_i_start} {gen_start} {input_text_fa} {rel_natural_fa} {gen_fa} {target_text_fa} {rel_i_start} {event} {rel_natural} {rel_i_end} {gen_end} {ph}"
+               qtemp = "{rel_i_start} {gen_start} {input_text_fa} {rel_natural_fa} {gen_fa} {target_text_fa} {rel_i_start} {event} {rel-natural} {rel_i_end} {gen_end} {ph}"
                anstemp = "{ph} {resp} {end}"
            elif method == "sup":
                qtemp = "{rel_token} {event}"
@@ -209,7 +211,7 @@ class RelTemplate:
                qtemp = "{event} {rel_i}"
                anstemp = "{resp} {end}"
            elif method == "gpt":
-               qtemp = "{event} {rel_natural}"
+               qtemp = "{event} {rel-natural}"
                anstemp = "{resp} {end}"
            elif method == "unsup-wrap-fw":
                qtemp = "{event} {rel_fw} {ph}"
@@ -236,17 +238,17 @@ class RelTemplate:
                qtemp = "{event} {tokens} {ph}"
                anstemp = "{ph} {resp} {end}"
            elif method == "unsup-tokens-nat":
-               qtemp = "{tokens} {rel_natural}"
+               qtemp = "{tokens} {rel-natural}"
                anstemp = "{ph} {resp} {end}"
            elif method == "unsup-rel-nat":
-               qtemp = "{prefix} {rel_natural}"
+               qtemp = "{prefix} {rel-natural}"
                anstemp = "{ph} {resp} {end}"
            elif method == "unsup-wrap-rel-ans":
                qtemp = "{event} {tokens} {ph} "
-               anstemp = "{ph} {rel_natural_pure} {resp}"
+               anstemp = "{ph} {rel-natural-pure} {resp}"
            elif method == "unsup-nat-rel-ans":
                qtemp = "{event}. {ph}"
-               anstemp = "{ph} {rel_natural_pure} {resp}."
+               anstemp = "{ph} {rel-natural-pure} {resp}."
            elif method == "unsup-tokens-rand" or method  == "unsup-tokens-rand-wrap":
                qtemp = "{event} {tokens-rand} {ph}"
                anstemp = "{ph} {resp} {end}"
@@ -303,7 +305,7 @@ class RelTemplate:
                    q = q.replace("  "," ")
                if method.startswith("sup"):
                    q = q.replace("{ph}","")
-                   q = q.replace("{rel_natural}","{rel_natural_pure}")
+                   q = q.replace("{rel-natural}","{rel-natural-pure}")
                q = fix_pos(q, gen_pos, prompt_pos)
                ret_q.append(q)
            qtemp = ret_q
@@ -416,10 +418,10 @@ class RelTemplate:
         rel_natural = rel_natural.replace("{ph}", placeholder_token)
 
         rep1  = {
-                "{rel_natural}":rel_natural,
-                "{rel_natural_pure}":rel_natural_pure,
-                "{rel_nat_n}":rel_nat_n,
-                "{nat_toekns}":rel_natural_tokens,
+                "{rel-natural}":rel_natural,
+                "{rel-natural-pure}":rel_natural_pure,
+                "{rel-nat-n}":rel_nat_n,
+                "{nat-tokens}":rel_natural_tokens,
                 "{gen}":gen_token}
         rep2  = {
                 "{event}":event, 

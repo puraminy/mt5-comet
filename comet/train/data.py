@@ -151,7 +151,7 @@ class CBTemplate(RelTemplate):
        return qtemp, anstemp, ex_qtemp, ex_anstemp, flags 
 
 template_conf = {
-        "cb": CBTemplate,
-        "xIntent":xIntentTemplate,
-        "xAttr":xAttrTemplate, 
+        #"cb": CBTemplate,
+        #"xIntent":xIntentTemplate,
+        #"xAttr":xAttrTemplate, 
         }
