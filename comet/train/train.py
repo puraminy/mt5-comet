@@ -2213,17 +2213,21 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             #{"params": model.z, "lr": Az_learning_rate},
         ]
         if opt_type == "adam":
-            optimizer = AdamW(optimizer_grouped_parameters,lr=_lr,eps=1e-8)
-            for encoder in model.prompt_encoders:
-                optimizer.add_param_group({'params': [p for p in encoder.parameters() if p.requires_grad ], "lr":pl_learning_rate})
-                if shared_embs:
-                    break
-            if model.merge_encoder is not None:
-                optimizer.add_param_group({'params': [p for p in model.merge_encoder.parameters() if p.requires_grad], "lr":pl_learning_rate})
-            optimizer.add_param_group({'params': model.A, "lr":Az_learning_rate})
-            optimizer.add_param_group({'params': model.z, "lr":Az_learning_rate})
-            optimizer.add_param_group({'params': model.router, "lr":router_learning_rate})
-            scheduler = get_linear_schedule_with_warmup(optimizer,warm_up_steps,iterations)
+            if len(wrapped_model.prompt_encoders) == 0:
+                optimizer = AdamW(optimizer_grouped_parameters,lr=_lr,eps=1e-8)
+                scheduler = get_linear_schedule_with_warmup(optimizer,warm_up_steps,iterations)
+            else:
+                paras = []
+                for encoder in model.prompt_encoders:
+                    paras.append([p for p in encoder.parameters() if p.requires_grad ])
+                lrs = [pl_learning_rate]*len(paras)
+                optimizer = Optim(paras, lrs)
+                scheduler = Scheduler(optimizer)
+            #if model.merge_encoder is not None:
+            #    optimizer.add_param_group({'params': [p for p in model.merge_encoder.parameters() if p.requires_grad], "lr":pl_learning_rate})
+            #optimizer.add_param_group({'params': model.A, "lr":Az_learning_rate})
+            #optimizer.add_param_group({'params': model.z, "lr":Az_learning_rate})
+            #optimizer.add_param_group({'params': model.router, "lr":router_learning_rate})
         elif opt_type == "ada_no_lr":
             optimizer = Adafactor(optimizer_grouped_parameters, 
                     scale_parameter=True, 

@@ -392,9 +392,6 @@ class PromptEncoder(torch.nn.Module):
 
 
 class EmbeddingPromptEncoder(PromptEncoder):
-    def __init__(self,name,length,embedding_dim,id_offset,init_embs=None, prompt_ids=[]) -> None:
-        super().__init__(name, length,embedding_dim,id_offset, init_embs, prompt_ids)
-    
     def forward(self,prompt_token_ids,pids=None):
         embinfo("=========================== Forward ===================")
         embinfo("=========================== %s ===================", self.name)
@@ -421,6 +418,14 @@ class EmbeddingPromptEncoder(PromptEncoder):
         embinfo("Dump embeddings: %s", detached_embeddings)
         embinfo("on this ids: %s", self.prompt_ids)
         weight[self.prompt_ids,:]=detached_embeddings
+
+class MergePromptEncoder(EmbeddingPromptEncoder):
+    def __init__(self, encoders, **kwargs):
+        self.encoders = encoders
+        super().__init__(**kwargs)
+
+    def forward(self, prompt_token_ids, pids=None):
+        pass
 
 class MLPPromptEncoder(PromptEncoder):
     def __init__(self,name,length,embedding_dim,id_offset,init_embs=None, prompt_ids=[], num_layers=1, hidden_size=-1) -> None:
@@ -470,6 +475,7 @@ class MLPPromptEncoder(PromptEncoder):
         embinfo("Dump embeddings: %s", detached_embeddings)
         embinfo("on this ids: %s", self.prompt_ids)
         weight[self.prompt_ids,:]=detached_embeddings
+
 
 class LSTMEmbeddingPromptEncoder(PromptEncoder):
     def __init__(self,name, length,embedding_dim,id_offset, init_embs=None, prompt_ids=[], num_layers=1, hidden_size=-1) -> None:

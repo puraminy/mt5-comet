@@ -43,8 +43,8 @@ alias runlite="python ${home}/mt5-comet/comet/train/train.py"
 folder=${PWD##*/}          
 cp train.sh ..
 
-test=100
-train=300
+test=200
+train=100
 trial=2
 if [ -z $m ]; then
    m=1
@@ -57,7 +57,7 @@ if [ "$m" -eq "0" ]; then
 fi
 seed=123
 
-exp=xint-multi_12
+exp=xint-multi_14
 log=${home}/logs/${exp}
 echo "log: ${log}"
 filter=xIntent#xAttr#multi

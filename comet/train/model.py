@@ -1,3 +1,4 @@
+import torch
 from transformers import (
     T5ForConditionalGeneration, T5TokenizerFast, 
     AutoModelForSeq2SeqLM, 
@@ -9,48 +10,46 @@ from transformers import (
 )
 
 class Optim:
-    def __init__(self, para1, para2, lr1, lr2):
-        self.optimizer1 = AdamW(para1, lr=lr1, betas=(0.9, 0.999))
-        self.optimizer2 = AdamW(para2, lr=lr2, betas=(0.9, 0.999))
+    def __init__(self, paras, lrs):
+        self.opts = []
+        for para,lr in zip(paras,lrs):
+            opt = AdamW(para, lr=lr, betas=(0.9, 0.999))
+            self.opts.append(opt)
 
     def step(self):
-        self.optimizer1.step()
-        self.optimizer2.step()
+        for opt in self.opts:
+            self.opt.step()
 
     def zero_grad(self):
-        self.optimizer1.zero_grad()
-        self.optimizer2.zero_grad()
+        for opt in self.opts:
+            self.opt.zero_grad()
 
     def state_dict(self):
-        return {
-            'optimizer1': self.optimizer1.state_dict(),
-            'optimizer2': self.optimizer2.state_dict()
-        }
+        ret = {}
+        for i, opt in enumerate(self.opts):
+            ret['opt'+ str(i)] = opt.state_dict()
+        return ret
 
     def load_state_dict(self, state_dict):
-        self.optimizer1.load_state_dict(state_dict['optimizer1'])
-        self.optimizer2.load_state_dict(state_dict['optimizer2'])
+        for i, opt in enumerate(self.opts):
+            opt.load_state_dict(state_dict['opt'+ str(i)])
 
     def cuda(self):
-        for state in self.optimizer1.state.values():
-            for k, v in state.items():
-                if isinstance(v, torch.Tensor):
-                    state[k] = v.cuda()
-
-        for state in self.optimizer2.state.values():
-            for k, v in state.items():
-                if isinstance(v, torch.Tensor):
-                    state[k] = v.cuda()
+        for opt in self.opts:
+            for state in opt.state.values():
+                for k, v in state.items():
+                    if isinstance(v, torch.Tensor):
+                        state[k] = v.cuda()
 
 class Scheduler:
-    def __init__(self, optim, step1=10000, step2=10000, gamma1=.1, gamma2=.1):
-        self.scheduler1 = torch.optim.lr_scheduler.StepLR(optim.optimizer1, step1, gamma1)
-        self.scheduler2 = torch.optim.lr_scheduler.StepLR(optim.optimizer2, step2, gamma2)
+    def __init__(self, optim, step=10000, gamma=.1):
+        self.schedulers = []
+        for opt in optim.opts:
+            self.schedulers.append(torch.optim.lr_scheduler.StepLR(opt, step, gamma))
 
     def step(self):
-        self.scheduler1.step()
-        self.scheduler2.step()
-
+        for sch in self.schedulers:
+           sch.step()
 
 def freeze_self_att(modules_to_freeze, part, ed, decoder=False):
     if part == "none":
