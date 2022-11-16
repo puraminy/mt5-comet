@@ -96,9 +96,9 @@ class RelTemplate:
            elif method == "unsup-wrap-nat":
                #qtemp = "{rel_i} {rel-natural} {ph}"
                if tn == 1:
-                   qtemp = "{c_6} {event} {rel_4} {ph}"
+                   qtemp = "{c_10} {event} {rel_8} {ph}"
                elif tn == 2:
-                   qtemp = "{rel-d_6} {event} {rel_4} {ph}"
+                   qtemp = "{rel-d_10} {event} {rel_8} {ph}"
                anstemp = "{ph} {resp} {end}"
            elif method == "unsup-wrap-nat-end":
                qtemp = "{rel-natural} {rel_i}"
