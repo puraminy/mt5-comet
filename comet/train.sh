@@ -45,7 +45,7 @@ cp train.sh ..
 
 test=100
 train=200
-trial=1
+trial=2
 if [ -z $m ]; then
    m=1
 fi
