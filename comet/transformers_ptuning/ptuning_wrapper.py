@@ -186,6 +186,7 @@ class PTuningWrapper(torch.nn.Module):
         prompt_token_fn = encoder.get_prompt_token_fn()
         encoder_masks = prompt_token_fn(input_ids)
         winfo("Encoder masks: %s", encoder_masks)
+        breakpoint()
         if encoder_masks.any():
             #find input ids for prompt tokens
             prompt_input_ids = input_ids[encoder_masks]

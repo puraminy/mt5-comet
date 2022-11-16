@@ -32,6 +32,8 @@ class xAttrTemplate(RelTemplate):
                qtemp = "{c_6} {rel_4} {event}, they seen as {ph}"
            elif tn == 6411:
                qtemp = "{c_6} {event}, {rel_4} {ph}"
+           elif tn == 6412:
+               qtemp = "{d_6} {event}, {rel_4} {ph}"
            elif tn == 643:
                qtemp = "{event}, {c_6} {rel_4} they seen as {ph}"
            elif tn == 6431:
@@ -90,6 +92,8 @@ class xIntentTemplate(RelTemplate):
                qtemp = "{c_6} {rel_4} {event}, they want {ph}"
            elif tn == 6411:
                qtemp = "{c_6} {event}, {rel_4}  {ph}"
+           elif tn == 6412:
+               qtemp = "{e_6} {event}, {rel_4}  {ph}"
            elif tn == 643:
                qtemp = "{event}, {c_6} {rel_4} they want {ph}"
            elif tn == 6431:
