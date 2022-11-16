@@ -57,7 +57,7 @@ if [ "$m" -eq "0" ]; then
 fi
 seed=123
 
-exp=xint-multi_15
+exp=xint-multi_3x
 log=${home}/logs/${exp}
 echo "log: ${log}"
 filter=xIntent#xAttr#xNeed#multi
