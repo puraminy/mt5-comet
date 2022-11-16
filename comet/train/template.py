@@ -94,7 +94,7 @@ class RelTemplate:
                anstemp = "{ph} {resp} {end}"
            elif method == "unsup-wrap-nat":
                #qtemp = "{rel_i} {rel-natural} {ph}"
-               qtemp = "{c_6} {rel_4} {rel-natural}"
+               qtemp = "{rel-d_6} {rel_4} {rel-natural}"
                anstemp = "{ph} {resp} {end}"
            elif method == "unsup-wrap-nat-end":
                qtemp = "{rel-natural} {rel_i}"
@@ -321,6 +321,7 @@ class RelTemplate:
         counter = 0
         pi = 0
         text = self.fill_prompt(text, rel, "{rel_i}")
+        text = self.fill_prompt_regex(text, rel, "{rel-([a-zA-Z]+)_(\d+)}")
         text = self.fill_prompt_regex(text, rel, "{([a-zA-Z]+)_(\d+)}")
         text = self.fill_prompt_regex(text, rel, "{([a-zA-Z]+)_([a-zA-Z]+)}")
         text = self.fill_prompt(text, "com", "{com_i}")
@@ -482,7 +483,11 @@ class RelTemplate:
                 plen = "1"
                 if emb.isdigit():
                     plen = emb
-                place_holder = "{" + rel + "_" + emb + "}"
+                if regex.startswith("{rel-"):
+                    place_holder = "{rel-" + rel + "_" + emb + "}"
+                    rel = row_rel + rel
+                else:
+                    place_holder = "{" + rel + "_" + emb + "}"
                 num_holder = "_" + plen
             elif len(m.groups()) == 3:
                 rel = m.groups()[0]
