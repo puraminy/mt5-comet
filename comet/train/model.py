@@ -18,7 +18,7 @@ class Optim:
 
     def step(self):
         for opt in self.opts:
-            self.opt.step()
+            opt.step()
 
     def zero_grad(self):
         for opt in self.opts:
