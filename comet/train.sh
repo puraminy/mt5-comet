@@ -56,6 +56,7 @@ if [ "$m" -eq "0" ]; then
   train=2
 fi
 seed=123
+
 exp=xint-multi_11
 log=${home}/logs/${exp}
 filter=xIntent#xAttr#multi
@@ -65,7 +66,7 @@ shared=False
 
 runlite run -exp $exp -lp ${log} -bc base -ov $g2 -var method=unsup-wrap-nat--rel_filter=$filter--train_samples=$train--epochs_num=2--repeat=4--temp_num=$tn--loop=True--test_samples=$test--merge_prompts=$merge--shared_embs=$shared--seed=123 --follow_method=True --scorers="rouge-bert" --data_path=${home}/mt5-comet/comet/data/atomic2020 --do_valid=False --val_samples=10 --encoder_type=lstm --cycle=100 $g1 --batch_size=16 --trial=$trial 
 
-#cp train.sh ${log}
+cp train.sh ${log}
 if [ $home = "/content/drive/MyDrive" ]; then
 	tar -czvf /content/${exp}-$m.tar.gz ${log}
 	cp /content/${exp}-$m.tar.gz ${home}/logs 
