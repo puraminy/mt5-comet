@@ -22,7 +22,7 @@ class Optim:
 
     def zero_grad(self):
         for opt in self.opts:
-            self.opt.zero_grad()
+            opt.zero_grad()
 
     def state_dict(self):
         ret = {}
