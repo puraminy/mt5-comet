@@ -60,7 +60,7 @@ seed=123
 exp=xint-multi_15
 log=${home}/logs/${exp}
 echo "log: ${log}"
-filter=xIntent#xAttr#multi
+filter=xIntent#xAttr#xNeed#multi
 merge=none #lstm
 tn=1
 shared=False
