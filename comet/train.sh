@@ -59,6 +59,7 @@ seed=123
 
 exp=xint-multi_11
 log=${home}/logs/${exp}
+echo "log: ${log}"
 filter=xIntent#xAttr#multi
 merge=none #lstm
 tn=6411#6431
@@ -69,7 +70,7 @@ runlite run -exp $exp -lp ${log} -bc base -ov $g2 -var method=unsup-wrap-nat--re
 cp train.sh ${log}
 if [ $home = "/content/drive/MyDrive" ]; then
 	tar -czvf /content/${exp}-$m.tar.gz ${log}
-	cp /content/${exp}-$m.tar.gz ${home}/logs 
+	#cp /content/${exp}-$m.tar.gz ${home}/logs 
 fi
 
 # learning rate for supervised and unsupervised learning for t5-v1
