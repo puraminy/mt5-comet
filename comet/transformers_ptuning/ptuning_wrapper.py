@@ -445,7 +445,7 @@ class MergePromptEncoder(EmbeddingPromptEncoder):
         s.to(device)
         for encoder in self.encoders:
             pids = encoder.input_ids.repeat(16)
-            out = encoder(pids) 
+            out = encoder(pids).to(device) 
             s += out
         out = s / len(self.encoders)
         return out
