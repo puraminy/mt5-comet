@@ -428,23 +428,22 @@ class MergePromptEncoder(PromptEncoder):
 
     def forward(self, prompt_token_ids, pids=None):
         device = prompt_token_ids.device
-        s = torch.zeros(10*16, self.embedding_dim).to(device)
+        if self.id_offset > 0:
+            prompt_token_ids = prompt_token_ids - self.id_offset
+        else:
+            prompt_token_ids = (prompt_token_ids.view(-1,1) == self.input_ids).int().argmax(dim=1)
+        s = torch.zeros(len(self.prompt_ids), self.embedding_dim).to(device)
         for encoder in self.encoders:
-            pids = encoder.input_ids.repeat(16)
+            pids = encoder.input_ids
             out = encoder(pids).to(device) 
             s += out
-        out = s / len(self.encoders)
-        return out 
+        running_weight = s / len(self.encoders)
+        ret_embeds = F.embedding(prompt_token_ids, running_weight)
+        return ret_embeds 
 
     def dump_embeddings_into(self, weight):
         with torch.no_grad():
-            device = self.input_ids.device
-            s = torch.zeros(len(self.prompt_ids), self.embedding_dim).to(device)
-            for encoder in self.encoders:
-                pids = encoder.input_ids
-                out = encoder(pids).to(device) 
-                s += out
-            embs = s / len(self.encoders)
+            embs = self.forward(self.input_ids)
         detached_embeddings = embs.detach()
         weight[self.prompt_ids,:]=detached_embeddings
         
