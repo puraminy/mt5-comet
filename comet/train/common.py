@@ -25,7 +25,7 @@ import pickle5 as pickle
 general_prompts = {}
 
 n_prompts = 1 
-n_prompt_tokens= 8 
+n_prompt_tokens= 10 
 
 for n in range(n_prompts):
     l = []
