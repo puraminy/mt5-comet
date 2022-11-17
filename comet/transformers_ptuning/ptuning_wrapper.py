@@ -440,11 +440,11 @@ class MergePromptEncoder(EmbeddingPromptEncoder):
         super().__init__(**kwargs)
 
     def forward(self, prompt_token_ids, pids=None):
-        s = torch.zeros(10*16, self.embedding_dim)
         device = prompt_token_ids.device
-        s.to(device)
+        s = torch.zeros(10*16, self.embedding_dim).to(device)
         for encoder in self.encoders:
             pids = encoder.input_ids.repeat(16)
+            print("pids device:", pids.device)
             pids.to(device)
             out = encoder(pids).to(device) 
             print("s device:", s.device)
