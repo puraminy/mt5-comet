@@ -39,7 +39,7 @@
     "encoder_type": "lstm",
     "last_data": false,
     "save_df": "",
-    "merge_prompts": false,
+    "flat_prompts": false,
     "no_save_model": false,
     "shared_embs": false,
     "no_confirm": false,

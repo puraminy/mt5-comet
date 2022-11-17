@@ -1139,7 +1139,7 @@ def run(ctx, conf_path, base_conf, experiment,
     help=""
 )
 @click.option(
-    "--merge_prompts",
+    "--flat_prompts",
     "-mp",
     is_flag=True,
     help=""
@@ -1444,7 +1444,7 @@ def run(ctx, conf_path, base_conf, experiment,
     type=int,
     help=""
 )
-def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, pl_learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, log_per_exp, wandb, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, rel_filter, ex_type, last_data, save_df, merge_prompts, num_workers, scorers, train_start, no_save_model, no_save_best, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, preview, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args, match, dpy, prompt_tune, prompt_config_file, load_prompt, data_name, seed, do_valid, stop_level, skilled_variant, int_dim, prompt_token_num, n_tasks, n_prompts, init_temperature):
+def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, pl_learning_rate, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, log_per_exp, wandb, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, rel_filter, ex_type, last_data, save_df, flat_prompts, num_workers, scorers, train_start, no_save_model, no_save_best, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, preview, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args, match, dpy, prompt_tune, prompt_config_file, load_prompt, data_name, seed, do_valid, stop_level, skilled_variant, int_dim, prompt_token_num, n_tasks, n_prompts, init_temperature):
 
     #%% some hyper-parameters
 
@@ -2139,21 +2139,21 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         'temperature': init_temperature,
     }
     #prefix_config = None
-    if merge_prompts == "none": merge_prompts = ""
-    assert merge_prompts != "none"
+    if flat_prompts == "none": flat_prompts = ""
+    assert flat_prompts != "none"
     prompts = {**general_prompts, **sample_dataset.prompts}
-    wrapped_model = wrap_model(model_to_wrap, tokenizer, encoder_type, load_prompt_path, merge_prompts=merge_prompts, method = method, shared_embs= shared_embs, skilled_variant=skilled_variant, prefix_config=prefix_config, exp_id=exp_id, encoder_prompts= prompts) 
-    fname = "output/" + str(experiment) + "-" + str(exp_id) + "-" + merge_prompts + ".txt"
+    wrapped_model = wrap_model(model_to_wrap, tokenizer, encoder_type, load_prompt_path, flat_prompts=flat_prompts, method = method, shared_embs= shared_embs, skilled_variant=skilled_variant, prefix_config=prefix_config, exp_id=exp_id, encoder_prompts= prompts) 
+    fname = "output/" + str(experiment) + "-" + str(exp_id) + "-" + flat_prompts + ".txt"
     Path("output").mkdir(exist_ok = True)
     with open(fname, "w") as f:
         print("Number of prompts:" + str(len(wrapped_model.prompt_encoders)), file=f)
         print("Train prompts:", prompts, file=f) 
-        if wrapped_model.merge_encoder:
-            print(wrapped_model.merge_encoder.id_offset, file=f)
-            print(wrapped_model.merge_encoder.prompt_ids, file=f)
-            print(wrapped_model.merge_encoder.input_ids, file=f)
+        if wrapped_model.flat_encoder:
+            print(wrapped_model.flat_encoder.id_offset, file=f)
+            print(wrapped_model.flat_encoder.prompt_ids, file=f)
+            print(wrapped_model.flat_encoder.input_ids, file=f)
             print("Merge Encoder:", file=f)
-            print(wrapped_model.merge_encoder, file=f)
+            print(wrapped_model.flat_encoder, file=f)
         if wrapped_model.prompt_encoders:
             for encoder in wrapped_model.prompt_encoders:
                 print(encoder.id_offset, file=f)
@@ -2224,8 +2224,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                 lrs = [pl_learning_rate]*len(paras)
                 optimizer = Optim(paras, lrs)
                 scheduler = Scheduler(optimizer)
-            #if model.merge_encoder is not None:
-            #    optimizer.add_param_group({'params': [p for p in model.merge_encoder.parameters() if p.requires_grad], "lr":pl_learning_rate})
+            #if model.flat_encoder is not None:
+            #    optimizer.add_param_group({'params': [p for p in model.flat_encoder.parameters() if p.requires_grad], "lr":pl_learning_rate})
             #optimizer.add_param_group({'params': model.A, "lr":Az_learning_rate})
             #optimizer.add_param_group({'params': model.z, "lr":Az_learning_rate})
             #optimizer.add_param_group({'params': model.router, "lr":router_learning_rate})
@@ -2235,8 +2235,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                     relative_step=True, warmup_init=True, lr=None)
             for encoder in model.prompt_encoders:
                 optimizer.add_param_group({'params': [p for p in encoder.parameters() if p.requires_grad ], "lr":pl_learning_rate})
-            if model.merge_encoder is not None:
-                optimizer.add_param_group({'params': [p for p in model.merge_encoder.parameters() if p.requires_grad], "lr":pl_learning_rate})
+            if model.flat_encoder is not None:
+                optimizer.add_param_group({'params': [p for p in model.flat_encoder.parameters() if p.requires_grad], "lr":pl_learning_rate})
             scheduler = AdafactorSchedule(optimizer)
         elif opt_type == "ada":
             mlog.info("Ada Factor")
@@ -2255,8 +2255,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
 		    ) 
             for encoder in model.prompt_encoders:
                 optimizer.add_param_group({'params': [p for p in encoder.parameters() if p.requires_grad ], "lr":pl_learning_rate})
-            if model.merge_encoder is not None:
-                optimizer.add_param_group({'params': [p for p in model.merge_encoder.parameters() if p.requires_grad], "lr":pl_learning_rate})
+            if model.flat_encoder is not None:
+                optimizer.add_param_group({'params': [p for p in model.flat_encoder.parameters() if p.requires_grad], "lr":pl_learning_rate})
         #optimizer = Adafactor(
         #        model.parameters(),
         #        lr=1e-3,

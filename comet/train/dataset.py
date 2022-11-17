@@ -346,10 +346,10 @@ class MyDataset(torch.utils.data.Dataset):
         _qtemp = rt.fill_consts(qtemp, ex_qtemp, context, rel, d, context_df, mask=mask,method = mt, someone=self.someone)
         _anstemp = rt.fill_consts(anstemp, ex_anstemp, context,rel, d, context_df, mask=mask,method = mt, someone=self.someone)
         _query = rt.fill_vars(_qtemp, rel, event, resp, gen_token, 
-                input_lang, target_lang, self.ph_num, self.temp_num, self.someone) 
+                input_lang, target_lang, self.ph_num, self.someone) 
         query = (index, _query)
         response = rt.fill_vars(_anstemp, rel, event, resp, gen_token, 
-                input_lang, target_lang, self.ph_num, self.temp_num, self.someone)
+                input_lang, target_lang, self.ph_num, self.someone)
         mbp("")
 
         for rr, prompt in rt.encoder_prompts.items():

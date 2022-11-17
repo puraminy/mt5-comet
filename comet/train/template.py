@@ -98,7 +98,7 @@ class RelTemplate:
                if tn == 1:
                    qtemp = "{c@mlp_6} {event} {rel@lstm_8} {ph}"
                elif tn == 2:
-                   qtemp = "{rel-d_10} {event} {rel_8} {ph}"
+                   qtemp = "{c@merge_10} {event} {ph}"
                anstemp = "{ph} {resp} {end}"
            elif method == "unsup-wrap-nat-end":
                qtemp = "{rel-natural} {rel_i}"
@@ -401,7 +401,8 @@ class RelTemplate:
         return context 
 
 
-    def fill_vars(self, template, rel, event, resp, gen_token= "gen_en",  inp_lang="en", resp_lang="en", ph_num=3, temp_num = 1, someone=False):
+    def fill_vars(self, template, rel, event, resp, gen_token= "gen_en",  inp_lang="en", resp_lang="en", ph_num=3, someone=False):
+        temp_num = self.temp_num
         if type(temp_num) == str and temp_num.isnumeric():
             temp_num = int(temp_num)
         event1, event2= "",""
