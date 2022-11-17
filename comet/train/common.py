@@ -22,6 +22,17 @@ import json
 from comet.train.mylogs import *
 import pickle5 as pickle
 
+general_prompts = {}
+
+n_prompts = 4
+n_prompt_tokens= 10
+
+for n in range(n_prompts):
+    l = []
+    for m in range(n_prompt_tokens):
+        l.append("<g"+str(n) + "_" + str(m)+ ">") 
+    general_prompts["g"+str(n)] = l 
+
 SPECIAL_TOKENS  = { "bos_token": "<|BOS|>",
                     "eos_token": "</s>",
                     "unk_token": "<|UNK|>",
@@ -495,6 +506,8 @@ def create_encoder(name, model, tokenizer, prompt_tokens, encoder_type="lstm",
     rel_ids = tokenizer.convert_tokens_to_ids(rel_tokens)
     cur_embeddings = model.get_input_embeddings()
     init_embs = {}
+    if "@" in name:
+        name, encoder_type = name.split("@") 
     for p in rel_tokens:
         if "_" in p:
            p = p.strip("<").strip(">")
@@ -504,10 +517,10 @@ def create_encoder(name, model, tokenizer, prompt_tokens, encoder_type="lstm",
                emb = cur_embeddings.weight[wid,:].detach().clone() 
                pid = tokenizer.convert_tokens_to_ids([p])[0]
                init_embs[pid] = emb
-        else:
-           pid = tokenizer.convert_tokens_to_ids([p])[0]
-           emb = cur_embeddings.weight[pid,:].detach().clone() 
-           init_embs[pid] = emb
+        #else:
+        #   pid = tokenizer.convert_tokens_to_ids([p])[0]
+        #   emb = cur_embeddings.weight[pid,:].detach().clone() 
+        #   init_embs[pid] = emb
     mlog.info("** final rel ids: %s", rel_ids)
     id_offset = min(rel_ids) 
     prompt_encoder = None

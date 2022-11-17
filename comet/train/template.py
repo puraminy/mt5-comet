@@ -96,7 +96,7 @@ class RelTemplate:
            elif method == "unsup-wrap-nat":
                #qtemp = "{rel_i} {rel-natural} {ph}"
                if tn == 1:
-                   qtemp = "{c_10} {event} {rel_8} {ph}"
+                   qtemp = "{c@lstm_10} {event} {rel@mlp_8} {ph}"
                elif tn == 2:
                    qtemp = "{rel-d_10} {event} {rel_8} {ph}"
                anstemp = "{ph} {resp} {end}"
@@ -325,9 +325,9 @@ class RelTemplate:
         counter = 0
         pi = 0
         text = self.fill_prompt(text, rel, "{rel_i}")
-        text = self.fill_prompt_regex(text, rel, "{rel-([a-zA-Z]+)_(\d+)}")
-        text = self.fill_prompt_regex(text, rel, "{([a-zA-Z]+)_(\d+)}")
-        text = self.fill_prompt_regex(text, rel, "{([a-zA-Z]+)_([a-zA-Z]+)}")
+        #text = self.fill_prompt_regex(text, rel, "{rel-([@a-zA-Z]+)_(\d+)}")
+        text = self.fill_prompt_regex(text, rel, "{([@a-zA-Z]+)_(\d+)}")
+        text = self.fill_prompt_regex(text, rel, "{([@a-zA-Z]+)_([a-zA-Z]+)}")
         text = self.fill_prompt(text, "com", "{com_i}")
         text = self.fill_prompt(text, rel, "{tokens}")
         text = self.fill_prompt(text, rel, "{tokens-rand}")
@@ -487,11 +487,7 @@ class RelTemplate:
                 plen = "1"
                 if emb.isdigit():
                     plen = emb
-                if regex.startswith("{rel-"):
-                    place_holder = "{rel-" + rel + "_" + emb + "}"
-                    rel = row_rel + rel
-                else:
-                    place_holder = "{" + rel + "_" + emb + "}"
+                place_holder = "{" + rel + "_" + emb + "}"
                 num_holder = "_" + plen
             elif len(m.groups()) == 3:
                 rel = m.groups()[0]
@@ -502,18 +498,20 @@ class RelTemplate:
             plen = [int(plen)]
             if rel == "rel":
                 rel = row_rel
-            text = self.fill_prompt(text, rel, place_holder, plen=plen, num_holder=num_holder)
+            text = self.fill_prompt(text, rel, place_holder, plen=plen, 
+                    num_holder=num_holder, row_rel=row_rel)
             m = re.search(regex, text)
         return text
 
-    def fill_prompt(self, text, rel, place_holder, counter = 0, lang="", plen = 0, num_holder="_i"):
+    def fill_prompt(self, text, rel, place_holder, counter = 0, lang="", plen = 0, num_holder="_i", row_rel=""):
+        if not row_rel: row_rel = rel
         pi = 0
         if plen==0 and rel in relation_prompt_lengths:
             plen = relation_prompt_lengths[rel]
         _pholder = place_holder
         place_holder = place_holder.replace("{", "<")  
         place_holder = place_holder.replace("}", ">")  
-        place_holder = place_holder.replace("rel", rel)  
+        place_holder = place_holder.replace("rel", row_rel)  
         place_holder = place_holder.replace("lang", lang)  
         #dlog.info("text: %s", text)
         while _pholder in text:
