@@ -43,7 +43,7 @@ alias runlite="python ${home}/mt5-comet/comet/train/train.py"
 folder=${PWD##*/}          
 
 test=100
-train=100
+train=200
 if [ -z $m ]; then
    m=1
 fi
@@ -55,13 +55,13 @@ if [ "$m" -eq "0" ]; then
 fi
 seed=123
 
-exp=xint-multi_mergeX3
+exp=xint-multi_mergeX4
 log=${home}/logs/${exp}
 echo "log: ${log}"
 #filter=xIntent#xAttr#xNeed#xReact#xEffect#oReact#xWant#multi
-filter=xIntent#xAttr#multi
+filter=xIntent#xAttr #multi
 merge=none #lstm
-tn=1
+tn=1#2
 shared=False
 trial=7
 epochs=3
