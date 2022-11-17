@@ -339,7 +339,9 @@ class PTuningWrapper(torch.nn.Module):
     def update_model_weight(self):
         winfo(f"Updating model weights")
         self.cur_embeddings = self.underlying_model.get_input_embeddings()
-        if self.flat_encoder:
+        if self.merge_encoder:
+            self.merge_encoder.dump_embeddings_into(self.cur_embeddings.weight)
+        elif self.flat_encoder:
             self.flat_encoder.dump_embeddings_into(self.cur_embeddings.weight)
         elif self.encoder_prompt_flag:
             for encoder in self.prompt_encoders:
@@ -436,13 +438,7 @@ class MergePromptEncoder(PromptEncoder):
 
     def dump_embeddings_into(self, weight):
         with torch.no_grad():
-            #embs = self.forward(self.input_ids)
-            s = torch.zeros(len(self.input_ids), self.embedding_dim).to(device)
-            for encoder in self.encoders:
-                pids = encoder.input_ids
-                out = encoder(pids).to(device) 
-                s += out
-            embs = s / len(self.encoders)
+            embs = self.forward(self.input_ids)
         detached_embeddings = embs.detach()
         weight[self.prompt_ids,:]=detached_embeddings
         
