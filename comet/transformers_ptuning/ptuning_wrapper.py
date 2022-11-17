@@ -438,7 +438,13 @@ class MergePromptEncoder(PromptEncoder):
 
     def dump_embeddings_into(self, weight):
         with torch.no_grad():
-            embs = self.forward(self.input_ids)
+            device = self.input_ids.device
+            s = torch.zeros(len(self.prompt_ids), self.embedding_dim).to(device)
+            for encoder in self.encoders:
+                pids = encoder.input_ids
+                out = encoder(pids).to(device) 
+                s += out
+            embs = s / len(self.encoders)
         detached_embeddings = embs.detach()
         weight[self.prompt_ids,:]=detached_embeddings
         
