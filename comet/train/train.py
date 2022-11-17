@@ -2217,14 +2217,12 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                 optimizer = AdamW(optimizer_grouped_parameters,lr=_lr,eps=1e-8)
                 scheduler = get_linear_schedule_with_warmup(optimizer,warm_up_steps,iterations)
             else:
-                optimizer = None
-                scheduler = None
-                #paras = []
-                #for encoder in model.prompt_encoders:
-                #    paras.append([p for p in encoder.parameters() if p.requires_grad ])
-                #lrs = [pl_learning_rate]*len(paras)
-                #optimizer = Optim(paras, lrs)
-                #scheduler = Scheduler(optimizer)
+                paras = []
+                for encoder in model.prompt_encoders:
+                    paras.append([p for p in encoder.parameters() if p.requires_grad ])
+                lrs = [pl_learning_rate]*len(paras)
+                optimizer = Optim(paras, lrs)
+                scheduler = Scheduler(optimizer)
             #if model.merge_encoder is not None:
             #    optimizer.add_param_group({'params': [p for p in model.merge_encoder.parameters() if p.requires_grad], "lr":pl_learning_rate})
             #optimizer.add_param_group({'params': model.A, "lr":Az_learning_rate})
@@ -2425,21 +2423,16 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                     tlog.info("Wrap model zero grad")
                     wrapped_model.train()
                     wrapped_model.zero_grad()
-                    if len(wrapped_model.prompt_encoders) > 0:
-                        for encoder in wrapped_model.prompt_encoders:
-                            encoder.zero_grad()
-                    else:
-                        optimizer.zero_grad()
+                    optimizer.zero_grad()
                     _model = wrapped_model
                     out = forward_step(_model, batch, no_model_batch, task_ids=task_ids)
                     loss = out["loss"]
                     loss.backward()
-                    if wrapped_model.prompt_encoders:
-                        for encoder in wrapped_model.prompt_encoders:
-                            encoder.step()
-                    else:
-                        optimizer.step()
-                        scheduler.step()
+                    for encoder in wrapped_model.prompt_encoders:
+                        pass
+
+                    optimizer.step()
+                    scheduler.step()
                     step+=1
                     global_step+=1
                     bloss = loss.item()
