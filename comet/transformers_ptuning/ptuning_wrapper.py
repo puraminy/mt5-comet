@@ -381,7 +381,7 @@ class PromptEncoder(torch.nn.Module):
                     if _id < len(self.embedding.weight):
                         self.embedding.weight[_id] = emb
                         embinfo("%s : %s", _id, emb)
-        para = [p for p in encoder.parameters() if p.requires_grad ]
+        para = [p for p in self.parameters() if p.requires_grad ]
         self.optimizer = AdamW(para, lr=self.learning_rate, betas=(0.9, 0.999))
         self.scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer, 10000, 0.1)
 
