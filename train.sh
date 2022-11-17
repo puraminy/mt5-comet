@@ -44,8 +44,7 @@ folder=${PWD##*/}
 cp train.sh ..
 
 test=200
-train=200
-trial=2
+train=50
 if [ -z $m ]; then
    m=1
 fi
@@ -57,15 +56,16 @@ if [ "$m" -eq "0" ]; then
 fi
 seed=123
 
-exp=xint-multi_3x
+exp=xint-multi_3all-ep
 log=${home}/logs/${exp}
 echo "log: ${log}"
-filter=xIntent#xAttr#xNeed#multi
+filter=xIntent#xAttr#xNeed#xReact#xEffect#oReact#xWant#multi
 merge=none #lstm
 tn=1
 shared=False
+trial=3
 
-runlite run -exp $exp -lp ${log} -bc base -ov $g2 -var method=unsup-wrap-nat--rel_filter=$filter--train_samples=$train--epochs_num=2--repeat=4--temp_num=$tn--loop=True--test_samples=$test--merge_prompts=$merge--shared_embs=$shared--seed=123 --follow_method=True --scorers="rouge-bert" --data_path=${home}/mt5-comet/comet/data/atomic2020 --do_valid=False --val_samples=10 --encoder_type=lstm --cycle=100 $g1 --batch_size=16 --trial=$trial 
+runlite run -exp $exp -lp ${log} -bc base -ov $g2 -var method=unsup-wrap-nat--rel_filter=$filter--train_samples=$train--epochs_num=4--repeat=4--temp_num=$tn--loop=True--test_samples=$test--merge_prompts=$merge--shared_embs=$shared--seed=123 --follow_method=True --scorers="rouge-bert" --data_path=${home}/mt5-comet/comet/data/atomic2020 --do_valid=False --val_samples=10 --encoder_type=lstm --cycle=100 $g1 --batch_size=16 --trial=$trial 
 
 cp train.sh ${log}
 if [ $home = "/content/drive/MyDrive" ]; then

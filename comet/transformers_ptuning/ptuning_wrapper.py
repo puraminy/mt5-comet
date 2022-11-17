@@ -15,6 +15,7 @@ import os
 import math
 from os.path import expanduser
 from comet.train.mylogs import mbp
+from transformers.optimization import Adafactor, AdafactorSchedule, AdamW
 from torch.distributions.relaxed_bernoulli import RelaxedBernoulli
 
 home = expanduser("~")
@@ -358,8 +359,9 @@ class PTuningWrapper(torch.nn.Module):
 
 
 class PromptEncoder(torch.nn.Module):
-    def __init__(self,name, length,embedding_dim,id_offset, init_embs, prompt_ids,**kwargs) -> None:
+    def __init__(self,name, length,embedding_dim,id_offset, init_embs, prompt_ids, lr=0.01,**kwargs) -> None:
         super().__init__()
+        self.learning_rate = lr
         self.length = length
         self.name = name
         self.counter = 0
@@ -379,6 +381,9 @@ class PromptEncoder(torch.nn.Module):
                     if _id < len(self.embedding.weight):
                         self.embedding.weight[_id] = emb
                         embinfo("%s : %s", _id, emb)
+        para = [p for p in encoder.parameters() if p.requires_grad ]
+        self.optimizer = AdamW(para, lr=self.learning_rate, betas=(0.9, 0.999))
+        self.scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer, 10000, 0.1)
 
     def isin(self, ar1, ar2):
         return (ar1[..., None] == ar2).any(-1)
@@ -390,6 +395,12 @@ class PromptEncoder(torch.nn.Module):
     def dump_embeddings_into(self,weight):
         raise NotImplementedError
 
+    def zero_grad(self):
+        self.optimizer.zero_grad()
+
+    def step(self):
+        self.optimizer.step()
+        self.scheduler.step()
 
 class EmbeddingPromptEncoder(PromptEncoder):
     def forward(self,prompt_token_ids,pids=None):
