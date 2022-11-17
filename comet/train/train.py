@@ -2179,7 +2179,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             mlog.info("encoder %s", encoder.name)
         wrapped_model.prompt_encoders.to(device=device)
     if wrapped_model.merge_encoder:
-        wrapped_model.moerge_encoder.to(device)
+        wrapped_model.merge_encoder.to(device)
     mlog.info("len tokenizer after wrapping %s", len(tokenizer))
     mbp("wrap")
     mbp("start")
