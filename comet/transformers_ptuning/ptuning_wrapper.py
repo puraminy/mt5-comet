@@ -444,14 +444,7 @@ class MergePromptEncoder(EmbeddingPromptEncoder):
         s = torch.zeros(10*16, self.embedding_dim).to(device)
         for encoder in self.encoders:
             pids = encoder.input_ids.repeat(16)
-            print("pids device:", pids.device)
-            pids.to(device)
             out = encoder(pids).to(device) 
-            print("s device:", s.device)
-            print("out device:", out.device)
-            out.to(device)
-            print(out.device)
-            print("out device:", out.device)
             s += out
         out = s / len(self.encoders)
         return out
