@@ -408,30 +408,15 @@ class PromptEncoder(torch.nn.Module):
 
 class EmbeddingPromptEncoder(PromptEncoder):
     def forward(self,prompt_token_ids,pids=None):
-        embinfo("=========================== Forward ===================")
-        embinfo("=========================== %s ===================", self.name)
-        embinfo("Before prompt token ids: %s", prompt_token_ids)
-        #embinfo("id offset: %s", self.id_offset)
-        #embinfo("id length: %s", self.length)
         if self.id_offset > 0:
             prompt_token_ids = prompt_token_ids - self.id_offset
         else:
             prompt_token_ids = (prompt_token_ids.view(-1,1) == self.input_ids).int().argmax(dim=1)
-        embinfo("self input ids: %s", self.input_ids)
-        embinfo("After prompt token ids: %s", prompt_token_ids)
-        embinfo(self.embedding.weight)
         ret_embs = self.embedding(prompt_token_ids)
-        embinfo("ret embs %s", ret_embs)
-        embinfo("=========================== Forward end ===================")
         return ret_embs
 
     def dump_embeddings_into(self, weight):
-        winfo("Dump embeddings")
-        embinfo("=========================== %s ===================", self.name)
-        embinfo("input weights: %s", weight)
         detached_embeddings = self.embedding.weight.detach()
-        embinfo("Dump embeddings: %s", detached_embeddings)
-        embinfo("on this ids: %s", self.prompt_ids)
         weight[self.prompt_ids,:]=detached_embeddings
 
 class MergePromptEncoder(PromptEncoder):
@@ -446,18 +431,15 @@ class MergePromptEncoder(PromptEncoder):
             pids = encoder.input_ids.repeat(16)
             out = encoder(pids).to(device) 
             s += out
-        self.embedding = s / len(self.encoders)
-        return self.embedding
+        out = s / len(self.encoders)
+        return out 
 
     def dump_embeddings_into(self, weight):
-        winfo("Dump embeddings")
-        embinfo("=========================== %s ===================", self.name)
-        embinfo("input weights: %s", weight)
-        detached_embeddings = self.embedding.weight.detach()
-        embinfo("Dump embeddings: %s", detached_embeddings)
-        embinfo("on this ids: %s", self.prompt_ids)
+        with torch.no_grad():
+            embs = self.forward(self.input_ids)
+        detached_embeddings = embs.detach()
         weight[self.prompt_ids,:]=detached_embeddings
-
+        
 class MLPPromptEncoder(PromptEncoder):
     def __init__(self,name,length,embedding_dim,id_offset,init_embs=None, prompt_ids=[], num_layers=1, hidden_size=-1) -> None:
         super().__init__(name, length,embedding_dim,id_offset, init_embs, prompt_ids)
@@ -478,35 +460,19 @@ class MLPPromptEncoder(PromptEncoder):
             )
     
     def forward(self,prompt_token_ids,pids=None):
-        embinfo("=========================== Forward ===================")
-        embinfo("=========================== %s ===================", self.name)
-        embinfo("Before prompt token ids: %s", prompt_token_ids)
-        #embinfo("id offset: %s", self.id_offset)
-        #embinfo("id length: %s", self.length)
         if self.id_offset > 0:
             prompt_token_ids = prompt_token_ids - self.id_offset
         else:
             prompt_token_ids = (prompt_token_ids.view(-1,1) == self.input_ids).int().argmax(dim=1)
-        embinfo("self input ids: %s", self.input_ids)
-        embinfo("After prompt token ids: %s", prompt_token_ids)
-        embinfo(self.embedding.weight)
         embs = self.embedding(prompt_token_ids)
         ret_embs = self.mlp(embs)
-        embinfo("ret embs %s", ret_embs)
-        embinfo("=========================== Forward end ===================")
         return ret_embs
 
     def dump_embeddings_into(self, weight):
-        winfo("Dump embeddings")
-        embinfo("=========================== %s ===================", self.name)
         with torch.no_grad():
             embs = self.forward(self.input_ids)
-        embinfo("input weights: %s", weight)
         detached_embeddings = embs.detach()
-        embinfo("Dump embeddings: %s", detached_embeddings)
-        embinfo("on this ids: %s", self.prompt_ids)
         weight[self.prompt_ids,:]=detached_embeddings
-
 
 class LSTMEmbeddingPromptEncoder(PromptEncoder):
     def __init__(self,name, length,embedding_dim,id_offset, init_embs=None, prompt_ids=[], num_layers=1, hidden_size=-1) -> None:
@@ -539,63 +505,24 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
 
  #### llllllf
     def forward(self,prompt_token_ids,pids=None):
-        embinfo("=========================== Forward begin ===================")
-        embinfo("=========================== %s ===================", self.name)
-        embinfo("before prompt token ids:{}".format(prompt_token_ids))
-        embinfo("self input ids: %s", self.input_ids)
-        embinfo("NETTTTT inps:{}".format(self.net_inps))
-        # find zero based ids 
         net_inputs = self.net_inps
         if self.id_offset > 0:
-            embinfo("------------------- case id offset > 0 ----------------")
             net_inputs = self.input_ids - self.id_offset
             #index_list = [((net_inputs == x).nonzero(as_tuple=True)[0]) for x in prompt_token_ids_2]
         index_list = (prompt_token_ids.view(-1,1) == self.input_ids).int().argmax(dim=1)
-        embinfo("after prompt token ids:  %s", prompt_token_ids)
-        embinfo("after net inputs:  %s", net_inputs)
-        embinfo("index list:  %s", index_list)
         # create embedding vectors for input ids
         embeds = self.embedding(net_inputs)
-        # do forward calculations
-        if self.name == "xIntent":
-            tlog.info("LSTM: %s", self.name)
-            tlog.info("after net inputs:  %s", net_inputs)
-            tlog.info("after prompt token ids:  %s", prompt_token_ids)
-            tlog.info("lstm embeds: %s",embeds)
-
         x = self.lstm(embeds.unsqueeze(0))
-        #embinfo("XXXXXXXXXXXXXXXXX: %s",x)
-        #embinfo("XXXXXXXXXXXXXXXXX[0]: %s",x[0])
-        #embinfo("XXXXXXXXXXXXXXXXX size: %s",x[0].size())
-        embinfo("lstm embeds: %s",embeds)
-
         running_weight = self.mlp(x[0]).squeeze(0)
-        if self.counter < 5:
-            embinfo("--------------------")
-            embinfo("running weights: %s",running_weight)
-            embinfo("running weights size: %s",running_weight.size())
-            self.counter += 1
-
-        # return weights for prompt_token_ids 
         ret_embeds = F.embedding(index_list,running_weight)
-        embinfo("ret embeds size %s", ret_embeds.size())
-        embinfo("ret embeds %s", ret_embeds)
-        embinfo("=========================== Forward end ===================")
         return ret_embeds
+
     def dump_embeddings_into(self, weight):
-        # get embedding weights as the output of forward pass
-        embinfo("%%%%%%%%%%%%%%%%%%%%%%%%%% dump embeddings start %%%%%%%%%%%%%%%%")
-        embinfo("=========================== %s ===================", self.name)
-        embinfo("Dump embeddings: %s", weight)
-        embinfo("Input ids: %s", self.input_ids)
         with torch.no_grad():
             embeddings = self.forward(self.input_ids)
         cur_embeds = weight[self.prompt_ids,:].detach()
-        embinfo("cur embeddings: %s", cur_embeds)
         new_embeds = embeddings.detach()
         weight[self.prompt_ids,:]=new_embeds 
-        embinfo("%%%%%%%%%%%%%%%%%%%%%%%%%% dump embeddings end %%%%%%%%%%%%%%%%%%")
-
 
 
 if __name__ == "__main__":
