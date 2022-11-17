@@ -434,7 +434,7 @@ class EmbeddingPromptEncoder(PromptEncoder):
         embinfo("on this ids: %s", self.prompt_ids)
         weight[self.prompt_ids,:]=detached_embeddings
 
-class MergePromptEncoder(EmbeddingPromptEncoder):
+class MergePromptEncoder(PromptEncoder):
     def __init__(self, encoders = [], **kwargs):
         self.encoders = encoders
         super().__init__(**kwargs)
@@ -446,8 +446,17 @@ class MergePromptEncoder(EmbeddingPromptEncoder):
             pids = encoder.input_ids.repeat(16)
             out = encoder(pids).to(device) 
             s += out
-        out = s / len(self.encoders)
-        return out
+        self.embedding = s / len(self.encoders)
+        return self.embedding
+
+    def dump_embeddings_into(self, weight):
+        winfo("Dump embeddings")
+        embinfo("=========================== %s ===================", self.name)
+        embinfo("input weights: %s", weight)
+        detached_embeddings = self.embedding.weight.detach()
+        embinfo("Dump embeddings: %s", detached_embeddings)
+        embinfo("on this ids: %s", self.prompt_ids)
+        weight[self.prompt_ids,:]=detached_embeddings
 
 class MLPPromptEncoder(PromptEncoder):
     def __init__(self,name,length,embedding_dim,id_offset,init_embs=None, prompt_ids=[], num_layers=1, hidden_size=-1) -> None:
