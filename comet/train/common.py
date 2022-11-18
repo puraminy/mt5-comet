@@ -86,7 +86,7 @@ rel_nat_maps = {
         },
     "xAttr":{ 
         1:"{event}, So PersonX is seen as {ph}.",
-        2:"{event}, So PersonX is seen as a {ph} person.",
+        2:"{event}, So PersonX is seen as {ph}.",
         3:"{event}, PersonX is seen as {ph}.",
         4:"PersonX is seen as {ph} because {event}",
         "rel_qtemp": "{event}. {rel_5} PersonX is seen as {ph}",
@@ -264,7 +264,7 @@ rel_nat_maps = {
     },
     "xIntent":{ 
         1:"Because of {event}, they want {ph}",
-        2:"if {event}, then he wants {ph}",
+        2:"Because of {event}, they want {ph}",
         3:"Because of {event}, he wants to {ph}",
         4:"Because of {event}, he wants {ph}",
         5:"Before {event}, PersonX would want {ph}. ",
