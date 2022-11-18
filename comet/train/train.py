@@ -2176,8 +2176,13 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     if wrapped_model.prompt_encoders:
         mlog.info("Number of encoders: %s", len(wrapped_model.prompt_encoders))
         for encoder in wrapped_model.prompt_encoders:
-            mlog.info("encoder %s", encoder.name)
+            mlog.info("Prompt encoder %s", encoder.name)
+            encoder.device = device
+        for encoder in wrapped_model.general_encoders:
+            mlog.info("General encoder %s", encoder.name)
+            encoder.device = device
         wrapped_model.prompt_encoders.to(device=device)
+        wrapped_model.general_encoders.to(device=device)
     if wrapped_model.merge_encoder:
         wrapped_model.merge_encoder.to(device)
     mlog.info("len tokenizer after wrapping %s", len(tokenizer))

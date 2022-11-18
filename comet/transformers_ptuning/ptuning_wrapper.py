@@ -371,6 +371,7 @@ class PromptEncoder(torch.nn.Module):
         self.learning_rate = lr
         self.length = length
         self.name = name
+        self.device = "cpu"
         self.counter = 0
         self.prompt_ids = prompt_ids
         self.input_ids = torch.nn.parameter.Parameter(torch.tensor(prompt_ids),
@@ -433,7 +434,7 @@ class MergePromptEncoder(PromptEncoder):
             self.encoders = torch.nn.ModuleList(encoders)
 
     def forward(self, prompt_token_ids, pids=None):
-        device = prompt_token_ids.device
+        device = self.device
         index_list = prompt_token_ids - self.id_offset
         s = torch.zeros(len(self.prompt_ids), self.embedding_dim).to(device)
         for encoder in self.encoders:
@@ -448,7 +449,7 @@ class MergePromptEncoder(PromptEncoder):
         with torch.no_grad():
             input_ids = torch.nn.parameter.Parameter(torch.tensor(self.prompt_ids),
                   requires_grad=False)
-            input_ids.to(weight.device)
+            input_ids.to(self.device)
             embs = self.forward(input_ids)
         detached_embeddings = embs.detach()
         weight[self.prompt_ids,:]=detached_embeddings
