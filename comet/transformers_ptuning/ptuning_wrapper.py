@@ -228,7 +228,7 @@ class PTuningWrapper(torch.nn.Module):
             if self.merge_encoder:
                 #flat_output = self.flat_encoder(all_prompts_input_ids,pids).to(device)
                 merge_output = self.encoder_forward(self.merge_encoder, input_ids, inputs_embeds)
-            if self.flat_encoder:
+            elif self.flat_encoder:
                 #flat_output = self.flat_encoder(all_prompts_input_ids,pids).to(device)
                 flat_output = self.encoder_forward(self.flat_encoder, input_ids, inputs_embeds)
                 if True: #self.prefix_config is None:
