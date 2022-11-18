@@ -2222,7 +2222,9 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             else:
                 paras = []
                 for encoder in model.prompt_encoders:
-                    paras.append([p for p in encoder.parameters() if p.requires_grad])
+                    para_list =[p for p in encoder.parameters() if p.requires_grad]
+                    if para_list:
+                        parars.append(para_list)
                 for encoder in model.general_encoders:
                     paras.append([p for p in encoder.parameters() if p.requires_grad])
                 lrs = [pl_learning_rate]*len(paras)

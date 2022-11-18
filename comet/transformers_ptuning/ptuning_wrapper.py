@@ -424,27 +424,31 @@ class EmbeddingPromptEncoder(PromptEncoder):
 
 class MergePromptEncoder(PromptEncoder):
     def __init__(self, encoders = [], **kwargs):
-        self.encoders = encoders
         super().__init__(**kwargs)
+        if self.id_offset <= 0:
+            self.id_offset = min(self.prompt_ids)
+        self.input_ids = None
+        self.embedding = None
+        if encoders:
+            self.encoders = torch.nn.ModuleList(encoders)
 
     def forward(self, prompt_token_ids, pids=None):
         device = prompt_token_ids.device
-        if self.id_offset > 0:
-            prompt_token_ids = prompt_token_ids - self.id_offset
-        else:
-            prompt_token_ids = (prompt_token_ids.view(-1,1) == self.input_ids).int().argmax(dim=1)
+        index_list = prompt_token_ids - self.id_offset
         s = torch.zeros(len(self.prompt_ids), self.embedding_dim).to(device)
         for encoder in self.encoders:
             pids = encoder.input_ids
             out = encoder(pids).to(device) 
             s += out
         running_weight = s / len(self.encoders)
-        ret_embeds = F.embedding(prompt_token_ids, running_weight)
+        ret_embeds = F.embedding(index_list, running_weight)
         return ret_embeds 
 
     def dump_embeddings_into(self, weight):
         with torch.no_grad():
-            embs = self.forward(self.input_ids)
+            input_ids = torch.nn.parameter.Parameter(torch.tensor(self.prompt_ids),
+                  requires_grad=False)
+            embs = self.forward(input_ids)
         detached_embeddings = embs.detach()
         weight[self.prompt_ids,:]=detached_embeddings
         
