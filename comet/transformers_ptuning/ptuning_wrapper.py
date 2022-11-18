@@ -436,6 +436,7 @@ class MergePromptEncoder(PromptEncoder):
     def forward(self, prompt_token_ids, pids=None):
         device = self.device
         index_list = prompt_token_ids - self.id_offset
+        index_list.to(device)
         s = torch.zeros(len(self.prompt_ids), self.embedding_dim).to(device)
         for encoder in self.encoders:
             pids = encoder.input_ids
