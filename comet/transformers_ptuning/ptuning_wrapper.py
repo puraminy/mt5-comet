@@ -448,6 +448,7 @@ class MergePromptEncoder(PromptEncoder):
         with torch.no_grad():
             input_ids = torch.nn.parameter.Parameter(torch.tensor(self.prompt_ids),
                   requires_grad=False)
+            input_ids.to(weight.device)
             embs = self.forward(input_ids)
         detached_embeddings = embs.detach()
         weight[self.prompt_ids,:]=detached_embeddings
