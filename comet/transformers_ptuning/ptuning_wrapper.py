@@ -428,8 +428,8 @@ class MergePromptEncoder(PromptEncoder):
         super().__init__(**kwargs)
         if self.id_offset <= 0:
             self.id_offset = min(self.prompt_ids)
-        self.input_ids = None
-        self.embedding = None
+        #self.input_ids = None
+        #self.embedding = None
         if encoders:
             self.encoders = torch.nn.ModuleList(encoders)
 
@@ -447,10 +447,10 @@ class MergePromptEncoder(PromptEncoder):
 
     def dump_embeddings_into(self, weight):
         with torch.no_grad():
-            input_ids = torch.nn.parameter.Parameter(torch.tensor(self.prompt_ids),
-                  requires_grad=False)
-            input_ids = input_ids.to(self.device)
-            embs = self.forward(input_ids)
+            #input_ids = torch.nn.parameter.Parameter(torch.tensor(self.prompt_ids),
+            #      requires_grad=False)
+            #input_ids = input_ids.to(self.device)
+            embs = self.forward(self.input_ids)
         detached_embeddings = embs.detach()
         weight[self.prompt_ids,:]=detached_embeddings
         
