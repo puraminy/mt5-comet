@@ -55,7 +55,7 @@ if [ "$m" -eq "0" ]; then
 fi
 seed=123
 
-exp=xint-multi_mergeX4
+exp=xint-multi_mergeXNat
 log=${home}/logs/${exp}
 echo "log: ${log}"
 #filter=xIntent#xAttr#xNeed#xReact#xEffect#oReact#xWant#multi
