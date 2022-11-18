@@ -2222,7 +2222,9 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             else:
                 paras = []
                 for encoder in model.prompt_encoders:
-                    paras.append([p for p in encoder.parameters() if p.requires_grad ])
+                    paras.append([p for p in encoder.parameters() if p.requires_grad])
+                for encoder in model.general_encoders:
+                    paras.append([p for p in encoder.parameters() if p.requires_grad])
                 lrs = [pl_learning_rate]*len(paras)
                 optimizer = Optim(paras, lrs)
                 scheduler = Scheduler(optimizer)

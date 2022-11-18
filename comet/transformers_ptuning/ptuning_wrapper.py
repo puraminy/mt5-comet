@@ -43,7 +43,7 @@ def getFname(name):
     return logFilename
 
 class PTuningWrapper(torch.nn.Module):
-    def __init__(self,model,prompt_encoders,decoder_prompt_encoder=None,
+    def __init__(self,model,prompt_encoders, general_encoders,decoder_prompt_encoder=None,
         prompt_token_fn=None, prompt_token_id=None, prompt_token_ids=None,
         replacing_token_id=0, do_log=True, merge_encoder=None, 
         flat_encoder = None, prefix_config=None, exp_id=""):
@@ -113,6 +113,7 @@ class PTuningWrapper(torch.nn.Module):
         model_embeddings_size = model.get_input_embeddings().num_embeddings
         winfo("model embedding_size:{}".format(model_embeddings_size))
         self.prompt_encoders = torch.nn.ModuleList(prompt_encoders)
+        self.general_encoders = torch.nn.ModuleList(general_encoders)
         winfo("num of encoders %s:", len(self.prompt_encoders))
         self.config = model.config
         self.embedding_dim = model.config.hidden_size

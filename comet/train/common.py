@@ -501,10 +501,18 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", flat_promp
     if skilled_variant:
        wrapped_model = SkilledMixin(model, n_tasks=2, n_skills=2, 
                skilled_variant=skilled_variant,
-               prompt_encoders=prompt_encoders, prompt_token_fn=get_prompt_token_fn(id_offset), merge_encoder=merge_encoder, flat_encoder=flat_encoder, prefix_config= prefix_config)
+               prompt_encoders=prompt_encoders, 
+               general_encoders=general_encoders, 
+               prompt_token_fn=get_prompt_token_fn(id_offset), 
+               merge_encoder=merge_encoder, flat_encoder=flat_encoder, 
+               prefix_config= prefix_config)
     else:
         wrapped_model = PTuningWrapper(model, 
-                prompt_encoders, prompt_token_fn=get_prompt_token_fn(id_offset), merge_encoder=merge_encoder, flat_encoder=flat_encoder, prefix_config = prefix_config, exp_id=exp_id)
+                prompt_encoders, 
+                general_encoders=general_encoders, 
+                prompt_token_fn=get_prompt_token_fn(id_offset), 
+                merge_encoder=merge_encoder, flat_encoder=flat_encoder, 
+                prefix_config = prefix_config, exp_id=exp_id)
     return wrapped_model
 
 def create_encoder(name, model, tokenizer, prompt_tokens, encoder_type="lstm", 
