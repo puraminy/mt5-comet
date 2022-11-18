@@ -420,11 +420,25 @@ def extend_tokenizer(tokenizer, prompt_tokens = [], model_id=""):
 
 def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", flat_prompts=False, method="", shared_embs =False, skilled_variant="", prefix_config=None, exp_id="", encoder_prompts={}):
     wrapped_model = None
-    prompt_encoders = []
     offsets = []
     tokenize_relations(tokenizer)
     flat_prompt_tokens = []
     ii = 1
+    general_encoders = []
+    for rel, prompt_tokens in general_prompts.items():
+        mlog.info("%s )******************* Wrapping model for %s", ii, rel)
+        if rel == "com":
+            continue
+        for p in prompt_tokens:
+            if not p in flat_prompt_tokens:
+                flat_prompt_tokens.append(p)
+        if not flat_prompts:
+            encoder, offset = create_encoder(rel, model, tokenizer, prompt_tokens, encoder_type, wrapped_model)
+            general_encoders.append(encoder)
+            offsets.append(offset)
+            ii += 1
+    
+    prompt_encoders = []
     for rel, prompt_tokens in encoder_prompts.items():
         mlog.info("%s )******************* Wrapping model for %s", ii, rel)
         if rel == "com":
@@ -469,16 +483,13 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", flat_promp
                     #encoder.length= len(flat_prompt_tokens)
 
     flat_encoder = None 
+    merge_encoder = None
     flat_embedding = None
     n_prompt_tokens = len(flat_prompt_tokens)
     mbp("")
-    merge_encoder = None
     for encoder in prompt_encoders:
         if isinstance(encoder, MergePromptEncoder):
-            merge_encoder = encoder
-            prompt_encoders.remove(encoder)
-            merge_encoder.encoders = prompt_encoders
-            break
+            encoder.encoders = general_encoders
 
     if flat_prompts:
         flat_encoder, _ = create_encoder("flat", model, tokenizer, flat_prompt_tokens, flat_prompts, wrapped_model)
