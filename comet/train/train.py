@@ -2130,6 +2130,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         model_to_wrap = model.pretrain_model
 
     task_ids = None
+    n_prompts = int(n_prompts)
+    prompt_token_num = int(prompt_token_num)
     if skilled_variant:
        task_ids = torch.LongTensor([0, 1])
     prefix_config = {
