@@ -17,9 +17,9 @@ class xAttrTemplate(RelTemplate):
        tn = int(self.temp_num)
        if method == "unsup-wrap-nat":
            if tn == 1:
-               qtemp = "{rel_8} {event}, So PersonX is seen as {ph}."
+               qtemp = "{c@lstm_i} {event}, {c@lstm_i} So PersonX is seen as {ph}."
            elif tn == 2:
-               qtemp = "{rel_8} {event}, So PersonX is {test_1} as {ph}."
+               qtemp = "{c@merge_i} {event}, {d@merge_i} So PersonX is as {ph}."
            elif tn == 3:
                qtemp = "{rel_8} {event}, So PersonX is {emb_seen_1} as {ph}."
            elif tn == 4:
@@ -79,7 +79,9 @@ class xIntentTemplate(RelTemplate):
                anstemp = "he intends {resp} {end}"
        elif method == "unsup-wrap-nat":
            if tn == 1:
-               qtemp = "{rel_5} {event}, {ph}"
+               qtemp = "{c@lstm_i} Because of {event}, {b@lstm_i} they want {ph}"
+           if tn == 2:
+               qtemp = "{c@merge_i} Because of {event}, {b@merge_i} they want {ph}"
            elif tn == 6:
                qtemp = "{emb_because_1} {emb_of_1} {event}, {emb_they_1} {emb_want_1} {ph}"
            elif tn == 61:
@@ -152,6 +154,6 @@ class CBTemplate(RelTemplate):
 
 template_conf = {
         #"cb": CBTemplate,
-        #"xIntent":xIntentTemplate,
-        #"xAttr":xAttrTemplate, 
+        "xIntent":xIntentTemplate,
+        "xAttr":xAttrTemplate, 
         }
