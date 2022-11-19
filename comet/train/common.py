@@ -22,16 +22,6 @@ import json
 from comet.train.mylogs import *
 import pickle5 as pickle
 
-general_prompts = {}
-
-n_prompts = 2 
-n_prompt_tokens= 6 
-
-for n in range(n_prompts):
-    l = []
-    for m in range(n_prompt_tokens):
-        l.append("<g"+str(n) + "@lstm_" + str(m)+ ">") 
-    general_prompts["g"+str(n)] = l 
 
 SPECIAL_TOKENS  = { "bos_token": "<|BOS|>",
                     "eos_token": "</s>",
@@ -418,7 +408,7 @@ def extend_tokenizer(tokenizer, prompt_tokens = [], model_id=""):
         mlog.info("No new token was added")
 
 
-def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", flat_prompts=False, method="", shared_embs =False, skilled_variant="", prefix_config=None, exp_id="", encoder_prompts={}):
+def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", flat_prompts=False, method="", shared_embs =False, skilled_variant="", prefix_config=None, exp_id="", encoder_prompts={}, general_prompts={}):
     wrapped_model = None
     offsets = []
     tokenize_relations(tokenizer)

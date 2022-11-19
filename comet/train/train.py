@@ -2015,6 +2015,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                     "prefixed":p_str,
                     "pid":pid,
                     "tag":tag,
+                    "gen_encs":n_prompts,
                     "multi":multi, 
                     "steps":str(train_samples)+"x"+str(repeat)+"x"+str(epochs_num),
                     "plen":prompt_length,
@@ -2139,10 +2140,19 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         'temperature': init_temperature,
     }
     #prefix_config = None
+    general_prompts = {}
+    for n in range(n_prompts):
+        l = []
+        for m in range(prompt_token_num):
+            l.append("<g"+str(n) + "@lstm_" + str(m)+ ">") 
+    general_prompts["g"+str(n)] = l 
     if flat_prompts == "none": flat_prompts = ""
     assert flat_prompts != "none"
     prompts = sample_dataset.prompts
-    wrapped_model = wrap_model(model_to_wrap, tokenizer, encoder_type, load_prompt_path, flat_prompts=flat_prompts, method = method, shared_embs= shared_embs, skilled_variant=skilled_variant, prefix_config=prefix_config, exp_id=exp_id, encoder_prompts= prompts) 
+    wrapped_model = wrap_model(model_to_wrap, tokenizer, encoder_type, load_prompt_path, flat_prompts=flat_prompts, method = method, shared_embs= shared_embs, skilled_variant=skilled_variant, prefix_config=prefix_config, 
+            exp_id=exp_id, 
+            encoder_prompts= prompts,
+            general_prompts= general_prompts) 
     fname = "output/" + str(experiment) + "-" + str(exp_id) + "-" + flat_prompts + ".txt"
     Path("output").mkdir(exist_ok = True)
     with open(fname, "w") as f:
