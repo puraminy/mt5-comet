@@ -21,6 +21,8 @@ class xAttrTemplate(RelTemplate):
            elif tn == 2:
                qtemp = "{c@merge_i} {event}, {rel_i} So PersonX is as {ph}."
            elif tn == 3:
+               qtemp = "{c@merge_i} {event}, So PersonX is as {ph}."
+           elif tn == 31:
                qtemp = "{rel_8} {event}, So PersonX is {emb_seen_1} as {ph}."
            elif tn == 4:
                qtemp = "{rel_2} {event}, So PersonX is {emb_seen_1} as {ph}."
@@ -82,6 +84,8 @@ class xIntentTemplate(RelTemplate):
                qtemp = "{c@lstm_i} Because of {event}, {rel_i} they want {ph}"
            if tn == 2:
                qtemp = "{c@merge_i} Because of {event}, {rel_i} they want {ph}"
+           if tn == 3:
+               qtemp = "{c@merge_i} Because of {event}, they want {ph}"
            elif tn == 6:
                qtemp = "{emb_because_1} {emb_of_1} {event}, {emb_they_1} {emb_want_1} {ph}"
            elif tn == 61:
