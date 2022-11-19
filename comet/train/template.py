@@ -98,7 +98,7 @@ class RelTemplate:
                if tn == 1:
                    qtemp = "{c@lstm_6} {rel-natural}"
                elif tn == 2:
-                   qtemp = "{c@merge_6} {rel-natural} "
+                   qtemp = "{c@merge_i} {rel-natural} "
                anstemp = "{ph} {resp} {end}"
            elif method == "unsup-wrap-nat-end":
                qtemp = "{rel-natural} {rel_i}"
@@ -488,15 +488,19 @@ class RelTemplate:
                 plen = "1"
                 if emb.isdigit():
                     plen = emb
+                num_holder = "_" + str(plen)
+                if emb == "i":
+                    plen = 0
+                    num_holder = "_" + emb
                 place_holder = "{" + rel + "_" + emb + "}"
-                num_holder = "_" + plen
             elif len(m.groups()) == 3:
                 rel = m.groups()[0]
                 emb = m.groups()[1]
                 plen = m.groups()[2]
                 num_holder = "_" + plen
                 place_holder = "{" + rel + "_" + emb + "_" + plen + "}"
-            plen = [int(plen)]
+            if plen != 0:
+                plen = [int(plen)]
             if rel == "rel":
                 rel = row_rel
             text = self.fill_prompt(text, rel, place_holder, plen=plen, 
@@ -507,8 +511,11 @@ class RelTemplate:
     def fill_prompt(self, text, rel, place_holder, counter = 0, lang="", plen = 0, num_holder="_i", row_rel=""):
         if not row_rel: row_rel = rel
         pi = 0
-        if plen==0 and rel in relation_prompt_lengths:
-            plen = relation_prompt_lengths[rel]
+        if plen==0: 
+            if rel in relation_prompt_lengths:
+                plen = relation_prompt_lengths[rel]
+            else:
+                plen = [5] 
         _pholder = place_holder
         place_holder = place_holder.replace("{", "<")  
         place_holder = place_holder.replace("}", ">")  
