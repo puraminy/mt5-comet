@@ -9,7 +9,7 @@ import numpy as np
 #import tensorflow as tf
 from comet.utils.myutils import *
 from comet.transformers_ptuning import PTuningWrapper
-from comet.transformers_ptuning.ptuning_wrapper import LSTMEmbeddingPromptEncoder, EmbeddingPromptEncoder, MLPPromptEncoder, MergePromptEncoder
+from comet.transformers_ptuning.ptuning_wrapper import * 
 from comet.polytropon import SkilledMixin
 from tqdm import tqdm
 import logging, sys
@@ -423,7 +423,7 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", flat_promp
             if not p in flat_prompt_tokens:
                 flat_prompt_tokens.append(p)
         if not flat_prompts:
-            encoder, offset = create_encoder(rel, model, tokenizer, prompt_tokens, encoder_type, wrapped_model)
+            encoder, offset = create_encoder(rel, model, tokenizer, prompt_tokens, encoder_type, wrapped_model, prefix_config)
             general_encoders.append(encoder)
             offsets.append(offset)
             ii += 1
@@ -437,7 +437,7 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", flat_promp
             if not p in flat_prompt_tokens:
                 flat_prompt_tokens.append(p)
         if not flat_prompts:
-            encoder, offset = create_encoder(rel, model, tokenizer, prompt_tokens, encoder_type, wrapped_model)
+            encoder, offset = create_encoder(rel, model, tokenizer, prompt_tokens, encoder_type, wrapped_model, prefix_config)
             prompt_encoders.append(encoder)
             offsets.append(offset)
             ii += 1
@@ -482,7 +482,7 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", flat_promp
             encoder.encoders = general_encoders
 
     if flat_prompts:
-        flat_encoder, _ = create_encoder("flat", model, tokenizer, flat_prompt_tokens, flat_prompts, wrapped_model)
+        flat_encoder, _ = create_encoder("flat", model, tokenizer, flat_prompt_tokens, flat_prompts, wrapped_model, prefix_config)
         #assert flat_encoder != None, "merge encoder for " + flat_prompts + " is none"
         #flat_encoder = _encoder # prompt_encoders[0]
         #prompt_encoders = [_encoder]
@@ -494,19 +494,18 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", flat_promp
                prompt_encoders=prompt_encoders, 
                general_encoders=general_encoders, 
                prompt_token_fn=get_prompt_token_fn(id_offset), 
-               merge_encoder=merge_encoder, flat_encoder=flat_encoder, 
-               prefix_config= prefix_config)
+               merge_encoder=merge_encoder, flat_encoder=flat_encoder) 
     else:
         wrapped_model = PTuningWrapper(model, 
                 prompt_encoders, 
                 general_encoders=general_encoders, 
                 prompt_token_fn=get_prompt_token_fn(id_offset), 
                 merge_encoder=merge_encoder, flat_encoder=flat_encoder, 
-                prefix_config = prefix_config, exp_id=exp_id)
+                exp_id=exp_id)
     return wrapped_model
 
 def create_encoder(name, model, tokenizer, prompt_tokens, encoder_type="lstm", 
-        wrapped_model = None):
+        wrapped_model = None, prefix_config=None):
     embedding_dim = model.config.hidden_size
     enc_plen = len(prompt_tokens)
 
@@ -570,6 +569,14 @@ def create_encoder(name, model, tokenizer, prompt_tokens, encoder_type="lstm",
         if enc_plen > 0:
             mlog.info("Prompt Encoder defined : %s", enc_plen)
             prompt_encoder = MergePromptEncoder(name = name, length=enc_plen,
+                    embedding_dim = embedding_dim,
+                    id_offset = -1, prompt_ids=rel_ids, init_embs=init_embs)
+    elif encoder_type.startswith("mat"):
+        mlog.info("in Mat %s", encoder_type)
+        if enc_plen > 0:
+            mlog.info("Prompt Encoder defined : %s", enc_plen)
+            prompt_encoder = MatPromptEncoder(prefix_config=prefix_config, 
+                    name = name, length=enc_plen,
                     embedding_dim = embedding_dim,
                     id_offset = -1, prompt_ids=rel_ids, init_embs=init_embs)
     else:

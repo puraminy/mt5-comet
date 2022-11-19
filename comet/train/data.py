@@ -17,7 +17,7 @@ class xAttrTemplate(RelTemplate):
        tn = int(self.temp_num)
        if method == "unsup-wrap-nat":
            if tn == 1:
-               qtemp = "{c@lstm_i} {event}, {rel_i} So PersonX is seen as {ph}."
+               qtemp = "{c@mat_i} {event}, So PersonX is seen as {ph}."
            elif tn == 2:
                qtemp = "{c@merge_i} {event}, {rel_i} So PersonX is as {ph}."
            elif tn == 3:
@@ -81,7 +81,7 @@ class xIntentTemplate(RelTemplate):
                anstemp = "he intends {resp} {end}"
        elif method == "unsup-wrap-nat":
            if tn == 1:
-               qtemp = "{c@lstm_i} Because of {event}, {rel_i} they want {ph}"
+               qtemp = "{c@mat_i} Because of {event}, they want {ph}"
            if tn == 2:
                qtemp = "{c@merge_i} Because of {event}, {rel_i} they want {ph}"
            if tn == 3:

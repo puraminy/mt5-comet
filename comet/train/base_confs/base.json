@@ -64,7 +64,6 @@
     "skilled_variant": "",
     "int_dim": 10,
     "prompt_token_num": 5,
-    "n_tasks": 2,
     "n_prompts": 5,
     "init_temperature": 0.3,
     "batch_size": 8,

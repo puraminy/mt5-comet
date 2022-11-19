@@ -172,6 +172,7 @@ class MyDataset(torch.utils.data.Dataset):
         self.old_input = ""
         self.si = 0
         self.prompts = {}
+        self.tasks = []
         self.example_counter = 0
         self.use_dif_templates = use_dif_templates
         self.repeat = repeat
@@ -410,8 +411,8 @@ class MyDataset(torch.utils.data.Dataset):
                 #response = "<extra_id_0> ___ " + response
             else:
                 _query = _query.replace("___", "<extra_id_0>")
-        #if not rel in self.data_split:
-        #    self.data_split[rel] = {}
+        if not rel in self.tasks:
+            self.tasks.append(rel)
         #if not lang in self.data_split[rel]:
         #    self.data_split[rel][lang] = []
         #if query not in self.data_split[rel][lang]:

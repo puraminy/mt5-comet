@@ -46,7 +46,7 @@ class PTuningWrapper(torch.nn.Module):
     def __init__(self,model,prompt_encoders, general_encoders,decoder_prompt_encoder=None,
         prompt_token_fn=None, prompt_token_id=None, prompt_token_ids=None,
         replacing_token_id=0, do_log=True, merge_encoder=None, 
-        flat_encoder = None, prefix_config=None, exp_id=""):
+        flat_encoder = None, exp_id=""):
         """
         PTuningWrapper for Huggingface transformer models (Encoder Models).
         It will replace the prompt token embeddings with ones from prompt encoder.
@@ -149,40 +149,11 @@ class PTuningWrapper(torch.nn.Module):
             self.model_embeddings_size = self.underlying_model.config.vocab_size
             self.prompt_token_fn = lambda t:(t>=self.model_embeddings_size)
             
-        if prefix_config is None:
-            prefix_config = {
-                  "temperature": 0.3,
-                  "n_tasks": len(prompt_encoders),
-                  "n_prompts": len(self.flat_prompt_ids),
-                  "n_prompt_tokens": len(self.flat_prompt_ids),
-                  "intrinsic_dim": 300,
-            }
-        self.prefix_config = prefix_config
-        if prefix_config is not None:
-            self.temperature = self.prefix_config['temperature']
-            self.task_id = 0
-
-            self.router = nn.Parameter(data=torch.empty((
-                prefix_config['n_tasks'],
-                prefix_config['n_prompts']
-            )).uniform_(-1e-3, 1e-3))
-
-            self.z = nn.Parameter(data=torch.empty((
-                prefix_config['n_prompts'],
-                prefix_config['intrinsic_dim']
-            )).uniform_(-1e-3, 1e-3))
-
-            bound = 1 / math.sqrt(prefix_config['n_prompt_tokens'] * model.config.hidden_size)
-            self.A = nn.Parameter(data=torch.empty((
-                prefix_config['intrinsic_dim'],
-                prefix_config['n_prompt_tokens'] * model.config.hidden_size
-            )).uniform_(-bound, bound))
-
 
     def add_prompt_encoder(self, encoder):
         self.prompt_encoders.append(encoder)
 
-    def encoder_forward(self, encoder, input_ids, inputs_embeds):
+    def encoder_forward(self, encoder, input_ids, inputs_embeds, tids):
         #encoder = self.prompt_encoders[0]
         device=inputs_embeds.device
         winfo("********** offset: %s, length: %s", encoder.id_offset, encoder.length)
@@ -195,8 +166,7 @@ class PTuningWrapper(torch.nn.Module):
             winfo("Prompt Input ids: %s", prompt_input_ids)
             winfo("Len Prompt Input ids: %s", len(prompt_input_ids))
             # call forwards on prompt encoder whose outputs are prompt embeddings
-            prompt_embeds = encoder(prompt_input_ids,\
-                pids=None).to(device)
+            prompt_embeds = encoder(prompt_input_ids, tids).to(device)
             winfo("Prompt Embeds size: %s", prompt_embeds.size())
             winfo("Encoder mask: %s", encoder_masks.size())
             inputs_embeds[encoder_masks]=prompt_embeds
@@ -227,39 +197,16 @@ class PTuningWrapper(torch.nn.Module):
             winfo("All prompts input ids: %s", all_prompts_input_ids)
             winfo("Len All prompts input ids: %s", len(all_prompts_input_ids))
             if self.merge_encoder:
-                #flat_output = self.flat_encoder(all_prompts_input_ids,pids).to(device)
-                merge_output = self.encoder_forward(self.merge_encoder, input_ids, inputs_embeds)
+                #flat_output = self.flat_encoder(all_prompts_input_ids,tids).to(device)
+                merge_output = self.encoder_forward(self.merge_encoder, input_ids, inputs_embeds, tids)
             elif self.flat_encoder:
-                #flat_output = self.flat_encoder(all_prompts_input_ids,pids).to(device)
-                flat_output = self.encoder_forward(self.flat_encoder, input_ids, inputs_embeds)
-                if True: #self.prefix_config is None:
-                    #inputs_embeds[prompt_masks]=flat_output
-                    pass
-                else:
-                    router = torch.index_select(self.router, 0, tids)
-                    if self.training:
-                        router = RelaxedBernoulli(temperature=self.temperature, logits=router).rsample()  # layer * n_prompts
-                    else:
-                        router = torch.sigmoid(router)  # layer * n_prompts
-                    router = (router / (router.sum(dim=-1, keepdim=True) + 1e-12))  # layer * 1 * n_prompts
-                    z = torch.mm(self.z, self.A) if not hasattr(self, 'prompt') else self.prompt
-                    #prompt_embeds = torch.matmul(router.unsqueeze(0), z).view(-1, self.config.hidden_size)
-                    prompt_embeds = torch.matmul(router.view(1, -1), flat_output).view(-1, self.config.hidden_size)
-
-
-                    inputs_embeds[prompt_masks]=flat_output
-                #prompt_padding = torch.zeros(size=(hidden_shape[0], hidden_shape[1] - self.prefix_config['n_prompt_tokens'] - 1, self.config.hidden_size), device=device)
-
-                #extended_prompt_embedding = torch.cat([prompt_embedding, prompt_padding], dim=1)
-                #pre_padding = torch.zeros(size=(hidden_shape[0], 1, self.config.hidden_size), device=device)
-                #extended_prompt_embedding = torch.cat([pre_padding, extended_prompt_embedding], dim=1)  # for <CLS>
-                # extended_prompt_embedding = extended_prompt_embedding.repeat(input_shape[0], 1, 1)
-                #hidden_states = hidden_states + extended_prompt_embedding
+                #flat_output = self.flat_encoder(all_prompts_input_ids,tids).to(device)
+                flat_output = self.encoder_forward(self.flat_encoder, input_ids, inputs_embeds, tids)
             else:
                 embeds_list = []
                 flat_dict = {}
                 for encoder in self.prompt_encoders:
-                    prompt_embeds = self.encoder_forward(encoder, input_ids, inputs_embeds)
+                    prompt_embeds = self.encoder_forward(encoder, input_ids, inputs_embeds, tids)
                     #inputs_embeds[encoder_masks]=prompt_embeds
                     if self.testing:
                         for _id,_embed in zip(prompt_input_ids.numpy(),prompt_embeds):
@@ -316,8 +263,7 @@ class PTuningWrapper(torch.nn.Module):
                         winfo("Len Prompt Input ids: %s", len(prompt_input_ids))
                         # call forwards on prompt encoder whose outputs are prompt embeddings
                         device=decoder_input_ids.device
-                        decoder_prompt_embeds = encoder(prompt_input_ids,\
-                            pids).to(device)
+                        decoder_prompt_embeds = encoder(prompt_input_ids, tids).to(device)
 
                         decoder_inputs_embeds[encoder_masks] = \
                             decoder_prompt_embeds
@@ -422,6 +368,50 @@ class EmbeddingPromptEncoder(PromptEncoder):
     def dump_embeddings_into(self, weight):
         detached_embeddings = self.embedding.weight.detach()
         weight[self.prompt_ids,:]=detached_embeddings
+
+class MatPromptEncoder(PromptEncoder):
+    def __init__(self, prefix_config, **kwargs):
+        super().__init__(**kwargs)
+        self.prefix_config = prefix_config
+        if prefix_config is not None:
+            self.temperature = self.prefix_config['temperature']
+            self.task_id = 0
+
+            self.router = nn.Parameter(data=torch.empty((
+                prefix_config['n_tasks'],
+                prefix_config['n_prompts']
+            )).uniform_(-1e-3, 1e-3))
+
+            self.z = nn.Parameter(data=torch.empty((
+                prefix_config['n_prompts'],
+                prefix_config['intrinsic_dim']
+            )).uniform_(-1e-3, 1e-3))
+
+            bound = 1 / math.sqrt(prefix_config['n_prompt_tokens'] * self.embedding_dim)
+            self.A = nn.Parameter(data=torch.empty((
+                prefix_config['intrinsic_dim'],
+                prefix_config['n_prompt_tokens'] * self.embedding_dim
+            )).uniform_(-bound, bound))
+
+    def forward(self, prompt_token_ids, tids=None):
+        router = torch.index_select(self.router, 0, tids)
+        if self.training:
+            router = RelaxedBernoulli(temperature=self.temperature, logits=router).rsample()  # layer * n_prompts
+        else:
+            router = torch.sigmoid(router)  # layer * n_prompts
+        router = (router / (router.sum(dim=-1, keepdim=True) + 1e-12))  # layer * 1 * n_prompts
+        z = torch.mm(self.z, self.A) if not hasattr(self, 'prompt') else self.prompt
+        #ret_embeds = torch.matmul(router.unsqueeze(0), z).view(-1, self.embedding_dim)
+        ret_embeds = torch.matmul(router, z).view(-1, self.embedding_dim)
+        return ret_embeds 
+
+    def dump_embeddings_into(self, weight):
+        with torch.no_grad():
+            embs = self.forward(self.input_ids)
+        detached_embeddings = embs.detach()
+        weight[self.prompt_ids,:]=detached_embeddings
+        
+
 
 class MergePromptEncoder(PromptEncoder):
     def __init__(self, encoders = [], **kwargs):

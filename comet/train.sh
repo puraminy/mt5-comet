@@ -55,13 +55,13 @@ if [ "$m" -eq "0" ]; then
 fi
 seed=123
 
-exp=xint-multi_mergeXG3
+exp=xint-multi_mat
 log=${home}/logs/${exp}
 echo "log: ${log}"
 #filter=xIntent#xAttr#xNeed#xReact#xEffect#oReact#xWant#multi
-filter=xAttr#xIntent#multi
+filter=xAttr#xIntent #multi
 merge=none #lstm
-tn=2#3
+tn=1
 shared=False
 trial=2
 epochs=2
