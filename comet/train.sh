@@ -55,7 +55,7 @@ if [ "$m" -eq "0" ]; then
 fi
 seed=123
 
-exp=xint-multi_mergeXNat122
+exp=xint-multi_mergeXG
 log=${home}/logs/${exp}
 echo "log: ${log}"
 #filter=xIntent#xAttr#xNeed#xReact#xEffect#oReact#xWant#multi
@@ -63,7 +63,7 @@ filter=xAttr#xIntent #multi
 merge=none #lstm
 tn=2
 shared=False
-trial=7
+trial=1
 epochs=2
 
 runlite run -exp $exp -lp ${log} -bc base -ov $g2 -var method=unsup-wrap-nat--rel_filter=$filter--train_samples=$train--epochs_num=$epochs--repeat=4--temp_num=$tn--loop=True--test_samples=$test--flat_prompts=$merge--shared_embs=$shared--seed=123 --follow_method=True --scorers="rouge-bert" --data_path=${home}/mt5-comet/comet/data/atomic2020 --do_valid=False --val_samples=10 --encoder_type=lstm --cycle=100 $g1 --batch_size=16 --trial=$trial 

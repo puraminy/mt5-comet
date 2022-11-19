@@ -2015,7 +2015,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                     "prefixed":p_str,
                     "pid":pid,
                     "tag":tag,
-                    "gen_encs":n_prompts,
+                    "n_prompts":n_prompts,
                     "multi":multi, 
                     "steps":str(train_samples)+"x"+str(repeat)+"x"+str(epochs_num),
                     "plen":prompt_length,
@@ -2145,7 +2145,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         l = []
         for m in range(prompt_token_num):
             l.append("<g"+str(n) + "@lstm_" + str(m)+ ">") 
-    general_prompts["g"+str(n)] = l 
+        general_prompts["g"+str(n)] = l 
     if flat_prompts == "none": flat_prompts = ""
     assert flat_prompts != "none"
     prompts = sample_dataset.prompts
