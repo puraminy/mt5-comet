@@ -1427,7 +1427,7 @@ def run(ctx, conf_path, base_conf, experiment,
 )
 @click.option(
     "--prompt_token_num",
-    default=5,
+    default=30,
     type=int,
     help=""
 )
@@ -1520,8 +1520,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         del args["run_args"]
         with open(os.path.join(conf_path, f'{config}.json'), 'w') as outfile:
             json.dump(args, outfile, indent=4)
-
-        mlog.info("Config %s was created at %s", config + ".json", conf_path)
+        mlog.info("Config %s was created at %s %s", conf_path, config + ".json", conf_path)
         return
     if not data_name:
         if not data_path:

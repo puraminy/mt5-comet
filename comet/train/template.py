@@ -7,6 +7,7 @@ class RelTemplate:
     def __init__(self, rel, temp_num=1):
         self.rel = rel
         self.temp_num = temp_num
+        self.num_prompt_tokens = 30
         self.rec_counter = 1
         self.encoder_prompts = {} 
         self.decoder_prompts = {}
@@ -515,7 +516,7 @@ class RelTemplate:
             if rel in relation_prompt_lengths:
                 plen = relation_prompt_lengths[rel]
             else:
-                plen = [5] 
+                plen = [self.num_prompt_tokens] 
         _pholder = place_holder
         place_holder = place_holder.replace("{", "<")  
         place_holder = place_holder.replace("}", ">")  

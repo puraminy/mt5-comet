@@ -398,7 +398,7 @@ class MatPromptEncoder(PromptEncoder):
             index_list = prompt_token_ids - self.id_offset
         else:
             index_list = (prompt_token_ids.view(-1,1) == self.input_ids).int().argmax(dim=1)
-        router = self.router[tids[0]] # torch.index_select(self.router, 0, tids)
+        router = self.router[0] # torch.index_select(self.router, 0, tids)
         if self.training:
             router = RelaxedBernoulli(temperature=self.temperature, logits=router).rsample()  # layer * n_prompts
         else:
