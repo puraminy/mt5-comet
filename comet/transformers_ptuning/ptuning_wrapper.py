@@ -423,11 +423,13 @@ class MergePromptEncoder(PromptEncoder):
         super().__init__(**kwargs)
         self.task_id = 0
         self.temperature = 1 
+        n_prompts = 5 #len(encoders) 
+        n_tasks = 2
         if encoders:
             self.encoders = torch.nn.ModuleList(encoders)
         self.router = nn.Parameter(data=torch.empty((
-            prefix_config['n_tasks'],
-            len(encoders) 
+            n_tasks,
+            n_prompts
         )).uniform_(-1e-3, 1e-3))
 
     def forward(self, prompt_token_ids, pids=None, training=True):
@@ -437,20 +439,22 @@ class MergePromptEncoder(PromptEncoder):
             router = RelaxedBernoulli(temperature=self.temperature, logits=router).rsample()  # layer * n_prompts
         else:
             router = torch.sigmoid(router)  # layer * n_prompts
-        router = (router / (router.sum(dim=-1, keepdim=True) + 1e-12))  # layer * 1 * n_prompts
-        z = torch.mm(self.z, self.A) if not hasattr(self, 'prompt') else self.prompt
+        router = (router / (router.sum(dim=-1, keepdim=True) + 1e-12))  
+        # layer * 1 * n_prompts
         #ret_embeds = torch.matmul(router.unsqueeze(0), z).view(-1, self.embedding_dim)
-        running_weight = torch.matmul(router, z).view(-1, self.embedding_dim)
         if self.id_offset > 0:
             index_list = prompt_token_ids - self.id_offset
         else:
             index_list = (prompt_token_ids.view(-1,1) == self.input_ids).int().argmax(dim=1)
-        s = torch.zeros(len(self.prompt_ids), self.embedding_dim).to(device)
+        z = torch.zeros(len(self.prompt_ids), self.embedding_dim).to(device)
+        tl = []
         for encoder in self.encoders:
             pids = encoder.input_ids
             out = encoder(pids).to(device) 
-            s += out
-        running_weight = s / len(self.encoders)
+            tl.append(out)
+        z = torch.vstack(tl) 
+        z = z.view(len(self.encoders), -1) 
+        running_weight = torch.matmul(router, z).view(-1, self.embedding_dim)
         ret_embeds = F.embedding(index_list, running_weight)
         return ret_embeds 
 

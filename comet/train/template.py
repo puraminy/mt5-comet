@@ -7,7 +7,7 @@ class RelTemplate:
     def __init__(self, rel, temp_num=1):
         self.rel = rel
         self.temp_num = temp_num
-        self.num_prompt_tokens = 30
+        self.num_prompt_tokens = 8 
         self.rec_counter = 1
         self.encoder_prompts = {} 
         self.decoder_prompts = {}
