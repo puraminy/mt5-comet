@@ -27,6 +27,9 @@ consoleHandler = logging.StreamHandler()
 tlog = logging.getLogger("comet.time")
 FORMAT = logging.Formatter("[%(filename)s:%(lineno)s - %(funcName)10s() ] %(message)s")
 
+def tinfo(text, *args, **kwargs):
+    tlog.info(text, *args)
+
 def winfo(text, *args, **kwargs):
     wlog.info(text, *args)
     #print((text, *args))
@@ -437,10 +440,10 @@ class MergePromptEncoder(PromptEncoder):
         router = self.router[self.task_id] # torch.index_select(self.router, 0, tids)
         if training:
             router = RelaxedBernoulli(temperature=self.temperature, logits=router).rsample()  # layer * n_prompts
-            winfo("router:", router)
+            tinfo("router: %s", router)
         else:
             router = torch.sigmoid(router)  # layer * n_prompts
-            print("Router Sigmoid:", self.router)
+            tinfo("Router Sigmoid: %s", router)
         router = (router / (router.sum(dim=-1, keepdim=True) + 1e-12))  
         # layer * 1 * n_prompts
         #ret_embeds = torch.matmul(router.unsqueeze(0), z).view(-1, self.embedding_dim)
@@ -461,7 +464,7 @@ class MergePromptEncoder(PromptEncoder):
         return ret_embeds 
 
     def dump_embeddings_into(self, weight):
-        print("Router:", self.router)
+        tinfo("Final Router: %s", self.router)
         with torch.no_grad():
             embs = self.forward(self.input_ids, training=False)
         detached_embeddings = embs.detach()
