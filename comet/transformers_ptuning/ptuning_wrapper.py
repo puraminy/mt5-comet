@@ -434,7 +434,7 @@ class MergePromptEncoder(PromptEncoder):
             n_tasks,
             n_prompts
         )).uniform_(-1e-3, 1e-3))
-        tinfo("Init router : %s", router)
+        tinfo("Init router : %s", self.router)
 
     def forward(self, prompt_token_ids, pids=None, training=True):
         device = self.device
