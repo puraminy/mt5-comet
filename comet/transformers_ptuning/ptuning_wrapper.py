@@ -39,7 +39,7 @@ def getFname(name):
     if "ahmad" in home or "pouramini" in home:
         logFilename = os.path.join(home, "mt5-comet", "comet", f"output/{name}.log")
     else:
-        logFilename = f"{name}.log"
+        logFilename = f"/content/{name}.log"
     return logFilename
 
 class PTuningWrapper(torch.nn.Module):
@@ -437,6 +437,7 @@ class MergePromptEncoder(PromptEncoder):
         router = self.router[self.task_id] # torch.index_select(self.router, 0, tids)
         if training:
             router = RelaxedBernoulli(temperature=self.temperature, logits=router).rsample()  # layer * n_prompts
+            winfo("router:", router)
         else:
             router = torch.sigmoid(router)  # layer * n_prompts
             print("Router Sigmoid:", self.router)

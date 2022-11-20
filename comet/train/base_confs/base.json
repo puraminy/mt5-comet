@@ -64,7 +64,7 @@
     "stop_level": 0,
     "skilled_variant": "",
     "int_dim": 300,
-    "prompt_token_num": 30,
+    "prompt_token_num": 8,
     "n_prompts": 5,
     "init_temperature": 1.0,
     "batch_size": 8,
