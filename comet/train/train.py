@@ -1421,13 +1421,13 @@ def run(ctx, conf_path, base_conf, experiment,
 )
 @click.option(
     "--init_temperature",
-    default=0.3,
+    default=1.,
     type=float,
     help=""
 )
 @click.option(
     "--prompt_token_num",
-    default=30,
+    default=10,
     type=int,
     help=""
 )
