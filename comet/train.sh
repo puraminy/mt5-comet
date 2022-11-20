@@ -59,7 +59,7 @@ exp=xint-mix
 log=${home}/logs/${exp}
 echo "log: ${log}"
 #filter=xIntent#xAttr#xNeed#xReact#xEffect#oReact#xWant#multi
-filter=xAttr#xIntent #multi
+filter=xAttr #xIntent #multi
 merge=none #lstm
 tn=3
 shared=False

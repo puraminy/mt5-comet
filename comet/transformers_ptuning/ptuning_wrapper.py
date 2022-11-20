@@ -434,13 +434,14 @@ class MergePromptEncoder(PromptEncoder):
             n_tasks,
             n_prompts
         )).uniform_(-1e-3, 1e-3))
+        tinfo("Init router : %s", router)
 
     def forward(self, prompt_token_ids, pids=None, training=True):
         device = self.device
         router = self.router[self.task_id] # torch.index_select(self.router, 0, tids)
         if training:
             router = RelaxedBernoulli(temperature=self.temperature, logits=router).rsample()  # layer * n_prompts
-            tinfo("router: %s", router)
+            #tinfo("router: %s", router)
         else:
             router = torch.sigmoid(router)  # layer * n_prompts
             tinfo("Router Sigmoid: %s", router)
