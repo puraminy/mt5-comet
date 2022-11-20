@@ -394,7 +394,7 @@ class MatPromptEncoder(PromptEncoder):
             self.A = nn.Parameter(data=torch.empty((
                 prefix_config['intrinsic_dim'],
                 prefix_config['n_prompt_tokens'] * self.embedding_dim
-            )).uniform_(-bound, bound))
+            )).uniform_(-bound, bound), requires_grad=False)
 
     def forward(self, prompt_token_ids, tids=None, training=True):
         if self.id_offset > 0:
@@ -441,11 +441,13 @@ class MergePromptEncoder(PromptEncoder):
         router = self.router[self.task_id] # torch.index_select(self.router, 0, tids)
         if training:
             router = RelaxedBernoulli(temperature=self.temperature, logits=router).rsample()  # layer * n_prompts
-            tinfo("router: %s", self.router)
+            router = (router / (router.sum(dim=-1, keepdim=True) + 1e-12))  
         else:
+            tinfo("Router Before Sigmoid: %s", router)
             router = torch.sigmoid(router)  # layer * n_prompts
-            tinfo("Router Sigmoid: %s", router)
-        router = (router / (router.sum(dim=-1, keepdim=True) + 1e-12))  
+            tinfo("Router After Sigmoid: %s", router)
+            router = (router / (router.sum(dim=-1, keepdim=True) + 1e-12))  
+            tinfo("Router After division: %s", router)
         # layer * 1 * n_prompts
         #ret_embeds = torch.matmul(router.unsqueeze(0), z).view(-1, self.embedding_dim)
         if self.id_offset > 0:
@@ -467,7 +469,7 @@ class MergePromptEncoder(PromptEncoder):
     def dump_embeddings_into(self, weight):
         tinfo("Final Router: %s", self.router)
         with torch.no_grad():
-            embs = self.forward(self.input_ids, training=True)
+            embs = self.forward(self.input_ids, training=False)
         detached_embeddings = embs.detach()
         weight[self.prompt_ids,:]=detached_embeddings
         
