@@ -1415,7 +1415,7 @@ def run(ctx, conf_path, base_conf, experiment,
 )
 @click.option(
     "--int_dim",
-    default=100,
+    default=300,
     type=int,
     help=""
 )
@@ -2232,13 +2232,27 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                 scheduler = get_linear_schedule_with_warmup(optimizer,warm_up_steps,iterations)
             else:
                 paras = []
+                lrs = []
                 for encoder in model.prompt_encoders:
-                    para_list =[p for p in encoder.parameters() if p.requires_grad]
-                    if para_list:
-                        paras.append(para_list)
+                    if isinstance(encoder, MatPromptEncoder):
+                        paras.append([encoder.router])
+                        lrs.append(router_learning_rate)
+                        paras.append([encoder.A])
+                        lrs.append(Az_learning_rate)
+                        paras.append([encoder.z])
+                        lrs.append(Az_learning_rate)
+                    else:
+                        if isinstance(encoder, MergePromptEncoder):
+                            paras.append([encoder.router])
+                            lrs.append(router_learning_rate)
+                        else:
+                            para_list =[p for p in encoder.parameters() if p.requires_grad]
+                            if para_list:
+                                paras.append(para_list)
+                                lrs.append(pl_learning_rate)
                 for encoder in model.general_encoders:
                     paras.append([p for p in encoder.parameters() if p.requires_grad])
-                lrs = [pl_learning_rate]*len(paras)
+                    lrs.append(pl_learning_rate)
                 optimizer = Optim(paras, lrs)
                 scheduler = Scheduler(optimizer)
             #if model.flat_encoder is not None:
