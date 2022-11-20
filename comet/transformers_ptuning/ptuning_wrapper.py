@@ -441,7 +441,7 @@ class MergePromptEncoder(PromptEncoder):
         router = self.router[self.task_id] # torch.index_select(self.router, 0, tids)
         if training:
             router = RelaxedBernoulli(temperature=self.temperature, logits=router).rsample()  # layer * n_prompts
-            #tinfo("router: %s", router)
+            tinfo("router: %s", self.router)
         else:
             router = torch.sigmoid(router)  # layer * n_prompts
             tinfo("Router Sigmoid: %s", router)
