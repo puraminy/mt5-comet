@@ -443,7 +443,7 @@ class MergePromptEncoder(PromptEncoder):
             router = RelaxedBernoulli(temperature=self.temperature, logits=router).rsample()  # layer * n_prompts
             router = (router / (router.sum(dim=-1, keepdim=True) + 1e-12))  
         else:
-            tinfo("Router Before Sigmoid: %s", router)
+            tinfo("Router Before relu: %s", router)
             #router = torch.sigmoid(router)  # layer * n_prompts
             router[ router <= 0] = 0
             router[ router > 0] = 1
@@ -469,7 +469,7 @@ class MergePromptEncoder(PromptEncoder):
         return ret_embeds 
 
     def dump_embeddings_into(self, weight):
-        tinfo("Final Router: %s", self.router)
+        tinfo("Final Router (ReLU): %s", self.router)
         with torch.no_grad():
             embs = self.forward(self.input_ids, training=False)
         detached_embeddings = embs.detach()
