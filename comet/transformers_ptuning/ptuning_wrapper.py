@@ -436,9 +436,9 @@ class MergePromptEncoder(PromptEncoder):
         )).uniform_(-1e-3, 1e-3))
         tinfo("Init router : %s", self.router)
 
-    def forward(self, prompt_token_ids, pids=None, training=True):
+    def forward(self, prompt_token_ids, tids=None, training=True):
         device = self.device
-        router = self.router[self.task_id] # torch.index_select(self.router, 0, tids)
+        router = self.router[tids[0]] # torch.index_select(self.router, 0, tids)
         if training:
             router = RelaxedBernoulli(temperature=self.temperature, logits=router).rsample()  # layer * n_prompts
             router = (router / (router.sum(dim=-1, keepdim=True) + 1e-12))  
@@ -471,7 +471,7 @@ class MergePromptEncoder(PromptEncoder):
     def dump_embeddings_into(self, weight):
         tinfo("Final Router (ReLU): %s", self.router)
         with torch.no_grad():
-            embs = self.forward(self.input_ids, training=False)
+            embs = self.forward(self.input_ids,tids=[0,1], training=False)
         detached_embeddings = embs.detach()
         weight[self.prompt_ids,:]=detached_embeddings
         
