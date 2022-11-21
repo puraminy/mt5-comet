@@ -448,7 +448,7 @@ class MergePromptEncoder(PromptEncoder):
             router[ router <= 0] = 0
             router[ router > 0] = 1
             tinfo("Router After relu: %s", router)
-            router = (router / (router.sum(dim=-1, keepdim=True) + 1e-12))  
+            #router = (router / (router.sum(dim=-1, keepdim=True) + 1e-12))  
             tinfo("Router After division: %s", router)
         # layer * 1 * n_prompts
         #ret_embeds = torch.matmul(router.unsqueeze(0), z).view(-1, self.embedding_dim)
