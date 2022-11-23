@@ -37,7 +37,6 @@ home=$(echo $others | xargs)
 if [ -z $home ]; then
    home=$HOME
 fi 
-home="/content/drive/MyDrive"
 echo $home
 alias runlite="python3 ${home}/mt5-comet/comet/train/train.py"
 # wrap experiments
