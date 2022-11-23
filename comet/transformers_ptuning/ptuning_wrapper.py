@@ -422,17 +422,19 @@ class MatPromptEncoder(PromptEncoder):
 
 
 class MergePromptEncoder(PromptEncoder):
-    def __init__(self, encoders = [], **kwargs):
+    def __init__(self, encoders = [], trunc_router=False, **kwargs):
         super().__init__(**kwargs)
         self.task_id = 0
         self.temperature = 1 
-        n_prompts = 5 #len(encoders) 
-        n_tasks = 2
+        self.n_prompts = 5 #len(encoders) 
+        self.n_tasks = 2
+        self.trunc_router = trunc_router
+
         if encoders:
             self.encoders = torch.nn.ModuleList(encoders)
         self.router = nn.Parameter(data=torch.empty((
-            n_tasks,
-            n_prompts
+            self.n_tasks,
+            self.n_prompts
         )).uniform_(-1e-3, 1e-3))
         tinfo("Init router : %s", self.router)
 
@@ -445,10 +447,11 @@ class MergePromptEncoder(PromptEncoder):
         else:
             tinfo("Router Before relu: %s", router)
             #router = torch.sigmoid(router)  # layer * n_prompts
-            with torch.no_grad():
-                router[ router <= 0] = 0
-                router[ router > 0] = 1
-            tinfo("Router After relu: %s", router)
+            if self.trunc_router:
+                with torch.no_grad():
+                    router[ router <= 0] = 0
+                    router[ router > 0] = 1
+                tinfo("Router After relu: %s", router)
             #router = (router / (router.sum(dim=-1, keepdim=True) + 1e-12))  
         # layer * 1 * n_prompts
         #ret_embeds = torch.matmul(router.unsqueeze(0), z).view(-1, self.embedding_dim)

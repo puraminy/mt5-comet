@@ -23,6 +23,11 @@ from comet.train.mylogs import *
 import pickle5 as pickle
 
 
+main_args = {}
+def set_args(args):
+    global main_args 
+    main_args =args
+
 SPECIAL_TOKENS  = { "bos_token": "<|BOS|>",
                     "eos_token": "</s>",
                     "unk_token": "<|UNK|>",
@@ -480,6 +485,7 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", flat_promp
     for encoder in prompt_encoders:
         if isinstance(encoder, MergePromptEncoder):
             encoder.encoders = general_encoders
+            encoder.trunc_router = main_args.trunc_router
 
     if flat_prompts:
         flat_encoder, _ = create_encoder("flat", model, tokenizer, flat_prompt_tokens, flat_prompts, wrapped_model, prefix_config)
