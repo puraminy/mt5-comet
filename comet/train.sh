@@ -38,7 +38,7 @@ if [ -z $home ]; then
    home=$HOME
 fi 
 echo $home
-alias runlite="python3 ${home}/mt5-comet/comet/train/train.py"
+alias runlite="python3 train/train.py"
 # wrap experiments
 folder=${PWD##*/}          
 
