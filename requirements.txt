@@ -4,3 +4,5 @@ rouge
 datasets
 bert_score
 pandas==1.2.3
+debugpy
+termcolor

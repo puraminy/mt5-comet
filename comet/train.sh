@@ -35,10 +35,10 @@ do
 done
 home=$(echo $others | xargs)
 if [ -z $home ]; then
-   home=/home/ahmad
+   home=$HOME
 fi 
 echo $home
-alias runlite="python ${home}/mt5-comet/comet/train/train.py"
+alias runlite="python3 ${home}/mt5-comet/comet/train/train.py"
 # wrap experiments
 folder=${PWD##*/}          
 
@@ -55,7 +55,7 @@ if [ "$m" -eq "0" ]; then
 fi
 seed=123
 
-exp=xint-mix-t2
+exp=xint-mix
 log=${home}/logs/${exp}
 echo "log: ${log}"
 #filter=xIntent#xAttr#xNeed#xReact#xEffect#oReact#xWant#multi
