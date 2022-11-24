@@ -55,13 +55,13 @@ if [ "$m" -eq "0" ]; then
 fi
 seed=123
 
-exp=xint-router2
+exp=xint-router3
 log=${home}/logs/${exp}
 echo "log: ${log}"
 #filter=xIntent#xAttr#xNeed#xReact#xEffect#oReact#xWant#multi
 filter=xAttr#xIntent#multi
 merge=none #lstm
-tn=2#3
+tn=3
 shared=False
 trial=2
 epochs=2
@@ -70,7 +70,7 @@ runlite run -exp $exp -lp ${log} -bc base -ov $g2 -var method=unsup-wrap-nat--re
 
 cp train.sh ${log}
 #if [ $home = "/content" ]; then
-mv /content/*.log ${log}
+mv /content/*time*.log ${log}
 tar -czvf /content/${exp}-$m.tar.gz ${log}
 #cp /content/${exp}-$m.tar.gz ${home}/logs 
 #fi

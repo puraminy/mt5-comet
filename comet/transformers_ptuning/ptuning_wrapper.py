@@ -440,7 +440,10 @@ class MergePromptEncoder(PromptEncoder):
 
     def forward(self, prompt_token_ids, tids=None, training=True):
         device = self.device
-        router = self.router[tids[0]] # torch.index_select(self.router, 0, tids)
+        if training:
+            router = self.router[tids[0]] 
+        else:
+            router = torch.index_select(self.router, 0, tids)
         if training:
             router = RelaxedBernoulli(temperature=self.temperature, logits=router).rsample()  # layer * n_prompts
             router = (router / (router.sum(dim=-1, keepdim=True) + 1e-12))  
