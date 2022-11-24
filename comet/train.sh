@@ -53,8 +53,6 @@ if [ "$m" -eq "0" ]; then
   test=-1
   train=2
 fi
-test=-1
-train=2
 seed=123
 
 exp=xint-router2
