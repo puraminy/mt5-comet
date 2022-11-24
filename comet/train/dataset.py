@@ -427,7 +427,6 @@ class MyDataset(torch.utils.data.Dataset):
         flat_data = []
         if iter_end < 0:
             iter_end = iter_start + self.num_samples
-        kk = 0 
         dlog.info("========================== SPLIT: %s", self.split_name)
         dlog.info("get data from %s to %s", iter_start, iter_end)
         dlog.info("total rows: %s", len(self.split_df))
@@ -436,33 +435,54 @@ class MyDataset(torch.utils.data.Dataset):
             pbar = tqdm(total = self.num_samples, position=0, leave=True) #,dynamic_ncols=True)
             pbar.set_description("Preparing iterator "+ self.split_name)
 
-        for index, d in self.split_df.iterrows():
-            if kk < iter_start:
-                dlog.info("!!!!!!!!! before start %s", iter_start)
+        dict_dfs = dict(tuple(self.split_df.groupby("prefix")))
+        bs = self.batch_size
+        keys = list(dict_dfs)
+        total = len(self.split_df)
+        rr = 0
+        kk = 0 # total rows counter
+        start = {} # stat pointer 
+        while kk < total:
+            key = keys[rr]
+            rr += 1 # data frames counter and switcher
+            rr = rr % len(keys)
+            df = dict_dfs[key]
+            ii = 0 # batch counter
+            jj = 0 # skip start counter
+            if not key in start:
+                start[key] = 0
+            for index, d in df.iterrows():
+                if jj < start[key]:
+                    dlog.info("!!!!!!!!! before start %s", iter_start)
+                    jj += 1
+                    continue
+                rel = d["prefix"]
+                inp = "input_text"
+                targ_col = "target_text"
+                event = d[inp]
+                jj+= 1
+                start[key] += 1
+                resp = d[targ_col]
+                lang = "en2en"
+                if kk > iter_end:
+                    self.flat_data.extend(flat_data)
+                    return flat_data
+                _ditem = {"event":event, "resp":resp, 
+                        "inp":inp, 
+                        "targ_col":targ_col, 
+                        "row":d,
+                        "context_df":context_df,
+                        "index": kk,
+                        "rep":0,
+                        "rel":rel}
+                for rep in range(self.repeat):
+                    n_item = _ditem.copy()
+                    n_item["rep"] = rep
+                    flat_data.append(n_item)
                 kk += 1
-                continue
-            rel = d["prefix"]
-            inp = "input_text"
-            targ_col = "target_text"
-            event = d[inp]
-            resp = d[targ_col]
-            lang = "en2en"
-            if kk > iter_end:
-                self.flat_data.extend(flat_data)
-                return flat_data
-            _ditem = {"event":event, "resp":resp, 
-                    "inp":inp, 
-                    "targ_col":targ_col, 
-                    "row":d,
-                    "context_df":context_df,
-                    "index": kk,
-                    "rep":0,
-                    "rel":rel}
-            for rr in range(self.repeat):
-                n_item = _ditem.copy()
-                n_item["rep"] = rr
-                flat_data.append(n_item)
-            kk += 1
+                ii += 1
+                if ii >= bs:
+                    break
             if show_progress:
                 pbar.update()
         self.flat_data.extend(flat_data)
