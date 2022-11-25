@@ -12,6 +12,7 @@ out/*
 venv/*
 output*/*
 wandb/*
+**/**/wandb/*
 runs/*
 logs/*
 **/**/logs/*
