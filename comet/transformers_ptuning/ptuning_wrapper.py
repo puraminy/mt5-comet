@@ -1,5 +1,5 @@
 #暂时没考虑encoder和decoder的tokenizer不同的情况，以后可以给decoder全套的prompt_token_fn
-
+import wandb
 import re
 from pathlib import Path
 import transformers
@@ -14,7 +14,7 @@ import logging
 import os
 import math
 from os.path import expanduser
-from comet.train.mylogs import mbp
+from comet.train.mylogs import mbp, main_args
 from transformers.optimization import Adafactor, AdafactorSchedule, AdamW
 from torch.distributions.relaxed_bernoulli import RelaxedBernoulli
 
@@ -422,28 +422,27 @@ class MatPromptEncoder(PromptEncoder):
 
 
 class MergePromptEncoder(PromptEncoder):
-    def __init__(self, encoders = [], trunc_router=False, **kwargs):
+    def __init__(self, encoders = [], trunc_router=False, wandb=False, **kwargs):
         super().__init__(**kwargs)
         self.task_id = 0
         self.temperature = 1 
         self.n_prompts = 5 #len(encoders) 
         self.n_tasks = 2
         self.trunc_router = trunc_router
-
+        self.wandb = wandb
         if encoders:
             self.encoders = torch.nn.ModuleList(encoders)
         self.router = nn.Parameter(data=torch.empty((
             self.n_tasks,
             self.n_prompts
         )).uniform_(-1e-3, 1e-3))
-        tinfo("Init router : %s", self.router)
 
     def forward(self, prompt_token_ids, tids=None, training=True):
         device = self.device
-        if training:
-            router = self.router[tids[0]] 
-        else:
-            router = torch.index_select(self.router, 0, tids)
+        task_id = tids[0]
+        if self.wandb:
+            wandb.log({'tid': task_id})
+        router = self.router[task_id]
         if training:
             router = RelaxedBernoulli(temperature=self.temperature, logits=router).rsample()  # layer * n_prompts
             router = (router / (router.sum(dim=-1, keepdim=True) + 1e-12))  

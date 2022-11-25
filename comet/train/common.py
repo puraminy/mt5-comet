@@ -1,5 +1,4 @@
 from pathlib import Path
-
 import math
 from termcolor import colored
 from transformers import AddedToken 
@@ -22,8 +21,6 @@ import json
 from comet.train.mylogs import *
 import pickle5 as pickle
 
-
-main_args = {}
 def set_args(args):
     global main_args 
     main_args =args
@@ -486,6 +483,7 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", flat_promp
         if isinstance(encoder, MergePromptEncoder):
             encoder.encoders = general_encoders
             encoder.trunc_router = main_args["trunc_router"]
+            encoder.wandb = main_args["wb"]
 
     if flat_prompts:
         flat_encoder, _ = create_encoder("flat", model, tokenizer, flat_prompt_tokens, flat_prompts, wrapped_model, prefix_config)

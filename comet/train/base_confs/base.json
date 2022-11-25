@@ -30,7 +30,7 @@
     "clear_logs": false,
     "print_log": "",
     "log_per_exp": "",
-    "wandb": false,
+    "wb": false,
     "training_round": 1,
     "epochs_num": 1,
     "prompt_length": "8",

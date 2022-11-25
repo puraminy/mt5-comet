@@ -5,6 +5,7 @@ from pytz import timezone
 import datetime
 from pathlib import Path
 
+main_args = {}
 tehran = timezone('Asia/Tehran')
 now = datetime.datetime.now(tehran)
 now = now.strftime('%Y-%m-%d-%H:%M')
