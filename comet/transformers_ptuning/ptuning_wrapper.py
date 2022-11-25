@@ -442,6 +442,7 @@ class MergePromptEncoder(PromptEncoder):
         task_id = tids[0]
         if self.wandb:
             wandb.log({'tid': task_id})
+        tinfo("tid: %s", task_id)
         router = self.router[task_id]
         if training:
             router = RelaxedBernoulli(temperature=self.temperature, logits=router).rsample()  # layer * n_prompts
