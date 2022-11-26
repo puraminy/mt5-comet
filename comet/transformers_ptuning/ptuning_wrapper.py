@@ -45,7 +45,6 @@ def embinfo(text, *args, **kwargs):
     #print((text, *args))
 
 def getFname(name):
-    assert False, main_args
     if "ahmad" in home or "pouramini" in home:
         logFilename = os.path.join(home, "mt5-comet", "comet", f"output/{name}.log")
     else:
