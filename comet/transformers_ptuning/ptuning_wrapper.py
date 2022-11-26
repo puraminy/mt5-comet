@@ -14,9 +14,15 @@ import logging
 import os
 import math
 from os.path import expanduser
-from comet.train.mylogs import mbp, main_args
+from comet.train.mylogs import mbp 
 from transformers.optimization import Adafactor, AdafactorSchedule, AdamW
 from torch.distributions.relaxed_bernoulli import RelaxedBernoulli
+
+wargs = {}
+
+def set_wargs(args):
+    global wargs 
+    wargs =args
 
 home = expanduser("~")
 wlog = logging.getLogger("comet.wrapper")
@@ -39,6 +45,7 @@ def embinfo(text, *args, **kwargs):
     #print((text, *args))
 
 def getFname(name):
+    assert False, main_args
     if "ahmad" in home or "pouramini" in home:
         logFilename = os.path.join(home, "mt5-comet", "comet", f"output/{name}.log")
     else:
@@ -49,7 +56,7 @@ class PTuningWrapper(torch.nn.Module):
     def __init__(self,model,prompt_encoders, general_encoders,decoder_prompt_encoder=None,
         prompt_token_fn=None, prompt_token_id=None, prompt_token_ids=None,
         replacing_token_id=0, do_log=True, merge_encoder=None, 
-        flat_encoder = None, exp_id=""):
+        flat_encoder = None, args={}):
         """
         PTuningWrapper for Huggingface transformer models (Encoder Models).
         It will replace the prompt token embeddings with ones from prompt encoder.
@@ -78,13 +85,14 @@ class PTuningWrapper(torch.nn.Module):
                 embedding layer of the transformer model.
         """
 
-        wHandler = logging.FileHandler(getFname(str(exp_id) + "_wrapper"), mode='w')
+        set_wargs(args)
+        wHandler = logging.FileHandler(getFname(args["rel_filter"] + "_wrapper"), mode='w')
         wHandler.setFormatter(FORMAT)
         wlog.addHandler(wHandler)
-        eHandler = logging.FileHandler(getFname(str(exp_id) + "_embedding"), mode='w')
+        eHandler = logging.FileHandler(getFname(args["rel_filter"] + "_embedding"), mode='w')
         eHandler.setFormatter(FORMAT)
         emblog.addHandler(eHandler)
-        tHandler = logging.FileHandler(getFname(str(exp_id) + "_time"), mode='w')
+        tHandler = logging.FileHandler(getFname(args["rel_filter"] + "_time"), mode='w')
         tHandler.setFormatter(FORMAT)
         tlog.addHandler(tHandler)
         embinfo("Embedding log")
@@ -442,7 +450,7 @@ class MergePromptEncoder(PromptEncoder):
         task_id = tids[0]
         if self.wandb:
             wandb.log({'tid': task_id})
-        tinfo("tid: %s", task_id)
+        tinfo("tids: %s", tids)
         router = self.router[task_id]
         if training:
             router = RelaxedBernoulli(temperature=self.temperature, logits=router).rsample()  # layer * n_prompts

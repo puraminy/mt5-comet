@@ -505,7 +505,7 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", flat_promp
                 general_encoders=general_encoders, 
                 prompt_token_fn=get_prompt_token_fn(id_offset), 
                 merge_encoder=merge_encoder, flat_encoder=flat_encoder, 
-                exp_id=exp_id)
+                args=main_args)
     return wrapped_model
 
 def create_encoder(name, model, tokenizer, prompt_tokens, encoder_type="lstm", 
