@@ -442,6 +442,7 @@ class MergePromptEncoder(PromptEncoder):
         self.temperature = 1 
         self.n_prompts = 5 #len(encoders) 
         self.n_tasks = 2
+        self.flag = True
         self.trunc_router = trunc_router
         self.wandb = wandb
         if encoders:
@@ -450,14 +451,15 @@ class MergePromptEncoder(PromptEncoder):
             self.n_tasks,
             self.n_prompts
         )).uniform_(-1e-3, 1e-3))
-        tinfo("Initial Router: %s", self.router)
 
     def forward(self, prompt_token_ids, tids=None, training=True):
         device = self.device
         task_id = tids[0]
         if self.wandb:
             wandb.log({'tid': task_id})
-        tinfo("tids: %s", tids)
+        if self.flag:
+            tinfo("Initial Router: %s", self.router)
+            self.flag = False
         router = self.router[task_id]
         if training:
             router = RelaxedBernoulli(temperature=self.temperature, logits=router).rsample()  # layer * n_prompts
@@ -466,10 +468,10 @@ class MergePromptEncoder(PromptEncoder):
             #router = torch.sigmoid(router)  # layer * n_prompts
             if self.trunc_router:
                 with torch.no_grad():
-                    tinfo("Router: ========================================")
+                    tinfo("Router:========================================")
                     tinfo("Router Before relu: %s", router)
-                    router[ router <= 0] = 0
-                    router[ router > 0] = 1
+                    router[router <= 0] = 0
+                    router[router > 0] = 1
                     tinfo("Router After relu: %s", router)
             #router = (router / (router.sum(dim=-1, keepdim=True) + 1e-12))  
         # layer * 1 * n_prompts
@@ -493,9 +495,9 @@ class MergePromptEncoder(PromptEncoder):
     def dump_embeddings_into(self, weight):
         tinfo("Final Router (ReLU): %s", self.router)
         with torch.no_grad():
-            embs1= self.forward(self.input_ids,tids=[0], training=False)
+            embs= self.forward(self.input_ids,tids=[0], training=False)
             embs2= self.forward(self.input_ids,tids=[1], training=False)
-            embs = embs1 + embs2
+            #embs = embs1 + embs2
         tinfo("Router After Forward: %s", self.router)
         detached_embeddings = embs.detach()
         weight[self.prompt_ids,:]=detached_embeddings
