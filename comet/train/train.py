@@ -468,6 +468,8 @@ def run(ctx, conf_path, base_conf, experiment,
                for d in dirs:
                     shutil.rmtree(d)
 
+           if Path(spath).is_file():
+               os.remove(spath)
            Path(spath).mkdir(exist_ok=True, parents=True)
            args["save_path"] = spath
            args["load_path"] = pretPath 
