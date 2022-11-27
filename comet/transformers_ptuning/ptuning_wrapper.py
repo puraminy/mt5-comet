@@ -44,11 +44,13 @@ def embinfo(text, *args, **kwargs):
     emblog.info(text, *args)
     #print((text, *args))
 
-def getFname(name):
-    if "ahmad" in home or "pouramini" in home:
-        logFilename = os.path.join(home, "mt5-comet", "comet", f"output/{name}.log")
-    else:
-        logFilename = f"/content/{name}.log"
+def getFname(name, path=""):
+    if not path:
+        if "ahmad" in home or "pouramini" in home:
+            path = os.path.join(home, "mt5-comet", "comet", "output")
+        else:
+            path = "/content"
+    logFilename = os.path.join(path, f"{name}.log")
     return logFilename
 
 class PTuningWrapper(torch.nn.Module):
@@ -91,7 +93,8 @@ class PTuningWrapper(torch.nn.Module):
         eHandler = logging.FileHandler(getFname(args["rel_filter"] + "_embedding"), mode='w')
         eHandler.setFormatter(FORMAT)
         emblog.addHandler(eHandler)
-        tHandler = logging.FileHandler(getFname(args["rel_filter"] + "_time"), mode='w')
+        tHandler = logging.FileHandler(getFname(args["rel_filter"] + "_time", 
+            path=args["save_path"]), mode='w')
         tHandler.setFormatter(FORMAT)
         tlog.addHandler(tHandler)
         embinfo("Embedding log")
@@ -182,6 +185,10 @@ class PTuningWrapper(torch.nn.Module):
             inputs_embeds[encoder_masks]=prompt_embeds
             return prompt_embeds
         return None
+
+    #def generate(self, task_ids, *args, **kwargs):
+        #inform_layers(self.underlying_model, self.adapter_class, task_ids)
+    #    return self.underlying_model.generate(*args, **kwargs)
 
     def forward(self,input_ids, pids=None, **kwargs):
         ll = self.ll # log level
@@ -443,6 +450,7 @@ class MergePromptEncoder(PromptEncoder):
             self.n_tasks,
             self.n_prompts
         )).uniform_(-1e-3, 1e-3))
+        tinfo("Initial Router: %s", self.router)
 
     def forward(self, prompt_token_ids, tids=None, training=True):
         device = self.device
@@ -458,6 +466,7 @@ class MergePromptEncoder(PromptEncoder):
             #router = torch.sigmoid(router)  # layer * n_prompts
             if self.trunc_router:
                 with torch.no_grad():
+                    tinfo("Router: ========================================")
                     tinfo("Router Before relu: %s", router)
                     router[ router <= 0] = 0
                     router[ router > 0] = 1
@@ -484,7 +493,9 @@ class MergePromptEncoder(PromptEncoder):
     def dump_embeddings_into(self, weight):
         tinfo("Final Router (ReLU): %s", self.router)
         with torch.no_grad():
-            embs = self.forward(self.input_ids,tids=[0,1], training=False)
+            embs1= self.forward(self.input_ids,tids=[0], training=False)
+            embs2= self.forward(self.input_ids,tids=[1], training=False)
+            embs = embs1 + embs2
         tinfo("Router After Forward: %s", self.router)
         detached_embeddings = embs.detach()
         weight[self.prompt_ids,:]=detached_embeddings

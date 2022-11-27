@@ -52,6 +52,7 @@ class MyCollator(object):
         r_len = [len(i) for i in enc_resps]
         max_dec_len = max(r_len) + 2 
         pad_id = self.tokenizer.pad_token_id
+        all_rels = list(rel_maps.keys())
         model_data = {
             "input_ids": torch.ones(bs, max_enc_len, dtype=torch.long) * pad_id,
             "attention_mask": torch.zeros(bs, max_enc_len),
@@ -81,8 +82,8 @@ class MyCollator(object):
             model_data["decoder_input_ids"][i][:len(dec_ids)] = torch.tensor(dec_ids, dtype=torch.long)
             model_data["attention_mask"][i][:len(q)] = 1.0
             model_data["decoder_attention_mask"][i][:len(dec_ids)] = 1.0 
-            model_data["task"][i] = 0 
-            no_model_data["task"][i] = 0 
+            model_data["task"][i] = task
+            no_model_data["task"][i] = task
             #model_data["cross_attention_mask"][i][0, :dec_len, :enc_len] = 1.0 
             #no_model_data["idx"][i] = samp["idx"]
             model_data["labels"][i][:len(label)] = torch.tensor(label, dtype=torch.long)
@@ -121,7 +122,7 @@ class MyCollator(object):
             enc_resp = self.tokenizer.encode(b["resp"].strip())
             responses.append(b["resp"].strip())
             enc_responses.append(enc_resp)
-            tasks.append(b["rel"])
+            tasks.append(b["task_id"])
             inputs.append(b["event"].strip())
             targets.append(b["target"].strip())
             index.append(b["index"])

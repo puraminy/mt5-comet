@@ -191,6 +191,7 @@ class MyDataset(torch.utils.data.Dataset):
                 _data = self.flat_data
             else:
                 if self.is_even or use_all_data:
+                    self.sort_key = "none"
                     _data = self.fill_all_data(_start, _end)
                 else:
                     _data = self.fill_data(_start, _end, True, 
@@ -413,13 +414,14 @@ class MyDataset(torch.utils.data.Dataset):
                 _query = _query.replace("___", "<extra_id_0>")
         if not rel in self.tasks:
             self.tasks.append(rel)
+        task_id = self.tasks.index(rel)
         #if not lang in self.data_split[rel]:
         #    self.data_split[rel][lang] = []
         #if query not in self.data_split[rel][lang]:
         #    self.data_split[rel][lang].append({query:[response]})
         #else:
         #    self.data_split[rel][lang][query].append(response)
-        return {"query":_query, "event":event, "resp":response, "target":resp, "rel":rel, "index":self.rec_counter, "rep":rep, "flag":flags}
+        return {"query":_query, "event":event, "resp":response, "target":resp, "rel":rel, "index":self.rec_counter, "rep":rep, "flag":flags, "task_id":task_id}
         #return (_query, event, response, rel, index, rep)
 
 
@@ -436,12 +438,13 @@ class MyDataset(torch.utils.data.Dataset):
             pbar.set_description("Preparing iterator "+ self.split_name)
 
         dict_dfs = dict(tuple(self.split_df.groupby("prefix")))
-        bs = self.batch_size
+        bs = (self.batch_size // self.repeat)
         keys = list(dict_dfs)
         total = len(self.split_df)
         rr = 0
         kk = 0 # total rows counter
         start = {} # stat pointer 
+        key_list = []
         while kk < total:
             key = keys[rr]
             rr += 1 # data frames counter and switcher
@@ -458,6 +461,7 @@ class MyDataset(torch.utils.data.Dataset):
                     continue
                 rel = d["prefix"]
                 inp = "input_text"
+                task_id = keys.index(key)
                 targ_col = "target_text"
                 event = d[inp]
                 jj+= 1
@@ -473,12 +477,15 @@ class MyDataset(torch.utils.data.Dataset):
                         "row":d,
                         "context_df":context_df,
                         "index": kk,
+                        "task_id": task_id,
                         "rep":0,
                         "rel":rel}
                 for rep in range(self.repeat):
                     n_item = _ditem.copy()
                     n_item["rep"] = rep
                     flat_data.append(n_item)
+                    #print(rel)
+                    key_list.append(rel)
                 kk += 1
                 ii += 1
                 if ii >= bs:
