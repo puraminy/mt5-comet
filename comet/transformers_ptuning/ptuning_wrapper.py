@@ -87,6 +87,10 @@ class PTuningWrapper(torch.nn.Module):
         """
 
         set_wargs(args)
+        wlog.handlers.clear()
+        emblog.handlers.clear()
+        tlog.handlers.clear()
+
         wHandler = logging.FileHandler(getFname(args["rel_filter"] + "_wrapper"), mode='w')
         wHandler.setFormatter(FORMAT)
         wlog.addHandler(wHandler)
@@ -99,6 +103,7 @@ class PTuningWrapper(torch.nn.Module):
         tlog.addHandler(tHandler)
         embinfo("Embedding log")
         winfo("Wrapper log")
+
         wlog.setLevel(logging.INFO)
         emblog.setLevel(logging.INFO)
         tlog.setLevel(logging.INFO)
