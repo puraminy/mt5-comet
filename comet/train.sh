@@ -55,11 +55,11 @@ if [ "$m" -eq "0" ]; then
 fi
 seed=123
 
-exp=xint-router-multi4
+exp=xint-router-multi5
 log=${home}/logs/${exp}
 echo "log: ${log}"
 #filter=xIntent#xAttr#xNeed#xReact#xEffect#oReact#xWant#multi
-filter=xIntent#xAttr#multi
+filter=xAttr#xIntent#multi
 merge=none #lstm
 tn=3
 shared=False

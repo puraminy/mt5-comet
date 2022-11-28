@@ -498,12 +498,11 @@ class MergePromptEncoder(PromptEncoder):
         return ret_embeds 
 
     def dump_embeddings_into(self, weight):
-        tinfo("Final Router (ReLU): %s", self.router)
+        tinfo("Final Router (before forward): %s", self.router)
         with torch.no_grad():
             embs= self.forward(self.input_ids,tids=[0], training=False)
             embs2= self.forward(self.input_ids,tids=[1], training=False)
             #embs = embs1 + embs2
-        tinfo("Router After Forward: %s", self.router)
         detached_embeddings = embs.detach()
         weight[self.prompt_ids,:]=detached_embeddings
         
