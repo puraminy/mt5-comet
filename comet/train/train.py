@@ -2496,9 +2496,9 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         # end train while
         pbar.close()
         sw.close()
-        with torch.no_grad():
-            mlog.info("Updating the model weights before evaluaton...")
-            wrapped_model.update_model_weight()
+        #with torch.no_grad():
+           # mlog.info("Updating the model weights before evaluaton...")
+           # wrapped_model.update_model_weight()
         if False: #not no_save_model:
             model.eval()
             save_checkpoint(wrapped_model.underlying_model, tokenizer, 
