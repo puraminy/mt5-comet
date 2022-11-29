@@ -76,7 +76,7 @@
     "exclude": "",
     "from_dir": false,
     "frozen": false,
-    "gen_bs": "10@10",
+    "gen_bs": "16@16",
     "gen_param": "top_k",
     "group_by": "prefix@input_text",
     "group_sets": "",
