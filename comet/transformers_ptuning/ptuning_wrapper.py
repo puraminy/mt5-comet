@@ -193,6 +193,7 @@ class PTuningWrapper(torch.nn.Module):
 
     def generate(self, *args, **kwargs):
         task_ids = kwargs.pop("task_ids", None)
+        task_ids = [0]
         if task_ids != None:
             task_ids = task_ids.long()
         #inform_layers(self.underlying_model, self.adapter_class, task_ids)
