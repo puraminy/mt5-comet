@@ -60,7 +60,7 @@ class MyCollator(object):
             #"cross_attention_mask": torch.zeros(bs, 1, max_dec_len, max_enc_len),
             "decoder_input_ids": torch.ones(bs, max_dec_len, dtype=torch.long) * pad_id,
             "labels": torch.ones(bs, max_dec_len, dtype=torch.long) * -100,
-            "task":torch.ones(bs)*-1,
+            "task_ids":torch.ones(bs)*-1,
         }
         no_model_data = {
             #"idx": torch.zeros(bs, dtype=torch.long),
@@ -68,7 +68,7 @@ class MyCollator(object):
             "loss_mask": torch.zeros(bs, max_dec_len),
             "query":[""]*bs,
             "target":[""]*bs,
-            "task":torch.ones(bs)*-1,
+            "task_ids":torch.ones(bs)*-1,
             "resp":[-1]*bs,
             "wrap":[False]*bs,
             "freeze":[False]*bs,
@@ -82,8 +82,8 @@ class MyCollator(object):
             model_data["decoder_input_ids"][i][:len(dec_ids)] = torch.tensor(dec_ids, dtype=torch.long)
             model_data["attention_mask"][i][:len(q)] = 1.0
             model_data["decoder_attention_mask"][i][:len(dec_ids)] = 1.0 
-            model_data["task"][i] = task
-            no_model_data["task"][i] = task
+            model_data["task_ids"][i] = task
+            no_model_data["task_ids"][i] = task
             #model_data["cross_attention_mask"][i][0, :dec_len, :enc_len] = 1.0 
             #no_model_data["idx"][i] = samp["idx"]
             model_data["labels"][i][:len(label)] = torch.tensor(label, dtype=torch.long)
@@ -2061,7 +2061,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             #mlog.info("acc1: %s, acc2: %s, sts: %s, res: %s", a1, a2, s1, r)
             mbp("start")
             mbp(2)
-            _model = model
+            _model = wrapped_model
             if task_ids is not None:
                 _model = wrapped_model 
             if not result_fname:
@@ -2560,7 +2560,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         test_dataloader, test_dataset, random_sampler = load_data2(dataset_path, "test", tokenizer, prompt_config, ratio=test_ratio, num=int(test_samples))
         val_records = int(test_samples)
         evaluate1(tokenizer, test_dataloader, model, device, prompt_config, mode="test", save_path="", task_ids=task_ids)
-        evaluate(test_dataset, test_dataloader, save_path, exp_info, val_records, gen_param, scorers = scorers, batch_size=gen_bs, model=model, tokenizer=tokenizer, set_name=_set, stop_level=stop_level, seed=seed, task_ids=task_ids)  
+        evaluate(test_dataset, test_dataloader, save_path, exp_info, val_records, gen_param, scorers = scorers, batch_size=gen_bs, model=wrapped_model, tokenizer=tokenizer, set_name=_set, stop_level=stop_level, seed=seed, task_ids=task_ids)  
     elif test_set:
         eval_test(model, tokenizer)
     else:

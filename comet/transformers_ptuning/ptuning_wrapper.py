@@ -191,9 +191,13 @@ class PTuningWrapper(torch.nn.Module):
             return prompt_embeds
         return None
 
-    #def generate(self, task_ids, *args, **kwargs):
+    def generate(self, *args, **kwargs):
+        task_ids = kwargs.pop("task_ids", None)
+        if task_ids != None:
+            task_ids = task_ids.long()
         #inform_layers(self.underlying_model, self.adapter_class, task_ids)
-    #    return self.underlying_model.generate(*args, **kwargs)
+        self.update_model_weight(task_ids)
+        return self.underlying_model.generate(*args, **kwargs)
 
     def forward(self,input_ids, pids=None, **kwargs):
         ll = self.ll # log level
@@ -201,7 +205,7 @@ class PTuningWrapper(torch.nn.Module):
         winfo("Prompt ids:{}".format(pids))
         # find masks based on the range of prompt ids (offset_id < X < offset_id + prompt_length)
         #Because this wrapper only deals with a single prompt, the length should be the same, you can use masked_select to reshape 
-        tids = kwargs.pop("task", None)
+        tids = kwargs.pop("task_ids", None)
         tids = tids.long()
         prompt_masks = self.prompt_token_fn(input_ids)
         if prompt_masks.any():
@@ -305,18 +309,18 @@ class PTuningWrapper(torch.nn.Module):
         else:
             self.ll = logging.DEBUG
             return self.underlying_model(inputs_embeds=inputs_embeds,**kwargs)
-    def update_model_weight(self):
+    def update_model_weight(self, task_ids = None):
         winfo(f"Updating model weights")
         self.cur_embeddings = self.underlying_model.get_input_embeddings()
         if self.merge_encoder:
-            self.merge_encoder.dump_embeddings_into(self.cur_embeddings.weight)
+            self.merge_encoder.dump_embeddings_into(self.cur_embeddings.weight, task_ids)
         elif self.flat_encoder:
-            self.flat_encoder.dump_embeddings_into(self.cur_embeddings.weight)
+            self.flat_encoder.dump_embeddings_into(self.cur_embeddings.weight, task_ids)
         elif self.encoder_prompt_flag:
             for encoder in self.prompt_encoders:
                 winfo(f"the wrapper has prompt encoder")
                 # fill the current embeddings with weights of encoder
-                encoder.dump_embeddings_into(self.cur_embeddings.weight)
+                encoder.dump_embeddings_into(self.cur_embeddings.weight, task_ids)
                 #self.prompt_encoder.dump_embeddings_into(self.model_embeddings.weight)
         if self.decoder_prompt_encoder in self.prompt_encoders:
             winfo(f"Encoder and Decoder are the same")
@@ -326,12 +330,12 @@ class PTuningWrapper(torch.nn.Module):
                 winfo(f"the wrapper has prompt encoder for decoder part")
                 # fill the current embeddings with weights of encoder
                 encoder.dump_embeddings_into(
-                                       self.model_decoder_embeddings.weight)
+                                       self.model_decoder_embeddings.weight, 
+                                       task_ids)
                 #self.prompt_encoder.dump_embeddings_into(self.model_embeddings.weight)
         if self.decoder_prompt_encoder:
             self.decoder_prompt_encoder.dump_embeddings_into(
-                self.model_decoder_embeddings.weight)
-
+                self.model_decoder_embeddings.weight, task_ids)
 
 class PromptEncoder(torch.nn.Module):
     def __init__(self,name, length,embedding_dim,id_offset, init_embs, prompt_ids, lr=0.01,**kwargs) -> None:
@@ -460,11 +464,13 @@ class MergePromptEncoder(PromptEncoder):
     def forward(self, prompt_token_ids, tids=None, training=True):
         device = self.device
         task_id = tids[0]
+        assert task_id == 0 or wargs["rel_filter"] == "multi", "Check task id " + str(task_id) + " rel:" + wargs["rel_filter"]
         if self.wandb:
             wandb.log({'tid': task_id})
         if self.flag:
             tinfo("Initial Router: %s", self.router)
             self.flag = False
+        tinfo("Task ids: %s", tids)
         router = self.router[task_id]
         if training:
             router = RelaxedBernoulli(temperature=self.temperature, logits=router).rsample()  # layer * n_prompts
@@ -497,14 +503,15 @@ class MergePromptEncoder(PromptEncoder):
         ret_embeds = F.embedding(index_list, running_weight)
         return ret_embeds 
 
-    def dump_embeddings_into(self, weight):
+    def dump_embeddings_into(self, weight, task_ids = None):
         tinfo("Final Router (before forward): %s", self.router)
+        if task_ids == None:
+            task_ids = [0]
+        tinfo("Gen ids %s", task_ids)
         with torch.no_grad():
-            embs= self.forward(self.input_ids,tids=[0], training=False)
-            embs2= self.forward(self.input_ids,tids=[1], training=False)
-            #embs = embs1 + embs2
-        detached_embeddings = embs.detach()
-        weight[self.prompt_ids,:]=detached_embeddings
+            embs= self.forward(self.input_ids, tids=task_ids, training=False)
+            detached_embeddings = embs.detach()
+            weight[self.prompt_ids,:]=detached_embeddings
         
 class MLPPromptEncoder(PromptEncoder):
     def __init__(self,name,length,embedding_dim,id_offset,init_embs=None, prompt_ids=[], num_layers=1, hidden_size=-1) -> None:

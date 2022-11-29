@@ -42,8 +42,8 @@ alias runlite="python3 ${home}/mt5-comet/comet/train/train.py"
 # wrap experiments
 folder=${PWD##*/}          
 
-test=100
-train=200
+test=3
+train=4
 if [ -z $m ]; then
    m=1
 fi
@@ -55,7 +55,7 @@ if [ "$m" -eq "0" ]; then
 fi
 seed=123
 
-exp=xint-router-multi5
+exp=xint-router-tids
 log=${home}/logs/${exp}
 echo "log: ${log}"
 #filter=xIntent#xAttr#xNeed#xReact#xEffect#oReact#xWant#multi
