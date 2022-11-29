@@ -42,8 +42,8 @@ alias runlite="python3 ${home}/mt5-comet/comet/train/train.py"
 # wrap experiments
 folder=${PWD##*/}          
 
-test=3
-train=4
+test=100
+train=200
 if [ -z $m ]; then
    m=1
 fi
