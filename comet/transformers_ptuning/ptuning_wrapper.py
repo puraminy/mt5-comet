@@ -464,7 +464,7 @@ class MergePromptEncoder(PromptEncoder):
     def forward(self, prompt_token_ids, tids=None, training=True):
         device = self.device
         task_id = tids[0]
-        assert task_id == 0 or wargs["rel_filter"] == "multi", "Check task id " + str(task_id) + " rel:" + wargs["rel_filter"]
+        assert task_id == 0 or wargs["rel_filter"] == "", "Check task id " + str(task_id) + " rel:" + wargs["rel_filter"]
         if self.wandb:
             wandb.log({'tid': task_id})
         if self.flag:
