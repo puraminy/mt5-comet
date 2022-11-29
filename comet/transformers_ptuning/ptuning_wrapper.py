@@ -374,7 +374,7 @@ class PromptEncoder(torch.nn.Module):
             return lambda x: self.isin(x, self.input_ids)
         else:
             return lambda x: (x>=self.id_offset)&(x<self.id_offset+self.length)
-    def dump_embeddings_into(self,weight):
+    def dump_embeddings_into(self,weight, task_ids = None):
         raise NotImplementedError
 
     def zero_grad(self):
@@ -393,7 +393,7 @@ class EmbeddingPromptEncoder(PromptEncoder):
         ret_embs = self.embedding(prompt_token_ids)
         return ret_embs
 
-    def dump_embeddings_into(self, weight):
+    def dump_embeddings_into(self, weight, task_ids = None):
         detached_embeddings = self.embedding.weight.detach()
         weight[self.prompt_ids,:]=detached_embeddings
 
@@ -438,7 +438,7 @@ class MatPromptEncoder(PromptEncoder):
         ret_embeds = F.embedding(index_list, running_weight)
         return ret_embeds 
 
-    def dump_embeddings_into(self, weight):
+    def dump_embeddings_into(self, weight, task_ids = None):
         with torch.no_grad():
             embs = self.forward(self.input_ids, training=False)
         detached_embeddings = embs.detach()
@@ -543,7 +543,7 @@ class MLPPromptEncoder(PromptEncoder):
         ret_embs = self.mlp(embs)
         return ret_embs
 
-    def dump_embeddings_into(self, weight):
+    def dump_embeddings_into(self, weight, task_ids = None):
         with torch.no_grad():
             embs = self.forward(self.input_ids)
         detached_embeddings = embs.detach()
@@ -592,7 +592,7 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
         ret_embeds = F.embedding(index_list,running_weight)
         return ret_embeds
 
-    def dump_embeddings_into(self, weight):
+    def dump_embeddings_into(self, weight, task_ids = None):
         with torch.no_grad():
             embeddings = self.forward(self.input_ids)
         cur_embeds = weight[self.prompt_ids,:].detach()
