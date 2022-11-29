@@ -193,9 +193,10 @@ class PTuningWrapper(torch.nn.Module):
 
     def generate(self, *args, **kwargs):
         task_ids = kwargs.pop("task_ids", None)
-        task_ids = [0]
+        task_ids = troch.tensor([0])
         if task_ids != None:
             task_ids = task_ids.long()
+            task_ids.to('cuda:0')
         #inform_layers(self.underlying_model, self.adapter_class, task_ids)
         self.update_model_weight(task_ids)
         return self.underlying_model.generate(*args, **kwargs)
