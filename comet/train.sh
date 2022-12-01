@@ -59,13 +59,13 @@ elif [ "$m" -eq "1" ]; then
 fi
 seed=123
 
-exp=xint-router-tids2
+exp=xint-router-tids3
 log=${home}/logs/${exp}
 echo "log: ${log}"
 #filter=xIntent#xAttr#xNeed#xReact#xEffect#oReact#xWant#multi
 filter=xIntent#xAttr#multi
 merge=none #lstm
-tn=3#2#4#5
+tn=2#4#5
 shared=False
 trial=2
 epochs=2
