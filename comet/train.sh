@@ -49,8 +49,12 @@ if [ -z $m ]; then
 fi
 echo "m: ${m}"
 if [ "$m" -eq "0" ]; then
-  echo "testing"
+  echo "testing train"
   test=-1
+  train=2
+elif [ "$m" -eq "1" ]; then
+  echo "testing train and test"
+  test=10
   train=2
 fi
 seed=123
