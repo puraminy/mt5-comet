@@ -596,9 +596,9 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
     def dump_embeddings_into(self, weight, task_ids = None):
         with torch.no_grad():
             embeddings = self.forward(self.input_ids)
-        cur_embeds = weight[self.prompt_ids,:].detach()
-        new_embeds = embeddings.detach()
-        weight[self.prompt_ids,:]=new_embeds 
+            cur_embeds = weight[self.prompt_ids,:].detach()
+            new_embeds = embeddings.detach()
+            weight[self.prompt_ids,:]=new_embeds 
 
 
 if __name__ == "__main__":
