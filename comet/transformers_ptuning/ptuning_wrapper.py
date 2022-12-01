@@ -194,7 +194,7 @@ class PTuningWrapper(torch.nn.Module):
     def generate(self, input_ids, *args, **kwargs):
         task_ids = kwargs.pop("task_ids", None)
         device = input_ids.device
-        task_ids = torch.tensor([0])
+        #task_ids = torch.tensor([0])
         if task_ids != None:
             task_ids = task_ids.long()
             task_ids.to(device)
