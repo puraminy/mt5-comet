@@ -23,9 +23,9 @@ class xAttrTemplate(RelTemplate):
            elif tn == 3:
                qtemp = "{c@merge_i} {event}, So PersonX is seen as {ph}."
            elif tn == 4:
-               qtemp = "{c@merge_i} {event}, {rel_i} So PersonX is seen as {ph}."
+               qtemp = "{c@lstm_i} {event}, {rel_i} So PersonX is seen as {ph}."
            elif tn == 5:
-               qtemp = "{rel@merge_i} {event}, {rel_i} So PersonX is seen as {ph}."
+               qtemp = "{rel@lstm_i} {event}, {rel_i} So PersonX is seen as {ph}."
            elif tn == 6:
                qtemp = "{event}, {emp_so_1} {emp_they_1} are {emb_seen_1} as {ph}."
            elif tn == 641:

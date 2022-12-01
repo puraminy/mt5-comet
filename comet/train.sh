@@ -45,7 +45,7 @@ folder=${PWD##*/}
 test=100
 train=200
 if [ -z $m ]; then
-   m=1
+   m=11
 fi
 echo "m: ${m}"
 if [ "$m" -eq "0" ]; then
@@ -59,7 +59,7 @@ elif [ "$m" -eq "1" ]; then
 fi
 seed=123
 
-exp=xint-router-tids3
+exp=xint-router-tids4
 log=${home}/logs/${exp}
 echo "log: ${log}"
 #filter=xIntent#xAttr#xNeed#xReact#xEffect#oReact#xWant#multi

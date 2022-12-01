@@ -418,7 +418,7 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", flat_promp
     ii = 1
     general_encoders = []
     for rel, prompt_tokens in general_prompts.items():
-        mlog.info("%s )******************* Wrapping model for %s", ii, rel)
+        mlog.info("%s )************* General) Wrapping model for %s", ii, rel)
         if rel == "com":
             continue
         for p in prompt_tokens:
@@ -431,8 +431,9 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", flat_promp
             ii += 1
     
     prompt_encoders = []
+    ii = 1
     for rel, prompt_tokens in encoder_prompts.items():
-        mlog.info("%s )******************* Wrapping model for %s", ii, rel)
+        mlog.info("%s )***********P Token Wrapping model for %s", ii, rel)
         if rel == "com":
             continue
         for p in prompt_tokens:
