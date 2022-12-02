@@ -2236,7 +2236,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         tokenizer.save_pretrained(save_path)
     def get_optimizer(model, learning_rate, opt_type):
         _lr = learning_rate
-        router_learning_rate = router_lr 
+        router_learning_rate = float(router_lr)
         Az_learning_rate = 0.0001
         optimizer_grouped_parameters = [
             {'params': [p for n, p in model.underlying_model.named_parameters() if p.requires_grad and not any(nd in n for nd in no_decay)], 'weight_decay': weight_decay},
