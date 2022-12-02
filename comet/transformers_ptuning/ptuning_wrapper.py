@@ -452,7 +452,7 @@ class MergePromptEncoder(PromptEncoder):
         super().__init__(**kwargs)
         self.task_id = 0
         self.temperature = 1 
-        self.n_prompts = 5 #len(encoders) 
+        self.n_prompts = 8 #len(encoders) 
         self.n_tasks = 2
         self.flag = True
         self.trunc_router = trunc_router
@@ -500,9 +500,12 @@ class MergePromptEncoder(PromptEncoder):
             pids = encoder.input_ids
             out = encoder(pids).to(device) 
             tl.append(out)
-        z = torch.vstack(tl) 
-        z = z.view(len(self.encoders), -1) 
-        running_weight = torch.matmul(router, z).view(-1, self.embedding_dim)
+            z += out
+        #z = torch.vstack(tl) 
+        z = z / len(self.encoders)
+        z = z.view(self.n_prompts, -1) 
+        #running_weight = torch.matmul(router, z).view(-1, self.embedding_dim)
+        running_weight = torch.mul(router.unsqueeze(1), z).view(-1, self.embedding_dim)
         ret_embeds = F.embedding(index_list, running_weight)
         return ret_embeds 
 
