@@ -119,10 +119,13 @@ def show_df(df):
     left = 0
     max_row, max_col= text_win.getmaxyx()
     width = 15
+    top = 10
+    height = 10
     cond = ""
     sort = ""
     asc = False
     info_cols = load_obj("info_cols", dfname, []) 
+    info_cols_back = []
     sel_vals = []
     stats = []
     col_widths = load_obj("widths", "")
@@ -327,6 +330,8 @@ def show_df(df):
         text_win.clear()
         left = min(left, max_col  - width)
         left = max(left, 0)
+        top = min(top, max_row  - height)
+        top = max(top, 0)
         sel_row = min(sel_row, len(df) - 1)
         sel_row = max(sel_row, 0)
         cur_col = min(cur_col, len(sel_cols) - 1)
@@ -396,6 +401,11 @@ def show_df(df):
         if ch == SRIGHT:
             left += 10
             adjust = False
+        if ch == SDOWN:
+            info_cols_back = info_cols.copy()
+            info_cols = []
+        if ch == SUP:
+            info_cols = info_cols_back.copy()
         if ch == LEFT:
             cur_col -= 1
             cur_col = max(0, cur_col)
