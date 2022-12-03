@@ -463,7 +463,7 @@ class MergePromptEncoder(PromptEncoder):
         super().__init__(**kwargs)
         self.task_id = 0
         self.temperature = 1 
-        self.n_prompts = 8 #len(encoders) 
+        self.n_prompts = wargs["n_prompt_tokens"] #len(encoders) 
         self.n_tasks = 2
         self.flag = True
         self.flat = True
