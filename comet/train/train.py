@@ -1477,7 +1477,6 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     seed = int(seed)
     set_random_seed(seed)
     
-    global main_args
     args = locals() #run_args # input parameters
     set_args(args.copy())
 

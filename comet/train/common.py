@@ -19,11 +19,8 @@ import os
 import torch
 import json
 from comet.train.mylogs import *
+import comet.train.mylogs as logs 
 import pickle5 as pickle
-
-def set_args(args):
-    global main_args 
-    main_args =args
 
 SPECIAL_TOKENS  = { "bos_token": "<|BOS|>",
                     "eos_token": "</s>",
@@ -483,8 +480,8 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", flat_promp
     for encoder in prompt_encoders:
         if isinstance(encoder, MergePromptEncoder):
             encoder.encoders = general_encoders
-            encoder.trunc_router = main_args["trunc_router"]
-            encoder.wandb = main_args["wb"]
+            encoder.trunc_router = logs.main_args["trunc_router"]
+            encoder.wandb = logs.main_args["wb"]
 
     if flat_prompts:
         flat_encoder, _ = create_encoder("flat", model, tokenizer, flat_prompt_tokens, flat_prompts, wrapped_model, prefix_config)
@@ -506,7 +503,7 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", flat_promp
                 general_encoders=general_encoders, 
                 prompt_token_fn=get_prompt_token_fn(id_offset), 
                 merge_encoder=merge_encoder, flat_encoder=flat_encoder, 
-                args=main_args)
+                args=logs.main_args)
     return wrapped_model
 
 def create_encoder(name, model, tokenizer, prompt_tokens, encoder_type="lstm", 

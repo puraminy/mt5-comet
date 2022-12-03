@@ -6,6 +6,9 @@ import datetime
 from pathlib import Path
 
 main_args = {}
+def set_args(args):
+    global main_args 
+    main_args =args
 tehran = timezone('Asia/Tehran')
 now = datetime.datetime.now(tehran)
 now = now.strftime('%Y-%m-%d-%H:%M')

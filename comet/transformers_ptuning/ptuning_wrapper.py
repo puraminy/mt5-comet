@@ -14,15 +14,11 @@ import logging
 import os
 import math
 from os.path import expanduser
+import comet.train.mylogs as logs
 from comet.train.mylogs import mbp 
 from transformers.optimization import Adafactor, AdafactorSchedule, AdamW
 from torch.distributions.relaxed_bernoulli import RelaxedBernoulli
 
-wargs = {}
-
-def set_wargs(args):
-    global wargs 
-    wargs =args
 
 home = expanduser("~")
 wlog = logging.getLogger("comet.wrapper")
@@ -86,7 +82,6 @@ class PTuningWrapper(torch.nn.Module):
                 embedding layer of the transformer model.
         """
 
-        set_wargs(args)
         wlog.handlers.clear()
         emblog.handlers.clear()
         tlog.handlers.clear()
@@ -433,7 +428,7 @@ class MatPromptEncoder(PromptEncoder):
             router = (router / (router.sum(dim=-1, keepdim=True) + 1e-12))  # layer * 1 * n_prompts
         else:
             #router = torch.sigmoid(router)  # layer * n_prompts
-            if wargs["trunc_router"]:
+            if logs.main_args["trunc_router"]:
                 with torch.no_grad():
                     tinfo("Router:========================================")
                     tinfo("Router Before relu: %s", router)
@@ -463,7 +458,7 @@ class MergePromptEncoder(PromptEncoder):
         super().__init__(**kwargs)
         self.task_id = 0
         self.temperature = 1 
-        self.n_prompts = wargs["prompt_token_num"] #len(encoders) 
+        self.n_prompts = int(logs.main_args["prompt_token_num"]) #len(encoders) 
         self.n_tasks = 2
         self.flag = True
         self.flat = True
@@ -479,7 +474,7 @@ class MergePromptEncoder(PromptEncoder):
     def forward(self, prompt_token_ids, tids=None, training=True):
         device = self.device
         task_id = tids[0]
-        assert task_id == 0 or wargs["rel_filter"] == "", "Check task id " + str(task_id) + " rel:" + wargs["rel_filter"]
+        assert task_id == 0 or logs.main_args["rel_filter"] == "", "Check task id " + str(task_id) + " rel:" + logs.main_args["rel_filter"]
         if self.wandb:
             wandb.log({'tid': task_id})
         if self.flag:
