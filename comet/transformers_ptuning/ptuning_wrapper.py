@@ -90,7 +90,7 @@ class PTuningWrapper(torch.nn.Module):
         wlog.handlers.clear()
         emblog.handlers.clear()
         tlog.handlers.clear()
-        exp = args["exp_id"] + "_" + args["rel_filter"] 
+        exp = str(args["exp_id"]) + "_" + args["rel_filter"] 
         wHandler = logging.FileHandler(getFname(exp + "_wrapper"), mode='w')
         wHandler.setFormatter(FORMAT)
         wlog.addHandler(wHandler)
@@ -404,7 +404,6 @@ class MatPromptEncoder(PromptEncoder):
         self.prefix_config = prefix_config
         if prefix_config is not None:
             self.temperature = self.prefix_config['temperature']
-            self.task_id = 0
 
             self.router = nn.Parameter(data=torch.empty((
                 prefix_config['n_tasks'],
@@ -427,7 +426,8 @@ class MatPromptEncoder(PromptEncoder):
             index_list = prompt_token_ids - self.id_offset
         else:
             index_list = (prompt_token_ids.view(-1,1) == self.input_ids).int().argmax(dim=1)
-        router = self.router[0] # torch.index_select(self.router, 0, tids)
+        task_id = tids[0]
+        router = self.router[task_id] # torch.index_select(self.router, 0, tids)
         if training:
             router = RelaxedBernoulli(temperature=self.temperature, logits=router).rsample()  # layer * n_prompts
         else:
@@ -442,8 +442,8 @@ class MatPromptEncoder(PromptEncoder):
     def dump_embeddings_into(self, weight, task_ids = None):
         with torch.no_grad():
             embs = self.forward(self.input_ids, training=False)
-        detached_embeddings = embs.detach()
-        weight[self.prompt_ids,:]=detached_embeddings
+            detached_embeddings = embs.detach()
+            weight[self.prompt_ids,:]=detached_embeddings
         
 
 
@@ -455,6 +455,7 @@ class MergePromptEncoder(PromptEncoder):
         self.n_prompts = 8 #len(encoders) 
         self.n_tasks = 2
         self.flag = True
+        self.flat = True
         self.trunc_router = trunc_router
         self.wandb = wandb
         if encoders:
@@ -473,7 +474,7 @@ class MergePromptEncoder(PromptEncoder):
         if self.flag:
             tinfo("Initial Router: %s", self.router)
             self.flag = False
-        tinfo("Task ids: %s", tids)
+        #tinfo("Task ids: %s", tids)
         router = self.router[task_id]
         if training:
             router = RelaxedBernoulli(temperature=self.temperature, logits=router).rsample()  # layer * n_prompts
@@ -501,11 +502,15 @@ class MergePromptEncoder(PromptEncoder):
             out = encoder(pids).to(device) 
             tl.append(out)
             z += out
-        #z = torch.vstack(tl) 
-        z = z / len(self.encoders)
+        if self.flat:
+            z = z / len(self.encoders)
+        else:
+            z = torch.vstack(tl) 
         z = z.view(self.n_prompts, -1) 
-        #running_weight = torch.matmul(router, z).view(-1, self.embedding_dim)
-        running_weight = torch.mul(router.unsqueeze(1), z).view(-1, self.embedding_dim)
+        if self.flat:
+            running_weight = torch.mul(router.unsqueeze(1), z).view(-1, self.embedding_dim)
+        else:
+            running_weight = torch.matmul(router, z).view(-1, self.embedding_dim)
         ret_embeds = F.embedding(index_list, running_weight)
         return ret_embeds 
 

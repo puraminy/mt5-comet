@@ -14,12 +14,16 @@ class xAttrTemplate(RelTemplate):
        qtemp = "{event} {ph}"
        anstemp = "{ph} {resp} {end}"
        flags = self.get_flags(method)
-       tn = int(self.temp_num)
+       tn = self.temp_num
+       if tn.isdigit():
+           tn = int(tn)
        if method == "unsup-wrap-nat":
            if tn == 1:
                qtemp = "{c@mat_i} {event}, So PersonX is seen as {ph}."
-           elif tn == 2:
+           elif tn == "merge":
                qtemp = "{c@merge_i} {event}, {rel_i} So PersonX is seen as {ph}."
+           elif tn == "mat":
+               qtemp = "{c@mat_i} {event}, {rel_i} So PersonX is seen as {ph}."
            elif tn == 3:
                qtemp = "{c@merge_i} {event}, So PersonX is seen as {ph}."
            elif tn == 4:
@@ -56,7 +60,9 @@ class xIntentTemplate(RelTemplate):
        qtemp = "{event}"
        anstemp = "{ph} {resp} {end}"
        flags = self.get_flags(method)
-       tn = int(self.temp_num)
+       tn = self.temp_num
+       if tn.isdigit():
+           tn = int(tn)
        if method == "unsup-nat":
            if tn == 1:
                qtemp = "Why does {event}? {ph}"
@@ -80,8 +86,10 @@ class xIntentTemplate(RelTemplate):
        elif method == "unsup-wrap-nat":
            if tn == 1:
                qtemp = "{c@mat_i} Because of {event}, they want {ph}"
-           if tn == 2:
+           if tn == "merge":
                qtemp = "{c@merge_i} Because of {event}, {rel_i} they want {ph}"
+           if tn == "mat":
+               qtemp = "{c@mat_i} Because of {event}, {rel_i} they want {ph}"
            if tn == 3:
                qtemp = "{c@merge_i} Because of {event}, they want {ph}"
            if tn == 4:
