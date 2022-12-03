@@ -430,9 +430,16 @@ class MatPromptEncoder(PromptEncoder):
         router = self.router[task_id] # torch.index_select(self.router, 0, tids)
         if training:
             router = RelaxedBernoulli(temperature=self.temperature, logits=router).rsample()  # layer * n_prompts
+            router = (router / (router.sum(dim=-1, keepdim=True) + 1e-12))  # layer * 1 * n_prompts
         else:
-            router = torch.sigmoid(router)  # layer * n_prompts
-        router = (router / (router.sum(dim=-1, keepdim=True) + 1e-12))  # layer * 1 * n_prompts
+            #router = torch.sigmoid(router)  # layer * n_prompts
+            if wargs["trunc_router"]:
+                with torch.no_grad():
+                    tinfo("Router:========================================")
+                    tinfo("Router Before relu: %s", router)
+                    router[router <= 0] = 0
+                    router[router > 0] = 1
+                    tinfo("Router After relu: %s", router)
         z = torch.mm(self.z, self.A) if not hasattr(self, 'prompt') else self.prompt
         #ret_embeds = torch.matmul(router.unsqueeze(0), z).view(-1, self.embedding_dim)
         running_weight = torch.matmul(router, z).view(-1, self.embedding_dim)
@@ -440,8 +447,12 @@ class MatPromptEncoder(PromptEncoder):
         return ret_embeds 
 
     def dump_embeddings_into(self, weight, task_ids = None):
+        tinfo("Final Router (before forward): %s", self.router)
+        if task_ids == None:
+            task_ids = [0]
+        tinfo("Gen ids %s", task_ids)
         with torch.no_grad():
-            embs = self.forward(self.input_ids, training=False)
+            embs = self.forward(self.input_ids, tids=task_ids, training=False)
             detached_embeddings = embs.detach()
             weight[self.prompt_ids,:]=detached_embeddings
         
