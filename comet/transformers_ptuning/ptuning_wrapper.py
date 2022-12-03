@@ -90,14 +90,14 @@ class PTuningWrapper(torch.nn.Module):
         wlog.handlers.clear()
         emblog.handlers.clear()
         tlog.handlers.clear()
-
-        wHandler = logging.FileHandler(getFname(args["rel_filter"] + "_wrapper"), mode='w')
+        exp = args["exp_id"] + "_" + args["rel_filter"] 
+        wHandler = logging.FileHandler(getFname(exp + "_wrapper"), mode='w')
         wHandler.setFormatter(FORMAT)
         wlog.addHandler(wHandler)
-        eHandler = logging.FileHandler(getFname(args["rel_filter"] + "_embedding"), mode='w')
+        eHandler = logging.FileHandler(getFname(exp + "_embedding"), mode='w')
         eHandler.setFormatter(FORMAT)
         emblog.addHandler(eHandler)
-        tHandler = logging.FileHandler(getFname(args["rel_filter"] + "_time", 
+        tHandler = logging.FileHandler(getFname(exp + "_time", 
             path=args["save_path"]), mode='w')
         tHandler.setFormatter(FORMAT)
         tlog.addHandler(tHandler)
