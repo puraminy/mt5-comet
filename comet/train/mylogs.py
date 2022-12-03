@@ -52,7 +52,7 @@ def mbp(sl=-1):
         fname = sys._getframe().f_back.f_code.co_name
         line = sys._getframe().f_back.f_lineno
         mlog.info("break point at %s line %s",fname, line)
-        breakpoint()
+        #breakpoint()
 
 def trace(frame, event, arg):
     if event == "call":
