@@ -132,7 +132,10 @@ class MyDataset(torch.utils.data.Dataset):
                 dlog.info(f"NUM samples %s, %s", self.num_samples, len(split_df))
                 dlog.info(f"len after sampling:{len(split_df)}")
 
-        split_df = split_df.sort_values(by=["freqs","input_text", "prefix"], ascending=False)
+        by_sort = ["freqs","input_text", "prefix"] 
+        if "sel" in split_df:
+            by_sort = ["sel", "freqs","input_text", "prefix"] 
+        split_df = split_df.sort_values(by=by_sort, ascending=False)
         assert len(split_df) > 0, "Data frame is empty " + self.split_name + " " + str(self.num_samples)
         dlog.info("Num Samples: %s", self.num_samples)
         mlog.info("Num Samples: %s", self.num_samples)
