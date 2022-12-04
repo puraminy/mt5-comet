@@ -1583,6 +1583,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     validation_size = val_samples 
     validation_num_generation = 20
     learning_rate = float(learning_rate)
+    pl_learning_rate = float(pl_learning_rate)
     lr_mt = {}
     if learning_rate == 0: 
         if opt_type == "adam": 
