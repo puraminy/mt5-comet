@@ -72,7 +72,7 @@ echo "log: ${log}"
 #filter=xIntent#xAttr#xNeed#xReact#xEffect#oReact#xWant#multi
 filter=xIntent#xAttr#multi
 merge=none #lstm
-tn=merge-mid #mat #2#4#5
+tn=merge-mid#mat #2#4#5
 shared=False
 trial=2
 epochs=2
