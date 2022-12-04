@@ -13,6 +13,16 @@ def set_args(args):
 def myargs(key):
     return main_args[key]
 
+def tag():
+    tag = main_args["tag"]
+    _tag = ""
+    for _t in tag.split("@"):
+        if _t in main_args:
+            _tag += "|" + _t  + "=" + str(main_args[_t])
+        else:
+            _tag += "|" + _t  
+    return _tag.strip("|")
+
 tehran = timezone('Asia/Tehran')
 now = datetime.datetime.now(tehran)
 now = now.strftime('%Y-%m-%d-%H:%M')

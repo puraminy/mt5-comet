@@ -85,7 +85,7 @@ class PTuningWrapper(torch.nn.Module):
         wlog.handlers.clear()
         emblog.handlers.clear()
         tlog.handlers.clear()
-        exp = str(args["exp_id"]) + "_" + args["rel_filter"] 
+        exp = str(args["exp_id"]) + "_" + logs.tag() 
         wHandler = logging.FileHandler(getFname(exp + "_wrapper"), mode='w')
         wHandler.setFormatter(FORMAT)
         wlog.addHandler(wHandler)
@@ -445,13 +445,10 @@ class MatPromptEncoder(PromptEncoder):
         tinfo("Final Router (before forward): %s", self.router)
         if task_ids == None:
             task_ids = [0]
-        tinfo("Gen ids %s", task_ids)
         with torch.no_grad():
             embs = self.forward(self.input_ids, tids=task_ids, training=False)
             detached_embeddings = embs.detach()
             weight[self.prompt_ids,:]=detached_embeddings
-        
-
 
 class MergePromptEncoder(PromptEncoder):
     def __init__(self, encoders = [], trunc_router=False, wandb=False, **kwargs):
@@ -524,7 +521,6 @@ class MergePromptEncoder(PromptEncoder):
         tinfo("Final Router (before forward): %s", self.router)
         if task_ids == None:
             task_ids = [0]
-        tinfo("Gen ids %s", task_ids)
         with torch.no_grad():
             embs= self.forward(self.input_ids, tids=task_ids, training=False)
             detached_embeddings = embs.detach()
