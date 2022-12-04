@@ -9,6 +9,10 @@ main_args = {}
 def set_args(args):
     global main_args 
     main_args =args
+
+def myargs(key):
+    return main_args[key]
+
 tehran = timezone('Asia/Tehran')
 now = datetime.datetime.now(tehran)
 now = now.strftime('%Y-%m-%d-%H:%M')
