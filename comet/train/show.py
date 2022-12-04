@@ -545,8 +545,9 @@ def show_df(df):
                 if col in info_cols:
                     info_cols.remove(col)
                     save_obj(info_cols, "info_cols", context)
-        elif char == "x" and prev_char == "x":
+        elif char == "w":
             sel_df = sel_df.append(df.iloc[sel_row])
+            consts["sel_path"] = sel_path
             mbeep()
             sel_df.to_csv(sel_path, sep="\t", index=False)
         elif char in ["h","v"] and prev_char == "x":
@@ -853,7 +854,7 @@ def show_df(df):
                     df["exp_name_y"] = "|".join(list(set(fid_y.split("@")) - set(fid_x.split("@"))))
             sel_cols = on_col_list
             info_cols = []
-            show_consts = False
+            #show_consts = False
             sel_cols.remove("prefix")
             if len(sel_rows) > 2:
                 df = df.reset_index()
@@ -1140,7 +1141,7 @@ def show_df(df):
                 sel_cols = order(sel_cols, [col])
             sel_row = 0
             filter_df = df
-        elif char == "w":
+        elif char == "w" and prev_cahr == "x":
             sel_rows = []
             adjust = True
             tdf = main_df[main_df['fid'] == sel_exp]
