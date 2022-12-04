@@ -1,0 +1,41 @@
+input_text	prefix	target_text
+call in sick	xReason	of cold
+commit suicide	xReason	have unendurable pain
+commit suicide	xReason	were depressed and feeling hopeless
+commit suicide	xReason	were stupid
+complain	xReason	have been cheated
+complain	xReason	were angry
+drink	xReason	drink tasted good
+drink	xReason	have parched mouth
+drink	xReason	was thirsty
+drink	xReason	were thirsty
+drive to work	xReason	live to far to walk
+drive to work	xReason	too far to walk
+drive to work	xReason	too far towalk
+drive to work	xReason	work far
+eat	xReason	had craving
+eat	xReason	last cookie
+eat	xReason	tastes good
+get exercise	xReason	you're always running out of breath
+get fit	xReason	eat well
+get up early	xReason	couldn't sleep
+get up early	xReason	have lots to do
+get up early	xReason	have to go to work
+go on vacation	xReason	burnt out
+go on vacation	xReason	you're tired
+have food	xReason	you'll die without
+play chess	xReason	like mental challenges
+play chess	xReason	like stragity games
+stand up	xReason	legs ached
+stand up	xReason	seat was wet
+stay in bed	xReason	back hurts
+stay in bed	xReason	don't feel well
+stay in bed	xReason	feel ill
+stay in bed	xReason	have sore throat
+stay in bed	xReason	of cold
+stay in bed	xReason	were sick
+stay in bed	xReason	you're sick
+stay in bed	xReason	you're still tired
+steal	xReason	have no money
+take cough medicine	xReason	of cold
+play chess	xReason	bored

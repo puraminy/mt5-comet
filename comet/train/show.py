@@ -193,11 +193,11 @@ def show_df(df):
         fav_df = pd.read_table(fav_path)
     else:
         fav_df = pd.DataFrame(columns = df.columns)
-    sel_path = os.path.join(base_dir, dfname + "_sel.tsv")
+    sel_path = os.path.join(base_dir, "test.tsv")
     if Path(sel_path).exists():
         sel_df = pd.read_table(sel_path)
     else:
-        sel_df = pd.DataFrame(columns = df.columns)
+        sel_df = pd.DataFrame(columns = ["prefix","input_text","target_text"])
 
     back = []
     sels = []
@@ -226,6 +226,10 @@ def show_df(df):
         df["blank"] = "blank"
     if not "opt_type" in df:
         df["opt_type"] = "na"
+    if not "rouge_score" in df:
+        df["rouge_score"] = 0
+    if not "bert_score" in df:
+        df["bert_score"] = 0
     prev_cahr = ""
     FID = "fid"
     hotkey = "gG"
@@ -492,7 +496,7 @@ def show_df(df):
                 if not col in sel_cols:
                     sel_cols.insert(0, col)
                     save_obj(sel_cols, "sel_cols", context)
-        elif char in ["W"]:
+        elif char in ["W"] and prev_char == "x":
             save_df(df)
         elif char in ["B", "N"]:
             s_rows = sel_rows
@@ -545,10 +549,20 @@ def show_df(df):
                 if col in info_cols:
                     info_cols.remove(col)
                     save_obj(info_cols, "info_cols", context)
-        elif char == "w":
-            sel_df = sel_df.append(df.iloc[sel_row])
-            consts["sel_path"] = sel_path
+        elif char in ["w","W"]:
+            inp = df.loc[sel_row,["prefix", "input_text"]]
+            _rows = main_df.loc[(main_df.prefix == inp.prefix) & 
+                    (main_df.input_text == inp.input_text), 
+                    ["prefix", "input_text", "target_text"]].drop_duplicates()
+            sel_df = sel_df.append(_rows)
+            if char == "W":
+                new_row = {"prefix":inp.prefix,
+                           "input_text":inp.input_text,
+                           "target_text":df.loc[sel_row,"pred_text1"]}
+                sel_df = sel_df.append(new_row, ignore_index=True)
+            consts["sel_path"] = sel_path + "|"+ str(len(sel_df)) + "|" + str(sel_df["input_text"].nunique())
             mbeep()
+            sel_df = sel_df.sort_values(by=["prefix","input_text","target_text"]).drop_duplicates()
             sel_df.to_csv(sel_path, sep="\t", index=False)
         elif char in ["h","v"] and prev_char == "x":
             _cols = ["method", "model", "prefix"]
@@ -882,6 +896,8 @@ def show_df(df):
             sel_rows = []
             info_cols.append("sum_fid")
             extra["short_keys"] = "m: show group" 
+            info_cols_back = info_cols.copy()
+            info_cols = []
 
         elif char == "m" and prev_char != "x":
             left = 0
@@ -1488,7 +1504,7 @@ std = None
 dfname = ""
 dfpath = ""
 dftype = "full"
-base_dir = os.path.join(home, "atomic" , "sel")
+base_dir = os.path.join(home, "mt5-comet", "comet", "data", "atomic2020" , "sel")
 def start(stdscr):
     global info_bar, text_win, cmd_win, std, main_win, colors, dfname
     stdscr.refresh()

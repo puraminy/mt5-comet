@@ -1,0 +1,2394 @@
+input_text	prefix	target_text
+acid	AtLocation	chemistry lab
+acid	AtLocation	stomach
+aircraft	AtLocation	air
+aircraft	AtLocation	sky
+alcoholic	AtLocation	bar
+alcoholic	AtLocation	bridge
+alcoholic	AtLocation	homeless shelter
+alcoholic	AtLocation	neighbor's house
+alcoholic	AtLocation	park
+alcoholic	AtLocation	prison
+ant	AtLocation	anthill
+ant	AtLocation	carpet
+ant	AtLocation	park
+appetizer	AtLocation	dinner
+atlas	AtLocation	bookstore
+atlas	AtLocation	country
+atlas	AtLocation	moon
+bacon	AtLocation	refridgerator
+bacon	AtLocation	refrigerator
+bacteria	AtLocation	finger
+bacteria	AtLocation	ground
+bacteria	AtLocation	lake
+bacteria	AtLocation	mouth
+bacteria	AtLocation	petri dish
+bacteria	AtLocation	septic tank
+bacteria	AtLocation	water
+bagel	AtLocation	bakery
+bagel	AtLocation	breadbox
+ball	AtLocation	ballroom
+ball	AtLocation	baseball field
+ball	AtLocation	baseball game
+ball	AtLocation	basketball court
+ball	AtLocation	beach
+ball	AtLocation	bearing
+ball	AtLocation	bowling alley
+ball	AtLocation	child's hand
+ball	AtLocation	childs toybox
+ball	AtLocation	closet
+ball	AtLocation	cricket pitch
+ball	AtLocation	gymnasium
+ball	AtLocation	hole
+ball	AtLocation	mouth of puppy
+ball	AtLocation	playground
+ball	AtLocation	playroom
+ball	AtLocation	pool table
+ball	AtLocation	sack
+ball	AtLocation	snooker table
+ball	AtLocation	soccer field
+ball	AtLocation	soccer game
+ball	AtLocation	sport
+ball	AtLocation	sporting event
+ball	AtLocation	sporting goods store
+ball	AtLocation	street
+ball	AtLocation	toy box
+ball	AtLocation	toy store
+ball	AtLocation	toybox
+banana	AtLocation	monkey's hand
+banana	AtLocation	pantry
+banana	AtLocation	stomach
+banjo	AtLocation	band
+banjo	AtLocation	banjo case
+banjo	AtLocation	banjo players hands
+banjo	AtLocation	bela fleck's hands
+banjo	AtLocation	country band
+banjo	AtLocation	country music singer's hands
+banjo	AtLocation	country singer's arms
+banjo	AtLocation	country western band
+banjo	AtLocation	hands of banjo player
+banjo	AtLocation	jug band
+banjo	AtLocation	movie deliverance
+banjo	AtLocation	music band
+banjo	AtLocation	music shop
+banjo	AtLocation	music store
+banjo	AtLocation	united states
+bank statement	AtLocation	mail
+banknote	AtLocation	pocket
+bar stool	AtLocation	drunker
+bar stool	AtLocation	kitchen
+bar stool	AtLocation	restaurant
+bar stool	AtLocation	row
+bar stool	AtLocation	saloon or cocktail lounge
+bar stool	AtLocation	tavern
+baseball diamond	AtLocation	park
+basement	AtLocation	building
+basement	AtLocation	canada
+basement	AtLocation	cellar
+basement	AtLocation	church
+basement	AtLocation	closet
+basement	AtLocation	home
+basement	AtLocation	office building
+basement	AtLocation	own house
+basketball	AtLocation	basketball court
+basketball	AtLocation	basketball game
+basketball	AtLocation	boys hands
+basketball	AtLocation	gymnasium
+basketball	AtLocation	park
+basketball	AtLocation	sporting goods store
+basketball	AtLocation	store
+bass	AtLocation	barbershop quartette
+bass	AtLocation	freshwater lake
+bass	AtLocation	jazz band
+bass	AtLocation	lake
+bass	AtLocation	music store
+bass	AtLocation	quartet
+bass	AtLocation	river
+bass	AtLocation	water
+battery charger	AtLocation	garage
+bicycle	AtLocation	bicycle shop
+bicycle	AtLocation	garage
+bicycle	AtLocation	lab
+bicycle	AtLocation	netherlands
+bicycle	AtLocation	park
+bicycle	AtLocation	schoolyard
+bicycle	AtLocation	shed
+bicycle	AtLocation	store
+bicycle	AtLocation	street
+bicycle	AtLocation	toy store
+bicycle	AtLocation	triatholon
+bicycle	AtLocation	university
+boat	AtLocation	bay
+boat	AtLocation	garage
+boat	AtLocation	harbor
+boat	AtLocation	lake
+boat	AtLocation	ocean
+boat	AtLocation	river
+boat	AtLocation	water
+boat	AtLocation	body of water
+book light	AtLocation	bookstore
+bottle	AtLocation	diaper bag
+bottle	AtLocation	drink
+bottle	AtLocation	fridge
+bottle	AtLocation	grocery store
+bottle	AtLocation	liquor store
+bottle	AtLocation	medicine cabinet
+bottle	AtLocation	nursery
+bottle	AtLocation	refigerator
+bottle	AtLocation	store
+bottle	AtLocation	supermarket
+box of cereal	AtLocation	grocery store
+box of cereal	AtLocation	market
+box of cereal	AtLocation	pantry
+box of cereal	AtLocation	store
+brake	AtLocation	car
+break room	AtLocation	work
+bug	AtLocation	garden
+bug	AtLocation	meadow
+bug	AtLocation	rock
+bug	AtLocation	rug
+butterfly	AtLocation	air
+butterfly	AtLocation	meadow
+cabbage	AtLocation	freezer
+cabbage	AtLocation	grocery store
+cabbage	AtLocation	market
+cabbage	AtLocation	plate
+cabbage	AtLocation	supermarket
+cafeteria	AtLocation	hospital
+cafeteria	AtLocation	school
+calandar	AtLocation	desk
+camel	AtLocation	desert
+candy	AtLocation	box
+candy	AtLocation	desktop
+candy	AtLocation	disneyland
+candy	AtLocation	drive in movie
+candy	AtLocation	jar
+candy	AtLocation	mall
+candy	AtLocation	movie
+candy	AtLocation	movies
+candy	AtLocation	purse
+candy	AtLocation	shop
+candy	AtLocation	show
+candy	AtLocation	store
+candy	AtLocation	supermarket
+candy	AtLocation	theater
+candy	AtLocation	theatre
+candy	AtLocation	trick or treat bag
+car key	AtLocation	car
+cart	AtLocation	supermarket
+catalogue	AtLocation	bookstore
+cd player	AtLocation	backpack
+cd player	AtLocation	friend's house
+centerpiece	AtLocation	table
+cheater	AtLocation	casino
+cheque	AtLocation	bank
+cheque	AtLocation	cheque book
+cheque	AtLocation	restraunt
+clipboard	AtLocation	classroom
+clipboard	AtLocation	coach's hand
+clipboard	AtLocation	desk
+clipboard	AtLocation	formans hand
+clipboard	AtLocation	office supply store
+clipboard	AtLocation	place of work
+clipboard	AtLocation	school
+clipboard	AtLocation	windows 95
+club	AtLocation	armory
+club	AtLocation	golf bag
+club	AtLocation	meeting place
+coach	AtLocation	hockey game
+coach	AtLocation	soccer game
+coach	AtLocation	sporting event
+comfort	AtLocation	bed
+comfort	AtLocation	friend's house
+comfort	AtLocation	home
+comfy chair	AtLocation	relatives house
+committee	AtLocation	boardroom
+committee	AtLocation	business
+committee	AtLocation	church
+committee	AtLocation	city council meeting
+committee	AtLocation	city hall
+committee	AtLocation	government
+committee	AtLocation	meeting
+committee	AtLocation	office building
+cookbook	AtLocation	shelf
+cookie sheet	AtLocation	oven
+coworkers	AtLocation	office
+cpu	AtLocation	computer
+cpu	AtLocation	motherboard
+curtain	AtLocation	department store
+curtain	AtLocation	house
+curtain	AtLocation	movies
+curtain	AtLocation	opera
+curtain	AtLocation	show
+curtain	AtLocation	theater
+curtain	AtLocation	theatre
+curtain	AtLocation	window
+dad	AtLocation	relatives house
+darkness	AtLocation	bed
+darkness	AtLocation	cellar
+darkness	AtLocation	drive in movie
+darkness	AtLocation	moon
+darkness	AtLocation	movies
+dead body	AtLocation	basement
+dead body	AtLocation	closet
+dead body	AtLocation	corner of two streets
+dead body	AtLocation	funeral
+dead body	AtLocation	trunk
+death	AtLocation	battlefield
+death	AtLocation	funeral
+death	AtLocation	hospital
+death	AtLocation	war
+debate	AtLocation	university
+dentist	AtLocation	city
+dentist	AtLocation	dental clinic
+dentist	AtLocation	dental office
+dentist	AtLocation	dentist's office
+dentist	AtLocation	hospital
+dentist	AtLocation	las vegas
+dentist	AtLocation	office
+dentist	AtLocation	phone book
+dentist	AtLocation	town
+diamond ring	AtLocation	finger
+diary	AtLocation	desk
+diary	AtLocation	friend's house
+dirt	AtLocation	bed
+dirt	AtLocation	bottom of sea
+dirt	AtLocation	carpet
+dirt	AtLocation	cellar
+dirt	AtLocation	closet
+dirt	AtLocation	corner
+dirt	AtLocation	desk
+dirt	AtLocation	field
+dirt	AtLocation	finger
+dirt	AtLocation	fingernails
+dirt	AtLocation	floor
+dirt	AtLocation	forest
+dirt	AtLocation	fraternity house
+dirt	AtLocation	garden
+dirt	AtLocation	ground
+dirt	AtLocation	moon
+dirt	AtLocation	old carpet
+dirt	AtLocation	race track
+dirt	AtLocation	rug
+dirt	AtLocation	street
+dirt	AtLocation	subway
+dirt	AtLocation	suface of moon
+dirt	AtLocation	surface of earth
+dirt	AtLocation	tree
+dog food	AtLocation	market
+doll	AtLocation	child's arms
+doll	AtLocation	doll house
+doll	AtLocation	dollshouse
+doll	AtLocation	girl's bedroom
+doll	AtLocation	girl's room
+doll	AtLocation	girls room
+doll	AtLocation	museum
+dollar bill	AtLocation	bank
+dollar bill	AtLocation	pocket
+dollar bill	AtLocation	purse
+dollar bill	AtLocation	wallet
+door knob	AtLocation	front door
+drink	AtLocation	backpack
+drink	AtLocation	bottle
+drink	AtLocation	cabinet
+drink	AtLocation	can
+drink	AtLocation	cup
+duvet	AtLocation	bed
+duvet	AtLocation	bedroom
+duvet	AtLocation	living room
+eagle	AtLocation	top of mountain
+eel	AtLocation	water
+ergonomic chair	AtLocation	catalog of office furniture
+ergonomic chair	AtLocation	furniture store
+ergonomic chair	AtLocation	office supply store
+ergonomic chair	AtLocation	upscale office
+exit	AtLocation	end of line
+expert	AtLocation	field
+family	AtLocation	friend's wedding
+family	AtLocation	house
+family	AtLocation	relatives house
+farecard	AtLocation	ticket booth
+farecard	AtLocation	transit user's pocket
+fear	AtLocation	war
+female	AtLocation	bed
+ferris wheel	AtLocation	carnival
+ferris wheel	AtLocation	fairgrounds
+fight	AtLocation	hockey game
+fingernail	AtLocation	finger
+fireplace	AtLocation	big house
+fireplace	AtLocation	cabin
+fireplace	AtLocation	camp
+fireplace	AtLocation	family room
+fireplace	AtLocation	home
+fireplace	AtLocation	house
+fireplace	AtLocation	living room
+flower pot	AtLocation	porch
+flower pot	AtLocation	windowsill
+flute	AtLocation	a
+flute	AtLocation	band
+flute	AtLocation	flute case
+flute	AtLocation	marching band
+flute	AtLocation	music shop
+flute	AtLocation	musical instrument store
+flute	AtLocation	orchestra
+flute	AtLocation	store
+flute	AtLocation	symphony
+flute	AtLocation	woodwind section
+foam	AtLocation	fire extinguisher
+foam	AtLocation	waterfall
+fountain	AtLocation	city
+fountain	AtLocation	courtyard
+fountain	AtLocation	front of casino
+fountain	AtLocation	garden
+fountain	AtLocation	grant park chicago
+fountain	AtLocation	public place
+fountain	AtLocation	rome
+fruit punch	AtLocation	grocery store
+garbage can	AtLocation	albertta
+garbage can	AtLocation	alley
+garbage can	AtLocation	backyard
+garbage can	AtLocation	funk band
+garbage can	AtLocation	garage
+garbage can	AtLocation	kitchen
+garbage can	AtLocation	own backyard
+garbage can	AtLocation	street
+gas station	AtLocation	street corner
+gear	AtLocation	car
+goalie	AtLocation	hockey game
+goalie	AtLocation	soccer game
+god	AtLocation	bible
+god	AtLocation	church
+god	AtLocation	clouds
+god	AtLocation	compassion
+god	AtLocation	everything
+god	AtLocation	fiction
+god	AtLocation	heaven
+god	AtLocation	imagination
+god	AtLocation	mind
+god	AtLocation	museum
+god	AtLocation	nowhere
+god	AtLocation	office
+god	AtLocation	synagogue
+gold	AtLocation	church
+gold	AtLocation	fort knox
+gold	AtLocation	gold mine
+gold	AtLocation	jewelry store
+gold	AtLocation	ring
+gold	AtLocation	tooth
+gold	AtLocation	treasure chest
+grapefruit	AtLocation	supermarket
+grocery store	AtLocation	city
+grocery store	AtLocation	just about city
+grocery store	AtLocation	neighborhood
+grocery store	AtLocation	shopping center
+grocery store	AtLocation	shopping center or strip mall
+grocery store	AtLocation	street
+grocery store	AtLocation	strip mall
+grocery store	AtLocation	town
+gum	AtLocation	ground
+gum	AtLocation	mail
+gum	AtLocation	movie
+gum	AtLocation	movies
+gum	AtLocation	purse
+gum	AtLocation	shelf
+gum	AtLocation	sidewalk
+gum	AtLocation	store
+gum	AtLocation	table
+gum	AtLocation	trash
+gum	AtLocation	underside of desk
+gum	AtLocation	waste bin
+gum	AtLocation	water fountain
+gun	AtLocation	army
+gun	AtLocation	bullets
+gun	AtLocation	crime scene
+gun	AtLocation	desk
+gun	AtLocation	drawer
+gun	AtLocation	gun enthusiasts locked gun cabinet
+gun	AtLocation	gun shop
+gun	AtLocation	gun store
+gun	AtLocation	holster
+gun	AtLocation	military base
+gun	AtLocation	police car
+gun	AtLocation	police station
+gun	AtLocation	shooting range
+gun	AtLocation	sporting goods store
+gun	AtLocation	war
+handkerchief	AtLocation	purse
+handle	AtLocation	bathroom
+handle	AtLocation	car door
+handle	AtLocation	door
+handle	AtLocation	drawer
+handle	AtLocation	fridge
+handle	AtLocation	hardware store
+handle	AtLocation	water fountain
+hanger	AtLocation	closet
+harmonica	AtLocation	blues band
+harmonica	AtLocation	hand
+harmonica	AtLocation	mouth
+harmonica	AtLocation	music shop
+harmonica	AtLocation	music store
+harmonica	AtLocation	pocket
+harmonica	AtLocation	rock band
+hay	AtLocation	barn
+hay	AtLocation	field
+hay	AtLocation	loft
+hay	AtLocation	stable
+heater	AtLocation	automobile
+heater	AtLocation	cold places
+heater	AtLocation	dwelling
+heater	AtLocation	electrical goods store
+heater	AtLocation	garage
+heater	AtLocation	home
+heater	AtLocation	house
+heater	AtLocation	office
+heater	AtLocation	pocket at football game
+heater	AtLocation	public building
+heater	AtLocation	someplace cold
+hockey	AtLocation	sporting event
+hole	AtLocation	button
+hole	AtLocation	dirt
+hole	AtLocation	donut
+hole	AtLocation	doughnut
+hole	AtLocation	golf course
+hole	AtLocation	golf green
+hole	AtLocation	green
+hole	AtLocation	ground
+hole	AtLocation	lock
+hole	AtLocation	notebook paper
+hole	AtLocation	old sock
+hole	AtLocation	pocket
+hole	AtLocation	swiss cheese
+hole	AtLocation	wall
+home office	AtLocation	house
+home office	AtLocation	london
+illness	AtLocation	body
+illness	AtLocation	brain
+illness	AtLocation	doctor's office
+illness	AtLocation	elderly person
+illness	AtLocation	hospital
+illness	AtLocation	medical reference book
+illness	AtLocation	nursing home
+illness	AtLocation	old lady
+illness	AtLocation	old person
+illness	AtLocation	sick person
+illness	AtLocation	stomach
+item	AtLocation	container
+jack	AtLocation	box
+jack	AtLocation	trunk
+john	AtLocation	bar
+john	AtLocation	bathroom
+john	AtLocation	house
+john	AtLocation	prostitute's bedroom
+john	AtLocation	ship
+juice	AtLocation	fridge
+juice	AtLocation	gym
+juice	AtLocation	refrigerator
+junk food	AtLocation	fair
+junk food	AtLocation	fast food restaurant
+junk food	AtLocation	party
+kettle	AtLocation	brewery
+kettle	AtLocation	kitchen
+kettle	AtLocation	percussion section
+kettle	AtLocation	witch's fireplace
+keypad	AtLocation	phone
+kite	AtLocation	air
+kite	AtLocation	child's hand
+kite	AtLocation	downstairs closet
+kite	AtLocation	end of line
+kite	AtLocation	hobby shop
+kite	AtLocation	park
+kite	AtLocation	sky
+kite	AtLocation	store at beach
+kite	AtLocation	toy store
+ladder	AtLocation	apple orchard
+ladder	AtLocation	garage
+ladder	AtLocation	hardware store
+ladder	AtLocation	roof
+library card	AtLocation	library
+lincoln memorial	AtLocation	washington d.c
+lizard	AtLocation	africa
+lizard	AtLocation	amazon
+lizard	AtLocation	another lizards belly
+lizard	AtLocation	arid region
+lizard	AtLocation	arid regions
+lizard	AtLocation	back yard
+lizard	AtLocation	backyard
+lizard	AtLocation	backyard on green plant
+lizard	AtLocation	beach
+lizard	AtLocation	bermuda
+lizard	AtLocation	book
+lizard	AtLocation	books
+lizard	AtLocation	bush
+lizard	AtLocation	bushes
+lizard	AtLocation	cage
+lizard	AtLocation	california
+lizard	AtLocation	captivity
+lizard	AtLocation	cat's mouth
+lizard	AtLocation	cheap mexican hotel room
+lizard	AtLocation	china
+lizard	AtLocation	costa rica
+lizard	AtLocation	country
+lizard	AtLocation	creek
+lizard	AtLocation	creek behind house
+lizard	AtLocation	deserrt
+lizard	AtLocation	desert country
+lizard	AtLocation	dessert
+lizard	AtLocation	documentary
+lizard	AtLocation	dry area
+lizard	AtLocation	dry rocky area
+lizard	AtLocation	encyclopedia
+lizard	AtLocation	field under rock
+lizard	AtLocation	forrest
+lizard	AtLocation	front porch
+lizard	AtLocation	galapagos archipelago
+lizard	AtLocation	galopagos arpegio
+lizard	AtLocation	garden
+lizard	AtLocation	geico commercial
+lizard	AtLocation	glass cage
+lizard	AtLocation	great outdoors
+lizard	AtLocation	herpetarium
+lizard	AtLocation	hidden spot
+lizard	AtLocation	hole
+lizard	AtLocation	homes
+lizard	AtLocation	hot place
+lizard	AtLocation	hot places
+lizard	AtLocation	house
+lizard	AtLocation	india
+lizard	AtLocation	it's natural habitat
+lizard	AtLocation	italy
+lizard	AtLocation	jazz club
+lizard	AtLocation	jungle or desert
+lizard	AtLocation	lake
+lizard	AtLocation	leaves
+lizard	AtLocation	little boy's hand
+lizard	AtLocation	lizard cage
+lizard	AtLocation	log
+lizard	AtLocation	louisiana
+lizard	AtLocation	masonry
+lizard	AtLocation	mexico
+lizard	AtLocation	nature
+lizard	AtLocation	nevada
+lizard	AtLocation	new hampshire
+lizard	AtLocation	new mexico
+lizard	AtLocation	new mexio
+lizard	AtLocation	outside
+lizard	AtLocation	overgrown area
+lizard	AtLocation	painting
+lizard	AtLocation	pet shop
+lizard	AtLocation	petshop
+lizard	AtLocation	petstore
+lizard	AtLocation	plant
+lizard	AtLocation	reptile family
+lizard	AtLocation	reptile house
+lizard	AtLocation	reptile park
+lizard	AtLocation	rock catching sun bath
+lizard	AtLocation	rock wall
+lizard	AtLocation	rocks
+lizard	AtLocation	rocky areas
+lizard	AtLocation	rocky places
+lizard	AtLocation	salad
+lizard	AtLocation	shade
+lizard	AtLocation	shady spot
+lizard	AtLocation	shrub
+lizard	AtLocation	small holes in ground
+lizard	AtLocation	sonora desert
+lizard	AtLocation	south america
+lizard	AtLocation	south carolina
+lizard	AtLocation	southern california desert
+lizard	AtLocation	southwestern united staes
+lizard	AtLocation	stream bed
+lizard	AtLocation	sun
+lizard	AtLocation	sun getting warmed up
+lizard	AtLocation	sunlight
+lizard	AtLocation	sunny place
+lizard	AtLocation	sunny spots
+lizard	AtLocation	swamp
+lizard	AtLocation	swmp
+lizard	AtLocation	tank
+lizard	AtLocation	tree trunk
+lizard	AtLocation	tropical areas
+lizard	AtLocation	tropical rainforest
+lizard	AtLocation	tropics
+lizard	AtLocation	undergrowth
+lizard	AtLocation	utah
+lizard	AtLocation	warm areas
+lizard	AtLocation	warm dry climates
+lizard	AtLocation	warm location
+lizard	AtLocation	warm place
+lizard	AtLocation	warm sunny spot
+lizard	AtLocation	water
+lizard	AtLocation	west texas
+lizard	AtLocation	whole
+lizard	AtLocation	wild
+lizard	AtLocation	wilderness area away from people
+lizard	AtLocation	yard
+loudspeaker	AtLocation	sporting event
+lunar module	AtLocation	suface of moon
+magic	AtLocation	air
+magic	AtLocation	coven
+mail man	AtLocation	front door
+mail slot	AtLocation	front door
+mailbox	AtLocation	apartment
+mailbox	AtLocation	apartment building
+mailbox	AtLocation	apartment complex
+mailbox	AtLocation	corner of two streets
+mailbox	AtLocation	downtown area
+mailbox	AtLocation	front door
+mailbox	AtLocation	front of home
+mailbox	AtLocation	front of house
+mailbox	AtLocation	front yard
+mailbox	AtLocation	garden
+mailbox	AtLocation	hardware store
+mailbox	AtLocation	outside of house
+mailbox	AtLocation	porch
+mailbox	AtLocation	post office
+mailbox	AtLocation	street
+mailbox	AtLocation	street corner
+mailbox	AtLocation	yard
+mall	AtLocation	american suburbia
+mall	AtLocation	city
+mall	AtLocation	downtown
+mall	AtLocation	large city
+mall	AtLocation	montana
+mall	AtLocation	populous area
+mall	AtLocation	shop
+mall	AtLocation	shopping area
+mall	AtLocation	suburb
+mall	AtLocation	suburbs
+mall	AtLocation	town
+marble	AtLocation	bag of marbles
+marble	AtLocation	boy's pocket
+marble	AtLocation	childs toy chest
+marble	AtLocation	game
+marble	AtLocation	jar
+marble	AtLocation	littly boy's pocket
+marble	AtLocation	pouch
+marble	AtLocation	store
+matter	AtLocation	universe
+merchandise	AtLocation	market
+merchandise	AtLocation	shop
+merchandise	AtLocation	show
+metal detector	AtLocation	sporting goods store
+mexican restaurant	AtLocation	california
+mexican restaurant	AtLocation	city
+mexican restaurant	AtLocation	mexica
+mexican restaurant	AtLocation	mexico
+mexican restaurant	AtLocation	san diego
+mexican restaurant	AtLocation	southern california
+mexican restaurant	AtLocation	tijuana
+mirror	AtLocation	at hotel
+mirror	AtLocation	bedroom
+mirror	AtLocation	car
+mirror	AtLocation	closet
+mirror	AtLocation	dressing room
+mirror	AtLocation	house
+mirror	AtLocation	purse
+mirror	AtLocation	same room as bed
+mirror	AtLocation	wall
+mirror	AtLocation	woman's purse
+moose	AtLocation	meadow
+mouse	AtLocation	a
+mouse	AtLocation	abandoned building
+mouse	AtLocation	abandoned houses
+mouse	AtLocation	abandonned house
+mouse	AtLocation	america
+mouse	AtLocation	animal lab
+mouse	AtLocation	apartment
+mouse	AtLocation	attic
+mouse	AtLocation	attic of old house
+mouse	AtLocation	backyard
+mouse	AtLocation	barn full of grain
+mouse	AtLocation	basements or cellars
+mouse	AtLocation	belly of pet snake
+mouse	AtLocation	biology laboratory
+mouse	AtLocation	box
+mouse	AtLocation	boy's pocket
+mouse	AtLocation	bucket on dishwasher
+mouse	AtLocation	building
+mouse	AtLocation	cat's belly
+mouse	AtLocation	cat's jaws
+mouse	AtLocation	cat's mouth
+mouse	AtLocation	cat's stomach
+mouse	AtLocation	cat
+mouse	AtLocation	cats mouth
+mouse	AtLocation	cellar
+mouse	AtLocation	cereal box
+mouse	AtLocation	cheese
+mouse	AtLocation	children's book
+mouse	AtLocation	computer
+mouse	AtLocation	computer lab
+mouse	AtLocation	computer shop
+mouse	AtLocation	computer store
+mouse	AtLocation	corn field
+mouse	AtLocation	cornfield
+mouse	AtLocation	country side
+mouse	AtLocation	crawl space
+mouse	AtLocation	crawlspace
+mouse	AtLocation	cupboard
+mouse	AtLocation	dark place
+mouse	AtLocation	dead people
+mouse	AtLocation	department store
+mouse	AtLocation	deserted house
+mouse	AtLocation	desk
+mouse	AtLocation	desktop
+mouse	AtLocation	dirty apartment
+mouse	AtLocation	dirty house
+mouse	AtLocation	dirty place
+mouse	AtLocation	disney movie
+mouse	AtLocation	disneyland
+mouse	AtLocation	dry stone wall
+mouse	AtLocation	empty building
+mouse	AtLocation	exercise wheel
+mouse	AtLocation	farm
+mouse	AtLocation	feed mill
+mouse	AtLocation	field
+mouse	AtLocation	gap behind skirting boards
+mouse	AtLocation	garage
+mouse	AtLocation	garbage
+mouse	AtLocation	garden
+mouse	AtLocation	ghetto
+mouse	AtLocation	grain
+mouse	AtLocation	grain bin
+mouse	AtLocation	grain field
+mouse	AtLocation	grain silo
+mouse	AtLocation	grainery
+mouse	AtLocation	granary
+mouse	AtLocation	grass
+mouse	AtLocation	grassy field
+mouse	AtLocation	grocery store
+mouse	AtLocation	hole
+mouse	AtLocation	hole in ground
+mouse	AtLocation	hole in wall
+mouse	AtLocation	home
+mouse	AtLocation	in
+mouse	AtLocation	india
+mouse	AtLocation	internet cafe
+mouse	AtLocation	kitchen
+mouse	AtLocation	lab
+mouse	AtLocation	lab cage
+mouse	AtLocation	lab maze
+mouse	AtLocation	laboratory
+mouse	AtLocation	larder
+mouse	AtLocation	living room
+mouse	AtLocation	michigan
+mouse	AtLocation	mouse nest
+mouse	AtLocation	mousehose
+mouse	AtLocation	mousehouse
+mouse	AtLocation	movie stuart little
+mouse	AtLocation	nest in tall grass
+mouse	AtLocation	new york
+mouse	AtLocation	new york city
+mouse	AtLocation	oatmeal
+mouse	AtLocation	of several places
+mouse	AtLocation	office
+mouse	AtLocation	office building
+mouse	AtLocation	old barn
+mouse	AtLocation	old garbage can
+mouse	AtLocation	outdoors
+mouse	AtLocation	outside
+mouse	AtLocation	own home
+mouse	AtLocation	pantry
+mouse	AtLocation	pants
+mouse	AtLocation	pasture or field
+mouse	AtLocation	pc store
+mouse	AtLocation	pet cats stomach
+mouse	AtLocation	petshop
+mouse	AtLocation	petstore
+mouse	AtLocation	place were no cats
+mouse	AtLocation	prairie
+mouse	AtLocation	predator's jaws
+mouse	AtLocation	process of eating cheese
+mouse	AtLocation	rat hole
+mouse	AtLocation	research laboratory
+mouse	AtLocation	rice field
+mouse	AtLocation	richard gere's ass
+mouse	AtLocation	room of house
+mouse	AtLocation	school
+mouse	AtLocation	sewer
+mouse	AtLocation	shelf
+mouse	AtLocation	shop
+mouse	AtLocation	small hole
+mouse	AtLocation	snake's cage
+mouse	AtLocation	snakes intestine
+mouse	AtLocation	snakes mouth
+mouse	AtLocation	soup
+mouse	AtLocation	south carolina
+mouse	AtLocation	space shuttle
+mouse	AtLocation	staples
+mouse	AtLocation	stew
+mouse	AtLocation	store
+mouse	AtLocation	taloned grip of owl
+mouse	AtLocation	terrarium
+mouse	AtLocation	the'mouse house toys
+mouse	AtLocation	the
+mouse	AtLocation	tom and jerry cartoon
+mouse	AtLocation	tom and jerry show
+mouse	AtLocation	trap
+mouse	AtLocation	trash
+mouse	AtLocation	treadmill
+mouse	AtLocation	tunnel
+mouse	AtLocation	use
+mouse	AtLocation	very small spaces between walls
+mouse	AtLocation	wall space
+mouse	AtLocation	warehouse
+mouse	AtLocation	wet moldy basement
+mouse	AtLocation	wild
+mouse	AtLocation	wire cage
+mouse	AtLocation	woodlands
+mouse	AtLocation	woods
+mousepad	AtLocation	desk
+mousepad	AtLocation	desktop
+nail	AtLocation	board
+nail	AtLocation	finger
+newspaper	AtLocation	bottom of bird cage
+newspaper	AtLocation	floor
+newspaper	AtLocation	front door
+newspaper	AtLocation	jail
+newspaper	AtLocation	lawn
+newspaper	AtLocation	library
+newspaper	AtLocation	porch
+newspaper	AtLocation	rug
+newspaper	AtLocation	subway
+newspaper	AtLocation	trash
+nut	AtLocation	ground
+object	AtLocation	basement
+object	AtLocation	drawer
+object	AtLocation	trash
+oboe	AtLocation	band
+oboe	AtLocation	case
+oboe	AtLocation	music store
+oboe	AtLocation	orchestra
+olive	AtLocation	jar
+pasta	AtLocation	box
+pasta	AtLocation	italian restaurant
+pasta	AtLocation	pantry
+pawn	AtLocation	chess game
+pawn	AtLocation	chess set
+pawn	AtLocation	north carolina
+pawn	AtLocation	scheme
+peace	AtLocation	meditating
+peace	AtLocation	synagogue
+peace	AtLocation	top of mountain
+pebble	AtLocation	aquarium
+pebble	AtLocation	creek
+pebble	AtLocation	gravel
+pebble	AtLocation	ground
+pebble	AtLocation	lake
+pebble	AtLocation	meadow
+pebble	AtLocation	playground
+pebble	AtLocation	pond
+pebble	AtLocation	river
+pebble	AtLocation	riverbed
+pebble	AtLocation	shoe
+pebble	AtLocation	street
+pen or pencil	AtLocation	table
+penis	AtLocation	lover's anus
+penis	AtLocation	lover's mouth
+penis	AtLocation	pair of pants
+penis	AtLocation	shorts
+piano	AtLocation	church
+piano	AtLocation	concert
+piano	AtLocation	concert hall
+piano	AtLocation	drawing room
+piano	AtLocation	music room
+piano	AtLocation	music school
+piano	AtLocation	music store
+piano	AtLocation	neighbor's house
+piano	AtLocation	old movie
+piano	AtLocation	orchestra
+piano	AtLocation	restaurant
+piano	AtLocation	store or home
+piano	AtLocation	symphony
+piano	AtLocation	symphony orchestra
+picture	AtLocation	art show
+picture	AtLocation	desktop
+picture	AtLocation	newspaper
+picture	AtLocation	shelf
+picture	AtLocation	table
+picture	AtLocation	wall
+place setting	AtLocation	table
+player	AtLocation	sporting event
+player	AtLocation	stadium
+pork	AtLocation	dinner
+pork	AtLocation	refrigerator
+possum	AtLocation	road
+pot	AtLocation	backpack
+pot	AtLocation	commercial kitchen
+pot	AtLocation	cupboard
+pot	AtLocation	drawer
+pot	AtLocation	greenhouse
+pot	AtLocation	hardware shop
+pot	AtLocation	kitchen
+pot	AtLocation	kitchen drawer
+pot	AtLocation	porch
+pot	AtLocation	restaurant
+prescription medication	AtLocation	sock drawer
+prescription medication	AtLocation	suitcase
+president	AtLocation	airforce one
+president	AtLocation	board room
+president	AtLocation	building
+president	AtLocation	conflict with himself
+president	AtLocation	corporation
+president	AtLocation	country
+president	AtLocation	election
+president	AtLocation	government
+president	AtLocation	meeting
+president	AtLocation	pta
+president	AtLocation	trouble
+president	AtLocation	white house
+president	AtLocation	whitehouse
+project	AtLocation	shelf
+projector	AtLocation	conference
+projector	AtLocation	meeting
+projector	AtLocation	movie
+projector	AtLocation	movies
+projector	AtLocation	theatre
+pump	AtLocation	boat
+purse	AtLocation	department store
+purse	AtLocation	hand
+purse	AtLocation	handbag
+purse	AtLocation	hanging on woman's shoulder
+purse	AtLocation	home
+purse	AtLocation	house
+purse	AtLocation	pocket
+purse	AtLocation	robber's cache
+purse	AtLocation	store
+purse	AtLocation	woman's room
+purse	AtLocation	women's accessory store
+reed	AtLocation	water
+reference	AtLocation	library
+return ticket	AtLocation	airline envelope
+return ticket	AtLocation	airport
+return ticket	AtLocation	back airline ticket
+return ticket	AtLocation	pcoket
+return ticket	AtLocation	plane
+return ticket	AtLocation	pocke
+return ticket	AtLocation	pocket
+return ticket	AtLocation	purse
+return ticket	AtLocation	tickets
+ring	AtLocation	bath tub
+ring	AtLocation	bathtub
+ring	AtLocation	box
+ring	AtLocation	boxing gym
+ring	AtLocation	finger
+ring	AtLocation	friend's wedding
+ring	AtLocation	jewelery box
+ring	AtLocation	jewelry store
+ring	AtLocation	jewlery store
+ring	AtLocation	julery store
+ring	AtLocation	mall
+ring	AtLocation	pocket
+ring	AtLocation	store
+ring	AtLocation	wedding ceremony
+ring	AtLocation	windowsill
+rolodex	AtLocation	desk
+router	AtLocation	house
+router	AtLocation	library
+router	AtLocation	network
+rubber	AtLocation	bedside table
+rubber	AtLocation	cabinet
+rubber	AtLocation	classroom
+rubber	AtLocation	condom store
+rubber	AtLocation	drawer by bed
+rubber	AtLocation	drawer of night table
+rubber	AtLocation	drug store
+rubber	AtLocation	drugstore
+rubber	AtLocation	freeway
+rubber	AtLocation	house
+rubber	AtLocation	intimate act
+rubber	AtLocation	pencil case
+rubber	AtLocation	small square plastic wrapper
+rubber	AtLocation	tires
+rubber	AtLocation	trash
+rubber	AtLocation	wallet
+salon	AtLocation	beauty school
+salon	AtLocation	canada
+salon	AtLocation	castle
+salon	AtLocation	city
+salon	AtLocation	hair dyers
+salon	AtLocation	mall
+salon	AtLocation	shopping mall
+salt	AtLocation	cabinet
+salt	AtLocation	cupboard
+salt	AtLocation	fast food restaurant
+salt	AtLocation	food
+salt	AtLocation	homes
+salt	AtLocation	kitchen cupboard
+salt	AtLocation	mine
+salt	AtLocation	neighbor's house
+salt	AtLocation	ocean
+salt	AtLocation	ocean water
+salt	AtLocation	resturant
+salt	AtLocation	salt mine
+salt	AtLocation	salt water
+salt	AtLocation	sea water
+salt	AtLocation	shaker
+salt	AtLocation	shelf
+salt	AtLocation	street
+salt	AtLocation	table
+salt	AtLocation	the
+salt	AtLocation	water
+salt water	AtLocation	ocean
+salt water	AtLocation	sea
+sand	AtLocation	bottom of ocean
+sand	AtLocation	bottom of sea
+sand	AtLocation	builders merchants
+sand	AtLocation	concrete
+sand	AtLocation	desert
+sand	AtLocation	earth
+sand	AtLocation	ground
+sand	AtLocation	moon
+sand	AtLocation	ocean
+sand	AtLocation	pail
+sand	AtLocation	sandbox
+sand	AtLocation	shoes
+sand	AtLocation	street
+sand	AtLocation	surface of earth
+sand	AtLocation	swimsuit
+sand	AtLocation	tree
+scoreboard	AtLocation	sporting event
+seal	AtLocation	sea
+seal	AtLocation	zoo
+shed	AtLocation	backyard
+shed	AtLocation	farm yard
+shed	AtLocation	ranch
+sheet of paper	AtLocation	box
+sheet of paper	AtLocation	office
+sheet of paper	AtLocation	printer
+showroom	AtLocation	appliance store
+showroom	AtLocation	automobile dealership
+showroom	AtLocation	automobile distributorship
+showroom	AtLocation	car dealership
+showroom	AtLocation	car mechanic's shop
+showroom	AtLocation	car shop
+showroom	AtLocation	city
+showroom	AtLocation	electronics store
+showroom	AtLocation	las vega
+showroom	AtLocation	store
+showroom	AtLocation	theater
+showroom	AtLocation	vegas
+sigh	AtLocation	corner of two streets
+skirt	AtLocation	closet
+sky	AtLocation	air
+sky	AtLocation	atmosphere
+sky	AtLocation	day
+sky	AtLocation	heavens
+sky	AtLocation	looking up
+sky	AtLocation	outdoors
+sky	AtLocation	outside
+sky	AtLocation	painting
+sky	AtLocation	photo
+sky	AtLocation	place on earth
+sky	AtLocation	planet
+sky	AtLocation	planetarium
+sky	AtLocation	pre schoolers painting
+snow	AtLocation	alaska
+snow	AtLocation	antarctica
+snow	AtLocation	antrarctica
+snow	AtLocation	canada
+snow	AtLocation	ground
+snow	AtLocation	mountains
+snow	AtLocation	north
+snow	AtLocation	north pole
+snow	AtLocation	roof
+snow	AtLocation	surface of earth
+solar panel	AtLocation	roof
+space suit	AtLocation	space shuttle
+spot light	AtLocation	opera
+square	AtLocation	carpenter's tool box
+square	AtLocation	fifties
+square	AtLocation	geometry
+square	AtLocation	town
+square	AtLocation	town center
+square	AtLocation	tokyo
+stationery	AtLocation	desk
+stationery	AtLocation	drawer
+stationery	AtLocation	office
+stationery	AtLocation	post office
+stop sign	AtLocation	bus stop
+stop sign	AtLocation	corner of two streets
+stop sign	AtLocation	fork in road
+stop sign	AtLocation	street corner
+street	AtLocation	map
+street	AtLocation	neighborhood
+street	AtLocation	street corner
+string	AtLocation	atom
+string	AtLocation	bird's nest
+string	AtLocation	guitar
+string	AtLocation	junk drawer
+string	AtLocation	kite
+string	AtLocation	peice of clothing
+string	AtLocation	quark
+string	AtLocation	spool
+string	AtLocation	surveyor's kit
+stupidity	AtLocation	people
+subway pass	AtLocation	city
+subway pass	AtLocation	new york
+subway pass	AtLocation	pocket
+subway pass	AtLocation	purse
+subway pass	AtLocation	subay station
+subway pass	AtLocation	subway station
+subway pass	AtLocation	wallet
+subway pass	AtLocation	wallet or purse
+suite	AtLocation	hotel
+suite	AtLocation	motel
+sushi	AtLocation	plate
+sweater	AtLocation	drawer
+syrup	AtLocation	waffle
+table cloth	AtLocation	cupboard
+table cloth	AtLocation	restaurant
+table cloth	AtLocation	table
+tape	AtLocation	backpack
+tape	AtLocation	cabinet
+tape	AtLocation	drawer
+teenager	AtLocation	mall
+teenager	AtLocation	roof
+telephone	AtLocation	desk
+telephone	AtLocation	desktop
+telephone	AtLocation	end of line
+telephone	AtLocation	every u.s
+telephone	AtLocation	friend's house
+telephone	AtLocation	hospital
+telephone	AtLocation	hotel
+telephone	AtLocation	office
+telephone	AtLocation	party
+telephone	AtLocation	phone booth
+telephone	AtLocation	telephone booth
+tension	AtLocation	meeting
+theater	AtLocation	city
+theater	AtLocation	downtown
+theater	AtLocation	downtown area
+theater	AtLocation	mall
+theater	AtLocation	military base
+theater	AtLocation	movie
+theater	AtLocation	new york
+theater	AtLocation	new york city
+theater	AtLocation	opera
+theater	AtLocation	populated area
+theater	AtLocation	school
+theater	AtLocation	shopping mall
+theater	AtLocation	town
+theif	AtLocation	fair
+theif	AtLocation	store
+tofu	AtLocation	refrigerator
+tomato	AtLocation	farmer's market
+tomato	AtLocation	refrigerator
+tool kit	AtLocation	garage
+trashcan	AtLocation	disneyland
+vaccum	AtLocation	space
+vacuum	AtLocation	closet
+vacuum	AtLocation	container
+vacuum	AtLocation	garage
+vacuum	AtLocation	orbit
+vacuum	AtLocation	space
+vodka	AtLocation	bar
+vodka	AtLocation	cabinet
+volley ball	AtLocation	beach
+volleyball	AtLocation	beach
+washington monument	AtLocation	washington d.c
+waste bin	AtLocation	desk
+weasel	AtLocation	animated film
+weasel	AtLocation	backyard
+weasel	AtLocation	backyards
+weasel	AtLocation	bad crowd
+weasel	AtLocation	bar
+weasel	AtLocation	barn
+weasel	AtLocation	book wind in willows
+weasel	AtLocation	box
+weasel	AtLocation	bushes
+weasel	AtLocation	canada
+weasel	AtLocation	cartoon
+weasel	AtLocation	cave
+weasel	AtLocation	cheese
+weasel	AtLocation	cherry tree
+weasel	AtLocation	chicken coop
+weasel	AtLocation	children's song
+weasel	AtLocation	children's story
+weasel	AtLocation	classroom
+weasel	AtLocation	congress
+weasel	AtLocation	corn fields
+weasel	AtLocation	cotton
+weasel	AtLocation	court room
+weasel	AtLocation	den
+weasel	AtLocation	dirt hole
+weasel	AtLocation	fairytale
+weasel	AtLocation	farm
+weasel	AtLocation	flagrante with rabbit
+weasel	AtLocation	fodasse
+weasel	AtLocation	foresrt
+weasel	AtLocation	forrest
+weasel	AtLocation	france
+weasel	AtLocation	garden
+weasel	AtLocation	great britain
+weasel	AtLocation	great outdoors
+weasel	AtLocation	habitat
+weasel	AtLocation	hen house
+weasel	AtLocation	henhouse
+weasel	AtLocation	hole in ground
+weasel	AtLocation	hole in tree
+weasel	AtLocation	hollow log
+weasel	AtLocation	it's den
+weasel	AtLocation	it's natural habitat
+weasel	AtLocation	jungle
+weasel	AtLocation	las vegas
+weasel	AtLocation	law firm
+weasel	AtLocation	law office
+weasel	AtLocation	mafia organization
+weasel	AtLocation	maine
+weasel	AtLocation	meatloaf
+weasel	AtLocation	michigan
+weasel	AtLocation	mulberry bush
+weasel	AtLocation	natre
+weasel	AtLocation	natural history museum
+weasel	AtLocation	nest
+weasel	AtLocation	new york post editorial
+weasel	AtLocation	office
+weasel	AtLocation	old loony toons
+weasel	AtLocation	out of doors
+weasel	AtLocation	outdoors
+weasel	AtLocation	own home
+weasel	AtLocation	parlamente
+weasel	AtLocation	pet shop
+weasel	AtLocation	pocket
+weasel	AtLocation	pop
+weasel	AtLocation	prarie
+weasel	AtLocation	public office
+weasel	AtLocation	rabbit warren
+weasel	AtLocation	river
+weasel	AtLocation	roomful of junkies
+weasel	AtLocation	singles bar
+weasel	AtLocation	spain
+weasel	AtLocation	temperate region deciduous forest
+weasel	AtLocation	terrarium
+weasel	AtLocation	trap
+weasel	AtLocation	tree
+weasel	AtLocation	tunnel
+weasel	AtLocation	underground burrow
+weasel	AtLocation	underground hole
+weasel	AtLocation	used car lot
+weasel	AtLocation	viking ship
+weasel	AtLocation	washington d.c
+weasel	AtLocation	washington dc
+weasel	AtLocation	way
+weasel	AtLocation	weasel easel
+weasel	AtLocation	weasel hole
+weasel	AtLocation	weasel trap
+weasel	AtLocation	weaselworld
+weasel	AtLocation	wolf's belly
+weasel	AtLocation	wood pile
+weasel	AtLocation	woodland
+weasel	AtLocation	zoo
+weasel	AtLocation	zoo or menagerie
+whisky	AtLocation	bar
+whisky	AtLocation	jar
+wine list	AtLocation	boston
+wine list	AtLocation	french
+wine list	AtLocation	printing shop
+wine list	AtLocation	restaurant
+wine list	AtLocation	resturant
+aconcagua	AtLocation	argentina
+advertisement billboard	AtLocation	bus stop
+ahy	AtLocation	loft
+airline seat	AtLocation	707
+airline seat	AtLocation	airplane factory
+airline seat	AtLocation	front of plane
+airline seat	AtLocation	onboard plane
+alto	AtLocation	chior
+alto	AtLocation	choir
+alto	AtLocation	concerto
+alto	AtLocation	marching band
+alto	AtLocation	symphony
+american english	AtLocation	united states
+american flag	AtLocation	moon
+american flag	AtLocation	suface of moon
+amoeba	AtLocation	water
+amphitheatre	AtLocation	greece
+amphitheatre	AtLocation	movie house
+amphitheatre	AtLocation	outside
+amphitheatre	AtLocation	park
+and apple	AtLocation	apple orchard
+angelfish	AtLocation	aquarium
+animal hair	AtLocation	rug
+another dimension	AtLocation	cupboard
+antiemetic	AtLocation	medicine chest
+apply tree	AtLocation	orchard
+arch	AtLocation	ancient rome
+arch	AtLocation	archway
+arch	AtLocation	bridge
+arch	AtLocation	building
+arch	AtLocation	cathedral
+arch	AtLocation	church
+arch	AtLocation	doorway
+arch	AtLocation	foot
+arch	AtLocation	gazebo
+arch	AtLocation	paris
+arch	AtLocation	shoe
+arch	AtLocation	st
+argon	AtLocation	chemistry lab
+athlete	AtLocation	locker room
+athlete	AtLocation	olympics
+athlete	AtLocation	sporting event
+athlete	AtLocation	stadium
+automaton	AtLocation	banking
+automaton	AtLocation	car assembly plant
+automaton	AtLocation	factory
+automaton	AtLocation	lab
+automaton	AtLocation	museum
+automaton	AtLocation	science fiction plot
+avalanche	AtLocation	top of mountain
+babe	AtLocation	beach
+background radiation	AtLocation	outerspace
+bad weather	AtLocation	top of mountain
+balcony	AtLocation	building
+balcony	AtLocation	hotel
+balcony	AtLocation	house
+balcony	AtLocation	michigan
+balcony	AtLocation	movie house
+balcony	AtLocation	new orleans
+balcony	AtLocation	opera
+balcony	AtLocation	opera house
+balcony	AtLocation	tall apartment building
+balcony	AtLocation	theater
+balcony	AtLocation	theatre
+barbecue restaurant	AtLocation	austin texas
+barbecue restaurant	AtLocation	commercial building
+barbecue restaurant	AtLocation	deep south
+barbecue restaurant	AtLocation	south
+barbecue restaurant	AtLocation	texas
+baritone	AtLocation	case
+baritone	AtLocation	chior
+baritone	AtLocation	singing group
+barkeeper	AtLocation	bar
+bat boy	AtLocation	weekly world news
+battery tester	AtLocation	garage
+bazaar	AtLocation	aisa
+bazaar	AtLocation	arabia
+bazaar	AtLocation	asia
+bazaar	AtLocation	church
+bazaar	AtLocation	city
+bazaar	AtLocation	festival
+bazaar	AtLocation	india
+bazaar	AtLocation	istanbul
+bazaar	AtLocation	shops
+beautiful gurl face	AtLocation	neighbor's house
+beer commercial	AtLocation	television
+beethoven	AtLocation	mercury
+best man	AtLocation	friend's wedding
+best man	AtLocation	wedding
+betrayal	AtLocation	confession
+bike mechanic	AtLocation	bike shop
+blood orange marmalade	AtLocation	jar
+body builder	AtLocation	gym
+bombardon	AtLocation	brass band
+bombardon	AtLocation	war
+bookie	AtLocation	race track
+bookie	AtLocation	sporting event
+bottle of merlot	AtLocation	wine cellar
+brass	AtLocation	bed frame
+brass	AtLocation	big band
+brass	AtLocation	english church
+brass	AtLocation	marching band
+brass	AtLocation	metal objects
+brass	AtLocation	orchestra
+bread crumb	AtLocation	floor
+breaker box	AtLocation	garage
+bronze sculpture	AtLocation	art show
+brownstone	AtLocation	brooklyn
+brownstone	AtLocation	new york
+brownstone	AtLocation	new york city
+brownstone	AtLocation	ring
+brownstone	AtLocation	subdivision
+bummies	AtLocation	subway
+burglers	AtLocation	museum
+bus terminal	AtLocation	bus
+calanders	AtLocation	bookstore
+canadian	AtLocation	hockey game
+candelabra	AtLocation	table
+captain	AtLocation	airplane
+captain	AtLocation	airplane cabin
+captain	AtLocation	basketball team
+captain	AtLocation	battleship
+captain	AtLocation	bridge of ship
+captain	AtLocation	charge
+captain	AtLocation	helm of ship
+captain	AtLocation	military
+captain	AtLocation	navy
+captain	AtLocation	ship
+card swipe	AtLocation	gym
+carnage	AtLocation	war
+chaulk board	AtLocation	class
+cherub	AtLocation	heaven
+chess knight	AtLocation	chess board
+chess knight	AtLocation	chess game
+chess knight	AtLocation	chess tournament
+chess knight	AtLocation	chess tournement
+chess knight	AtLocation	chessboard
+chess knight	AtLocation	clothes drawer
+chess knight	AtLocation	game room
+chess knight	AtLocation	position to attack
+chess knight	AtLocation	threatening position
+chess pawn	AtLocation	chess game
+chess pawn	AtLocation	chess match
+chess pawn	AtLocation	chess set
+chess pawn	AtLocation	game store
+chess pawn	AtLocation	row of chess pawns
+chess pawn	AtLocation	small case
+chess pawn	AtLocation	square on chess board
+chess pawn	AtLocation	strategic move
+chess pawn	AtLocation	toy store
+chiffonier	AtLocation	home offices
+chigger	AtLocation	navel
+choice of direction	AtLocation	corner of two streets
+choir loft	AtLocation	church
+citizen	AtLocation	country
+cleric	AtLocation	church
+closet floor	AtLocation	closet
+clown	AtLocation	carnival
+clown	AtLocation	circus
+clown	AtLocation	party
+coach airline seat	AtLocation	coach
+coach airline seat	AtLocation	jet
+coach airline seat	AtLocation	large airplane
+compost	AtLocation	forest
+compost	AtLocation	garden
+compost	AtLocation	surface of earth
+concept car	AtLocation	car show
+congregation	AtLocation	synagogue
+construction	AtLocation	roadblock
+contraceptive device	AtLocation	adult woman's body
+contraceptive device	AtLocation	bedroom
+contraceptive device	AtLocation	bedside table
+contraceptive device	AtLocation	drawer
+contraceptive device	AtLocation	drug store
+contraceptive device	AtLocation	drugstore
+contraceptive device	AtLocation	gynecologist's office
+contraceptive device	AtLocation	person
+contraceptive device	AtLocation	pharmacy
+contraceptive device	AtLocation	vagina
+contraceptive device	AtLocation	womans vagina
+control room	AtLocation	airbase
+control room	AtLocation	building
+control room	AtLocation	factory
+control room	AtLocation	nuclear plant
+control room	AtLocation	nuclear power plant
+control room	AtLocation	power plant
+control room	AtLocation	prison
+control room	AtLocation	recording studio
+control room	AtLocation	studio
+control room	AtLocation	tv studio
+copyholder	AtLocation	desk
+cork puller	AtLocation	drawer
+corrigation	AtLocation	box
+cosmic radiation	AtLocation	space
+country fruit chutney	AtLocation	jar
+county highway	AtLocation	country
+county highway	AtLocation	map
+county highway	AtLocation	michigan
+county highway	AtLocation	rural area
+county highway	AtLocation	rural areas
+courant	AtLocation	hartford
+courant	AtLocation	jelly
+courant	AtLocation	liqueur
+croquet game	AtLocation	lawn
+cue ball	AtLocation	pool table
+curator	AtLocation	gallery opening
+curator	AtLocation	museum
+danger	AtLocation	roadblock
+danger	AtLocation	war
+dark matter	AtLocation	outerspace
+dark matter	AtLocation	universe
+dead jellyfish	AtLocation	beach
+dead leaf	AtLocation	tree
+delicatessen counter	AtLocation	supermarket
+demonstration	AtLocation	class
+depressant	AtLocation	medicine chest
+desk pad	AtLocation	desk
+desk tray	AtLocation	desk
+desk tray	AtLocation	desk drawer
+desk tray	AtLocation	dorm room
+desk tray	AtLocation	house
+desk tray	AtLocation	office
+desk tray	AtLocation	office max
+desk tray	AtLocation	pencils
+desk tray	AtLocation	study
+diaphragm	AtLocation	drugstore
+diaphragm	AtLocation	gas pump
+diaphragm	AtLocation	human
+diaphragm	AtLocation	person's chest
+diaphragm	AtLocation	respitory system
+diaphragm	AtLocation	valve
+diaphragm	AtLocation	woman's body
+diaphragm	AtLocation	woman's purse
+difficult to make decision	AtLocation	quandry
+dilemma	AtLocation	quandry
+dirt and trash	AtLocation	street
+dogfish	AtLocation	sea
+door bell	AtLocation	front door
+door to door salesman	AtLocation	front door
+door with lock	AtLocation	automobile
+door with lock	AtLocation	bus terminal
+door with lock	AtLocation	file cabinet
+door with lock	AtLocation	garage
+door with lock	AtLocation	house
+door with lock	AtLocation	office
+door with lock	AtLocation	office buildng
+door with lock	AtLocation	safe
+duck in	AtLocation	pond
+ear plug	AtLocation	eart
+earth in	AtLocation	map of solar system
+eat	AtLocation	dinner
+eat	AtLocation	plate
+edible	AtLocation	plate
+editorial	AtLocation	newspaper
+elderly person	AtLocation	nursing home
+emergency care	AtLocation	hospital
+emergency kit	AtLocation	basement
+emptiness	AtLocation	backseat of car
+emptiness	AtLocation	space
+english channel	AtLocation	atlantic ocean
+english channel	AtLocation	england
+english channel	AtLocation	northern hemisphere
+escherichia coli	AtLocation	colon
+exit sign	AtLocation	freeway
+express mail package	AtLocation	post office
+extra storage	AtLocation	cellar
+famil	AtLocation	home
+family member	AtLocation	relatives house
+family photograph	AtLocation	relatives house
+ficus	AtLocation	agarden
+ficus	AtLocation	apartment
+ficus	AtLocation	arboretum
+ficus	AtLocation	ass
+ficus	AtLocation	bank
+ficus	AtLocation	basket
+ficus	AtLocation	big planter
+ficus	AtLocation	bonsai arrangment
+ficus	AtLocation	book
+ficus	AtLocation	book of trees
+ficus	AtLocation	books
+ficus	AtLocation	boss's office
+ficus	AtLocation	botanical garden
+ficus	AtLocation	california
+ficus	AtLocation	canada
+ficus	AtLocation	clay pot
+ficus	AtLocation	clinic
+ficus	AtLocation	conservatory
+ficus	AtLocation	container
+ficus	AtLocation	corner
+ficus	AtLocation	dictionary
+ficus	AtLocation	dirt
+ficus	AtLocation	dirt in pot
+ficus	AtLocation	doctor's office
+ficus	AtLocation	doctor's waiting room
+ficus	AtLocation	ecosphere
+ficus	AtLocation	family room
+ficus	AtLocation	ficus garden
+ficus	AtLocation	field
+ficus	AtLocation	fig tree
+ficus	AtLocation	floral shop
+ficus	AtLocation	florida
+ficus	AtLocation	flower garden
+ficus	AtLocation	flower pot
+ficus	AtLocation	flowerpot
+ficus	AtLocation	forest
+ficus	AtLocation	forets
+ficus	AtLocation	front yard
+ficus	AtLocation	garden nursery
+ficus	AtLocation	garden shop
+ficus	AtLocation	garden store
+ficus	AtLocation	gardening section
+ficus	AtLocation	good health
+ficus	AtLocation	great outdoors
+ficus	AtLocation	green house
+ficus	AtLocation	greenhuse
+ficus	AtLocation	ground
+ficus	AtLocation	hair salon
+ficus	AtLocation	hallway
+ficus	AtLocation	health
+ficus	AtLocation	home and garden store
+ficus	AtLocation	horticultural encyclopedia
+ficus	AtLocation	horticulture supply house
+ficus	AtLocation	hospital
+ficus	AtLocation	house plant store
+ficus	AtLocation	illinois
+ficus	AtLocation	it's natural habitat
+ficus	AtLocation	landscape
+ficus	AtLocation	large flower pot
+ficus	AtLocation	large indoor pot
+ficus	AtLocation	large pot
+ficus	AtLocation	library
+ficus	AtLocation	lobby
+ficus	AtLocation	mall
+ficus	AtLocation	middle east
+ficus	AtLocation	moderate light
+ficus	AtLocation	nature
+ficus	AtLocation	nursery
+ficus	AtLocation	nursery supply store
+ficus	AtLocation	office
+ficus	AtLocation	office building
+ficus	AtLocation	office building foyer
+ficus	AtLocation	old folks home
+ficus	AtLocation	old lady's home
+ficus	AtLocation	orchard
+ficus	AtLocation	own home
+ficus	AtLocation	park
+ficus	AtLocation	persons home
+ficus	AtLocation	plant catalog
+ficus	AtLocation	plant kingdom
+ficus	AtLocation	plant shop or office
+ficus	AtLocation	plant store
+ficus	AtLocation	planter
+ficus	AtLocation	planting pot
+ficus	AtLocation	pool
+ficus	AtLocation	pot
+ficus	AtLocation	pot in house
+ficus	AtLocation	pot in office
+ficus	AtLocation	pot in somone's home
+ficus	AtLocation	pots
+ficus	AtLocation	public building
+ficus	AtLocation	public mall
+ficus	AtLocation	public place
+ficus	AtLocation	rainforest
+ficus	AtLocation	science class
+ficus	AtLocation	screened porch
+ficus	AtLocation	shady places
+ficus	AtLocation	southern us
+ficus	AtLocation	store sells plants
+ficus	AtLocation	sunny window
+ficus	AtLocation	tree
+ficus	AtLocation	tree nursery
+ficus	AtLocation	tropical forest
+ficus	AtLocation	tropical landscape
+ficus	AtLocation	tropical rainforest
+ficus	AtLocation	tropical region
+ficus	AtLocation	tropical zones
+ficus	AtLocation	tropics
+ficus	AtLocation	waer
+ficus	AtLocation	water
+ficus	AtLocation	wet places
+ficus	AtLocation	wild
+ficus	AtLocation	yard
+ficus in	AtLocation	pot
+fig and lemon conserve	AtLocation	jar
+flea	AtLocation	rug
+flora and fauna	AtLocation	park
+foliage	AtLocation	forest
+forgiveness	AtLocation	confession
+forgiveness	AtLocation	family
+forklift in	AtLocation	factory
+foulard	AtLocation	menswear shop
+free food	AtLocation	gallery opening
+friendship	AtLocation	friend's house
+front garden	AtLocation	front yard
+front garden	AtLocation	house
+front garden	AtLocation	michigan
+front garden	AtLocation	outside of house
+front garden	AtLocation	sunny yard
+front garden	AtLocation	urban area
+fume hood	AtLocation	chemistry lab
+fungus in air	AtLocation	house
+furnace	AtLocation	basement
+furnace	AtLocation	cellar
+furnace	AtLocation	home
+furnace	AtLocation	house
+game of chance	AtLocation	carnival
+gate leg table	AtLocation	dining room
+giant underpants	AtLocation	drawer
+ginseng	AtLocation	medicine chest
+good meal	AtLocation	dinner
+good meal	AtLocation	restaurant
+goodyear blimp	AtLocation	sky
+gourmet shop	AtLocation	city
+gourmet shop	AtLocation	department store
+gourmet shop	AtLocation	indiana
+gourmet shop	AtLocation	mall
+gourmet shop	AtLocation	malls
+gourmet shop	AtLocation	ritzy neighborhoods
+gourmet shop	AtLocation	shopping mall
+graffiti	AtLocation	bridge
+graffiti	AtLocation	bus stop
+graphitti	AtLocation	subway
+gras	AtLocation	lawn
+gras	AtLocation	park
+green space	AtLocation	park
+grit	AtLocation	carpet
+grocer shop	AtLocation	centre of town
+grocer shop	AtLocation	suburbs
+guard station	AtLocation	military base
+gum under seat	AtLocation	bus
+gutter	AtLocation	roof
+gutter	AtLocation	street
+hair care article	AtLocation	bathroom
+hair care article	AtLocation	bathroom cabinet
+hair care article	AtLocation	beauty supply store
+hair care article	AtLocation	cosmo magazine
+hair care article	AtLocation	drug store
+hair care article	AtLocation	hair magazine
+hair care article	AtLocation	hairstyle magazine
+hair care article	AtLocation	ladies purse
+hair care article	AtLocation	magazine
+hair care article	AtLocation	woman's purse
+hairdressing salon	AtLocation	mall
+hairdressing salon	AtLocation	strip mall
+hairdressing salon	AtLocation	town
+hairpin	AtLocation	barber shop
+hairpin	AtLocation	bathroom
+hairpin	AtLocation	bathroom cabinet drawer
+hairpin	AtLocation	female's hair
+hairpin	AtLocation	hair of woman
+hairpin	AtLocation	hair salon
+hairpin	AtLocation	hiar
+hairpin	AtLocation	ladies hair
+hairpin	AtLocation	lady's head
+hairpin	AtLocation	makeup cabinet
+hairpin	AtLocation	woman's hair
+handstraps	AtLocation	subway
+hangnail	AtLocation	finger
+heat source	AtLocation	basement such as furnace
+heat source	AtLocation	bedroom
+heat source	AtLocation	car
+heat source	AtLocation	coal or wood
+heat source	AtLocation	fire
+heat source	AtLocation	home
+heat source	AtLocation	house
+heat source	AtLocation	solar energy
+heavy traffic	AtLocation	freeway
+herpatologist	AtLocation	zoo
+hindi	AtLocation	india
+hindi	AtLocation	nepal
+horseshoe crab	AtLocation	beach
+hostility	AtLocation	war zone
+hubble space telescope	AtLocation	space
+human body	AtLocation	funeral
+ikea	AtLocation	leiden
+in space above earth	AtLocation	orbit
+inbox and outbox	AtLocation	desktop
+indian ocean	AtLocation	asia
+indian ocean	AtLocation	earth
+indian ocean	AtLocation	east
+indian ocean	AtLocation	india
+indian ocean	AtLocation	near india
+indian ocean	AtLocation	southern hemisphere
+ink remover	AtLocation	cabinet
+instrument organ	AtLocation	marching band
+intersection	AtLocation	cars
+intersection	AtLocation	city
+intersection	AtLocation	city street
+intersection	AtLocation	corner of two streets
+intersection	AtLocation	fork in road
+intersection	AtLocation	place where two streets meet
+intersection	AtLocation	road
+intersection	AtLocation	street
+intersection	AtLocation	street corner
+intersection	AtLocation	town
+intersection	AtLocation	town center
+ipecac	AtLocation	medicine chest
+island	AtLocation	body of water
+island	AtLocation	hawaii
+island	AtLocation	middle of ocean
+island	AtLocation	mississippi river
+island	AtLocation	pacific ocean
+island	AtLocation	water
+jacknives	AtLocation	sporting goods store
+jan mayen	AtLocation	arctic ocean
+jazz	AtLocation	new orleans
+jellyfish	AtLocation	all oceans of world
+jellyfish	AtLocation	aquarium
+jellyfish	AtLocation	aqurium
+jellyfish	AtLocation	art
+jellyfish	AtLocation	atlantic ocean
+jellyfish	AtLocation	baltimore aquarium
+jellyfish	AtLocation	bathing suit
+jellyfish	AtLocation	bay
+jellyfish	AtLocation	book
+jellyfish	AtLocation	calm waters
+jellyfish	AtLocation	cartoon
+jellyfish	AtLocation	chesapeake bay
+jellyfish	AtLocation	chinese entree
+jellyfish	AtLocation	chinese restaurant
+jellyfish	AtLocation	coral reef
+jellyfish	AtLocation	cuba
+jellyfish	AtLocation	current
+jellyfish	AtLocation	deep ocean
+jellyfish	AtLocation	detroit zoo
+jellyfish	AtLocation	encyclopedia
+jellyfish	AtLocation	florida
+jellyfish	AtLocation	gulf
+jellyfish	AtLocation	hand
+jellyfish	AtLocation	hawaii
+jellyfish	AtLocation	international waters
+jellyfish	AtLocation	jamaca
+jellyfish	AtLocation	japanese restaurant
+jellyfish	AtLocation	jelly bean
+jellyfish	AtLocation	jungle
+jellyfish	AtLocation	lake
+jellyfish	AtLocation	marine aquarium
+jellyfish	AtLocation	maui
+jellyfish	AtLocation	mediterranean sea
+jellyfish	AtLocation	monterey bay
+jellyfish	AtLocation	monterey bay aquarium
+jellyfish	AtLocation	most oceans
+jellyfish	AtLocation	movie
+jellyfish	AtLocation	north sea
+jellyfish	AtLocation	ocea
+jellyfish	AtLocation	ocean
+jellyfish	AtLocation	ocean or aquarium
+jellyfish	AtLocation	ocean water
+jellyfish	AtLocation	oceanic trench
+jellyfish	AtLocation	oceans and seas
+jellyfish	AtLocation	open ocean
+jellyfish	AtLocation	oriental restaurant
+jellyfish	AtLocation	osean
+jellyfish	AtLocation	pacific ocean
+jellyfish	AtLocation	peanut butter pool
+jellyfish	AtLocation	penny candy aisle
+jellyfish	AtLocation	pervet's bedroom
+jellyfish	AtLocation	photographs
+jellyfish	AtLocation	pond
+jellyfish	AtLocation	potato sout
+jellyfish	AtLocation	public aquarium
+jellyfish	AtLocation	red sea
+jellyfish	AtLocation	restaurant with strange menu
+jellyfish	AtLocation	saardina
+jellyfish	AtLocation	salt water
+jellyfish	AtLocation	saltwater
+jellyfish	AtLocation	sandwith
+jellyfish	AtLocation	sea at coral reefs
+jellyfish	AtLocation	sea water
+jellyfish	AtLocation	sea world
+jellyfish	AtLocation	see
+jellyfish	AtLocation	shore
+jellyfish	AtLocation	shores washed up and dead
+jellyfish	AtLocation	smack
+jellyfish	AtLocation	store
+jellyfish	AtLocation	surf
+jellyfish	AtLocation	sushi restaurant
+jellyfish	AtLocation	tank
+jellyfish	AtLocation	texas
+jellyfish	AtLocation	thai restaurant
+jellyfish	AtLocation	thesand
+jellyfish	AtLocation	tidal pools
+jellyfish	AtLocation	tidal waters
+jellyfish	AtLocation	tropical body of water
+jellyfish	AtLocation	tropical waters
+jellyfish	AtLocation	underwater
+jellyfish	AtLocation	warm ocean
+jellyfish	AtLocation	warm ocean water
+jellyfish	AtLocation	warm ocean waters
+jellyfish	AtLocation	warm sea
+jellyfish	AtLocation	weirdest places
+jellyfish	AtLocation	zoo
+jet fighter	AtLocation	war
+jewish person	AtLocation	synagogue
+jive	AtLocation	japan
+jive	AtLocation	shinjuku
+jive	AtLocation	tokyo
+junk mail	AtLocation	desk
+junk mail	AtLocation	mail
+junk mail	AtLocation	mail box
+junk mail	AtLocation	trash
+junk mail	AtLocation	waste bin
+keeper	AtLocation	soccer game
+kitchen utensil	AtLocation	dishwasher
+kitchen utensil	AtLocation	drawer
+kitchen utensil	AtLocation	kitchen and bathroom store
+kitchen utensil	AtLocation	kitchen sink
+kitchen utensil	AtLocation	kitchen supply store
+kitchen utensil	AtLocation	sink
+kitchenette	AtLocation	apartment
+kitchenette	AtLocation	cheap motel
+kitchenette	AtLocation	dormroom
+kitchenette	AtLocation	hotel room
+kitchenette	AtLocation	house
+kitchenette	AtLocation	one room flat
+kitchenette	AtLocation	small fridge
+knight	AtLocation	battle groung
+knight	AtLocation	castle
+knight	AtLocation	chess board
+knight	AtLocation	chess set
+knight	AtLocation	chessboard
+knight	AtLocation	england
+knight	AtLocation	europe
+knight	AtLocation	fairy tale
+knight	AtLocation	field
+knight	AtLocation	historical novel
+knight	AtLocation	middle ages
+knight	AtLocation	movie
+knight	AtLocation	story
+kosher restaurant	AtLocation	big city
+kosher restaurant	AtLocation	city
+kosher restaurant	AtLocation	jerusalem
+kosher restaurant	AtLocation	jewish neighborhood
+kosher restaurant	AtLocation	jewish neighborhoods
+kosher restaurant	AtLocation	new york
+kosher restaurant	AtLocation	new york city
+kosher restaurant	AtLocation	seattle
+kyushu	AtLocation	east asia
+large container	AtLocation	cabinet
+large container	AtLocation	container store
+large container	AtLocation	factory
+large container	AtLocation	garden
+large container	AtLocation	juice
+large container	AtLocation	kitchen
+large container	AtLocation	pantry
+large container	AtLocation	restaurant
+large container	AtLocation	restaurant kitchen
+large container	AtLocation	shed
+large container	AtLocation	supermarket
+large container	AtLocation	tanker
+large container	AtLocation	train yard
+large container	AtLocation	warehouse
+large library	AtLocation	university
+last person in line	AtLocation	end of line
+lemon peel	AtLocation	bar
+leo	AtLocation	germany
+less gravity	AtLocation	moon
+letter scale	AtLocation	office
+letter scale	AtLocation	or on desk
+letter scale	AtLocation	postoffice
+letter scale	AtLocation	shipping and receiving department
+librariam	AtLocation	library
+lidocaine	AtLocation	medicine chest
+liquor glass	AtLocation	bar
+liquor glass	AtLocation	bar room
+liquor glass	AtLocation	barroom
+liquor glass	AtLocation	cupboard
+liquor glass	AtLocation	kitchen
+liquor glass	AtLocation	liquor store
+liquor glass	AtLocation	pub
+livestock	AtLocation	fairgrounds
+livestock	AtLocation	field
+llullaillaco	AtLocation	argentina
+llullaillaco	AtLocation	chile
+loser	AtLocation	casino
+loser	AtLocation	austria
+loser	AtLocation	styria
+lot of stuff about sex	AtLocation	perverted person's mind
+loud preacher	AtLocation	church
+magents	AtLocation	fridge
+magnetic poetry	AtLocation	fridge
+main entrance	AtLocation	building
+main entrance	AtLocation	buildings
+main entrance	AtLocation	house
+main entrance	AtLocation	movie theater
+main entrance	AtLocation	public building
+main entrance	AtLocation	stadium
+mandolin	AtLocation	band
+mandolin	AtLocation	blue grass band
+mandolin	AtLocation	bluegrass band
+mandolin	AtLocation	greek band
+mandolin	AtLocation	instrument case
+mandolin	AtLocation	music shop
+mandolin	AtLocation	music store
+mandolin	AtLocation	musical instrument store
+mandolin	AtLocation	musician's hand
+mandolin	AtLocation	spain
+manhole	AtLocation	street corner
+manmade satellite	AtLocation	orbit
+marine	AtLocation	ocean
+marine life	AtLocation	ocean
+marine life	AtLocation	water
+mario	AtLocation	nintendo games
+mast	AtLocation	boatyard
+mast	AtLocation	sailing ship
+mast	AtLocation	ship
+membrane	AtLocation	animal
+membrane	AtLocation	cell
+membrane	AtLocation	fresh egg
+menorah	AtLocation	synagogue
+merchant	AtLocation	bizzarre
+merchant	AtLocation	business
+merchant	AtLocation	mall
+merchant	AtLocation	market
+merchant	AtLocation	shop
+merchant	AtLocation	shopping center
+merchant	AtLocation	store
+mermaid	AtLocation	sea
+mess hall	AtLocation	military base
+microwave oven	AtLocation	house
+microwave oven	AtLocation	kitchen
+military equipment	AtLocation	war
+mineral	AtLocation	earth
+mineral	AtLocation	michigan
+mineral	AtLocation	multivitamin
+mineral	AtLocation	ore
+mini freezer	AtLocation	at hotel
+minnie mouse	AtLocation	disneyland
+moon bounce	AtLocation	fair
+moss	AtLocation	bridge
+moss	AtLocation	forest
+moss	AtLocation	ground
+moss	AtLocation	tree
+moss	AtLocation	waterfall
+mouspad	AtLocation	desk
+nasty	AtLocation	carpet
+nasty	AtLocation	trash
+national highway	AtLocation	atlas
+national highway	AtLocation	canada
+national highway	AtLocation	major cities
+national highway	AtLocation	one of contiguous united states
+national highway	AtLocation	united states
+naughty child	AtLocation	corner
+nerd	AtLocation	comic convention
+new artwork	AtLocation	gallery opening
+new movie	AtLocation	theater
+off ramp	AtLocation	freeway
+old gum	AtLocation	sidewalk
+old magazine	AtLocation	basement
+old magazine	AtLocation	dentist
+old medicine	AtLocation	cabinet
+opportunity	AtLocation	fork in road
+orange cone	AtLocation	roadblock
+orchestra pit	AtLocation	auditorium
+orchestra pit	AtLocation	butt
+orchestra pit	AtLocation	concert hall
+orchestra pit	AtLocation	concert theater
+orchestra pit	AtLocation	hollywood bowl
+orchestra pit	AtLocation	opera
+orchestra pit	AtLocation	opera house
+orchestra pit	AtLocation	orchestra cherry
+orchestra pit	AtLocation	severance hall in cleveland
+orchestra pit	AtLocation	theatre
+pallbearer	AtLocation	funeral
+paper clipa	AtLocation	desktop
+paper page	AtLocation	book
+paper page	AtLocation	comic book
+paper page	AtLocation	journal
+paper page	AtLocation	magazine
+paper page	AtLocation	magazines
+paper page	AtLocation	music book
+paper page	AtLocation	newspaper
+paper page	AtLocation	notebook
+paper page	AtLocation	writing
+parkway	AtLocation	garage
+parkway	AtLocation	map
+parkway	AtLocation	new jersey
+parkway	AtLocation	new york
+passeger	AtLocation	bus depot
+passport case	AtLocation	airport
+passport case	AtLocation	airport store
+passport case	AtLocation	coat pocket
+passport case	AtLocation	pocket
+passport case	AtLocation	suitcase
+passport case	AtLocation	travel goods store
+passport case	AtLocation	travel luggage
+passport case	AtLocation	travelers posession
+patio door	AtLocation	landfill
+patio door	AtLocation	patio
+payment counter	AtLocation	bank
+payment counter	AtLocation	business
+payment counter	AtLocation	convenience store
+payment counter	AtLocation	department store
+payment counter	AtLocation	store
+payment counter	AtLocation	travel agency
+peace and quiet	AtLocation	home
+peace and quiet	AtLocation	library
+peace and quiet	AtLocation	sea
+peace and quiet	AtLocation	top of mountain
+peacefulness	AtLocation	tree
+performance	AtLocation	circus
+performance	AtLocation	commercial
+performance	AtLocation	concert hall
+performance	AtLocation	movie
+performance	AtLocation	opera theater
+performance	AtLocation	play
+performance	AtLocation	school ausitorium
+performance	AtLocation	show
+performance	AtLocation	small block chevy
+performance	AtLocation	theatre
+performer	AtLocation	opera
+performer	AtLocation	party
+performer	AtLocation	stage
+perserves	AtLocation	pantry
+petrol tank	AtLocation	car
+pick up truck	AtLocation	car show
+pine tre	AtLocation	park
+pine tress	AtLocation	countryside
+pineapple ginger chutney	AtLocation	jar
+pineapple mango chutney	AtLocation	jar
+pit orchestra	AtLocation	opera
+pitcher mound	AtLocation	baseball field
+pitcher mound	AtLocation	baseball stadium
+pitcher mound	AtLocation	stadium
+populace	AtLocation	country
+possibility to sit down	AtLocation	rest area
+post binder	AtLocation	post office
+post binder	AtLocation	supply room
+post office	AtLocation	building
+post office	AtLocation	business district
+post office	AtLocation	center of town
+post office	AtLocation	central area of town
+post office	AtLocation	city
+post office	AtLocation	even smallest town
+post office	AtLocation	most towns
+post office	AtLocation	population center
+post office	AtLocation	town
+post office	AtLocation	town or city
+postal counter	AtLocation	mail room
+postal counter	AtLocation	mail room of business
+postal counter	AtLocation	office
+prism	AtLocation	windowsill
+prostitute	AtLocation	corner of two streets
+prostitute	AtLocation	hotel
+prostitute	AtLocation	new york
+prostitute	AtLocation	street corner
+prostitute	AtLocation	whorehouse
+protestor	AtLocation	demonstration
+pump shotgun	AtLocation	sporting goods store
+pumpking pie	AtLocation	windowsill
+punch bag	AtLocation	boxing gym
+quill	AtLocation	ink
+quill	AtLocation	ink pot
+racism	AtLocation	south
+rampant stupidity	AtLocation	fraternity house
+ratchet	AtLocation	repair shop
+reception	AtLocation	catering hall
+reception	AtLocation	church basement
+reception	AtLocation	country club
+reception	AtLocation	hall
+reception	AtLocation	large room
+reception	AtLocation	lobby
+reception	AtLocation	receptionist
+reception	AtLocation	restaurant
+reception	AtLocation	restorand
+reception	AtLocation	wedding party
+reception desk	AtLocation	at hotel
+reception desk	AtLocation	building
+reception desk	AtLocation	doctors office
+reception desk	AtLocation	front of office
+reception desk	AtLocation	hotel
+reception desk	AtLocation	large office
+reception desk	AtLocation	lobby
+reception desk	AtLocation	motel
+reception desk	AtLocation	office
+reception desk	AtLocation	office park
+reception desk	AtLocation	offices of law firm
+reception desk	AtLocation	real estate office
+refill	AtLocation	coffee shop
+refill	AtLocation	cup
+refill	AtLocation	restaurant
+refill	AtLocation	seven eleven store
+refill	AtLocation	stationary store
+refill	AtLocation	stationery shop
+refreshment stand	AtLocation	drive in movie
+refrigerator magnet	AtLocation	fridge
+reverence	AtLocation	church
+richmond	AtLocation	greater london
+ring toss	AtLocation	carnival
+road or water	AtLocation	bridge
+roast dinner	AtLocation	oven
+robin	AtLocation	lawn
+rock star	AtLocation	stage
+rowdy conduct	AtLocation	bar
+s schill	AtLocation	fair
+sane	AtLocation	beach
+santa claus	AtLocation	north pole
+santa claus	AtLocation	roof
+sattelite	AtLocation	orbit
+sattelites	AtLocation	orbit
+sattelites	AtLocation	outer space
+scampi sauce	AtLocation	jar
+scenic view	AtLocation	top of mountain
+school library	AtLocation	school
+sea cucumber	AtLocation	bottom of sea
+sea cucumber	AtLocation	water
+seawater	AtLocation	sea
+senate	AtLocation	belize
+senate	AtLocation	belmopan
+senate	AtLocation	hague
+senate	AtLocation	netherlands
+sewer	AtLocation	street
+sexual activity	AtLocation	bedroom
+shady spot	AtLocation	bridge
+sherpa	AtLocation	tibet
+shingel	AtLocation	roof
+shiny red car	AtLocation	car show
+shopkeeper	AtLocation	bookstore
+shopkeeper	AtLocation	shop
+shortcut to microsoft word	AtLocation	desktop
+show horse	AtLocation	fairgrounds
+side show	AtLocation	carnival
+silicone	AtLocation	artificial breasts
+silicone	AtLocation	contact lens
+silicone	AtLocation	hardware store
+silicone	AtLocation	many man made items
+silicone	AtLocation	silicone based caulk
+silicone	AtLocation	tube
+silicone	AtLocation	windows
+silicone	AtLocation	womans breast
+silk gown	AtLocation	opera
+skateboarder	AtLocation	park
+slipper	AtLocation	bed
+slush	AtLocation	ground
+small but active morgue	AtLocation	hospital
+snack food	AtLocation	backpack
+snot	AtLocation	nose
+space station	AtLocation	orbit
+space station	AtLocation	outerspace
+space station	AtLocation	space
+spacecraft	AtLocation	outerspace
+spaceshutle	AtLocation	moon
+spanish restaurant	AtLocation	california
+spanish restaurant	AtLocation	large city
+spanish restaurant	AtLocation	most cities
+spanish restaurant	AtLocation	new york
+spanish restaurant	AtLocation	nice part of town
+spanish restaurant	AtLocation	place where spanish people live
+spanish restaurant	AtLocation	rice
+spanish restaurant	AtLocation	spain
+spanish restaurant	AtLocation	texas
+sphinx	AtLocation	egypt
+split	AtLocation	fork in road
+stage border	AtLocation	building
+stage border	AtLocation	concert hall
+stage border	AtLocation	theatre
+stage entrance	AtLocation	back hallway
+stage entrance	AtLocation	theater
+stage entrance	AtLocation	theatre
+stairway	AtLocation	building with multiple floors
+stairway	AtLocation	house
+stairway	AtLocation	multi story building
+stairway	AtLocation	office building
+stairway	AtLocation	two story house
+stallion	AtLocation	field
+stamp rack	AtLocation	cpa's office
+stamp rack	AtLocation	mall
+stamp rack	AtLocation	office
+stamp rack	AtLocation	post office
+stamp rack	AtLocation	stationery store
+state highway	AtLocation	american state
+state highway	AtLocation	area between cities
+state highway	AtLocation	california
+state highway	AtLocation	californiea
+state highway	AtLocation	every state in us
+state highway	AtLocation	of states
+state highway	AtLocation	state
+state highway	AtLocation	united states
+steel cable	AtLocation	bridge
+steel cable	AtLocation	building
+steel cable	AtLocation	construction
+steel cable	AtLocation	construction site
+steel cable	AtLocation	factory
+steel cable	AtLocation	golden gate bridge
+steel cable	AtLocation	ground
+steel cable	AtLocation	ship
+steel cable	AtLocation	suspension bridge
+steel cable	AtLocation	winch
+sticky floor	AtLocation	fraternity house
+stoplight	AtLocation	street corner
+storage furniture	AtLocation	bedroom
+storage furniture	AtLocation	ebay
+storage furniture	AtLocation	house
+storage furniture	AtLocation	mall
+storage furniture	AtLocation	storage room
+storage furniture	AtLocation	walmart
+store refrigerator	AtLocation	back of store
+store refrigerator	AtLocation	back room
+store refrigerator	AtLocation	deli
+store refrigerator	AtLocation	grocery store
+store refrigerator	AtLocation	industrial sized kitchen
+store refrigerator	AtLocation	store
+store refrigerator	AtLocation	supermarket
+storehouse	AtLocation	basement
+stormcloud	AtLocation	sky
+streptomycin	AtLocation	medicine chest
+stripper	AtLocation	strip club
+studio control room	AtLocation	building
+studio control room	AtLocation	laboratory
+studio control room	AtLocation	music production company
+studio control room	AtLocation	newsroom
+studio control room	AtLocation	television station
+studio control room	AtLocation	television studio
+supernova	AtLocation	universe
+surf board	AtLocation	ocean
+suspension cable	AtLocation	bridge
+suspension cable	AtLocation	elevator
+suspension cable	AtLocation	golden gate bridge
+suspension cable	AtLocation	suspension bridge
+t.v	AtLocation	home
+taxiway turn off	AtLocation	airport
+taxiway turn off	AtLocation	big city
+taxiway turn off	AtLocation	city
+taxiway turn off	AtLocation	las vegas
+telephone kiosk	AtLocation	mall
+telephone kiosk	AtLocation	street
+telephone line	AtLocation	roof
+television program	AtLocation	television
+terminal	AtLocation	airport
+terrorist	AtLocation	plane
+ticket turnstile	AtLocation	mall
+ticket turnstile	AtLocation	subway
+ticket turnstile	AtLocation	subway station
+ticket turnstile	AtLocation	train station
+toll road	AtLocation	connecticut
+toll road	AtLocation	dallas
+toll road	AtLocation	eastern united states
+toll road	AtLocation	florida
+toll road	AtLocation	good repair
+toll road	AtLocation	illinois
+toll road	AtLocation	massachusetts
+toll road	AtLocation	new england
+toll road	AtLocation	new jersey
+toll road	AtLocation	new york
+toll road	AtLocation	road
+toll road	AtLocation	u
+toll road	AtLocation	united states
+tony blair	AtLocation	england
+top floor	AtLocation	apartment building
+top floor	AtLocation	apartment highrise
+top floor	AtLocation	building
+top floor	AtLocation	office building
+top floor	AtLocation	tall building
+townhouse	AtLocation	apartment building
+townhouse	AtLocation	michigan
+townhouse	AtLocation	new york
+townhouse	AtLocation	row of townhouses
+townhouse	AtLocation	suburban development
+townhouse	AtLocation	suburbs
+townhouse	AtLocation	town
+townhouse	AtLocation	urbon america
+train or homeless	AtLocation	train station
+tropical fish	AtLocation	aquarium
+tropical fish	AtLocation	freshwater tank
+truth about yourself	AtLocation	quandry
+ufo	AtLocation	outer space
+ufo	AtLocation	space
+vaccine	AtLocation	medicine chest
+veggie dip	AtLocation	supermarket
+vine	AtLocation	jungle
+volcanic sand	AtLocation	beach
+volvo	AtLocation	gothenburg
+voyager	AtLocation	bottom of sea
+waitstaff	AtLocation	resturant
+waste material	AtLocation	can
+weather prediction	AtLocation	newspaper
+welcone mat	AtLocation	porch
+whale shark	AtLocation	ocean
+wheelchari	AtLocation	hospital
+white house	AtLocation	america
+white house	AtLocation	doofus
+white house	AtLocation	pennsylvania avenue
+white house	AtLocation	press
+white house	AtLocation	washington
+white house	AtLocation	washington d.c
+white house	AtLocation	washington dc
+wino	AtLocation	bridge
+wrist rest	AtLocation	desk
+wrods	AtLocation	books
+yarmulke	AtLocation	synagogue
+yolk	AtLocation	egg
+yourself	AtLocation	home
+yourself	AtLocation	school
+yourself	AtLocation	surface of earth
+candy	AtLocation	candy dish
+snow	AtLocation	high mountains
+lizard	AtLocation	leaf in tropics
+hole	AtLocation	life saver candy
+snow	AtLocation	mountains often
+diaphragm	AtLocation	beneath lungs
+ed	AtLocation	hospice
+lacebug	AtLocation	underside of leaves
+recepies	AtLocation	food store
+spanner	AtLocation	toolbox
+talc	AtLocation	hospital
+yolk	AtLocation	shell

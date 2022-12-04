@@ -1,0 +1,692 @@
+input_text	prefix	target_text
+analyst	CapableOf	value common stock
+anarchist	CapableOf	carry banner
+asexual fish	CapableOf	dominate in extreme environments
+athlete	CapableOf	attempt to set record
+athlete	CapableOf	bicycle for many miles
+athlete	CapableOf	break record
+athlete	CapableOf	miss ball
+athlete	CapableOf	prepare for competition
+auctioneer	CapableOf	number paintings for auction
+bike mechanic	CapableOf	fix bikes
+bricklayer	CapableOf	wall up opening
+captain	CapableOf	man ship
+chameleon	CapableOf	reach very far with tongue
+citizen	CapableOf	choose candidate in election
+citizen	CapableOf	vote
+clapper	CapableOf	ring bell
+close friend	CapableOf	call by nickname
+clown	CapableOf	delight children
+cornerback	CapableOf	return pass
+curator	CapableOf	help to plan exhibition
+dalmations	CapableOf	ride on fire trucks
+damage to brain	CapableOf	cause loss of memories
+detective	CapableOf	find missing person
+detective	CapableOf	piece together clues
+detective	CapableOf	spot criminal
+detective	CapableOf	tail suspect husband
+energetic person	CapableOf	wash own car
+evangelist	CapableOf	gather followers
+even powerful person	CapableOf	throw up
+exhibitionist	CapableOf	raise skirt
+fbi agent	CapableOf	bug office
+foal	CapableOf	stand hour after birth
+gardener	CapableOf	hill potatoes
+gardener	CapableOf	pick weeds
+gardener	CapableOf	plant shrub
+gardener	CapableOf	rake leaves
+gardener	CapableOf	seed to grow vegetables
+gardener	CapableOf	stock canned home grown vegetables
+gardener	CapableOf	thin garden of weeds
+gardener	CapableOf	turn garden
+gardener	CapableOf	water garden
+gardener	CapableOf	water plants
+good captain	CapableOf	right boat
+hypocrite	CapableOf	act like friend
+ibm	CapableOf	ship computers all over world
+journalist	CapableOf	report news
+knight	CapableOf	charging into battle
+knight	CapableOf	ride horse
+merchant	CapableOf	get paid
+mormon	CapableOf	travel to europe
+painter	CapableOf	coat wall
+painter	CapableOf	do painting
+painter	CapableOf	letter sign
+performer	CapableOf	dance
+pianist	CapableOf	master piece
+prep cook	CapableOf	cut zucchini
+prosecutor	CapableOf	present evidence
+prostitute	CapableOf	service client
+rabid dog	CapableOf	spread disease
+recipient	CapableOf	except gift
+recipient	CapableOf	thank giver
+robin	CapableOf	mother chicks
+rock star	CapableOf	sign picture
+sarcastic comic	CapableOf	needle audience
+scapegoat	CapableOf	shoulder blame
+schoolchildren	CapableOf	miss bell
+showgirl	CapableOf	dance can can
+shyster	CapableOf	sell broken goods
+signmaker	CapableOf	letter sign
+stagehand	CapableOf	open curtains
+torturer	CapableOf	subject victim
+typist	CapableOf	stop typing
+voter	CapableOf	object to issues
+voter	CapableOf	voice opinion
+young lady	CapableOf	care to dance
+alto	CapableOf	high pitched voice
+captain	CapableOf	commanding ship
+captain	CapableOf	commanding starship
+captain	CapableOf	commanding vessel
+captain	CapableOf	lead team
+captain	CapableOf	telling people what to do
+merchant	CapableOf	selling
+merchant	CapableOf	selling things
+painter	CapableOf	coat walls
+athlete	CapableOf	decide to train
+clown	CapableOf	blow up balloon
+carnival worker	CapableOf	guess weight
+clown	CapableOf	wave to audiance
+merchant	CapableOf	selling products
+robin	CapableOf	winter down south
+sportsman	CapableOf	reach finish
+knight	CapableOf	company lord
+citizen	CapableOf	question policy
+mockingbird	CapableOf	sing many songs
+shopkeeper	CapableOf	charge money for products
+pusher	CapableOf	supply drugs to addict
+gardener	CapableOf	garden plants
+only sailor	CapableOf	sail seas
+gardener	CapableOf	seed lawn
+bookie	CapableOf	place bet
+anarchist	CapableOf	agitate
+copilot	CapableOf	ready to launch
+captain	CapableOf	man vessel
+shopkeeper	CapableOf	right display
+door to door salesman	CapableOf	selling encyclopedias
+homemaker in family	CapableOf	prepare meal
+typist	CapableOf	type companies documents
+handyman	CapableOf	doctor broken appliance
+sleazy broad	CapableOf	attempt to steal husband
+journalist	CapableOf	out celebrity
+athlete	CapableOf	wash car
+painter	CapableOf	paint wall
+gardener	CapableOf	thin seedlings
+executive	CapableOf	bicycle to work
+clown	CapableOf	act strange
+civilian	CapableOf	report crime
+gunner	CapableOf	man position
+computer scientist	CapableOf	designing algorithm
+captain	CapableOf	sailing boat
+yogi	CapableOf	fast for long time
+hurt person	CapableOf	wall off feelings
+captain	CapableOf	commanding ship's crew
+auctioneer	CapableOf	shout price
+gardener	CapableOf	seed flower bed
+loser	CapableOf	experience defeat
+captain	CapableOf	commanding sailing vessel
+baseball pitcher	CapableOf	perfect throw
+groundskeeper	CapableOf	start lawn mower
+flea	CapableOf	jump
+clown	CapableOf	appear confused
+dishonest person	CapableOf	doctor results
+painter	CapableOf	coat wall with paint
+detective	CapableOf	miss clue
+stallion	CapableOf	service mare
+card player	CapableOf	holding best cards
+shopkeeper	CapableOf	price goods selling
+gardener	CapableOf	water flowers
+captain	CapableOf	singing pop songs with tenniel
+captain	CapableOf	leadership
+gardener	CapableOf	water herb garden
+gardener	CapableOf	plant seed
+athlete	CapableOf	jump high
+clown	CapableOf	blow balloon up fast
+captain	CapableOf	command of ship at sea
+captain	CapableOf	captain boat
+detective	CapableOf	question witness
+citizen	CapableOf	honor country
+captain	CapableOf	directing people
+naughty child	CapableOf	lie to parents
+alto	CapableOf	singing
+bricklayer	CapableOf	build house
+detective	CapableOf	hunt for clues
+prosecutor	CapableOf	state case
+stripper	CapableOf	showing breasts to
+athlete	CapableOf	run marathon
+captain	CapableOf	commanding submarine
+gardener	CapableOf	grow plant
+merchant	CapableOf	trading goods
+pianist	CapableOf	play piano
+psychologist	CapableOf	condition subject
+renaissance man	CapableOf	do many different things
+card player	CapableOf	deal cards
+terrorist	CapableOf	plan attac
+alto	CapableOf	sing
+firefighter	CapableOf	put out fire
+gardener	CapableOf	garden garden
+captain	CapableOf	ring bell
+painter	CapableOf	spend time on preliminary sketches
+listener	CapableOf	hear radio program
+gardener	CapableOf	plant plants
+athlete	CapableOf	sprint
+listener	CapableOf	like music
+sensitive person	CapableOf	take umbrage
+police man	CapableOf	fire gun
+salior	CapableOf	weather storm
+performer	CapableOf	win kudos
+gardener	CapableOf	plant tree
+sculptor	CapableOf	form piece of art
+gardener	CapableOf	pick flowers
+knight	CapableOf	storm castle
+cry for help	CapableOf	go unanswered
+captain	CapableOf	directing lieutenants
+clown	CapableOf	feel sad
+captain	CapableOf	shore ship
+late worker	CapableOf	rush to get to work
+body builder	CapableOf	lift weights
+painter	CapableOf	picture scene
+hen	CapableOf	guard chicks
+gardener	CapableOf	thin vegetables
+captain	CapableOf	relaying orders from higher up
+citizen	CapableOf	sign petition
+bricklayer	CapableOf	wall in enclosure
+socialist	CapableOf	party member
+gardener	CapableOf	growing flowers in garden
+stockboy	CapableOf	price groceries
+loser	CapableOf	open door
+best man	CapableOf	rise to propose toast
+firefighter	CapableOf	rush to burning building
+gardener	CapableOf	wind up hose
+gardener	CapableOf	seed vegetable patch
+recipient	CapableOf	receive gift
+gardener	CapableOf	water plant
+yogi	CapableOf	fast for days
+gardener	CapableOf	thin flower bed
+sportsman	CapableOf	drop catch
+typist	CapableOf	type on keyboard
+merchant	CapableOf	sell things
+good fictional detective	CapableOf	trip up cunning adversary
+gardener	CapableOf	raise vegetables
+captain	CapableOf	command troops
+good salesman	CapableOf	sell
+athlete	CapableOf	bicycle up hill
+party goer	CapableOf	dress in costume
+gardener	CapableOf	fence out deer
+detective	CapableOf	tail suspect
+flea	CapableOf	lay eggs
+villain	CapableOf	face courts
+stonemason	CapableOf	cut stone
+city child	CapableOf	wonder at endless meadows
+merchant	CapableOf	obtaining merchandise
+carnival worker	CapableOf	guess weight for prize
+merchant	CapableOf	distributing products
+assassin	CapableOf	prepare hit list
+kindergartener	CapableOf	beginning school
+socialist	CapableOf	empower community
+painter	CapableOf	coat house with paint
+detective	CapableOf	tail cheating husband
+journalist	CapableOf	read press release
+captain	CapableOf	stay course
+bricklayer	CapableOf	wall off room
+quartermaster	CapableOf	supply troops
+voyager	CapableOf	board ship
+recipient	CapableOf	thank gift giver
+handyman	CapableOf	maintenance and repairs
+sculptor	CapableOf	create statues
+merchant	CapableOf	ship order
+detective	CapableOf	trust instinct
+detective	CapableOf	case joint
+prostitute	CapableOf	give head
+shopkeeper	CapableOf	price goods
+clown	CapableOf	delight child
+squirls	CapableOf	live in trees
+sailers	CapableOf	sail boat
+citizen	CapableOf	follow law
+gardener	CapableOf	plant cabbages
+painter	CapableOf	coat house in paint
+gardener	CapableOf	water roses
+executive	CapableOf	talk with confidence
+medical doctor	CapableOf	prescribe medicine
+loser	CapableOf	close door
+recipient	CapableOf	reply to e mail
+athlete	CapableOf	play baseball
+detective	CapableOf	tail person
+wrongdoer	CapableOf	pay penalty
+executive	CapableOf	page co worker
+merchant	CapableOf	sell goods
+citizen	CapableOf	report theft
+unibomber	CapableOf	mail bomb to victim
+good scientist	CapableOf	prove newton's laws
+captain	CapableOf	man helm
+detective	CapableOf	catch suspect
+captain	CapableOf	final authority aboard ship
+merchant	CapableOf	selling things to people
+hen	CapableOf	mother chicks
+marathoner	CapableOf	run for long distances
+stripper	CapableOf	show penis to
+oarsman	CapableOf	row boat
+gardener	CapableOf	seed garden
+athlete	CapableOf	letter in football
+sunflower seed	CapableOf	feed birds
+captain	CapableOf	being in charge
+sportsman	CapableOf	judge flight of ball
+athlete	CapableOf	play sport
+family member	CapableOf	pass peas
+gardener	CapableOf	plant seeds in garden
+gardener	CapableOf	plant seeds
+adult child	CapableOf	care for elderly parents
+sculptor	CapableOf	produce statue
+prosecutor	CapableOf	present facts at trial
+athlete	CapableOf	watch weight
+spearman	CapableOf	throw spear
+without good shade person	CapableOf	get heat stroke
+one legged man	CapableOf	dance jig in dreams
+merchant	CapableOf	carry credit
+captain	CapableOf	being army company commander
+cad	CapableOf	wrong lover
+schoolchildren	CapableOf	read newspaper
+citizen	CapableOf	vote for leaders who hereos
+clown	CapableOf	act foolish
+skateboarder	CapableOf	break bone
+hen	CapableOf	produce eggs
+flea	CapableOf	suck blood
+painter	CapableOf	step up ladder
+athlete	CapableOf	attempt to break world record
+captain	CapableOf	singing aria in hms pinafore
+art dealer	CapableOf	supply paintings
+creative person	CapableOf	add value to product
+citizen	CapableOf	air grievances
+jellyfish	CapableOf	hurt person
+loser	CapableOf	crying about losing game
+voter	CapableOf	choose candidate
+medical doctor	CapableOf	diagnose
+merchant	CapableOf	buying and selling goods
+audiophile	CapableOf	listen to music
+merchant	CapableOf	shop for
+bike mechanic	CapableOf	replace worn out parts
+captain	CapableOf	sailing
+painter	CapableOf	paint
+executive	CapableOf	run business
+former president	CapableOf	build house
+gardener	CapableOf	thin plants
+oscar winner	CapableOf	thank many people
+good salesman	CapableOf	nail down appointment
+terrorist	CapableOf	plant bomb
+curator	CapableOf	hang picture
+detective	CapableOf	find facts from witnesses
+loser	CapableOf	hand winner trophy
+sensitive person	CapableOf	use tact
+prostitute	CapableOf	sell sexual favors
+knight	CapableOf	free damsel in distress
+medical doctor	CapableOf	identify illness
+guilty person	CapableOf	go to jail
+handyman	CapableOf	oil squeaky wheel
+terrorist	CapableOf	arm bomb
+law enforcement officer	CapableOf	book convict
+detective	CapableOf	piece one clue together with another
+supermodel	CapableOf	turn heads
+gardener	CapableOf	dig hole
+with enough practice person	CapableOf	set record
+citizen	CapableOf	stop crime
+detective	CapableOf	question suspect
+egotist	CapableOf	fish for compliments
+athlete	CapableOf	best previous record
+pianist	CapableOf	read sheet music
+mechanical engineer	CapableOf	shore up bridge
+guilty person	CapableOf	face music
+detective	CapableOf	notice clue
+painter	CapableOf	view portrait
+moviemakers	CapableOf	insert subliminal messaging
+gardener	CapableOf	thin carrot patch
+quaterback	CapableOf	shoulder blame for loss
+meat cutter	CapableOf	quarter carcass
+athlete	CapableOf	run fast
+shoemaker	CapableOf	shoe man
+captain	CapableOf	command ship
+gardener	CapableOf	grow healthy plants
+clown	CapableOf	try to juggle
+captain	CapableOf	command of army company
+high jumper	CapableOf	jump high
+firefighter	CapableOf	pull hose
+athlete	CapableOf	lose competition
+and judge	CapableOf	overrrule lawyer
+clown	CapableOf	act silly
+detective	CapableOf	gather evidence
+analyst	CapableOf	study whether geography
+horse owner	CapableOf	shoe horse
+clapper	CapableOf	hear hands clap
+psychologist	CapableOf	counselling
+ufologists	CapableOf	believe in aliens
+famer	CapableOf	grow more than one crop
+athlete	CapableOf	jog
+merchant	CapableOf	offer deal
+mute	CapableOf	sign loves
+gardener	CapableOf	grow garden
+captain	CapableOf	command lieutenants
+oarsman	CapableOf	stay course
+gardener	CapableOf	plant roses
+athlete	CapableOf	compete
+detective	CapableOf	case building
+merchant	CapableOf	exchange money for goods
+painter	CapableOf	thin paint with turpentine
+detective	CapableOf	nail criminal
+detective	CapableOf	follow suspect
+recipient	CapableOf	keep gift
+journalist	CapableOf	begin story
+gardener	CapableOf	water seed bed
+cat owner	CapableOf	care for cat
+athlete	CapableOf	letter in sport
+signmaker	CapableOf	letter name on door
+handyman	CapableOf	oil hinges
+bird lover	CapableOf	listen to mockingbird sing
+citizen	CapableOf	voice opinion
+very lucky person	CapableOf	win lottery
+good salesman	CapableOf	sell cat litter to arabs
+athlete	CapableOf	play lacrosse
+painter	CapableOf	finishing wooden deck
+detective	CapableOf	catch criminal
+clown	CapableOf	spread cheer
+clown	CapableOf	surprise
+captain	CapableOf	captain ship
+torturer	CapableOf	subject victim to torture
+wet dog	CapableOf	get cold
+detective	CapableOf	note clues
+painter	CapableOf	paint picture
+captor	CapableOf	free slave
+gardener	CapableOf	pick berries
+cabinet maker	CapableOf	true board
+painter	CapableOf	coat house
+voter	CapableOf	side with speaker
+athlete	CapableOf	lose game
+deep sea fisherman	CapableOf	catch large tunafish
+gardener	CapableOf	plant vegetable
+police man	CapableOf	drive car
+athlete	CapableOf	choose to become professional
+gardener	CapableOf	pick crate of apples
+hen	CapableOf	lay dozen eggs
+each person in world	CapableOf	hope for peace
+sportsman	CapableOf	ride horse
+ghost	CapableOf	appear out of nowhere
+jet fighter	CapableOf	travel very fast
+museum goer	CapableOf	view great paintings
+offender	CapableOf	face consequences
+schoolchildren	CapableOf	duck and cover
+psychopath	CapableOf	attempt murder
+school graduate	CapableOf	advance to next grade
+stallion	CapableOf	cover mare
+malcontent	CapableOf	air grievences
+socialist	CapableOf	become communist
+old dog	CapableOf	learn new tricks
+elderly person	CapableOf	act childishly
+citizen	CapableOf	report crime
+captain	CapableOf	ship
+plaintiff	CapableOf	demand fair trial
+alto	CapableOf	create opera
+political party	CapableOf	contest election
+citizen	CapableOf	write editorial to newspaper
+guilty person	CapableOf	fit glove
+adroit leader	CapableOf	right situation
+at work woman	CapableOf	lift no more than 35 lbs
+caliph	CapableOf	marry off daughter
+footballer	CapableOf	head football
+detective	CapableOf	find eveidence
+knight	CapableOf	fence during duel
+gladiator	CapableOf	fight to death
+rabid animal	CapableOf	foam at mouth
+blind person	CapableOf	look with ears
+even fish	CapableOf	drink water
+beautiful hand	CapableOf	touch to neck
+computer scientist	CapableOf	say hello world
+medical doctor	CapableOf	doctor patient
+fast food clerk	CapableOf	number waiting in line
+martial artist	CapableOf	show off agility
+political party	CapableOf	back candidate
+sower	CapableOf	spread alfalfa seed
+loser	CapableOf	father child
+top bowler	CapableOf	nail shot
+scorpion	CapableOf	sting
+sewer	CapableOf	sew
+software company	CapableOf	ship cd roms
+sorter	CapableOf	sort ibm cards
+athlete	CapableOf	ready for race
+expert	CapableOf	spot fake
+expert	CapableOf	answer question
+player	CapableOf	cut mustard
+dentist	CapableOf	view teeth
+alcoholic	CapableOf	bottom out
+coach	CapableOf	time runner
+president	CapableOf	fool around with movie star
+family	CapableOf	farm potatoes
+mouse	CapableOf	eat grain
+dentist	CapableOf	use drill
+possum	CapableOf	play dead
+president	CapableOf	veto bill
+lover	CapableOf	have sez
+lover	CapableOf	serenade sweetheart
+employer	CapableOf	offer job
+employer	CapableOf	lay off employees
+family	CapableOf	move house
+employer	CapableOf	page employee with beeper
+president	CapableOf	choke on pretzel
+trainer	CapableOf	season troops
+coach	CapableOf	push players
+family	CapableOf	plan to go on vacation
+bass	CapableOf	live in ponds
+female	CapableOf	reproduce with male
+president	CapableOf	arm third world country
+female	CapableOf	produce eggs
+teenager	CapableOf	date apple of eye
+player	CapableOf	understand rules
+dentist	CapableOf	decide whether need drill
+expert	CapableOf	guide apprentice
+teenager	CapableOf	bicycle to school
+coach	CapableOf	condition players
+family	CapableOf	plan vacation
+president	CapableOf	wave to journalists
+teenager	CapableOf	enjoy party
+god	CapableOf	judge people
+teenager	CapableOf	listen to rock music
+rodent	CapableOf	age rapidly
+employer	CapableOf	hire new employees
+family	CapableOf	visit museum together
+mouse	CapableOf	enter mousehole
+president	CapableOf	field question
+family	CapableOf	play board game together
+employer	CapableOf	pay employee with check
+family	CapableOf	crowd around television
+teenager	CapableOf	run away from home
+attorney	CapableOf	represent in lawsuit
+president	CapableOf	succeed to help country
+family	CapableOf	move to new state
+camel	CapableOf	work for days without water
+player	CapableOf	master video game
+lover	CapableOf	long for beloved
+lover	CapableOf	delight beloved with sweet words
+trainer	CapableOf	train dog
+mouse	CapableOf	spring trap
+trainer	CapableOf	time horse
+lover	CapableOf	complete
+president	CapableOf	lead country
+president	CapableOf	govern nation
+opponent	CapableOf	cook goose
+president	CapableOf	lose election
+player	CapableOf	bank shot
+expert	CapableOf	supply answer
+family	CapableOf	include more than related people
+lover	CapableOf	return feeling
+teenager	CapableOf	eye pretty girl
+trainer	CapableOf	condition animal to respond
+coach	CapableOf	plan new play
+president	CapableOf	spend political capital on losing causes
+president	CapableOf	fall from grace
+silverfish	CapableOf	damage books
+family	CapableOf	include ten children
+family	CapableOf	spend vacation on cruise
+trainer	CapableOf	page veterinarian
+professional	CapableOf	clean goose
+possum	CapableOf	scatter rubbish
+dad	CapableOf	fence garden
+president	CapableOf	meeting students
+trainer	CapableOf	shoe horse
+trainer	CapableOf	train dog to fetch
+president	CapableOf	speaking to congress
+female	CapableOf	bear young
+lizard	CapableOf	sun on rock
+coach	CapableOf	cry foul
+teenager	CapableOf	cook pie
+family	CapableOf	call relatives
+trainer	CapableOf	buy horse
+teenager	CapableOf	short sheet bed
+camel	CapableOf	journey across desert
+employer	CapableOf	fire employees
+player	CapableOf	best opponent
+lover	CapableOf	demand second chance
+president	CapableOf	present medal with honors
+coach	CapableOf	train for competition
+family	CapableOf	include two children
+president	CapableOf	honor war heros
+family	CapableOf	sits at table to eat
+player	CapableOf	passing card
+ant	CapableOf	lift several times own weight
+president	CapableOf	govern country
+coach	CapableOf	lead team
+dentist	CapableOf	bridge two teeth
+president	CapableOf	list cabinet members
+president	CapableOf	duck out of dull parties
+cheater	CapableOf	feel guilty
+family	CapableOf	buy house
+butterfly	CapableOf	make landing
+player	CapableOf	even score
+dad	CapableOf	shoulder burden
+employer	CapableOf	fire employee
+coach	CapableOf	ready atheletes for competition
+family	CapableOf	share food with needy people
+teenager	CapableOf	smoke cigarette
+teenager	CapableOf	pain parents
+president	CapableOf	state problem to country
+president	CapableOf	name cabinet members
+alcoholic	CapableOf	drink lot of booze
+employer	CapableOf	present employee with paycheck
+player	CapableOf	deal cards to others
+teenager	CapableOf	talk on telephone
+president	CapableOf	sign bill into law
+employer	CapableOf	pay employee
+lover	CapableOf	fall in love
+jack	CapableOf	deal drugs
+butterfly	CapableOf	delight
+eagle	CapableOf	spot prey from afar
+coach	CapableOf	field team
+butterfly	CapableOf	fly
+attorney	CapableOf	put clients mind at ease
+family	CapableOf	eat in backyard
+coach	CapableOf	cut player
+coach	CapableOf	backing player
+coach	CapableOf	time runner's performance
+lover	CapableOf	distance themselves
+teenager	CapableOf	hang loose until parents leave
+trainer	CapableOf	condition athlete
+trainer	CapableOf	time runner
+trainer	CapableOf	train students
+lover	CapableOf	mail loveletter to sweetheart
+family	CapableOf	visit relatives on thanksgiving
+trainer	CapableOf	condition racehorse
+professional	CapableOf	train novice
+family	CapableOf	visit zoo
+coach	CapableOf	time team's speed
+expert	CapableOf	talk on news program
+president	CapableOf	govern with majority vote
+cheater	CapableOf	doctor results
+attorney	CapableOf	prove case
+possum	CapableOf	fool enemy
+dentist	CapableOf	pull teeth
+expert	CapableOf	note fine detail
+family	CapableOf	arriving at home
+player	CapableOf	attempt to win
+player	CapableOf	participate in game
+teenager	CapableOf	price stereo
+lizard	CapableOf	sun to warm up
+cheater	CapableOf	doctor test reults
+president	CapableOf	lead nation
+player	CapableOf	save game
+dentist	CapableOf	bridge gap in teeth
+hedgehog	CapableOf	roll up in ball
+possum	CapableOf	cross road
+lover	CapableOf	rain compliments
+trainer	CapableOf	break colt
+expert	CapableOf	head committee
+trainer	CapableOf	show dog to sit
+dad	CapableOf	cook well
+expert	CapableOf	teach what know
+ant	CapableOf	build colony
+family	CapableOf	include no children
+employer	CapableOf	offer job to
+president	CapableOf	sign bill
+seal	CapableOf	position itsself on rock
+trainer	CapableOf	condition boxer to perfection
+crane	CapableOf	lift heavy weight
+trainer	CapableOf	condition athelete
+mouse	CapableOf	enter trap
+player	CapableOf	head ball
+employer	CapableOf	pay employees
+bass	CapableOf	sing very low
+employer	CapableOf	require employee to work
+lover	CapableOf	make love
+dentist	CapableOf	fix teeth
+goalie	CapableOf	clear crease
+teenager	CapableOf	put out garbage
+lover	CapableOf	hope for being loved
+teenager	CapableOf	battle parents
+family	CapableOf	share meal
+female	CapableOf	conceive
+family	CapableOf	branch out in many directions
+president	CapableOf	declare war on foreign country
+attorney	CapableOf	right wrong
+lizard	CapableOf	sun itself on rock
+trainer	CapableOf	train trainees
+family	CapableOf	include one child
+player	CapableOf	place chess piece
+president	CapableOf	head company
+mouse	CapableOf	ring bell
+god	CapableOf	judge men
+cheater	CapableOf	throw game
+president	CapableOf	fire rockets to afghanistan
+eagle	CapableOf	spot rabbit on ground
+president	CapableOf	veto law
+opponent	CapableOf	dig up skeletons
+family	CapableOf	visit city on vacatio
+jack	CapableOf	rise out of bed
+trainer	CapableOf	show dog to site
+dad	CapableOf	start car
+mouse	CapableOf	eat rice
+jack	CapableOf	borrow money
+god	CapableOf	give peace
+lizard	CapableOf	sun itself
+player	CapableOf	belong to team
+dentist	CapableOf	cause to have great pain
+expert	CapableOf	answer questions
+lover	CapableOf	mail postcard
+president	CapableOf	offer pardon
+president	CapableOf	arm army
+coach	CapableOf	school team in basic skills
+god	CapableOf	everywhere
+god	CapableOf	work miracles
+female	CapableOf	give birth to child
+coach	CapableOf	coaching team
+player	CapableOf	advance pawn
+god	CapableOf	love
+dad	CapableOf	go fishing with son
+attorney	CapableOf	state case
+president	CapableOf	arriving in los angeles
+expert	CapableOf	judge dog show
+dentist	CapableOf	wash hands
+dentist	CapableOf	pulling teeth all day
+family	CapableOf	include five children
+expert	CapableOf	explain difference to us
+family	CapableOf	move to new house
+lover	CapableOf	touching tenderly
+family	CapableOf	include four children
+lover	CapableOf	touch tenderly
+goalie	CapableOf	head ball
+family	CapableOf	visit at thanksgiving
+player	CapableOf	field ball

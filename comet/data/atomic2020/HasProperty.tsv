@@ -1,0 +1,516 @@
+input_text	prefix	target_text
+murder	HasProperty	wrong
+stairway	HasProperty	winding
+citizen	HasProperty	responsible for paying state taxes
+performance	HasProperty	stressful for performer
+plutonium	HasProperty	one of most toxic metals
+hosta	HasProperty	perennial
+density	HasProperty	mass per unit volume
+triage	HasProperty	important for large accidents
+friendship	HasProperty	offered and must honored
+alto	HasProperty	lower than soprano
+addition	HasProperty	commutative
+selenium	HasProperty	toxic in high doses
+corperations	HasProperty	greedy
+bloodstone	HasProperty	red
+stairway	HasProperty	dark
+island	HasProperty	alone in sea of water
+parana	HasProperty	one of brazilian states
+seawater	HasProperty	salt
+yolk	HasProperty	yellow
+lexicon	HasProperty	useful to openmind
+murder	HasProperty	illegal
+compost	HasProperty	useful for recycling
+masturbation	HasProperty	enjoyable
+compost	HasProperty	wonderful
+jazz	HasProperty	innovative and improvisational
+fashion	HasProperty	extravagant
+asymetry	HasProperty	more interesting
+divine	HasProperty	same as holy
+cinematographer	HasProperty	responsible for motion picture photography
+sabotage	HasProperty	systematic
+racism	HasProperty	bad
+jazz	HasProperty	form of music
+plutonium	HasProperty	radioactive
+orgasm	HasProperty	very pleasurable
+aphotograph	HasProperty	one kind of image
+transparent	HasProperty	clear
+lutefisk	HasProperty	horrible
+pcp	HasProperty	illegal
+jellyfish	HasProperty	hard to see
+mineral	HasProperty	hard or soft
+bit	HasProperty	one or zero
+mastercard	HasProperty	one of many credit card
+performance	HasProperty	bad
+mandolin	HasProperty	similar to guitar
+spanner	HasProperty	useful for fixing car
+arch	HasProperty	strong in compression
+phosphorus	HasProperty	soluble in carbon disulphide
+harmony	HasProperty	pleasing to ear
+survival	HasProperty	fun
+townhouse	HasProperty	rather large house
+orgasm	HasProperty	necessary for mental health
+clown	HasProperty	funny
+friendship	HasProperty	important
+bocci	HasProperty	played outside
+winetrs	HasProperty	cold
+lexicon	HasProperty	very useful to openmind
+mastercard	HasProperty	one of many credit cards
+vodun	HasProperty	practiced in haiti
+athena	HasProperty	one of twelve olympians
+triage	HasProperty	important for war situations
+revolution	HasProperty	fun
+hippocampus	HasProperty	essential for forming new memories
+arch	HasProperty	weak in tension
+hippocampus	HasProperty	essential for foming new memories
+triage	HasProperty	common in emergency medicine
+cindy	HasProperty	hot
+au	HasProperty	gold
+density	HasProperty	mass divided by volume
+bottle	HasProperty	filled with fluids
+juice	HasProperty	made from crushed fruit pulp
+locomotive	HasProperty	one kind of vehicle
+bacteria	HasProperty	killed
+god	HasProperty	forgiving
+baseball diamond	HasProperty	outfield
+barrette	HasProperty	used in hair
+gun	HasProperty	dangerous
+chess	HasProperty	two sides black and white
+panda	HasProperty	quiet
+vacuum	HasProperty	almost no mass in
+snow	HasProperty	falling outside
+order	HasProperty	said to created from chaos
+dollar bill	HasProperty	exchanged for goods and services
+ball	HasProperty	spherical
+newspaper	HasProperty	printed on large sheets of paper
+snow	HasProperty	both cold and wet
+square	HasProperty	four right angles
+gold	HasProperty	melted
+day	HasProperty	ending when sun goes down
+mirror	HasProperty	found in car
+committee	HasProperty	more than one person
+vodka	HasProperty	made from potato extracts
+salt	HasProperty	bad for blood pressure
+salt	HasProperty	bad for
+ladder	HasProperty	climbed
+john	HasProperty	cavity
+cafeteria	HasProperty	found in school
+matter	HasProperty	affected by electrical charge
+sand	HasProperty	made up of tiny ground rocks
+basement	HasProperty	similar to cellar
+newspaper	HasProperty	light
+doll	HasProperty	small
+basketball	HasProperty	popular in america
+president	HasProperty	more important than mayor
+matter	HasProperty	mass
+sky	HasProperty	blue on clear day
+juice	HasProperty	extracted from fruits
+basketball	HasProperty	played on court
+day	HasProperty	light
+newspaper	HasProperty	information about many things
+vodka	HasProperty	liquid
+basketball	HasProperty	played by teams
+sky	HasProperty	dark blue just before night
+god	HasProperty	very powerful
+sax	HasProperty	short for saxophone
+banjo	HasProperty	found in new orleans
+death	HasProperty	way for simplifying family conflicts
+president	HasProperty	elected
+testimony	HasProperty	given in trial
+matter	HasProperty	converted to energy
+bacteria	HasProperty	benign and do not cause disease
+weasel	HasProperty	nose
+copulation	HasProperty	necessary for reproduction through sexual intercourse
+government office	HasProperty	calculator
+hockey	HasProperty	more dangerous than football
+string	HasProperty	cut into many pieces
+debate	HasProperty	useful in developing consensus
+god	HasProperty	omnibenevolent
+stop sign	HasProperty	eight sides
+sheet of paper	HasProperty	thin
+project	HasProperty	interesting
+spanish restaurant	HasProperty	good food
+drink	HasProperty	put in containers
+passport case	HasProperty	passport
+gold	HasProperty	burnished
+god	HasProperty	based on belief
+salt	HasProperty	found in sea
+hole	HasProperty	filled with air
+cauldron	HasProperty	steeped in magical tradition and mystery
+string	HasProperty	tied in knots
+bicycle	HasProperty	two weheels
+cancer	HasProperty	very dangerous
+syrup	HasProperty	sticky
+vodka	HasProperty	colourless
+bacon	HasProperty	found in store
+cuba	HasProperty	beaches
+tape	HasProperty	placed in clean place
+ball	HasProperty	three dimensions
+sky	HasProperty	blue when not cloudy
+cd player	HasProperty	found in house
+hockey	HasProperty	played on ice
+marble	HasProperty	porous
+sky	HasProperty	dark
+all news	HasProperty	source
+marble	HasProperty	polished
+square	HasProperty	four sides
+grocery store	HasProperty	many shelves of food
+boat	HasProperty	powered by engine
+string	HasProperty	tied into knot
+god	HasProperty	omnipotent
+sushi	HasProperty	made from raw fish
+basketball	HasProperty	punctured
+boat	HasProperty	propellor
+piano	HasProperty	solid
+conference table	HasProperty	found in office
+marble	HasProperty	etched
+ladder	HasProperty	climbed to reach place high
+sky	HasProperty	black in outer space
+illness	HasProperty	cured
+hockey	HasProperty	played with sticks and ball
+day	HasProperty	made up of 24 hours
+vodka	HasProperty	made from potatoes
+banana	HasProperty	found in store
+staple gun	HasProperty	held by hand
+family	HasProperty	descendants
+sky	HasProperty	bright
+bicycle	HasProperty	fun to ride
+bicycle	HasProperty	two peddles
+piano	HasProperty	88 black and white keys
+sky	HasProperty	clouds
+snow	HasProperty	blown around by wind
+lie	HasProperty	false
+ladder	HasProperty	stored in garage
+sky	HasProperty	grey on cloudy day
+boat	HasProperty	supposed to float
+bicycle	HasProperty	two wheels
+butterfly	HasProperty	wings
+dentist	HasProperty	paid to interact with
+nail	HasProperty	hit by hammer
+sky	HasProperty	foggy
+fireplace	HasProperty	chimney
+eagle	HasProperty	landed
+peach	HasProperty	pit
+penis	HasProperty	inserted into vagina
+kettle	HasProperty	handle
+hanger	HasProperty	made from wood plastic or metal
+cancer	HasProperty	represented by crab
+snow	HasProperty	slippery to drive on
+gold	HasProperty	pounded into thin sheets
+tomato	HasProperty	red or green
+string	HasProperty	made up of fibers
+tomato	HasProperty	eaten
+salt	HasProperty	found in store
+vodka	HasProperty	strong tasting
+orchestra pit	HasProperty	musicians
+piano	HasProperty	found in house
+john	HasProperty	big dick
+mirror	HasProperty	broken
+red wine	HasProperty	red in color
+salt	HasProperty	found in food
+object	HasProperty	moved in downward direction
+basketball	HasProperty	filled with air
+pottery	HasProperty	created on pottery wheel
+machinery	HasProperty	tested
+ball	HasProperty	circular
+every room	HasProperty	door
+typical livingroom	HasProperty	coffee table
+piano	HasProperty	played with hands
+magic	HasProperty	performed by magicians
+hay	HasProperty	used in hay ride
+hot wax	HasProperty	dangerous
+matter	HasProperty	gaseous
+jack	HasProperty	strong enough to lift truck
+dirt	HasProperty	opaque
+basketball	HasProperty	played by many people
+ball	HasProperty	formal
+snow	HasProperty	white and fluffy
+duvet	HasProperty	used on bed
+item	HasProperty	singular
+return ticket	HasProperty	more expensive than one way ticket
+jack	HasProperty	legs
+birthday cake	HasProperty	served on birthdays
+charge	HasProperty	made to account
+control room	HasProperty	machinery
+banana	HasProperty	peel
+bacteria	HasProperty	harmful
+basketball	HasProperty	big and orange
+boat	HasProperty	sails
+tofu	HasProperty	used in soups
+gun	HasProperty	found in pawnshop
+piano	HasProperty	white and black keys
+red wine	HasProperty	served at room temperature
+sand	HasProperty	found in desert
+ladder	HasProperty	rungs
+junk food	HasProperty	bad for people to eat
+mall	HasProperty	many different stores in
+bottle	HasProperty	liquid
+post office	HasProperty	weighing equipment
+gold	HasProperty	mined
+banjo	HasProperty	strings
+sky	HasProperty	sunny
+matter	HasProperty	solid
+cancer	HasProperty	bad
+ball	HasProperty	used in golf
+cookbook	HasProperty	many recipies
+comfort	HasProperty	important in all places people sit
+gold	HasProperty	yellow in color
+string	HasProperty	wound up into ball
+picture	HasProperty	reminiscent of picasso's cubist drawings
+bicycle	HasProperty	chain
+bicycle	HasProperty	steered by handlebars
+heater	HasProperty	used in winter
+newspaper	HasProperty	composed of several separate pages
+mailbox	HasProperty	found on sidewalk
+bacteria	HasProperty	very small
+diary	HasProperty	appointments
+every human	HasProperty	parents
+sand	HasProperty	found at beach
+mirror	HasProperty	reflective
+juice	HasProperty	pressed from fruit or vegetables
+basement	HasProperty	finished or unfinished
+home office	HasProperty	special definition for tax purposes
+tape	HasProperty	sticky
+sand	HasProperty	made into glass
+fight	HasProperty	starting outside
+buss pass	HasProperty	smooth
+sand	HasProperty	white
+pasta	HasProperty	produced by cooking dry pasta
+matter	HasProperty	no electrical charge
+rubber	HasProperty	similar to vinyl
+family	HasProperty	compound of several members
+human body	HasProperty	water
+gun	HasProperty	hidden in room
+sky	HasProperty	snowy
+hockey	HasProperty	played with puck
+bacteria	HasProperty	microscopic
+gun	HasProperty	one of many firearms
+duvet	HasProperty	similar to comforter
+banana	HasProperty	good to eat
+string	HasProperty	made from leather
+gold	HasProperty	worth more than silver
+ring	HasProperty	worn on finger
+candy	HasProperty	sugar
+sky	HasProperty	blue when weather fair
+gold	HasProperty	considered more secure than cash
+marble	HasProperty	rolling across table
+hockey	HasProperty	violent
+curtain	HasProperty	essential for privacy
+stairway	HasProperty	steps
+snow	HasProperty	white colour
+matter	HasProperty	converted into energy
+candy	HasProperty	high quantity of sugar
+purse	HasProperty	money
+sky	HasProperty	overcast
+salt	HasProperty	found in pantry
+carrie	HasProperty	kids
+pork	HasProperty	forbidden by judaism and islam
+death	HasProperty	fitting end for murderer
+gold	HasProperty	dented by person's teeth
+darkness	HasProperty	impossible to see in
+basement	HasProperty	flooded
+day	HasProperty	divided into a.m
+picture	HasProperty	painted on canvas
+syrup	HasProperty	sweet taste
+salt	HasProperty	used as seasoning on foods
+hay	HasProperty	organic
+telephone	HasProperty	dial on
+gold	HasProperty	number 79 on periodic table
+snow	HasProperty	beautiful
+lizard	HasProperty	cold blooded
+basketball	HasProperty	very popular with western children
+piano	HasProperty	black and white keys
+newspaper	HasProperty	news in paper format
+bottle	HasProperty	recycled
+sky	HasProperty	overhead
+sushi	HasProperty	very popular in asian cuisine
+cart	HasProperty	found in store
+modem	HasProperty	attached to computer
+ball	HasProperty	rolling on sports field
+ball	HasProperty	round and fun to bounce
+sand	HasProperty	found on beach
+ball	HasProperty	played with
+bagel	HasProperty	made in bakery
+sand	HasProperty	gritty
+sand	HasProperty	dry and small
+death	HasProperty	very sad for humans
+atlas	HasProperty	many maps
+basketball	HasProperty	round
+bicycle	HasProperty	chain drives wheels
+bar stool	HasProperty	found in bar
+ball	HasProperty	kicked
+bicycle	HasProperty	two wheels and pedals
+candy	HasProperty	lots of sugar in
+bow	HasProperty	knot
+committee	HasProperty	made up of people
+every human	HasProperty	name
+bacteria	HasProperty	alive
+skirt	HasProperty	one part of woman clth
+picture	HasProperty	useful to convey idea
+kite	HasProperty	tail
+fingernail	HasProperty	used as tool
+ball	HasProperty	pushed up hill
+ball	HasProperty	hit with bat
+bicycle	HasProperty	two tires
+salt	HasProperty	used as cooking seasoning
+candy	HasProperty	messy
+mirror	HasProperty	found in bathroom
+god	HasProperty	omniscient
+peace	HasProperty	elusive
+object	HasProperty	surface
+basketball	HasProperty	orange in color and round
+peace	HasProperty	better than war
+bottle	HasProperty	standing on table
+dad	HasProperty	one of human's parents
+street	HasProperty	name
+mouse	HasProperty	whiskers
+acid	HasProperty	dangerous
+solar system	HasProperty	planets
+salt	HasProperty	mined or collected
+dandruff	HasProperty	white
+ring	HasProperty	expensive
+salt	HasProperty	found in ocean
+newspaper	HasProperty	folded
+kite	HasProperty	flown in sky
+marble	HasProperty	carved
+process	HasProperty	broken down into steps
+sky	HasProperty	full of stars
+juice	HasProperty	liquid
+piano	HasProperty	played
+john	HasProperty	been in business since 1996
+chess	HasProperty	extremely precise rules
+gun	HasProperty	one kind of firearm
+basketball	HasProperty	full of air
+newspaper	HasProperty	read
+plunger	HasProperty	used in toilet
+tube	HasProperty	hollow
+mall	HasProperty	many shops
+plunger	HasProperty	useful for unblocking toilet
+hole	HasProperty	dark
+piano	HasProperty	one kind of musical instrument
+mailbox	HasProperty	flag
+mall	HasProperty	many bright lights outside
+rolodex	HasProperty	adresses and telephone numbers
+kettle	HasProperty	bought in store
+god	HasProperty	than which no greater can conceived
+street	HasProperty	one way or two way
+president	HasProperty	voted into office
+marble	HasProperty	opaque
+death	HasProperty	inevitable
+fruit juice	HasProperty	served in glass
+gold	HasProperty	atomic number 79
+pottery	HasProperty	considered work of art
+nut	HasProperty	found in shell
+sky	HasProperty	blue
+tape	HasProperty	sticking for long time
+boat	HasProperty	flipped over has capsized
+family	HasProperty	made up of seperate members
+kite	HasProperty	controlled with piece of string
+pot	HasProperty	made to hold
+ball	HasProperty	round
+sky	HasProperty	cloudy
+marble	HasProperty	round
+sheet of paper	HasProperty	folded
+tofu	HasProperty	made from soybeans
+stop sign	HasProperty	red and white
+pasta	HasProperty	made from wheatflour
+sky	HasProperty	blue during day
+newspaper	HasProperty	many columns
+dollar bill	HasProperty	made from paper
+ergonomic chair	HasProperty	better for people with backpain
+candy	HasProperty	made mostly of sugar
+ergonomic chair	HasProperty	adjusted to individual user's needs
+blackboard	HasProperty	message on
+cd player	HasProperty	found in car
+tofu	HasProperty	very nourishing
+dollar bill	HasProperty	equal to ten dimes in value
+picture	HasProperty	hung on wall
+ladder	HasProperty	many rungs
+dollar bill	HasProperty	equal to four quarters in value
+sky	HasProperty	opposite from ground
+ring	HasProperty	blue
+utterance might	HasProperty	language
+up	HasProperty	opposite of down
+banana	HasProperty	yellow
+touch	HasProperty	contact
+merchandise	HasProperty	sold at vending stands
+typical livingroom	HasProperty	sofa
+gum	HasProperty	sticky
+sky	HasProperty	colorful during sunset
+basketball	HasProperty	bounced up and down
+ergonomic chair	HasProperty	healthy for humans to sit in
+subway pass	HasProperty	useful for who ride daily
+pasta	HasProperty	hot or cold
+brake	HasProperty	found in car
+ball	HasProperty	used in many sports
+atlas	HasProperty	maps
+sky	HasProperty	hazy
+henry	HasProperty	kids
+square	HasProperty	four equal sides
+lover	HasProperty	sex with
+death	HasProperty	tragic
+sky	HasProperty	up
+fountain	HasProperty	pretty
+piano	HasProperty	88 keys
+street	HasProperty	dark
+mouse	HasProperty	short lifespan
+god	HasProperty	glorified in christianity
+basketball	HasProperty	gripped by hand
+newspaper	HasProperty	used as fuel for fire
+gun	HasProperty	used by murders
+basketball	HasProperty	used when playing basketball
+god	HasProperty	important to people
+sand	HasProperty	played in
+sand	HasProperty	found on beaches
+god	HasProperty	everlasting
+dirt	HasProperty	washed off
+ball	HasProperty	rolling down street
+sushi	HasProperty	made from fish
+action	HasProperty	performed
+theater	HasProperty	walls
+mailbox	HasProperty	mail recieved by individual
+day	HasProperty	bright
+newspaper	HasProperty	read by candlelight
+dwain	HasProperty	kids
+debate	HasProperty	good
+day	HasProperty	24 hours
+hanger	HasProperty	found in closet
+acid	HasProperty	diluted by water
+harmonica	HasProperty	annoying
+alcoholic	HasProperty	difficult to live with
+god	HasProperty	more powerful than human being
+door with lock	HasProperty	key
+flute	HasProperty	solid
+gold	HasProperty	value
+snow	HasProperty	water half frozen
+matter	HasProperty	three states
+hole	HasProperty	one
+fear	HasProperty	contagious
+eel	HasProperty	no legs
+gold	HasProperty	polished
+player	HasProperty	proud
+chess	HasProperty	game for thinkers
+video recorder	HasProperty	head
+fruit juice	HasProperty	made from fruit
+object	HasProperty	rolled up if floppy
+matter	HasProperty	liquid
+sand	HasProperty	black
+president	HasProperty	coming on interns
+basketball	HasProperty	one form of exercise
+gold	HasProperty	more valuable than silver
+square	HasProperty	four corners
+shed	HasProperty	tools
+sushi	HasProperty	both beautiful and delicious
+dad	HasProperty	cool
+john	HasProperty	kids
+fountain	HasProperty	considered source
+flute	HasProperty	taps and weighs practically nothing
+banana	HasProperty	eaten
+human head	HasProperty	brain
+grocery store	HasProperty	plastic bag dispensers
+computer scientist	HasProperty	names
+sweater	HasProperty	sticky
+sheet of paper	HasProperty	rectangular
+acid	HasProperty	fun
+action	HasProperty	past or present
+sky	HasProperty	red at sunrise and sunset

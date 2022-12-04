@@ -1,0 +1,111 @@
+prefix	input_text	target_text
+xAttr	PersonX applies for jobs	desperate
+xAttr	PersonX applies for jobs	eager
+xAttr	PersonX applies for jobs	hardworking
+xAttr	PersonX beats everyone	capable
+xAttr	PersonX beats everyone	skilled
+xAttr	PersonX beats everyone	talented
+xAttr	PersonX beats everyone	tough
+xAttr	PersonX becomes a lawyer	competent
+xAttr	PersonX becomes a lawyer	knowledgeable
+xAttr	PersonX becomes a lawyer	skilled
+xAttr	PersonX becomes a lawyer	willful
+xAttr	PersonX becomes great friends	friendly
+xAttr	PersonX becomes great friends	social
+xAttr	PersonX becomes great friends	warm
+xAttr	PersonX bows PersonX's heads	respectful
+xAttr	PersonX bows PersonX's heads	reverent
+xAttr	PersonX bows PersonX's heads	sleepy
+xAttr	PersonX bows PersonX's heads	thoughtful
+xAttr	PersonX enters an art contest	ambitious
+xAttr	PersonX enters an art contest	dedicated
+xAttr	PersonX enters an art contest	entertainment
+xAttr	PersonX finally worked up ___	brave
+xAttr	PersonX finally worked up ___	proud
+xAttr	PersonX finally worked up ___	subdue
+xAttr	PersonX finds what PersonY wanted	dedicated
+xAttr	PersonX finds what PersonY wanted	determined
+xAttr	PersonX finds what PersonY wanted	hardworking
+xAttr	PersonX gives PersonY light	Helpful
+xAttr	PersonX gives PersonY light	caring
+xAttr	PersonX gives PersonY light	thoughtful
+xAttr	PersonX has a lot of money	industrious
+xAttr	PersonX has a lot of money	lavish
+xAttr	PersonX has a lot of money	luxurious
+xAttr	PersonX has a lot of money	wealthy
+xAttr	PersonX has a new car	motorized
+xAttr	PersonX has a new car	rich
+xAttr	PersonX has a new car	wealthy
+xAttr	PersonX leaned back in PersonX's chair	comfortable
+xAttr	PersonX leaned back in PersonX's chair	inquisitive
+xAttr	PersonX leaned back in PersonX's chair	relaxed
+xAttr	PersonX looks like a tourist	adventures
+xAttr	PersonX looks like a tourist	fashionable
+xAttr	PersonX looks like a tourist	funny
+xAttr	PersonX looks like a tourist	tourist
+xAttr	PersonX loves reading	refined
+xAttr	PersonX loves reading	scholarly
+xAttr	PersonX loves reading	smart
+xAttr	PersonX shakes the ___ to PersonY's foundations	forceful
+xAttr	PersonX sits patiently	calm
+xAttr	PersonX sits patiently	cool headed
+xAttr	PersonX sits patiently	patient
+xAttr	PersonX smells something bad	finicky
+xAttr	PersonX smells something bad	nervous
+xAttr	PersonX smells something bad	sensitive
+xAttr	PersonX smells something bad	suspicious
+xAttr	PersonX solves the world 's ___	Ambitious
+xAttr	PersonX solves the world 's ___	Genius
+xAttr	PersonX solves the world 's ___	brave
+xAttr	PersonX steals anything	evil
+xAttr	PersonX steals anything	mean
+xAttr	PersonX stings by a jellyfish	astonished
+xAttr	PersonX stings by a jellyfish	crying
+xAttr	PersonX stings by a jellyfish	indifferent
+xAttr	PersonX takes a new job	adventurous
+xAttr	PersonX takes a new job	lucky
+xAttr	PersonX takes a new job	persistent
+xAttr	PersonX watches old movies	artistic
+xAttr	PersonX watches old movies	nostalgic
+xAttr	PersonX watches old movies	old-fashioned
+xIntent	PersonX agrees on anything	to gain approval from others
+xIntent	PersonX agrees on anything	to take risks
+xIntent	PersonX applies to jobs	to be employed
+xIntent	PersonX applies to jobs	to be happier
+xIntent	PersonX applies to jobs	to make money
+xIntent	PersonX argues with PersonX's boyfriend	none
+xIntent	PersonX argues with PersonX's boyfriend	to be heard.
+xIntent	PersonX argues with PersonX's boyfriend	to confront the boyfriend.
+xIntent	PersonX argues with PersonX's boyfriend	to get own way.
+xIntent	PersonX arrives soon	to arrive early
+xIntent	PersonX arrives soon	to be on time
+xIntent	PersonX asks PersonX's doctor	to be informed
+xIntent	PersonX asks PersonX's doctor	to feel knowledgable
+xIntent	PersonX asks PersonX's doctor	to get information
+xIntent	PersonX asks PersonX's doctor	to know his health condition.
+xIntent	PersonX asks PersonX's doctor	to learn
+xIntent	PersonX asks PersonY for money	to pay the fees
+xIntent	PersonX asks PersonY for money	to pay their bills
+xIntent	PersonX asks PersonY's dad for help	help building something
+xIntent	PersonX asks PersonY's dad for help	help with their car
+xIntent	PersonX asks PersonY's dad for help	to be helpful
+xIntent	PersonX asks PersonY's dad for help	to do it correctly
+xIntent	PersonX asks ___ for a raise	believes they deserve something
+xIntent	PersonX asks ___ for a raise	fairness
+xIntent	PersonX asks ___ for a raise	to be able to survive
+xIntent	PersonX asks ___ for a raise	to be compensated
+xIntent	PersonX asks ___ for a raise	to be financially stable
+xIntent	PersonX asks ___ for a raise	to not have to worry
+xIntent	PersonX catches PersonY's eye	to clean eye
+xIntent	PersonX catches PersonY's eye	to help
+xIntent	PersonX catches PersonY's eye	to see effected eye
+xIntent	PersonX cheats on PersonY	is immoral
+xIntent	PersonX cheats on PersonY	is unfaithful towards PersonY
+xIntent	PersonX cheats on PersonY	no longer cares about PersonY
+xIntent	PersonX cheats on PersonY	to get revenge
+xIntent	PersonX communicates PersonX's ___ to others	other people to understand where he's coming from
+xIntent	PersonX communicates PersonX's ___ to others	to get their opinion
+xIntent	PersonX communicates PersonX's ___ to others	to share his views
+xIntent	PersonX dyes PersonY's hair red	it is personx's job
+xIntent	PersonX dyes PersonY's hair red	personx is a hairdressor
+xIntent	PersonX dyes PersonY's hair red	persony is paying personx
