@@ -69,6 +69,7 @@
     "init_temperature": 1.0,
     "trunc_router": false,
     "general_type": "lstm",
+    "merge_flat": false,
     "batch_size": 8,
     "break_sent": "",
     "cycle": 30,
