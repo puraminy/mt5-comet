@@ -68,6 +68,7 @@
     "n_prompts": 5,
     "init_temperature": 1.0,
     "trunc_router": false,
+    "general_type": "lstm",
     "batch_size": 8,
     "break_sent": "",
     "cycle": 30,

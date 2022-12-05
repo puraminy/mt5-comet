@@ -458,7 +458,7 @@ class MergePromptEncoder(PromptEncoder):
         self.n_prompts = int(logs.main_args["prompt_token_num"]) #len(encoders) 
         self.n_tasks = 2
         self.flag = True
-        self.flat = True
+        self.flat = logs.myargs("merge_flat")
         self.trunc_router = trunc_router
         self.wandb = wandb
         if encoders:
