@@ -2017,10 +2017,10 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     _tag = ""
     for _t in tag.split("@"):
         if _t in args:
-            _tag += "|" + _t  + "=" + str(args[_t])
+            _tag += "|" + str(args[_t])
         else:
             _tag += "|" + _t  
-    tag = _tag
+    tag = _tag.strip("|")
     exp_info = {"exp":experiment + "-" + str(exp_id), "model":model_id, "lang": lang, 
                     "method":method, 
                     "wrap": w_str + ("-" + encoder_type if wrap else ""),
