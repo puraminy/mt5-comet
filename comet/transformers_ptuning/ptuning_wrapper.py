@@ -396,10 +396,11 @@ class PromptEncoder(torch.nn.Module):
             router = RelaxedBernoulli(temperature=self.temperature, logits=router).rsample()            # layer * n_prompts
         else:
             if logs.args("trunc_router") == "sigmoid":
+                tinfo("Trunc:===================TRUNC=====Sigmoid===========")
                 router = torch.sigmoid(router)  # layer * n_prompts
             elif logs.main_args["trunc_router"] == "sign":
                 with torch.no_grad():
-                    tinfo("Router:========================================")
+                    tinfo("Trunc:===================TRUNC======SIGN======")
                     tinfo("Router Before relu: %s", router)
                     router[router <= 0] = 0
                     router[router > 0] = 1
