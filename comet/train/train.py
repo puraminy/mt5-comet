@@ -2218,6 +2218,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         mlog.info("Number of encoders: %s", len(wrapped_model.prompt_encoders))
         for encoder in wrapped_model.prompt_encoders:
             mlog.info("Prompt encoder %s", encoder.name)
+            if encoder.router: encoder.router.to(device=device)
             encoder.device = device
         for encoder in wrapped_model.general_encoders:
             mlog.info("General encoder %s", encoder.name)

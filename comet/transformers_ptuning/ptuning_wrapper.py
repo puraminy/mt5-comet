@@ -387,7 +387,6 @@ class PromptEncoder(torch.nn.Module):
     def learn_router(self, tids=None, training=True):
         task_id = tids[0]
         router = self.router[task_id] # torch.index_select(self.router, 0, tids)
-        router.to(self.device)
         if self.freezed_router or not self.is_learned:
             return router
         if self.init_flag:
