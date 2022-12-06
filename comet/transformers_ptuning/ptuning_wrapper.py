@@ -363,6 +363,7 @@ class PromptEncoder(torch.nn.Module):
         self.n_tasks = n_tasks
         self.is_learned = False
         self.freezed_router = False
+        self.length = length
         if router is None:
             self.is_learned = True
             self.router = nn.Parameter(data=torch.empty((
@@ -470,6 +471,7 @@ class MergePromptEncoder(PromptEncoder):
         self.wandb = wandb
         if encoders:
             self.encoders = torch.nn.ModuleList(encoders)
+            self.n_prompts = len(encoders)
 
     def forward_step(self, index_list, tids=None, training=True):
         router = self.learn_router(tids, training)
@@ -508,7 +510,7 @@ class MLPPromptEncoder(PromptEncoder):
         router = self.learn_router(tids, training)
         embs = self.embedding(self.prompt_ids)
         z = self.mlp(embs)
-        z = z.view(self.n_prompts, -1) 
+        z = z.view(self.length, -1) 
         running_weight = torch.mul(router.unsqueeze(1), z).view(-1, self.embedding_dim)
         ret_embeds = F.embedding(index_list, running_weight)
         return ret_embeds 
@@ -553,7 +555,7 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
         embeds = self.embedding(net_inputs)
         x = self.lstm(embeds.unsqueeze(0))
         z = self.mlp(x[0]).squeeze(0)
-        z = z.view(self.n_prompts, -1) 
+        z = z.view(self.length, -1) 
         running_weight = torch.mul(router.unsqueeze(1), z).view(-1, self.embedding_dim)
         ret_embeds = F.embedding(index_list, running_weight)
         return ret_embeds
