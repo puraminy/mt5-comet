@@ -556,8 +556,6 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
         x = self.lstm(embeds.unsqueeze(0))
         z = self.mlp(x[0]).squeeze(0)
         z = z.view(self.length, -1) 
-        assert False, router.device
-        assert z.device != "cpu", z.device
         running_weight = torch.mul(router.unsqueeze(1), z).view(-1, self.embedding_dim)
         ret_embeds = F.embedding(index_list, running_weight)
         return ret_embeds
