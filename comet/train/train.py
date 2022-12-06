@@ -2183,7 +2183,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     wrapped_model = wrap_model(model_to_wrap, tokenizer, encoder_type, load_prompt_path, flat_prompts=flat_prompts, method = method, shared_embs= shared_embs, skilled_variant=skilled_variant, prefix_config=prefix_config, 
             exp_id=exp_id, 
             encoder_prompts= prompts,
-            general_prompts= general_prompts, router_variant=router_variant) 
+            general_prompts= general_prompts, 
+            router_variant=router_variant, device=device) 
     fname = "output/" + str(experiment) + "-" + str(exp_id) + "-" + flat_prompts + ".txt"
     Path("output").mkdir(exist_ok = True)
     with open(fname, "w") as f:

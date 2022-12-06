@@ -407,7 +407,7 @@ def extend_tokenizer(tokenizer, prompt_tokens = [], model_id=""):
         mlog.info("No new token was added")
 
 
-def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", flat_prompts=False, method="", shared_embs =False, skilled_variant="", prefix_config=None, exp_id="", encoder_prompts={}, general_prompts={}, n_tasks=2, router_variant="learned"):
+def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", flat_prompts=False, method="", shared_embs =False, skilled_variant="", prefix_config=None, exp_id="", encoder_prompts={}, general_prompts={}, n_tasks=2, router_variant="learned", device="cuda"):
     wrapped_model = None
     offsets = []
     tokenize_relations(tokenizer)
@@ -435,7 +435,7 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", flat_promp
         if not flat_prompts:
             enc_router = None
             if router_variant == "fixed":
-                enc_router = torch.ones((n_tasks, len(prompt_tokens))) 
+                enc_router = torch.ones((n_tasks, len(prompt_tokens)), device=device)
             encoder, offset = create_encoder(rel, model, tokenizer, prompt_tokens, encoder_type, wrapped_model, prefix_config, enc_router)
             prompt_encoders.append(encoder)
             offsets.append(offset)
