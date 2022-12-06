@@ -104,6 +104,10 @@ class xIntentTemplate(RelTemplate):
                qtemp = "{com_i} {event} {ph}"
            if tn == "com-mid":
                qtemp = "{event}, {com_i} {ph}"
+           if tn == "com-pre-nat":
+               qtemp = "{com_i} Because of {event}, they want {ph}"
+           if tn == "com-mid-nat":
+               qtemp = "Because of {event}, {com_i} they want {ph}"
            if tn == "merge":
                qtemp = "{c@merge_i} Because of {event}, {rel_i} they want {ph}"
            if tn == "merge":

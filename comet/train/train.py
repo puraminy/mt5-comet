@@ -2280,14 +2280,12 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                         paras.append([encoder.z])
                         lrs.append(Az_learning_rate)
                     else:
-                        if isinstance(encoder, MergePromptEncoder):
-                            paras.append([encoder.router])
-                            lrs.append(router_learning_rate)
-                        else:
-                            para_list =[p for p in encoder.parameters() if p.requires_grad]
-                            if para_list:
-                                paras.append(para_list)
-                                lrs.append(pl_learning_rate)
+                        paras.append([encoder.router])
+                        lrs.append(router_learning_rate)
+                        para_list =[p for p in encoder.parameters() if p.requires_grad]
+                        if para_list:
+                            paras.append(para_list)
+                            lrs.append(pl_learning_rate)
                 for encoder in model.general_encoders:
                     paras.append([p for p in encoder.parameters() if p.requires_grad])
                     lrs.append(pl_learning_rate)
