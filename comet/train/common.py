@@ -316,7 +316,7 @@ inputs = ["input_text"] #, "input_text_fa", "natural_input_text", "natural_input
 placeholder_token = "<extra_id_0>"
 end_token = SPECIAL_TOKENS['eos_token']  #"</s>"
 # %%
-relation_prompt_lengths = {"com":[3]}
+relation_prompt_lengths = {}
 
 for key, val in rel_nat_maps.items():
     relation_prompt_lengths[key] = [len(val["tokens"].split())] 
@@ -407,7 +407,7 @@ def extend_tokenizer(tokenizer, prompt_tokens = [], model_id=""):
         mlog.info("No new token was added")
 
 
-def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", flat_prompts=False, method="", shared_embs =False, skilled_variant="", prefix_config=None, exp_id="", encoder_prompts={}, general_prompts={}, n_tasks=2):
+def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", flat_prompts=False, method="", shared_embs =False, skilled_variant="", prefix_config=None, exp_id="", encoder_prompts={}, general_prompts={}, n_tasks=2, router_variant="learned"):
     wrapped_model = None
     offsets = []
     tokenize_relations(tokenizer)
@@ -416,8 +416,6 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", flat_promp
     general_encoders = []
     for rel, prompt_tokens in general_prompts.items():
         mlog.info("%s )************* General) Wrapping model for %s", ii, rel)
-        if rel == "com":
-            continue
         for p in prompt_tokens:
             if not p in flat_prompt_tokens:
                 flat_prompt_tokens.append(p)
@@ -431,19 +429,21 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", flat_promp
     ii = 1
     for rel, prompt_tokens in encoder_prompts.items():
         mlog.info("%s )***********P Token Wrapping model for %s", ii, rel)
-        if rel == "com":
-            continue
         for p in prompt_tokens:
             if not p in flat_prompt_tokens:
                 flat_prompt_tokens.append(p)
         if not flat_prompts:
-            encoder, offset = create_encoder(rel, model, tokenizer, prompt_tokens, encoder_type, wrapped_model, prefix_config)
+            enc_router = None
+            if router_variant == "fixed":
+                enc_router = torch.ones((n_tasks, len(prompt_tokens))) 
+            encoder, offset = create_encoder(rel, model, tokenizer, prompt_tokens, encoder_type, wrapped_model, prefix_config, enc_router)
             prompt_encoders.append(encoder)
             offsets.append(offset)
             ii += 1
     
     id_offset = len(tokenizer)
     embedding_dim = model.config.hidden_size
+    flat_router = torch.zeros((n_tasks, len(flat_prompt_tokens))) 
     if prompt_encoders:
         id_offset = min(offsets)
 #################
@@ -507,7 +507,7 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", flat_promp
     return wrapped_model
 
 def create_encoder(name, model, tokenizer, prompt_tokens, encoder_type="lstm", 
-        wrapped_model = None, prefix_config=None):
+        wrapped_model = None, prefix_config=None, enc_router=None):
     embedding_dim = model.config.hidden_size
     enc_plen = len(prompt_tokens)
 
@@ -559,20 +559,22 @@ def create_encoder(name, model, tokenizer, prompt_tokens, encoder_type="lstm",
         if enc_plen > 0:
             mlog.info("Prompt Encoder defined : %s", enc_plen)
             prompt_encoder = MLPPromptEncoder(name, enc_plen,
-                    embedding_dim,id_offset = -1, prompt_ids=rel_ids, init_embs=init_embs, num_layers=num_layers, hidden_size=hidden_size)
+                    embedding_dim,id_offset = -1, prompt_ids=rel_ids, init_embs=init_embs, num_layers=num_layers, hidden_size=hidden_size, router=enc_router)
     elif encoder_type.startswith("emb"):
         mlog.info("in Emb %s", encoder_type)
         if enc_plen > 0:
             mlog.info("Prompt Encoder defined : %s", enc_plen)
             prompt_encoder = EmbeddingPromptEncoder(name, enc_plen,
-                    embedding_dim,id_offset = -1, prompt_ids=rel_ids, init_embs=init_embs)
+                    embedding_dim,id_offset = -1, 
+                    prompt_ids=rel_ids, init_embs=init_embs, router=enc_router)
     elif encoder_type.startswith("merge"):
         mlog.info("in Merge %s", encoder_type)
         if enc_plen > 0:
             mlog.info("Prompt Encoder defined : %s", enc_plen)
             prompt_encoder = MergePromptEncoder(name = name, length=enc_plen,
                     embedding_dim = embedding_dim,
-                    id_offset = -1, prompt_ids=rel_ids, init_embs=init_embs)
+                    id_offset = -1, prompt_ids=rel_ids, init_embs=init_embs, 
+                    router=enc_router)
     elif encoder_type.startswith("mat"):
         mlog.info("in Mat %s", encoder_type)
         if enc_plen > 0:
@@ -592,9 +594,9 @@ def create_encoder(name, model, tokenizer, prompt_tokens, encoder_type="lstm",
                 hidden_size = int(_enc_type[2])
             mlog.info("Prompt Encoder defined : %s", enc_plen)
             prompt_encoder = LSTMEmbeddingPromptEncoder(name, enc_plen,embedding_dim,
-                    id_offset = -1, prompt_ids=rel_ids, init_embs=init_embs, num_layers=num_layers, hidden_size=hidden_size)
-
-
+                    id_offset = -1, prompt_ids=rel_ids, init_embs=init_embs, 
+                    num_layers=num_layers, 
+                    hidden_size=hidden_size, router=enc_router)
     return prompt_encoder, id_offset
 
 def filter_inputs(include, exclude, lang):

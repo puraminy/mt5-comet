@@ -18,12 +18,24 @@ class xAttrTemplate(RelTemplate):
        if tn.isdigit():
            tn = int(tn)
        if method == "unsup-wrap-nat":
-           if tn == 1:
+           if tn == "mat-pre":
                qtemp = "{c@mat_i} {event}, So PersonX is seen as {ph}."
-           elif tn == "merge":
+           elif tn == "com-pre-nat":
+               qtemp = "{com_i} {event}, So PersonX is seen as {ph}."
+           elif tn == "com-pre":
+               qtemp = "{com_i} {event}, {ph}."
+           elif tn == "com-mid-nat":
+               qtemp = "{event}, {com_i} So PersonX is seen as {ph}."
+           elif tn == "com-mid":
+               qtemp = "{event}, {com_i} {ph}."
+           elif tn == "merge-pre-only":
+               qtemp = "{c@merge_i} {event},So PersonX is seen as {ph}."
+           elif tn == "merge-pre":
                qtemp = "{c@merge_i} {event}, {rel_i} So PersonX is seen as {ph}."
            elif tn == "merge-mid":
                qtemp = "{rel_i} {event}, {c@merge_i} So PersonX is seen as {ph}."
+           elif tn == "merge-mid-only":
+               qtemp = "{event}, {c@merge_i} So PersonX is seen as {ph}."
            elif tn == "mat":
                qtemp = "{c@mat_i} {event}, {rel_i} So PersonX is seen as {ph}."
            elif tn == 3:
@@ -88,6 +100,12 @@ class xIntentTemplate(RelTemplate):
        elif method == "unsup-wrap-nat":
            if tn == 1:
                qtemp = "{c@mat_i} Because of {event}, they want {ph}"
+           if tn == "com-pre":
+               qtemp = "{com_i} {event} {ph}"
+           if tn == "com-mid":
+               qtemp = "{event}, {com_i} {ph}"
+           if tn == "merge":
+               qtemp = "{c@merge_i} Because of {event}, {rel_i} they want {ph}"
            if tn == "merge":
                qtemp = "{c@merge_i} Because of {event}, {rel_i} they want {ph}"
            if tn == "merge-mid":

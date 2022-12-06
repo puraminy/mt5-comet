@@ -10,6 +10,7 @@ class RelTemplate:
         self.rel = rel
         self.temp_num = temp_num
         self.num_prompt_tokens = int(logs.main_args["prompt_token_num"]) #len(encoders) 
+        self.num_prompts = int(logs.main_args["n_prompts"]) #len(encoders) 
         self.rec_counter = 1
         self.encoder_prompts = {} 
         self.decoder_prompts = {}
@@ -331,7 +332,6 @@ class RelTemplate:
         #text = self.fill_prompt_regex(text, rel, "{rel-([@a-zA-Z]+)_(\d+)}")
         text = self.fill_prompt_regex(text, rel, "{([@a-zA-Z]+)_(\d+)}")
         text = self.fill_prompt_regex(text, rel, "{([@a-zA-Z]+)_([a-zA-Z]+)}")
-        text = self.fill_prompt(text, "com", "{com_i}")
         text = self.fill_prompt(text, rel, "{tokens}")
         text = self.fill_prompt(text, rel, "{tokens-rand}")
         if "{examples}" in text:
@@ -379,7 +379,6 @@ class RelTemplate:
                     assert enc_prompt != "", "Prompt was not set!"
                 example = self.fill_const_for_rel(example, _row)
                 example = self.fill_prompt(example, relation, "{rel_i}")
-                example = self.fill_prompt(example, "com", "{com_i}")
                 for key,value in _row.items():
                     val = str(value)
                     if "fa" in method and "_fa" in key:
@@ -518,7 +517,10 @@ class RelTemplate:
             if rel in relation_prompt_lengths:
                 plen = relation_prompt_lengths[rel]
             else:
-                plen = [self.num_prompt_tokens] 
+                if "merge" in rel or "mat" in rel:
+                    plen = [self.num_prompts]  
+                else:
+                    plen = [self.num_prompt_tokens]  
         _pholder = place_holder
         place_holder = place_holder.replace("{", "<")  
         place_holder = place_holder.replace("}", ">")  
@@ -548,13 +550,10 @@ class RelTemplate:
             prompt = prompt.strip()
             enc_plen = len(prompt.split())
             for token in prompt.split():
-                if rel == "com" and not token in common_tokens:
-                    common_tokens.append(token)
-                else:
-                    if not rel in self.encoder_prompts:
-                        self.encoder_prompts[rel] = []
-                    if not token in self.encoder_prompts[rel]:
-                        self.encoder_prompts[rel].append(token)
+                if not rel in self.encoder_prompts:
+                    self.encoder_prompts[rel] = []
+                if not token in self.encoder_prompts[rel]:
+                    self.encoder_prompts[rel].append(token)
             text = text.replace(_pholder,prompt, 1)
             counter += enc_plen 
             pi += 1
