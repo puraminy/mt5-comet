@@ -486,8 +486,8 @@ class MergePromptEncoder(PromptEncoder):
         return ret_embeds 
 
 class MLPPromptEncoder(PromptEncoder):
-    def __init__(self,name,length,embedding_dim,id_offset,init_embs=None, prompt_ids=[], num_layers=1, hidden_size=-1) -> None:
-        super().__init__(name, length,embedding_dim,id_offset, init_embs, prompt_ids)
+    def __init__(self,name,length,embedding_dim,id_offset,init_embs=None, prompt_ids=[], num_layers=1, hidden_size=-1, **kwargs) -> None:
+        super().__init__(name, length,embedding_dim,id_offset, init_embs, prompt_ids, **kwargs)
         hsize = hidden_size if hidden_size > 1 else embedding_dim
         if num_layers == 2:
             self.mlp = torch.nn.Sequential(
@@ -514,8 +514,8 @@ class MLPPromptEncoder(PromptEncoder):
         return ret_embeds 
 
 class LSTMEmbeddingPromptEncoder(PromptEncoder):
-    def __init__(self,name, length,embedding_dim,id_offset, init_embs=None, prompt_ids=[], num_layers=1, hidden_size=-1) -> None:
-        super().__init__(name, length,embedding_dim,id_offset, init_embs, prompt_ids)
+    def __init__(self,name, length,embedding_dim,id_offset, init_embs=None, prompt_ids=[], num_layers=1, hidden_size=-1, **kwargs) -> None:
+        super().__init__(name, length,embedding_dim,id_offset, init_embs, prompt_ids, **kwargs)
         hsize = hidden_size if hidden_size > 1 else embedding_dim
         self.net_inps = torch.nn.parameter.Parameter(torch.arange(length),
             requires_grad=False)
