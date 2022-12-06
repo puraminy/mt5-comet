@@ -10,7 +10,7 @@ def set_args(args):
     global main_args 
     main_args =args
 
-def myargs(key):
+def args(key):
     return main_args[key]
 
 def tag():
