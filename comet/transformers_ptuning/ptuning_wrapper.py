@@ -1,4 +1,3 @@
-encoder和decoder的tokenizer不同的情况，以后可以给decoder全套的prompt_token_fn
 import wandb
 import re
 from pathlib import Path
