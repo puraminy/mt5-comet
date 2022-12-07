@@ -7,8 +7,6 @@ from copy import deepcopy
 import torch
 from torch import nn
 import torch.nn.functional as F
-def _isin(tensor:torch.Tensor,values:torch.Tensor):
-    return (tensor[..., None] == values).any(-1)
 import logging
 import os
 import math
@@ -19,6 +17,8 @@ from transformers.optimization import Adafactor, AdafactorSchedule, AdamW
 from torch.distributions.relaxed_bernoulli import RelaxedBernoulli
 
 
+def _isin(tensor:torch.Tensor,values:torch.Tensor):
+    return (tensor[..., None] == values).any(-1)
 home = expanduser("~")
 wlog = logging.getLogger("comet.wrapper")
 emblog = logging.getLogger("comet.embedding")
@@ -516,7 +516,9 @@ class MLPPromptEncoder(PromptEncoder):
 
     def forward_step(self, index_list, tids=None, training=True):
         router = self.learn_router(tids, training)
-        embs = self.embedding(self.prompt_ids)
+        self.net_inps = torch.nn.parameter.Parameter(torch.arange(self.length),
+            requires_grad=False)
+        embs = self.embedding(self.net_inps)
         z = self.mlp(embs)
         z = z.view(self.length, -1) 
         running_weight = torch.mul(router.unsqueeze(1), z).view(-1, self.embedding_dim)
