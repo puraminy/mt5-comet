@@ -343,6 +343,8 @@ class PromptEncoder(torch.nn.Module):
         self.prompt_ids = prompt_ids
         self.input_ids = torch.nn.parameter.Parameter(torch.tensor(prompt_ids),
              requires_grad=False)
+        self.net_inps = torch.nn.parameter.Parameter(torch.arange(length),
+            requires_grad=False)
         embinfo("=========================== %s ===================", name)
         embinfo("prompt ids: %s", prompt_ids)
         self.embedding_dim = embedding_dim
@@ -516,8 +518,6 @@ class MLPPromptEncoder(PromptEncoder):
 
     def forward_step(self, index_list, tids=None, training=True):
         router = self.learn_router(tids, training)
-        self.net_inps = torch.nn.parameter.Parameter(torch.arange(self.length),
-            requires_grad=False)
         embs = self.embedding(self.net_inps)
         z = self.mlp(embs)
         z = z.view(self.length, -1) 
@@ -529,8 +529,6 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
     def __init__(self,name, length,embedding_dim,id_offset, init_embs=None, prompt_ids=[], num_layers=1, hidden_size=-1, **kwargs) -> None:
         super().__init__(name, length,embedding_dim,id_offset, init_embs, prompt_ids, **kwargs)
         hsize = hidden_size if hidden_size > 1 else embedding_dim
-        self.net_inps = torch.nn.parameter.Parameter(torch.arange(length),
-            requires_grad=False)
         self.lstm = torch.nn.LSTM(
             input_size=embedding_dim,
             hidden_size=embedding_dim // 2, #my code
