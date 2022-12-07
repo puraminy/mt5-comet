@@ -1,4 +1,4 @@
-#暂时没考虑encoder和decoder的tokenizer不同的情况，以后可以给decoder全套的prompt_token_fn
+encoder和decoder的tokenizer不同的情况，以后可以给decoder全套的prompt_token_fn
 import wandb
 import re
 from pathlib import Path
@@ -373,6 +373,12 @@ class PromptEncoder(torch.nn.Module):
         else:
             self.router = router
 
+    def freeze_router():
+        self.reouter.requires_grad = False
+
+    def unfreeze_router():
+        self.router.requires_grad = True
+
     def forward(self,prompt_token_ids, tids=None, training=True):
         if self.id_offset > 0:
             index_list = prompt_token_ids - self.id_offset
@@ -385,6 +391,8 @@ class PromptEncoder(torch.nn.Module):
         raise NotImplementedError()
 
     def learn_router(self, tids=None, training=True):
+        if self.router is None:
+            return None
         task_id = tids[0]
         router = self.router[task_id] # torch.index_select(self.router, 0, tids)
         if self.freezed_router or not self.is_learned:
@@ -547,7 +555,6 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
 
  #### llllllf
     def forward_step(self, index_list, tids=None, training=True):
-        router = self.learn_router(tids, training)
         net_inputs = self.net_inps
         if self.id_offset > 0:
             net_inputs = self.input_ids - self.id_offset
@@ -555,9 +562,11 @@ class LSTMEmbeddingPromptEncoder(PromptEncoder):
         # create embedding vectors for input ids
         embeds = self.embedding(net_inputs)
         x = self.lstm(embeds.unsqueeze(0))
-        z = self.mlp(x[0]).squeeze(0)
-        z = z.view(self.length, -1) 
-        running_weight = torch.mul(router.unsqueeze(1), z).view(-1, self.embedding_dim)
+        running_weight = self.mlp(x[0]).squeeze(0)
+        router = self.learn_router(tids, training)
+        if self.is_learned:
+            z = running_weight.view(self.length, -1) 
+            running_weight = torch.mul(router.unsqueeze(1), z).view(-1, self.embedding_dim)
         ret_embeds = F.embedding(index_list, running_weight)
         return ret_embeds
 
