@@ -18,7 +18,7 @@ def tag():
     _tag = ""
     for _t in tag.split("@"):
         if _t in main_args:
-            _tag += "|" + _t  + "--" + str(main_args[_t])
+            _tag += "_" + _t  + "--" + str(main_args[_t])
         else:
             _tag += "|" + _t  
     return _tag.strip("|")

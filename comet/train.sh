@@ -66,22 +66,22 @@ elif [ "$m" -eq "1" ]; then
 fi
 seed=123
 
-exp=xint-router-merge-emb-var2
-log=${home}/logs/${exp}
+exp=xint-router-merge-emb-var5
+log=${home}/logs   #/${exp}
 echo "log: ${log}"
 #filter=xIntent#xAttr#xNeed#xReact#xEffect#oReact#xWant#multi
 filter=xIntent#xAttr#multi
 merge=none #lstm
-tn=com-mid #mat #2#4#5
+tn=com-mid#com-mid-nat #mat #2#4#5
 shared=False
 trial=5
 epochs=3
 tag=temp_num@encoder_type@router_variant
-trunc=none #sigmoid#sign
-enc_type=lstm #emb
+trunc=none#sign #sigmoid#sign
+enc_type=mlp #lstm #emb
 router=learned
 
-runlite run -exp $exp -lp ${log} -bc base -ov $g2 -var method=unsup-wrap-nat--rel_filter=$filter--train_samples=$train--epochs_num=$epochs--repeat=4--temp_num=$tn--loop=True--test_samples=$test--flat_prompts=$merge--shared_embs=$shared--seed=123--n_prompts=1--trunc_router=$trunc--router_lr=0.001--pl_learning_rate=0.01--encoder_type=$enc_type--router_variant=$router --follow_method=True --scorers="rouge-bert" --data_path=${home}/mt5-comet/comet/data/atomic2020/sel --do_valid=False --val_samples=10  --cycle=100 $g1 --batch_size=16 --trial=$trial --prompt_token_num=8 --model_id=$model --tag=$tag
+runlite run -exp $exp -lp ${log} -bc base -ov $g2 -var method=unsup-wrap-nat--rel_filter=$filter--train_samples=$train--epochs_num=$epochs--repeat=4--temp_num=$tn--loop=True--test_samples=$test--flat_prompts=$merge--shared_embs=$shared--seed=123--n_prompts=1--trunc_router=$trunc--router_lr=0.01--pl_learning_rate=0.01--encoder_type=$enc_type--router_variant=$router --follow_method=True --scorers="rouge-bert" --data_path=${home}/mt5-comet/comet/data/atomic2020/sel --do_valid=False --val_samples=10  --cycle=100 $g1 --batch_size=16 --trial=$trial --prompt_token_num=8 --model_id=$model --tag=$tag
 
 cp train.sh ${log}
 #if [ $home = "/content" ]; then

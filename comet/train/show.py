@@ -523,6 +523,26 @@ def show_df(df):
                 #main_df.loc[eval(cond), "bert_score"] = tdf["bert_score"]
             df = main_df
             hotkey = "gG"
+        elif char == "l":
+            exp=df.iloc[sel_row]["exp_id"]
+            exp = str(exp)
+            logs = glob(str(exp) + "*.log")
+            if logs:
+                log = logs[0]
+                with open(log,"r") as f:
+                    infos = f.readlines()
+                    change_info(infos)
+                    cc = std.getch()
+                    ii = 0
+                    while chr(cc) != "q":
+                        if chr(ch) == "l":
+                            ii += 1
+                        if chr(ch) == "j":
+                            ii -= 1
+                        inf = infos[ii:]
+                        change_info(inf)
+                        cc = std.getch()
+
         elif char == "<":
             col = sel_cols[cur_col]
             sel_cols.remove(col)
