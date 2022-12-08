@@ -82,10 +82,10 @@ def find_common(df, main_df, on_col_list, s_rows, FID, char):
         mlog.info("%s == %s", FID, exp)
         cond = f"(main_df['{FID}'] == '{exp}') & (main_df['prefix'] == '{prefix}')"
         tdf = main_df[(main_df[FID] == exp) & (main_df['prefix'] == prefix)]
-        tdf = tdf[["pred_text1", "exp_name", "id","hscore", "bert_score","query", "resp", "method", "rouge_score", "fid","prefix", "input_text","target_text"]]
+        tdf = tdf[["pred_text1", "exp_name", "id","hscore", "bert_score","query", "resp", "method", "rouge_score", "fid","prefix", "input_text","target_text", "sel"]]
         tdf = tdf.sort_values(by="rouge_score", ascending=False)
         if len(tdf) > 1:
-            tdf = tdf.groupby(on_col_list).agg({"exp_name":"first","query":"first", "resp":"first","input_text":"first","target_text":"first", "hscore":"first", "method":"first", "rouge_score":"first","prefix":"first","pred_text1":"first", "fid":"first", "id":"count","bert_score":"first"}).reset_index(drop=True)
+            tdf = tdf.groupby(on_col_list).agg({"exp_name":"first","query":"first", "resp":"first","input_text":"first","target_text":"first", "hscore":"first", "method":"first", "rouge_score":"first","prefix":"first","pred_text1":"first", "fid":"first", "id":"count","bert_score":"first", "sel":"first"}).reset_index(drop=True)
             for on_col in on_col_list:
                 tdf[on_col] = tdf[on_col].astype(str).str.strip()
             #tdf = tdf.set_index(on_col_list)
@@ -174,6 +174,9 @@ def show_df(df):
 
     if not "prefixed" in df:
         df["prefixed"] = False
+
+    if not "sel" in df:
+       df["sel"] = False
 
     if "input_text" in df:
         df['input_text'] = df['input_text'].str.replace('##','')
@@ -549,12 +552,35 @@ def show_df(df):
                 if col in info_cols:
                     info_cols.remove(col)
                     save_obj(info_cols, "info_cols", context)
+        elif char in ["o","O"]:
+            inp = df.loc[sel_row,["prefix", "input_text"]]
+            df.loc[(df.prefix == inp.prefix) & 
+                    (df.input_text == inp.input_text), 
+                    ["sel"]] = False
+            sel_df.loc[(sel_df.prefix == inp.prefix) & 
+                    (sel_df.input_text == inp.input_text), 
+                    ["sel"]] = False
+            df = df.sort_values(by="sel", ascending=False)
+            consts["sel_path"] = sel_path + "|"+ str(len(sel_df)) + "|" + str(sel_df["input_text"].nunique())
+            mbeep()
+            df = df.sort_values(by="sel", ascending=False).reset_index(drop=True)
+            row = df.loc[(df.prefix == inp.prefix) & 
+                    (df.input_text == inp.input_text),:]
+            sel_row = row.index[0]
+            sel_df = sel_df.sort_values(by=["prefix","input_text","target_text"]).drop_duplicates()
+            sel_df.to_csv(sel_path, sep="\t", index=False)
         elif char in ["w","W"]:
             inp = df.loc[sel_row,["prefix", "input_text"]]
+            df.loc[(df.prefix == inp.prefix) & 
+                    (df.input_text == inp.input_text),["sel"]] = True
             _rows = main_df.loc[(main_df.prefix == inp.prefix) & 
                     (main_df.input_text == inp.input_text), 
                     ["prefix", "input_text", "target_text"]].drop_duplicates()
             sel_df = sel_df.append(_rows)
+            df = df.sort_values(by="sel", ascending=False).reset_index(drop=True)
+            row = df.loc[(df.prefix == inp.prefix) & 
+                    (df.input_text == inp.input_text),:]
+            sel_row = row.index[0]
             if char == "W":
                 new_row = {"prefix":inp.prefix,
                            "input_text":inp.input_text,
@@ -878,13 +904,13 @@ def show_df(df):
                     if _col.startswith("pred_text1"):
                         info_cols.append(_col)
             else:
-                _from_cols = ["pred_text1","fid", "id", "pred_text1_x", "pred_text1_y","query_x","query_y", "query", "resp", "resp_x", "resp_y", "method", "prefix", "input_text","target_text_x", "target_text", "rouge_score", "rouge_score_x","rouge_score_y", "bert_score", "bert_score_x", "bert_score_y", "exp_name_x", "exp_name_y"]
+                _from_cols = ["pred_text1","fid", "id", "pred_text1_x", "pred_text1_y","query_x","query_y", "query", "resp", "resp_x", "resp_y", "method", "prefix", "input_text","target_text_x", "target_text", "rouge_score", "rouge_score_x","rouge_score_y", "bert_score", "bert_score_x", "bert_score_y", "exp_name_x", "exp_name_y","sel"]
                 for _col in _from_cols:
                     if (_col.startswith("id") or
                         _col.startswith("pred_text1") or 
                         _col.startswith("rouge_score") or 
                         _col.startswith("fid") or 
-                        _col=="target_text" or 
+                        _col=="target_text" or _col=="sel" or 
                         _col.startswith("bert_score")):
                         sel_cols.append(_col)
                     elif not _col in on_col_list and not _col in info_cols:
@@ -941,7 +967,7 @@ def show_df(df):
                 char = "SS"
                 if col in df:
                     del df[col]
-        elif char == "o":
+        elif char == "o" and prev_char == "x":
             if "pname" in df:
                 pname = df.iloc[sel_row]["pname"]
             elif "l1_encoder" in df:
