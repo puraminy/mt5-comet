@@ -177,7 +177,6 @@ def show_df(df):
 
     if not "sel" in df:
        df["sel"] = False
-    assert False, df["exp"]
 
     if "input_text" in df:
         df['input_text'] = df['input_text'].str.replace('##','')
@@ -525,30 +524,31 @@ def show_df(df):
             df = main_df
             hotkey = "gG"
         elif char == "l":
-            exp=df.iloc[sel_row]["exp_id"]
+            exp=df.iloc[sel_row]["expid"]
             exp = str(exp)
             logs = glob(str(exp) + "*.log")
             if logs:
                 log = logs[0]
                 with open(log,"r") as f:
                     infos = f.readlines()
-                    change_info(infos)
+                ii = 0
+                inf = infos[ii:ii+30]
+                change_info(inf)
+                cc = std.getch()
+                while chr(cc) != "q":
+                    if cc == DOWN:
+                        ii += 1
+                    if cc == UP:
+                        ii -= 1
+                    if cc == cur.KEY_HOME:
+                        ii = 0
+                    if cc == cur.KEY_END:
+                        ii = len(infos) - 20 
+                    ii = max(ii, 0)
+                    ii = min(ii, len(infos)-10)
+                    inf = infos[ii:ii+30]
+                    change_info(inf)
                     cc = std.getch()
-                    ii = 0
-                    while chr(cc) != "q":
-                        if ch == DOWN:
-                            ii += 1
-                        if ch == UP:
-                            ii -= 1
-                        if ch == cur.KEY_HOME:
-                            ii = 0
-                        if ch == cur.KEY_DOWN:
-                            ii = len(infos) - 20 
-                        ii = max(ii, 0)
-                        ii = min(ii, len(infos)-10)
-                        inf = infos[ii:ii+30]
-                        change_info(inf)
-                        cc = std.getch()
 
         elif char == "<":
             col = sel_cols[cur_col]
