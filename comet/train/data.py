@@ -28,14 +28,16 @@ class xAttrTemplate(RelTemplate):
                qtemp = "{event}, {com_i} So PersonX is seen as {ph}."
            elif tn == "com-mid":
                qtemp = "{event}, {com_i} {ph}."
+           elif tn == "rel-mid":
+               qtemp = "{event}, {rel_i} {ph}."
            elif tn == "merge-pre-only":
                qtemp = "{c@merge_i} {event},So PersonX is seen as {ph}."
            elif tn == "merge-pre":
                qtemp = "{c@merge_i} {event}, {rel_i} So PersonX is seen as {ph}."
-           elif tn == "merge-mid":
-               qtemp = "{rel_i} {event}, {c@merge_i} So PersonX is seen as {ph}."
-           elif tn == "merge-mid-only":
+           elif tn == "merge-mid-nat":
                qtemp = "{event}, {c@merge_i} So PersonX is seen as {ph}."
+           elif tn == "merge-mid":
+               qtemp = "{event}, {com@merge_i} {ph}."
            elif tn == "mat":
                qtemp = "{c@mat_i} {event}, {rel_i} So PersonX is seen as {ph}."
            elif tn == 3:
@@ -104,6 +106,8 @@ class xIntentTemplate(RelTemplate):
                qtemp = "{com_i} {event} {ph}"
            if tn == "com-mid":
                qtemp = "{event}, {com_i} {ph}"
+           if tn == "rel-mid":
+               qtemp = "{event}, {rel_i} {ph}"
            if tn == "com-pre-nat":
                qtemp = "{com_i} Because of {event}, they want {ph}"
            if tn == "com-mid-nat":
