@@ -2182,11 +2182,11 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     }
     #prefix_config = None
     general_prompts = {}
-    for n in range(n_prompts):
+    for n in range(prompt_token_num):
         l = []
         for m in range(prompt_token_num):
             l.append("<g"+str(n) + "@" + general_type + "_" + str(m)+ ">") 
-        general_prompts["g"+str(n)] = l 
+        general_prompts["g"+str(n) + "@" + general_type]  = l 
     if flat_prompts == "none": flat_prompts = ""
     assert flat_prompts != "none"
     prompts = sample_dataset.prompts

@@ -416,9 +416,6 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", flat_promp
     general_encoders = []
     for rel, prompt_tokens in general_prompts.items():
         mlog.info("%s )************* General) Wrapping model for %s", ii, rel)
-        for p in prompt_tokens:
-            if not p in flat_prompt_tokens:
-                flat_prompt_tokens.append(p)
         if not flat_prompts:
             encoder, offset = create_encoder(rel, model, tokenizer, prompt_tokens, encoder_type, wrapped_model, prefix_config)
             general_encoders.append(encoder)
@@ -479,7 +476,7 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", flat_promp
     mbp("")
     for encoder in prompt_encoders:
         if isinstance(encoder, MergePromptEncoder):
-            encoder.encoders = general_encoders
+            encoder.set_encoders(general_encoders)
             encoder.trunc_router = logs.main_args["trunc_router"]
             encoder.wandb = logs.main_args["wb"]
 

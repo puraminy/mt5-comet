@@ -517,7 +517,7 @@ class RelTemplate:
             if rel in relation_prompt_lengths:
                 plen = relation_prompt_lengths[rel]
             else:
-                if "merge" in rel or "mat" in rel:
+                if False: #"merge" in rel or "mat" in rel:
                     plen = [self.num_prompts]  
                 else:
                     plen = [self.num_prompt_tokens]  
