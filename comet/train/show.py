@@ -540,6 +540,10 @@ def show_df(df):
                         ii += 1
                     if cc == UP:
                         ii -= 1
+                    if cc == cur.KEY_NPAGE:
+                        ii += 10
+                    if cc == cur.KEY_PPAGE:
+                        ii -= 10
                     if cc == cur.KEY_HOME:
                         ii = 0
                     if cc == cur.KEY_END:

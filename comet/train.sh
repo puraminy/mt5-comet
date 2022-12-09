@@ -72,11 +72,11 @@ echo "log: ${log}"
 #filter=xIntent#xAttr#xNeed#xReact#xEffect#oReact#xWant#multi
 filter=xIntent#xAttr#multi
 merge=none #lstm
-tn=com-mid#com-mid-nat #mat #2#4#5
+tn=com-mid #com-mid-nat #mat #2#4#5
 shared=False
 trial=5
-epochs=3
-tag=temp_num@encoder_type@router_variant
+epochs=2
+tag=temp_num@encoder_type@trunc_router
 trunc=none#sign #sigmoid#sign
 enc_type=mlp #lstm #emb
 router=learned
