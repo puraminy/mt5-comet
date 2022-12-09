@@ -2043,7 +2043,10 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         else:
             _tag += "|" + _t  
     tag = _tag.strip("|")
-    exp_info = {"exp":experiment + "-" + str(exp_id), "model":model_id, "lang": lang, 
+    exp_info = {"exp":experiment + "-" + str(exp_id), 
+                "expid": str(exp_id),
+                    "model":model_id, 
+                    "lang": lang, 
                     "method":method, 
                     "wrap": w_str + ("-" + encoder_type if wrap else ""),
                     "frozen":f_str, 

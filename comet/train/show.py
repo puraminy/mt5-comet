@@ -177,6 +177,7 @@ def show_df(df):
 
     if not "sel" in df:
        df["sel"] = False
+    assert False, df["exp"]
 
     if "input_text" in df:
         df['input_text'] = df['input_text'].str.replace('##','')
@@ -535,11 +536,17 @@ def show_df(df):
                     cc = std.getch()
                     ii = 0
                     while chr(cc) != "q":
-                        if chr(ch) == "l":
+                        if ch == DOWN:
                             ii += 1
-                        if chr(ch) == "j":
+                        if ch == UP:
                             ii -= 1
-                        inf = infos[ii:]
+                        if ch == cur.KEY_HOME:
+                            ii = 0
+                        if ch == cur.KEY_DOWN:
+                            ii = len(infos) - 20 
+                        ii = max(ii, 0)
+                        ii = min(ii, len(infos)-10)
+                        inf = infos[ii:ii+30]
                         change_info(inf)
                         cc = std.getch()
 

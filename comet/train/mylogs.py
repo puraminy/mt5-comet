@@ -18,10 +18,10 @@ def tag():
     _tag = ""
     for _t in tag.split("@"):
         if _t in main_args:
-            _tag += "_" + _t  + "--" + str(main_args[_t])
+            _tag += "_" + str(main_args[_t])
         else:
-            _tag += "|" + _t  
-    return _tag.strip("|")
+            _tag += "_" + _t  
+    return _tag.strip("_")
 
 tehran = timezone('Asia/Tehran')
 now = datetime.datetime.now(tehran)
