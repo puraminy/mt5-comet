@@ -35,7 +35,7 @@ class xAttrTemplate(RelTemplate):
            elif tn == "merge-pre":
                qtemp = "{c@merge_i} {event}, {rel_i} So PersonX is seen as {ph}."
            elif tn == "merge-mid-nat":
-               qtemp = "{event}, {c@merge_i} So PersonX is seen as {ph}."
+               qtemp = "{event}, {com@merge_i} So PersonX is seen as {ph}."
            elif tn == "merge-mid":
                qtemp = "{event}, {com@merge_i} {ph}."
            elif tn == "mat":
@@ -116,8 +116,10 @@ class xIntentTemplate(RelTemplate):
                qtemp = "{c@merge_i} Because of {event}, {rel_i} they want {ph}"
            if tn == "merge":
                qtemp = "{c@merge_i} Because of {event}, {rel_i} they want {ph}"
+           if tn == "merge-mid-nat":
+               qtemp = "Because of {event}, {com@merge_i} they want {ph}"
            if tn == "merge-mid":
-               qtemp = "{rel_i} Because of {event}, {c@merge_i} they want {ph}"
+               qtemp = "{event}, {com@merge_i} {ph}"
            if tn == "mat":
                qtemp = "{c@mat_i} Because of {event}, {rel_i} they want {ph}"
            if tn == 3:
