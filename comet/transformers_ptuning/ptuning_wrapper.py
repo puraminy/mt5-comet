@@ -490,14 +490,17 @@ class MergePromptEncoder(PromptEncoder):
         router = self.learn_router(tids, training)
         device = self.device
         tl = []
-        for encoder in self.encoders:
+        z = torch.zeros((self.length, self.embedding_dim), device =self.device)
+        for i, encoder in enumerate(self.encoders):
             pids = encoder.input_ids
             out = encoder(pids, tids).to(device) 
+            z += router[i]*out
             tl.append(out)
-        z = torch.vstack(tl) 
-        z = z.view(self.length, -1) 
-        running_weight = torch.matmul(router, z).view(-1, self.embedding_dim)
-        ret_embeds = F.embedding(index_list, running_weight)
+        #z = torch.vstack(tl) 
+        #z = z.view(self.length, -1) 
+        #x = torch.mul(router.unsqueeze(1), z)
+        #y = y.view(-1, self.embedding_dim)
+        ret_embeds = F.embedding(index_list, z)
         return ret_embeds 
 
 class MLPPromptEncoder(PromptEncoder):
