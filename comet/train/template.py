@@ -293,7 +293,7 @@ class RelTemplate:
            flags = {
                    "method":method,
                    "wrap":"wrap" in method,
-                   "freeze":"wrap" in method,
+                   "freeze":False,
                    "unfreeze":False,
                    }
            return flags

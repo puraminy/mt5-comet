@@ -417,7 +417,8 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", flat_promp
     for rel, prompt_tokens in general_prompts.items():
         mlog.info("%s )************* General) Wrapping model for %s", ii, rel)
         if not flat_prompts:
-            encoder, offset = create_encoder(rel, model, tokenizer, prompt_tokens, encoder_type, wrapped_model, prefix_config)
+            enc_router = torch.ones((n_tasks, len(prompt_tokens)), device=device)
+            encoder, offset = create_encoder(rel, model, tokenizer, prompt_tokens, encoder_type, wrapped_model, prefix_config, enc_router)
             general_encoders.append(encoder)
             offsets.append(offset)
             ii += 1
@@ -430,9 +431,9 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", flat_promp
             if not p in flat_prompt_tokens:
                 flat_prompt_tokens.append(p)
         if not flat_prompts:
-            enc_router = None
-            if router_variant == "fixed":
-                enc_router = torch.ones((n_tasks, len(prompt_tokens)), device=device)
+            enc_router = torch.ones((n_tasks, len(prompt_tokens)), device=device)
+            if router_variant == "learned":
+                enc_router = "random"
             encoder, offset = create_encoder(rel, model, tokenizer, prompt_tokens, encoder_type, wrapped_model, prefix_config, enc_router)
             prompt_encoders.append(encoder)
             offsets.append(offset)

@@ -47,6 +47,12 @@ class Scheduler:
         for opt in optim.opts:
             self.schedulers.append(torch.optim.lr_scheduler.StepLR(opt, step, gamma))
 
+    def get_last_lr(self):
+        last_lrs = []
+        for s in self.schedulers:
+            last_lrs.append(s.get_last_lr())
+        return last_lrs
+
     def step(self):
         for sch in self.schedulers:
            sch.step()

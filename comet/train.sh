@@ -81,7 +81,9 @@ trunc=none#sign #sigmoid#sign
 enc_type=merge-mid#merge-mid-nat #mlp #lstm #emb
 router=learned
 
-runlite run -exp $exp -lp ${log} -bc base -ov $g2 -var method=unsup-wrap-nat--rel_filter=$filter--train_samples=$train--epochs_num=$epochs--prompt_token_num=5#10--repeat=4--temp_num=$tn--loop=True--test_samples=$test--flat_prompts=$merge--shared_embs=$shared--seed=123--n_prompts=1--trunc_router=$trunc--router_lr=0.001--pl_learning_rate=0.01--encoder_type=$enc_type--router_variant=$router --follow_method=True --scorers="rouge-bert" --data_path=${home}/mt5-comet/comet/data/atomic2020/sel --do_valid=False --val_samples=10  --cycle=100 $g1 --batch_size=16 --trial=$trial  --model_id=$model --tag=$tag
+runlite run -exp $exp -lp ${log} -bc base -ov $g2 -var method=unsup-wrap-nat--rel_filter=$filter--train_samples=$train--epochs_num=$epochs--prompt_token_num=5#10--repeat=4--temp_num=$tn--loop=True--test_samples=$test--flat_prompts=$merge--shared_embs=$shared--seed=123--n_prompts=1--trunc_router=$trunc--router_lr=0.001--pl_learning_rate=0.01--encoder_type=$enc_type--router_variant=$router --follow_method=True --scorers="rouge-bert" --data_path=${home}/mt5-comet/comet/data/atomic2020/sel --do_valid=False --val_samples=10  --cycle=100 $g1 --batch_size=16 --trial=$trial  --model_id=$model --tag=$tag --freeze_parts="router" --freeze_step=5 
+
+#--unfreeze_parts="encoder" --unfreez_step=50 
 
 cp train.sh ${log}
 #if [ $home = "/content" ]; then

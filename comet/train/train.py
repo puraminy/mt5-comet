@@ -887,14 +887,14 @@ def run(ctx, conf_path, base_conf, experiment,
     help=""
 )
 @click.option(
-    "--freez_step",
+    "--freeze_step",
     "-fs",
     default=0,
     type=int,
     help=""
 )
 @click.option(
-    "--unfreez_step",
+    "--unfreeze_step",
     "-ufs",
     default=0,
     type=int,
@@ -1228,7 +1228,14 @@ def run(ctx, conf_path, base_conf, experiment,
     help="Repeating the same experiment with different tirals"
 )
 @click.option(
-    "--fz_parts",
+    "--unfreeze_parts",
+    "-ufzl",
+    default="",
+    type=str,
+    help="Layers to be freezed"
+)
+@click.option(
+    "--freeze_parts",
     "-fzl",
     default="",
     type=str,
@@ -1476,7 +1483,7 @@ def run(ctx, conf_path, base_conf, experiment,
     type=str,
     help="The target for freeze and unfreeze"
 )
-def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, pl_learning_rate, router_lr, do_eval, cont, wrap, prefix, frozen, freez_step, unfreez_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, log_per_exp, wb, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, rel_filter, ex_type, last_data, save_df, flat_prompts, num_workers, scorers, train_start, no_save_model, no_save_best, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, fz_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, preview, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args, match, dpy, prompt_tune, prompt_config_file, load_prompt, data_name, seed, do_valid, stop_level, skilled_variant, int_dim, prompt_token_num, n_prompts, init_temperature, trunc_router, general_type, router_variant, freeze_target):
+def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, pl_learning_rate, router_lr, do_eval, cont, wrap, prefix, frozen, freeze_step, unfreeze_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, log_per_exp, wb, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, rel_filter, ex_type, last_data, save_df, flat_prompts, num_workers, scorers, train_start, no_save_model, no_save_best, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, unfreeze_parts, freeze_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, preview, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args, match, dpy, prompt_tune, prompt_config_file, load_prompt, data_name, seed, do_valid, stop_level, skilled_variant, int_dim, prompt_token_num, n_prompts, init_temperature, trunc_router, general_type, router_variant, freeze_target):
 
     #%% some hyper-parameters
 
@@ -1531,9 +1538,9 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         else:
             save_path = "/content/drive/MyDrive/pouramini/logs"
 
-    if fz_parts == "none":
+    if freeze_parts == "none":
         frozen = False
-        fz_parts = ""
+        freeze_parts = ""
 
     if "-wrap" in method and not wrap:
         mlog.info("Method %s is for wrapped models...", method)
@@ -1885,7 +1892,9 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                                 int(pid), _break_sent, sort, _replace_blanks, 
                                 None, int(ph_num), group_them = group_them, 
                                 temp_num = temp_num, someone=someone, 
-                                match=_match, batch_size=int(batch_size)
+                                match=_match, batch_size=int(batch_size),
+                                freeze_step= int(freeze_step),
+                                unfreeze_step = int(unfreeze_step)
                         )
             if save_data:
                 myds[_name].save_data(os.path.join(save_data,_name + ".tsv"), merge=True)
@@ -1999,36 +2008,35 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         # Torch dataloader.
         return data_loader, dataset, sampler
 
-    if not fz_parts or fz_parts == "all":
-        modules_to_freeze = [model]
-    else:
-        modules_to_freeze = []
-
-    _parts = fz_parts.split("@")
-    if not "@" in fz_parts:
-        enc_parts = _parts[0]
+    modules_to_freeze = []
+    modules_to_unfreeze = []
+    if "model@" in freeze_parts:
+        _parts = freeze_parts.split("@")
+        enc_parts = _parts[1]
         freeze_self_att(modules_to_freeze, enc_parts, model.encoder)
-    else:
-        enc_parts = _parts[0]
-        dec_parts = _parts[1]
-        freeze_self_att(modules_to_freeze, enc_parts, model.encoder)
-        freeze_self_att(modules_to_freeze, dec_parts, model.decoder, True)
-    if len(_parts) == 3:
-        decx_parts = _parts[2]
-        freeze_cross_att(modules_to_freeze, decx_parts, model.decoder)
+        if len(_parts) == 3:
+            dec_parts = _parts[2]
+            freeze_self_att(modules_to_freeze, dec_parts, model.decoder, True)
+        if len(_parts) == 4:
+            decx_parts = _parts[3]
+            freeze_cross_att(modules_to_freeze, decx_parts, model.decoder)
 
     def freeze(modules_to_freeze):
         for module in modules_to_freeze:
-            for param in module.parameters():
-                param.requires_grad = False  # Actual freezing operation
+            if hasattr(module, "parameters"):
+                for param in module.parameters():
+                    param.requires_grad = False  # Actual freezing operation
+            else:
+                module.requires_grad = False  # Actual freezing operation
 
-    def unfreeze(modules_to_freeze):
-        for module in modules_to_freeze:
-            for param in module.parameters():
-                param.requires_grad = True  # Actual freezing operation
+    def unfreeze(modules_to_unfreeze):
+        for module in modules_to_unfreeze:
+            if hasattr(module, "parameters"):
+                for param in module.parameters():
+                    param.requires_grad = True  # Actual freezing operation
+            else:
+                module.requires_grad = True  # Actual freezing operation
 
-    if frozen:
-        freeze(modules_to_freeze)
 
     mlog.info("len tokenizer %s", len(tokenizer))
     my_specials = [x for x in tokenizer.additional_special_tokens if not "<extra_id"  in x]
@@ -2195,6 +2203,31 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             encoder_prompts= prompts,
             general_prompts= general_prompts, 
             router_variant=router_variant, device=device) 
+
+    def add_parts(_list, parts):
+        if parts == "encoder":
+            for encoder in wrapped_model.general_encoders:
+                _list.append(encoder)
+            for encoder in wrapped_model.prompt_encoders:
+                _list.append(encoder)
+        if parts == "router":
+            for encoder in wrapped_model.general_encoders:
+                if encoder.router is not None: 
+                    _list.append(encoder.router)
+            for encoder in wrapped_model.prompt_encoders:
+                if encoder.router is not None: 
+                    _list.append(encoder.router)
+
+    add_parts(modules_to_freeze, freeze_parts)
+    add_parts(modules_to_unfreeze, unfreeze_parts)
+
+    if frozen:
+        if "model@" in freeze_parts:
+            freeze(modules_to_freeze)
+        else:
+            freeze([model])
+            freeze(modules_to_unfreeze)
+
     fname = "output/" + str(experiment) + "-" + str(exp_id) + "-" + flat_prompts + ".txt"
     Path("output").mkdir(exist_ok = True)
     with open(fname, "w") as f:
@@ -2290,13 +2323,17 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                         paras.append([encoder.z])
                         lrs.append(Az_learning_rate)
                     else:
-                        paras.append([encoder.router])
-                        lrs.append(router_learning_rate)
+                        if encoder.router.requires_grad:
+                            paras.append([encoder.router])
+                            lrs.append(router_learning_rate)
                         para_list =[p for p in encoder.parameters() if p.requires_grad]
                         if para_list:
                             paras.append(para_list)
                             lrs.append(pl_learning_rate)
                 for encoder in model.general_encoders:
+                    if encoder.router.requires_grad:
+                        paras.append([encoder.router])
+                        lrs.append(router_learning_rate)
                     paras.append([p for p in encoder.parameters() if p.requires_grad])
                     lrs.append(pl_learning_rate)
                 optimizer = Optim(paras, lrs)
@@ -2412,7 +2449,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     mlog.info(f"============== Data Path: {data_path}\n")
     mlog.info(f"============== batch size: {batch_size} per node: {node_batch_size} | learning_rate: {learning_rate} | prompt_lr: {pl_learning_rate} \n")
     mlog.info(f"============== train samples: {train_samples} test_samples: {test_samples} | repeat: {repeat}  epochs: {epochs_num}\n")
-    mlog.info(f"============== wrap: {wrap} | prefixed: {prefix} | frozen: {frozen} {fz_parts}\n")
+    mlog.info(f"============== wrap: {wrap} | prefixed: {prefix} | frozen: {frozen} {freeze_parts}\n")
     mlog.info(f"============== rel_filter: {rel_filter} | method: {method} | model: {model_id} \n")
     epochs_num = int(epochs_num)
     cycle = int(cycle)
@@ -2430,6 +2467,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         best_eval_step = 0
         best_step = 0
         is_freezed = frozen
+        unfreeze_done = False
+        freeze_done = False
         freeze_it = False
         unfreeze_it = False
         if epochs_num == 0 or (not wrap and frozen and modules_to_freeze is model):
@@ -2484,16 +2523,16 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                     batch = {k:v.to(device=device) for k,v in batch.items()}
                     freeze_it = no_model_batch["freeze"][0]
                     unfreeze_it = no_model_batch["unfreeze"][0]
-                    if  unfreeze_it and is_freezed:
+                    if  unfreeze_it and not unfreeze_done:
                         mlog.info("unfreezing the model")
-                        is_freezed = False
-                        unfreeze(modules_to_freeze)
+                        unfreeze_done = True 
+                        unfreeze(modules_to_unfreeze)
                         last_lr = scheduler.get_last_lr()[0]
                         optimizer, scheduler = get_optimizer(wrapped_model, last_lr, opt_type)
 
-                    if freeze_it and not is_freezed:
+                    if freeze_it and not freeze_done:
                         mlog.info("freezing the model")
-                        is_freezed = True
+                        freeze_done = True
                         freeze(modules_to_freeze)
                         last_lr = scheduler.get_last_lr()[0]
                         optimizer, scheduler = get_optimizer(wrapped_model, last_lr, opt_type)

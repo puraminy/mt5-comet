@@ -25,10 +25,15 @@ class MyDataset(torch.utils.data.Dataset):
             sort_key="event", replace_blanks = False, 
             tokenizer=None, ph_num=3, limit_lang = False, 
             use_dif_templates=False, group_them=[], temp_num=1, 
-            someone=False, match="", batch_size=0): 
+            someone=False, match="", batch_size=0,  
+            freeze_step= 0,
+            unfreeze_step = 0):
         super(MyDataset).__init__()
         fingerprint = save_ds_path + "_" + split_name + "_"  + method + \
                 "_" + str(len(split_df)) + "_" + str(num_samples) 
+        self.freeze_step = freeze_step
+        self.unfreeze_step = unfreeze_step
+
         self.flat_data = []
         self.data_split = {}
         self.sort_key = sort_key # sort index
@@ -334,6 +339,12 @@ class MyDataset(torch.utils.data.Dataset):
         qtemp, anstemp, ex_qtemp, ex_anstemp, context, flags = rt.create_templates(
                 mt, index, 
                 gen_pos="end", prompt_pos=self.prompt_pos, rel=rel)
+
+        if self.freeze_step > 0 and self.rec_counter > self.freeze_step: 
+            flags["freeze"] = True
+        if self.unfreeze_step > 0 and self.rec_counter > self.freeze_step:
+            flags["unfreeze"] = True
+
         assert type(qtemp) == list, "qtemp must be a list"
         if self.use_dif_templates:
             _rep = rep

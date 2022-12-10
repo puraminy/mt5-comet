@@ -363,9 +363,8 @@ class PromptEncoder(torch.nn.Module):
         para = [p for p in self.parameters() if p.requires_grad ]
         self.n_tasks = n_tasks
         self.is_learned = False
-        self.freezed_router = False
         self.length = length
-        if router is None:
+        if router == "random":
             self.is_learned = True
             self.router = nn.Parameter(data=torch.empty((
                 self.n_tasks,
@@ -396,7 +395,7 @@ class PromptEncoder(torch.nn.Module):
             return None
         task_id = tids[0]
         router = self.router[task_id] # torch.index_select(self.router, 0, tids)
-        if self.freezed_router or not self.is_learned:
+        if not self.router.requires_grad or not self.is_learned:
             return router
         if self.init_flag:
             tinfo("Initial Router: %s", self.router)
