@@ -72,7 +72,7 @@ echo "log: ${log}"
 #filter=xIntent#xAttr#xNeed#xReact#xEffect#oReact#xWant#multi
 filter=xIntent#xAttr#multi
 merge=none #lstm
-tn=merge-mid#merge-mid-nat #com-mid-nat #mat #2#4#5
+tn=merge-pre#mat #merge-mid-nat #com-mid-nat #mat #2#4#5
 shared=False
 trial=5
 epochs=2
@@ -85,10 +85,10 @@ runlite run -exp $exp -lp ${log} -bc base -ov $g2 -var method=unsup-wrap-nat--re
 
 #--unfreeze_parts="encoder" --unfreez_step=50 
 
-cp train.sh ${log}
+#cp train.sh ${log}
 #if [ $home = "/content" ]; then
-mv /content/*time*.log ${log}
-tar -czvf /content/${exp}-$m.tar.gz ${log}
+#mv /content/*time*.log ${log}
+#tar -czvf /content/${exp}-$m.tar.gz ${log}
 #cp /content/${exp}-$m.tar.gz ${home}/logs 
 #fi
 
