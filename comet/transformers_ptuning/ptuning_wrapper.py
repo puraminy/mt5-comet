@@ -465,13 +465,15 @@ class MergePromptEncoder(PromptEncoder):
         self.flat = True
         self.trunc_router = trunc_router
         self.wandb = wandb
-        if encoders:
-            self.encoders = torch.nn.ModuleList(encoders)
+        self.set_encoders(encoders)
         self.router = nn.Parameter(data=torch.empty((
             self.n_tasks,
             self.n_prompts
         )).uniform_(-1e-3, 1e-3))
 
+    def set_encoders(self, encoders):
+        if encoders:
+            self.encoders = torch.nn.ModuleList(encoders)
     def forward(self, prompt_token_ids, tids=None, training=True):
         device = self.device
         task_id = tids[0]

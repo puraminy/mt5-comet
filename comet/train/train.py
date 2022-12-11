@@ -1483,7 +1483,7 @@ def run(ctx, conf_path, base_conf, experiment,
 @click.option(
     "--router_variant",
     "-rv",
-    default="learned",
+    default="fixed",
     type=str,
     help=""
 )

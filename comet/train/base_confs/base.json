@@ -68,7 +68,7 @@
     "init_temperature": 1.0,
     "trunc_router": "none",
     "general_type": "lstm",
-    "router_variant": "learned",
+    "router_variant": "fixed",
     "freeze_target": "model",
     "batch_size": 8,
     "break_sent": "",
