@@ -406,7 +406,8 @@ def cli():
 @click.option(
     "--preview",
     "-pv",
-    is_flag=True,
+    default="",
+    type=str,
     help=""
 )
 @click.option(
@@ -528,6 +529,10 @@ def run(ctx, conf_path, base_conf, experiment,
                    for vv, cc in zip(var_names, values):
                        if len(cc) > 1:
                            tags.append(vv)
+                           if preview and not vv in preview:
+                               var_names.remove(vv)
+                               values.remove(cc)
+
                    args["tag"] = "@".join(tags)
                tot_comb = [dict(zip(var_names, comb)) for comb in itertools.product(*values)]
                ii = 0
@@ -592,7 +597,7 @@ def run(ctx, conf_path, base_conf, experiment,
                        args["save_data"] = False
                    else:
                        if multi_only: 
-                           args["preview"] = True
+                           args["preview"] = "multi_only"
                            args["save_data"] = spath
                        _dp = os.path.join(dataPath,"sel",args["rel_filter"] + ".tsv")
                        if not load_data:
@@ -1301,7 +1306,8 @@ def run(ctx, conf_path, base_conf, experiment,
 @click.option(
     "--preview",
     "-pv",
-    is_flag=True,
+    default="",
+    type=str,
     help="Don't run the trainer and just show initial settings"
 )
 @click.option(

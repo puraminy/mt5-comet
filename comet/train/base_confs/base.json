@@ -50,7 +50,7 @@
     "do_preproc": false,
     "loop": false,
     "know": "s",
-    "preview": false,
+    "preview": "",
     "tag": "",
     "skip": false,
     "use_all_data": false,
