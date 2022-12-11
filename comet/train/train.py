@@ -523,10 +523,15 @@ def run(ctx, conf_path, base_conf, experiment,
                    if "multi-only" in values[index]:
                        multi_only = True
 
+               if not args["tag"]:
+                   tags = []
+                   for vv, cc in zip(var_names, values):
+                       if len(cc) > 1:
+                           tags.append(vv)
+                   args["tag"] = "@".join(tags)
                tot_comb = [dict(zip(var_names, comb)) for comb in itertools.product(*values)]
                ii = 0
                orig_args = args.copy()
-               inp_tag = args["tag"]
                inp_test_samples = args["test_samples"]
                if one: num_exps = 1
                if num_exps > 0:

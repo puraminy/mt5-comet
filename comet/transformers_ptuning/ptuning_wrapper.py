@@ -395,7 +395,7 @@ class PromptEncoder(torch.nn.Module):
             return None
         task_id = tids[0]
         router = self.router[task_id] # torch.index_select(self.router, 0, tids)
-        if not self.router.requires_grad or not self.is_learned:
+        if training and (not self.router.requires_grad or not self.is_learned):
             return router
         if self.init_flag:
             tinfo("Initial Router: %s", self.router)
