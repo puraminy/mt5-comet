@@ -89,8 +89,8 @@ runlite run -exp $exp -lp ${log} -bc base -ov $g2 -var method=unsup-wrap-nat--re
 case "$home" in 
   *content*)
     # Do stuff
-	mv /content/*time*.log ${log}
-	tar -czvf /content/${exp}-$m.tar.gz ${log}
+	mv /content/*time*.log ${log}/$exp
+	tar -czvf /content/${exp}-$m.tar.gz ${log}/$exp
 	cp /content/${exp}-$m.tar.gz ${home}/logs 
     ;;
 esac
