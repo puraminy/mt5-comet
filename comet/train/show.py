@@ -535,7 +535,7 @@ def show_df(df):
                 inf = infos[ii:ii+30]
                 change_info(inf)
                 cc = std.getch()
-                while chr(cc) != "q":
+                while chr(cc) != "b":
                     if cc == DOWN:
                         ii += 1
                     if cc == UP:
