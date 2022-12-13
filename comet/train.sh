@@ -66,13 +66,13 @@ elif [ "$m" -eq "1" ]; then
 fi
 seed=123
 
-exp=xint-router-merge-emb-var33
+exp=xint-mold
 log=${home}/logs   #/${exp}
 echo "log: ${log}"
 #filter=xIntent#xAttr#xNeed#xReact#xEffect#oReact#xWant#multi
 filter=xIntent#xAttr#multi
 merge=none #lstm
-tn=merge#mat #merge-mid-nat #com-mid-nat #mat #2#4#5
+tn=mold#merge #merge-mid-nat #com-mid-nat #mat #2#4#5
 shared=False
 trial=7
 epochs=2

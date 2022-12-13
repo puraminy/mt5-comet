@@ -476,7 +476,7 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", flat_promp
     n_prompt_tokens = len(flat_prompt_tokens)
     mbp("")
     for encoder in prompt_encoders:
-        if isinstance(encoder, MergePromptEncoder):
+        if isinstance(encoder, MergePromptEncoderBase):
             encoder.set_encoders(general_encoders)
             encoder.trunc_router = logs.main_args["trunc_router"]
             encoder.wandb = logs.main_args["wb"]
@@ -565,6 +565,14 @@ def create_encoder(name, model, tokenizer, prompt_tokens, encoder_type="lstm",
             prompt_encoder = EmbeddingPromptEncoder(name, enc_plen,
                     embedding_dim,id_offset = -1, 
                     prompt_ids=rel_ids, init_embs=init_embs, router=enc_router)
+    elif encoder_type.startswith("mold"):
+        mlog.info("in Merge %s", encoder_type)
+        if enc_plen > 0:
+            mlog.info("Prompt Encoder defined : %s", enc_plen)
+            prompt_encoder = MergePromptEncoderOld(name = name, length=enc_plen,
+                    embedding_dim = embedding_dim,
+                    id_offset = -1, prompt_ids=rel_ids, init_embs=init_embs, 
+                    router=enc_router)
     elif encoder_type.startswith("merge"):
         mlog.info("in Merge %s", encoder_type)
         if enc_plen > 0:
