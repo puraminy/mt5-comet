@@ -1201,7 +1201,7 @@ def run(ctx, conf_path, base_conf, experiment,
 @click.option(
     "--gen_bs",
     "-gb",
-    default="16@16",
+    default="",
     type=str,
     help="Batch sizes for generation."
 )
@@ -2088,6 +2088,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             exp_info[k] = v
 
     mbp("start")
+    if not gen_bs:
+        gen_bs = str(batch_size) + "@" + str(batch_size)
     def eval_test(model, tokenizer, result_fname=""):
         if "@" in gen_bs:
             test_bs,_ = gen_bs.split("@")
