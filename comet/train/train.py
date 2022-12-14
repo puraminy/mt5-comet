@@ -1642,7 +1642,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
 
     assert learning_rate > 0, "Learning rate is zero!"
     assert pl_learning_rate > 0, "Prompt tuning Learning rate is zero!"
-    device = 'cuda' if not cpu else 'cpu'
+    device = 'cuda' if not cpu and torch.cuda.is_available() else 'cpu'
 
     log_dir = save_path
     set_device(device)

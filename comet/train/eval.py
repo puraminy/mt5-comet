@@ -279,7 +279,7 @@ def generate(model, tokenizer, batch, gen_token = "", gen_param = "greedy", at_m
         hyps = tokenizer.batch_decode(hyps,skip_special_tokens=False)
     else:
         #breakpoint()
-        if task_ids is not None:
+        if False: #task_ids is not None:
             hyps = model.generate(task_ids, 
                     input_ids=input_ids,
                     attention_mask=attention_mask,

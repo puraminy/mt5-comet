@@ -68,6 +68,11 @@ class SkilledMixin(PTuningWrapper):
     def generate(self, input_ids, *args, **kwargs):
         task_ids = kwargs.pop("task_ids", None)
         tinfo("gen task ids vvvvvvv: %s", task_ids)
+        device = input_ids.device
+        #task_ids = torch.tensor([0])
+        if task_ids != None:
+            task_ids = task_ids.long()
+            task_ids.to(device)
         inform_layers(self.underlying_model, self.adapter_class, task_ids)
         return self.underlying_model.generate(input_ids=input_ids, *args, **kwargs)
 
