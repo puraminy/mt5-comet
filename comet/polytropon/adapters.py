@@ -162,8 +162,11 @@ class SkilledLoRALinear(SkilledModule):
                 skill_logits = torch.sigmoid(skill_logits)
         skill_logits = skill_logits / (skill_logits.sum(dim=-1, keepdim=True) + EPS)
 
-        skills_weight_A = torch.mm(skill_logits, self.skills_weight_A).view(input.size()[0], self.in_features, self.r)
-        skills_weight_B = torch.mm(skill_logits, self.skills_weight_B).view(input.size()[0], self.r, self.out_features)
+        if skill_logits.size()[1] != self.skills_weight_A.size()[0]:
+            skill_logits = torch.t(skill_logits)
+        #TODO my code above
+        skills_weight_A = torch.mm(skill_logits, self.skills_weight_A).view(input.size()[0], self.in_features, -1) #self.r)
+        skills_weight_B = torch.mm(skill_logits, self.skills_weight_B).view(input.size()[0], -1, self.out_features)
         output = torch.matmul(input, skills_weight_A) # bsi,bir->bsr
         output = torch.matmul(output, skills_weight_B) # bsr,bro->bso
         output = F.linear(input, self.weight, self.bias) + output * self.scaling

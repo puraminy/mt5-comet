@@ -45,10 +45,10 @@ confPath = "base_confs"
 Path(resPath).mkdir(exist_ok=True, parents=True)
 Path(logPath).mkdir(exist_ok=True, parents=True)
 
-logFilename = os.path.join(logPath, "all.log") #app_path + '/log_file.log'
+#logFilename = os.path.join(logPath, "all.log") #app_path + '/log_file.log'
 FORMAT = logging.Formatter("[%(filename)s:%(lineno)s - %(funcName)10s() ] %(message)s")
 FORMAT2 = logging.Formatter("%(message)s")
-logging.basicConfig(filename=logFilename)
+#logging.basicConfig(filename=logFilename)
 consoleHandler = logging.StreamHandler()
 consoleHandler.setFormatter(FORMAT2)
 mlog = logging.getLogger("comet.main")
@@ -84,10 +84,11 @@ def trace(frame, event, arg):
 mlog.info(now)
 #sys.settrace(trace)
 
-for logger, fname in zip([mlog,dlog,clog,vlog,tlog,timelog], ["all_main","all_data","all_cfg","all_eval","all_train", "all_time"]):
-    logger.setLevel(logging.INFO)
-    logFilename = os.path.join(logPath, fname + ".log")
-    handler = logging.FileHandler(logFilename, mode="w")
-    handler.setFormatter(FORMAT)
-    logger.addHandler(handler)
+if False:
+    for logger, fname in zip([mlog,dlog,clog,vlog,tlog,timelog], ["all_main","all_data","all_cfg","all_eval","all_train", "all_time"]):
+        logger.setLevel(logging.INFO)
+        logFilename = os.path.join(logPath, fname + ".log")
+        handler = logging.FileHandler(logFilename, mode="w")
+        handler.setFormatter(FORMAT)
+        logger.addHandler(handler)
 

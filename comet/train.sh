@@ -61,8 +61,8 @@ if [ "$m" -eq "0" ]; then
   train=2
 elif [ "$m" -eq "1" ]; then
   echo "testing train and test"
-  test=2
-  train=2
+  test=8
+  train=8
 fi
 seed=123
 
