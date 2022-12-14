@@ -86,7 +86,7 @@ class xIntentTemplate(RelTemplate):
                qtemp = "Why does {event}? {ph}"
                anstemp = "{ph} Because he wants {resp} {end}."
            elif tn == 1:
-               qtemp = "{event}? Because he wants {ph}"
+               qtemp = "Because PersonX wants {ph}, {event}"
                anstemp = "{ph} {resp} {end}"
            elif tn == 3:
                qtemp = "Why does {event}? Because {ph}"
