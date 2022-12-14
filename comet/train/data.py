@@ -82,11 +82,11 @@ class xIntentTemplate(RelTemplate):
        if tn.isdigit():
            tn = int(tn)
        if method == "unsup-nat":
-           if tn == 1:
+           if tn == "why-dec":
                qtemp = "Why does {event}? {ph}"
                anstemp = "{ph} Because he wants {resp} {end}."
-           elif tn == 2:
-               qtemp = "Why does {event}? Because he wants {ph}"
+           elif tn == 1:
+               qtemp = "{event}? Because he wants {ph}"
                anstemp = "{ph} {resp} {end}"
            elif tn == 3:
                qtemp = "Why does {event}? Because {ph}"
