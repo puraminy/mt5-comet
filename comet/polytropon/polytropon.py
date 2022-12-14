@@ -71,7 +71,9 @@ class SkilledMixin(PTuningWrapper):
         inform_layers(self.underlying_model, self.adapter_class, task_ids)
         return self.underlying_model.generate(input_ids=input_ids, *args, **kwargs)
 
-    def forward(self, input_ids, task_ids, *args, add_prior=False, **kwargs):
+    def forward(self, input_ids, tids=None, add_prior=False, *args, **kwargs):
+        task_ids = kwargs.pop("task_ids", None)
+        task_ids = task_ids.long()
         inform_layers(self.underlying_model, self.adapter_class, task_ids)
         outputs = self.underlying_model.forward(input_ids = input_ids, *args, **kwargs)
         #outputs = super().forward(input_ids, *args, **kwargs)
