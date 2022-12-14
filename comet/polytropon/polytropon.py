@@ -55,9 +55,9 @@ class SkilledMixin(PTuningWrapper):
             # skills are computed inside each module
             skills = None
         elif self.skilled_variant == "shared":
-            skills = torch.ones((self.n_tasks, 1), device=task_ids.device)
+            skills = torch.ones((self.n_tasks, 1), device=self.device)
         elif self.skilled_variant == "private":
-            skills = torch.eye(self.n_tasks, self.n_tasks, device=task_ids.device)
+            skills = torch.eye(self.n_tasks, self.n_tasks, device=self.device)
         elif self.skilled_variant == "custom":
             skills = custom_skills
         else:
@@ -68,7 +68,7 @@ class SkilledMixin(PTuningWrapper):
     def generate(self, input_ids, *args, **kwargs):
         task_ids = kwargs.pop("task_ids", None)
         tinfo("gen task ids vvvvvvv: %s", task_ids)
-        device = input_ids.device
+        device = self.device
         #task_ids = torch.tensor([0])
         if task_ids != None:
             task_ids = task_ids.long()

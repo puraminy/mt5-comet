@@ -105,6 +105,8 @@ class PTuningWrapper(torch.nn.Module):
 
         super().__init__()
         mbp("")
+        cpu = args["cpu"]
+        self.device = 'cuda' if not cpu and torch.cuda.is_available() else 'cpu'
         self.flat_encoder = flat_encoder
         self.merge_encoder = merge_encoder
         #assert flat_encoder == None, "merege_encoder was set"
