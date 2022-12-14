@@ -2192,6 +2192,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     n_prompts = int(n_prompts)
     n_tasks = len(sample_dataset.tasks)
     prompt_token_num = int(prompt_token_num)
+    if skilled_variant == "none":
+        skilled_variant = ""
     if skilled_variant:
        task_ids = torch.LongTensor([0, 1])
     prefix_config = {
