@@ -494,7 +494,8 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", flat_promp
                prompt_encoders=prompt_encoders, 
                general_encoders=general_encoders, 
                prompt_token_fn=get_prompt_token_fn(id_offset), 
-               merge_encoder=merge_encoder, flat_encoder=flat_encoder) 
+               merge_encoder=merge_encoder, flat_encoder=flat_encoder, 
+               args=logs.main_args)
     else:
         wrapped_model = PTuningWrapper(model, 
                 prompt_encoders, 
