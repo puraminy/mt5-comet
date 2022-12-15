@@ -75,6 +75,7 @@ class SkilledMixin(torch.nn.Module):
 
     def generate(self, input_ids, *args, **kwargs):
         self.training = False
+        self.adapter.training = False
         task_ids = kwargs.pop("task_ids", None)
         tinfo("gen task ids skilled: %s", task_ids)
         device = self.device
