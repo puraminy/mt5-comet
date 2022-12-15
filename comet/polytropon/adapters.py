@@ -9,6 +9,8 @@ from torch import nn
 import torch.nn.functional as F
 from torch.nn.init import calculate_gain
 from torch.distributions.relaxed_bernoulli import RelaxedBernoulli
+import comet.train.mylogs as logs
+from comet.train.mylogs import tinfo, getFname, tlog
 
 
 EPS = 1e-12
@@ -122,6 +124,7 @@ class SkilledLoRALinear(SkilledModule):
         else:
             self.register_buffer("skill_logits", skills)
             self.is_learned = False
+        tinfo("Init skill logits: %s", self.skill_logits)
 
         self.weight = nn.Parameter(weight.data)
         if freeze:
@@ -142,6 +145,7 @@ class SkilledLoRALinear(SkilledModule):
             self.register_parameter('bias', None)
 
         self.reset_parameters()
+        self.training = True
 
     def reset_parameters(self):
         gain = calculate_gain(nonlinearity="leaky_relu", param=math.sqrt(5))
@@ -173,6 +177,8 @@ class SkilledLoRALinear(SkilledModule):
         output = torch.matmul(input, skills_weight_A) # bsi,bir->bsr
         output = torch.matmul(output, skills_weight_B) # bsr,bro->bso
         output = F.linear(input, self.weight, self.bias) + output * self.scaling
+        if not self.training:
+            tinfo("skill logits: %s", self.skill_logits)
 
         return output
 

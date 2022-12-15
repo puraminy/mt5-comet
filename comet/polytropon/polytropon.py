@@ -51,7 +51,8 @@ class SkilledMixin(torch.nn.Module):
         adapter_class, only_attention = VARIANT2CLASS.get(skilled_variant, (SkilledLoRALinear, True))
         self.adapter_class = adapter_class
         skills = self.get_skills(custom_skills)
-        replace_layers(self.underlying_model, adapter_class, n_tasks, n_skills, skills, only_attention=only_attention)
+        self.adapter = None
+        replace_layers(self.underlying_model, adapter_class, n_tasks, n_skills, skills, only_attention=only_attention, wrapper =self)
 
         if state_dict is not None:
             self.underlying_model.load_state_dict(state_dict, strict=False)
@@ -73,9 +74,9 @@ class SkilledMixin(torch.nn.Module):
         return skills
 
     def generate(self, input_ids, *args, **kwargs):
+        self.training = False
         task_ids = kwargs.pop("task_ids", None)
         tinfo("gen task ids skilled: %s", task_ids)
-        tinfo("gen skilled: %s", self.skills)
         device = self.device
         #task_ids = torch.tensor([0])
         if task_ids != None:

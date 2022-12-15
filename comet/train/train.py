@@ -2210,15 +2210,18 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         'temperature': init_temperature,
     }
     #prefix_config = None
+
     general_prompts = {}
-    for n in range(prompt_token_num):
-        l = []
-        for m in range(prompt_token_num):
-            l.append("<g"+str(n) + "@" + general_type + "_" + str(m)+ ">") 
-        general_prompts["g"+str(n) + "@" + general_type]  = l 
-    if flat_prompts == "none": flat_prompts = ""
-    assert flat_prompts != "none"
-    prompts = sample_dataset.prompts
+    prompts = {} 
+    if isinstance(wrapped_model, PTuningWrapper):
+        for n in range(prompt_token_num):
+            l = []
+            for m in range(prompt_token_num):
+                l.append("<g"+str(n) + "@" + general_type + "_" + str(m)+ ">") 
+            general_prompts["g"+str(n) + "@" + general_type]  = l 
+        if flat_prompts == "none": flat_prompts = ""
+        assert flat_prompts != "none"
+        prompts = sample_dataset.prompts
     wrapped_model = wrap_model(model_to_wrap, tokenizer, encoder_type, load_prompt_path, flat_prompts=flat_prompts, method = method, shared_embs= shared_embs, skilled_variant=skilled_variant, prefix_config=prefix_config, 
             exp_id=exp_id, 
             encoder_prompts= prompts,

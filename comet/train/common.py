@@ -481,7 +481,7 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", flat_promp
             encoder.trunc_router = logs.main_args["trunc_router"]
             encoder.wandb = logs.main_args["wb"]
 
-    if flat_prompts:
+    if flat_prompts and not skilled_variant:
         flat_encoder, _ = create_encoder("flat", model, tokenizer, flat_prompt_tokens, flat_prompts, wrapped_model, prefix_config)
         #assert flat_encoder != None, "merge encoder for " + flat_prompts + " is none"
         #flat_encoder = _encoder # prompt_encoders[0]
