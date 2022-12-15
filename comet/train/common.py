@@ -489,13 +489,9 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", flat_promp
 ####################
     mlog.info("ID OFFSET: %s", id_offset)
     if skilled_variant:
-       wrapped_model = SkilledMixin(model, n_tasks=n_tasks, n_skills=len(general_encoders), 
-               skilled_variant=skilled_variant,
-               prompt_encoders=prompt_encoders, 
-               general_encoders=general_encoders, 
-               prompt_token_fn=get_prompt_token_fn(id_offset), 
-               merge_encoder=merge_encoder, flat_encoder=flat_encoder, 
-               args=logs.main_args)
+       wrapped_model = SkilledMixin(model=model, n_tasks=n_tasks, 
+               n_skills=len(general_encoders), 
+               skilled_variant=skilled_variant, freeze = logs.args("freeze_skill"))
     else:
         wrapped_model = PTuningWrapper(model, 
                 prompt_encoders, 

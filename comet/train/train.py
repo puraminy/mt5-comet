@@ -1494,7 +1494,13 @@ def run(ctx, conf_path, base_conf, experiment,
     type=str,
     help="The target for freeze and unfreeze"
 )
-def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, pl_learning_rate, router_lr, do_eval, cont, wrap, prefix, frozen, freeze_step, unfreeze_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, log_per_exp, wb, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, rel_filter, ex_type, last_data, save_df, flat_prompts, num_workers, scorers, train_start, no_save_model, no_save_best, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, unfreeze_parts, freeze_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, preview, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args, match, dpy, prompt_tune, prompt_config_file, load_prompt, data_name, seed, do_valid, stop_level, skilled_variant, int_dim, prompt_token_num, n_prompts, init_temperature, trunc_router, general_type, router_variant, freeze_target):
+@click.option(
+    "--freeze_skill",
+    "-fsk",
+    is_flag=True,
+    help=""
+)
+def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, pl_learning_rate, router_lr, do_eval, cont, wrap, prefix, frozen, freeze_step, unfreeze_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, log_per_exp, wb, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, rel_filter, ex_type, last_data, save_df, flat_prompts, num_workers, scorers, train_start, no_save_model, no_save_best, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, unfreeze_parts, freeze_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, preview, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args, match, dpy, prompt_tune, prompt_config_file, load_prompt, data_name, seed, do_valid, stop_level, skilled_variant, int_dim, prompt_token_num, n_prompts, init_temperature, trunc_router, general_type, router_variant, freeze_target, freeze_skill):
 
     #%% some hyper-parameters
 
@@ -2246,7 +2252,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
 
     fname = "output/" + str(experiment) + "-" + str(exp_id) + "-" + flat_prompts + ".txt"
     Path("output").mkdir(exist_ok = True)
-    with open(fname, "w") as f:
+    if not isinstance(wrapped_model, SkilledMixin):
+        f = open(fname, "w")
         print("Number of prompts:" + str(len(wrapped_model.prompt_encoders)), file=f)
         print("Train prompts:", prompts, file=f) 
         if wrapped_model.flat_encoder:
@@ -2264,6 +2271,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         print(model, file=f)
         jargs = json.dumps(args, indent=2)
         print(jargs, file=f)
+        f.close()
     mlog.info("len tokenizer after extending %s", len(tokenizer))
     # ooooooooooooo
     if preview:
@@ -2274,20 +2282,23 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         model.pretrain_model.resize_token_embeddings(len(tokenizer))
 
     wrapped_model.to(device=device)
-    if wrapped_model.prompt_encoders:
-        mlog.info("Number of encoders: %s", len(wrapped_model.prompt_encoders))
-        for encoder in wrapped_model.prompt_encoders:
-            mlog.info("Prompt encoder %s", encoder.name)
-            if encoder.router is not None: 
-                encoder.router.to(device=device)
-            encoder.device = device
-        for encoder in wrapped_model.general_encoders:
-            mlog.info("General encoder %s", encoder.name)
-            encoder.device = device
-        wrapped_model.prompt_encoders.to(device=device)
-        wrapped_model.general_encoders.to(device=device)
-    if wrapped_model.merge_encoder:
-        wrapped_model.merge_encoder.to(device)
+    if not isinstance(wrapped_model, SkilledMixin):
+        if wrapped_model.prompt_encoders:
+            mlog.info("Number of encoders: %s", len(wrapped_model.prompt_encoders))
+            for encoder in wrapped_model.prompt_encoders:
+                mlog.info("Prompt encoder %s", encoder.name)
+                if encoder.router is not None: 
+                    encoder.router.to(device=device)
+                encoder.device = device
+            for encoder in wrapped_model.general_encoders:
+                mlog.info("General encoder %s", encoder.name)
+                encoder.device = device
+            wrapped_model.prompt_encoders.to(device=device)
+            wrapped_model.general_encoders.to(device=device)
+
+        if wrapped_model.merge_encoder:
+            wrapped_model.merge_encoder.to(device)
+
     mlog.info("len tokenizer after wrapping %s", len(tokenizer))
     mbp("wrap")
     mbp("start")
@@ -2296,6 +2307,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         rgrad = [p for p in wrapped_model.parameters() if p.requires_grad]
         nrgrad = [p for p in wrapped_model.parameters() if not p.requires_grad]
 
+    if not isinstance(wrapped_model, SkilledMixin):
         _sum = 0
         for encoder in wrapped_model.prompt_encoders:
             enc_rgrad = [p for p in encoder.parameters() if p.requires_grad]
@@ -2324,7 +2336,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             #{"params": model.z, "lr": Az_learning_rate},
         ]
         if opt_type == "adam":
-            if len(wrapped_model.prompt_encoders) == 0:
+            if (not isinstance(wrapped_model, PTuningWrapper) or
+                len(wrapped_model.prompt_encoders) == 0):
                 optimizer = AdamW(optimizer_grouped_parameters,lr=_lr,eps=1e-8)
                 scheduler = get_linear_schedule_with_warmup(optimizer,warm_up_steps,iterations)
             else:
@@ -2470,7 +2483,9 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     epochs_num = int(epochs_num)
     cycle = int(cycle)
     wrap = True
-    exp_info["enc_num"] = len(wrapped_model.prompt_encoders) 
+    exp_info["enc_num"] = 0
+    if isinstance(wrapped_model, PTuningWrapper): 
+        exp_info["enc_num"] = len(wrapped_model.prompt_encoders) 
     exp_info["train_records"] = train_dataset.num_records
     exp_info["iterations"] = iterations 
     mbp("start")
@@ -2561,9 +2576,9 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                     out = forward_step(_model, batch, no_model_batch, task_ids=task_ids)
                     loss = out["loss"]
                     loss.backward()
-                    for encoder in wrapped_model.prompt_encoders:
-                        pass
-
+                    if isinstance(wrapped_model, PTuningWrapper): 
+                        for encoder in wrapped_model.prompt_encoders:
+                            pass
                     optimizer.step()
                     scheduler.step()
                     step+=1

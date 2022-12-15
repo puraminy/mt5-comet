@@ -21,7 +21,7 @@ VARIANT2CLASS = {
 }
 
 
-class SkilledMixin(PTuningWrapper):
+class SkilledMixin(torch.nn.Module):
     def __init__(
         self,
         model: nn.Module,
@@ -32,7 +32,8 @@ class SkilledMixin(PTuningWrapper):
         custom_skills: str = None,
         state_dict = None, **kwargs,
     ):
-        super().__init__(model = model, **kwargs)
+        super().__init__(**kwargs)
+        self.underlying_model = model
         self.n_tasks = n_tasks
         self.n_skills = n_skills
         self.skilled_variant = skilled_variant
