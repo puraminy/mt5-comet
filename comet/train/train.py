@@ -2213,7 +2213,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
 
     general_prompts = {}
     prompts = {} 
-    if isinstance(wrapped_model, PTuningWrapper):
+    if not skilled_variant:
         for n in range(prompt_token_num):
             l = []
             for m in range(prompt_token_num):
