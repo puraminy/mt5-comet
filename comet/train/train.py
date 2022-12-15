@@ -2062,7 +2062,9 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     m_name = model_id + "-" + method
     p_str = "prefixed" if prefix else "not_prefixed"
     _tag = ""
+    taginfo = ""
     for _t in tag.split("@"):
+        taginfo += "|" + _t  
         if _t in args:
             _tag += "|" + str(args[_t])
         else:
@@ -2078,6 +2080,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                     "prefixed":p_str,
                     "pid":pid,
                     "tag":tag,
+                    "taginfo":taginfo,
                     "n_prompts":n_prompts,
                     "multi":multi, 
                     "steps":str(train_samples)+"x"+str(repeat)+"x"+str(epochs_num),
