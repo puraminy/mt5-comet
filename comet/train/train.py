@@ -2185,7 +2185,6 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         #model = ut.get_model(pre_args.model.name)(pre_args)
     # %% prepare for training
     sw = SummaryWriter(save_path, flush_secs=1)
-    no_decay = ['bias', 'LayerNorm.weight']
     wrapped_model = None
 
     mbp("start")
@@ -2331,11 +2330,14 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         tokenizer.save_pretrained(save_path)
     def get_optimizer(model, learning_rate, opt_type):
         _lr = learning_rate
+        no_decay = ['bias', 'LayerNorm.weight']
         router_learning_rate = float(router_lr)
         Az_learning_rate = 0.0001
+        skill_params = [p for n, p in model.underlying_model.named_parameters() if "skill_logits" in n]
         optimizer_grouped_parameters = [
-            {'params': [p for n, p in model.underlying_model.named_parameters() if p.requires_grad and not any(nd in n for nd in no_decay)], 'weight_decay': weight_decay},
-            {'params': [p for n, p in model.underlying_model.named_parameters() if p.requires_grad and any(nd in n for nd in no_decay)], 'weight_decay': 0.0},
+            {'params': [p for n, p in model.underlying_model.named_parameters() if not "skill_logits" in n and p.requires_grad and not any(nd in n for nd in no_decay)], 'weight_decay': weight_decay, "lr":_lr},
+            {'params': [p for n, p in model.underlying_model.named_parameters() if not "skill_logits" in n and p.requires_grad and any(nd in n for nd in no_decay)], 'weight_decay': 0.0, "lr":_lr},
+            {"params": skill_params, "lr": pl_learning_rate, "weight_decay": weight_decay}
             #{"params": model.mlp.parameters(), "lr": pl_learning_rate},
             #{"params": model.router, "lr": router_learning_rate},
             #{"params": model.A, "lr": Az_learning_rate},
@@ -2344,7 +2346,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         if opt_type == "adam":
             if (not isinstance(wrapped_model, PTuningWrapper) or
                 len(wrapped_model.prompt_encoders) == 0):
-                optimizer = AdamW(optimizer_grouped_parameters,lr=_lr,eps=1e-8)
+                optimizer = AdamW(optimizer_grouped_parameters,eps=1e-8)
                 scheduler = get_linear_schedule_with_warmup(optimizer,warm_up_steps,iterations)
             else:
                 paras = []
