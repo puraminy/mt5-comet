@@ -110,7 +110,7 @@ class SkilledLoRALinear(SkilledModule):
                  weight: Tensor,
                  bias: Optional[Tensor],
                  r: int = 16,
-                 freeze: bool = True
+                 freeze: bool = False
                  ) -> None:
         super().__init__()
         self.out_features, self.in_features = weight.shape
@@ -124,7 +124,10 @@ class SkilledLoRALinear(SkilledModule):
             self.is_learned = False
 
         self.weight = nn.Parameter(weight.data)
-        self.weight.requires_grad = not freeze
+        if freeze:
+            self.weight.requires_grad = False 
+        else:
+            self.weight.requires_grad = True 
 
         skills_weight_A = weight.new_empty((n_skills, r * self.in_features))
         skills_weight_B = weight.new_empty((n_skills, self.out_features * r))

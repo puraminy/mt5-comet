@@ -6,9 +6,6 @@ import datetime
 from pathlib import Path
 
 main_args = {}
-def set_args(args):
-    global main_args 
-    main_args =args
 
 def args(key):
     return main_args[key]
@@ -60,6 +57,18 @@ vlog = logging.getLogger("comet.eval")
 tlog = logging.getLogger("comet.train")
 timelog = logging.getLogger("comet.time")
 
+def getFname(name, path=""):
+    if not path:
+        if "ahmad" in home or "pouramini" in home:
+            path = os.path.join(home, "mt5-comet", "comet", "output")
+        else:
+            path = "/content"
+    logFilename = os.path.join(path, f"{name}.log")
+    return logFilename
+
+def tinfo(text, *args, **kwargs):
+    tlog.info(text, *args)
+
 import inspect
 import sys
 STOP_LEVEL = 0
@@ -92,3 +101,13 @@ if False:
         handler.setFormatter(FORMAT)
         logger.addHandler(handler)
 
+def set_args(args):
+    global main_args 
+    main_args =args
+    tlog.handlers.clear()
+    exp = str(args["exp_id"]) + "_" + tag() 
+    tHandler = logging.FileHandler(getFname(exp + "_time", 
+        path=args["save_path"]), mode='w')
+    tHandler.setFormatter(FORMAT)
+    tlog.addHandler(tHandler)
+    tlog.setLevel(logging.INFO)

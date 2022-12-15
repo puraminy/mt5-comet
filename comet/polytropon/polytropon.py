@@ -3,6 +3,7 @@ import math
 from scipy import special
 from comet.transformers_ptuning.ptuning_wrapper import * 
 import comet.train.mylogs as logs
+from comet.train.mylogs import tinfo, getFname, tlog
 
 import torch
 from torch import nn
@@ -73,7 +74,8 @@ class SkilledMixin(torch.nn.Module):
 
     def generate(self, input_ids, *args, **kwargs):
         task_ids = kwargs.pop("task_ids", None)
-        tinfo("gen task ids vvvvvvv: %s", task_ids)
+        tinfo("gen task ids skilled: %s", task_ids)
+        tinfo("gen skilled: %s", self.skills)
         device = self.device
         #task_ids = torch.tensor([0])
         if task_ids != None:

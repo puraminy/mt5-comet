@@ -12,6 +12,8 @@ import os
 import math
 from os.path import expanduser
 import comet.train.mylogs as logs
+from comet.train.mylogs import tinfo, getFname, tlog
+
 from comet.train.mylogs import mbp 
 from transformers.optimization import Adafactor, AdafactorSchedule, AdamW
 from torch.distributions.relaxed_bernoulli import RelaxedBernoulli
@@ -25,11 +27,7 @@ emblog = logging.getLogger("comet.embedding")
 consoleHandler = logging.StreamHandler()
 #wlog.addHandler(consoleHandler)
 #emblog.addHandler(consoleHandler)
-tlog = logging.getLogger("comet.time")
 FORMAT = logging.Formatter("[%(filename)s:%(lineno)s - %(funcName)10s() ] %(message)s")
-
-def tinfo(text, *args, **kwargs):
-    tlog.info(text, *args)
 
 def winfo(text, *args, **kwargs):
     wlog.info(text, *args)
@@ -38,15 +36,6 @@ def winfo(text, *args, **kwargs):
 def embinfo(text, *args, **kwargs):
     emblog.info(text, *args)
     #print((text, *args))
-
-def getFname(name, path=""):
-    if not path:
-        if "ahmad" in home or "pouramini" in home:
-            path = os.path.join(home, "mt5-comet", "comet", "output")
-        else:
-            path = "/content"
-    logFilename = os.path.join(path, f"{name}.log")
-    return logFilename
 
 class PTuningWrapper(torch.nn.Module):
     def __init__(self,model,prompt_encoders, general_encoders,decoder_prompt_encoder=None,
@@ -83,24 +72,18 @@ class PTuningWrapper(torch.nn.Module):
 
         wlog.handlers.clear()
         emblog.handlers.clear()
-        tlog.handlers.clear()
-        exp = str(args["exp_id"]) + "_" + logs.tag() 
         #wHandler = logging.FileHandler(getFname(exp + "_wrapper"), mode='w')
         #wHandler.setFormatter(FORMAT)
         #wlog.addHandler(wHandler)
         #eHandler = logging.FileHandler(getFname(exp + "_embedding"), mode='w')
         #eHandler.setFormatter(FORMAT)
         #emblog.addHandler(eHandler)
-        tHandler = logging.FileHandler(getFname(exp + "_time", 
-            path=args["save_path"]), mode='w')
-        tHandler.setFormatter(FORMAT)
-        tlog.addHandler(tHandler)
+
         embinfo("Embedding log")
         winfo("Wrapper log")
 
         wlog.setLevel(logging.INFO)
         emblog.setLevel(logging.INFO)
-        tlog.setLevel(logging.INFO)
 
 
         super().__init__()
