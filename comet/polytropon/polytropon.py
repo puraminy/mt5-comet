@@ -37,6 +37,8 @@ class SkilledMixin(torch.nn.Module):
         self.n_tasks = n_tasks
         self.n_skills = n_skills
         self.skilled_variant = skilled_variant
+        self.training = True
+        self.add_prior = True
 
         if freeze:
             for p in self.underlying_model.parameters():
@@ -77,14 +79,14 @@ class SkilledMixin(torch.nn.Module):
         inform_layers(self.underlying_model, self.adapter_class, task_ids)
         return self.underlying_model.generate(input_ids=input_ids, *args, **kwargs)
 
-    def forward(self, input_ids, tids=None, add_prior=False, *args, **kwargs):
+    def forward(self, input_ids, tids=None, *args, **kwargs):
         task_ids = kwargs.pop("task_ids", None)
         task_ids = task_ids.long()
         inform_layers(self.underlying_model, self.adapter_class, task_ids)
         outputs = self.underlying_model.forward(input_ids = input_ids, *args, **kwargs)
         #outputs = super().forward(input_ids, *args, **kwargs)
 
-        if self.training and self.skilled_variant == "learned" and add_prior:
+        if self.training and self.skilled_variant == "learned" and self.add_prior:
             aux_loss = [self.neg_log_IBP(p) for n, p in self.underlying_model.named_parameters() if "skill_logits" in n]
             outputs.loss += torch.stack(aux_loss).sum()
 
