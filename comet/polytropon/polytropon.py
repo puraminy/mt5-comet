@@ -2,6 +2,7 @@ import logging
 import math
 from scipy import special
 from comet.transformers_ptuning.ptuning_wrapper import * 
+import comet.train.mylogs as logs
 
 import torch
 from torch import nn
@@ -39,6 +40,8 @@ class SkilledMixin(torch.nn.Module):
         self.skilled_variant = skilled_variant
         self.training = True
         self.add_prior = True
+        cpu = logs.args("cpu")
+        self.device = 'cuda' if not cpu and torch.cuda.is_available() else 'cpu'
 
         if freeze:
             for p in self.underlying_model.parameters():
