@@ -1461,6 +1461,12 @@ def run(ctx, conf_path, base_conf, experiment,
     help=""
 )
 @click.option(
+    "--n_skills",
+    default=0,
+    type=int,
+    help=""
+)
+@click.option(
     "--n_prompts",
     default=8,
     type=int,
@@ -1500,7 +1506,7 @@ def run(ctx, conf_path, base_conf, experiment,
     is_flag=True,
     help=""
 )
-def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, pl_learning_rate, router_lr, do_eval, cont, wrap, prefix, frozen, freeze_step, unfreeze_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, log_per_exp, wb, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, rel_filter, ex_type, last_data, save_df, flat_prompts, num_workers, scorers, train_start, no_save_model, no_save_best, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, unfreeze_parts, freeze_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, preview, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args, match, dpy, prompt_tune, prompt_config_file, load_prompt, data_name, seed, do_valid, stop_level, skilled_variant, int_dim, prompt_token_num, n_prompts, init_temperature, trunc_router, general_type, router_variant, freeze_target, freeze_skill):
+def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, pl_learning_rate, router_lr, do_eval, cont, wrap, prefix, frozen, freeze_step, unfreeze_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, log_per_exp, wb, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, rel_filter, ex_type, last_data, save_df, flat_prompts, num_workers, scorers, train_start, no_save_model, no_save_best, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, unfreeze_parts, freeze_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, preview, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args, match, dpy, prompt_tune, prompt_config_file, load_prompt, data_name, seed, do_valid, stop_level, skilled_variant, int_dim, prompt_token_num, n_skills, n_prompts, init_temperature, trunc_router, general_type, router_variant, freeze_target, freeze_skill):
 
     #%% some hyper-parameters
 
@@ -2201,6 +2207,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     task_ids = None
     n_prompts = int(n_prompts)
     n_tasks = len(sample_dataset.tasks)
+    if n_skills == 0:
+        n_skills = n_tasks
     prompt_token_num = int(prompt_token_num)
     if skilled_variant == "none":
         skilled_variant = ""
@@ -2226,7 +2234,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         if flat_prompts == "none": flat_prompts = ""
         assert flat_prompts != "none"
         prompts = sample_dataset.prompts
-    wrapped_model = wrap_model(model_to_wrap, tokenizer, encoder_type, load_prompt_path, flat_prompts=flat_prompts, method = method, shared_embs= shared_embs, skilled_variant=skilled_variant, prefix_config=prefix_config, 
+    wrapped_model = wrap_model(model_to_wrap, tokenizer, encoder_type, load_prompt_path, flat_prompts=flat_prompts, method = method, shared_embs= shared_embs, skilled_variant=skilled_variant, prefix_config=prefix_config, n_tasks=n_tasks, n_skills=n_skills, 
             exp_id=exp_id, 
             encoder_prompts= prompts,
             general_prompts= general_prompts, 
