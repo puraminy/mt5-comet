@@ -112,7 +112,7 @@ class SkilledLoRALinear(SkilledModule):
                  weight: Tensor,
                  bias: Optional[Tensor],
                  r: int = 16,
-                 freeze: bool = False
+                 freeze: bool = True
                  ) -> None:
         super().__init__()
         self.out_features, self.in_features = weight.shape
@@ -120,14 +120,15 @@ class SkilledLoRALinear(SkilledModule):
 
         if skills is None:
             self.skill_logits = nn.Parameter(torch.empty((n_tasks, n_skills)).uniform_(-1e-3, 1e-3))
+            tinfo("Random Init skill logits: %s", self.skill_logits)
             self.is_learned = True
         else:
             self.register_buffer("skill_logits", skills)
             self.is_learned = False
-        tinfo("Init skill logits: %s", self.skill_logits)
 
         self.weight = nn.Parameter(weight.data)
         if freeze:
+            tinfo("Freezing .... %s", self.skill_logits)
             self.weight.requires_grad = False 
         else:
             self.weight.requires_grad = True 
@@ -167,6 +168,7 @@ class SkilledLoRALinear(SkilledModule):
                 skill_logits = RelaxedBernoulli(temperature=1., logits=skill_logits).rsample()
             else:
                 skill_logits = torch.sigmoid(skill_logits)
+                tinfo("Evaluating ... Sigmoid: %s", skill_logits)
         skill_logits = skill_logits / (skill_logits.sum(dim=-1, keepdim=True) + EPS)
 
         #if skill_logits.size()[1] != self.skills_weight_A.size()[0]:
@@ -178,7 +180,7 @@ class SkilledLoRALinear(SkilledModule):
         output = torch.matmul(output, skills_weight_B) # bsr,bro->bso
         output = F.linear(input, self.weight, self.bias) + output * self.scaling
         if not self.training:
-            tinfo("Evaluating ... skill logits: %s", self.skill_logits)
+            tinfo("Evaluating ... skill logits: %s", skill_logits)
 
         return output
 
@@ -213,7 +215,6 @@ class SkilledLTSFTLinear(SkilledModule):
 
         self.weight = nn.Parameter(weight.data)
         if freeze:
-            assert False, "feeze"
             self.weight.requires_grad = not freeze 
 
         indices = itertools.product(range(self.out_features * self.in_features), range(n_skills))
@@ -242,6 +243,7 @@ class SkilledLTSFTLinear(SkilledModule):
             if self.training:
                 skill_logits = RelaxedBernoulli(temperature=1., logits=skill_logits).rsample()
             else:
+                tinfo("Sigmoid ....")
                 skill_logits = torch.sigmoid(skill_logits)
         skill_logits = skill_logits / (skill_logits.sum(dim=-1, keepdim=True) + EPS)
 
