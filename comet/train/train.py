@@ -2038,10 +2038,12 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             decx_parts = _parts[3]
             freeze_cross_att(modules_to_freeze, decx_parts, model.decoder)
 
-    def freeze(modules_to_freeze):
+    def freeze(modules_to_freeze, exclude=""):
         for module in modules_to_freeze:
             if hasattr(module, "parameters"):
-                for param in module.parameters():
+                for name, param in module.named_parameters():
+                    if exclude and name in exclude:
+                        continue
                     param.requires_grad = False  # Actual freezing operation
             else:
                 module.requires_grad = False  # Actual freezing operation
@@ -2251,8 +2253,13 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         if "model@" in freeze_parts:
             freeze(modules_to_freeze)
         else:
-            freeze([model])
-            freeze(modules_to_unfreeze)
+            if skilled_variant:
+                freeze([model], exclude="skill_logits")
+                freeze(modules_to_unfreeze)
+            else:
+                freeze([model])
+                freeze(modules_to_unfreeze)
+
 
     fname = "output/" + str(experiment) + "-" + str(exp_id) + "-" + flat_prompts + ".txt"
     Path("output").mkdir(exist_ok = True)
