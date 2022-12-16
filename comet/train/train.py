@@ -2213,6 +2213,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     task_ids = None
     n_prompts = int(n_prompts)
     n_tasks = len(sample_dataset.tasks)
+    n_skills = int(n_skills)
     if n_skills == 0:
         n_skills = n_tasks
     prompt_token_num = int(prompt_token_num)
@@ -2268,7 +2269,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             freeze(modules_to_freeze)
         else:
             if skilled_variant:
-                freeze([model], exclude="skill_logits")
+                freeze([model], exclude="skills_weight")
                 freeze(modules_to_unfreeze)
             else:
                 freeze([model])
@@ -2353,10 +2354,10 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         no_decay = ['bias', 'LayerNorm.weight']
         router_learning_rate = float(router_lr)
         Az_learning_rate = 0.0001
-        skill_params = [p for n, p in model.underlying_model.named_parameters() if "skill_logits" in n]
+        skill_params = [p for n, p in model.underlying_model.named_parameters() if "skills_weight" in n]
         optimizer_grouped_parameters = [
-            {'params': [p for n, p in model.underlying_model.named_parameters() if not "skill_logits" in n and p.requires_grad and not any(nd in n for nd in no_decay)], 'weight_decay': weight_decay, "lr":_lr},
-            {'params': [p for n, p in model.underlying_model.named_parameters() if not "skill_logits" in n and p.requires_grad and any(nd in n for nd in no_decay)], 'weight_decay': 0.0, "lr":_lr},
+            {'params': [p for n, p in model.underlying_model.named_parameters() if not "skills_weight" in n and p.requires_grad and not any(nd in n for nd in no_decay)], 'weight_decay': weight_decay, "lr":_lr},
+            {'params': [p for n, p in model.underlying_model.named_parameters() if not "skills_weight" in n and p.requires_grad and any(nd in n for nd in no_decay)], 'weight_decay': 0.0, "lr":_lr},
             {"params": skill_params, "lr": pl_learning_rate, "weight_decay": weight_decay}
             #{"params": model.mlp.parameters(), "lr": pl_learning_rate},
             #{"params": model.router, "lr": router_learning_rate},
