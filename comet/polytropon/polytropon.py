@@ -40,7 +40,7 @@ class SkilledMixin(torch.nn.Module):
         self.n_skills = n_skills
         self.skilled_variant = skilled_variant
         self.training = True
-        self.add_prior = True
+        self.add_prior = logs.args("add_prior")
         cpu = logs.args("cpu")
         self.device = 'cuda' if not cpu and torch.cuda.is_available() else 'cpu'
 
