@@ -169,8 +169,8 @@ class SkilledLoRALinear(SkilledModule):
                 skill_logits = torch.sigmoid(skill_logits)
         skill_logits = skill_logits / (skill_logits.sum(dim=-1, keepdim=True) + EPS)
 
-        if skill_logits.size()[1] != self.skills_weight_A.size()[0]:
-            skill_logits = torch.t(skill_logits)
+        #if skill_logits.size()[1] != self.skills_weight_A.size()[0]:
+        #    skill_logits = torch.t(skill_logits)
         #TODO my code above
         skills_weight_A = torch.mm(skill_logits, self.skills_weight_A).view(input.size()[0], self.in_features, -1) #self.r)
         skills_weight_B = torch.mm(skill_logits, self.skills_weight_B).view(input.size()[0], -1, self.out_features)
@@ -178,7 +178,7 @@ class SkilledLoRALinear(SkilledModule):
         output = torch.matmul(output, skills_weight_B) # bsr,bro->bso
         output = F.linear(input, self.weight, self.bias) + output * self.scaling
         if not self.training:
-            tinfo("skill logits: %s", self.skill_logits)
+            tinfo("Evaluating ... skill logits: %s", self.skill_logits)
 
         return output
 
@@ -212,7 +212,9 @@ class SkilledLTSFTLinear(SkilledModule):
             self.is_learned = False
 
         self.weight = nn.Parameter(weight.data)
-        self.weight.requires_grad = not freeze
+        if freeze:
+            assert False, "feeze"
+            self.weight.requires_grad = not freeze 
 
         indices = itertools.product(range(self.out_features * self.in_features), range(n_skills))
         k = int(self.out_features * self.in_features * n_skills * density)
