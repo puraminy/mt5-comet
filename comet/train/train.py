@@ -2042,7 +2042,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         for module in modules_to_freeze:
             if hasattr(module, "parameters"):
                 for name, param in module.named_parameters():
-                    if exclude and name in exclude:
+                    if exclude and exclude in name:
                         continue
                     param.requires_grad = False  # Actual freezing operation
             else:
