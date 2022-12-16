@@ -81,7 +81,7 @@ trunc=none #sign #sigmoid#sign
 enc_type=lstm #emb
 router=fixed #learned
 
-runlite run -exp $exp -lp ${log} -bc base -ov $g2 -var method=unsup-nat--rel_filter=$filter--train_samples=$train--epochs_num=$epochs--prompt_token_num=8--repeat=4--temp_num=$tn--loop=True--test_samples=$test--flat_prompts=$merge--freeze_skill=False#True--seed=123--n_prompts=1--trunc_router=$trunc--router_lr=0.001--pl_learning_rate=0.01--encoder_type=$enc_type--router_variant=$router--skilled_variant=learned#none--follow_method=True --scorers="rouge-bert" --data_path=${home}/mt5-comet/comet/data/atomic2020/sel --do_valid=False --val_samples=10  --cycle=100 $g1 --batch_size=8 --trial=$trial  --model_id=$model  
+runlite run -exp $exp -lp ${log} -bc base -ov $g2 -var method=unsup-nat--rel_filter=$filter--train_samples=$train--epochs_num=$epochs--prompt_token_num=8--repeat=4--temp_num=$tn--loop=True--test_samples=$test--flat_prompts=$merge--frozen=True#False--seed=123--n_prompts=1--trunc_router=$trunc--router_lr=0.001--pl_learning_rate=0.01--encoder_type=$enc_type--router_variant=$router--skilled_variant=learned#none--follow_method=True --scorers="rouge-bert" --data_path=${home}/mt5-comet/comet/data/atomic2020/sel --do_valid=False --val_samples=10  --cycle=100 $g1 --batch_size=8 --trial=$trial  --model_id=$model 
 
 
 #--freeze_parts="router" --freeze_step=500 

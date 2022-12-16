@@ -2251,9 +2251,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         if "model@" in freeze_parts:
             freeze(modules_to_freeze)
         else:
-            if not skilled_variant: 
-                freeze([model])
-                freeze(modules_to_unfreeze)
+            freeze([model])
+            freeze(modules_to_unfreeze)
 
     fname = "output/" + str(experiment) + "-" + str(exp_id) + "-" + flat_prompts + ".txt"
     Path("output").mkdir(exist_ok = True)
