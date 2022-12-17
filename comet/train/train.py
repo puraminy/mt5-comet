@@ -2214,13 +2214,15 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     n_prompts = int(n_prompts)
     n_tasks = len(sample_dataset.tasks)
     n_skills = int(n_skills)
-    if n_skills == 0:
+    if skilled_variant == "private":
         n_skills = n_tasks
+    if skilled_variant == "shared":
+        n_skills = 1
     prompt_token_num = int(prompt_token_num)
     if skilled_variant == "none":
         skilled_variant = ""
     if skilled_variant:
-       task_ids = torch.LongTensor([0, 1])
+       task_ids = torch.LongTensor(range(n_tasks))
     prefix_config = {
         'intrinsic_dim': int_dim,
         'n_prompt_tokens': prompt_token_num,
@@ -2269,7 +2271,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             freeze(modules_to_freeze)
         else:
             if skilled_variant:
-                freeze([model], exclude="skills_weight")
+                freeze([model]) #, exclude="skills_weight")
                 freeze(modules_to_unfreeze)
             else:
                 freeze([model])

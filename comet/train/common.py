@@ -491,7 +491,7 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", flat_promp
     if skilled_variant:
        wrapped_model = SkilledMixin(model=model, n_tasks=n_tasks, 
                n_skills=n_skills, 
-               skilled_variant=skilled_variant, freeze = logs.args("freeze_skill"))
+               skilled_variant=skilled_variant)
     else:
         wrapped_model = PTuningWrapper(model, 
                 prompt_encoders, 
