@@ -30,7 +30,7 @@ class SkilledMixin(torch.nn.Module):
         n_tasks: int,
         n_skills: int,
         skilled_variant: str = "learned",
-        freeze: bool = True,
+        freeze: bool = False,
         custom_skills: str = None,
         state_dict = None, **kwargs,
     ):
