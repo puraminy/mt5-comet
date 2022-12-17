@@ -120,7 +120,6 @@ class SkilledLoRALinear(SkilledModule):
 
         if skills is None:
             self.skill_logits = nn.Parameter(torch.empty((n_tasks, n_skills)).uniform_(-1e-3, 1e-3))
-            tinfo("Random Init skill logits: %s", self.skill_logits)
             self.is_learned = True
         else:
             self.register_buffer("skill_logits", skills)
@@ -128,7 +127,6 @@ class SkilledLoRALinear(SkilledModule):
 
         self.weight = nn.Parameter(weight.data)
         if freeze:
-            tinfo("Freezing .... %s", self.skill_logits)
             self.weight.requires_grad = False 
         else:
             self.weight.requires_grad = True 
@@ -179,8 +177,6 @@ class SkilledLoRALinear(SkilledModule):
         output = torch.matmul(input, skills_weight_A) # bsi,bir->bsr
         output = torch.matmul(output, skills_weight_B) # bsr,bro->bso
         output = F.linear(input, self.weight, self.bias) + output * self.scaling
-        if not self.training:
-            tinfo("Evaluating ... skill logits: %s", skill_logits)
 
         return output
 
