@@ -13,7 +13,7 @@ from comet.utils.configue import Configure
 import comet.utils.tool as ut
 #from comet.models.unified.prefixtuning import Model
 from transformers.trainer_seq2seq import Seq2SeqTrainer
-from transformers.optimization import Adafactor, AdafactorSchedule
+from transformers.optimization import Adafactor
 from torch.optim import SparseAdam
 from transformers import TrainingArguments
 from comet.train.model import *
@@ -2512,9 +2512,9 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     #11111111111
     # ffffffffffff
     #%% tttttt
+    mlog.info(f"============== model : {type(wrapped_model)}\n")
     mlog.info(f"============== Example : {example}\n")
     mlog.info(f"============== Exp id: {exp_id}\n")
-    mlog.info(f"============== Save path: {save_path}\n")
     mlog.info(f"============== Data Path: {data_path}\n")
     mlog.info(f"============== batch size: {batch_size} per node: {node_batch_size} | learning_rate: {learning_rate} | prompt_lr: {pl_learning_rate} \n")
     mlog.info(f"============== train samples: {train_samples} test_samples: {test_samples} | repeat: {repeat}  epochs: {epochs_num}\n")

@@ -15,7 +15,7 @@ import comet.train.mylogs as logs
 from comet.train.mylogs import tinfo, getFname, tlog
 
 from comet.train.mylogs import mbp 
-from transformers.optimization import Adafactor, AdafactorSchedule, AdamW
+from transformers.optimization import Adafactor, AdamW
 from torch.distributions.relaxed_bernoulli import RelaxedBernoulli
 
 
