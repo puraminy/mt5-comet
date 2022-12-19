@@ -9,6 +9,7 @@ from comet.utils.utils import get_adapter_config
 import itertools, collections
 import shutil
 from comet.train.eval import *
+import comet.third_party.models as tp
 from comet.utils.dataset import TokenizedDataset
 from comet.utils.configue import Configure
 import comet.utils.tool as ut
@@ -1528,7 +1529,14 @@ def run(ctx, conf_path, base_conf, experiment,
     type=str,
     help=""
 )
-def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, pl_learning_rate, router_lr, do_eval, cont, wrap, prefix, frozen, freeze_step, unfreeze_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, log_per_exp, wb, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, rel_filter, ex_type, last_data, save_df, flat_prompts, num_workers, scorers, train_start, no_save_model, no_save_best, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, unfreeze_parts, freeze_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, preview, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args, match, dpy, prompt_tune, prompt_config_file, load_prompt, data_name, seed, do_valid, stop_level, skilled_variant, int_dim, prompt_token_num, n_skills, n_prompts, init_temperature, trunc_router, general_type, router_variant, freeze_target, freeze_skill, add_prior, freeze_exclude, config_file):
+@click.option(
+    "--stype",
+    "-stype",
+    default="",
+    type=str,
+    help="sub type for model"
+)
+def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, pl_learning_rate, router_lr, do_eval, cont, wrap, prefix, frozen, freeze_step, unfreeze_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, log_per_exp, wb, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, rel_filter, ex_type, last_data, save_df, flat_prompts, num_workers, scorers, train_start, no_save_model, no_save_best, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, unfreeze_parts, freeze_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, preview, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args, match, dpy, prompt_tune, prompt_config_file, load_prompt, data_name, seed, do_valid, stop_level, skilled_variant, int_dim, prompt_token_num, n_skills, n_prompts, init_temperature, trunc_router, general_type, router_variant, freeze_target, freeze_skill, add_prior, freeze_exclude, config_file, stype):
 
     #%% some hyper-parameters
 
@@ -1795,29 +1803,29 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             tpath = underlying_model_name 
             if from_dir:
                 tpath = f"{load_path}/{model_id}"
-            breakpoint()
-            config = T5Config.from_pretrained(
-                underlying_model_name
-                #cache_dir=model_args.cache_dir,
-                #revision=model_args.model_revision,
-                #use_auth_token=True if model_args.use_auth_token else None,
-            )
-            config.train_task_adapters = adapter_args.train_task_adapters
-            config.prefix_tuning = adapter_args.prefix_tuning
-            config.attn_prefix_tuning = model_args.attn_prefix_tuning
-            config.attn_method = model_args.attn_method
-            config.ignore_target = model_args.ignore_target
-            config.shared_attn = model_args.shared_attn
-            config.prefix_num = model_args.prefix_num
-            config.num_target = len(data_args.task_name)
-            config.temperature = model_args.temperature
-            config.learned_temperature = model_args.learned_temperature
-            config.fix_attention = model_args.fix_attention
-            adapter_config = get_adapter_config(
-                adapter_args, data_args, training_args, config)
+            if stype == "attemp":
+                config = tp.T5Config.from_pretrained(
+                    underlying_model_name
+                    #cache_dir=model_args.cache_dir,
+                    #revision=model_args.model_revision,
+                    #use_auth_token=True if model_args.use_auth_token else None,
+                )
+                config.train_task_adapters = adapter_args.train_task_adapters
+                config.prefix_tuning = adapter_args.prefix_tuning
+                config.attn_prefix_tuning = model_args.attn_prefix_tuning
+                config.attn_method = model_args.attn_method
+                config.ignore_target = model_args.ignore_target
+                config.shared_attn = model_args.shared_attn
+                config.prefix_num = model_args.prefix_num
+                config.num_target = len(data_args.task_name)
+                config.temperature = model_args.temperature
+                config.learned_temperature = model_args.learned_temperature
+                config.fix_attention = model_args.fix_attention
+                adapter_config = get_adapter_config(
+                    adapter_args, data_args, training_args, config)
 
-            tokenizer = AutoTokenizer.from_pretrained(tpath)
-            model = T5ForConditionalGeneration.from_pretrained(underlying_model_name, 
+                model = tp.T5ForConditionalGeneration.from_pretrained(
+                                                         underlying_model_name, 
                                                          #output_attentions = False, 
                                                          config = config,
                                                          adapter_config=adapter_config,
@@ -1825,6 +1833,15 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                                                          #output_hidden_states = False,
                                                          #return_dict=True
                                                            ) 
+            else:
+                model = T5ForConditionalGeneration.from_pretrained(
+                                                         underlying_model_name, 
+                                                         #output_attentions = False, 
+                                           # Whether the model returns attentions weights.
+                                                         #output_hidden_states = False,
+                                                         #return_dict=True
+                                                           ) 
+            tokenizer = AutoTokenizer.from_pretrained(tpath)
 
         if underlying_model_name == model_id:
             mlog.info("Saving model on local %s", load_path)
