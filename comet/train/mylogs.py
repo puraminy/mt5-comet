@@ -55,6 +55,7 @@ clog = logging.getLogger("comet.cfg")
 dlog = logging.getLogger("comet.data")
 vlog = logging.getLogger("comet.eval")
 tlog = logging.getLogger("comet.train")
+ttlog = logging.getLogger("comet.train")
 timelog = logging.getLogger("comet.time")
 
 def getFname(name, path=""):

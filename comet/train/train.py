@@ -1560,7 +1560,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
 
 
     if log_per_exp:
-        for logger, fname in zip([mlog,dlog,clog,vlog,tlog,timelog], ["main","data","cfg","eval","train", "time"]):
+        for logger, fname in zip([mlog,dlog,clog,vlog,ttlog,timelog], ["main","data","cfg","eval","train", "time"]):
             logger.setLevel(logging.INFO)
             logFilename = os.path.join("output", str(exp_id) + "_" + fname + ".log")
             handler = logging.FileHandler(logFilename, mode="w")
@@ -1732,7 +1732,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     Path(os.path.join(save_path, "best_model")).mkdir(exist_ok=True, parents=True)
 
     #save log files
-    for logger, fname in zip([mlog,dlog,clog,vlog,tlog], ["main","data","cfg","eval","train"]):
+    for logger, fname in zip([mlog,dlog,clog,vlog,ttlog], ["main","data","cfg","eval","train"]):
         if len(logger.handlers) >= 3:
             continue
         logger.setLevel(logging.INFO)
@@ -1740,7 +1740,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         handler = logging.FileHandler(logFilename, mode = "w" if clear_logs else "a")
         logger.addHandler(handler)
 
-    for logger in [mlog, clog, dlog, tlog, vlog]:
+    for logger in [mlog, clog, dlog, ttlog, vlog]:
         logger.info("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
         logger.info(f"%%%%%%%%%%%%%%%%%% { model_id } ")
         logger.info(f"%%%%%%%%%%%%%%%%%% { now } ")
@@ -1817,7 +1817,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                 continue
             path = train_path if split_name == "train" else val_path
             model.to(device=device)
-            logger = tlog 
+            logger = ttlog 
             mlog.info("Translating %s", path)
             trans_df = translate(model, tokenizer, df, "target_text@fa@5000", path, logger, start, load_path) 
             translate(model, tokenizer, trans_df, "input_text@fa@5000", path, logger, start, load_path) 
@@ -2503,7 +2503,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         logger.info("Train records: %s", train_records)
     iterations = train_records//batch_size
     
-    for logger in [mlog, tlog]:
+    for logger in [mlog, ttlog]:
         logger.info("Iterations:"  + str(iterations))
     #st_embed = tf.saved_model.load("/home/pouramini/pret/sm")
     def consume(iterator, n):
@@ -2547,7 +2547,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         elif step <= iterations and (wrap or not frozen or modules_to_freeze is not model):
             mlog.info("Training... %s", save_path)
         for epoch in range(epochs_num):
-            tlog.info(f"============== epoch {epoch}\n")
+            ttlog.info(f"============== epoch {epoch}\n")
             pbar = tqdm(total = iterations, position=0, leave=True) #,dynamic_ncols=True)
             if epoch > 0:
                 train_iter = iter(train_dataloader)
@@ -2588,7 +2588,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                     try:
                         batch, no_model_batch = next(train_iter)
                     except StopIteration:
-                        tlog.info("Stop Iteration occured at %s", step)
+                        ttlog.info("Stop Iteration occured at %s", step)
                         train_iter = iter(train_dataloader)
                         batch, no_model_batch = next(train_iter)
                     batch = {k:v.to(device=device) for k,v in batch.items()}
@@ -2608,7 +2608,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                         last_lr = scheduler.get_last_lr()[0]
                         optimizer, scheduler = get_optimizer(wrapped_model, last_lr, opt_type)
 
-                    tlog.info("Wrap model zero grad")
+                    ttlog.info("Wrap model zero grad")
                     wrapped_model.train()
                     wrapped_model.zero_grad()
                     optimizer.zero_grad()
@@ -2627,7 +2627,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                     tot_loss += bloss
                     mean_loss = tot_loss/(step-train_start)
                     sw.add_scalar('train/loss',bloss,global_step=step)
-                    tlog.info("{:<5}: {:6.2f} > {:6.2f}".format(step, bloss, mean_loss))
+                    ttlog.info("{:<5}: {:6.2f} > {:6.2f}".format(step, bloss, mean_loss))
                     pbar.set_description(f'training ...[loss:{bloss:.2f} ({mean_loss:.2f}) best:{best_eval_step} {best_dev_loss:.2f}]')
                     pbar.update()
                     #del result
