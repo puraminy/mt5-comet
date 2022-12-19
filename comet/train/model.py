@@ -1,6 +1,7 @@
 import torch
+from comet.third_party.models import T5Config, T5ForConditionalGeneration
 from transformers import (
-    T5ForConditionalGeneration, T5TokenizerFast, 
+    T5TokenizerFast, 
     AutoModelForSeq2SeqLM, 
     MT5ForConditionalGeneration, MT5TokenizerFast, AdamW, AddedToken,
     GPT2LMHeadModel, GPT2Tokenizer,
