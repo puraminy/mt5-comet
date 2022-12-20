@@ -2071,7 +2071,7 @@ class T5ForConditionalGeneration(T5PreTrainedModel):
             "encoder_outputs": encoder_outputs,
             "attention_mask": attention_mask,
             "use_cache": use_cache,
-            "task": kwargs["task"]
+            "task": kwargs["task_ids"]
             # "lang": kwargs["lang"]
         }
 
