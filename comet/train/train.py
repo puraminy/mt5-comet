@@ -1803,7 +1803,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             tpath = underlying_model_name 
             if from_dir:
                 tpath = f"{load_path}/{model_id}"
-            if stype == "attemp":
+            if stype == "atm":
                 config = tp.T5Config.from_pretrained(
                     underlying_model_name
                     #cache_dir=model_args.cache_dir,
