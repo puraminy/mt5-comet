@@ -171,7 +171,10 @@ class PTuningWrapper(torch.nn.Module):
         return None
 
     def generate(self, input_ids, *args, **kwargs):
-        task_ids = kwargs.setdefault("task_ids", None)
+        if logs.args("stype") == "atm":
+            task_ids = kwargs.setdefault("task_ids", None)
+        else:
+            task_ids = kwargs.pop("task_ids", None)
         tinfo("gen task ids ggggggggggg: %s", task_ids)
         device = input_ids.device
         #task_ids = torch.tensor([0])
