@@ -327,6 +327,7 @@ class PromptEncoder(torch.nn.Module):
         self.learning_rate = lr
         self.length = length
         self.name = name
+        self.task_id = 0
         self.device = "cpu"
         self.counter = 0
         self.prompt_ids = prompt_ids
@@ -369,6 +370,9 @@ class PromptEncoder(torch.nn.Module):
         self.router.requires_grad = True
 
     def forward(self,prompt_token_ids, tids=None, training=True):
+        task_id = tids[0]
+        if self.task_id != task_id:
+            return None
         if self.id_offset > 0:
             index_list = prompt_token_ids - self.id_offset
         else:
@@ -383,6 +387,8 @@ class PromptEncoder(torch.nn.Module):
         if self.router is None:
             return None
         task_id = tids[0]
+        if self.task_id != task_id:
+            return None
         router = self.router[task_id] # torch.index_select(self.router, 0, tids)
         if training and (not self.router.requires_grad or not self.is_learned):
             return router

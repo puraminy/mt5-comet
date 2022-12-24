@@ -1810,7 +1810,6 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                     #revision=model_args.model_revision,
                     #use_auth_token=True if model_args.use_auth_token else None,
                 )
-                breakpoint()
                 config.train_task_adapters = adapter_args.train_task_adapters
                 config.prefix_tuning = False #adapter_args.prefix_tuning
                 config.attn_prefix_tuning = model_args.attn_prefix_tuning

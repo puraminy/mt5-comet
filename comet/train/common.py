@@ -419,6 +419,7 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", flat_promp
         if not flat_prompts:
             enc_router = torch.ones((n_tasks, len(prompt_tokens)), device=device)
             encoder, offset = create_encoder(rel, model, tokenizer, prompt_tokens, encoder_type, wrapped_model, prefix_config, enc_router)
+            encoder.task_id = (ii - 1) % n_tasks 
             general_encoders.append(encoder)
             offsets.append(offset)
             ii += 1
