@@ -857,7 +857,8 @@ def show_df(df):
                             _sel_cols.append(c)
                     else:
                         _sel_cols.append(c)
-                sel_cols = _sel_cols
+                if _sel_cols:
+                    sel_cols = _sel_cols
 
             extra["common"] = _infos
             df = df.sort_values(by = ["rouge_score"], ascending=False)
@@ -1689,7 +1690,7 @@ def start(stdscr):
 )
 def main(fname, path, fid, ftype, dpy):
     if dpy:
-        port = 2030
+        port = 5678
         debugpy.listen(('0.0.0.0', int(port)))
         print("Waiting for client at run...port:", port)
         debugpy.wait_for_client()  # blocks execution until client is attached
