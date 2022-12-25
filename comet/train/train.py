@@ -1811,7 +1811,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                     #use_auth_token=True if model_args.use_auth_token else None,
                 )
                 config.train_task_adapters = adapter_args.train_task_adapters
-                config.prefix_tuning = False #adapter_args.prefix_tuning
+                config.prefix_tuning = adapter_args.prefix_tuning
                 config.attn_prefix_tuning = model_args.attn_prefix_tuning
                 config.attn_method = model_args.attn_method
                 config.ignore_target = model_args.ignore_target
