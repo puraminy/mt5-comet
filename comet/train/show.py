@@ -838,7 +838,7 @@ def show_df(df):
             #df = df.reset_index()
             df["avg_len"] = avg_len
             _infos =""
-            if True:
+            if False:
                 _sel_cols = []
                 for c in sel_cols:
                     if "train_" in c:
