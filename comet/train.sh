@@ -66,7 +66,7 @@ elif [ "$m" -eq "1" ]; then
 fi
 seed=123
 
-exp=xint-skilled-pcom2
+exp=xint-att
 log=${home}/logs   #/${exp}
 echo "log: ${log}"
 #filter=xIntent#xAttr#xNeed#xReact#xEffect#oReact#xWant#multi

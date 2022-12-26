@@ -2783,14 +2783,6 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         #with torch.no_grad():
            # mlog.info("Updating the model weights before evaluaton...")
            # wrapped_model.update_model_weight()
-        if False: #not no_save_model:
-            model.eval()
-            save_checkpoint(wrapped_model.underlying_model, tokenizer, 
-                    optimizer, scheduler, step, 
-                    best_eval_step, best_dev_loss,
-                    save_path)
-        else:
-            mlog.info("No save model is on!!")
     #% vvvv
     if loop: #not prefix:
        train_loop(epochs_num, wrap, optimizer, scheduler)
@@ -2827,6 +2819,17 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         )
         train_result = trainer.train()
 
+        if model_args.save_prefix_only:
+            save_prompts(wrapped_model, output_dir=training_args.output_dir, attn_prefix_tuning=model_args.attn_prefix_tuning,
+                         shared_attn=model_args.shared_attn, num_target=config.num_target, task_name=data_args.task_name)
+        if False: #not no_save_model:
+            model.eval()
+            save_checkpoint(wrapped_model.underlying_model, tokenizer, 
+                    optimizer, scheduler, step, 
+                    best_eval_step, best_dev_loss,
+                    save_path)
+        else:
+            mlog.info("No save model is on!!")
     # vvvv
     if do_valid and not no_save_best:
         mlog.info("loading best model")
