@@ -1034,6 +1034,8 @@ class T5Stack(T5PreTrainedModel):
         task=None
     ):
         # Model parallel
+        task_ids=None #TODO remove it
+        #task_ids = task_ids.long()
         if self.model_parallel:
             torch.cuda.set_device(self.first_device)
             self.embed_tokens = self.embed_tokens.to(self.first_device)
@@ -1769,7 +1771,8 @@ class T5ForConditionalGeneration(T5PreTrainedModel):
     def store_prefix_weights(self, prefix_embeddings):
         # need to pass them as a parameter?
         # stack or cat?
-        embeddings = torch.stack([emb.cuda() for emb in prefix_embeddings])
+        #embeddings = torch.stack([emb.cuda() for emb in prefix_embeddings])
+        embeddings = torch.stack([emb for emb in prefix_embeddings])
         # Initialize the embeddings
         self.mul_prefix_emb.data = embeddings.clone().detach()
 

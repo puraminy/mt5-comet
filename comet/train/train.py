@@ -5,7 +5,9 @@ import comet.train.mylogs as mylogs
 from comet.train.common import *
 from comet.train.dataset import *
 from comet.train.data import *
-from comet.utils.utils import get_adapter_config
+from comet.utils.utils import (modify_model_after_init, 
+        save_training_config, save_prompts,get_adapter_config)
+
 import itertools, collections
 import shutil
 from comet.train.eval import *
@@ -1834,6 +1836,61 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                                                          #output_hidden_states = False,
                                                          #return_dict=True
                                                            ) 
+                ##################################################
+                if model_args.load_prefix_embeddings is True:
+                    if model_args.prompt_embedding_path is None:
+                        for name, param in model.named_parameters():
+                            if "prefix_shared" in name or "prefix" in name:
+                                shared_params = [param]
+                    else:
+                        shared_params = []
+                        mapl=torch.device('cpu')
+                        for path in model_args.prompt_embedding_path:
+                            shared_param = torch.load(path, map_location=mapl)
+                            shared_params.append(shared_param)
+                        if model_args.target_prompt_embedding_path is not None:
+                            target_prompt_embedding = torch.load(
+                                model_args.target_prompt_embedding_path,
+                                map_location=mapl)
+
+                    if model_args.attn_prefix_tuning is True:
+                        if training_args.do_train is True and model_args.multi_task is False and model_args.shared_attn is False:
+                            # Initialize the prompt embeddings using the first prompts
+                            # Load all of the target prompts
+                            model.store_prefix_weights(shared_params)
+                            model.update_prefix_weights_single(shared_params[0])
+                        elif training_args.do_train is True and model_args.multi_task is False and model_args.shared_attn is True:
+                            # initialize the embeddings
+                            # initialize multiple shared embeddings
+                            model.store_prefix_weights(shared_params)
+                            model.update_prefix_weights_multi(
+                                shared_params[0], num_target=config.num_target)
+                        else:
+                            # Load prompt embeddings except for the last one
+                            # Load last prompt embeddings to initialize the target prompt embeddings.
+                            model.store_prefix_weights(shared_params)
+                            model.update_prefix_weights_single(shared_params[-1])
+
+                    else:
+                        if model_args.target_prompt_embedding_path is None:
+                            model.update_prefix_weights(shared_params)
+                        else:
+                            model.update_prefix_weights(
+                                shared_params, target_prompt_embedding)
+
+                if model_args.load_attention is True and model_args.attn_path is not None:
+                    model.update_attention_weights(torch.load(model_args.attn_path), 
+                            map_location=mapl)
+
+                if model_args.load_attention is True and model_args.attn_path_sub is not None:
+                    model.update_attention_weights_sub(model_args.attn_path_sub)
+
+                if model_args.load_layer_norm is True and model_args.layer_norm_dir is not None:
+                    model.update_layer_norm_weights(model_args.layer_norm_dir)
+
+            #################################################
+                model = modify_model_after_init(
+                    model, training_args, adapter_args, adapter_config)
             else:
                 model = T5ForConditionalGeneration.from_pretrained(
                                                          underlying_model_name, 
@@ -2335,7 +2392,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
 
     if freeze_exclude == "none":
         freeze_exclude = ""
-    if frozen:
+    if frozen and stype != "atm":
         if "model@" in freeze_parts:
             freeze(modules_to_freeze)
         else:
