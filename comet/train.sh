@@ -66,25 +66,25 @@ elif [ "$m" -eq "1" ]; then
 fi
 seed=123
 
-exp=xint-skilled-stype2
+exp=xint-skilled-pcom
 log=${home}/logs   #/${exp}
 echo "log: ${log}"
 #filter=xIntent#xAttr#xNeed#xReact#xEffect#oReact#xWant#multi
 filter=xIntent#xAttr#multi
 merge=none #lstm
-tn=1 #com-mid #merge-mid-nat #com-mid-nat #mat #2#4#5
+tn=p-com #com-mid #merge-mid-nat #com-mid-nat #mat #2#4#5
 shared=False
 trial=7
 epochs=2
 # tag=temp_num@encoder_type@trunc_router@prompt_token_num
 trunc=none #sign #sigmoid#sign
-enc_type=merge #emb
+enc_type=lstm
 router=fixed #learned
 fex=none #skills_weight#none
 skill=none #learned#private#none
-mt=unsup-nat
+mt=unsup-wrap-nat
 
-runlite run -exp $exp -lp ${log} -bc base -ov $g2 -var method=$mt--rel_filter=$filter--train_samples=$train--epochs_num=$epochs--prompt_token_num=8--repeat=4--temp_num=$tn--loop=True--test_samples=$test--flat_prompts=$merge--frozen=False--seed=123--n_prompts=1--trunc_router=$trunc--router_lr=0.001--pl_learning_rate=0.005--encoder_type=$enc_type--router_variant=$router--freeze_exclude=$fex--stype=atm#t5--skilled_variant=$skill--n_skills=4--follow_method=True --scorers="rouge-bert" --data_path=${home}/mt5-comet/comet/data/atomic2020/sel --do_valid=False --val_samples=10  --cycle=100 $g1 --batch_size=8 --trial=$trial  --model_id=$model --config_file=configs/baselines/prompt_tuning.json 
+runlite run -exp $exp -lp ${log} -bc base -ov $g2 -var method=${mt}--rel_filter=$filter--train_samples=$train--epochs_num=$epochs--prompt_token_num=8--repeat=4--temp_num=$tn--loop=True--test_samples=$test--flat_prompts=$merge--frozen=False--seed=123--n_prompts=1--trunc_router=$trunc--router_lr=0.001--pl_learning_rate=0.005--encoder_type=$enc_type--router_variant=$router--freeze_exclude=$fex--stype=t5--skilled_variant=$skill--n_skills=4--follow_method=True --scorers="rouge-bert" --data_path=${home}/mt5-comet/comet/data/atomic2020/sel --do_valid=False --val_samples=10  --cycle=100 $g1 --batch_size=8 --trial=$trial  --model_id=$model --config_file=configs/baselines/prompt_tuning.json 
 
 
 #--freeze_parts="router" --freeze_step=500 

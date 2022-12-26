@@ -34,6 +34,8 @@ class xAttrTemplate(RelTemplate):
                qtemp = "{c@merge_i} {event},So PersonX is seen as {ph}."
            elif tn == "merge":
                qtemp = "{c@merge_i} {event}, {rel_i} So PersonX is seen as {ph}."
+           elif tn == "p-com":
+               qtemp = "{pa@com_3} {pb@com_3} {pc@com_3} {pd@com_3} {pe@com_3} Because of {event}, So PersonX is seen as {ph}."
            elif tn == "mold":
                qtemp = "{c@mold_i} {event}, {rel_i} So PersonX is seen as {ph}."
            elif tn == "merge-mid-nat":
@@ -116,6 +118,8 @@ class xIntentTemplate(RelTemplate):
                qtemp = "Because of {event}, {com_i} they want {ph}"
            if tn == "merge":
                qtemp = "{c@merge_i} Because of {event}, {rel_i} they want {ph}"
+           if tn == "p-com":
+               qtemp = "{pa@com_3} {pb@com_3} {pc@com_3} {pd@com_3} {pe@com_3} Because of {event}, {rel_i} they want {ph}"
            if tn == "mold":
                qtemp = "{c@mold_i} Because of {event}, {rel_i} they want {ph}"
            if tn == "merge-mid-nat":
