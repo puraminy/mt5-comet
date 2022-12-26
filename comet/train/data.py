@@ -119,7 +119,7 @@ class xIntentTemplate(RelTemplate):
            if tn == "merge":
                qtemp = "{c@merge_i} Because of {event}, {rel_i} they want {ph}"
            if tn == "p-com":
-               qtemp = "{pa@com_3} {pb@com_3} {pc@com_3} {pd@com_3} {pe@com_3} Because of {event}, {rel_i} they want {ph}"
+               qtemp = "{pa@com_3} {pb@com_3} {pc@com_3} {pd@com_3} {pe@com_3} Because of {event}, they want {ph}"
            if tn == "mold":
                qtemp = "{c@mold_i} Because of {event}, {rel_i} they want {ph}"
            if tn == "merge-mid-nat":
