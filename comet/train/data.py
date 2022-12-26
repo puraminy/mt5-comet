@@ -20,6 +20,8 @@ class xAttrTemplate(RelTemplate):
        if method == "unsup-wrap-nat":
            if tn == "mat-pre":
                qtemp = "{c@mat_i} {event}, So PersonX is seen as {ph}."
+           elif tn == "prefix":
+               qtemp = "{event}, So PersonX is seen as {ph}."
            elif tn == "com-pre-nat":
                qtemp = "{com_i} {event}, So PersonX is seen as {ph}."
            elif tn == "com-pre":
@@ -104,7 +106,9 @@ class xIntentTemplate(RelTemplate):
                qtemp = "Why does {event}? Because "
                anstemp = "he intends {resp} {end}"
        elif method == "unsup-wrap-nat":
-           if tn == 1:
+           if tn == "prefix":
+               qtemp = "Because of {event}, they want {ph}"
+           if tn == "pre-mat":
                qtemp = "{c@mat_i} Because of {event}, they want {ph}"
            if tn == "com-pre":
                qtemp = "{com_i} {event} {ph}"
