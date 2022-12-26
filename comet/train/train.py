@@ -1563,6 +1563,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     set_args(args.copy())
     parser = HfArgumentParser((ModelArguments, DataTrainingArguments, TrainingArguments,
                                AdapterTrainingArguments))
+    model_args = data_args = training_args = None
     if config_file and config_file.endswith(".json"):
         # If we pass only one argument to the script and it's the path to a json file,
         # let's parse it to get our arguments.
@@ -2307,7 +2308,9 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         if flat_prompts == "none": flat_prompts = ""
         assert flat_prompts != "none"
         prompts = sample_dataset.prompts
-    wrapped_model = wrap_model(model_to_wrap, tokenizer, encoder_type, load_prompt_path, flat_prompts=flat_prompts, method = method, shared_embs= shared_embs, skilled_variant=skilled_variant, prefix_config=prefix_config, n_tasks=n_tasks, n_skills=n_skills, 
+    wrapped_model = model_to_wrap
+    if adapter_args and not adapter_args.prefix_tuning:
+        wrapped_model = wrap_model(model_to_wrap, tokenizer, encoder_type, load_prompt_path, flat_prompts=flat_prompts, method = method, shared_embs= shared_embs, skilled_variant=skilled_variant, prefix_config=prefix_config, n_tasks=n_tasks, n_skills=n_skills, 
             exp_id=exp_id, 
             encoder_prompts= prompts,
             general_prompts= general_prompts, 
@@ -2346,7 +2349,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
 
     fname = "output/" + str(experiment) + "-" + str(exp_id) + "-" + flat_prompts + ".txt"
     Path("output").mkdir(exist_ok = True)
-    if not isinstance(wrapped_model, SkilledMixin):
+    if isinstance(wrapped_model, PTuningWrapper):
         f = open(fname, "w")
         print("Number of prompts:" + str(len(wrapped_model.prompt_encoders)), file=f)
         print("Train prompts:", prompts, file=f) 
@@ -2376,7 +2379,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         model.pretrain_model.resize_token_embeddings(len(tokenizer))
 
     wrapped_model.to(device=device)
-    if not isinstance(wrapped_model, SkilledMixin):
+    if isinstance(wrapped_model, PTuningWrapper):
         if wrapped_model.prompt_encoders:
             mlog.info("Number of encoders: %s", len(wrapped_model.prompt_encoders))
             for encoder in wrapped_model.prompt_encoders:
@@ -2401,7 +2404,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         rgrad = [p for p in wrapped_model.parameters() if p.requires_grad]
         nrgrad = [p for p in wrapped_model.parameters() if not p.requires_grad]
 
-    if not isinstance(wrapped_model, SkilledMixin):
+    if isinstance(wrapped_model, PTuningWrapper):
         _sum = 0
         for encoder in wrapped_model.prompt_encoders:
             enc_rgrad = [p for p in encoder.parameters() if p.requires_grad]
@@ -2418,14 +2421,38 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     if not no_save_model:
         tokenizer.save_pretrained(save_path)
     def get_optimizer(model, learning_rate, opt_type):
+        if model_args and model_args.attn_learning_rate is not None:
+            all_parameters = set(model.parameters())
+            attn_params = []
+            for name, param in model.named_parameters():
+                if name == "encoder.attn_W_up" or name == "encoder.attn_W_down" or name == "encoder.layer_norm":
+                    attn_params += list(param)
+            attn_params = set(attn_params)
+            non_attn_params = all_parameters - attn_params
+            non_attn_params = list(non_attn_params)
+            attn_params = list(attn_params)
+
+            optim = AdamW([
+                {'params': non_attn_params},
+                {'params': attn_params, 'lr': model_args.attn_learning_rate},
+            ], lr=training_args.learning_rate,)
+            scheduler = get_linear_schedule_with_warmup(
+                optim, num_warmup_steps=training_args.warmup_steps, num_training_steps=len(
+                    train_dataset) * training_args.num_train_epochs // (training_args.gradient_accumulation_steps * training_args.per_device_train_batch_size)
+            )
+            return optim, scheduler
+
+        _model = model
+        if isinstance(wrapped_model, PTuningWrapper):
+            model = model.underlying_model
         _lr = learning_rate
         no_decay = ['bias', 'LayerNorm.weight']
         router_learning_rate = float(router_lr)
         Az_learning_rate = 0.0001
-        skill_params = [p for n, p in model.underlying_model.named_parameters() if "skills_weight" in n]
+        skill_params = [p for n, p in _model.named_parameters() if "skills_weight" in n]
         optimizer_grouped_parameters = [
-            {'params': [p for n, p in model.underlying_model.named_parameters() if not "skills_weight" in n and p.requires_grad and not any(nd in n for nd in no_decay)], 'weight_decay': weight_decay, "lr":_lr},
-            {'params': [p for n, p in model.underlying_model.named_parameters() if not "skills_weight" in n and p.requires_grad and any(nd in n for nd in no_decay)], 'weight_decay': 0.0, "lr":_lr},
+            {'params': [p for n, p in _model.named_parameters() if not "skills_weight" in n and p.requires_grad and not any(nd in n for nd in no_decay)], 'weight_decay': weight_decay, "lr":_lr},
+            {'params': [p for n, p in _model.named_parameters() if not "skills_weight" in n and p.requires_grad and any(nd in n for nd in no_decay)], 'weight_decay': 0.0, "lr":_lr},
             {"params": skill_params, "lr": pl_learning_rate, "weight_decay": weight_decay}
             #{"params": model.mlp.parameters(), "lr": pl_learning_rate},
             #{"params": model.router, "lr": router_learning_rate},

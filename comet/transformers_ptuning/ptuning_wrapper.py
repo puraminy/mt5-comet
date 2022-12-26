@@ -191,6 +191,11 @@ class PTuningWrapper(torch.nn.Module):
         #Because this wrapper only deals with a single prompt, the length should be the same, you can use masked_select to reshape 
         tids = kwargs.pop("task_ids", None)
         tids = tids.long()
+        append_prefix = (self.underlying_model.prefix_tuning and 
+                not self.underlying_model.attn_prefix_tuning)
+        if append_prefix:
+            return self.underlying_model(input_ids=input_ids, **kwargs)
+
         prompt_masks = self.prompt_token_fn(input_ids)
         if prompt_masks.any():
             self.encoder_prompt_flag = True
