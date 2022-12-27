@@ -259,8 +259,8 @@ def generate(model, tokenizer, batch, gen_token = "", gen_param = "greedy", at_m
         gen_kwargs["knowledge_input_ids"] = batch["knowledge_input_ids"]
     if "knowledge_attention_mask" in batch:
         gen_kwargs["knowledge_attention_mask"] = batch["knowledge_attention_mask"]
-    if "task_ids" in batch:
-        gen_kwargs["task_ids"] = batch["task_ids"]
+    if "task" in batch:
+        gen_kwargs["task"] = batch["task"]
 
     input_batch = {}
     input_batch["input_ids"] = batch["input_ids"]
