@@ -2801,6 +2801,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                 model=model,
                 args=training_args,
                 train_dataset=train_dataset, 
+                eval_dataset= myds["validation"] if training_args.do_eval else None,
                 tokenizer=tokenizer,
                 data_collator=data_collator,
                 shared=model_args.shared_attn,
@@ -2811,6 +2812,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                 model=model,
                 args=training_args,
                 train_dataset=train_dataset,
+                eval_dataset= myds["validation"] if training_args.do_eval else None,
                 tokenizer=tokenizer,
                 data_collator=data_collator,
                 shared=model_args.shared_attn)
