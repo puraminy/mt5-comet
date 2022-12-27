@@ -33,6 +33,7 @@
     "eval_dataset_config_name": ["en"],
     "test_dataset_config_name": ["en"],
     "predict_with_generate": true,
+    "logging_steps":1,
     "save_prefix_only": true,
     "weight_decay": 1e-5,
     "compute_memory": true

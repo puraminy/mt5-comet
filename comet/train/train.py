@@ -10,6 +10,9 @@ from comet.train.data import *
 from comet.utils.utils import (modify_model_after_init, 
         save_training_config, save_prompts,get_adapter_config)
 
+from comet.metrics.metrics import TASK_TO_METRICS
+from comet.metrics.metrics import build_compute_metrics_fn
+import comet.metrics.metrics as metrics
 import itertools, collections
 import shutil
 from comet.train.eval import *
@@ -67,7 +70,7 @@ class MyCollator(object):
             #"cross_attention_mask": torch.zeros(bs, 1, max_dec_len, max_enc_len),
             "decoder_input_ids": torch.ones(bs, max_dec_len, dtype=torch.long) * pad_id,
             "labels": torch.ones(bs, max_dec_len, dtype=torch.long) * -100,
-            "task_ids":torch.ones(bs)*-1,
+            "task":torch.ones(bs)*-1,
         }
         no_model_data = {
             #"idx": torch.zeros(bs, dtype=torch.long),
@@ -75,7 +78,7 @@ class MyCollator(object):
             "loss_mask": torch.zeros(bs, max_dec_len),
             "query":[""]*bs,
             "target":[""]*bs,
-            "task_ids":torch.ones(bs)*-1,
+            "task":torch.ones(bs)*-1,
             "resp":[-1]*bs,
             "wrap":[False]*bs,
             "freeze":[False]*bs,
@@ -89,8 +92,8 @@ class MyCollator(object):
             model_data["decoder_input_ids"][i][:len(dec_ids)] = torch.tensor(dec_ids, dtype=torch.long)
             model_data["attention_mask"][i][:len(q)] = 1.0
             model_data["decoder_attention_mask"][i][:len(dec_ids)] = 1.0 
-            model_data["task_ids"][i] = task
-            no_model_data["task_ids"][i] = task
+            model_data["task"][i] = task
+            no_model_data["task"][i] = task
             #model_data["cross_attention_mask"][i][0, :dec_len, :enc_len] = 1.0 
             #no_model_data["idx"][i] = samp["idx"]
             model_data["labels"][i][:len(label)] = torch.tensor(label, dtype=torch.long)
@@ -107,7 +110,11 @@ class MyCollator(object):
             else:
                 no_model_data["loss_mask"][i][:len(label)] = 1.0
 
-        return model_data #, no_model_data
+        loop =  logs.args("loop")
+        if loop == "custom":
+            return model_data , no_model_data
+        else:
+            return model_data
 
     def __call__(self, batch):
         #return {"query":_query, "event":event, "resp":response, "rel":rel, "index":index, "rep":rep}
@@ -129,7 +136,7 @@ class MyCollator(object):
             enc_resp = self.tokenizer.encode(b["resp"].strip())
             responses.append(b["resp"].strip())
             enc_responses.append(enc_resp)
-            tasks.append(b["task_id"])
+            tasks.append(b["task"])
             inputs.append(b["event"].strip())
             targets.append(b["target"].strip())
             index.append(b["index"])
@@ -2237,6 +2244,18 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     mbp("start")
     if not gen_bs:
         gen_bs = str(batch_size) + "@" + str(batch_size)
+    def compute_metrics(eval_preds):
+        preds, labels, data_info = eval_preds
+        #post_processor = AutoPostProcessor.get(data_args.dataset_name[0], tokenizer,
+        #                                       data_args.ignore_pad_token_for_loss)
+        #decoded_preds, decoded_labels = post_processor.process(
+        #    preds, labels, data_info)
+        result = {}
+        eval_metrics = [metrics.rouge]
+        for metric in eval_metrics:
+            result.update(metric(preds, labels))
+        return result
+
     def eval_test(model, tokenizer, result_fname=""):
         if "@" in gen_bs:
             test_bs,_ = gen_bs.split("@")
@@ -2802,6 +2821,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                 args=training_args,
                 train_dataset=train_dataset, 
                 eval_dataset= eval_dataset, 
+                evaluation_metrics=["rouge"],
+                compute_metrics=compute_metrics if training_args.predict_with_generate else None,
                 tokenizer=tokenizer,
                 data_collator=data_collator,
                 shared=model_args.shared_attn,
@@ -2813,6 +2834,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                 args=training_args,
                 train_dataset=train_dataset,
                 eval_dataset= eval_dataset, 
+                evaluation_metrics=["rouge"],
+                compute_metrics=compute_metrics if training_args.predict_with_generate else None,
                 tokenizer=tokenizer,
                 data_collator=data_collator,
                 shared=model_args.shared_attn)

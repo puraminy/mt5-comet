@@ -435,7 +435,7 @@ class MyDataset(torch.utils.data.Dataset):
         #    self.data_split[rel][lang].append({query:[response]})
         #else:
         #    self.data_split[rel][lang][query].append(response)
-        return {"query":_query, "event":event, "resp":response, "target":resp, "rel":rel, "index":self.rec_counter, "rep":rep, "flag":flags, "task_id":task_id}
+        return {"query":_query, "event":event, "resp":response, "target":resp, "rel":rel, "index":self.rec_counter, "rep":rep, "flag":flags, "task":task_id}
         #return (_query, event, response, rel, index, rep)
 
 

@@ -172,9 +172,9 @@ class PTuningWrapper(torch.nn.Module):
 
     def generate(self, input_ids, *args, **kwargs):
         if logs.args("stype") == "atm":
-            task_ids = kwargs.setdefault("task_ids", None)
+            task_ids = kwargs.setdefault("task", None)
         else:
-            task_ids = kwargs.pop("task_ids", None)
+            task_ids = kwargs.pop("task", None)
         tinfo("gen task ids ggggggggggg: %s", task_ids)
         device = input_ids.device
         #task_ids = torch.tensor([0])
@@ -189,7 +189,7 @@ class PTuningWrapper(torch.nn.Module):
         ll = self.ll # log level
         # find masks based on the range of prompt ids (offset_id < X < offset_id + prompt_length)
         #Because this wrapper only deals with a single prompt, the length should be the same, you can use masked_select to reshape 
-        tids = kwargs.pop("task_ids", None)
+        tids = kwargs.pop("task", None)
         tids = tids.long()
         append_prefix = (self.underlying_model.prefix_tuning and 
                 not self.underlying_model.attn_prefix_tuning)
