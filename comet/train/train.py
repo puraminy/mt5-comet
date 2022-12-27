@@ -1794,7 +1794,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     #%% load model
 
     def load_model(model_id, underlying_model_name):
-        adapter_config = {} 
+        config = {} 
         mlog.info("Loading model ...")
         if model_id == "test":
             return None, None, "test"
@@ -1915,7 +1915,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             model.save_pretrained(os.path.join(load_path, model_id))
             tokenizer.save_pretrained(os.path.join(load_path, model_id))
             underlying_model_name = os.path.join(load_path, model_id)
-        return model, tokenizer, underlying_model_name, adapter_config
+        return model, tokenizer, underlying_model_name, config
 
     #%% load atomic data
     atomic_dataset = {}
@@ -1934,7 +1934,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             val_path = _val_path
             mlog.info("Loading val data...")
     if trans:
-        model, tokenizer, underlying_model_name, adapter_config = load_model(model_id, underlying_model_name)
+        model, tokenizer, underlying_model_name, atm_config = load_model(model_id, underlying_model_name)
         for split_name, df in atomic_dataset.items():
             mlog.info("Translating ...%s ", split_name)
             if trans != split_name:
@@ -1948,7 +1948,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         return
     
     mlog.info("Loading from %s", underlying_model_name)
-    model, tokenizer, underlying_model_name, adapter_config = load_model(model_id, underlying_model_name)
+    model, tokenizer, underlying_model_name, atm_config = load_model(model_id, underlying_model_name)
     extend_tokenizer(tokenizer)
     if prompt_length:
         length = [int(s) for s in str(prompt_length).split("-")]
@@ -2420,6 +2420,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         freeze_exclude = ""
     if frozen: # and stype != "atm":
         if stype == "atm": 
+            adapter_config = get_adapter_config(
+                    adapter_args, data_args, training_args, atm_config)
             model = modify_model_after_init(
                 model, training_args, adapter_args, adapter_config)
         elif "model@" in freeze_parts:
@@ -2877,7 +2879,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         save_prompts(wrapped_model, output_dir=training_args.output_dir, 
                 attn_prefix_tuning=model_args.attn_prefix_tuning,
                 shared_attn=model_args.shared_attn, 
-                num_target=config.num_target, task_name=data_args.task_name)
+                num_target=atm_config.num_target, task_name=data_args.task_name)
     if False: #not no_save_model:
         model.eval()
         save_checkpoint(wrapped_model.underlying_model, tokenizer, 
@@ -2890,7 +2892,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     if do_valid and not no_save_best:
         mlog.info("loading best model")
         best_path = os.path.join(save_path, "best_model")
-        model, tokenizer, _, adapter_config = load_model(model_id, best_path) 
+        model, tokenizer, _, atm_config = load_model(model_id, best_path) 
         if no_save_model:
             shutil.rmtree(best_path)
         model.to(device)
