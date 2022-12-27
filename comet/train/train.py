@@ -111,7 +111,7 @@ class MyCollator(object):
                 no_model_data["loss_mask"][i][:len(label)] = 1.0
 
         loop =  logs.args("loop")
-        if loop == "custom":
+        if loop == "custom" or self.ds_type == "test":
             return model_data , no_model_data
         else:
             return model_data
@@ -2906,7 +2906,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         val_records = int(test_samples)
         evaluate1(tokenizer, test_dataloader, model, device, prompt_config, mode="test", save_path="", task_ids=task_ids)
         evaluate(test_dataset, test_dataloader, save_path, exp_info, val_records, gen_param, scorers = scorers, batch_size=gen_bs, model=wrapped_model, tokenizer=tokenizer, set_name=_set, break_point=break_point, seed=seed, task_ids=task_ids)  
-    elif test_set and loop == "custom":
+    elif test_set: # and loop == "custom":
         eval_test(model, tokenizer)
     elif training_args.do_test:
         mlog.info("*** Test ***")
