@@ -12,7 +12,7 @@ from comet.utils.utils import (modify_model_after_init,
 
 from comet.metrics.metrics import TASK_TO_METRICS
 from comet.metrics.metrics import build_compute_metrics_fn
-import comet.metrics.metrics as metrics
+import comet.metrics.metrics as my_metrics
 import itertools, collections
 import shutil
 from comet.train.eval import *
@@ -2251,7 +2251,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         #decoded_preds, decoded_labels = post_processor.process(
         #    preds, labels, data_info)
         result = {}
-        eval_metrics = [metrics.rouge]
+        eval_metrics = [my_metrics.rouge]
         for metric in eval_metrics:
             result.update(metric(preds, labels))
         return result
