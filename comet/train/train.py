@@ -2279,7 +2279,6 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             #a1, a2, s1, r = evaluate1(tokenizer, test_dataloader, model, device, seed, mode="test", save_path=save_path, wrap=False, task_ids=task_ids)
             #mlog.info("acc1: %s, acc2: %s, sts: %s, res: %s", a1, a2, s1, r)
             mbp("start")
-            mbp(2)
             _model = wrapped_model
             if task_ids is not None:
                 _model = wrapped_model 
