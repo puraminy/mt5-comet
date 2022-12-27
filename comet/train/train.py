@@ -2914,42 +2914,44 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         results = {}
         if model_args.shared_attn is False:
             task = rel_filter
-            test_dataset = test_set
-            predictions, labels, metrics = trainer.predict(test_dataset=test_dataset,
-                                       max_length=data_args.test_max_target_length, 
-                                       num_beams=data_args.num_beams,
-                                       metric_key_prefix="test"
-                                       )
-            
-            trainer.log_metrics("test", metrics)
-            trainer.save_metrics("test", metrics)
+            for _set in test_set.split("@"):
+                myds = load_data([_set])
+                test_dataset = myds[_set]
+                predictions, labels, metrics = trainer.predict(test_dataset=test_dataset,
+                                           max_length=data_args.test_max_target_length, 
+                                           num_beams=data_args.num_beams,
+                                           metric_key_prefix="test"
+                                           )
+                
+                trainer.log_metrics("test", metrics)
+                trainer.save_metrics("test", metrics)
 
-            #predictions = np.argmax(predictions, axis=1)
-            #predictions = tokenizer.batch_decode(predictions)
-            output_predict_file = os.path.join(training_args.output_dir, 
-                    "full_results_" + task + ".tsv")
-            df = test_dataset.to_pandas()
-            df["pred_text1"] = ""
-            #df["rouge_score"] = 0.0
-            #df["bert_score"] = 0.0
-            df["method"] = "ptun" 
-            df["resp"] = ""
-            df["langs"] = "en2en"
-            df["prefix"] = task
-            for i, row in df.iterrows():
-                inp = tokenizer.decode(row["input_ids"], skip_special_tokens=True)
-                inp = re.sub(r'<.*?>','', inp)
-                df.at[i, "input_text"] = inp 
-                labels = row["labels"]
-                labels = np.where(labels != -100, labels, tokenizer.pad_token_id)
-                labels = tokenizer.decode(labels, skip_special_tokens=True)
-                df.at[i, "target_text"] = labels 
-                pred = tokenizer.decode(predictions[i], skip_special_tokens=True)
-                pred = re.sub(r'<.*?>','',pred)
-                pred = pred.strip()
-                df.at[i, "pred_text1"] = pred
-            df.drop(columns=["input_ids","labels","attention_mask"])
-            do_score(df, "rouge", training_args.output_dir)
+                #predictions = np.argmax(predictions, axis=1)
+                #predictions = tokenizer.batch_decode(predictions)
+                output_predict_file = os.path.join(training_args.output_dir, 
+                        "full_results_" + task + ".tsv")
+                df = test_dataset.to_pandas()
+                df["pred_text1"] = ""
+                #df["rouge_score"] = 0.0
+                #df["bert_score"] = 0.0
+                df["method"] = "ptun" 
+                df["resp"] = ""
+                df["langs"] = "en2en"
+                df["prefix"] = task
+                for i, row in df.iterrows():
+                    inp = tokenizer.decode(row["input_ids"], skip_special_tokens=True)
+                    inp = re.sub(r'<.*?>','', inp)
+                    df.at[i, "input_text"] = inp 
+                    labels = row["labels"]
+                    labels = np.where(labels != -100, labels, tokenizer.pad_token_id)
+                    labels = tokenizer.decode(labels, skip_special_tokens=True)
+                    df.at[i, "target_text"] = labels 
+                    pred = tokenizer.decode(predictions[i], skip_special_tokens=True)
+                    pred = re.sub(r'<.*?>','',pred)
+                    pred = pred.strip()
+                    df.at[i, "pred_text1"] = pred
+                df.drop(columns=["input_ids","labels","attention_mask"])
+                do_score(df, "rouge", training_args.output_dir)
 
 #ettt
 
