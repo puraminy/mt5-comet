@@ -13,10 +13,14 @@ venv/*
 output*/*
 wandb/*
 **/**/wandb/*
+**/**/__*cache*__/*
 runs/*
 logs/*
 **/**/logs/*
-**/**/output/*
+**/**/outputs/*
+**/output*/**/**
+**/**/runs/*
+**/**/source_prompts/*
 **/**/images/*
 **/**/tmp_*/*
 **/**/plogs/*
