@@ -1,6 +1,6 @@
 {
     "do_train": true,
-    "do_eval": true,
+    "do_eval": false,
     "do_test": true,
     "warmup_steps": 500,
     "save_steps": 1000,
