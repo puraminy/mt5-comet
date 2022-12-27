@@ -389,9 +389,9 @@ def cli():
     help=""
 )
 @click.option(
-    "--stop_level",
-    "-sl",
-    default=2,
+    "--break_point",
+    "-bp",
+    default="2",
     type=str,
     help="Stop on breakpoints equal to the value"
 )
@@ -428,7 +428,7 @@ def run(ctx, conf_path, base_conf, experiment,
         exclude_conf, include_conf, overwrite_conf, var, 
         save_model, addto, rem, save_data, load_data, add_prefix, wrap, 
         only_var, sep, num_exps, one, cpu, undone, repeat, log_path, 
-        dpy, port, stop_level, reval_bests, trial, preview):
+        dpy, port, break_point, reval_bests, trial, preview):
 
      if dpy:
         debugpy.listen(('0.0.0.0', int(port)))
@@ -581,9 +581,9 @@ def run(ctx, conf_path, base_conf, experiment,
                    if repeat:
                        args["skip"] = False
                    if preview:
-                       stop_level = "data"
-                   args["stop_level"] = stop_level 
-                   mylogs.STOP_LEVEL = stop_level
+                       break_point = "data"
+                   args["break_point"] = break_point 
+                   mylogs.BREAK_POINT = break_point
                    if cpu:
                        args["cpu"] = True
                        os.environ["CUDA_VISIBLE_DEVICES"] = ""
@@ -1434,7 +1434,7 @@ def run(ctx, conf_path, base_conf, experiment,
     help=""
 )
 @click.option(
-    "--stop_level",
+    "--break_point",
     "-stbr",
     default=0,
     type=int,
@@ -1538,11 +1538,11 @@ def run(ctx, conf_path, base_conf, experiment,
     type=str,
     help="sub type for model"
 )
-def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, pl_learning_rate, router_lr, do_eval, cont, wrap, prefix, frozen, freeze_step, unfreeze_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, log_per_exp, wb, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, rel_filter, ex_type, last_data, save_df, flat_prompts, num_workers, scorers, train_start, no_save_model, no_save_best, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, unfreeze_parts, freeze_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, preview, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args, match, dpy, prompt_tune, prompt_config_file, load_prompt, data_name, seed, do_valid, stop_level, skilled_variant, int_dim, prompt_token_num, n_skills, n_prompts, init_temperature, trunc_router, general_type, router_variant, freeze_target, freeze_skill, add_prior, freeze_exclude, config_file, stype):
+def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, pl_learning_rate, router_lr, do_eval, cont, wrap, prefix, frozen, freeze_step, unfreeze_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, log_per_exp, wb, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, rel_filter, ex_type, last_data, save_df, flat_prompts, num_workers, scorers, train_start, no_save_model, no_save_best, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, unfreeze_parts, freeze_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, preview, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args, match, dpy, prompt_tune, prompt_config_file, load_prompt, data_name, seed, do_valid, break_point, skilled_variant, int_dim, prompt_token_num, n_skills, n_prompts, init_temperature, trunc_router, general_type, router_variant, freeze_target, freeze_skill, add_prior, freeze_exclude, config_file, stype):
 
     #%% some hyper-parameters
 
-    mylogs.STOP_LEVEL = stop_level
+    mylogs.BREAK_POINT = break_point
 # Allow other computers to attach to debugpy at this IP address and port.
     if dpy:
         debugpy.listen(('0.0.0.0', 5678))
@@ -1565,7 +1565,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     set_args(args.copy())
     parser = HfArgumentParser((ModelArguments, DataTrainingArguments, TrainingArguments,
                                AdapterTrainingArguments))
-    model_args = data_args = training_args = None
+    model_args = data_args = training_args = adapter_args = None
     if config_file and config_file.endswith(".json"):
         # If we pass only one argument to the script and it's the path to a json file,
         # let's parse it to get our arguments.
@@ -1784,6 +1784,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     #%% load model
 
     def load_model(model_id, underlying_model_name):
+        adapter_config = {} 
         mlog.info("Loading model ...")
         if model_id == "test":
             return None, None, "test"
@@ -1889,8 +1890,6 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                     model.update_layer_norm_weights(model_args.layer_norm_dir)
 
             #################################################
-                model = modify_model_after_init(
-                    model, training_args, adapter_args, adapter_config)
             else:
                 model = T5ForConditionalGeneration.from_pretrained(
                                                          underlying_model_name, 
@@ -1906,7 +1905,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             model.save_pretrained(os.path.join(load_path, model_id))
             tokenizer.save_pretrained(os.path.join(load_path, model_id))
             underlying_model_name = os.path.join(load_path, model_id)
-        return model, tokenizer, underlying_model_name
+        return model, tokenizer, underlying_model_name, adapter_config
 
     #%% load atomic data
     atomic_dataset = {}
@@ -1925,7 +1924,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             val_path = _val_path
             mlog.info("Loading val data...")
     if trans:
-        model, tokenizer, underlying_model_name = load_model(model_id, underlying_model_name)
+        model, tokenizer, underlying_model_name, adapter_config = load_model(model_id, underlying_model_name)
         for split_name, df in atomic_dataset.items():
             mlog.info("Translating ...%s ", split_name)
             if trans != split_name:
@@ -1939,7 +1938,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         return
     
     mlog.info("Loading from %s", underlying_model_name)
-    model, tokenizer, underlying_model_name = load_model(model_id, underlying_model_name)
+    model, tokenizer, underlying_model_name, adapter_config = load_model(model_id, underlying_model_name)
     extend_tokenizer(tokenizer)
     if prompt_length:
         length = [int(s) for s in str(prompt_length).split("-")]
@@ -2175,7 +2174,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     def freeze(modules_to_freeze, exclude=""):
         for module in modules_to_freeze:
             if hasattr(module, "parameters"):
-                for name, param in module.named_parameters():
+                for param in module.parameters():
                     if exclude and exclude in name:
                         continue
                     param.requires_grad = False  # Actual freezing operation
@@ -2373,6 +2372,11 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             general_prompts= general_prompts, 
             router_variant=router_variant, device=device) 
 
+    if not prefix:
+        model.resize_token_embeddings(len(tokenizer))
+    else:
+        model.pretrain_model.resize_token_embeddings(len(tokenizer))
+
     def add_parts(_list, parts):
         if parts == "encoder":
             for encoder in wrapped_model.general_encoders:
@@ -2392,8 +2396,11 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
 
     if freeze_exclude == "none":
         freeze_exclude = ""
-    if frozen and stype != "atm":
-        if "model@" in freeze_parts:
+    if frozen: # and stype != "atm":
+        if stype == "atm": 
+            model = modify_model_after_init(
+                model, training_args, adapter_args, adapter_config)
+        elif "model@" in freeze_parts:
             freeze(modules_to_freeze)
         else:
             if skilled_variant:
@@ -2430,10 +2437,6 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     # ooooooooooooo
     if preview:
         return
-    if not prefix:
-        model.resize_token_embeddings(len(tokenizer))
-    else:
-        model.pretrain_model.resize_token_embeddings(len(tokenizer))
 
     wrapped_model.to(device=device)
     if isinstance(wrapped_model, PTuningWrapper):
@@ -2454,7 +2457,6 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             wrapped_model.merge_encoder.to(device)
 
     mlog.info("len tokenizer after wrapping %s", len(tokenizer))
-    mbp("wrap")
     mbp("start")
     if wrapped_model:
         #model.get_input_embeddings().weight.requires_grad = False
@@ -2470,10 +2472,11 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             _sum += len(encoder.prompt_ids)
             mlog.info("len prompt ids %s: %s",encoder.name, len(encoder.prompt_ids))
 
-        mlog.info("_sum: %s", _sum)
-        mlog.info("Wrapped model require grad %s, ", len(rgrad))
-        mlog.info("Wrapped model not require grad %s, ", len(nrgrad))
-        mbp("wrap")
+        mlog.info("Total prompt ids: %s", _sum)
+    mlog.info("Wrapped model require grad %s, ", len(rgrad))
+    mlog.info("Wrapped model not require grad %s, ", len(nrgrad))
+     
+    mbp("wrap")
 
     if not no_save_model:
         tokenizer.save_pretrained(save_path)
@@ -2788,24 +2791,24 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
        train_loop(epochs_num, wrap, optimizer, scheduler)
        mbp("start")
     else:
-        training_args = TrainingArguments(output_dir=save_path)
-        training_args.per_device_train_batch_size=node_batch_size
-        training_args.num_train_epochs=epochs_num
-        training_args.save_strategy="steps"
-        training_args.save_steps=10000 
-        training_args.save_total_limit=1 
+        t_args = TrainingArguments(output_dir=save_path)
+        t_args.per_device_train_batch_size=node_batch_size
+        t_args.num_train_epochs=epochs_num
+        t_args.save_strategy="steps"
+        t_args.save_steps=10000 
+        t_args.save_total_limit=1 
 
-        #training_args.logging_steps=5
-        #training_args.learning_rate=learning_rate
-        training_args.report_to = ["wandb"] if wb else []
-        training_args.do_predict=True
-        training_args.gradient_accumulation_steps=accumulation_tiny_steps
+        #t_args.logging_steps=5
+        #t_args.learning_rate=learning_rate
+        t_args.report_to = ["wandb"] if wb else []
+        t_args.do_predict=True
+        t_args.gradient_accumulation_steps=accumulation_tiny_steps
         train_dataset = myds["train"]#.map(tokenize)
         if seed > 0:
-            training_args.seed = seed
+            t_args.seed = seed
         #test_dataset = myds["test"]
         trainer = Seq2SeqTrainer(
-            args=training_args,
+            args=t_args,
             model=model,
             #optimizers = (optimizer, scheduler),
             #schedulers = schedulers,
@@ -2834,7 +2837,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     if do_valid and not no_save_best:
         mlog.info("loading best model")
         best_path = os.path.join(save_path, "best_model")
-        model, tokenizer, _ = load_model(model_id, best_path) 
+        model, tokenizer, _, adapter_config = load_model(model_id, best_path) 
         if no_save_model:
             shutil.rmtree(best_path)
         model.to(device)
@@ -2847,7 +2850,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         test_dataloader, test_dataset, random_sampler = load_data2(dataset_path, "test", tokenizer, prompt_config, ratio=test_ratio, num=int(test_samples))
         val_records = int(test_samples)
         evaluate1(tokenizer, test_dataloader, model, device, prompt_config, mode="test", save_path="", task_ids=task_ids)
-        evaluate(test_dataset, test_dataloader, save_path, exp_info, val_records, gen_param, scorers = scorers, batch_size=gen_bs, model=wrapped_model, tokenizer=tokenizer, set_name=_set, stop_level=stop_level, seed=seed, task_ids=task_ids)  
+        evaluate(test_dataset, test_dataloader, save_path, exp_info, val_records, gen_param, scorers = scorers, batch_size=gen_bs, model=wrapped_model, tokenizer=tokenizer, set_name=_set, break_point=break_point, seed=seed, task_ids=task_ids)  
     elif test_set:
         eval_test(model, tokenizer)
     else:

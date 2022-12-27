@@ -72,14 +72,14 @@ def tinfo(text, *args, **kwargs):
 
 import inspect
 import sys
-STOP_LEVEL = 0
+BREAK_POINT = 0
 def mbp(sl=-1):
     if colab: return
-    if sl == STOP_LEVEL or sl == 0: 
+    if str(sl) == str(BREAK_POINT): 
         fname = sys._getframe().f_back.f_code.co_name
         line = sys._getframe().f_back.f_lineno
         mlog.info("break point at %s line %s",fname, line)
-        #breakpoint()
+        breakpoint()
 
 def trace(frame, event, arg):
     if event == "call":
