@@ -2889,7 +2889,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     else:
         mlog.info("No save model is on!!")
     # vvvv
-    if do_valid and not no_save_best:
+    if False: #do_valid and not no_save_best:
         mlog.info("loading best model")
         best_path = os.path.join(save_path, "best_model")
         model, tokenizer, _, atm_config = load_model(model_id, best_path) 
