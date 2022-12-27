@@ -48,7 +48,7 @@
     "freeze_parts": "",
     "use_dif_templates": false,
     "do_preproc": false,
-    "loop": false,
+    "loop": "custom",
     "know": "s",
     "preview": "",
     "tag": "",

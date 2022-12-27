@@ -5,6 +5,8 @@ import comet.train.mylogs as mylogs
 from comet.train.common import *
 from comet.train.dataset import *
 from comet.train.data import *
+#from comet.data import TaskDataCollatorForSeq2Seq
+#from comet.data import AutoTask
 from comet.utils.utils import (modify_model_after_init, 
         save_training_config, save_prompts,get_adapter_config)
 
@@ -16,7 +18,7 @@ from comet.utils.dataset import TokenizedDataset
 from comet.utils.configue import Configure
 import comet.utils.tool as ut
 #from comet.models.unified.prefixtuning import Model
-from transformers.trainer_seq2seq import Seq2SeqTrainer
+from comet.third_party.trainers import Seq2SeqTrainer
 from transformers.optimization import Adafactor
 from torch.optim import SparseAdam
 from transformers import TrainingArguments, HfArgumentParser
@@ -105,7 +107,7 @@ class MyCollator(object):
             else:
                 no_model_data["loss_mask"][i][:len(label)] = 1.0
 
-        return model_data, no_model_data
+        return model_data #, no_model_data
 
     def __call__(self, batch):
         #return {"query":_query, "event":event, "resp":response, "rel":rel, "index":index, "rep":rep}
@@ -1298,8 +1300,9 @@ def run(ctx, conf_path, base_conf, experiment,
 @click.option(
     "--loop",
     "-tl",
-    is_flag=True,
-    help=""
+    default="custom",
+    type=str,
+    help="training loop"
 )
 @click.option(
     "--know",
@@ -2481,6 +2484,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     if not no_save_model:
         tokenizer.save_pretrained(save_path)
     def get_optimizer(model, learning_rate, opt_type):
+        mbp("optim")
         if model_args and model_args.attn_learning_rate is not None:
             all_parameters = set(model.parameters())
             attn_params = []
@@ -2787,9 +2791,30 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
            # mlog.info("Updating the model weights before evaluaton...")
            # wrapped_model.update_model_weight()
     #% vvvv
-    if loop: #not prefix:
-       train_loop(epochs_num, wrap, optimizer, scheduler)
-       mbp("start")
+    if loop == "custom": #not prefix:
+        train_loop(epochs_num, wrap, optimizer, scheduler)
+        mbp("start")
+        # Initialize our Trainer
+    elif loop == "atm":
+        if model_args.attn_learning_rate is not None:
+            trainer = Seq2SeqTrainer(
+                model=model,
+                args=training_args,
+                train_dataset=train_dataset, 
+                tokenizer=tokenizer,
+                data_collator=data_collator,
+                shared=model_args.shared_attn,
+                optimizers=(optimizer, scheduler)
+            )
+        else:
+            trainer = Seq2SeqTrainer(
+                model=model,
+                args=training_args,
+                train_dataset=train_dataset,
+                tokenizer=tokenizer,
+                data_collator=data_collator,
+                shared=model_args.shared_attn)
+        train_result = trainer.train()
     else:
         t_args = TrainingArguments(output_dir=save_path)
         t_args.per_device_train_batch_size=node_batch_size
@@ -2820,19 +2845,22 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             train_dataset=train_dataset,
             #test_dataset=test_dataset,
         )
+        mbp("train")
         train_result = trainer.train()
 
-        if model_args.save_prefix_only:
-            save_prompts(wrapped_model, output_dir=training_args.output_dir, attn_prefix_tuning=model_args.attn_prefix_tuning,
-                         shared_attn=model_args.shared_attn, num_target=config.num_target, task_name=data_args.task_name)
-        if False: #not no_save_model:
-            model.eval()
-            save_checkpoint(wrapped_model.underlying_model, tokenizer, 
-                    optimizer, scheduler, step, 
-                    best_eval_step, best_dev_loss,
-                    save_path)
-        else:
-            mlog.info("No save model is on!!")
+    if model_args.save_prefix_only:
+        save_prompts(wrapped_model, output_dir=training_args.output_dir, 
+                attn_prefix_tuning=model_args.attn_prefix_tuning,
+                shared_attn=model_args.shared_attn, 
+                num_target=config.num_target, task_name=data_args.task_name)
+    if False: #not no_save_model:
+        model.eval()
+        save_checkpoint(wrapped_model.underlying_model, tokenizer, 
+                optimizer, scheduler, step, 
+                best_eval_step, best_dev_loss,
+                save_path)
+    else:
+        mlog.info("No save model is on!!")
     # vvvv
     if do_valid and not no_save_best:
         mlog.info("loading best model")
