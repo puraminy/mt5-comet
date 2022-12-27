@@ -725,7 +725,7 @@ def run(ctx, conf_path, base_conf, experiment,
 @click.option(
     "--val_samples",
     "-vn",
-    default=0,
+    default=10,
     type=int,
     help=""
 )
