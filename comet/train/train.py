@@ -2272,14 +2272,14 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     if do_eval or (not wrap and frozen and modules_to_freeze is model):
         mlog.info("Evaluating the model...")
         model.to(device=device)
-        dev_dataset = myds[test_set]#.map(tokenize)
+        eval_dataset = myds[test_set]#.map(tokenize)
         data_collator = MyCollator(tokenizer, model, ds_type=test_set, prefix=prefix)
-        dev_dataloader = torch.utils.data.DataLoader(dev_dataset,
+        eval_dataloader = torch.utils.data.DataLoader(eval_dataset,
             batch_size=batch_size,shuffle=False,
             collate_fn=data_collator,
         )
-        a1, a2, s1, dev_loss = evaluate1(tokenizer, dev_dataloader, model, device, seed, mode="dev", save_path=save_path, wrap=False)
-        log_string = "dev_loss: " + str(dev_loss) + " | dev acc({}, {} st:{}): ".format(a1, a2, s1) 
+        a1, a2, s1, eval_loss = evaluate1(tokenizer, eval_dataloader, model, device, seed, mode="dev", save_path=save_path, wrap=False)
+        log_string = "eval_loss: " + str(eval_loss) + " | dev acc({}, {} st:{}): ".format(a1, a2, s1) 
         mlog.info(log_string)
         eval_test(model, tokenizer, "reval_full.tsv")
         return
@@ -2613,14 +2613,14 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
         step = checkpoint['step']
         best_eval_step = checkpoint['best_eval_step']
-        best_dev_loss = checkpoint['best_dev_loss']
+        best_eval_loss = checkpoint['best_eval_loss']
 
     #%% build dataloader
     if data_name:
         train_ratio = 1
         dataset_path = os.path.join(data_path, data_name)
         train_dataloader, train_dataset, random_sampler = load_data2(dataset_path, "train", tokenizer, prompt_config, ratio=train_ratio, num=int(train_samples))
-        for s in ["train","test","valid"]:
+        for s in ["train","test","validation"]:
             load_data2(dataset_path, s, tokenizer, prompt_config, ratio=train_ratio, num=int(train_samples))
         train_records = int(train_samples)
     else:
@@ -2638,8 +2638,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             collate_fn=data_collator,
         )
         if do_valid: 
-            dev_dataset = myds["validation"]#.map(tokenize)
-            dev_dataloader = torch.utils.data.DataLoader(dev_dataset,
+            eval_dataset = myds["validation"]#.map(tokenize)
+            eval_dataloader = torch.utils.data.DataLoader(eval_dataset,
                 batch_size=node_batch_size,shuffle=shuffle,
                 collate_fn=data_collator,
             )
@@ -2682,7 +2682,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         global_step = 0
         max_acc = 0
         step = 0
-        best_dev_loss = 100
+        best_eval_loss = 100
         best_eval_step = 0
         best_step = 0
         is_freezed = frozen
@@ -2715,11 +2715,11 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                         with torch.no_grad():
                             mlog.info("Updating the model weights before evaluaton...")
                             wrapped_model.update_model_weight()
-                        a1, a2, s1, dev_loss = evaluate1(tokenizer, dev_dataloader, _model, device, seed, mode="dev", save_path=save_path, task_ids=task_ids)
-                        log_string =  "dev acc({}, {} st:{}): dev_loss:{}  | best_dev_loss:{}   best_step: {} ".format(a1, a2, s1, dev_loss, best_dev_loss, best_step) 
-                        if dev_loss <= best_dev_loss: 
+                        a1, a2, s1, eval_loss = evaluate1(tokenizer, eval_dataloader, _model, device, seed, mode="dev", save_path=save_path, task_ids=task_ids)
+                        log_string =  "dev acc({}, {} st:{}): eval_loss:{}  | best_eval_loss:{}   best_step: {} ".format(a1, a2, s1, eval_loss, best_eval_loss, best_step) 
+                        if eval_loss <= best_eval_loss: 
                             max_acc = a2
-                            best_dev_loss = dev_loss
+                            best_eval_loss = eval_loss
                             exp_info["max_acc"] = max_acc
                             exp_info["best_step"] = best_step = str(epoch) + "x" + str(step)
                             mlog.info(log_string)
@@ -2776,7 +2776,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                     mean_loss = tot_loss/(step-train_start)
                     sw.add_scalar('train/loss',bloss,global_step=step)
                     ttlog.info("{:<5}: {:6.2f} > {:6.2f}".format(step, bloss, mean_loss))
-                    pbar.set_description(f'training ...[loss:{bloss:.2f} ({mean_loss:.2f}) best:{best_eval_step} {best_dev_loss:.2f}]')
+                    pbar.set_description(f'training ...[loss:{bloss:.2f} ({mean_loss:.2f}) best:{best_eval_step} {best_eval_loss:.2f}]')
                     pbar.update()
                     #del result
                     del loss
@@ -2801,7 +2801,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                 model=model,
                 args=training_args,
                 train_dataset=train_dataset, 
-                eval_dataset= myds["validation"] if training_args.do_eval else None,
+                eval_dataset= eval_dataset, 
                 tokenizer=tokenizer,
                 data_collator=data_collator,
                 shared=model_args.shared_attn,
@@ -2812,7 +2812,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                 model=model,
                 args=training_args,
                 train_dataset=train_dataset,
-                eval_dataset= myds["validation"] if training_args.do_eval else None,
+                eval_dataset= eval_dataset, 
                 tokenizer=tokenizer,
                 data_collator=data_collator,
                 shared=model_args.shared_attn)
@@ -2859,7 +2859,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         model.eval()
         save_checkpoint(wrapped_model.underlying_model, tokenizer, 
                 optimizer, scheduler, step, 
-                best_eval_step, best_dev_loss,
+                best_eval_step, best_eval_loss,
                 save_path)
     else:
         mlog.info("No save model is on!!")
