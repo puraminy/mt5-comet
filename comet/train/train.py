@@ -485,13 +485,11 @@ def run(ctx, conf_path, base_conf, experiment,
                 all_vars = jargs.values()
                 jfname = Path(config_file).stem
                 values = []
-                tags = []
                 for ii, x in enumerate(all_vars):
                     if type(x) == str:
                         xx = x.split("#")
                         if "#" in x:
                             _vname = "ARG-" + list(var_names)[ii] 
-                            tags.append(_vname)
                             var += "--" + _vname + "=" + x 
                         z = []
                         for y in xx:
@@ -582,6 +580,7 @@ def run(ctx, conf_path, base_conf, experiment,
                        multi_only = True
 
                if not args["tag"]:
+                   tags = []
                    for vv, cc in zip(var_names, values):
                        if len(cc) > 1 and vv != "config_file":
                            tags.append(vv)
