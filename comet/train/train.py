@@ -2783,7 +2783,10 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                             mlog.info(log_string)
                             if not no_save_best:
                                 best_path = os.path.join(save_path, "best_model")
-                                save_checkpoint(wrapped_model.underlying_model, 
+                                model_to_save = wrapped_model
+                                if isinstance(wrapped_model, PTuningWrapper):
+                                    model_to_save = wrapped_model.underlying_model 
+                                save_checkpoint(model_to_save, 
                                         tokenizer, 
                                         optimizer, scheduler, step, 
                                         global_step, max_acc,
