@@ -1620,10 +1620,13 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         DataTrainingArguments, TrainingArguments,
         AdapterTrainingArguments))
     model_args = data_args = training_args = adapter_args = None
+    epochs_num = int(epochs_num)
     if config_file and config_file.endswith(".json"):
         # let's parse it to get our arguments.
         model_args, data_args, training_args, adapter_args = parser.parse_json_file(
             json_file=config_file)
+        setattr(training_args,"num_train_epochs", epochs_num)
+        setattr(training_args,"per_device_train_batch_size", batch_size)
         for k,v in kwargs.items():
             if k.startswith("ARG-"):
                 k = k.replace("ARG-","")
@@ -2385,7 +2388,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
 
     train_dataset = myds["train"]#.map(tokenize)
     iterations = train_dataset.num_records//batch_size
-    warm_up_steps = 0.002*iterations
+    warm_up_steps = 500 # 0.002*iterations
     #ppppppppppppppp
     if prefix:
         pre_args = Configure.Get("pl5.cfg")
@@ -2604,7 +2607,10 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             if (not isinstance(wrapped_model, PTuningWrapper) or
                 len(wrapped_model.prompt_encoders) == 0):
                 optimizer = AdamW(optimizer_grouped_parameters,eps=1e-8)
-                scheduler = get_linear_schedule_with_warmup(optimizer,warm_up_steps,iterations)
+                #scheduler = get_linear_schedule_with_warmup(optimizer,warm_up_steps,iterations)
+                scheduler = get_linear_schedule_with_warmup(
+                    optimizer, num_warmup_steps=warm_up_steps, num_training_steps=train_dataset.num_records * epochs_num // (accumulation_tiny_steps * node_batch_size)
+            )
             else:
                 paras = []
                 lrs = []
@@ -2745,7 +2751,6 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     mlog.info(f"============== train samples: {train_samples} test_samples: {test_samples} | repeat: {repeat}  epochs: {epochs_num}\n")
     mlog.info(f"============== wrap: {wrap} | prefixed: {prefix} | frozen: {frozen} {freeze_parts}\n")
     mlog.info(f"============== rel_filter: {rel_filter} | method: {method} | model: {model_id} \n")
-    epochs_num = int(epochs_num)
     cycle = int(cycle)
     wrap = True
     exp_info["enc_num"] = 0
@@ -2903,7 +2908,9 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                 compute_metrics=compute_metrics if training_args.predict_with_generate else None,
                 tokenizer=tokenizer,
                 data_collator=data_collator,
-                shared=model_args.shared_attn)
+                shared=model_args.shared_attn,
+                optimizers=(optimizer, scheduler)
+        )
         train_result = trainer.train()
     else:
         t_args = TrainingArguments(output_dir=save_path)
