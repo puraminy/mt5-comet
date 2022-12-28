@@ -2734,6 +2734,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     exp_info["train_records"] = train_dataset.num_records
     exp_info["iterations"] = iterations 
     mbp("start")
+    best_path = ""
     def train_loop(epochs_num, wrap, optimizer, scheduler):
         train_iter = iter(train_dataloader)
         global_step = 0
@@ -2742,6 +2743,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         best_eval_loss = 100
         best_eval_step = 0
         best_step = 0
+        best_path = ""
         is_freezed = frozen
         unfreeze_done = False
         freeze_done = False
@@ -2781,7 +2783,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                             exp_info["max_acc"] = max_acc
                             exp_info["best_step"] = best_step = str(epoch) + "x" + str(step)
                             mlog.info(log_string)
-                            if not no_save_best:
+                            if not colab and not no_save_best:
                                 best_path = os.path.join(save_path, "best_model")
                                 model_to_save = wrapped_model
                                 if isinstance(wrapped_model, PTuningWrapper):
@@ -2848,12 +2850,13 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         # end train while
         pbar.close()
         sw.close()
+        return best_path
         #with torch.no_grad():
            # mlog.info("Updating the model weights before evaluaton...")
            # wrapped_model.update_model_weight()
     #% vvvv
     if loop == "custom": #not prefix:
-        train_loop(epochs_num, wrap, optimizer, scheduler)
+        best_path = train_loop(epochs_num, wrap, optimizer, scheduler)
         mbp("start")
         # Initialize our Trainer
     elif loop == "atm":
@@ -2915,7 +2918,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         mbp("train")
         train_result = trainer.train()
 
-    if model_args.save_prefix_only:
+    if not colab and model_args.save_prefix_only:
+        Path(training_args.output_dir).mkdir(exist_ok=True, parents=True)
         save_prompts(wrapped_model, output_dir=training_args.output_dir, 
                 attn_prefix_tuning=model_args.attn_prefix_tuning,
                 shared_attn=model_args.shared_attn, 
@@ -2929,9 +2933,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     else:
         mlog.info("No save model is on!!")
     # vvvv
-    if False: #do_valid and not no_save_best:
+    if best_path:
         mlog.info("loading best model")
-        best_path = os.path.join(save_path, "best_model")
         model, tokenizer, _, atm_config = load_model(model_id, best_path) 
         if no_save_model:
             shutil.rmtree(best_path)
