@@ -484,9 +484,14 @@ def run(ctx, conf_path, base_conf, experiment,
                 all_vars = jargs.values()
                 jfname = Path(config_file).stem
                 values = []
-                for x in all_vars:
+                tags = []
+                for ii, x in enumerate(all_vars):
                     if type(x) == str:
                         xx = x.split("#")
+                        if "#" in x:
+                            _vname = "ARG-" + list(var_names)[ii] 
+                            tags.append(_vname)
+                            var += "--" + _vname + "=" + x 
                         z = []
                         for y in xx:
                             if y.isdigit():
@@ -576,7 +581,6 @@ def run(ctx, conf_path, base_conf, experiment,
                        multi_only = True
 
                if not args["tag"]:
-                   tags = []
                    for vv, cc in zip(var_names, values):
                        if len(cc) > 1 and vv != "config_file":
                            tags.append(vv)
@@ -1585,7 +1589,7 @@ def run(ctx, conf_path, base_conf, experiment,
     type=str,
     help="sub type for model"
 )
-def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, pl_learning_rate, router_lr, do_eval, cont, wrap, prefix, frozen, freeze_step, unfreeze_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, log_per_exp, wb, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, rel_filter, ex_type, last_data, save_df, flat_prompts, num_workers, scorers, train_start, no_save_model, no_save_best, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, unfreeze_parts, freeze_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, preview, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args, match, dpy, prompt_tune, prompt_config_file, load_prompt, data_name, seed, do_valid, break_point, skilled_variant, int_dim, prompt_token_num, n_skills, n_prompts, init_temperature, trunc_router, general_type, router_variant, freeze_target, freeze_skill, add_prior, freeze_exclude, config_file, stype):
+def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, pl_learning_rate, router_lr, do_eval, cont, wrap, prefix, frozen, freeze_step, unfreeze_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, log_per_exp, wb, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, rel_filter, ex_type, last_data, save_df, flat_prompts, num_workers, scorers, train_start, no_save_model, no_save_best, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, unfreeze_parts, freeze_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, preview, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args, match, dpy, prompt_tune, prompt_config_file, load_prompt, data_name, seed, do_valid, break_point, skilled_variant, int_dim, prompt_token_num, n_skills, n_prompts, init_temperature, trunc_router, general_type, router_variant, freeze_target, freeze_skill, add_prior, freeze_exclude, config_file, stype, **kwargs):
 
     #%% some hyper-parameters
 
