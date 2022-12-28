@@ -4,6 +4,7 @@ from comet.train.common import *
 import nltk
 import math
 from nltk.tokenize import word_tokenize
+from comet.transformers_ptuning import PTuningWrapper
 from nltk.translate.bleu_score import SmoothingFunction, sentence_bleu
 from sentence_transformers import SentenceTransformer, util
 from sentence_transformers import CrossEncoder
@@ -65,7 +66,9 @@ def evaluate1(tokenizer, eval_data_loader, model, device, seed =0, mode="dev", s
     all_gens = []
     all_resps = []
     all_queries = []
-    gen_model = model.underlying_model if wrap else model
+    gen_model = model
+    if isinstance(model, PTuningWrapper): 
+        gen_model = model.underlying_model 
     with torch.no_grad():
         for model_batch, no_model_batch in eval_data_loader:
             for k in model_batch:
