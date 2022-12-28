@@ -475,6 +475,7 @@ def run(ctx, conf_path, base_conf, experiment,
            args["experiment"] = experiment 
            args["preview"] = preview 
            args["skip"] = True # skip experiment
+           args["config_file"] = config_file
            conf_files = []
            if config_file and config_file.endswith(".json"):
                 # let's parse it to get our arguments.
@@ -509,7 +510,7 @@ def run(ctx, conf_path, base_conf, experiment,
                     comb_str = json.dumps(comb, indent=2)
                     with open(comb_file, "w") as f:
                        print(comb_str, file=f) 
-                var += "--config_file=" + "#".join(conf_files)
+                #var += "--config_file=" + "#".join(conf_files)
            global logPath
            if log_path:
                logPath = log_path
@@ -1623,6 +1624,21 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         # let's parse it to get our arguments.
         model_args, data_args, training_args, adapter_args = parser.parse_json_file(
             json_file=config_file)
+        for k,v in kwargs.items():
+            if k.startswith("ARG-"):
+                k = k.replace("ARG-","")
+                if v.isdigit():
+                    v = int(v)
+                elif isfloat(v):
+                    v = float(v)
+                if hasattr(model_args,k):
+                    setattr(model_args, k, v)
+                if hasattr(data_args,k):
+                    setattr(data_args, k, v)
+                if hasattr(training_args,k):
+                    setattr(training_args, k, v)
+                if hasattr(adapter_args,k):
+                    setattr(adapter_args, k, v)
     if wb:
         wandb.init(project="plearning")
 

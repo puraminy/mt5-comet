@@ -70,6 +70,17 @@ def getFname(name, path=""):
 def tinfo(text, *args, **kwargs):
     tlog.info(text, *args)
 
+
+def isfloat(element: any) -> bool:
+    #If you expect None to be passed:
+    if element is None: 
+        return False
+    try:
+        float(element)
+        return True
+    except ValueError:
+        return False
+
 import inspect
 import sys
 BREAK_POINT = 0
