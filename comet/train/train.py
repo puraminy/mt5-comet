@@ -2769,9 +2769,10 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                 try:
                     if do_valid and cycle > 0 and (global_step % cycle == 0 and global_step > 0): #validation
                         _model = wrapped_model
-                        with torch.no_grad():
-                            mlog.info("Updating the model weights before evaluaton...")
-                            wrapped_model.update_model_weight()
+                        if isinstance(wrapped_model, PTuningWrapper): 
+                            with torch.no_grad():
+                                mlog.info("Updating the model weights before evaluaton...")
+                                wrapped_model.update_model_weight()
                         a1, a2, s1, eval_loss = evaluate1(tokenizer, eval_dataloader, _model, device, seed, mode="dev", save_path=save_path, task_ids=task_ids)
                         log_string =  "dev acc({}, {} st:{}): eval_loss:{}  | best_eval_loss:{}   best_step: {} ".format(a1, a2, s1, eval_loss, best_eval_loss, best_step) 
                         if eval_loss <= best_eval_loss: 
