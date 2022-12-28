@@ -954,7 +954,7 @@ def run(ctx, conf_path, base_conf, experiment,
 @click.option(
     "--val_path",
     "-vp",
-    default="valid.tsv",
+    default="validation.tsv",
     type=str,
     help=""
 )
@@ -1654,7 +1654,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         else:
             train_path = os.path.join(data_path, "train.tsv")
             test_path = os.path.join(data_path, "test.tsv")
-            val_path = os.path.join(data_path, "valid.tsv")
+            val_path = os.path.join(data_path, "validation.tsv")
             sample_path = os.path.join(data_path, "sample.tsv")
 
         assert Path(train_path).is_file(), f"Train path {train_path} is not!"
