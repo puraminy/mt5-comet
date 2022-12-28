@@ -1621,6 +1621,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         AdapterTrainingArguments))
     model_args = data_args = training_args = adapter_args = None
     epochs_num = int(epochs_num)
+    batch_size = int(batch_size)
     if config_file and config_file.endswith(".json"):
         # let's parse it to get our arguments.
         model_args, data_args, training_args, adapter_args = parser.parse_json_file(
@@ -2377,7 +2378,6 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         training_round += 1
 
     accumulation_tiny_steps = 1 
-    batch_size = int(batch_size)
     if "gpt" in model_id:
         accumulation_tiny_steps = 1
     if batch_size >= 2:

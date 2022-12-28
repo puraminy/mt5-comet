@@ -66,7 +66,7 @@ elif [ "$m" -eq "1" ]; then
 fi
 seed=123
 
-exp=xint-att-cc2
+exp=xint-att-cc-42
 log=${home}/logs   #/${exp}
 echo "log: ${log}"
 #filter=xIntent#xAttr#xNeed#xReact#xEffect#oReact#xWant#multi
@@ -84,7 +84,7 @@ fex=none #skills_weight#none
 skill=none #learned#private#none
 mt=unsup-wrap-nat
 
-runlite run -exp $exp -cfg configs/baselines/prompt_tuning.json -lp ${log} -bc base -ov $g2 -var method=${mt}--rel_filter=$filter--train_samples=$train--epochs_num=$epochs--prompt_token_num=8--repeat=4--temp_num=$tn--loop=custom#atm--test_samples=$test--flat_prompts=$merge--frozen=False--seed=123--n_prompts=1--trunc_router=$trunc--router_lr=0.001--pl_learning_rate=0.005--encoder_type=$enc_type--router_variant=$router--freeze_exclude=$fex--stype=atm--skilled_variant=$skill--n_skills=4--follow_method=True --scorers="rouge-bert" --data_path=${home}/mt5-comet/comet/data/atomic2020/sel --do_valid=False --val_samples=10  --cycle=100 $g1 --batch_size=8 --trial=$trial  --model_id=$model --learning_rate=0.3 --do_valid=True 
+runlite run -exp $exp -cfg configs/baselines/prompt_tuning.json -lp ${log} -bc base -ov $g2 -var method=${mt}--rel_filter=$filter--train_samples=$train--epochs_num=$epochs--prompt_token_num=8--repeat=4--temp_num=$tn--loop=atm#custom--test_samples=$test--flat_prompts=$merge--frozen=False--seed=123--n_prompts=1--trunc_router=$trunc--router_lr=0.001--pl_learning_rate=0.005--encoder_type=$enc_type--router_variant=$router--freeze_exclude=$fex--stype=atm--skilled_variant=$skill--n_skills=4--follow_method=True --scorers="rouge-bert" --data_path=${home}/mt5-comet/comet/data/atomic2020/sel --do_valid=False --val_samples=10  --cycle=100 $g1 --batch_size=8 --trial=$trial  --model_id=$model --learning_rate=0.3 --do_valid=True 
 
 # configs/baselines/prompt_tuning.json 
 # configs/attempt/single_task.json  
