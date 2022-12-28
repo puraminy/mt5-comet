@@ -1614,6 +1614,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     set_random_seed(seed)
     
     args = locals() #run_args # input parameters
+    args = {**args, **kwargs}
     set_args(args.copy())
 
     parser = HfArgumentParser((ModelArguments, 
