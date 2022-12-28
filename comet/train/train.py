@@ -431,13 +431,20 @@ def cli():
     type=str,
     help=""
 )
+@click.option(
+    "--config_file",
+    "-cfg",
+    default="",
+    type=str,
+    help=""
+)
 @click.pass_context
 #rrrrrrrrrrr
 def run(ctx, conf_path, base_conf, experiment, 
         exclude_conf, include_conf, overwrite_conf, var, 
         save_model, addto, rem, save_data, load_data, add_prefix, wrap, 
         only_var, sep, num_exps, one, cpu, undone, repeat, log_path, 
-        dpy, port, break_point, reval_bests, trial, preview):
+        dpy, port, break_point, reval_bests, trial, preview, config_file):
 
      if dpy:
         debugpy.listen(('0.0.0.0', int(port)))
@@ -468,6 +475,36 @@ def run(ctx, conf_path, base_conf, experiment,
            args["experiment"] = experiment 
            args["preview"] = preview 
            args["skip"] = True # skip experiment
+           conf_files = []
+           if config_file and config_file.endswith(".json"):
+                # let's parse it to get our arguments.
+                with open(config_file) as json_file:
+                    jargs = json.load(json_file)
+                var_names = jargs.keys() 
+                all_vars = jargs.values()
+                jfname = Path(config_file).stem
+                values = []
+                for x in all_vars:
+                    if type(x) == str:
+                        xx = x.split("#")
+                        z = []
+                        for y in xx:
+                            if y.isdigit():
+                                z.append(int(y))
+                            else:
+                                z.append(y)
+                        values.append(z)
+                    else:
+                        values.append([x])
+                #values = [x.split("#") if type(x) == str else [x] for x in all_vars]
+                combs = [dict(zip(var_names, comb)) for comb in itertools.product(*values)]
+                for i,comb in enumerate(combs):
+                    comb_file = config_file.replace(jfname, jfname + "_" + str(i))
+                    conf_files.append(comb_file)
+                    comb_str = json.dumps(comb, indent=2)
+                    with open(comb_file, "w") as f:
+                       print(comb_str, file=f) 
+                var += "--config_file=" + "#".join(conf_files)
            global logPath
            if log_path:
                logPath = log_path
@@ -541,7 +578,7 @@ def run(ctx, conf_path, base_conf, experiment,
                if not args["tag"]:
                    tags = []
                    for vv, cc in zip(var_names, values):
-                       if len(cc) > 1:
+                       if len(cc) > 1 and vv != "config_file":
                            tags.append(vv)
                            if preview and not vv in preview:
                                var_names.remove(vv)
@@ -1573,15 +1610,15 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     
     args = locals() #run_args # input parameters
     set_args(args.copy())
-    parser = HfArgumentParser((ModelArguments, DataTrainingArguments, TrainingArguments,
-                               AdapterTrainingArguments))
+
+    parser = HfArgumentParser((ModelArguments, 
+        DataTrainingArguments, TrainingArguments,
+        AdapterTrainingArguments))
     model_args = data_args = training_args = adapter_args = None
     if config_file and config_file.endswith(".json"):
-        # If we pass only one argument to the script and it's the path to a json file,
         # let's parse it to get our arguments.
         model_args, data_args, training_args, adapter_args = parser.parse_json_file(
             json_file=config_file)
-
     if wb:
         wandb.init(project="plearning")
 
