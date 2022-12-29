@@ -2302,6 +2302,9 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     for k,v in run_args.items():
         if not k in exp_info:
             exp_info[k] = v
+    for k,v in kwargs.items():
+        if not k in exp_info:
+            exp_info[k] = v
 
     mbp("start")
     if not gen_bs:
