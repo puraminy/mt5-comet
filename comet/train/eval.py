@@ -1,6 +1,7 @@
 
 from itertools import islice
 from comet.train.common import *
+import comet.train.mylogs as mylogs 
 import nltk
 import math
 from nltk.tokenize import word_tokenize
@@ -262,7 +263,7 @@ def generate(model, tokenizer, batch, gen_token = "", gen_param = "greedy", at_m
         gen_kwargs["knowledge_input_ids"] = batch["knowledge_input_ids"]
     if "knowledge_attention_mask" in batch:
         gen_kwargs["knowledge_attention_mask"] = batch["knowledge_attention_mask"]
-    if "task" in batch:
+    if "task" in batch and mylogs.args("stype") == "atm":
         gen_kwargs["task"] = batch["task"]
 
     input_batch = {}
