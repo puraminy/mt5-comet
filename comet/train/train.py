@@ -501,13 +501,13 @@ def run(ctx, conf_path, base_conf, experiment,
                     else:
                         values.append([x])
                 #values = [x.split("#") if type(x) == str else [x] for x in all_vars]
-                combs = [dict(zip(var_names, comb)) for comb in itertools.product(*values)]
-                for i,comb in enumerate(combs):
-                    comb_file = config_file.replace(jfname, jfname + "_" + str(i))
-                    conf_files.append(comb_file)
-                    comb_str = json.dumps(comb, indent=2)
-                    with open(comb_file, "w") as f:
-                       print(comb_str, file=f) 
+                #combs = [dict(zip(var_names, comb)) for comb in itertools.product(*values)]
+                #for i,comb in enumerate(combs):
+                    #comb_file = config_file.replace(jfname, jfname + "_" + str(i))
+                    #conf_files.append(comb_file)
+                    #comb_str = json.dumps(comb, indent=2)
+                    #with open(comb_file, "w") as f:
+                    #   print(comb_str, file=f) 
                 #var += "--config_file=" + "#".join(conf_files)
            global logPath
            if log_path:
@@ -2482,7 +2482,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     if freeze_exclude == "none":
         freeze_exclude = ""
     if frozen: # and stype != "atm":
-        if stype == "atm": 
+        if stype == "atm" and adapter_args.prefix_tuning: 
             adapter_config = get_adapter_config(
                     adapter_args, data_args, training_args, atm_config)
             model = modify_model_after_init(
@@ -2618,7 +2618,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             else:
                 paras = []
                 lrs = []
-                for encoder in model.prompt_encoders:
+                for encoder in wrapped_model.prompt_encoders:
                     if isinstance(encoder, MatPromptEncoder):
                         paras.append([encoder.router])
                         lrs.append(router_learning_rate)
@@ -2634,7 +2634,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                         if para_list:
                             paras.append(para_list)
                             lrs.append(pl_learning_rate)
-                for encoder in model.general_encoders:
+                for encoder in wrapped_model.general_encoders:
                     if encoder.router.requires_grad:
                         paras.append([encoder.router])
                         lrs.append(router_learning_rate)
