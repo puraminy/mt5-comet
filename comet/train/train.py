@@ -1630,6 +1630,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         setattr(training_args,"per_device_train_batch_size", batch_size)
         for k,v in kwargs.items():
             if k.startswith("arg-"):
+                mlog.info("ARGS: %s=%s", k, v)
                 k = k.replace("arg-","")
                 if v.isdigit():
                     v = int(v)
