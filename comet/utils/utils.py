@@ -89,6 +89,11 @@ def freeze_model_params(model, adapter_args, adapter_config):
                     for param_name, param in sub_module.named_parameters():
                         param.requires_grad = True
 
+    if adapter_args.prompt_tuning:
+        for n, m in model.named_parameters():
+            if not "prompt_encoders" in n and not "general_encoders" in n:
+                m.requires_grad = False
+
     if adapter_args.prefix_tuning:
         freeze_params(model)
         if adapter_config.attn_prefix is False:

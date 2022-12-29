@@ -78,6 +78,8 @@ class AdapterTrainingArguments:
         default=True, metadata={"help": "If set, adds adapters in the self attention"})
     prefix_tuning: Optional[bool] = field(
         default=False, metadata={"help": "If set, uses prefix tuning."})
+    prompt_tuning: Optional[bool] = field(
+        default=False, metadata={"help": "If set, uses prompt tuning."})
     prefix_dim: Optional[int] = field(
         default=100, metadata={"help": "Specifies the prefix embedding dimension."})
     init_prefix_from_vocab: Optional[bool] = field(default=False, metadata={

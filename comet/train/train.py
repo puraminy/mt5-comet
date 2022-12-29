@@ -1536,11 +1536,11 @@ def run(ctx, conf_path, base_conf, experiment,
     help="Trunc router in wrapper"
 )
 @click.option(
-    "--general_type",
+    "--skill_enc_type",
     "-gt",
     default="lstm",
     type=str,
-    help="The type of general prompt encoders"
+    help="The type of skill prompt encoders"
 )
 @click.option(
     "--router_variant",
@@ -1589,7 +1589,7 @@ def run(ctx, conf_path, base_conf, experiment,
     type=str,
     help="sub type for model"
 )
-def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, pl_learning_rate, router_lr, do_eval, cont, wrap, prefix, frozen, freeze_step, unfreeze_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, log_per_exp, wb, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, rel_filter, ex_type, last_data, save_df, flat_prompts, num_workers, scorers, train_start, no_save_model, no_save_best, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, unfreeze_parts, freeze_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, preview, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args, match, dpy, prompt_tune, prompt_config_file, load_prompt, data_name, seed, do_valid, break_point, skilled_variant, int_dim, prompt_token_num, n_skills, n_prompts, init_temperature, trunc_router, general_type, router_variant, freeze_target, freeze_skill, add_prior, freeze_exclude, config_file, stype, **kwargs):
+def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_method, train_samples, test_set, val_samples, test_samples, load_path, data_path, train_path, val_path, test_path, sample_path, overwrite, save_path, output_name, lang, pred_tresh, ignore_blanks,only_blanks, include, exclude, nli_group, learning_rate, pl_learning_rate, router_lr, do_eval, cont, wrap, prefix, frozen, freeze_step, unfreeze_step, cpu, load_prompt_path, verbose, cycle, batch_size, path, from_dir, is_flax, config,clear_logs, gen_param, print_log, log_per_exp, wb, training_round, epochs_num, per_record, per_prefix, is_even, start, prompt_length, prompt_pos, zero_shot, sampling, opt_type, samples_per_head, group_sets, group_by, deep_log, trans, encoder_type, rel_filter, ex_type, last_data, save_df, flat_prompts, num_workers, scorers, train_start, no_save_model, no_save_best, gen_bs, shared_embs, no_confirm, follow_method, repeat, trial, unfreeze_parts, freeze_parts, pid, use_dif_templates, break_sent,sort, do_preproc, replace_blanks, loop, know, preview, ph_num, save_data, tag, skip, use_all_data, multi, temp_num, undone, someone, run_args, match, dpy, prompt_tune, prompt_config_file, load_prompt, data_name, seed, do_valid, break_point, skilled_variant, int_dim, prompt_token_num, n_skills, n_prompts, init_temperature, trunc_router, skill_enc_type, router_variant, freeze_target, freeze_skill, add_prior, freeze_exclude, config_file, stype, **kwargs):
 
     #%% some hyper-parameters
 
@@ -1888,6 +1888,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                 )
                 config.train_task_adapters = adapter_args.train_task_adapters
                 config.prefix_tuning = adapter_args.prefix_tuning
+                config.prompt_tuning = adapter_args.prompt_tuning
                 config.attn_prefix_tuning = model_args.attn_prefix_tuning
                 config.attn_method = model_args.attn_method
                 config.ignore_target = model_args.ignore_target
@@ -2246,7 +2247,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     def freeze(modules_to_freeze, exclude=""):
         for module in modules_to_freeze:
             if hasattr(module, "parameters"):
-                for param in module.parameters():
+                for name, param in module.named_parameters():
                     if exclude and exclude in name:
                         continue
                     param.requires_grad = False  # Actual freezing operation
@@ -2438,23 +2439,23 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     }
     #prefix_config = None
 
-    general_prompts = {}
+    skill_prompts = {}
     prompts = {} 
     if not skilled_variant:
         for n in range(prompt_token_num):
             l = []
             for m in range(prompt_token_num):
-                l.append("<g"+str(n) + "@" + general_type + "_" + str(m)+ ">") 
-            general_prompts["g"+str(n) + "@" + general_type]  = l 
+                l.append("<g"+str(n) + "@" + skill_enc_type + "_" + str(m)+ ">") 
+            skill_prompts["g"+str(n) + "@" + skill_enc_type]  = l 
         if flat_prompts == "none": flat_prompts = ""
         assert flat_prompts != "none"
         prompts = sample_dataset.prompts
     wrapped_model = model_to_wrap
     if adapter_args and not adapter_args.prefix_tuning:
-        wrapped_model = wrap_model(model_to_wrap, tokenizer, encoder_type, load_prompt_path, flat_prompts=flat_prompts, method = method, shared_embs= shared_embs, skilled_variant=skilled_variant, prefix_config=prefix_config, n_tasks=n_tasks, n_skills=n_skills, 
+        wrapped_model = add_encoders(model_to_wrap, tokenizer, encoder_type, load_prompt_path, flat_prompts=flat_prompts, method = method, shared_embs= shared_embs, skilled_variant=skilled_variant, prefix_config=prefix_config, n_tasks=n_tasks, n_skills=n_skills, 
             exp_id=exp_id, 
             encoder_prompts= prompts,
-            general_prompts= general_prompts, 
+            skill_prompts= skill_prompts, 
             router_variant=router_variant, device=device) 
 
     if not prefix:
@@ -2464,12 +2465,12 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
 
     def add_parts(_list, parts):
         if parts == "encoder":
-            for encoder in wrapped_model.general_encoders:
+            for encoder in wrapped_model.skill_encoders:
                 _list.append(encoder)
             for encoder in wrapped_model.prompt_encoders:
                 _list.append(encoder)
         if parts == "router":
-            for encoder in wrapped_model.general_encoders:
+            for encoder in wrapped_model.skill_encoders:
                 if encoder.router is not None: 
                     _list.append(encoder.router)
             for encoder in wrapped_model.prompt_encoders:
@@ -2482,7 +2483,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     if freeze_exclude == "none":
         freeze_exclude = ""
     if frozen: # and stype != "atm":
-        if stype == "atm" and adapter_args.prefix_tuning: 
+        if stype == "atm":
             adapter_config = get_adapter_config(
                     adapter_args, data_args, training_args, atm_config)
             model = modify_model_after_init(
@@ -2500,11 +2501,11 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
 
     fname = "output/" + str(experiment) + "-" + str(exp_id) + "-" + flat_prompts + ".txt"
     Path("output").mkdir(exist_ok = True)
-    if isinstance(wrapped_model, PTuningWrapper):
+    if True: #isinstance(wrapped_model, PTuningWrapper):
         f = open(fname, "w")
         print("Number of prompts:" + str(len(wrapped_model.prompt_encoders)), file=f)
         print("Train prompts:", prompts, file=f) 
-        if wrapped_model.flat_encoder:
+        if False: #wrapped_model.flat_encoder:
             print(wrapped_model.flat_encoder.id_offset, file=f)
             print(wrapped_model.flat_encoder.prompt_ids, file=f)
             print(wrapped_model.flat_encoder.input_ids, file=f)
@@ -2526,7 +2527,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         return
 
     wrapped_model.to(device=device)
-    if isinstance(wrapped_model, PTuningWrapper):
+    if True: #isinstance(wrapped_model, PTuningWrapper):
         if wrapped_model.prompt_encoders:
             mlog.info("Number of encoders: %s", len(wrapped_model.prompt_encoders))
             for encoder in wrapped_model.prompt_encoders:
@@ -2534,11 +2535,11 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                 if encoder.router is not None: 
                     encoder.router.to(device=device)
                 encoder.device = device
-            for encoder in wrapped_model.general_encoders:
+            for encoder in wrapped_model.skill_encoders:
                 mlog.info("General encoder %s", encoder.name)
                 encoder.device = device
             wrapped_model.prompt_encoders.to(device=device)
-            wrapped_model.general_encoders.to(device=device)
+            wrapped_model.skill_encoders.to(device=device)
 
         if wrapped_model.merge_encoder:
             wrapped_model.merge_encoder.to(device)
@@ -2550,7 +2551,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         rgrad = [p for p in wrapped_model.parameters() if p.requires_grad]
         nrgrad = [p for p in wrapped_model.parameters() if not p.requires_grad]
 
-    if isinstance(wrapped_model, PTuningWrapper):
+    if True: #isinstance(wrapped_model, PTuningWrapper):
         _sum = 0
         for encoder in wrapped_model.prompt_encoders:
             enc_rgrad = [p for p in encoder.parameters() if p.requires_grad]
@@ -2608,8 +2609,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             #{"params": model.z, "lr": Az_learning_rate},
         ]
         if opt_type == "adam":
-            if (not isinstance(wrapped_model, PTuningWrapper) or
-                len(wrapped_model.prompt_encoders) == 0):
+            if True:
                 optimizer = AdamW(optimizer_grouped_parameters,eps=1e-8)
                 #scheduler = get_linear_schedule_with_warmup(optimizer,warm_up_steps,iterations)
                 scheduler = get_linear_schedule_with_warmup(
@@ -2634,7 +2634,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                         if para_list:
                             paras.append(para_list)
                             lrs.append(pl_learning_rate)
-                for encoder in wrapped_model.general_encoders:
+                for encoder in wrapped_model.skill_encoders:
                     if encoder.router.requires_grad:
                         paras.append([encoder.router])
                         lrs.append(router_learning_rate)
@@ -2758,8 +2758,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     cycle = int(cycle)
     wrap = True
     exp_info["enc_num"] = 0
-    if isinstance(wrapped_model, PTuningWrapper): 
-        exp_info["enc_num"] = len(wrapped_model.prompt_encoders) 
+    exp_info["enc_num"] = len(wrapped_model.prompt_encoders) 
     exp_info["train_records"] = train_dataset.num_records
     exp_info["iterations"] = iterations 
     mbp("start")
@@ -2800,10 +2799,9 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                 try:
                     if do_valid and cycle > 0 and (global_step % cycle == 0 and global_step > 0): #validation
                         _model = wrapped_model
-                        if isinstance(wrapped_model, PTuningWrapper): 
-                            with torch.no_grad():
-                                mlog.info("Updating the model weights before evaluaton...")
-                                wrapped_model.update_model_weight()
+                        with torch.no_grad():
+                            mlog.info("Updating the model weights before evaluaton...")
+                            wrapped_model.update_model_weight()
                         a1, a2, s1, eval_loss = evaluate1(tokenizer, eval_dataloader, _model, device, seed, mode="dev", save_path=save_path, task_ids=task_ids)
                         log_string =  "dev acc({}, {} st:{}): eval_loss:{}  | best_eval_loss:{}   best_step: {} ".format(a1, a2, s1, eval_loss, best_eval_loss, best_step) 
                         if eval_loss <= best_eval_loss: 
@@ -2856,9 +2854,6 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                     out = forward_step(_model, batch, no_model_batch, task_ids=task_ids)
                     loss = out["loss"]
                     loss.backward()
-                    if isinstance(wrapped_model, PTuningWrapper): 
-                        for encoder in wrapped_model.prompt_encoders:
-                            pass
                     optimizer.step()
                     scheduler.step()
                     step+=1
@@ -2880,9 +2875,6 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         pbar.close()
         sw.close()
         return best_path
-        #with torch.no_grad():
-           # mlog.info("Updating the model weights before evaluaton...")
-           # wrapped_model.update_model_weight()
     #% vvvv
     if loop == "custom": #not prefix:
         best_path = train_loop(epochs_num, wrap, optimizer, scheduler)
@@ -2948,6 +2940,10 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         )
         mbp("train")
         train_result = trainer.train()
+
+    with torch.no_grad():
+       mlog.info("Updating the model weights before evaluaton...")
+       wrapped_model.update_model_weight()
 
     if not colab and model_args.save_prefix_only:
         Path(training_args.output_dir).mkdir(exist_ok=True, parents=True)

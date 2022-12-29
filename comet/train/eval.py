@@ -290,8 +290,9 @@ def generate(model, tokenizer, batch, gen_token = "", gen_param = "greedy", at_m
                     **gen_kwargs,
                     )
         else:
+            breakpoint()
             hyps = model.generate(
-                    input_ids,
+                    input_ids=input_ids,
                     attention_mask=attention_mask,
                     **gen_kwargs,
                     )

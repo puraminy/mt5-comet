@@ -46,6 +46,9 @@ from transformers.utils import logging
 from transformers.utils.model_parallel_utils import assert_device_map, get_device_map
 from .configuration_t5 import T5Config
 
+#### My import
+from comet.transformers_ptuning.encoders import * 
+
 from comet.adapters import AdapterController
 from typing import Dict, Any
 
@@ -902,10 +905,21 @@ class T5Stack(T5PreTrainedModel):
         self.embed_tokens = embed_tokens
 
         self.is_decoder = config.is_decoder
+        ################# MyCode
+        self.prompt_encoders = []
+        self.merge_encoder = None
+        self.skill_encoders = []
+        self.embedding_dim = self.config.hidden_size
+        self.model_embeddings = self.get_input_embeddings()
+        self.replacing_token_id = 0 #replacing_token_id
+        self.id_offset = -1 # offset of prompt tokens in tokenizer
+        self.prompt_token_fn = self.get_prompt_token_fn() 
+        #############################################################
         #######################################
         self.ignore_target = ignore_target
         self.prefix_emb = prefix_emb if self.ignore_target is False else None
         self.prefix_tuning = config.prefix_tuning
+        self.prompt_tuning = config.prompt_tuning
         self.attn_prefix_tuning = attn_prefix_tuning
         self.mul_prefix_emb = mul_prefix_emb
         self.attn_method = attn_method
@@ -950,6 +964,9 @@ class T5Stack(T5PreTrainedModel):
         self.model_parallel = False
         self.device_map = None
 
+    ################# MyCode
+    def get_prompt_token_fn(self):
+        return lambda x: (x>=self.id_offset) #&(x<id_offset+length)
     ######################################################
     def per_layer_config(self, config, layer_id, adapter_config, is_decoder):
         """Sets the train_task_adapter in the config, based on the information given."""
@@ -1064,6 +1081,31 @@ class T5Stack(T5PreTrainedModel):
         if inputs_embeds is None:
             assert self.embed_tokens is not None, "You have to initialize the model with valid token embeddings"
             inputs_embeds = self.embed_tokens(input_ids)
+            ################ MyCode
+            if len(self.prompt_encoders) > 0 or len(self.skill_encoders) > 0:
+                tids = task_ids
+                prompt_masks = self.prompt_token_fn(input_ids)
+                if prompt_masks.any():
+                    input_ids_clone = input_ids.clone()
+                    if self.replacing_token_id is not None:
+                        # replace prompt ids in input_ids with replacing token
+                        input_ids_clone[prompt_masks]=self.replacing_token_id
+                    # find the model embeddings of input ids except for prompt tokens
+                    inputs_embeds = self.model_embeddings(input_ids_clone)
+                    device=inputs_embeds.device
+                    all_prompts_input_ids = input_ids[prompt_masks]
+                    for encoder in self.prompt_encoders:
+                        prompt_token_fn = encoder.get_prompt_token_fn()
+                        encoder_masks = prompt_token_fn(input_ids)
+                        if encoder_masks.any():
+                            #find input ids for prompt tokens
+                            prompt_input_ids = input_ids[encoder_masks]
+                            #call forwards on prompt encoder whose outputs are prompt embeddings
+                            prompt_embeds = encoder(prompt_input_ids, tids).to(device)
+                            inputs_embeds[encoder_masks]=prompt_embeds
+                    input_ids = None
+            ################ My code End
+
             ######################################
             if self.append_prefix and self.append_attn_prefix is False:
                 inputs_embeds = torch.cat([self.prefix_emb.unsqueeze(0).repeat(
@@ -1693,6 +1735,11 @@ class T5Model(T5PreTrainedModel):
         )
 
 
+
+def _isin(tensor:torch.Tensor,values:torch.Tensor):
+    return (tensor[..., None] == values).any(-1)
+
+
 @add_start_docstrings("""T5 Model with a `language modeling` head on top. """, T5_START_DOCSTRING)
 class T5ForConditionalGeneration(T5PreTrainedModel):
     _keys_to_ignore_on_load_missing = [
@@ -1708,7 +1755,6 @@ class T5ForConditionalGeneration(T5PreTrainedModel):
         super().__init__(config)
         self.model_dim = config.d_model
         self.shared = nn.Embedding(config.vocab_size, config.d_model)
-        #############################################################
         self.prefix_tuning = config.prefix_tuning
         self.attn_prefix_tuning = config.attn_prefix_tuning
         self.attn_method = config.attn_method
@@ -1756,7 +1802,34 @@ class T5ForConditionalGeneration(T5PreTrainedModel):
         self.model_parallel = False
         self.device_map = None
 
-    ###############################################
+    ########## My functions
+    @property
+    def prompt_encoders(self):
+        return self.encoder.prompt_encoders
+    
+    @property
+    def skill_encoders(self):
+        return self.encoder.skill_encoders
+
+    @property
+    def merge_encoder(self):
+        return self.encoder.merge_encoder
+
+    def set_encoders(self, prompt_encoders, skill_encoders, offset):
+        self.encoder.prompt_encoders = torch.nn.ModuleList(prompt_encoders)
+        self.encoder.skill_encoders = torch.nn.ModuleList(skill_encoders)
+        self.encoder.id_offset = offset 
+
+    def update_model_weight(self, task_ids = None):
+        self.cur_embeddings = self.get_input_embeddings()
+        if self.merge_encoder:
+            self.merge_encoder.dump_embeddings_into(self.cur_embeddings.weight, task_ids)
+
+        for encoder in self.prompt_encoders:
+            # fill the current embeddings with weights of encoder
+            encoder.dump_embeddings_into(self.cur_embeddings.weight, task_ids)
+            #self.prompt_encoder.dump_embeddings_into(self.model_embeddings.weight)
+    ################## End my functions
 
     def init_prefix_weights(self):
         if self.init_prefix_from_vocab:
@@ -1931,7 +2004,7 @@ class T5ForConditionalGeneration(T5PreTrainedModel):
             if attention_mask is not None:
                 attention_mask = torch.cat([torch.ones((attention_mask.shape[0], self.prefix_dim)).to(
                     attention_mask.device), attention_mask], dim=1)
-
+ 
         # Encode if needed (training, first prediction pass)
         if encoder_outputs is None:
             # Convert encoder inputs in embeddings if needed

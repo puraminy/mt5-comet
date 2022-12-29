@@ -9,6 +9,7 @@ import numpy as np
 from comet.utils.myutils import *
 from comet.transformers_ptuning import PTuningWrapper
 from comet.transformers_ptuning.ptuning_wrapper import * 
+from comet.transformers_ptuning.encoders import * 
 from comet.polytropon import SkilledMixin
 from tqdm import tqdm
 import logging, sys
@@ -407,20 +408,20 @@ def extend_tokenizer(tokenizer, prompt_tokens = [], model_id=""):
         mlog.info("No new token was added")
 
 
-def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", flat_prompts=False, method="", shared_embs =False, skilled_variant="", prefix_config=None, exp_id="", encoder_prompts={}, general_prompts={}, n_tasks=2, n_skills=2, router_variant="fixed", device="cuda"):
+def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", flat_prompts=False, method="", shared_embs =False, skilled_variant="", prefix_config=None, exp_id="", encoder_prompts={}, skill_prompts={}, n_tasks=2, n_skills=2, router_variant="fixed", device="cuda"):
     wrapped_model = None
     offsets = []
     tokenize_relations(tokenizer)
     flat_prompt_tokens = []
     ii = 1
-    general_encoders = []
-    for rel, prompt_tokens in general_prompts.items():
+    skill_encoders = []
+    for rel, prompt_tokens in skill_prompts.items():
         mlog.info("%s )************* General) Wrapping model for %s", ii, rel)
         if not flat_prompts:
             enc_router = torch.ones((n_tasks, len(prompt_tokens)), device=device)
             encoder, offset = create_encoder(rel, model, tokenizer, prompt_tokens, encoder_type, wrapped_model, prefix_config, enc_router)
             encoder.gid = (ii - 1) % n_tasks 
-            general_encoders.append(encoder)
+            skill_encoders.append(encoder)
             offsets.append(offset)
             ii += 1
     
@@ -478,7 +479,7 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", flat_promp
     mbp("")
     for encoder in prompt_encoders:
         if isinstance(encoder, MergePromptEncoderBase):
-            encoder.set_encoders(general_encoders)
+            encoder.set_encoders(skill_encoders)
             encoder.trunc_router = logs.main_args["trunc_router"]
             encoder.wandb = logs.main_args["wb"]
 
@@ -496,10 +497,101 @@ def wrap_model(model, tokenizer, encoder_type="lstm", prompt_path="", flat_promp
     else:
         wrapped_model = PTuningWrapper(model, 
                 prompt_encoders, 
-                general_encoders=general_encoders, 
+                skill_encoders=skill_encoders, 
                 prompt_token_fn=get_prompt_token_fn(id_offset), 
                 merge_encoder=merge_encoder, flat_encoder=flat_encoder, 
                 args=logs.main_args)
+    return wrapped_model
+
+def add_encoders(model, tokenizer, encoder_type="lstm", prompt_path="", flat_prompts=False, method="", shared_embs =False, skilled_variant="", prefix_config=None, exp_id="", encoder_prompts={}, skill_prompts={}, n_tasks=2, n_skills=2, router_variant="fixed", device="cuda"):
+    wrapped_model = None
+    offsets = []
+    tokenize_relations(tokenizer)
+    flat_prompt_tokens = []
+    ii = 1
+    skill_encoders = []
+    for rel, prompt_tokens in skill_prompts.items():
+        mlog.info("%s )************* General) Wrapping model for %s", ii, rel)
+        if not flat_prompts:
+            enc_router = torch.ones((n_tasks, len(prompt_tokens)), device=device)
+            encoder, offset = create_encoder(rel, model, tokenizer, prompt_tokens, encoder_type, wrapped_model, prefix_config, enc_router)
+            encoder.gid = (ii - 1) % n_tasks 
+            skill_encoders.append(encoder)
+            offsets.append(offset)
+            ii += 1
+    
+    prompt_encoders = []
+    ii = 1
+    for rel, prompt_tokens in encoder_prompts.items():
+        mlog.info("%s )***********P Token Wrapping model for %s", ii, rel)
+        for p in prompt_tokens:
+            if not p in flat_prompt_tokens:
+                flat_prompt_tokens.append(p)
+        if not flat_prompts:
+            enc_router = torch.ones((n_tasks, len(prompt_tokens)), device=device)
+            if router_variant == "learned":
+                enc_router = "random"
+            encoder, offset = create_encoder(rel, model, tokenizer, prompt_tokens, encoder_type, wrapped_model, prefix_config, enc_router)
+            prompt_encoders.append(encoder)
+            offsets.append(offset)
+            ii += 1
+    
+    id_offset = len(tokenizer)
+    embedding_dim = model.config.hidden_size
+    flat_router = torch.zeros((n_tasks, len(flat_prompt_tokens))) 
+    if prompt_encoders:
+        id_offset = min(offsets)
+#################
+        flat_prompt_ids = []
+        if prompt_encoders:
+           flat_embedding = torch.nn.Embedding(len(flat_prompt_tokens), embedding_dim)
+           p_index = 0
+           mlog.info("len merge tokens: %s", len(flat_prompt_tokens))
+           for encoder in prompt_encoders:
+               for pid, emb in encoder.init_embs.items():
+                   if not pid in flat_prompt_ids:
+                      with torch.no_grad():
+                        flat_prompt_ids.append(pid)
+                        flat_embedding.weight[p_index] = emb #.detach()
+                        p_index += 1
+           #_ids_tensor = torch.LongTensor(flat_prompt_ids)
+           #embs = model.get_input_embeddings()
+           #flat_embs = embs(_ids_tensor)
+           #with torch.no_grad():
+           #    for i, e in enumerate(flat_embs):
+           #        flat_embedding.weight[i] = e #.detach()
+           if shared_embs:
+               mlog.info("Flat_ids: %s", flat_prompt_ids)
+               for encoder in prompt_encoders:
+                    encoder.embedding = flat_embedding
+                    #encoder.id_offset= -1
+                    #encoder.length= len(flat_prompt_tokens)
+
+    flat_encoder = None 
+    merge_encoder = None
+    flat_embedding = None
+    n_prompt_tokens = len(flat_prompt_tokens)
+    mbp("")
+    for encoder in prompt_encoders:
+        if isinstance(encoder, MergePromptEncoderBase):
+            encoder.set_encoders(skill_encoders)
+            encoder.trunc_router = logs.main_args["trunc_router"]
+            encoder.wandb = logs.main_args["wb"]
+
+    if flat_prompts and not skilled_variant:
+        flat_encoder, _ = create_encoder("flat", model, tokenizer, flat_prompt_tokens, flat_prompts, wrapped_model, prefix_config)
+        #assert flat_encoder != None, "merge encoder for " + flat_prompts + " is none"
+        #flat_encoder = _encoder # prompt_encoders[0]
+        #prompt_encoders = [_encoder]
+####################
+    mlog.info("ID OFFSET: %s", id_offset)
+    if skilled_variant:
+       wrapped_model = SkilledMixin(model=model, n_tasks=n_tasks, 
+               n_skills=n_skills, 
+               skilled_variant=skilled_variant)
+    else:
+        wrapped_model = model
+        wrapped_model.set_encoders(prompt_encoders, skill_encoders, id_offset)
     return wrapped_model
 
 def create_encoder(name, model, tokenizer, prompt_tokens, encoder_type="lstm", 
