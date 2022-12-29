@@ -15,7 +15,7 @@
     "overwrite_output_dir": true,
     "init_prefix_from_vocab": true,
     "prefix_tuning": true,
-    "prefix_dim": "30#40",
+    "prefix_dim": 100,
     "max_source_length": 250,
     "learning_rate": 3e-1,
     "output_dir": "outputs/prompt_tuning_xIntent",

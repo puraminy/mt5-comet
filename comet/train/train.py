@@ -2909,7 +2909,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                 tokenizer=tokenizer,
                 data_collator=data_collator,
                 shared=model_args.shared_attn,
-                optimizers=(optimizer, scheduler)
+                #optimizers=(optimizer, scheduler)
         )
         train_result = trainer.train()
     else:
