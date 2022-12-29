@@ -74,7 +74,7 @@ filter=xIntent #xAttr#multi
 merge=none #lstm
 tn=com-pre #com-mid #merge-mid-nat #com-mid-nat #mat #2#4#5
 shared=False
-trial=7
+trial=2
 epochs=3
 # tag=temp_num@encoder_type@trunc_router@prompt_token_num
 trunc=none #sign #sigmoid#sign
@@ -85,7 +85,7 @@ skill=none #learned#private#none
 mt=unsup-wrap-nat
 cfg=configs/baselines/finetuning.json
 
-runlite run -exp $exp -cfg ${cfg} -lp ${log} -bc base -ov $g2 -var method=${mt}--rel_filter=$filter--train_samples=$train--epochs_num=$epochs--prompt_token_num=8--repeat=4--temp_num=$tn--loop=custom--test_samples=$test--flat_prompts=$merge--frozen=False--seed=123--n_prompts=1--trunc_router=$trunc--router_lr=0.001--learning_rate=0.5--encoder_type=$enc_type--router_variant=$router--freeze_exclude=$fex--stype=atm--skilled_variant=$skill--n_skills=4--follow_method=True--arg-prefix_dim=30#200 --scorers="rouge-bert" --data_path=${home}/mt5-comet/comet/data/atomic2020/sel --do_valid=False --val_samples=10  --cycle=100 $g1 --batch_size=8 --trial=$trial  --model_id=$model --do_valid=True 
+runlite run -exp $exp -cfg ${cfg} -lp ${log} -bc base -ov $g2 -var method=${mt}--rel_filter=$filter--train_samples=$train--epochs_num=$epochs--prompt_token_num=8--repeat=4--temp_num=$tn--loop=custom--test_samples=$test--flat_prompts=$merge--frozen=False--seed=123--n_prompts=1--trunc_router=$trunc--router_lr=0.001--learning_rate=0.5--encoder_type=$enc_type--router_variant=$router--freeze_exclude=$fex--stype=t5--skilled_variant=$skill--n_skills=4--follow_method=True--arg-prefix_dim=30#200 --scorers="rouge-bert" --data_path=${home}/mt5-comet/comet/data/atomic2020/sel --do_valid=False --val_samples=10  --cycle=100 $g1 --batch_size=8 --trial=$trial  --model_id=$model --do_valid=True 
 
 # configs/baselines/prompt_tuning.json 
 # configs/attempt/single_task.json  
