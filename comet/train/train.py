@@ -489,7 +489,7 @@ def run(ctx, conf_path, base_conf, experiment,
                     if type(x) == str:
                         xx = x.split("#")
                         if "#" in x:
-                            _vname = "ARG-" + list(var_names)[ii] 
+                            _vname = "arg-" + list(var_names)[ii] 
                             var += "--" + _vname + "=" + x 
                         z = []
                         for y in xx:
@@ -1629,8 +1629,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         setattr(training_args,"num_train_epochs", epochs_num)
         setattr(training_args,"per_device_train_batch_size", batch_size)
         for k,v in kwargs.items():
-            if k.startswith("ARG-"):
-                k = k.replace("ARG-","")
+            if k.startswith("arg-"):
+                k = k.replace("arg-","")
                 if v.isdigit():
                     v = int(v)
                 elif isfloat(v):
