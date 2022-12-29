@@ -1741,7 +1741,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         underlying_model_name = model_id
     
         
-    weight_decay = 0.01
+    weight_decay = 0.0001
     shuffle = False
     shuffle_evaluation=False
     validation_size = val_samples 
