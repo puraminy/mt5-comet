@@ -69,7 +69,7 @@ elif [ "$m" -eq "1" ]; then
 fi
 seed=123
 
-exp=xint-att-cc-xx2
+exp=xint-att-monly
 log=${home}/logs   #/${exp}
 echo "log: ${log}"
 #filter=xIntent#xAttr#xNeed#xReact#xEffect#oReact#xWant#multi

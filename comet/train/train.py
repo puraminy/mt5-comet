@@ -559,6 +559,8 @@ def run(ctx, conf_path, base_conf, experiment,
                    run_args[_key] = "False"
            # oooooooooooooo
            multi_only = False
+           if preview == "data":
+               save_data = True
            if not var:
                output_name = base_conf + sep + args["method"] + sep + _extra
                args["overwrite"] = output_name
@@ -630,7 +632,7 @@ def run(ctx, conf_path, base_conf, experiment,
                        args["undone"] = True
                    if repeat:
                        args["skip"] = False
-                   if preview:
+                   if preview == "data":
                        break_point = "data"
                    args["break_point"] = break_point 
                    mylogs.BREAK_POINT = break_point
@@ -2133,6 +2135,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         ds_list = ["train"]
         if do_valid:
             ds_list += ["validation"]
+        if preview == "data":
+            ds_list += [test_set]
         ds_list += ["sample"]
         myds = load_data(ds_list)
         example = ""
