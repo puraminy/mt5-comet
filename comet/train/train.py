@@ -7,7 +7,7 @@ from comet.train.dataset import *
 from comet.train.data import *
 #from comet.data import TaskDataCollatorForSeq2Seq
 #from comet.data import AutoTask
-from comet.utils.utils import (modify_model_after_init, 
+from comet.utils.utils import (modify_model_after_init,isfloat, 
         save_training_config, save_prompts,get_adapter_config)
 
 from comet.metrics.metrics import TASK_TO_METRICS

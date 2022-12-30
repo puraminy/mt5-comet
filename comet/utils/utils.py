@@ -14,6 +14,16 @@ sys.path.append('..')
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+def isfloat(element: any) -> bool:
+    #If you expect None to be passed:
+    if element is None: 
+        return False
+    try:
+        float(element)
+        return True
+    except ValueError:
+        return False
+
 
 def create_dir(output_dir):
     """
@@ -91,7 +101,7 @@ def freeze_model_params(model, adapter_args, adapter_config):
 
     if adapter_args.prompt_tuning:
         for n, m in model.named_parameters():
-            if not "prompt_encoders" in n and not "general_encoders" in n:
+            if not "prompt_encoders" in n and not "skill_encoders" in n:
                 m.requires_grad = False
 
     if adapter_args.prefix_tuning:

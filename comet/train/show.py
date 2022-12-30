@@ -178,6 +178,9 @@ def show_df(df):
     if not "sel" in df:
        df["sel"] = False
 
+    if "exp_id" in df:
+        df = df.rename(columns={"exp_id":"expid"})
+
     if "input_text" in df:
         df['input_text'] = df['input_text'].str.replace('##','')
         df['input_text'] = df['input_text'].str.split('>>').str[0]
