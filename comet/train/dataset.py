@@ -214,6 +214,7 @@ class MyDataset(torch.utils.data.Dataset):
                 _data = sorted(_data, key = lambda x:x[self.sort_key], reverse=False)
             self.flat_data = _data
             self.num_records = len(self.flat_data)
+            mlog.info("Num records of %s %s", self.split_name, self.num_records)
 
     def get_data(self):
         return self.flat_data

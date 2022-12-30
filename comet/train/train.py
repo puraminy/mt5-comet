@@ -2171,6 +2171,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             logger.info("Preparing samples: %s ", len(generated_samples["sample"]))
     extend_tokenizer(tokenizer)
     prompt_config = None
+    if preview == "data":
+        return
     if prompt_tune:
         with open(prompt_config_file, "r") as f:
             prompt_config = json.load(f)
