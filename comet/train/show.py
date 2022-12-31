@@ -178,6 +178,9 @@ def show_df(df):
     if not "sel" in df:
        df["sel"] = False
 
+    if not "bert_score" in df:
+       df["bert_score"] = 0
+
     if "exp_id" in df:
         df = df.rename(columns={"exp_id":"expid"})
 

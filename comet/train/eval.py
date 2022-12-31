@@ -599,10 +599,6 @@ def do_score(df, scorers, save_path, reval=False):
     #    mlog.info(f"using nltk from: {nltk_path}")
     #except LookupError:
     #    nltk.download('punkt')
-
-
-# Pause the program until a remote debugger is attached
-    #debugpy.wait_for_client()
     if "st" in scorers:
         embed = tf.saved_model.load("/home/pouramini/pret/sm")
 
