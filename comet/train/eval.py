@@ -316,7 +316,7 @@ def batch_generate(model, tokenizer, queries, batch_size=5, gen_token = "", gen_
             "num_return_sequences":1,
             "bad_words_ids": bad_words_ids
         }
-    elif gen_param == "top_p":
+    else: #if gen_param == "top_p":
         gen_kwargs = {
             "max_length":160,
             "do_sample":True, 
@@ -328,6 +328,7 @@ def batch_generate(model, tokenizer, queries, batch_size=5, gen_token = "", gen_
             "repetition_penalty":5.5,
             "bad_words_ids": bad_words_ids
         }
+        gen_kwargs["task"] = 0 #batch["task"]
     with torch.no_grad():
         examples = queries
         decs = []
@@ -449,6 +450,7 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
         _, ist = gen_param.split("@")
         ignore_special_tokens = ist == "True"
     test_iter = iter(test_set)
+    bs = 2
     batches = batched(list(test_iter), bs)
     if model is not None:
         dl_iter = iter(dataloader)
@@ -458,8 +460,8 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
         if exit_loop:
             break
         if model is not None:
-            if False:
-                queries = [x[0] for x in batch_list]
+            if True:
+                queries = [x["query"] for x in batch_list]
                 hyps = batch_generate(model, tokenizer, queries, batch_size = gen_bs, gen_param=gen_param)
             else:
                 batch,_ = next(dl_iter)
