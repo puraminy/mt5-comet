@@ -87,7 +87,7 @@ skill=none #learned#private#none
 mt=unsup-wrap-nat
 cfg=configs/baselines/prompt_tuning.json
 
-runlite run -exp $exp -cfg ${cfg} -lp ${log} -bc base -ov $g2 -var method=${mt}--rel_filter=$filter--train_samples=$train--epochs_num=$epochs--prompt_token_num=8--repeat=1--temp_num=$tn--loop=atm--test_samples=$test--flat_prompts=$merge--frozen=False--seed=123--n_prompts=1--trunc_router=$trunc--router_lr=0.001--learning_rate=0.5--encoder_type=$enc_type--router_variant=$router--freeze_exclude=$fex--stype=atm--skilled_variant=$skill--n_skills=4--follow_method=True--arg-prefix_dim=100 --scorers="rouge-bert" --data_path=${home}/mt5-comet/comet/data/atomic2020 --val_samples=10  --cycle=100 $g1 --batch_size=4 --model_id=$model --do_valid=True 
+runlite run -exp $exp -cfg ${cfg} -lp ${log} -bc base -ov $g2 -var method=${mt}--rel_filter=$filter--train_samples=$train--epochs_num=$epochs--prompt_token_num=8--repeat=1--temp_num=$tn--loop=atm--test_samples=$test--flat_prompts=$merge--frozen=False--seed=123--n_prompts=1--trunc_router=$trunc--router_lr=0.001--learning_rate=0.5--encoder_type=$enc_type--router_variant=$router--freeze_exclude=$fex--stype=atm--skilled_variant=$skill--n_skills=4--follow_method=True--arg-prefix_dim=100 --scorers="rouge-bert" --data_path=${home}/mt5-comet/comet/data/atomic2020 --val_samples=10  --cycle=100 $g1 --batch_size=8 --model_id=$model --do_valid=True 
 
 # configs/baselines/prompt_tuning.json 
 # configs/attempt/single_task.json  
