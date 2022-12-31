@@ -7,7 +7,7 @@ from comet.train.dataset import *
 from comet.train.data import *
 #from comet.data import TaskDataCollatorForSeq2Seq
 #from comet.data import AutoTask
-from comet.utils.utils import (modify_model_after_init,isfloat, 
+from attempt.utils.utils import (modify_model_after_init,isfloat, 
         save_training_config, save_prompts,get_adapter_config)
 
 from comet.metrics.metrics import TASK_TO_METRICS
@@ -2949,6 +2949,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
 
     with torch.no_grad():
        mlog.info("Updating the model weights before evaluaton...")
+       breakpoint()
        wrapped_model.update_model_weight()
 
     if not colab and model_args.save_prefix_only:
