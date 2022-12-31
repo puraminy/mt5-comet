@@ -16,7 +16,7 @@ import comet.metrics.metrics as my_metrics
 import itertools, collections
 import shutil
 from comet.train.eval import *
-import comet.third_party.models as tp
+import attempt.third_party.models as tp
 from comet.utils.dataset import TokenizedDataset
 from comet.utils.configue import Configure
 import comet.utils.tool as ut
