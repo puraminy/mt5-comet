@@ -389,7 +389,7 @@ def chunks(lst, n):
 import debugpy
 # vvvvvvvvvvvvvvv
 
-def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="greedy", scorers="rouge", batch_size="20@5", model = None, tokenizer = None, preds_file = "", set_name = "test", rewrite_info = False, stop_level=0, seed=0, task_ids=None):  
+def evaluate(test_set, dataloader, save_path, exp_info, val_records = 1, gen_param="greedy", scorers="rouge", batch_size="20@5", model = None, tokenizer = None, preds_file = "", set_name = "test", rewrite_info = False, stop_level=0, seed=0, task_ids=None):  
     if rewrite_info:
         save_path = os.path.join(save_path, "full_results.tsv")
         if Path(save_path).is_file() and rewrite:
@@ -452,7 +452,7 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
     test_iter = iter(test_set)
     bs = 2
     batches = batched(list(test_iter), bs)
-    if model is not None:
+    if model is not None and dataloader is not None:
         dl_iter = iter(dataloader)
     iid  = 0
     old_query = ""
@@ -478,9 +478,9 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
             inp = b["event"]
             tail = b["target"]
             resp = b["resp"]
-            rel = b["rel"]
-            qid = b["index"]
-            repid = b["rep"]
+            rel = "h" #b["rel"]
+            qid = step #b["index"]
+            repid = iid #b["rep"]
             mlog.info("\n%s/%s) query: %s", step, len(test_set), query)
             mlog.info("\nhyp: %s",top_hyp)
             mlog.info("\ntail: %s",tail)
@@ -543,9 +543,11 @@ def evaluate(test_set, dataloader, save_path, exp_info, val_records, gen_param="
             step += 1
 
     df = pd.DataFrame(rows)
-    if test_set.orig_df is not None:
-       df = test_set.orig_df.merge(df, on=['prefix','input_text'], how='inner')
+    #if test_set.orig_df is not None:
+    #   df = test_set.orig_df.merge(df, on=['prefix','input_text'], how='inner')
     for key, info in exp_info.items():
+        if type(info) == list:
+            info = "@".join(info)
         df[key] = info
 
     do_score(df, scorers, save_path)
