@@ -810,9 +810,9 @@ def show_df(df):
             sel_cols =  load_obj("sel_cols", context, [])
             info_cols = load_obj("info_cols", context, [])
             if True:
-                info_cols = ["query", "resp", "taginfo"]
+                info_cols = ["taginfo", "extra_fields"]
             if True: #col == "fid":
-                sel_cols = ["trial", "tag","temp_num", "prefix","method", "num_preds", "rouge_score", "steps","max_acc","best_step",  "bert_score", "st_score", "learning_rate",  "num_targets", "num_inps", "train_records", "train_records_nunique", "group_records", "wrap", "frozen", "prefixed"]
+                sel_cols = ["trial", "tag","prefix","num_preds", "rouge_score", "steps","max_acc","best_step",  "bert_score", "st_score", "learning_rate",  "num_targets", "num_inps", "train_records", "train_records_nunique", "group_records", "wrap", "frozen", "prefixed"]
 
             _agg = {}
             for c in df.columns:
