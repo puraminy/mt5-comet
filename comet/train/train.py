@@ -2576,26 +2576,37 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         tokenizer.save_pretrained(save_path)
     def get_optimizer(model, learning_rate, opt_type):
         mbp("optim")
-        if model_args and model_args.attn_learning_rate is not None:
-            all_parameters = set(model.parameters())
-            attn_params = []
+        grouped_params = []
+        all_parameters = set([p for p in model.parameters() if p.requires_grad])
+        attn_params = []
+        if model_args.attn_learning_rate is not None:
             for name, param in model.named_parameters():
                 if name == "encoder.attn_W_up" or name == "encoder.attn_W_down" or name == "encoder.layer_norm":
                     attn_params += list(param)
             attn_params = set(attn_params)
-            non_attn_params = all_parameters - attn_params
-            non_attn_params = list(non_attn_params)
-            attn_params = list(attn_params)
+            grouped_params.append({'params': list(attn_params), 
+                'lr': model_args.attn_learning_rate})
+            
+        ########### My Code
+        prompt_params = []
+        if True: 
+            for encoder in model.prompt_encoders:
+               para_list =[p for p in encoder.parameters() if p.requires_grad]
+               prompt_params.extend(para_list)
 
-            optim = AdamW([
-                {'params': non_attn_params},
-                {'params': attn_params, 'lr': model_args.attn_learning_rate},
-            ], lr=training_args.learning_rate,)
-            scheduler = get_linear_schedule_with_warmup(
-                optim, num_warmup_steps=training_args.warmup_steps, num_training_steps=len(
-                    train_dataset) * training_args.num_train_epochs // (training_args.gradient_accumulation_steps * training_args.per_device_train_batch_size)
-            )
-            return optim, scheduler
+            prompt_params = set(prompt_params)
+            grouped_params.append({'params': list(prompt_params), 
+                'lr': pl_learning_rate})
+
+        other_params = all_parameters - set(attn_params) - set(prompt_params)
+        other_params = list(other_params)
+        grouped_params.append({'params': other_params})
+        
+        optimizer = AdamW(grouped_params, lr=learning_rate)
+        scheduler = get_linear_schedule_with_warmup(
+                    optimizer, num_warmup_steps=warm_up_steps, num_training_steps=train_dataset.num_records * epochs_num // (accumulation_tiny_steps * node_batch_size)
+        )
+        return optimizer, scheduler
 
         _model = model
         if isinstance(wrapped_model, PTuningWrapper):
