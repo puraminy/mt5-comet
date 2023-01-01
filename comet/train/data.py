@@ -26,6 +26,9 @@ class xAttrTemplate(RelTemplate):
                qtemp = "{com_i} {event}, So PersonX is seen as {ph}."
            elif tn == "com-pre":
                qtemp = "{com_i} {event}, {ph}."
+           elif tn == "com-pre-sup":
+               qtemp = "{com_i} {event}"
+               anstemp = "{resp} {end}"
            elif tn == "com-mid-nat":
                qtemp = "{event}, {com_i} So PersonX is seen as {ph}."
            elif tn == "com-mid":

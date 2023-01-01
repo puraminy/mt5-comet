@@ -2606,7 +2606,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         scheduler = get_linear_schedule_with_warmup(
                     optimizer, num_warmup_steps=warm_up_steps, num_training_steps=train_dataset.num_records * epochs_num // (accumulation_tiny_steps * node_batch_size)
         )
-        # return optimizer, scheduler
+        #return optimizer, scheduler
 
         _model = model
         if isinstance(wrapped_model, PTuningWrapper):
@@ -2922,7 +2922,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                 tokenizer=tokenizer,
                 data_collator=data_collator,
                 shared=model_args.shared_attn,
-                #optimizers=(optimizer, scheduler)
+                optimizers=(optimizer, scheduler)
         )
         train_result = trainer.train()
     else:
