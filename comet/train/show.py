@@ -332,7 +332,7 @@ def show_df(df):
     map_cols = {
             "epochs_num":"epn",
             "exp_trial":"exp",
-            "temp_num":"tn",
+            "template":"tn",
             }
     adjust = True
     show_consts = True
