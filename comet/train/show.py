@@ -211,6 +211,10 @@ def show_df(df):
     back = []
     sels = []
     filter_df = main_df
+    if "src_path" in df:
+        sel_path = df.loc[0, "src_path"]
+        if not sel_path.startswith("/"):
+            sel_path = os.path.join(home, sel_path)
     if "pred_text1" in df:
         br_col = df.loc[: , "bert_score":"rouge_score"]
         df['nr_score'] = df['rouge_score']
@@ -591,8 +595,6 @@ def show_df(df):
                     save_obj(info_cols, "info_cols", context)
         elif char in ["o","O"]:
             inp = df.loc[sel_row,["prefix", "input_text"]]
-            if "src_path" in df:
-                sel_path = df.loc[sel_row,["src_path"]]
             df.loc[(df.prefix == inp.prefix) & 
                     (df.input_text == inp.input_text), 
                     ["sel"]] = False
@@ -610,8 +612,6 @@ def show_df(df):
             sel_df.to_csv(sel_path, sep="\t", index=False)
         elif char in ["w","W"]:
             inp = df.loc[sel_row,["prefix", "input_text"]]
-            if "src_path" in df:
-                sel_path = df.loc[sel_row,["src_path"]]
             df.loc[(df.prefix == inp.prefix) & 
                     (df.input_text == inp.input_text),["sel"]] = True
             _rows = main_df.loc[(main_df.prefix == inp.prefix) & 
