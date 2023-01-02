@@ -58,9 +58,9 @@ def load_results(path):
     sd = superitems(data)
     fname = Path(path).stem
     if fname == "results":
-        main_df = pd.DataFrame(sd, columns=["exp","model","lang", "method","wrap","frozen","epochs","stype", "date", "dir", "score"])
+        main_df = pd.DataFrame(sd, columns=["exp","model","lang", "template","wrap","frozen","epochs","stype", "date", "dir", "score"])
     else:
-        main_df = pd.DataFrame(sd, columns=["tid","exp","model","lang", "method","wrap","frozen","epochs","date", "field", "text"])
+        main_df = pd.DataFrame(sd, columns=["tid","exp","model","lang", "template","wrap","frozen","epochs","date", "field", "text"])
 
     out = f"{fname}.tsv"
     df = main_df.pivot(index=list(main_df.columns[~main_df.columns.isin(['field', 'text'])]), columns='field').reset_index()
@@ -82,10 +82,10 @@ def find_common(df, main_df, on_col_list, s_rows, FID, char):
         mlog.info("%s == %s", FID, exp)
         cond = f"(main_df['{FID}'] == '{exp}') & (main_df['prefix'] == '{prefix}')"
         tdf = main_df[(main_df[FID] == exp) & (main_df['prefix'] == prefix)]
-        tdf = tdf[["pred_text1", "exp_name", "id","hscore", "bert_score","query", "resp", "method", "rouge_score", "fid","prefix", "input_text","target_text", "sel"]]
+        tdf = tdf[["pred_text1", "exp_name", "id","hscore", "bert_score","query", "resp", "template", "rouge_score", "fid","prefix", "input_text","target_text", "sel"]]
         tdf = tdf.sort_values(by="rouge_score", ascending=False)
         if len(tdf) > 1:
-            tdf = tdf.groupby(on_col_list).agg({"exp_name":"first","query":"first", "resp":"first","input_text":"first","target_text":"first", "hscore":"first", "method":"first", "rouge_score":"first","prefix":"first","pred_text1":"first", "fid":"first", "id":"count","bert_score":"first", "sel":"first"}).reset_index(drop=True)
+            tdf = tdf.groupby(on_col_list).agg({"exp_name":"first","query":"first", "resp":"first","input_text":"first","target_text":"first", "hscore":"first", "template":"first", "rouge_score":"first","prefix":"first","pred_text1":"first", "fid":"first", "id":"count","bert_score":"first", "sel":"first"}).reset_index(drop=True)
             for on_col in on_col_list:
                 tdf[on_col] = tdf[on_col].astype(str).str.strip()
             #tdf = tdf.set_index(on_col_list)
@@ -521,7 +521,7 @@ def show_df(df):
                 #    continue
                 cond = f"(main_df['{FID}'] == '{exp}')"
                 tdf = main_df[main_df[FID] == exp]
-                #df = tdf[["pred_text1", "id", "bert_score","query", "method", "rouge_score", "fid","prefix", "input_text","target_text"]]
+                #df = tdf[["pred_text1", "id", "bert_score","query", "template", "rouge_score", "fid","prefix", "input_text","target_text"]]
                 spath = tdf.iloc[0]["path"]
                 spath = str(Path(spath).parent)
                 tdf = do_score(tdf, "rouge-bert", spath, reval=True) 
@@ -628,7 +628,7 @@ def show_df(df):
             sel_df = sel_df.sort_values(by=["prefix","input_text","target_text"]).drop_duplicates()
             sel_df.to_csv(sel_path, sep="\t", index=False)
         elif char in ["h","v"] and prev_char == "x":
-            _cols = ["method", "model", "prefix"]
+            _cols = ["template", "model", "prefix"]
             _types = ["l1_decoder", "l1_encoder", "cossim_decoder", "cossim_encoder"]
             canceled, col = list_values(_cols)
             folder = "/home/ahmad/share/comp/"
@@ -637,12 +637,12 @@ def show_df(df):
             Path(folder).mkdir(parents=True, exist_ok=True)
             files = []
             for _type in _types:
-                g_list = ["method", "model", "prefix"]
+                g_list = ["template", "model", "prefix"]
                 mm = main_df.groupby(g_list, as_index=False).first()
                 g_list.remove(col)
                 mlog.info("g_list: %s", g_list)
                 g_df = mm.groupby(g_list, as_index=False)
-                sel_cols = [_type, "method", "model", "prefix"]
+                sel_cols = [_type, "template", "model", "prefix"]
                 #_agg = {}
                 #for _g in g_list:
                 #    _agg[_g] ="first"
@@ -689,8 +689,8 @@ def show_df(df):
             df = sel_df
         # png files
         elif char == "l" and prev_char == "x":
-            df = main_df.groupby(["l1_decoder", "method", "model", "prefix"], as_index=False).first()
-            sel_cols = ["l1_decoder", "method", "model", "prefix"]
+            df = main_df.groupby(["l1_decoder", "template", "model", "prefix"], as_index=False).first()
+            sel_cols = ["l1_decoder", "template", "model", "prefix"]
         elif char == "z" and prev_char == "x":
             fav_df = fav_df.append(df.iloc[sel_row])
             mbeep()
@@ -744,7 +744,7 @@ def show_df(df):
             for group_name, df_group in gdf:
                 for row_index, row in df_group.iterrows():
                     pass
-            arr = ["prefix","fid","query","input_text","method"]
+            arr = ["prefix","fid","query","input_text","template"]
             canceled, col = list_values(arr)
             if not canceled:
                 FID = col 
@@ -942,7 +942,7 @@ def show_df(df):
                     if _col.startswith("pred_text1"):
                         info_cols.append(_col)
             else:
-                _from_cols = ["pred_text1","fid", "id", "pred_text1_x", "pred_text1_y","query_x","query_y", "query", "resp", "resp_x", "resp_y", "method", "prefix", "input_text","target_text_x", "target_text", "rouge_score", "rouge_score_x","rouge_score_y", "bert_score", "bert_score_x", "bert_score_y", "exp_name_x", "exp_name_y","sel"]
+                _from_cols = ["pred_text1","fid", "id", "pred_text1_x", "pred_text1_y","query_x","query_y", "query", "resp", "resp_x", "resp_y", "template", "prefix", "input_text","target_text_x", "target_text", "rouge_score", "rouge_score_x","rouge_score_y", "bert_score", "bert_score_x", "bert_score_y", "exp_name_x", "exp_name_y","sel"]
                 for _col in _from_cols:
                     if (_col.startswith("id") or
                         _col.startswith("pred_text1") or 
@@ -1024,7 +1024,7 @@ def show_df(df):
                     Path(folder).mkdir(exist_ok=True, parents=True)
                     pname = os.path.join(folder, name + ".png")
                     draw = ImageDraw.Draw(new_im)
-                    draw.text((0, 0), str(s_row) + "  " + df.iloc[s_row]["method"] +  
+                    draw.text((0, 0), str(s_row) + "  " + df.iloc[s_row]["template"] +  
                                      " " + df.iloc[s_row]["model"] ,(20,25,255),font=font)
                     new_im.save(pname)
                     pnames.append(pname)
@@ -1266,11 +1266,11 @@ def show_df(df):
                     table_file = f"{table_dir}/{table_name}"
                     _input = f"table/{table_name}" 
                     out = open(table_file, "w")
-                    for met in df["method"].unique():
+                    for met in df["template"].unique():
                         for mod in ["t5-v1", "t5-lmb", "t5-base"]:
                             for sc in ["rouge_score", "bert_score", "hscore", "num_preds"]:
                                 cond = ((df['prefix'] == rel) &
-                                        (df["method"] == met) &
+                                        (df["template"] == met) &
                                         (df["steps"] == samp) &
                                         (df["model"] == mod))
                                 val = df.loc[cond, sc].mean()
@@ -1311,11 +1311,11 @@ def show_df(df):
         if cmd == "clean":
             main_df = main_df.replace(r'\n',' ', regex=True)
             char = "SS"
-        if cmd == "fix_method":
-            main_df.loc[(df["method"] == "unsup-tokens") & 
-                    (main_df["wrap"] == "wrapped-lstm"), "method"] = "unsup-tokens-wrap"
-            main_df.loc[(main_df["method"] == "sup-tokens") & 
-                    (main_df["wrap"] == "wrapped-lstm"), "method"] = "sup-tokens-wrap"
+        if cmd == "fix_template":
+            main_df.loc[(df["template"] == "unsup-tokens") & 
+                    (main_df["wrap"] == "wrapped-lstm"), "template"] = "unsup-tokens-wrap"
+            main_df.loc[(main_df["template"] == "sup-tokens") & 
+                    (main_df["wrap"] == "wrapped-lstm"), "template"] = "sup-tokens-wrap"
         
         if cmd == "repall":
             canceled, col,val = list_df_values(main_df, get_val=False)
