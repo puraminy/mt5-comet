@@ -591,6 +591,8 @@ def show_df(df):
                     save_obj(info_cols, "info_cols", context)
         elif char in ["o","O"]:
             inp = df.loc[sel_row,["prefix", "input_text"]]
+            if "src_path" in df:
+                sel_path = df.loc[sel_row,["src_path"]]
             df.loc[(df.prefix == inp.prefix) & 
                     (df.input_text == inp.input_text), 
                     ["sel"]] = False
@@ -608,6 +610,8 @@ def show_df(df):
             sel_df.to_csv(sel_path, sep="\t", index=False)
         elif char in ["w","W"]:
             inp = df.loc[sel_row,["prefix", "input_text"]]
+            if "src_path" in df:
+                sel_path = df.loc[sel_row,["src_path"]]
             df.loc[(df.prefix == inp.prefix) & 
                     (df.input_text == inp.input_text),["sel"]] = True
             _rows = main_df.loc[(main_df.prefix == inp.prefix) & 
