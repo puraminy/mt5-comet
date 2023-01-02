@@ -211,6 +211,10 @@ def show_df(df):
     back = []
     sels = []
     filter_df = main_df
+    taginfo = []
+    if "taginfo" in df:
+        tags = df.loc[0, "taginfo"]
+        taginfo = tags.split("|")
     if "src_path" in df:
         sel_path = df.loc[0, "src_path"]
         if not sel_path.startswith("/"):
@@ -816,7 +820,7 @@ def show_df(df):
             if True:
                 info_cols = ["taginfo", "extra_fields"]
             if True: #col == "fid":
-                sel_cols = ["trial", "tag","prefix","num_preds", "rouge_score", "steps","max_acc","best_step",  "bert_score", "st_score", "learning_rate",  "num_targets", "num_inps", "train_records", "train_records_nunique", "group_records", "wrap", "frozen", "prefixed"]
+                sel_cols = ["trial", "tag","prefix","num_preds", "rouge_score", "steps","max_acc","best_step",  "bert_score", "st_score", "learning_rate",  "num_targets", "num_inps", "train_records", "train_records_nunique", "group_records", "wrap", "frozen", "prefixed"] + taginfo 
 
             _agg = {}
             for c in df.columns:
