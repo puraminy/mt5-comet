@@ -575,7 +575,7 @@ def show_df(df):
             info_cols.append(col)
             save_obj(sel_cols, "sel_cols", context)
             save_obj(info_cols, "info_cols", context)
-        elif char == "X" and not prev_char == "x" and hk=="G":
+        elif char == "i" and not prev_char == "x" and hk=="G":
             backit(df,sel_cols)
             exp=df.iloc[sel_row]["exp_id"]
             cond = f"(main_df['{FID}'] == '{exp}')"
