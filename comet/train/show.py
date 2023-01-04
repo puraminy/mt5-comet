@@ -110,6 +110,8 @@ def find_common(df, main_df, on_col_list, s_rows, FID, char):
 
 def show_df(df):
     global dfname, hotkey
+
+    hk = hotkey
     cmd = ""
     sel_row = 0
     cur_col = 0
@@ -573,7 +575,7 @@ def show_df(df):
             info_cols.append(col)
             save_obj(sel_cols, "sel_cols", context)
             save_obj(info_cols, "info_cols", context)
-        elif char == "X" and not prev_char == "x":
+        elif char == "X" and not prev_char == "x" and hk=="G":
             backit(df,sel_cols)
             exp=df.iloc[sel_row]["exp_id"]
             cond = f"(main_df['{FID}'] == '{exp}')"
@@ -891,7 +893,7 @@ def show_df(df):
             sel_rows = []
             FID = "input_text"
             hotkey = "gG"
-        elif char in ["n", "p", "t", "i"] and prev_cahr != "x":
+        elif char in ["n", "p", "t", "i"] and prev_cahr != "x" and hk == "gG":
             left = 0
             context= "comp"
             s_rows = sel_rows
