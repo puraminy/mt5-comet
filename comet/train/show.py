@@ -109,7 +109,7 @@ def find_common(df, main_df, on_col_list, s_rows, FID, char):
     return df, exp
 
 def show_df(df):
-    global dfname
+    global dfname, hotkey
     cmd = ""
     sel_row = 0
     cur_col = 0
@@ -249,7 +249,6 @@ def show_df(df):
         df["bert_score"] = 0
     prev_cahr = ""
     FID = "fid"
-    hotkey = "gG"
     sel_exp = ""
     infos = []
     back_rows = []
@@ -579,7 +578,7 @@ def show_df(df):
             exp=df.iloc[sel_row]["exp_id"]
             cond = f"(main_df['{FID}'] == '{exp}')"
             df = main_df[main_df[FID] == exp]
-            sel_cols=["fid","input_text","target_text","pred_text1", "hscore","bert_score","prefix"]
+            sel_cols=["input_text","pred_text1","target_text","rouge_score","bert_score","prefix"]
             df = df[sel_cols]
             df = df.sort_values(by="input_text", ascending=False)
         elif char in ["I"] or ch == cur.KEY_IC:
@@ -777,7 +776,6 @@ def show_df(df):
                 sel_cols = list(df.columns)
                 col_widths["index"]=50
                 info_cols = []
-            
         elif char == "g": 
             score_col = "rouge_score"
             backit(df, sel_cols)
@@ -1084,7 +1082,7 @@ def show_df(df):
                         with open(tname, "w") as f:
                             f.write(latex)
 
-        elif char == "P":
+        elif char == "P" and prev_char == "x":
             cols = get_cols(df,2)
             if cols:
                 df = df.sort_values(cols[1])
@@ -1576,6 +1574,7 @@ std = None
 dfname = ""
 dfpath = ""
 dftype = "full"
+hotkey = ""
 base_dir = os.path.join(home, "mt5-comet", "comet", "data", "atomic2020" , "sel")
 def start(stdscr):
     global info_bar, text_win, cmd_win, std, main_win, colors, dfname
@@ -1702,14 +1701,22 @@ def start(stdscr):
     is_flag=True,
     help=""
 )
-def main(fname, path, fid, ftype, dpy):
+@click.option(
+    "--hkey",
+    "-h",
+    default="",
+    type=str,
+    help=""
+)
+def main(fname, path, fid, ftype, dpy, hkey):
     if dpy:
         port = 5678
         debugpy.listen(('0.0.0.0', int(port)))
         print("Waiting for client at run...port:", port)
         debugpy.wait_for_client()  # blocks execution until client is attached
-    global dfname,dfpath,file_id,dftype
+    global dfname,dfpath,file_id,dftype,hotkey
     file_id = fid
+    hotkey = hkey 
     if not fname:
         fname = [dftype]
     if fname != "last":
