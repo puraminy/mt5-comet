@@ -1511,7 +1511,7 @@ def subwin(infos):
     inf = infos[ii:ii+30]
     change_info(inf)
     cc = std.getch()
-    while chr(cc) != "b":
+    while not is_enter(cc): 
         if cc == DOWN:
             ii += 1
         if cc == UP:
