@@ -537,7 +537,7 @@ def show_df(df):
                 tdf = tdf.reset_index()
                 #main_df.loc[eval(cond), "bert_score"] = tdf["bert_score"]
             df = main_df
-            hotkey = "gG"
+            hotkey = hk
         elif char == "l":
             exp=df.iloc[sel_row]["expid"]
             exp = str(exp)
@@ -580,7 +580,7 @@ def show_df(df):
             exp=df.iloc[sel_row]["exp_id"]
             cond = f"(main_df['{FID}'] == '{exp}')"
             df = main_df[main_df[FID] == exp]
-            sel_cols=["input_text","pred_text1","target_text","rouge_score","bert_score","prefix"]
+            sel_cols=["input_text","tail", "pred_text1","target_text","rouge_score","bert_score","prefix"]
             df = df[sel_cols]
             df = df.sort_values(by="input_text", ascending=False)
         elif char in ["I"] or ch == cur.KEY_IC:
@@ -734,19 +734,19 @@ def show_df(df):
             mlog.info("%s == %s", col, exp)
             df = main_df[main_df[col] == exp]
             filter_df = df
-            hotkey = "gG"
+            hotkey = hk
         elif char  == "a": 
             col = sel_cols[cur_col]
             FID = col 
             extra["FID"] = FID
             df = filter_df
-            hotkey="gG"
+            hotkey=hk
         elif char == "A":
             col = sel_cols[cur_col]
             FID = col 
             extra["FID"] = FID
             df = main_df
-            hotkey="gG"
+            hotkey=hk
         elif char == "AA":
             gdf = filter_df.groupby("input_text")
             rows = []
@@ -759,7 +759,7 @@ def show_df(df):
                 FID = col 
                 extra["FID"] = FID
                 df = filter_df
-                hotkey="gG"
+                hotkey=hk
         elif char == "s":
             if cur_col < len(sel_cols):
                 col = sel_cols[cur_col]
@@ -892,7 +892,7 @@ def show_df(df):
             df = filter_df.copy()
             sel_rows = []
             FID = "input_text"
-            hotkey = "gG"
+            hotkey = hk
         elif char in ["n", "p", "t", "i"] and prev_cahr != "x" and hk == "gG":
             left = 0
             context= "comp"
@@ -1005,7 +1005,7 @@ def show_df(df):
                 df = main_df
                 filter_df = main_df
                 sel_rows = []
-                hotkey = "gG"
+                hotkey = hk
         elif char == "D" and prev_char == "x":
             canceled, col,val = list_df_values(main_df, get_val=False)
             if not canceled:
@@ -1124,7 +1124,7 @@ def show_df(df):
                    extra["filter"].append(cond)
                    sel_row = 0
                    if char == "F" or char == "f":
-                       hotkey = "gG"
+                       hotkey = hk
         if char in ["y","Y"]:
             #yyyyyyyy
            cols = get_cols(df, 2)
@@ -1434,7 +1434,7 @@ def show_df(df):
             sel_cols = []
             save_obj([], "sel_cols", context)
             save_obj([], "info_cols", context)
-            hotkey = "gG"
+            hotkey = hk
         if char == "r" and prev_char == "x":
             df = main_df
             sel_cols = list(df.columns)
