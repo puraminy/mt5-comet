@@ -546,28 +546,7 @@ def show_df(df):
                 log = logs[0]
                 with open(log,"r") as f:
                     infos = f.readlines()
-                ii = 0
-                inf = infos[ii:ii+30]
-                change_info(inf)
-                cc = std.getch()
-                while chr(cc) != "b":
-                    if cc == DOWN:
-                        ii += 1
-                    if cc == UP:
-                        ii -= 1
-                    if cc == cur.KEY_NPAGE:
-                        ii += 10
-                    if cc == cur.KEY_PPAGE:
-                        ii -= 10
-                    if cc == cur.KEY_HOME:
-                        ii = 0
-                    if cc == cur.KEY_END:
-                        ii = len(infos) - 20 
-                    ii = max(ii, 0)
-                    ii = min(ii, len(infos)-10)
-                    inf = infos[ii:ii+30]
-                    change_info(inf)
-                    cc = std.getch()
+                subwin(infos)
 
         elif char == "<":
             col = sel_cols[cur_col]
@@ -799,13 +778,10 @@ def show_df(df):
                 sel_rows.append(sel_row)
             adjust = False
         elif char == "?": 
-            if "fid" in df.iloc[sel_row]:
-                exp=df.iloc[sel_row]["fid"]
-                sel_exp = exp
-                extra["exp"] = exp
-                #path = main_df.loc[main_df["fid"] == exp, "path"][0]
-                #extra["path"] = path
-            show_extra = True
+            taginfo=df.iloc[sel_row]["ftag"]
+            taginfo = json.dumps(taginfo) 
+            infos = taginfo.split("\n")
+            subwin(infos)
         elif char == "z":
             sel_cols =  load_obj("sel_cols", context, [])
             info_cols = load_obj("info_cols", context, [])
@@ -1530,7 +1506,29 @@ def order(sel_cols, cols, pos=0):
     save_obj(z, "sel_cols",dfname)
     return z
 
-
+def subwin(infos):
+    ii = 0
+    inf = infos[ii:ii+30]
+    change_info(inf)
+    cc = std.getch()
+    while chr(cc) != "b":
+        if cc == DOWN:
+            ii += 1
+        if cc == UP:
+            ii -= 1
+        if cc == cur.KEY_NPAGE:
+            ii += 10
+        if cc == cur.KEY_PPAGE:
+            ii -= 10
+        if cc == cur.KEY_HOME:
+            ii = 0
+        if cc == cur.KEY_END:
+            ii = len(infos) - 20 
+        ii = max(ii, 0)
+        ii = min(ii, len(infos)-10)
+        inf = infos[ii:ii+30]
+        change_info(inf)
+        cc = std.getch()
                 
 def change_info(infos):
     info_bar.erase()
