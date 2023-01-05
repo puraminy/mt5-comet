@@ -580,7 +580,8 @@ def show_df(df):
             exp=df.iloc[sel_row]["exp_id"]
             cond = f"(main_df['{FID}'] == '{exp}')"
             df = main_df[main_df[FID] == exp]
-            sel_cols=["input_text","tail", "pred_text1","target_text","rouge_score","bert_score","prefix"]
+            sel_cols=["input_text","pred_text1","target_text","rouge_score","bert_score","prefix", "tail"]
+            info_cols_back = info_cols=["tail"]
             df = df[sel_cols]
             df = df.sort_values(by="input_text", ascending=False)
         elif char in ["I"] or ch == cur.KEY_IC:
@@ -968,8 +969,9 @@ def show_df(df):
             sel_rows = []
             info_cols.append("sum_fid")
             extra["short_keys"] = "m: show group" 
-            info_cols_back = info_cols.copy()
-            info_cols = []
+            if len(info_cols) > 3:
+                info_cols_back = info_cols.copy()
+                info_cols = []
 
         elif char == "m" and prev_char != "x":
             left = 0
@@ -985,7 +987,7 @@ def show_df(df):
                 sel_cols = ["fid","input_text","pred_text1","target_text","bert_score", "hscore", "rouge_score", "prefix"]
                 df = df[sel_cols]
                 df = df.sort_values(by="bert_score", ascending=False)
-        elif char == "D" or ch == cur.KEY_SDC or char == "d":
+        elif char == "D" or char == "d":
             s_rows = sel_rows
             if FID == "fid":
                 mdf = main_df.groupby("fid", as_index=False).first()
@@ -1192,6 +1194,12 @@ def show_df(df):
             col = sel_cols[cur_col]
             sel_cols.remove(col)
             save_obj(sel_cols, "sel_cols", context)
+        elif ch == cur.KEY_SDC:
+            col = sel_cols[cur_col]
+            sel_cols.remove(col)
+            info_cols.append(col)
+            save_obj(sel_cols, "sel_cols", context)
+            save_obj(info_cols, "sel_cols", context)
         elif ch == cur.KEY_SDC and prev_char == 'x':
             col = sel_cols[0]
             val = sel_dict[col]
