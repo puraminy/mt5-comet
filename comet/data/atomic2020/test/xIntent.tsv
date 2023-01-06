@@ -1,32 +1,32 @@
 prefix	input_text	target_text	sel
-xIntent	PersonX applies for jobs	to afford food and rent	True
-xIntent	PersonX applies for jobs	to get a better life	True
-xIntent	PersonX applies for jobs	to have his own apartment.	True
+xIntent	PersonX applies for jobs	to afford food and rent	False
+xIntent	PersonX applies for jobs	to get a better life	False
+xIntent	PersonX applies for jobs	to have his own apartment.	False
 xIntent	PersonX applies to jobs	do better in life	False
 xIntent	PersonX applies to jobs	gain income	False
 xIntent	PersonX applies to jobs	to be employed	False
-xIntent	PersonX argues with PersonX's boyfriend	none	True
-xIntent	PersonX argues with PersonX's boyfriend	to be heard.	True
-xIntent	PersonX argues with PersonX's boyfriend	to confront the boyfriend.	True
+xIntent	PersonX argues with PersonX's boyfriend	none	False
+xIntent	PersonX argues with PersonX's boyfriend	to be heard.	False
+xIntent	PersonX argues with PersonX's boyfriend	to confront the boyfriend.	False
 xIntent	PersonX asks PersonX's dad for help	assistance	False
 xIntent	PersonX asks PersonX's dad for help	assistance from their father	False
 xIntent	PersonX asks PersonX's dad for help	financial support from his dad	False
-xIntent	PersonX asks PersonX's doctor	to be informed	True
-xIntent	PersonX asks PersonX's doctor	to feel knowledgable	True
-xIntent	PersonX asks PersonX's doctor	to get information	True
-xIntent	PersonX asks PersonY for money	to pay the fees	True
-xIntent	PersonX asks PersonY for money	to pay their bills	True
+xIntent	PersonX asks PersonX's doctor	to be informed	False
+xIntent	PersonX asks PersonX's doctor	to feel knowledgable	False
+xIntent	PersonX asks PersonX's doctor	to get information	False
+xIntent	PersonX asks PersonY for money	to pay the fees	False
+xIntent	PersonX asks PersonY for money	to pay their bills	False
 xIntent	PersonX asks PersonY's dad for help	help building something	False
 xIntent	PersonX asks PersonY's dad for help	help with their car	False
 xIntent	PersonX asks PersonY's dad for help	to do it correctly	False
-xIntent	PersonX beats everyone	to be the best	True
-xIntent	PersonX becomes a lawyer	to be something	True
-xIntent	PersonX becomes a lawyer	to become respected	True
-xIntent	PersonX becomes a lawyer	to help people	True
-xIntent	PersonX becomes great friends	to enjoy friendship	True
-xIntent	PersonX bows PersonX's heads	show gratefulness	True
-xIntent	PersonX bows PersonX's heads	show respect	True
-xIntent	PersonX bows PersonX's heads	to show respect	True
+xIntent	PersonX beats everyone	to be the best	False
+xIntent	PersonX becomes a lawyer	to be something	False
+xIntent	PersonX becomes a lawyer	to become respected	False
+xIntent	PersonX becomes a lawyer	to help people	False
+xIntent	PersonX becomes great friends	to enjoy friendship	False
+xIntent	PersonX bows PersonX's heads	show gratefulness	False
+xIntent	PersonX bows PersonX's heads	show respect	False
+xIntent	PersonX bows PersonX's heads	to show respect	False
 xIntent	PersonX catches PersonY's eye	none	False
 xIntent	PersonX catches PersonY's eye	to be attractive	False
 xIntent	PersonX catches PersonY's eye	to be important	False
@@ -126,9 +126,9 @@ xIntent	PersonX opens the doors	to be nice	False
 xIntent	PersonX opens the lid	to eat the soup	False
 xIntent	PersonX opens the lid	to let something out	False
 xIntent	PersonX opens the lid	to put something inside	False
-xIntent	PersonX orders delivery food	doesn't want to cook	True
-xIntent	PersonX orders delivery food	is hungry	True
-xIntent	PersonX orders delivery food	to avoid cooking	True
+xIntent	PersonX orders delivery food	doesn't want to cook	False
+xIntent	PersonX orders delivery food	is hungry	False
+xIntent	PersonX orders delivery food	to avoid cooking	False
 xIntent	PersonX plans PersonX's trip	fill someone in	False
 xIntent	PersonX plans PersonX's trip	to be exciting	False
 xIntent	PersonX plans PersonX's trip	to go on vacation	False
@@ -141,9 +141,9 @@ xIntent	PersonX plays a new instrument	to learn music	False
 xIntent	PersonX plays hardball	succeed in their goal, at almost any cost	False
 xIntent	PersonX plays hardball	to attain physical fitness	False
 xIntent	PersonX plays hardball	to be the victor	False
-xIntent	PersonX practices singing	because he likes to sing	False
-xIntent	PersonX practices singing	to be a good singer	False
-xIntent	PersonX practices singing	to be famous	False
+xIntent	PersonX practices singing	because he likes to sing	True
+xIntent	PersonX practices singing	to be a good singer	True
+xIntent	PersonX practices singing	to be famous	True
 xIntent	PersonX provides ___ for the poor	to be a good heart	False
 xIntent	PersonX provides ___ for the poor	to be generous	False
 xIntent	PersonX provides ___ for the poor	to feel good	False
@@ -256,9 +256,9 @@ xIntent	commit suicide	end pain	False
 xIntent	drink	avoid becoming dehydrated	False
 xIntent	drink	get drunk	False
 xIntent	drink	not to thirsty	False
-xIntent	drive to work	at work on time	False
-xIntent	drive to work	get there faster	False
-xIntent	drive to work	get there sooner	False
+xIntent	drive to work	at work on time	True
+xIntent	drive to work	get there faster	True
+xIntent	drive to work	get there sooner	True
 xIntent	eat	feed hunger	False
 xIntent	eat	fill stomath	False
 xIntent	eat	not hungry	False

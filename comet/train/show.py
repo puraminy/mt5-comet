@@ -779,9 +779,9 @@ def show_df(df):
                 sel_rows.append(sel_row)
             adjust = False
         elif char == "?": 
-            taginfo=df.iloc[sel_row]["ftag"]
-            taginfo = json.dumps(taginfo) 
-            infos = taginfo.split("\n")
+            tinfo=df.iloc[sel_row]["ftag"]
+            tinfo = json.dumps(tinfo) 
+            infos = tinfo.split("@")
             subwin(infos)
         elif char == "z":
             sel_cols =  load_obj("sel_cols", context, [])
