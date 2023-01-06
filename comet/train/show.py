@@ -798,7 +798,7 @@ def show_df(df):
             if True:
                 info_cols = ["ftaginfo", "extra_fields"]
             if True: #col == "fid":
-                sel_cols = ["trial", "tag","prefix","num_preds", "rouge_score", "steps","max_acc","best_step",  "bert_score", "st_score", "learning_rate",  "num_targets", "num_inps", "train_records", "train_records_nunique", "group_records", "wrap", "frozen", "prefixed"] + taginfo 
+                sel_cols = ["method", "tag","prefix","num_preds", "rouge_score", "steps","max_acc","best_step",  "bert_score", "st_score", "learning_rate",  "num_targets", "num_inps", "train_records", "train_records_nunique", "group_records", "wrap", "frozen", "prefixed"] + taginfo 
 
             _agg = {}
             for c in df.columns:
@@ -905,10 +905,10 @@ def show_df(df):
                 df = df.sort_values(by="int", ascending=False)
             else:
                 df, sel_exp = find_common(df, filter_df, on_col_list, _rows, FID, char)
-            if len(sel_rows) == 1:
-                df = df.sort_values(by="sel", ascending=False)
-            else:
+            if "sel_x" in df: 
                 df = df.sort_values(by="sel_x", ascending=False)
+            else:
+                df = df.sort_values(by="sel", ascending=False)
             if len(sel_rows) == 2:
                 _all = len(df)
                 df = df[df['pred_text1_x'].str.strip() != df['pred_text1_y'].str.strip()]
