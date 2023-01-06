@@ -905,7 +905,10 @@ def show_df(df):
                 df = df.sort_values(by="int", ascending=False)
             else:
                 df, sel_exp = find_common(df, filter_df, on_col_list, _rows, FID, char)
+            if len(sel_rows) == 1:
                 df = df.sort_values(by="sel", ascending=False)
+            else:
+                df = df.sort_values(by="sel_x", ascending=False)
             if len(sel_rows) == 2:
                 _all = len(df)
                 df = df[df['pred_text1_x'].str.strip() != df['pred_text1_y'].str.strip()]
