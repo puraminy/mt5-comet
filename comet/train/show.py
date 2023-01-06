@@ -207,8 +207,10 @@ def show_df(df):
     sel_path = os.path.join(base_dir, "test.tsv")
     if Path(sel_path).exists():
         sel_df = pd.read_table(sel_path)
+        if not "sel" in sel_df:
+            sel_df["sel"] = False
     else:
-        sel_df = pd.DataFrame(columns = ["prefix","input_text","target_text"])
+        sel_df = pd.DataFrame(columns = ["prefix","input_text","target_text", "sel"])
 
     back = []
     sels = []
@@ -599,10 +601,9 @@ def show_df(df):
             inp = df.loc[sel_row,["prefix", "input_text"]]
             df.loc[(df.prefix == inp.prefix) & 
                     (df.input_text == inp.input_text),["sel"]] = True
-            _rows = main_df.loc[(main_df.prefix == inp.prefix) & 
-                    (main_df.input_text == inp.input_text), 
-                    ["prefix", "input_text", "target_text"]].drop_duplicates()
-            sel_df = sel_df.append(_rows)
+            _rows = sel_df.loc[(sel_df.prefix == inp.prefix) & 
+                    (sel_df.input_text == inp.input_text), 
+                    ["sel"]] = True
             df = df.sort_values(by="sel", ascending=False).reset_index(drop=True)
             row = df.loc[(df.prefix == inp.prefix) & 
                     (df.input_text == inp.input_text),:]
