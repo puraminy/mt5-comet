@@ -1,0 +1,4 @@
+prefix	input_text	target_text	sel
+xIntent	PersonX applies for jobs	to afford food and rent	False
+xIntent	PersonX applies for jobs	to get a better life	False
+xIntent	PersonX applies for jobs	to have his own apartment.	False
