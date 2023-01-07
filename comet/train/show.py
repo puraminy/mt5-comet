@@ -219,10 +219,11 @@ def show_df(df):
     if "taginfo" in df:
         tags = df.loc[0, "taginfo"]
         taginfo = tags.split("|")
+    src_path = ""
     if "src_path" in df:
-        sel_path = df.loc[0, "src_path"]
-        if not sel_path.startswith("/"):
-            sel_path = os.path.join(home, sel_path)
+        src_path = df.loc[0, "src_path"]
+        if not src_path.startswith("/"):
+            src_path = os.path.join(home, src_path)
     if "pred_text1" in df:
         br_col = df.loc[: , "bert_score":"rouge_score"]
         df['nr_score'] = df['rouge_score']
