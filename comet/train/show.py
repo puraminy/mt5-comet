@@ -1586,7 +1586,7 @@ text_width = 60
 std = None
 dfname = ""
 dfpath = ""
-dftype = "full"
+dftype = "tsv"
 hotkey = ""
 base_dir = os.path.join(home, "mt5-comet", "comet", "data", "atomic2020")
 def start(stdscr):
@@ -1636,7 +1636,11 @@ def start(stdscr):
                 for root, dirs, _files in os.walk(dfpath):
                     for _file in _files:
                         root_file = os.path.join(root,_file)
-                        if dftype in _file and all(s.strip() in root_file for s in dfname.split("+")):
+                        if "+" in dfname:
+                            cond = all(s.strip() in root_file for s in dfname.split("+"))
+                        else:
+                            cond = any(s.strip() in root_file for s in dfname.split("-"))
+                        if dftype in _file and cond: 
                             files.append(root_file)
         mlog.info("files: %s",files)
         if not files:
@@ -1704,7 +1708,7 @@ def start(stdscr):
 @click.option(
     "--ftype",
     "-ft",
-    default="full",
+    default="tsv",
     type=str,
     help=""
 )
