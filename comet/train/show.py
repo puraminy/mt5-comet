@@ -207,7 +207,7 @@ def show_df(df):
         fav_df = pd.read_table(fav_path)
     else:
         fav_df = pd.DataFrame(columns = df.columns)
-    sel_path = os.path.join(base_dir, "sel-test", "test.tsv")
+    sel_path = os.path.join(home, "atomic2020", "sel-test", "test.tsv")
     if Path(sel_path).exists():
         sel_df = pd.read_table(sel_path)
         if not "sel" in sel_df:
