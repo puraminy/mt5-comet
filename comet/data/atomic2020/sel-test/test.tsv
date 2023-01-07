@@ -1,4 +1,0 @@
-prefix	input_text	target_text	sel
-xIntent	PersonX reluctantly agreed	cordial	False
-xIntent	PersonX reluctantly agreed	to accept something	False
-xIntent	PersonX reluctantly agreed	to be accepted	False
