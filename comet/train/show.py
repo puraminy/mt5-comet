@@ -207,7 +207,7 @@ def show_df(df):
         fav_df = pd.read_table(fav_path)
     else:
         fav_df = pd.DataFrame(columns = df.columns)
-    sel_path = os.path.join(base_dir, "sel", "test.tsv")
+    sel_path = os.path.join(base_dir, "sel-test", "test.tsv")
     if Path(sel_path).exists():
         sel_df = pd.read_table(sel_path)
         if not "sel" in sel_df:
@@ -586,24 +586,14 @@ def show_df(df):
                     info_cols.remove(col)
                     save_obj(info_cols, "info_cols", context)
         elif char in ["o","O"]:
-            inp = df.loc[sel_row,["prefix", "input_text"]]
-            df.loc[(df.prefix == inp.prefix) & 
-                    (df.input_text == inp.input_text), 
-                    ["sel"]] = False
-            sel_df.loc[(sel_df.prefix == inp.prefix) & 
-                    (sel_df.input_text == inp.input_text), 
-                    ["sel"]] = False
-            df = df.sort_values(by="sel", ascending=False)
-            consts["sel_path"] = sel_path + "|"+ str(len(sel_df)) + "|" + str(sel_df["input_text"].nunique())
+            inp = df.loc[df.index[sel_row],["prefix", "input_text"]]
+            df = df[(df.prefix != inp.prefix) | 
+                    (df.input_text != inp.input_text)] 
             mbeep()
-            df = df.sort_values(by="sel", ascending=False).reset_index(drop=True)
-            row = df.loc[(df.prefix == inp.prefix) & 
-                    (df.input_text == inp.input_text),:]
-            sel_row = row.index[0]
-            sel_df = sel_df.sort_values(by=["prefix","input_text","target_text"]).drop_duplicates()
+            sel_df = df.sort_values(by=["prefix","input_text","target_text"]).drop_duplicates()
             sel_df.to_csv(sel_path, sep="\t", index=False)
         elif char in ["w","W"]:
-            inp = df.loc[sel_row,["prefix", "input_text"]]
+            inp = df.loc[df.index[sel_row],["prefix", "input_text"]]
             df.loc[(df.prefix == inp.prefix) & 
                     (df.input_text == inp.input_text),["sel"]] = True
             _rows = main_df.loc[(main_df.prefix == inp.prefix) & 
@@ -611,18 +601,22 @@ def show_df(df):
                     ["prefix","input_text", "target_text","sel"]]
             row = df.loc[(df.prefix == inp.prefix) & 
                     (df.input_text == inp.input_text),:]
-            sel_df = sel_df.append(_rows)
+            sel_df = sel_df.append(_rows,ignore_index=True)
             #df = df.sort_values(by="sel", ascending=False).reset_index(drop=True)
             #sel_row = row.index[0]
             if char == "W":
                 new_row = {"prefix":inp.prefix,
                            "input_text":inp.input_text,
-                           "target_text":df.loc[sel_row,"pred_text1"]}
+                           "target_text":df.loc[sel_row,"pred_text1"], "sel":False}
                 sel_df = sel_df.append(new_row, ignore_index=True)
             consts["sel_path"] = sel_path + "|"+ str(len(sel_df)) + "|" + str(sel_df["input_text"].nunique())
             mbeep()
             sel_df = sel_df.sort_values(by=["prefix","input_text","target_text"]).drop_duplicates()
             sel_df.to_csv(sel_path, sep="\t", index=False)
+        elif char == "h":
+            backit(df, sel_cols)
+            sel_cols = ["prefix", "input_text", "target_text", "sel"]
+            df = sel_df
         elif char in ["h","v"] and prev_char == "x":
             _cols = ["template", "model", "prefix"]
             _types = ["l1_decoder", "l1_encoder", "cossim_decoder", "cossim_encoder"]
