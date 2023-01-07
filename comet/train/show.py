@@ -593,7 +593,7 @@ def show_df(df):
             sel_df = df.sort_values(by=["prefix","input_text","target_text"]).drop_duplicates()
             sel_df.to_csv(sel_path, sep="\t", index=False)
         elif char in ["w","W"]:
-            inp = df.loc[df.index[sel_row],["prefix", "input_text"]]
+            inp = df.loc[df.index[sel_row],["prefix", "input_text","pred_text1"]]
             df.loc[(df.prefix == inp.prefix) & 
                     (df.input_text == inp.input_text),["sel"]] = True
             _rows = main_df.loc[(main_df.prefix == inp.prefix) & 
@@ -607,7 +607,7 @@ def show_df(df):
             if char == "W":
                 new_row = {"prefix":inp.prefix,
                            "input_text":inp.input_text,
-                           "target_text":df.loc[sel_row,"pred_text1"], "sel":False}
+                           "target_text":inp.pred_text1, "sel":False}
                 sel_df = sel_df.append(new_row, ignore_index=True)
             consts["sel_path"] = sel_path + "|"+ str(len(sel_df)) + "|" + str(sel_df["input_text"].nunique())
             mbeep()
