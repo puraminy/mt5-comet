@@ -796,7 +796,7 @@ def show_df(df):
             sel_cols =  load_obj("sel_cols", context, [])
             info_cols = load_obj("info_cols", context, [])
             if True:
-                info_cols = ["ftaginfo", "extra_fields"]
+                info_cols = ["full_tag", "extra_fields"]
             if True: #col == "fid":
                 sel_cols = ["method", "tag","prefix","num_preds", "rouge_score", "steps","max_acc","best_step",  "bert_score", "st_score", "learning_rate",  "num_targets", "num_inps", "train_records", "train_records_nunique", "group_records", "wrap", "frozen", "prefixed"] + taginfo 
 
