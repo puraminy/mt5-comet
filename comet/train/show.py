@@ -21,10 +21,16 @@ file_id = "name"
 from PIL import Image
 from PIL import ImageFont
 from PIL import ImageDraw
+import sklearn
+import sklearn.metrics
+
+def matthews_corrcoef(predictions, targets) -> dict:
+    """Computes the Matthews correlation coefficient."""
+    return {"matthews_correlation": 100 * sklearn.metrics.matthews_corrcoef(targets, predictions)}
 
 def accuracy(predictions, targets) -> dict:
     """Computes the average accuracy."""
-    return 100 * ((np.array(predictions) == np.array(targets)).mean())
+    return {"accuracy": 100 * ((np.array(predictions) == np.array(targets)).mean())}
 
 def combine_x(images):
     widths, heights = zip(*(i.size for i in images))
@@ -760,8 +766,14 @@ def show_df(df):
         elif char == "U":
             preds = df["pred_text1"].tolist()
             golds = df["target_text"].tolist()
-            acc = accuracy(preds, golds)
-            infos = ["Accuracy is :", str(acc)]
+            with open("results.txt", "w") as f:
+                for p,g in zip(preds, golds):
+                    print(p + "\t" + g, file=f)
+            met = [accuracy(preds, golds)]
+            met.append(matthews_corrcoef(preds, golds))
+            infos = []
+            for m in met:
+                infos.append(str(m))
             subwin(infos)
         elif char == "U" and prev_char == "x": 
             if sel_col:
