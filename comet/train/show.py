@@ -221,7 +221,7 @@ def show_df(df):
     filter_df = main_df
     taginfo = []
     if "taginfo" in df:
-        tags = df.loc[0, "taginfo"]
+        tags = df.loc[0, "ftag"]
         taginfo = tags.split("|")
     src_path = ""
     if "src_path" in df:
@@ -566,7 +566,7 @@ def show_df(df):
             exp=df.iloc[sel_row]["exp_id"]
             cond = f"(main_df['{FID}'] == '{exp}')"
             df = main_df[main_df[FID] == exp]
-            sel_cols=["input_text","pred_text1","target_text","rouge_score","bert_score","prefix", "tail"]
+            sel_cols=["input_text","pred_text1","target_text","rouge_score","bert_score","prefix"]
             info_cols_back = info_cols=["tail"]
             df = df[sel_cols]
             df = df.sort_values(by="input_text", ascending=False)
@@ -791,6 +791,7 @@ def show_df(df):
             if FID == "input_text":
                 context = "inp2"
             col = FID
+            hk = "G"
             left = 0
             col = [col, "prefix"]
             sel_cols =  load_obj("sel_cols", context, [])
