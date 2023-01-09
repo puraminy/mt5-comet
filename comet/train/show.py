@@ -22,6 +22,10 @@ from PIL import Image
 from PIL import ImageFont
 from PIL import ImageDraw
 
+def accuracy(predictions, targets) -> dict:
+    """Computes the average accuracy."""
+    return 100 * ((np.array(predictions) == np.array(targets)).mean())
+
 def combine_x(images):
     widths, heights = zip(*(i.size for i in images))
 
@@ -753,7 +757,13 @@ def show_df(df):
             for col in df:
                counts[col] = df[col].nunique()
             df = pd.DataFrame(data=[counts], columns = df.columns)
-        elif char == "U": 
+        elif char == "U":
+            preds = df["pred_text1"].tolist()
+            golds = df["target_text"].tolist()
+            acc = accuracy(preds, golds)
+            infos = ["Accuracy is :", str(acc)]
+            subwin(infos)
+        elif char == "U" and prev_char == "x": 
             if sel_col:
                 df = df[sel_col].value_counts(ascending=False).reset_index()
                 sel_cols = list(df.columns)
