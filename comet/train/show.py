@@ -802,8 +802,8 @@ def show_df(df):
             adjust = False
         elif char == "?": 
             tinfo=df.iloc[sel_row]["ftag"]
-            tinfo = json.dumps(tinfo) 
-            infos = tinfo.split("@")
+            infos = tinfo.split(",")
+            infos.append(main_df.loc[0, "path"])
             subwin(infos)
         elif char == "z":
             sel_cols =  load_obj("sel_cols", context, [])
@@ -1536,6 +1536,7 @@ def order(sel_cols, cols, pos=0):
 
 def subwin(infos):
     ii = 0
+    infos.append("[OK]")
     inf = infos[ii:ii+30]
     change_info(inf)
     cc = std.getch()
