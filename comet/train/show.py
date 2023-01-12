@@ -813,7 +813,6 @@ def show_df(df):
             if FID == "input_text":
                 context = "inp2"
             col = FID
-            hk = "G"
             left = 0
             col = [col, "prefix"]
             sel_cols =  load_obj("sel_cols", context, [])
