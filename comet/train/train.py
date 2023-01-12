@@ -2458,11 +2458,18 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         prompts = sample_dataset.prompts
     wrapped_model = model_to_wrap
     if adapter_args and not adapter_args.prefix_tuning:
-        wrapped_model = add_encoders(model_to_wrap, tokenizer, encoder_type, load_prompt_path, flat_prompts=flat_prompts, method = method, shared_embs= shared_embs, skilled_variant=skilled_variant, prefix_config=prefix_config, n_tasks=n_tasks, n_skills=n_skills, 
-            exp_id=exp_id, 
-            encoder_prompts= prompts,
-            skill_prompts= skill_prompts, 
-            router_variant=router_variant, device=device) 
+        if stype == "atm":
+            wrapped_model = add_encoders(model_to_wrap, tokenizer, encoder_type, load_prompt_path, flat_prompts=flat_prompts, method = method, shared_embs= shared_embs, skilled_variant=skilled_variant, prefix_config=prefix_config, n_tasks=n_tasks, n_skills=n_skills, 
+                exp_id=exp_id, 
+                encoder_prompts= prompts,
+                skill_prompts= skill_prompts, 
+                router_variant=router_variant, device=device) 
+        else:
+            wrapped_model = wrap_model(model_to_wrap, tokenizer, encoder_type, load_prompt_path, flat_prompts=flat_prompts, method = method, shared_embs= shared_embs, skilled_variant=skilled_variant, prefix_config=prefix_config, n_tasks=n_tasks, n_skills=n_skills, 
+                exp_id=exp_id, 
+                encoder_prompts= prompts,
+                skill_prompts= skill_prompts, 
+                router_variant=router_variant, device=device) 
 
     if not prefix:
         model.resize_token_embeddings(len(tokenizer))
