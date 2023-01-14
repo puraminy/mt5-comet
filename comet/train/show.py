@@ -557,6 +557,17 @@ def show_df(df):
             df = main_df
             hotkey = hk
         elif char == "l":
+            exp=df.iloc[sel_row]["exp_id"]
+            cond = f"(main_df['{FID}'] == '{exp}')"
+            tdf = main_df[main_df[FID] == exp]
+            path=tdf.iloc[0]["path"]
+            logs = Path(path).parent().rglob("config.json")
+            if logs:
+                log = logs[0]
+                with open(log,"r") as f:
+                    infos = f.readlines()
+                subwin(infos)
+        elif char == "l" and prev_char == "x":
             exp=df.iloc[sel_row]["expid"]
             exp = str(exp)
             logs = glob(str(exp) + "*.log")
