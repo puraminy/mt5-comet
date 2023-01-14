@@ -820,7 +820,7 @@ def show_df(df):
             if True:
                 info_cols = ["full_tag", "extra_fields"]
             if True: #col == "fid":
-                sel_cols = ["method", "tag","prefix","num_preds", "rouge_score", "steps","max_acc","best_step",  "bert_score", "st_score", "learning_rate",  "num_targets", "num_inps", "train_records", "train_records_nunique", "group_records", "wrap", "frozen", "prefixed"] + taginfo 
+                sel_cols = ["method", "trial", "tag","prefix","num_preds", "rouge_score", "steps","max_acc","best_step",  "bert_score", "st_score", "learning_rate",  "num_targets", "num_inps", "train_records", "train_records_nunique", "group_records", "wrap", "frozen", "prefixed"] + taginfo 
 
             _agg = {}
             for c in df.columns:
@@ -1265,6 +1265,12 @@ def show_df(df):
                 save_df(df)
             else:
                 ch = 0
+        if cmd.startswith("cp="):
+            _, folder, dest = cmd.split("=")
+            spath = main_df.iloc[0]["path"]
+            dest = os.path.join(home, "logs", folder, dest)
+            Path(folder).mkdir(exist_ok=True, parents=True)
+            shutil.copyfile(spath, dest)
         if cmd.startswith("w="):
             _,val = cmd.split("=")[1]
             col = sel_cols[cur_col]
