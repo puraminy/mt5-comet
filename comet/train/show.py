@@ -561,12 +561,10 @@ def show_df(df):
             cond = f"(main_df['{FID}'] == '{exp}')"
             tdf = main_df[main_df[FID] == exp]
             path=tdf.iloc[0]["path"]
-            logs = Path(path).parent().rglob("config.json")
-            if logs:
-                log = logs[0]
-                with open(log,"r") as f:
-                    infos = f.readlines()
-                subwin(infos)
+            conf = os.path.join(str(Path(path).parent), "exp.json")
+            with open(conf,"r") as f:
+                infos = f.readlines()
+            subwin(infos)
         elif char == "l" and prev_char == "x":
             exp=df.iloc[sel_row]["expid"]
             exp = str(exp)
@@ -889,23 +887,16 @@ def show_df(df):
             extra["common"] = _infos
             df = df.sort_values(by = ["rouge_score"], ascending=False)
         elif char == "T":
-            backit(df,sel_cols)
             exp=df.iloc[sel_row]["exp_id"]
             score=df.iloc[sel_row]["rouge_score"]
             cond = f"(main_df['{FID}'] == '{exp}')"
-            df = main_df[main_df[FID] == exp]
-            tags = df.iloc[0]["taginfo"]
-            expname = df.iloc[0]["experiment"]
-            taginfo = tags.split("@")
-            sel_cols = ["prefix", "task_name", "num_train_epochs", "max_train_samples","method","data_seed", "learning_rate", "prompt_learning_rate"] 
-            cols = set(sel_cols + taginfo)
-            df = df[cols].reset_index()
-            prefix=df.iloc[0]["prefix"]
-            conf = df.iloc[0][cols].to_dict()
-            js = json.dumps(conf, indent=2, default=str)
-            fname = expname + "_" + str(exp) + "_" + prefix + "_" + str(round(score,2)) + ".json"
-            with open(os.path.join(home, "results", fname), "w") as f:
-                print(js, file=f)
+            tdf = main_df[main_df[FID] == exp]
+            prefix=tdf.iloc[0]["prefix"]
+            path=tdf.iloc[0]["path"]
+            js = os.path.join(str(Path(path).parent), "exp.json")
+            fname ="exp_" + str(exp) + "_" + prefix + "_" + str(round(score,2)) + ".json"
+            dest = os.path.join(home, "results", fname)
+            shutil.copyfile(js, dest)
         elif char == "u":
             left = 0
             backit(df, sel_cols)
