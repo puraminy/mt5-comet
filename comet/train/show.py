@@ -876,6 +876,22 @@ def show_df(df):
 
             extra["common"] = _infos
             df = df.sort_values(by = ["rouge_score"], ascending=False)
+        elif char == "T":
+            exp=df.loc[df.index[sel_row], "exp_id"]
+            score=df.loc[df.index[sel_row], "rouge_score"]
+            prefix=df.loc[df.index[sel_row], "prefix"]
+            cond += f"| (main_df['{FID}'] == '{exp}') "
+            cond = cond.strip("|")
+            df = main_df[eval(cond)]
+            tags = df.loc[0, "ftag"]
+            expname = df.loc[0, "experiment"]
+            taginfo = tags.split("|")
+            cols = ["prefix", "task_name", "num_train_epochs", "max_train_samples","method", "seed", "learning_rate", "prompt_learning_rate"] + taginfo 
+            conf = df.loc[0,cols].to_dict('records')[0]
+            js = json.dumps(conf, indent=2)
+            fname = expname + "_" + exp + "_" + prefix + "_" + str(score) + ".json"
+            with open(os.path.join(home, "results", fname)) as f:
+                    print(js, file=f)
         elif char == "u":
             left = 0
             backit(df, sel_cols)
