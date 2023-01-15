@@ -892,9 +892,12 @@ def show_df(df):
             cond = f"(main_df['{FID}'] == '{exp}')"
             tdf = main_df[main_df[FID] == exp]
             prefix=tdf.iloc[0]["prefix"]
+            expid=tdf.iloc[0]["expid"]
             path=tdf.iloc[0]["path"]
             js = os.path.join(str(Path(path).parent), "exp.json")
-            fname ="exp_" + str(exp) + "_" + prefix + "_" + str(round(score,2)) + ".json"
+            fname ="exp_" + str(expid) + "_" + prefix + "_" + str(round(score,2)) + ".json"
+            pfix = rowinput("prefix:")
+            fname = pfix + "_" + fname
             dest = os.path.join(home, "results", fname)
             shutil.copyfile(js, dest)
         elif char == "u":
