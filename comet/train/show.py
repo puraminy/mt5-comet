@@ -960,7 +960,7 @@ def show_df(df):
                 df = df[df['pred_text1_x'].str.strip() != df['pred_text1_y'].str.strip()]
                 _dif = len(df)
                 _common = _all - _dif
-                consts["Common"] = _common
+                consts["Common"] = str(_common) + "| {:.2f}".format(_common / _all)
                 if "exp_name_x" in df:
                     fid_x = df.iloc[0]["exp_name_x"]
                     fid_y = df.iloc[0]["exp_name_y"]
