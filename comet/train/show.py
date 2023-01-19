@@ -961,7 +961,7 @@ def show_df(df):
                 _dif = len(df)
                 _common = _all - _dif
                 consts["Common"] = str(_common) + "| {:.2f}".format(_common / _all)
-                if "exp_name_x" in df:
+                if _dif > 0 and "exp_name_x" in df:
                     fid_x = df.iloc[0]["exp_name_x"]
                     fid_y = df.iloc[0]["exp_name_y"]
                     df["exp_name_x"] = "|".join(list(set(fid_x.split("@")) - set(fid_y.split("@"))))
