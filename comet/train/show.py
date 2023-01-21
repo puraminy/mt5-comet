@@ -360,6 +360,7 @@ def show_df(df):
             "epochs_num":"epn",
             "exp_trial":"exp",
             "template":"tn",
+            "pred_max_num":"pnm",
             }
     adjust = True
     show_consts = True
@@ -807,10 +808,6 @@ def show_df(df):
             df["pred_freq"] = df.groupby(['fid','prefix','pred_text1'],
                              sort=False)["pred_text1"].transform("count")
             #df["nr_score"] = df.groupby(['fid','prefix','input_text'])["nr_score"].transform("max")
-            #cols = ['fid', 'prefix']
-            #df = df.merge(df.value_counts().groupby(cols).head(1)
-            #   .reset_index(name='pred_max_num').rename(columns={'pred_text1': 'pred_max'})
-            #)
             cols = ['fid', 'prefix']
             df = df.merge(df[cols+['pred_text1']]
                  .value_counts().groupby(cols).head(1)
