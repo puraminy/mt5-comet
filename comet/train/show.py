@@ -533,12 +533,12 @@ def show_df(df):
                     save_obj(sel_cols, "sel_cols", context)
         elif char in ["W"] and prev_char == "x":
             save_df(df)
-        elif char in ["B", "N"]:
+        elif char == "B":
             s_rows = sel_rows
             from comet.train.eval import do_score
             if not s_rows:
                 s_rows = [sel_row]
-            if char == "N":
+            if prev_char == "x":
                 s_rows = range(len(df))
             for s_row in s_rows:
                 exp=df.iloc[s_row]["exp_id"]
@@ -580,6 +580,9 @@ def show_df(df):
             info_cols.append(col)
             save_obj(sel_cols, "sel_cols", context)
             save_obj(info_cols, "info_cols", context)
+        elif char == "N":
+            backit(df,sel_cols)
+            sel_cols=["tag","prefix","rouge_score", "num_preds","pred_max_num","pred_max","bert_score"]
         elif char == "I" or (char == "i" and not prev_char == "x" and hk=="G"):
             backit(df,sel_cols)
             exp=df.iloc[sel_row]["exp_id"]
