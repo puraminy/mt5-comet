@@ -800,6 +800,7 @@ def show_df(df):
             df["rouge_score"] = df.groupby(['fid','prefix','input_text'])["rouge_score"].transform("max")
             df["bert_score"] = df.groupby(['fid','prefix','input_text'])["bert_score"].transform("max")
             df["hscore"] = df.groupby(['fid','prefix','input_text'])["hscore"].transform("max")
+            df["max_pred"] = df.groupby(['fid','prefix'])["pred_text1"].count().max(level=0)
             #df["nr_score"] = df.groupby(['fid','prefix','input_text'])["nr_score"].transform("max")
             if not group_col in info_cols: info_cols.append(group_col)
             sel_cols.append("num_preds")
@@ -830,7 +831,7 @@ def show_df(df):
             if True:
                 info_cols = ["full_tag", "extra_fields"]
             if True: #col == "fid":
-                sel_cols = ["method", "trial", "tag","prefix","num_preds", "rouge_score", "steps","max_acc","best_step",  "bert_score", "st_score", "learning_rate",  "num_targets", "num_inps", "train_records", "train_records_nunique", "group_records", "wrap", "frozen", "prefixed"] + taginfo 
+                sel_cols = ["method", "trial", "tag","prefix","rouge_score", "max_pred", "steps","max_acc","best_step",  "bert_score", "st_score", "learning_rate",  "num_targets", "num_inps", "train_records", "train_records_nunique", "group_records", "wrap", "frozen", "prefixed"] + taginfo 
 
             _agg = {}
             for c in df.columns:
