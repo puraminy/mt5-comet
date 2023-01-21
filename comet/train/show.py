@@ -391,8 +391,7 @@ def show_df(df):
                     adjust = True
                if sel_col in col_widths and len(head) + 5 > col_widths[sel_col]:
                    col_widths[sel_col] = len(head) + 5
-               if sel_col in col_widths:
-                   _w = col_widths[sel_col] 
+               _w = col_widths[sel_col] if sel_col in col_widths else 10
                text += "{:<{x}}".format(head, x=_w) 
             mprint(text, text_win) 
             #fffff
@@ -586,10 +585,10 @@ def show_df(df):
             exp=df.iloc[sel_row]["exp_id"]
             cond = f"(main_df['{FID}'] == '{exp}')"
             df = main_df[main_df[FID] == exp]
-            sel_cols=["input_text","pred_text1","target_text","rouge_score","bert_score","prefix"]
+            sel_cols=["pred_freq","input_text","pred_text1", "target_text","rouge_score","bert_score","prefix"]
             info_cols_back = info_cols=["tail"]
             df = df[sel_cols]
-            df = df.sort_values(by="input_text", ascending=False)
+            df = df.sort_values(by="pred_freq", ascending=False)
         elif ch == cur.KEY_IC:
             if char == "I":
                 canceled, col, val = list_df_values(df, get_val=False)
@@ -800,8 +799,31 @@ def show_df(df):
             df["rouge_score"] = df.groupby(['fid','prefix','input_text'])["rouge_score"].transform("max")
             df["bert_score"] = df.groupby(['fid','prefix','input_text'])["bert_score"].transform("max")
             df["hscore"] = df.groupby(['fid','prefix','input_text'])["hscore"].transform("max")
-            df["max_pred"] = df.groupby(['fid','prefix'])["pred_text1"].count().max(level=0)
+            #df["pred_max_num"] = (df.groupby(['fid','prefix'])['pred_text1']
+            #             .transform(lambda g: g.value_counts(sort=False).max()))
+            df["pred_freq"] = df.groupby(['fid','prefix','pred_text1'],
+                             sort=False)["pred_text1"].transform("count")
             #df["nr_score"] = df.groupby(['fid','prefix','input_text'])["nr_score"].transform("max")
+            #cols = ['fid', 'prefix']
+            #df = df.merge(df.value_counts().groupby(cols).head(1)
+            #   .reset_index(name='pred_max_num').rename(columns={'pred_text1': 'pred_max'})
+            #)
+            cols = ['fid', 'prefix']
+            df = df.merge(df[cols+['pred_text1']]
+                 .value_counts().groupby(cols).head(1)
+                 .reset_index(name='pred_max_num').rename(columns={'pred_text1': 'pred_max'})
+               )
+
+
+
+            #temp = (pd
+            #       .get_dummies(df, columns = ['pred_text1'], prefix="",prefix_sep="")
+            #       .groupby(['fid','prefix'])
+            #       .transform('sum'))
+            #df = (df
+            #.assign(pred_max_num=temp.max(1), pred_max = temp.idxmax(1))
+            #)
+
             if not group_col in info_cols: info_cols.append(group_col)
             sel_cols.append("num_preds")
             extra["filter"].append("group predictions")
@@ -831,7 +853,7 @@ def show_df(df):
             if True:
                 info_cols = ["full_tag", "extra_fields"]
             if True: #col == "fid":
-                sel_cols = ["method", "trial", "tag","prefix","rouge_score", "max_pred", "steps","max_acc","best_step",  "bert_score", "st_score", "learning_rate",  "num_targets", "num_inps", "train_records", "train_records_nunique", "group_records", "wrap", "frozen", "prefixed"] + taginfo 
+                sel_cols = ["method", "trial", "tag","prefix","num_preds", "rouge_score", "pred_max_num","pred_max", "steps","max_acc","best_step",  "bert_score", "st_score", "learning_rate",  "num_targets", "num_inps", "train_records", "train_records_nunique", "group_records", "wrap", "frozen", "prefixed"] + taginfo 
 
             _agg = {}
             for c in df.columns:
