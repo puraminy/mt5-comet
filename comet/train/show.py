@@ -582,7 +582,7 @@ def show_df(df):
             save_obj(info_cols, "info_cols", context)
         elif char == "N":
             backit(df,sel_cols)
-            sel_cols=["tag","prefix","rouge_score", "num_preds","pred_max_num","pred_max","bert_score"]
+            sel_cols=["pred_max_num","pred_max", "tag","prefix","rouge_score", "num_preds","bert_score"]
         elif char == "I" or (char == "i" and not prev_char == "x" and hk=="G"):
             backit(df,sel_cols)
             exp=df.iloc[sel_row]["exp_id"]
