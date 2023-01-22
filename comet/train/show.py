@@ -309,7 +309,8 @@ def show_df(df):
                content = str(row[sel_col])
                content = content.strip()
                if sel_col in wraps:
-                   content = textwrap.wrap(content, width=wraps[sel_col], placeholder=".")
+                   content = textwrap.shorten(content, 
+                           width=wraps[sel_col], placeholder=".")
                if "score" in sel_col:
                    try:
                        content = "{:.2f}".format(float(content))
