@@ -308,6 +308,8 @@ def show_df(df):
                    continue
                content = str(row[sel_col])
                content = content.strip()
+               if sel_col in wraps:
+                   content = textwrap.wrap(content, width=wraps[sel_col], placeholder=".")
                if "score" in sel_col:
                    try:
                        content = "{:.2f}".format(float(content))
@@ -361,6 +363,9 @@ def show_df(df):
             "exp_trial":"exp",
             "template":"tn",
             "pred_max_num":"pnm",
+            }
+    wraps = {
+            "tag":15,
             }
     adjust = True
     show_consts = True
