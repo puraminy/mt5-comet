@@ -308,15 +308,15 @@ def show_df(df):
                    continue
                content = str(row[sel_col])
                content = content.strip()
+               orig_content = content
                if sel_col in wraps:
-                   content = textwrap.shorten(content, 
-                           width=wraps[sel_col], placeholder=".")
+                   content = content[:wraps[sel_col]] + ".."
                if "score" in sel_col:
                    try:
                        content = "{:.2f}".format(float(content))
                    except:
                        pass
-               _info = sel_col + ":" + content
+               _info = sel_col + ":" + orig_content
                if sel_col in info_cols:
                    if ii == sel_row and not sel_col in _infs:
                       infos.append(_info)
@@ -366,7 +366,7 @@ def show_df(df):
             "pred_max_num":"pnm",
             }
     wraps = {
-            "tag":15,
+            "tag":20,
             }
     adjust = True
     show_consts = True
@@ -857,7 +857,7 @@ def show_df(df):
             sel_cols =  load_obj("sel_cols", context, [])
             info_cols = load_obj("info_cols", context, [])
             if True:
-                info_cols = ["full_tag", "extra_fields"]
+                info_cols = ["tag", "full_tag", "extra_fields"]
             if True: #col == "fid":
                 sel_cols = ["method", "trial", "tag","prefix","num_preds", "rouge_score", "pred_max_num","pred_max", "steps","max_acc","best_step",  "bert_score", "st_score", "learning_rate",  "num_targets", "num_inps", "train_records", "train_records_nunique", "group_records", "wrap", "frozen", "prefixed"] + taginfo 
 
@@ -1007,7 +1007,7 @@ def show_df(df):
                     if _col.startswith("pred_text1"):
                         info_cols.append(_col)
             else:
-                _from_cols = ["pred_text1","fid", "id", "pred_text1_x", "pred_text1_y","query_x","query_y", "query", "resp", "resp_x", "resp_y", "template", "prefix", "input_text","target_text_x", "target_text", "rouge_score", "rouge_score_x","rouge_score_y", "bert_score", "bert_score_x", "bert_score_y", "exp_name_x", "exp_name_y","sel"]
+                _from_cols = ["pred_text1", "pred_text1_x", "pred_text1_y","query_x","query_y", "query", "resp", "resp_x", "resp_y", "template", "prefix", "input_text","target_text_x", "target_text", "rouge_score", "rouge_score_x","rouge_score_y", "bert_score", "bert_score_x", "bert_score_y", "exp_name_x", "exp_name_y","sel"]
                 for _col in _from_cols:
                     if (_col.startswith("id") or
                         _col.startswith("pred_text1") or 
