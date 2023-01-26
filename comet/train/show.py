@@ -272,6 +272,7 @@ def show_df(df):
     sel_exp = ""
     infos = []
     back_rows = []
+    back_infos = []
     sel_rows = []
     cmd = ""
     prev_cmd = ""
@@ -355,6 +356,7 @@ def show_df(df):
         back.append(df)
         sels.append(sel_cols.copy())
         back_rows.append(sel_row)
+        back_infos.append(info_cols.copy())
     for _col in ["input_text","pred_text1","target_text"]:
         if _col in df:
             df[_col] = df[_col].astype(str)
@@ -1516,6 +1518,7 @@ def show_df(df):
                 df = back.pop()
                 sel_cols = sels.pop() 
                 sel_row = back_rows.pop()
+                info_cols = back_infos.pop()
                 left = 0
             else:
                 mbeep()
