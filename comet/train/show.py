@@ -809,16 +809,11 @@ def show_df(df):
             score_col = "rouge_score"
             backit(df, sel_cols)
             group_col = "pred_text1"
-            #tdf = df.groupby(['fid','prefix','input_text'],as_index=False).agg(target_text=('target_text','<br />'.join)).rename(columns={'target_text':'top_target'})
-            #df = df.sort_values(score_col, ascending=False).drop_duplicates(['fid','prefix','input_text']).merge(tdf)
             df["rouge_score"] = df.groupby(['fid','prefix','input_text'])["rouge_score"].transform("max")
             df["bert_score"] = df.groupby(['fid','prefix','input_text'])["bert_score"].transform("max")
             df["hscore"] = df.groupby(['fid','prefix','input_text'])["hscore"].transform("max")
-            #df["pred_max_num"] = (df.groupby(['fid','prefix'])['pred_text1']
-            #             .transform(lambda g: g.value_counts(sort=False).max()))
             df["pred_freq"] = df.groupby(['fid','prefix','pred_text1'],
                              sort=False)["pred_text1"].transform("count")
-            #df["nr_score"] = df.groupby(['fid','prefix','input_text'])["nr_score"].transform("max")
             cols = ['fid', 'prefix']
             df = df.merge(df[cols+['pred_text1']]
                  .value_counts().groupby(cols).head(1)
@@ -877,7 +872,6 @@ def show_df(df):
             df = (counts.join(gb.agg(_agg)))
             df.columns = [ '_'.join(str(i) for i in col) for col in df.columns]
 
-            #num_targets = (df['prefix']+'_'+df['target_text']).groupby(df[col]).nunique()
             avg_len = 1 #(df.groupby(col)["pred_text1"]
                         #   .apply(lambda x: np.mean(x.str.len()).round(2)))
             ren = {
