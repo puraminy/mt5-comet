@@ -200,6 +200,9 @@ def show_df(df):
     if "exp_id" in df:
         df = df.rename(columns={"exp_id":"expid"})
 
+    if "tag" in df:
+        df['tag'] = df['tag'].str.replace('@','     ')
+        df['full_tag'] = df['full_tag'].str.replace('@','   ')
     if "input_text" in df:
         df['input_text'] = df['input_text'].str.replace('##','')
         df['input_text'] = df['input_text'].str.split('>>').str[0]
@@ -859,7 +862,7 @@ def show_df(df):
             sel_cols =  load_obj("sel_cols", context, [])
             info_cols = load_obj("info_cols", context, [])
             if True:
-                info_cols = ["tag", "full_tag", "extra_fields"]
+                info_cols = ["full_tag", "tag"]
             if True: #col == "fid":
                 sel_cols = ["method", "trial", "tag","prefix","num_preds", "rouge_score", "pred_max_num","pred_max", "steps","max_acc","best_step",  "bert_score", "st_score", "learning_rate",  "num_targets", "num_inps", "train_records", "train_records_nunique", "group_records", "wrap", "frozen", "prefixed"] + taginfo 
 
