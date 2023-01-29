@@ -200,9 +200,6 @@ def show_df(df):
     if "exp_id" in df:
         df = df.rename(columns={"exp_id":"expid"})
 
-    if "tag" in df:
-        df['tag'] = df['tag'].str.replace('@','     ')
-        df['full_tag'] = df['full_tag'].str.replace('@','   ')
     if "input_text" in df:
         df['input_text'] = df['input_text'].str.replace('##','')
         df['input_text'] = df['input_text'].str.split('>>').str[0]
@@ -279,6 +276,7 @@ def show_df(df):
     sel_rows = []
     cmd = ""
     prev_cmd = ""
+    do_wrap = True
 
     def row_print(df, sel_row, col_widths ={}, _print=False):
         ii = 0
@@ -313,7 +311,7 @@ def show_df(df):
                content = str(row[sel_col])
                content = content.strip()
                orig_content = content
-               if sel_col in wraps:
+               if sel_col in wraps and do_wrap:
                    content = content[:wraps[sel_col]] + ".."
                if "score" in sel_col:
                    try:
@@ -1265,6 +1263,8 @@ def show_df(df):
                 info_cols = []
                 if col in df:
                     df = df.drop(df[df[col] == val].index)
+        elif char == "v":
+            do_wrap = not do_wrap
         elif char == "M" and prev_char == "x":
             info_cols = []
             for col in df.columns:
@@ -1625,7 +1625,7 @@ def change_info(infos):
     for msg in infos:
         lines = textwrap.wrap(msg, width=w, placeholder=".")
         for line in lines: 
-            mprint(str(line), info_bar, color=HL_COLOR)
+            mprint(str(line).replace("@","   "), info_bar, color=HL_COLOR)
             lnum += 1
     rows,cols = std.getmaxyx()
     info_bar.refresh(0,0, rows -lnum - 1,0, rows-1, cols - 2)
