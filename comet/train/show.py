@@ -233,7 +233,9 @@ def show_df(df):
     taginfo = []
     if "taginfo" in df:
         tags = df.loc[0, "ftag"]
-        taginfo = tags.split("|")
+        tags = tags.replace("'", "\"")
+        tags = json.loads(tags)
+        taginfo = list(tags.keys())
     src_path = ""
     if "src_path" in df:
         src_path = df.loc[0, "src_path"]
@@ -367,6 +369,8 @@ def show_df(df):
             "exp_trial":"exp",
             "template":"tn",
             "pred_max_num":"pnm",
+            "attn_learning_rate":"alr",
+            "attn_method":"am",
             }
     wraps = {
             "tag":20,
@@ -857,7 +861,7 @@ def show_df(df):
             if True:
                 info_cols = ["full_tag", "tag"]
             if True: #col == "fid":
-                sel_cols = ["method", "trial", "tag","prefix","num_preds", "rouge_score", "pred_max_num","pred_max", "steps","max_acc","best_step",  "bert_score", "st_score", "learning_rate",  "num_targets", "num_inps", "train_records", "train_records_nunique", "group_records", "wrap", "frozen", "prefixed"] + taginfo 
+                sel_cols = taginfo + ["method", "trial", "tag","prefix","num_preds", "rouge_score", "pred_max_num","pred_max", "steps","max_acc","best_step",  "bert_score", "st_score", "learning_rate",  "num_targets", "num_inps", "train_records", "train_records_nunique", "group_records", "wrap", "frozen", "prefixed"] 
 
             _agg = {}
             for c in df.columns:
@@ -888,7 +892,7 @@ def show_df(df):
             #df = df.reset_index()
             df["avg_len"] = avg_len
             _infos =""
-            if False:
+            if True:
                 _sel_cols = []
                 for c in sel_cols:
                     if "train_" in c:
