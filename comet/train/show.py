@@ -98,7 +98,7 @@ def list_dfs(df, main_df, s_rows, FID):
         dfs.append(tdf)
     return dfs
 
-def find_common(df, main_df, on_col_list, s_rows, FID, char):
+def find_common(df, main_df, on_col_list, s_rows, FID, char, sel_cols):
     dfs_items = [] 
     dfs = []
     ii = 0
@@ -110,7 +110,7 @@ def find_common(df, main_df, on_col_list, s_rows, FID, char):
         mlog.info("%s == %s", FID, exp)
         cond = f"(main_df['{FID}'] == '{exp}') & (main_df['prefix'] == '{prefix}')"
         tdf = main_df[(main_df[FID] == exp) & (main_df['prefix'] == prefix)]
-        tdf = tdf[["pred_text1", "exp_name", "id","hscore", "bert_score","query", "resp", "template", "rouge_score", "fid","prefix", "input_text","target_text", "sel"]]
+        tdf = tdf[sel_cols + ["pred_text1", "exp_name", "id","hscore", "bert_score","query", "resp", "template", "rouge_score", "fid","prefix", "input_text","target_text", "sel"]]
         tdf = tdf.sort_values(by="rouge_score", ascending=False)
         if len(tdf) > 1:
             tdf = tdf.groupby(on_col_list).agg({"exp_name":"first","query":"first", "resp":"first","input_text":"first","target_text":"first", "hscore":"first", "template":"first", "rouge_score":"first","prefix":"first","pred_text1":"first", "fid":"first", "id":"count","bert_score":"first", "sel":"first"}).reset_index(drop=True)
@@ -134,7 +134,7 @@ def find_common(df, main_df, on_col_list, s_rows, FID, char):
     else:
        df = tdf
        df["sum_fid"] = df["id"].sum()
-    return df, exp
+    return df, exp, dfs
 
 def show_df(df):
     global dfname, hotkey
@@ -997,11 +997,11 @@ def show_df(df):
                 df = pd.concat(dfs,ignore_index=True)
                 #df = df.sort_values(by="int", ascending=False)
             else:
-                #df, sel_exp = find_common(df, filter_df, on_col_list, _rows, FID, char)
-                dfs = list_dfs(df, filter_df, _rows, FID)
-                df = pd.concat(dfs).sort_index().reset_index(drop=True)
+                _cols = [sel_cols[cur_col]]
+                df, sel_exp, dfs = find_common(df, filter_df, on_col_list, _rows, 
+                                               FID, char, _cols)
                 df = pd.concat(dfs).sort_index(kind='mergesort')
-                #df = df.sort_values(by="input_text", ascending=False)
+                df = df.sort_values(by="input_text", ascending=False)
             if "sel_x" in df: 
                 df = df.sort_values(by="sel_x", ascending=False)
             elif "sel" in df:
@@ -1025,6 +1025,8 @@ def show_df(df):
                 df = df.reset_index()
                 _from_cols = list(df.columns) 
                 sel_cols.append("target_text")
+                sel_cols.append(sel_col)
+                sel_cols.append("pred_text1")
                 for _col in _from_cols:
                     if _col.startswith("pred_text1"):
                         info_cols.append(_col)
