@@ -117,7 +117,7 @@ def find_common(df, main_df, on_col_list, s_rows, FID, char):
     else:
        df = tdf
        df["sum_fid"] = df["id"].sum()
-    return df, exp
+    return df, exp, dfs
 
 def show_df(df):
     global dfname, hotkey
@@ -975,17 +975,18 @@ def show_df(df):
                     for r2 in all_rows:
                         if r2 > r1:
                             _rows = [r1, r2]
-                            _df, sel_exp = find_common(df, filter_df, on_col_list, _rows, FID, char)
+                            _df, sel_exp, _ = find_common(df, filter_df, on_col_list, _rows, FID, char)
                             dfs.append(_df)
                 df = pd.concat(dfs,ignore_index=True)
-                df = df.sort_values(by="int", ascending=False)
+                #df = df.sort_values(by="int", ascending=False)
             else:
-                df, sel_exp = find_common(df, filter_df, on_col_list, _rows, FID, char)
+                df, sel_exp, dfs = find_common(df, filter_df, on_col_list, _rows, FID, char)
+                df = pd.concat(dfs).sort_index().reset_index(drop=True)
             if "sel_x" in df: 
                 df = df.sort_values(by="sel_x", ascending=False)
-            else:
+            elif "sel" in df:
                 df = df.sort_values(by="sel", ascending=False)
-            if len(sel_rows) == 2:
+            if False: #len(sel_rows) == 2 and char != "n":
                 _all = len(df)
                 df = df[df['pred_text1_x'].str.strip() != df['pred_text1_y'].str.strip()]
                 _dif = len(df)
