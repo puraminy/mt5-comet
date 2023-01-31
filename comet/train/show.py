@@ -1000,7 +1000,8 @@ def show_df(df):
                 #df, sel_exp = find_common(df, filter_df, on_col_list, _rows, FID, char)
                 dfs = list_dfs(df, filter_df, _rows, FID)
                 df = pd.concat(dfs).sort_index().reset_index(drop=True)
-                df = df.sort_values(by="input_text", ascending=False)
+                df = pd.concat(dfs).sort_index(kind='mergesort')
+                #df = df.sort_values(by="input_text", ascending=False)
             if "sel_x" in df: 
                 df = df.sort_values(by="sel_x", ascending=False)
             elif "sel" in df:
