@@ -1056,7 +1056,11 @@ def show_df(df):
                 df, sel_exp, dfs = find_common(df, filter_df, on_col_list, _rows, 
                                                FID, char, _cols)
                 df = pd.concat(dfs).sort_index(kind='mergesort')
-                df = df.sort_values(by="input_text", ascending=False)
+                _all = len(df)
+                df =df.sort_values(by='input_text').drop_duplicates(subset=['input_text', 'pred_text1',"prefix"], keep=False)
+                _common = _all - len(df)
+                consts["Common"] = str(_common) + "| {:.2f}".format(_common / _all)
+                #df = df.sort_values(by="input_text", ascending=False)
             if False: #len(sel_rows) == 2 and char != "n":
                 if "sel_x" in df: 
                     df = df.sort_values(by="sel_x", ascending=False)
