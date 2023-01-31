@@ -98,7 +98,7 @@ def list_dfs(df, main_df, s_rows, FID):
         dfs.append(tdf)
     return dfs
 
-def find_common(df, main_df, on_col_list, s_rows, FID, char, sel_cols):
+def find_common(df, main_df, on_col_list, s_rows, FID, char, taginfo):
     dfs_items = [] 
     dfs = []
     ii = 0
@@ -110,15 +110,35 @@ def find_common(df, main_df, on_col_list, s_rows, FID, char, sel_cols):
         mlog.info("%s == %s", FID, exp)
         cond = f"(main_df['{FID}'] == '{exp}') & (main_df['prefix'] == '{prefix}')"
         tdf = main_df[(main_df[FID] == exp) & (main_df['prefix'] == prefix)]
-        tdf = tdf[sel_cols + ["pred_text1", "exp_name", "id","hscore", "bert_score","query", "resp", "template", "rouge_score", "fid","prefix", "input_text","target_text", "sel"]]
+        tdf = tdf[taginfo + ["pred_text1", "exp_name", "id","hscore", "bert_score","query", "resp", "template", "rouge_score", "fid","prefix", "input_text","target_text", "sel"]]
         tdf = tdf.sort_values(by="rouge_score", ascending=False)
         if len(tdf) > 1:
-            tdf = tdf.groupby(on_col_list).agg({"exp_name":"first","query":"first", "resp":"first","input_text":"first","target_text":"first", "hscore":"first", "template":"first", "rouge_score":"first","prefix":"first","pred_text1":"first", "fid":"first", "id":"count","bert_score":"first", "sel":"first"}).reset_index(drop=True)
+            _agg = {}
+            for c in tdf.columns:
+                if c.endswith("score"):
+                    _agg[c] = "mean"
+                else:
+                    _agg[c] = ["first"]
+            gb = tdf.groupby(on_col_list)
+            #counts = gb.size().to_frame(name='group_records')
+            tdf = gb.agg(_agg).reset_index(drop=True)
+            tdf.columns = [ '_'.join(str(i) for i in col) for col in tdf.columns]
+            ren = {}
+            for c in tdf.columns:
+                if c == FID + "_first":
+                    ren[c] = "exp_id"
+                elif c.endswith("_mean"):
+                    ren[c] = c.replace("_mean","")
+                elif c.endswith("_first"):
+                    ren[c] = c.replace("_first","")
+            tdf = tdf.rename(columns=ren)
             for on_col in on_col_list:
                 tdf[on_col] = tdf[on_col].astype(str).str.strip()
             #tdf = tdf.set_index(on_col_list)
         dfs.append(tdf) #.copy())
         ii += 1
+    if char == "i":
+        return df, exp, dfs
     if ii > 1:
         intersect = reduce(lambda  left,right: pd.merge(left,right,on=on_col_list,
                                     how='inner'), dfs)
@@ -145,7 +165,6 @@ def show_df(df):
     cur_col = 0
     ROWS, COLS = std.getmaxyx()
     ch = 1
-    sel_row = 0
     left = 0
     max_row, max_col= text_win.getmaxyx()
     width = 15
@@ -296,24 +315,48 @@ def show_df(df):
     cmd = ""
     prev_cmd = ""
     do_wrap = True
-
-    def row_print(df, sel_row, col_widths ={}, _print=False):
-        ii = 0
+    group_row = "input_text"
+    sel_group = 0
+    def row_print(df, col_widths ={}, _print=False):
+        nonlocal sel_row
         infos = []
         top_margin = min(len(df), 5)
         sel_dict = {}
+        g_row = "dummy"
+        g = 0
+        g_color = TEXT_COLOR
+        g_sel_color = TITLE_COLOR
+        cross_color = HL_COLOR   
+        ii = 0
         for idx, row in df.iterrows():
-           if ii < sel_row - top_margin:
-               ii += 1
-               continue
            text = "{:<5}".format(ii)
            _sels = []
            _infs = []
-           _color = TEXT_COLOR
+           group_mode = group_row and group_row in row and group_row in sel_cols 
+           if (group_mode and row[group_row] != g_row):
+               g_row = row[group_row]
+               if g % 2 == 0:
+                  g_color = INFO_COLOR 
+                  g_sel_color = ITEM_COLOR 
+               else:
+                  g_color = TEXT_COLOR
+                  g_sel_color = TITLE_COLOR
+               if g == sel_group:
+                  sel_row = ii
+                  g_color = CUR_ITEM_COLOR
+                  g_sel_color = WARNING_COLOR
+               g+=1
+           if ii < sel_row - top_margin:
+               ii += 1
+               continue
+
+           if group_mode: cross_color = g_sel_color
+           _color = g_color
            if ii in sel_rows:
                _color = HL_COLOR
-           if ii == sel_row:
+           if ii == sel_row and not group_mode:
                 _color = CUR_ITEM_COLOR
+
            if _print:
                mprint(text, text_win, color = _color, end="") 
            if _print:
@@ -352,10 +395,10 @@ def show_df(df):
                _w = col_widths[sel_col] 
                if sel_col in sel_cols:
                    if cur_col < len(sel_cols) and sel_col == sel_cols[cur_col]:
-                       if ii == sel_row:
-                          cell_color = HL_COLOR
+                       if ii == sel_row: 
+                          cell_color = cross_color 
                        else:
-                           cell_color = TITLE_COLOR
+                          cell_color = g_sel_color
                    else:
                        cell_color = _color
                    text = textwrap.shorten(text, width=36, placeholder="...")
@@ -405,11 +448,13 @@ def show_df(df):
         top = max(top, 0)
         sel_row = min(sel_row, len(df) - 1)
         sel_row = max(sel_row, 0)
+        sel_group = max(sel_group, 0)
+        #sel_group = min(sel_row, sel_group)
         cur_col = min(cur_col, len(sel_cols) - 1)
         cur_col = max(cur_col, 0)
         if not hotkey:
             if adjust:
-                _, col_widths = row_print(df, sel_row, col_widths={})
+                _, col_widths = row_print(df, col_widths={})
             text = "{:<5}".format(sel_row)
             for i, sel_col in enumerate(sel_cols):
                if not sel_col in df:
@@ -418,7 +463,7 @@ def show_df(df):
                head = sel_col if not sel_col in map_cols else map_cols[sel_col] 
                #head = textwrap.shorten(f"{i} {head}" , width=15, placeholder=".")
                if not sel_col in col_widths and not adjust:
-                    _, col_widths = row_print(df, sel_row, col_widths={})
+                    _, col_widths = row_print(df, col_widths={})
                     adjust = True
                if sel_col in col_widths and len(head) + 5 > col_widths[sel_col]:
                    col_widths[sel_col] = len(head) + 5
@@ -426,7 +471,7 @@ def show_df(df):
                text += "{:<{x}}".format(head, x=_w) 
             mprint(text, text_win) 
             #fffff
-            infos,_ = row_print(df, sel_row, col_widths, True)
+            infos,_ = row_print(df, col_widths, True)
             refresh()
         for c in info_cols:
             if not c in df:
@@ -512,20 +557,25 @@ def show_df(df):
             if context == "inp":
                 back_rows[-1] += 1
                 hotkey = "bp"
+            elif group_row and group_row in sel_cols:
+                sel_group +=1
             else:
                 sel_row += 1
-                adjust = False
+            adjust = False
         elif ch == UP: 
             if context == "inp":
                 back_rows[-1] -= 1
                 hotkey = "bp"
+            elif group_row and group_row in sel_cols:
+                sel_group -=1
             else:
                 sel_row -= 1
-                adjust = False
+            adjust = False
         elif ch == cur.KEY_NPAGE:
             sel_row += ROWS - 4
         elif ch == cur.KEY_HOME:
             sel_row = 0 
+            sel_group = 0
         elif ch == cur.KEY_SHOME:
             left = 0 
         elif ch == cur.KEY_END:
@@ -930,6 +980,11 @@ def show_df(df):
                         _sel_cols.append(c)
                 if _sel_cols:
                     sel_cols = _sel_cols
+                    _taginfo = []
+                    for _col in _sel_cols:
+                        if _col in taginfo:
+                            _taginfo.append(_col)
+                    taginfo = _taginfo
 
             extra["common"] = _infos
             df = df.sort_values(by = ["rouge_score"], ascending=False)
@@ -964,7 +1019,7 @@ def show_df(df):
             sel_rows = []
             FID = "input_text"
             hotkey = hk
-        elif char in ["n", "p", "t", "i"] and prev_cahr != "x" and hk == "gG":
+        elif char in ["n", "p", "t", "i"]: # and prev_cahr != "x" and hk == "gG":
             left = 0
             context= "comp"
             s_rows = sel_rows
@@ -997,16 +1052,16 @@ def show_df(df):
                 df = pd.concat(dfs,ignore_index=True)
                 #df = df.sort_values(by="int", ascending=False)
             else:
-                _cols = [sel_cols[cur_col]]
+                _cols = taginfo
                 df, sel_exp, dfs = find_common(df, filter_df, on_col_list, _rows, 
                                                FID, char, _cols)
                 df = pd.concat(dfs).sort_index(kind='mergesort')
                 df = df.sort_values(by="input_text", ascending=False)
-            if "sel_x" in df: 
-                df = df.sort_values(by="sel_x", ascending=False)
-            elif "sel" in df:
-                df = df.sort_values(by="sel", ascending=False)
             if False: #len(sel_rows) == 2 and char != "n":
+                if "sel_x" in df: 
+                    df = df.sort_values(by="sel_x", ascending=False)
+                elif "sel" in df:
+                    df = df.sort_values(by="sel", ascending=False)
                 _all = len(df)
                 df = df[df['pred_text1_x'].str.strip() != df['pred_text1_y'].str.strip()]
                 _dif = len(df)
@@ -1021,12 +1076,12 @@ def show_df(df):
             info_cols = []
             #show_consts = False
             sel_cols.remove("prefix")
-            if len(sel_rows) > 2:
+            if len(sel_rows) > 1:
                 df = df.reset_index()
                 _from_cols = list(df.columns) 
-                sel_cols.append("target_text")
-                sel_cols.append(sel_col)
+                sel_cols.extend(taginfo)
                 sel_cols.append("pred_text1")
+                sel_cols.append("target_text")
                 for _col in _from_cols:
                     if _col.startswith("pred_text1"):
                         info_cols.append(_col)
