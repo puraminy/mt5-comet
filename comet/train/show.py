@@ -81,6 +81,23 @@ def load_results(path):
     df.to_csv(path.replace("json", "tsv"), sep="\t", index = False)
     return df
 
+def list_dfs(df, main_df, s_rows, FID):
+    dfs_items = [] 
+    dfs = []
+    ii = 0
+    dfs_val = {}
+    for s_row in s_rows:
+        exp=df.iloc[s_row]["exp_id"]
+        prefix=df.iloc[s_row]["prefix"]
+        dfs_val["exp" + str(ii)] = exp
+        mlog.info("%s == %s", FID, exp)
+        cond = f"(main_df['{FID}'] == '{exp}') & (main_df['prefix'] == '{prefix}')"
+        tdf = main_df[(main_df[FID] == exp) & (main_df['prefix'] == prefix)]
+        tdf = tdf[["pred_text1", "exp_name", "id","hscore", "bert_score","query", "resp", "template", "rouge_score", "fid","prefix", "input_text","target_text", "sel"]]
+        tdf = tdf.sort_values(by="rouge_score", ascending=False)
+        dfs.append(tdf)
+    return dfs
+
 def find_common(df, main_df, on_col_list, s_rows, FID, char):
     dfs_items = [] 
     dfs = []
@@ -117,7 +134,7 @@ def find_common(df, main_df, on_col_list, s_rows, FID, char):
     else:
        df = tdf
        df["sum_fid"] = df["id"].sum()
-    return df, exp, dfs
+    return df, exp
 
 def show_df(df):
     global dfname, hotkey
@@ -975,13 +992,15 @@ def show_df(df):
                     for r2 in all_rows:
                         if r2 > r1:
                             _rows = [r1, r2]
-                            _df, sel_exp, _ = find_common(df, filter_df, on_col_list, _rows, FID, char)
+                            _df, sel_exp = find_common(df, filter_df, on_col_list, _rows, FID, char)
                             dfs.append(_df)
                 df = pd.concat(dfs,ignore_index=True)
                 #df = df.sort_values(by="int", ascending=False)
             else:
-                df, sel_exp, dfs = find_common(df, filter_df, on_col_list, _rows, FID, char)
+                #df, sel_exp = find_common(df, filter_df, on_col_list, _rows, FID, char)
+                dfs = list_dfs(df, filter_df, _rows, FID)
                 df = pd.concat(dfs).sort_index().reset_index(drop=True)
+                df = df.sort_values(by="input_text", ascending=False)
             if "sel_x" in df: 
                 df = df.sort_values(by="sel_x", ascending=False)
             elif "sel" in df:
