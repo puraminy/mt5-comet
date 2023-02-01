@@ -431,6 +431,12 @@ def show_df(df):
             "pred_max_num":"pnm",
             "attn_learning_rate":"alr",
             "attn_method":"am",
+            "attend_source":"att_src",
+            "attend_target":"att_tg",
+            "attend_input":"att_inp",
+            "add_target":"add_tg",
+            "rouge_score":"rg",
+            "bert_score":"bt",
             }
     wraps = {
             "tag":20,
@@ -926,9 +932,9 @@ def show_df(df):
             sel_cols =  load_obj("sel_cols", context, [])
             info_cols = load_obj("info_cols", context, [])
             if True:
-                info_cols = ["full_tag", "tag"]
+                info_cols = ["bert_score", "num_preds"]
             if True: #col == "fid":
-                sel_cols = taginfo + ["method", "trial", "prefix","num_preds", "rouge_score", "pred_max_num","pred_max", "steps","max_acc","best_step",  "bert_score", "st_score", "learning_rate",  "num_targets", "num_inps", "train_records", "train_records_nunique", "group_records", "wrap", "frozen", "prefixed"] 
+                sel_cols = ["rouge_score"] + taginfo + ["method", "trial", "prefix","num_preds", "rouge_score", "pred_max_num","pred_max", "steps","max_acc","best_step",  "bert_score", "st_score", "learning_rate",  "num_targets", "num_inps", "train_records", "train_records_nunique", "group_records", "wrap", "frozen", "prefixed"] 
 
             _agg = {}
             for c in df.columns:
@@ -939,8 +945,8 @@ def show_df(df):
             gb = df.groupby(col)
             counts = gb.size().to_frame(name='group_records')
             df = (counts.join(gb.agg(_agg)))
+            df = df.reset_index()
             df.columns = [ '_'.join(str(i) for i in col) for col in df.columns]
-
             avg_len = 1 #(df.groupby(col)["pred_text1"]
                         #   .apply(lambda x: np.mean(x.str.len()).round(2)))
             ren = {
@@ -956,7 +962,6 @@ def show_df(df):
                 elif c.endswith("_first"):
                     ren[c] = c.replace("_first","")
             df = df.rename(columns=ren)
-            #df = df.reset_index()
             df["avg_len"] = avg_len
             _infos =""
             if True:
