@@ -81,6 +81,32 @@ def load_results(path):
     df.to_csv(path.replace("json", "tsv"), sep="\t", index = False)
     return df
 
+def remove_uniques(df, sel_cols, tag_cols):
+    _sel_cols = []
+    _info_cols = []
+    _tag_cols = tag_cols
+    for c in sel_cols:
+        _count = 0
+        try:
+            _count = df[c].nunique()
+        except:
+            continue
+        if _count == 1 and c != "exp_id":
+           _info_cols.append(c) 
+        elif c in df and c + "_nunique" in df:
+            _gn = df[c + "_nunique"].iloc[0]
+            if _gn == 1 or c == "exp_id":
+                _sel_cols.append(c)
+        else:
+            _sel_cols.append(c)
+    if _sel_cols:
+        sel_cols = _sel_cols
+        _tag_cols = []
+        for _col in _sel_cols:
+            if _col in tag_cols:
+                _tag_cols.append(_col)
+    return _sel_cols, _info_cols, _tag_cols
+
 def list_dfs(df, main_df, s_rows, FID):
     dfs_items = [] 
     dfs = []
@@ -98,7 +124,7 @@ def list_dfs(df, main_df, s_rows, FID):
         dfs.append(tdf)
     return dfs
 
-def find_common(df, main_df, on_col_list, s_rows, FID, char, taginfo):
+def find_common(df, main_df, on_col_list, s_rows, FID, char, tag_cols):
     dfs_items = [] 
     dfs = []
     ii = 0
@@ -110,7 +136,7 @@ def find_common(df, main_df, on_col_list, s_rows, FID, char, taginfo):
         mlog.info("%s == %s", FID, exp)
         cond = f"(main_df['{FID}'] == '{exp}') & (main_df['prefix'] == '{prefix}')"
         tdf = main_df[(main_df[FID] == exp) & (main_df['prefix'] == prefix)]
-        tdf = tdf[taginfo + ["pred_text1", "exp_name", "id","hscore", "bert_score","query", "resp", "template", "rouge_score", "fid","prefix", "input_text","target_text", "sel"]]
+        tdf = tdf[tag_cols + ["pred_text1", "exp_name", "id","hscore", "bert_score","query", "resp", "template", "rouge_score", "fid","prefix", "input_text","target_text", "sel"]]
         tdf = tdf.sort_values(by="rouge_score", ascending=False)
         if len(tdf) > 1:
             _agg = {}
@@ -266,12 +292,12 @@ def show_df(df):
     back = []
     sels = []
     filter_df = main_df
-    taginfo = []
+    tag_cols = []
     if "taginfo" in df:
         tags = df.loc[0, "ftag"]
         tags = tags.replace("'", "\"")
         tags = json.loads(tags)
-        taginfo = list(tags.keys())
+        tag_cols = list(tags.keys())
     src_path = ""
     if "src_path" in df:
         src_path = df.loc[0, "src_path"]
@@ -315,46 +341,57 @@ def show_df(df):
     cmd = ""
     prev_cmd = ""
     do_wrap = True
-    group_row = "input_text"
     sel_group = 0
+    group_col = ""
+    group_rows = []
     def row_print(df, col_widths ={}, _print=False):
-        nonlocal sel_row
+        nonlocal group_rows
         infos = []
-        top_margin = min(len(df), 5)
+        margin = min(len(df), 5)
         sel_dict = {}
-        g_row = "dummy"
+        g_row = ""
         g = 0
-        g_color = TEXT_COLOR
-        g_sel_color = TITLE_COLOR
+        g_start = -1
+        row_color = TEXT_COLOR
+        sel_col_color = TITLE_COLOR
         cross_color = HL_COLOR   
-        ii = 0
+        sel_row_color = CUR_ITEM_COLOR
+        g_color = row_color
+        group_mode = group_col and group_col in sel_cols 
+        _sel_row = -1 if group_mode else sel_row 
+        ii = 0 
         for idx, row in df.iterrows():
            text = "{:<5}".format(ii)
            _sels = []
            _infs = []
-           group_mode = group_row and group_row in row and group_row in sel_cols 
-           if (group_mode and row[group_row] != g_row):
-               g_row = row[group_row]
+           if (group_mode and group_col in row and row[group_col] != g_row):
+               g_row = row[group_col]
+               if g_start >= 0:
+                   group_rows = range(g_start, ii)
+                   g_start = -1
                if g % 2 == 0:
-                  g_color = INFO_COLOR 
-                  g_sel_color = ITEM_COLOR 
+                  row_color = INFO_COLOR 
+                  sel_col_color = ITEM_COLOR 
+                  g_color = row_color
                else:
-                  g_color = TEXT_COLOR
-                  g_sel_color = TITLE_COLOR
+                  row_color = TEXT_COLOR
+                  sel_col_color = TITLE_COLOR
+                  g_color = row_color
                if g == sel_group:
-                  sel_row = ii
-                  g_color = CUR_ITEM_COLOR
-                  g_sel_color = WARNING_COLOR
+                  _sel_row = ii
+                  row_color = CUR_ITEM_COLOR
+                  g_color = WARNING_COLOR
+                  g_start = ii
                g+=1
-           if ii < sel_row - top_margin:
+           if _sel_row < 0 or ii < _sel_row - margin:
                ii += 1
                continue
 
-           if group_mode: cross_color = g_sel_color
-           _color = g_color
+           if group_mode: cross_color = sel_col_color
+           _color = row_color
            if ii in sel_rows:
                _color = HL_COLOR
-           if ii == sel_row and not group_mode:
+           if ii == _sel_row and not group_mode:
                 _color = CUR_ITEM_COLOR
 
            if _print:
@@ -382,10 +419,10 @@ def show_df(df):
                        pass
                _info = sel_col + ":" + orig_content
                if sel_col in info_cols:
-                   if ii == sel_row and not sel_col in _infs:
+                   if ii == _sel_row and not sel_col in _infs:
                       infos.append(_info)
                       _infs.append(sel_col)
-               if ii == sel_row:
+               if ii == _sel_row:
                    sel_dict[sel_col] = row[sel_col]
                if not sel_col in col_widths:
                    col_widths[sel_col] = len(content) + 4
@@ -394,13 +431,19 @@ def show_df(df):
                col_widths[sel_col] = min(col_widths[sel_col],40)
                _w = col_widths[sel_col] 
                if sel_col in sel_cols:
-                   if cur_col < len(sel_cols) and sel_col == sel_cols[cur_col]:
-                       if ii == sel_row: 
+                   _cur_col = sel_cols[cur_col]
+                   if cur_col < len(sel_cols) and sel_col == _cur_col:
+                       if ii == _sel_row: 
                           cell_color = cross_color 
                        else:
-                          cell_color = g_sel_color
+                          cell_color = sel_col_color
                    else:
-                       cell_color = _color
+                       if sel_col == group_col:
+                          cell_color = g_color
+                       elif ii == _sel_row:
+                          cell_color = sel_row_color
+                       else:
+                          cell_color = row_color
                    text = textwrap.shorten(text, width=36, placeholder="...")
                    text = "{:<{x}}".format(content, x= _w)
                    if _print:
@@ -411,7 +454,7 @@ def show_df(df):
            if _print:
                mprint("", text_win, color = _color, end="\n") 
            ii += 1
-           if ii > sel_row + ROWS - 4 - len(infos):
+           if ii > _sel_row + ROWS:
                break
         return infos, col_widths
 
@@ -563,7 +606,7 @@ def show_df(df):
             if context == "inp":
                 back_rows[-1] += 1
                 hotkey = "bp"
-            elif group_row and group_row in sel_cols:
+            elif group_col and group_col in sel_cols:
                 sel_group +=1
             else:
                 sel_row += 1
@@ -572,7 +615,7 @@ def show_df(df):
             if context == "inp":
                 back_rows[-1] -= 1
                 hotkey = "bp"
-            elif group_row and group_row in sel_cols:
+            elif group_col and group_col in sel_cols:
                 sel_group -=1
             else:
                 sel_row -= 1
@@ -850,14 +893,24 @@ def show_df(df):
                 extra["FID"] = FID
                 df = filter_df
                 hotkey=hk
-        elif char == "s":
+        elif char == "s": 
             if cur_col < len(sel_cols):
                 col = sel_cols[cur_col]
                 if col == sort:
                     asc = not asc
                 sort = col
                 df = df.sort_values(by=sort, ascending=asc)
-        elif char in ["c","C"] and prev_char == "c": 
+        elif char == "g":
+            if group_col:
+                group_col = ""
+                sel_row = 0
+                sel_group = 0
+            elif cur_col < len(sel_cols):
+                col = sel_cols[cur_col]
+                group_col = col
+                sel_row = 0
+                sel_group = 0
+        elif char == "c":
             counts = {}
             for col in df:
                counts[col] = df[col].nunique()
@@ -880,10 +933,9 @@ def show_df(df):
                 sel_cols = list(df.columns)
                 col_widths["index"]=50
                 info_cols = []
-        elif char == "g": 
+        elif char == "C": 
             score_col = "rouge_score"
             backit(df, sel_cols)
-            group_col = "pred_text1"
             df["rouge_score"] = df.groupby(['fid','prefix','input_text'])["rouge_score"].transform("max")
             df["bert_score"] = df.groupby(['fid','prefix','input_text'])["bert_score"].transform("max")
             df["hscore"] = df.groupby(['fid','prefix','input_text'])["hscore"].transform("max")
@@ -905,7 +957,6 @@ def show_df(df):
             #.assign(pred_max_num=temp.max(1), pred_max = temp.idxmax(1))
             #)
 
-            if not group_col in info_cols: info_cols.append(group_col)
             sel_cols.append("num_preds")
             extra["filter"].append("group predictions")
         elif char == " ":
@@ -934,7 +985,7 @@ def show_df(df):
             if True:
                 info_cols = ["bert_score", "num_preds"]
             if True: #col == "fid":
-                sel_cols = ["rouge_score"] + taginfo + ["method", "trial", "prefix","num_preds", "rouge_score", "pred_max_num","pred_max", "steps","max_acc","best_step",  "bert_score", "st_score", "learning_rate",  "num_targets", "num_inps", "train_records", "train_records_nunique", "group_records", "wrap", "frozen", "prefixed"] 
+                sel_cols = ["rouge_score"] + tag_cols + ["method", "trial", "prefix","num_preds", "rouge_score", "pred_max_num","pred_max", "steps","max_acc","best_step",  "bert_score", "st_score", "learning_rate",  "num_targets", "num_inps", "train_records", "train_records_nunique", "group_records", "wrap", "frozen", "prefixed"] 
 
             _agg = {}
             for c in df.columns:
@@ -963,35 +1014,9 @@ def show_df(df):
                     ren[c] = c.replace("_first","")
             df = df.rename(columns=ren)
             df["avg_len"] = avg_len
-            _infos =""
-            if True:
-                _sel_cols = []
-                for c in sel_cols:
-                    if "train_" in c:
-                        mbp("sel")
-                    _count = 0
-                    try:
-                        _count = df[c].nunique()
-                        _first = df[c].iloc[0]
-                    except:
-                        continue
-                    if _count == 1 and c != "exp_id":
-                        _infos += f"{c}:{_first}  |  "
-                    elif c in df and c + "_nunique" in df:
-                        _gn = df[c + "_nunique"].iloc[0]
-                        if _gn == 1 or c == "exp_id":
-                            _sel_cols.append(c)
-                    else:
-                        _sel_cols.append(c)
-                if _sel_cols:
-                    sel_cols = _sel_cols
-                    _taginfo = []
-                    for _col in _sel_cols:
-                        if _col in taginfo:
-                            _taginfo.append(_col)
-                    taginfo = _taginfo
-
-            extra["common"] = _infos
+            sel_cols, info_cols, tag_cols = remove_uniques(df, sel_cols, tag_cols)
+            info_cols_back = info_cols.copy()
+            info_cols = []
             df = df.sort_values(by = ["rouge_score"], ascending=False)
         elif char == "T":
             exp=df.iloc[sel_row]["exp_id"]
@@ -1029,7 +1054,9 @@ def show_df(df):
             context= "comp"
             s_rows = sel_rows
             if not sel_rows:
-                s_rows = [sel_row]
+                s_rows = group_rows
+                if not group_rows:
+                    s_rows = [sel_row]
             sel_rows = sorted(sel_rows)
             if sel_rows:
                 sel_row = sel_rows[-1]
@@ -1037,6 +1064,7 @@ def show_df(df):
             on_col_list = ["pred_text1"]
             other_col = "target_text"
             if char =="i": 
+                group_col = "input_text"
                 on_col_list = ["input_text"] 
                 other_col = "pred_text1"
             if char =="t": 
@@ -1057,7 +1085,7 @@ def show_df(df):
                 df = pd.concat(dfs,ignore_index=True)
                 #df = df.sort_values(by="int", ascending=False)
             else:
-                _cols = taginfo
+                _cols = tag_cols
                 df, sel_exp, dfs = find_common(df, filter_df, on_col_list, _rows, 
                                                FID, char, _cols)
                 df = pd.concat(dfs).sort_index(kind='mergesort')
@@ -1081,21 +1109,14 @@ def show_df(df):
                     fid_y = df.iloc[0]["exp_name_y"]
                     df["exp_name_x"] = "|".join(list(set(fid_x.split("@")) - set(fid_y.split("@"))))
                     df["exp_name_y"] = "|".join(list(set(fid_y.split("@")) - set(fid_x.split("@"))))
-            sel_cols = on_col_list
+            sel_cols = tag_cols + ["prefix","input_text","pred_text1","target_text"] 
             info_cols = []
             #show_consts = False
-            sel_cols.remove("prefix")
             if len(sel_rows) > 1:
                 df = df.reset_index()
-                _from_cols = list(df.columns) 
-                sel_cols.extend(taginfo)
-                sel_cols.append("pred_text1")
-                sel_cols.append("target_text")
-                for _col in _from_cols:
-                    if _col.startswith("pred_text1"):
-                        info_cols.append(_col)
+                sel_cols, info_cols, tag_cols = remove_uniques(df, sel_cols, tag_cols)
             else:
-                _from_cols = ["pred_text1", "pred_text1_x", "pred_text1_y","query_x","query_y", "query", "resp", "resp_x", "resp_y", "template", "prefix", "input_text","target_text_x", "target_text", "rouge_score", "rouge_score_x","rouge_score_y", "bert_score", "bert_score_x", "bert_score_y", "exp_name_x", "exp_name_y","sel"]
+                _from_cols = ["pred_text1", "pred_text1_x", "pred_text1_y","query_x","query_y", "query", "resp", "resp_x", "resp_y", "template", "prefix", "input_text","target_text_x", "target_text", "rouge_score", "rouge_score_x","rouge_score_y", "bert_score", "bert_score_x", "bert_score_y", "exp_name_x", "exp_name_y","sel"] + tag_cols
                 for _col in _from_cols:
                     if (_col.startswith("id") or
                         _col.startswith("pred_text1") or 
@@ -1796,25 +1817,18 @@ def start(stdscr):
     if not dfname:
         mlog.info("No file name provided")
     else:
-        if len(dfname) > 1:
-            files = list(dfname)
+        path = os.path.join(dfpath, *dfname)
+        if Path(path).is_file():
+            files = [path]
+            dfname = Path(dfname).stem
         else:
-            dfname = dfname[0]
-            path = os.path.join(dfpath, dfname)
-            if Path(path).is_file():
-                files = [path]
-                dfname = Path(dfname).stem
-            else:
-                files = []
-                for root, dirs, _files in os.walk(dfpath):
-                    for _file in _files:
-                        root_file = os.path.join(root,_file)
-                        if "+" in dfname:
-                            cond = all(s.strip() in root_file for s in dfname.split("+"))
-                        else:
-                            cond = any(s.strip() in root_file for s in dfname.split("-"))
-                        if dftype in _file and cond: 
-                            files.append(root_file)
+            files = []
+            for root, dirs, _files in os.walk(dfpath):
+                for _file in _files:
+                    root_file = os.path.join(root,_file)
+                    cond = all(s.strip() in root_file for s in dfname)
+                    if dftype in _file and cond: 
+                        files.append(root_file)
         mlog.info("files: %s",files)
         if not files:
             print("No file was selected")
@@ -1862,7 +1876,9 @@ def start(stdscr):
         else:
             mlog.info("No tsv or json file was found")
 
-@click.command()
+@click.command(context_settings=dict(
+            ignore_unknown_options=True,
+            allow_extra_args=True,))
 @click.argument("fname", nargs=-1, type=str)
 @click.option(
     "--path",
@@ -1894,11 +1910,12 @@ def start(stdscr):
 @click.option(
     "--hkey",
     "-h",
-    default="",
+    default="CG",
     type=str,
     help=""
 )
-def main(fname, path, fid, ftype, dpy, hkey):
+@click.pass_context
+def main(ctx, fname, path, fid, ftype, dpy, hkey):
     if dpy:
         port = 5678
         debugpy.listen(('0.0.0.0', int(port)))
