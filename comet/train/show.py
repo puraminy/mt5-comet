@@ -1090,7 +1090,8 @@ def show_df(df):
             info_cols = []
             df = df.reset_index()
             if len(df) > 1:
-                df.columns = df.columns.droplevel()
+                if df.index.nlevels > 1:
+                    df.columns = df.columns.droplevel()
                 sel_cols, info_cols, tag_cols = remove_uniques(df, sel_cols, tag_cols)
 
         elif char == "m" and prev_char != "x":
