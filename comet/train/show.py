@@ -1103,35 +1103,9 @@ def show_df(df):
                     df["exp_name_y"] = "|".join(list(set(fid_y.split("@")) - set(fid_x.split("@"))))
             sel_cols = ["pred_text1","target_text"] + tag_cols + ["prefix","input_text"]
             info_cols = []
-            #show_consts = False
-            if True: #len(sel_rows) > 1:
-                df = df.reset_index()
-                if len(df) > 1:
-                    sel_cols, info_cols, tag_cols = remove_uniques(df, sel_cols, tag_cols)
-                if not "pred_text1" in sel_cols:
-                    sel_cols = ["pred_text1"] + sel_cols
-            else:
-                _from_cols = ["pred_text1", "pred_text1_x", "pred_text1_y","query_x","query_y", "query", "resp", "resp_x", "resp_y", "template", "prefix", "input_text","target_text_x", "target_text", "rouge_score", "rouge_score_x","rouge_score_y", "bert_score", "bert_score_x", "bert_score_y", "exp_name_x", "exp_name_y","sel"] + tag_cols
-                for _col in _from_cols:
-                    if (_col.startswith("id") or
-                        _col.startswith("pred_text1") or 
-                        _col.startswith("rouge_score") or 
-                        _col.startswith("fid") or 
-                        _col=="target_text" or _col=="sel" or 
-                        _col.startswith("bert_score")):
-                        sel_cols.append(_col)
-                    elif not _col in on_col_list and not _col in info_cols:
-                        info_cols.append(_col)
-            info_cols.append("prefix")
-            if char == "n":
-                sel_cols = list(df.columns)
-            sel_row = 0
-            sel_rows = []
-            info_cols.append("sum_fid")
-            extra["short_keys"] = "m: show group" 
-            if len(info_cols) > 3:
-                info_cols_back = info_cols.copy()
-                info_cols = []
+            df = df.reset_index()
+            if len(df) > 1:
+                sel_cols, info_cols, tag_cols = remove_uniques(df, sel_cols, tag_cols)
 
         elif char == "m" and prev_char != "x":
             left = 0
