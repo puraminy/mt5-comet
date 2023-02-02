@@ -205,9 +205,10 @@ def reset_colors(theme, bg=None):
     cur.init_pair(SEL_ITEM_COLOR, bg, int(theme["sel-item-color"]) % cur.COLORS)
     cur.init_pair(INPUT_COLOR, TEXT_COLOR, int(theme["input-color"]) % cur.COLORS)
     cur.init_pair(ERR_COLOR, cW, cR % cur.COLORS)
-    cur.init_pair(MSG_COLOR, cW, clB % cur.COLORS)
+    cur.init_pair(MSG_COLOR, 232, 30 % cur.COLORS)
     #cur.init_pair(INFO_COLOR, 235, cG % cur.COLORS)
-    cur.init_pair(INFO_COLOR, 243, 235 % cur.COLORS)
+    cur.init_pair(SEL_COLOR, 253, 24 % cur.COLORS)
+    cur.init_pair(INFO_COLOR, 246, 235 % cur.COLORS)
     cur.init_pair(WARNING_COLOR, cW, cO % cur.COLORS)
 
 def reset_hl(theme):

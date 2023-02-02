@@ -355,7 +355,7 @@ def show_df(df):
         row_color = TEXT_COLOR
         sel_col_color = TITLE_COLOR
         cross_color = HL_COLOR   
-        sel_row_color = CUR_ITEM_COLOR
+        sel_row_color = SEL_COLOR
         g_color = row_color
         group_mode = group_col and group_col in sel_cols 
         _sel_row = -1 if group_mode else sel_row 
@@ -379,7 +379,7 @@ def show_df(df):
                   g_color = row_color
                if g == sel_group:
                   _sel_row = ii
-                  row_color = CUR_ITEM_COLOR
+                  row_color = SEL_COLOR
                   g_color = WARNING_COLOR
                   g_start = ii
                g+=1
@@ -389,11 +389,12 @@ def show_df(df):
 
            if group_mode: cross_color = sel_col_color
            _color = row_color
+           if cur_col < 0:
+              _color = sel_col_color
            if ii in sel_rows:
-               _color = HL_COLOR
+               _color = MSG_COLOR
            if ii == _sel_row and not group_mode:
-                _color = CUR_ITEM_COLOR
-
+                _color = cross_color if cur_col < 0 else SEL_COLOR 
            if _print:
                mprint(text, text_win, color = _color, end="") 
            if _print:
@@ -431,8 +432,8 @@ def show_df(df):
                col_widths[sel_col] = min(col_widths[sel_col],40)
                _w = col_widths[sel_col] 
                if sel_col in sel_cols:
-                   _cur_col = sel_cols[cur_col]
-                   if cur_col < len(sel_cols) and sel_col == _cur_col:
+                   if (cur_col >=0 and cur_col < len(sel_cols) 
+                          and sel_col == sel_cols[cur_col]):
                        if ii == _sel_row: 
                           cell_color = cross_color 
                        else:
@@ -440,6 +441,8 @@ def show_df(df):
                    else:
                        if sel_col == group_col:
                           cell_color = g_color
+                       elif ii in sel_rows:
+                          cell_color = MSG_COLOR
                        elif ii == _sel_row:
                           cell_color = sel_row_color
                        else:
@@ -500,7 +503,7 @@ def show_df(df):
         sel_group = max(sel_group, 0)
         #sel_group = min(sel_row, sel_group)
         cur_col = min(cur_col, len(sel_cols) - 1)
-        cur_col = max(cur_col, 0)
+        cur_col = max(cur_col, -1)
         if not hotkey:
             if adjust:
                 _, col_widths = row_print(df, col_widths={})
@@ -572,7 +575,7 @@ def show_df(df):
             info_cols = info_cols_back.copy()
         if ch == LEFT:
             cur_col -= 1
-            cur_col = max(0, cur_col)
+            cur_col = max(-1, cur_col)
             width = col_widths[sel_cols[cur_col]]
             _sw = sum([col_widths[x] for x in sel_cols[:cur_col]])
             if _sw < left:
@@ -1052,6 +1055,9 @@ def show_df(df):
         elif char in ["n", "p", "t", "i"]: # and prev_cahr != "x" and hk == "gG":
             left = 0
             context= "comp"
+            cur_col = -1
+            sel_group = 0
+            sel_row = 0
             s_rows = sel_rows
             if not sel_rows:
                 s_rows = group_rows
@@ -1086,7 +1092,7 @@ def show_df(df):
                 #df = df.sort_values(by="int", ascending=False)
             else:
                 _cols = tag_cols
-                df, sel_exp, dfs = find_common(df, filter_df, on_col_list, _rows, 
+                df, sel_exp, dfs = find_common(df, main_df, on_col_list, _rows, 
                                                FID, char, _cols)
                 df = pd.concat(dfs).sort_index(kind='mergesort')
                 _all = len(df)

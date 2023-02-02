@@ -101,6 +101,7 @@ WARNING_COLOR = 106
 TEMP_COLOR = 107
 TEMP_COLOR2 = 108
 SEL_ITEM_COLOR = 109
+SEL_COLOR = 110
 
 color_map = {
     "cur-item-color": CUR_ITEM_COLOR,
