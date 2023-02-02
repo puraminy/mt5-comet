@@ -139,25 +139,8 @@ def find_common(df, main_df, on_col_list, s_rows, FID, char, tag_cols):
         tdf = tdf[tag_cols + ["pred_text1", "exp_name", "id","hscore", "bert_score","query", "resp", "template", "rouge_score", "fid","prefix", "input_text","target_text", "sel"]]
         tdf = tdf.sort_values(by="rouge_score", ascending=False)
         if len(tdf) > 1:
-            _agg = {}
-            for c in tdf.columns:
-                if c.endswith("score"):
-                    _agg[c] = "mean"
-                else:
-                    _agg[c] = ["first"]
-            gb = tdf.groupby(on_col_list)
-            #counts = gb.size().to_frame(name='group_records')
-            tdf = gb.agg(_agg).reset_index(drop=True)
-            tdf.columns = [ '_'.join(str(i) for i in col) for col in tdf.columns]
-            ren = {}
-            for c in tdf.columns:
-                if c == FID + "_first":
-                    ren[c] = "exp_id"
-                elif c.endswith("_mean"):
-                    ren[c] = c.replace("_mean","")
-                elif c.endswith("_first"):
-                    ren[c] = c.replace("_first","")
-            tdf = tdf.rename(columns=ren)
+            tdf = tdf.groupby(on_col_list).first()
+            tdf = tdf.reset_index()
             for on_col in on_col_list:
                 tdf[on_col] = tdf[on_col].astype(str).str.strip()
             #tdf = tdf.set_index(on_col_list)
@@ -473,6 +456,8 @@ def show_df(df):
     map_cols = {
             "epochs_num":"epn",
             "exp_trial":"exp",
+            "pred_text1":"pred",
+            "target_text":"tgt",
             "template":"tn",
             "pred_max_num":"pnm",
             "attn_learning_rate":"alr",
@@ -494,6 +479,7 @@ def show_df(df):
     extra = {"filter":[]}
     while ch != ord("q"):
         text_win.clear()
+        group_rows = []
         left = min(left, max_col  - width)
         left = max(left, 0)
         top = min(top, max_row  - height)
@@ -1017,7 +1003,8 @@ def show_df(df):
                     ren[c] = c.replace("_first","")
             df = df.rename(columns=ren)
             df["avg_len"] = avg_len
-            sel_cols, info_cols, tag_cols = remove_uniques(df, sel_cols, tag_cols)
+            if len(df) > 1:
+                sel_cols, info_cols, tag_cols = remove_uniques(df, sel_cols, tag_cols)
             info_cols_back = info_cols.copy()
             info_cols = []
             df = df.sort_values(by = ["rouge_score"], ascending=False)
@@ -1057,7 +1044,6 @@ def show_df(df):
             context= "comp"
             cur_col = -1
             sel_group = 0
-            sel_row = 0
             s_rows = sel_rows
             if not sel_rows:
                 s_rows = group_rows
@@ -1115,12 +1101,15 @@ def show_df(df):
                     fid_y = df.iloc[0]["exp_name_y"]
                     df["exp_name_x"] = "|".join(list(set(fid_x.split("@")) - set(fid_y.split("@"))))
                     df["exp_name_y"] = "|".join(list(set(fid_y.split("@")) - set(fid_x.split("@"))))
-            sel_cols = tag_cols + ["prefix","input_text","pred_text1","target_text"] 
+            sel_cols = ["pred_text1","target_text"] + tag_cols + ["prefix","input_text"]
             info_cols = []
             #show_consts = False
-            if len(sel_rows) > 1:
+            if True: #len(sel_rows) > 1:
                 df = df.reset_index()
-                sel_cols, info_cols, tag_cols = remove_uniques(df, sel_cols, tag_cols)
+                if len(df) > 1:
+                    sel_cols, info_cols, tag_cols = remove_uniques(df, sel_cols, tag_cols)
+                if not "pred_text1" in sel_cols:
+                    sel_cols = ["pred_text1"] + sel_cols
             else:
                 _from_cols = ["pred_text1", "pred_text1_x", "pred_text1_y","query_x","query_y", "query", "resp", "resp_x", "resp_y", "template", "prefix", "input_text","target_text_x", "target_text", "rouge_score", "rouge_score_x","rouge_score_y", "bert_score", "bert_score_x", "bert_score_y", "exp_name_x", "exp_name_y","sel"] + tag_cols
                 for _col in _from_cols:
@@ -1876,8 +1865,8 @@ def start(stdscr):
             dfs.append(df)
         if len(dfs) > 1:
             df = pd.concat(dfs, ignore_index=True)
-            dfname = "merged"
         if files:
+            dfname = "merged"
             show_df(df)
         else:
             mlog.info("No tsv or json file was found")
