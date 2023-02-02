@@ -1086,25 +1086,11 @@ def show_df(df):
                 _common = _all - len(df)
                 consts["Common"] = str(_common) + "| {:.2f}".format(_common / _all)
                 #df = df.sort_values(by="input_text", ascending=False)
-            if False: #len(sel_rows) == 2 and char != "n":
-                if "sel_x" in df: 
-                    df = df.sort_values(by="sel_x", ascending=False)
-                elif "sel" in df:
-                    df = df.sort_values(by="sel", ascending=False)
-                _all = len(df)
-                df = df[df['pred_text1_x'].str.strip() != df['pred_text1_y'].str.strip()]
-                _dif = len(df)
-                _common = _all - _dif
-                consts["Common"] = str(_common) + "| {:.2f}".format(_common / _all)
-                if _dif > 0 and "exp_name_x" in df:
-                    fid_x = df.iloc[0]["exp_name_x"]
-                    fid_y = df.iloc[0]["exp_name_y"]
-                    df["exp_name_x"] = "|".join(list(set(fid_x.split("@")) - set(fid_y.split("@"))))
-                    df["exp_name_y"] = "|".join(list(set(fid_y.split("@")) - set(fid_x.split("@"))))
             sel_cols = ["pred_text1","target_text"] + tag_cols + ["prefix","input_text"]
             info_cols = []
             df = df.reset_index()
             if len(df) > 1:
+                df.columns = df.columns.droplevel()
                 sel_cols, info_cols, tag_cols = remove_uniques(df, sel_cols, tag_cols)
 
         elif char == "m" and prev_char != "x":
