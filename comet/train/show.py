@@ -707,10 +707,10 @@ def show_df(df):
             exp=df.iloc[sel_row]["exp_id"]
             cond = f"(main_df['{FID}'] == '{exp}')"
             df = main_df[main_df[FID] == exp]
-            sel_cols=["pred_freq","input_text","pred_text1", "target_text","rouge_score","bert_score","prefix"]
-            info_cols_back = info_cols=["tail"]
+            sel_cols=tag_cols + ["bert_score","pred_text1","target_text","input_text","rouge_score","prefix"]
+            sel_cols, info_cols, tag_cols = remove_uniques(df, sel_cols, tag_cols)
             df = df[sel_cols]
-            df = df.sort_values(by="pred_freq", ascending=False)
+            df = df.sort_values(by="input_text", ascending=False)
         elif ch == cur.KEY_IC:
             if char == "I":
                 canceled, col, val = list_df_values(df, get_val=False)
