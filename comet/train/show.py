@@ -1535,7 +1535,7 @@ def show_df(df):
                         char = "SS"
         if cmd.isnumeric():
             sel_row = int(cmd)
-        elif cmd == "q":
+        elif cmd == "q" or cmd == "wq":
             save_df(df)
             ch = ord("q")
         elif not char in ["q", "S","r"]:
