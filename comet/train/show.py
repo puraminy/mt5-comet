@@ -974,7 +974,7 @@ def show_df(df):
             if True:
                 info_cols = ["bert_score", "num_preds"]
             if True: #col == "fid":
-                sel_cols = ["rouge_score"] + tag_cols + ["method", "trial", "prefix","num_preds", "rouge_score", "pred_max_num","pred_max", "steps","max_acc","best_step",  "bert_score", "st_score", "learning_rate",  "num_targets", "num_inps", "train_records", "train_records_nunique", "group_records", "wrap", "frozen", "prefixed"] 
+                sel_cols = ["rouge_score"] + tag_cols + ["method", "trial", "prefix","num_preds", "pred_max_num","pred_max", "steps","max_acc","best_step",  "bert_score", "st_score", "learning_rate",  "num_targets", "num_inps", "train_records", "train_records_nunique", "group_records", "wrap", "frozen", "prefixed"] 
 
             _agg = {}
             for c in df.columns:
