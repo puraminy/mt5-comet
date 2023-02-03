@@ -1076,7 +1076,7 @@ def show_df(df):
                             dfs.append(_df)
                 df = pd.concat(dfs,ignore_index=True)
                 #df = df.sort_values(by="int", ascending=False)
-            else:
+            elif len(s_rows) > 1:
                 _cols = tag_cols
                 df, sel_exp, dfs = find_common(df, main_df, on_col_list, _rows, 
                                                FID, char, _cols)
