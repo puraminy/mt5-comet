@@ -82,7 +82,7 @@ def load_results(path):
     return df
 
 def remove_uniques(df, sel_cols, tag_cols):
-    _sel_cols = []
+    _sel_cols = sel_cols.copy() 
     _info_cols = []
     _tag_cols = tag_cols
     for c in sel_cols:
@@ -91,14 +91,13 @@ def remove_uniques(df, sel_cols, tag_cols):
             _count = df[c].nunique()
         except:
             continue
-        if _count == 1 and c != "exp_id":
+        if _count == 1 and c != "exp_id" and len(_sel_cols) > 5:
            _info_cols.append(c) 
+           _sel_cols.remove(c)
         elif c in df and c + "_nunique" in df:
             _gn = df[c + "_nunique"].iloc[0]
-            if _gn == 1 or c == "exp_id":
-                _sel_cols.append(c)
-        else:
-            _sel_cols.append(c)
+            if _gn != 1 and len(_sel_cols) > 5:
+                _sel_cols.remove(c)
     if _sel_cols:
         sel_cols = _sel_cols
         _tag_cols = []
