@@ -452,7 +452,9 @@ def show_df(df):
         if _col in df:
             df[_col] = df[_col].astype(str)
 
-    map_cols = {
+    map_cols =  load_obj("map_cols", "atomic", {})
+    if not map_cols:
+        map_cols = {
             "epochs_num":"epn",
             "exp_trial":"exp",
             "pred_text1":"pred",
@@ -1461,6 +1463,11 @@ def show_df(df):
             main_df.loc[(main_df["template"] == "sup-tokens") & 
                     (main_df["wrap"] == "wrapped-lstm"), "template"] = "sup-tokens-wrap"
         
+        if cmd == "ren":
+            sel_col = sel_cols[cur_col]
+            new_name = rowinput("from", default=sel_col)
+            map_cols[sel_col] = new_name
+            save_obj(map_cols, "map_cols", "atomic")
         if cmd == "repall":
             canceled, col,val = list_df_values(main_df, get_val=False)
             if not canceled:
