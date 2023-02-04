@@ -87,17 +87,18 @@ def remove_uniques(df, sel_cols, tag_cols):
     _tag_cols = tag_cols
     for c in sel_cols:
         _count = 0
-        try:
-            _count = df[c].nunique()
-        except:
+        if not c in df or c in ["rouge_score", "pred_max_num"]:
             continue
-        if _count == 1 and c != "exp_id" and len(_sel_cols) > 5:
+        _count = df[c].nunique()
+        if _count == 1 and c != "exp_id":
            _info_cols.append(c) 
            _sel_cols.remove(c)
         elif c in df and c + "_nunique" in df:
             _gn = df[c + "_nunique"].iloc[0]
-            if _gn != 1 and len(_sel_cols) > 5:
+            if _gn != 1:
                 _sel_cols.remove(c)
+        if len(_sel_cols) <= 5:
+            break
     if _sel_cols:
         sel_cols = _sel_cols
         _tag_cols = []
