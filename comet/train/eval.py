@@ -25,6 +25,8 @@ def forward_step(model, batch, no_model_batch, accumulation_tiny_steps=1, mode="
     #if task_ids is not None:
     #    result =  model.forward(task_ids, add_prior=True, **batch)
     #else:
+    if not isinstance(model, PTuningWrapper): 
+        del batch["task"]
     result = model(**batch)
     logits = result["logits"]
     forw_out = {
@@ -328,6 +330,7 @@ def batch_generate(model, tokenizer, queries, batch_size=5, gen_token = "", gen_
             "repetition_penalty":5.5,
             "bad_words_ids": bad_words_ids
         }
+    if isinstance(model, PTuningWrapper):
         gen_kwargs["task"] = 0 #batch["task"]
     with torch.no_grad():
         examples = queries

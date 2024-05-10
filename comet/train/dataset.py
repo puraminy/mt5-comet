@@ -239,10 +239,13 @@ class MyDataset(torch.utils.data.Dataset):
         mlog.info("Saving data set in dataframe ...")
         df1 = None
         save_dir = save_path
-        if save_path.endswith(".tsv"):
+        if save_path.endswith(".csv"):
             save_dir = Path(save_path).parent
         if merge and Path(save_path).is_file():
-            df1 = pd.read_table(save_path)
+            if save_path.endswith(".tsv"):
+               df1 = pd.read_table(save_path)
+            else:
+               df1 = pd.read_csv(save_path)
         rows = []
         ii = 0
         for item in self.flat_data:
@@ -264,7 +267,10 @@ class MyDataset(torch.utils.data.Dataset):
         #df.to_csv(os.path.join(save_dir, self.rel_filter + "_" + self.split_name + ".tsv"), sep="\t", index=False)
         if merge and df1 is not None:
             df = pd.concat([df1, df])
-        df.to_csv(save_path, sep="\t", index=False)
+        if save_path.endswith(".tsv"):
+            df.to_csv(save_path, sep="\t", index=False)
+        else:
+            df.to_csv(save_path, index=False)
 
 
     def load(self):

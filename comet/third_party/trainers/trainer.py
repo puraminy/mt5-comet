@@ -26,7 +26,7 @@ from .trainer_utils import EvalPrediction
 
 from torch.utils.data.dataloader import DataLoader
 from torch.utils.data.dataset import IterableDataset
-from transformers.integrations import deepspeed_init
+# from transformers.integrations import deepspeed_init
 
 
 if version.parse(torch.__version__) >= version.parse("1.6"):
@@ -140,7 +140,7 @@ class BaseTrainer(Trainer):
         )
 
         # if eval is called w/o train init deepspeed here
-        if self.args.deepspeed and not self.deepspeed:
+        if False: #self.args.deepspeed and not self.deepspeed:
 
             # XXX: eval doesn't have `resume_from_checkpoint` arg but we should be able to do eval
             # from the checkpoint eventually

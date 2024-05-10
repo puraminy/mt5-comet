@@ -27,7 +27,7 @@ from torch.optim import SparseAdam
 from transformers import TrainingArguments, HfArgumentParser
 from comet.options import AdapterTrainingArguments, ModelArguments, DataTrainingArguments, TrainingArguments
 from comet.train.model import *
-from comet.data_utils import *
+#from comet.data_utils import *
 from comet.polytropon import SkilledMixin
 import torch
 import re
@@ -325,8 +325,9 @@ def cli():
 @click.option(
     "--save_data",
     "-sd",
-    is_flag=True,
-    help=""
+    default="",
+    type=str,
+    help="Folder to save datasets"
 )
 @click.option(
     "--load_data",
@@ -386,7 +387,7 @@ def cli():
 )
 @click.option(
     "--port",
-    "-p",
+    "-d",
     default="1234",
     type=str,
     help="port for debugpy"
@@ -560,7 +561,7 @@ def run(ctx, conf_path, base_conf, experiment,
            # oooooooooooooo
            multi_only = False
            if preview == "data":
-               save_data = True
+               save_data = spath
            if not var:
                output_name = base_conf + sep + args["method"] + sep + _extra
                args["overwrite"] = output_name
@@ -644,7 +645,7 @@ def run(ctx, conf_path, base_conf, experiment,
                    if wrap:
                        args["method"] += "-wrap"
                    if save_data: 
-                       args["save_data"] = spath
+                       args["save_data"] = save_data
                    if "multi" in args["rel_filter"]:
                        mbp("multi")
                        args["data_path"] = spath
@@ -655,7 +656,7 @@ def run(ctx, conf_path, base_conf, experiment,
                    else:
                        if multi_only: 
                            args["preview"] = "multi_only"
-                           args["save_data"] = spath
+                           args["save_data"] = save_data
                        _dp = os.path.join(dataPath,"sel",args["rel_filter"] + ".tsv")
                        if not load_data:
                            args["data_path"] = orig_args["data_path"]
@@ -1679,7 +1680,10 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         frozen = False
         freeze_parts = ""
 
+
+     
     if "-wrap" in method and not wrap:
+        breakpoint()
         mlog.info("Method %s is for wrapped models...", method)
         wrap = True
         if wrap and not frozen and follow_method and not "-nfz" in method:
@@ -2122,7 +2126,12 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                                 unfreeze_step = int(unfreeze_step)
                         )
             if save_data:
-                myds[_name].save_data(os.path.join(save_data,_name + ".tsv"), merge=True)
+                ds_name = _name  + ".csv"
+                if _name == "train":
+                    ds_name = _name + "_" + str(seed) + "_"  + str(train_samples) + ".csv"
+                elif _name == "test":
+                    ds_name = _name + "_" + str(test_samples) + ".csv"
+                myds[_name].save_data(os.path.join(save_data,ds_name), merge=False)
                 if _name == "train":
                     myds[_name].save_data(os.path.join(save_data, "sample.tsv"), merge=True, sample=10)
         return myds
@@ -2421,6 +2430,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     mlog.info("Wrapping the model ...")
     model_to_wrap = model
     if prefix:
+        assert False, "not prefix"
         model_to_wrap = model.pretrain_model
 
     task_ids = None
@@ -2457,24 +2467,25 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         assert flat_prompts != "none"
         prompts = sample_dataset.prompts
     wrapped_model = model_to_wrap
-    if adapter_args and not adapter_args.prefix_tuning:
-        if stype == "atm":
-            wrapped_model = add_encoders(model_to_wrap, tokenizer, encoder_type, load_prompt_path, flat_prompts=flat_prompts, method = method, shared_embs= shared_embs, skilled_variant=skilled_variant, prefix_config=prefix_config, n_tasks=n_tasks, n_skills=n_skills, 
-                exp_id=exp_id, 
-                encoder_prompts= prompts,
-                skill_prompts= skill_prompts, 
-                router_variant=router_variant, device=device) 
-        else:
-            wrapped_model = wrap_model(model_to_wrap, tokenizer, encoder_type, load_prompt_path, flat_prompts=flat_prompts, method = method, shared_embs= shared_embs, skilled_variant=skilled_variant, prefix_config=prefix_config, n_tasks=n_tasks, n_skills=n_skills, 
-                exp_id=exp_id, 
-                encoder_prompts= prompts,
-                skill_prompts= skill_prompts, 
-                router_variant=router_variant, device=device) 
+    if wrap is True:
+        if adapter_args and not adapter_args.prefix_tuning:
+            if stype == "atm":
+                wrapped_model = add_encoders(model_to_wrap, tokenizer, encoder_type, load_prompt_path, flat_prompts=flat_prompts, method = method, shared_embs= shared_embs, skilled_variant=skilled_variant, prefix_config=prefix_config, n_tasks=n_tasks, n_skills=n_skills, 
+                    exp_id=exp_id, 
+                    encoder_prompts= prompts,
+                    skill_prompts= skill_prompts, 
+                    router_variant=router_variant, device=device) 
+            else:
+                wrapped_model = wrap_model(model_to_wrap, tokenizer, encoder_type, load_prompt_path, flat_prompts=flat_prompts, method = method, shared_embs= shared_embs, skilled_variant=skilled_variant, prefix_config=prefix_config, n_tasks=n_tasks, n_skills=n_skills, 
+                    exp_id=exp_id, 
+                    encoder_prompts= prompts,
+                    skill_prompts= skill_prompts, 
+                    router_variant=router_variant, device=device) 
 
-    if not prefix:
-        model.resize_token_embeddings(len(tokenizer))
-    else:
-        model.pretrain_model.resize_token_embeddings(len(tokenizer))
+        if not prefix:
+            model.resize_token_embeddings(len(tokenizer))
+        else:
+            model.pretrain_model.resize_token_embeddings(len(tokenizer))
 
     def add_parts(_list, parts):
         if parts == "encoder":
@@ -2514,7 +2525,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
 
     fname = "output/" + str(experiment) + "-" + str(exp_id) + "-" + flat_prompts + ".txt"
     Path("output").mkdir(exist_ok = True)
-    if True: #isinstance(wrapped_model, PTuningWrapper):
+    if isinstance(wrapped_model, PTuningWrapper):
         f = open(fname, "w")
         print("Number of prompts:" + str(len(wrapped_model.prompt_encoders)), file=f)
         print("Train prompts:", prompts, file=f) 
@@ -2540,7 +2551,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         return
 
     wrapped_model.to(device=device)
-    if True: #isinstance(wrapped_model, PTuningWrapper):
+    if isinstance(wrapped_model, PTuningWrapper):
         if wrapped_model.prompt_encoders:
             mlog.info("Number of encoders: %s", len(wrapped_model.prompt_encoders))
             for encoder in wrapped_model.prompt_encoders:
@@ -2564,7 +2575,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         rgrad = [p for p in wrapped_model.parameters() if p.requires_grad]
         nrgrad = [p for p in wrapped_model.parameters() if not p.requires_grad]
 
-    if True: #isinstance(wrapped_model, PTuningWrapper):
+    if isinstance(wrapped_model, PTuningWrapper):
         _sum = 0
         for encoder in wrapped_model.prompt_encoders:
             enc_rgrad = [p for p in encoder.parameters() if p.requires_grad]
@@ -2596,7 +2607,7 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
             
         ########### My Code
         prompt_params = []
-        if True: 
+        if isinstance(wrapped_model, PTuningWrapper):
             for encoder in model.prompt_encoders:
                para_list =[p for p in encoder.parameters() if p.requires_grad]
                prompt_params.extend(para_list)
@@ -2782,8 +2793,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
     cycle = int(cycle)
     wrap = True
     exp_info["enc_num"] = 0
-    exp_info["enc_num"] = len(wrapped_model.prompt_encoders) 
-    exp_info["train_records"] = train_dataset.num_records
+    # exp_info["enc_num"] = len(wrapped_model.prompt_encoders) 
+    exp_info["max_train_samples"] = train_dataset.num_records
     exp_info["iterations"] = iterations 
     mbp("start")
     best_path = ""
@@ -2825,7 +2836,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                         _model = wrapped_model
                         with torch.no_grad():
                             mlog.info("Updating the model weights before evaluaton...")
-                            wrapped_model.update_model_weight()
+                            if isinstance(wrapped_model, PTuningWrapper): 
+                                wrapped_model.update_model_weight()
                         a1, a2, s1, eval_loss = evaluate1(tokenizer, eval_dataloader, _model, device, seed, mode="dev", save_path=save_path, task_ids=task_ids)
                         log_string =  "dev acc({}, {} st:{}): eval_loss:{}  | best_eval_loss:{}   best_step: {} ".format(a1, a2, s1, eval_loss, best_eval_loss, best_step) 
                         if eval_loss <= best_eval_loss: 
@@ -2937,6 +2949,8 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         t_args.per_device_train_batch_size=node_batch_size
         t_args.num_train_epochs=epochs_num
         t_args.save_strategy="steps"
+        t_args.evaluation_strategy="steps"
+        t.load_best_model_at_end = False
         t_args.save_steps=10000 
         t_args.save_total_limit=1 
 
@@ -2965,9 +2979,10 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
         mbp("train")
         train_result = trainer.train()
 
-    with torch.no_grad():
-       mlog.info("Updating the model weights before evaluaton...")
-       wrapped_model.update_model_weight()
+    if isinstance(model, PTuningWrapper): 
+        with torch.no_grad():
+           mlog.info("Updating the model weights before evaluaton...")
+           wrapped_model.update_model_weight()
 
     if not colab and model_args.save_prefix_only:
         Path(training_args.output_dir).mkdir(exist_ok=True, parents=True)
@@ -2977,7 +2992,10 @@ def train(exp_id, model_id, experiment, qtemp, anstemp, extemp, method, val_meth
                 num_target=atm_config.num_target, task_name=data_args.task_name)
     if False: #not no_save_model:
         model.eval()
-        save_checkpoint(wrapped_model.underlying_model, tokenizer, 
+        _model = wrapped_model
+        if isinstance(model, PTuningWrapper): 
+            _model = wrapped_model.underlying_model
+        save_checkpoint(_model, tokenizer, 
                 optimizer, scheduler, step, 
                 best_eval_step, best_eval_loss,
                 save_path)

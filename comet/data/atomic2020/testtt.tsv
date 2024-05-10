@@ -1,0 +1,293 @@
+input_text	prefix	target_text
+PersonX applies for jobs	h	desperate
+PersonX applies for jobs	h	eager
+PersonX applies for jobs	h	hardworking
+PersonX beats everyone	h	capable
+PersonX beats everyone	h	skilled
+PersonX beats everyone	h	talented
+PersonX becomes a lawyer	h	knowledgeable
+PersonX becomes a lawyer	h	skilled
+PersonX becomes a lawyer	h	willful
+PersonX becomes great friends	h	friendly
+PersonX becomes great friends	h	social
+PersonX becomes great friends	h	warm
+PersonX bows PersonX's heads	h	reverent
+PersonX bows PersonX's heads	h	sleepy
+PersonX bows PersonX's heads	h	thoughtful
+PersonX breaks PersonY's heart	h	callous
+PersonX breaks PersonY's heart	h	hurtful
+PersonX breaks PersonY's heart	h	uncaring
+PersonX catches PersonY's eye	h	noticeable
+PersonX catches PersonY's eye	h	sexy
+PersonX catches PersonY's eye	h	unique
+PersonX cleans PersonY	h	caring
+PersonX cleans PersonY	h	empathetic
+PersonX cleans PersonY	h	nurturing
+PersonX compares ___ with another	h	judgemental
+PersonX compares ___ with another	h	judgy
+PersonX compares ___ with another	h	smart
+PersonX decides to read a book	h	intellignet
+PersonX decides to read a book	h	interested
+PersonX decides to read a book	h	knowlegable
+PersonX defines ___ as real	h	pragmatic
+PersonX defines ___ as real	h	prudent
+PersonX defines ___ as real	h	realistic
+PersonX enters an art contest	h	ambitious
+PersonX enters an art contest	h	dedicated
+PersonX enters an art contest	h	entertainment
+PersonX finally worked up ___	h	brave
+PersonX finally worked up ___	h	proud
+PersonX finally worked up ___	h	subdue
+PersonX finds what PersonY wanted	h	dedicated
+PersonX finds what PersonY wanted	h	determined
+PersonX finds what PersonY wanted	h	hardworking
+PersonX gives PersonY light	h	Helpful
+PersonX gives PersonY light	h	caring
+PersonX gives PersonY light	h	thoughtful
+PersonX gives ___ an allowance	h	dutiful
+PersonX gives ___ an allowance	h	generous
+PersonX gives ___ an allowance	h	parental
+PersonX has a lot of money	h	industrious
+PersonX has a lot of money	h	lavish
+PersonX has a lot of money	h	luxurious
+PersonX has a new car	h	motorized
+PersonX has a new car	h	rich
+PersonX has a new car	h	wealthy
+PersonX keeps straight	h	disciplined
+PersonX keeps straight	h	lawful
+PersonX keeps straight	h	righteous
+PersonX leaned back in PersonX's chair	h	inquisitive
+PersonX leaned back in PersonX's chair	h	relaxed
+PersonX leans PersonY's head back	h	agressive
+PersonX leans PersonY's head back	h	careful
+PersonX leans PersonY's head back	h	gentle
+PersonX leaves the class	h	displeased
+PersonX leaves the class	h	exhausted
+PersonX leaves the class	h	tired
+PersonX looks like a tourist	h	adventures
+PersonX looks like a tourist	h	fashionable
+PersonX looks like a tourist	h	funny
+PersonX loves reading	h	refined
+PersonX loves reading	h	scholarly
+PersonX loves reading	h	smart
+PersonX measures ___ directly	h	careful
+PersonX measures ___ directly	h	confident
+PersonX measures ___ directly	h	talented
+PersonX meets the love of PersonX's life	h	affectionate
+PersonX meets the love of PersonX's life	h	loving
+PersonX meets the love of PersonX's life	h	passionate
+PersonX meets the user 's ___	h	expectations
+PersonX meets the user 's ___	h	reliable
+PersonX meets the user 's ___	h	standards
+PersonX plays PersonY's new game	h	curios
+PersonX plays PersonY's new game	h	inqusitive
+PersonX plays PersonY's new game	h	playful
+PersonX puts ___ in PersonX's purse	h	Industrious
+PersonX puts ___ in PersonX's purse	h	Mobile
+PersonX puts ___ in PersonX's purse	h	Organized
+PersonX realizes PersonY was lost	h	anxious
+PersonX realizes PersonY was lost	h	excited
+PersonX realizes PersonY was lost	h	worried
+PersonX really love PersonY	h	compassionate
+PersonX really love PersonY	h	loving
+PersonX really love PersonY	h	smitten
+PersonX scores two goals	h	Athletic
+PersonX scores two goals	h	Blooming
+PersonX scores two goals	h	Proud
+PersonX scrambles eggs for breakfast	h	hungry
+PersonX scrambles eggs for breakfast	h	skilled
+PersonX scrambles eggs for breakfast	h	tired
+PersonX shakes the ___ to PersonY's foundations	h	forceful
+PersonX shares ___ equally	h	compromising
+PersonX shares ___ equally	h	fair
+PersonX shares ___ equally	h	selfless
+PersonX shows PersonY's mother	h	Charming
+PersonX shows PersonY's mother	h	Generous
+PersonX shows PersonY's mother	h	emotional
+PersonX sifts out ___	h	curious
+PersonX sifts out ___	h	methodical
+PersonX sifts out ___	h	studious
+PersonX sings PersonX's heart	h	enduring
+PersonX sings PersonX's heart	h	passionate
+PersonX sings PersonX's heart	h	talented
+PersonX sits patiently	h	calm
+PersonX sits patiently	h	cool headed
+PersonX sits patiently	h	patient
+PersonX skateboards with PersonX's friends	h	athletic
+PersonX skateboards with PersonX's friends	h	energetic
+PersonX skateboards with PersonX's friends	h	skilled
+PersonX skates around	h	carefree
+PersonX skates around	h	cautious
+PersonX skates around	h	winded
+PersonX smells something bad	h	finicky
+PersonX smells something bad	h	nervous
+PersonX smells something bad	h	sensitive
+PersonX solves the world 's ___	h	Ambitious
+PersonX solves the world 's ___	h	Genius
+PersonX solves the world 's ___	h	brave
+PersonX spends ___ in prayer	h	devoted
+PersonX spends ___ in prayer	h	faithful
+PersonX spends ___ in prayer	h	religious
+PersonX spends ___ on the beach	h	care free
+PersonX spends ___ on the beach	h	mellow
+PersonX spends ___ on the beach	h	well-tanned
+PersonX spends a lot of money	h	Immature
+PersonX spends a lot of money	h	Young
+PersonX spends a lot of money	h	important
+PersonX spills PersonY's coffee	h	careless
+PersonX spills PersonY's coffee	h	idiotic
+PersonX spills PersonY's coffee	h	tactless
+PersonX stares back at PersonY	h	aggressive
+PersonX stares back at PersonY	h	combative
+PersonX stares back at PersonY	h	stubborn
+PersonX starts a campfire	h	competent
+PersonX starts a campfire	h	handy
+PersonX starts a campfire	h	outdoorsy
+PersonX starts cooking	h	creative
+PersonX starts cooking	h	hungry
+PersonX starts cooking	h	industrious
+PersonX starts hurting	h	exasperated
+PersonX starts hurting	h	scared
+PersonX starts hurting	h	worried
+PersonX starves the ___ into submission	h	aggressive
+PersonX starves the ___ into submission	h	dominant
+PersonX starves the ___ into submission	h	evil
+PersonX states and local ___	h	Intelligent
+PersonX states and local ___	h	Smart
+PersonX states and local ___	h	curious
+PersonX stays clean	h	neat
+PersonX stays clean	h	tidy
+PersonX steals anything	h	evil
+PersonX steals anything	h	mean
+PersonX stings by a jellyfish	h	astonished
+PersonX stings by a jellyfish	h	crying
+PersonX stings by a jellyfish	h	indifferent
+PersonX stops at a store	h	eager
+PersonX stops at a store	h	interested
+PersonX storms out of the blocks	h	aggressive
+PersonX storms out of the blocks	h	angry
+PersonX storms out of the blocks	h	violent
+PersonX studies for an exam	h	motivated
+PersonX studies for an exam	h	responsible
+PersonX studies for an exam	h	smart
+PersonX surmounts every ___	h	decisive
+PersonX surmounts every ___	h	motivated
+PersonX surmounts every ___	h	persistant
+PersonX takes PersonX's watch off	h	prepared
+PersonX takes PersonX's watch off	h	relaxing
+PersonX takes PersonX's watch off	h	well-dressed
+PersonX takes PersonY everywhere	h	Sociable
+PersonX takes PersonY everywhere	h	chauffering
+PersonX takes PersonY everywhere	h	driving
+PersonX takes ___ to the grave	h	committed
+PersonX takes ___ to the grave	h	respectful
+PersonX takes ___ to the grave	h	trusting
+PersonX takes a new job	h	adventurous
+PersonX takes a new job	h	lucky
+PersonX takes a new job	h	persistent
+PersonX takes down a peg	h	proud
+PersonX takes down a peg	h	superb
+PersonX takes down a peg	h	uncaring
+PersonX takes it everywhere with PersonY	h	habitual
+PersonX takes it everywhere with PersonY	h	prepared
+PersonX takes it everywhere with PersonY	h	thoughtful
+PersonX teaches ___ to use	h	astute
+PersonX teaches ___ to use	h	encouraging
+PersonX teaches ___ to use	h	sharp
+PersonX tells PersonY's daughter	h	cunning
+PersonX tells PersonY's daughter	h	honest
+PersonX tells PersonY's daughter	h	open
+PersonX tests PersonY's ability	h	competitive
+PersonX tests PersonY's ability	h	demanding
+PersonX tests PersonY's ability	h	rebellious
+PersonX throws PersonX's hat over the wall	h	celebratory
+PersonX throws PersonX's hat over the wall	h	rude
+PersonX throws PersonX's hat over the wall	h	unkind
+PersonX throws PersonY overboard	h	aggressive
+PersonX throws PersonY overboard	h	uncaring
+PersonX throws PersonY overboard	h	violent
+PersonX throws ___ in PersonX's face	h	Bad mannered
+PersonX throws ___ in PersonX's face	h	Ill tempered
+PersonX throws ___ in PersonX's face	h	humurous
+PersonX throws money away	h	careless
+PersonX throws money away	h	indulgent
+PersonX travels to france	h	excited
+PersonX travels to france	h	international
+PersonX travels to france	h	patient
+PersonX turns PersonX's music	h	creative
+PersonX turns PersonX's music	h	energetic
+PersonX turns PersonX's music	h	in the mood
+PersonX unbuckles PersonY's belt	h	capable
+PersonX unbuckles PersonY's belt	h	helpful
+PersonX unbuckles PersonY's belt	h	ready to go
+PersonX uses ___ anymore	h	clever
+PersonX uses ___ anymore	h	skillful
+PersonX uses ___ anymore	h	strong
+PersonX visits PersonY friend	h	happy
+PersonX visits PersonY friend	h	kind
+PersonX visits PersonY friend	h	polite
+PersonX visits PersonY's cousin	h	infatuated
+PersonX visits PersonY's cousin	h	reliable
+PersonX visits PersonY's cousin	h	social
+PersonX visits PersonY's mother	h	kind
+PersonX visits PersonY's mother	h	social
+PersonX visits PersonY's mother	h	thoughtful
+PersonX visits my friend	h	Kind
+PersonX visits my friend	h	Social
+PersonX visits my friend	h	happy
+PersonX waits at the bus stop	h	adventurous
+PersonX waits at the bus stop	h	arrive
+PersonX waits at the bus stop	h	independant
+PersonX waits for PersonY's answer	h	anxious
+PersonX waits for PersonY's answer	h	expectant
+PersonX waits for PersonY's answer	h	patient
+PersonX walks PersonY to PersonZ's car	h	caring
+PersonX walks PersonY to PersonZ's car	h	considerate
+PersonX walks PersonY to PersonZ's car	h	curteous
+PersonX walks in the park	h	active
+PersonX walks in the park	h	peaceful
+PersonX walks in the park	h	thirsty
+PersonX wants ___ to play with	h	entertainment
+PersonX wants ___ to play with	h	needy
+PersonX wants ___ to play with	h	playful
+PersonX wants a cat	h	Desiring
+PersonX wants a cat	h	Lonely
+PersonX wants a cat	h	loving
+PersonX wants to learn	h	curious
+PersonX wants to learn	h	intellectual
+PersonX wants to learn to swim	h	athletic
+PersonX wants to learn to swim	h	healthy
+PersonX wants to learn to swim	h	nervous
+PersonX wants to play baseball	h	athletic
+PersonX wants to play baseball	h	hopeful
+PersonX wants to play baseball	h	young
+PersonX wants to play football	h	Big
+PersonX wants to play football	h	eager
+PersonX wants to play football	h	hopeful
+PersonX wants to play with PersonY	h	adventurous
+PersonX wants to play with PersonY	h	entertaining
+PersonX wants to play with PersonY	h	playful
+PersonX watches a scary movie	h	bold
+PersonX watches a scary movie	h	excited
+PersonX watches a scary movie	h	suspenseful
+PersonX watches old movies	h	artistic
+PersonX watches old movies	h	nostalgic
+PersonX watches old movies	h	old-fashioned
+PersonX wins every game	h	confident
+PersonX wins every game	h	crafty
+PersonX wins every game	h	skilled
+PersonX wipes PersonY's hands	h	caring
+PersonX wipes PersonY's hands	h	clean
+PersonX wipes PersonY's hands	h	helpful
+PersonX works for PersonY	h	busy
+PersonX works for PersonY	h	loyal
+PersonX works for PersonY	h	subservient
+PersonX works last night	h	exhausted
+PersonX works last night	h	hard working
+PersonX works last night	h	sleepy
+PersonX would work	h	eager
+PersonX would work	h	hardworking
+PersonX would work	h	working
+PersonX writes ___ using	h	creative
+PersonX writes ___ using	h	literate
+PersonX writes ___ using	h	poetic

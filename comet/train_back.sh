@@ -38,7 +38,7 @@ model=t5-v1
 case "$HOME" in 
   *ahmad*)
     # Do stuff
-    model=t5-lm
+    model=t5-v1
     ;;
 esac
 if [ -z $home ]; then
@@ -87,9 +87,8 @@ skill=none #learned#private#none
 mt=unsup-nat
 lr=0.001
 cfg=configs/baselines/finetuning.json
-sd=/home/ahmad/datasets/$filter/
 
-runlite run -exp $exp -cfg ${cfg} -lp ${log} --save_data=$sd -bc base -ov $g2 -var method=${mt}--rel_filter=$filter--train_samples=$train--epochs_num=$epochs--prompt_token_num=8--repeat=1--temp_num=$tn--loop=custom--test_samples=$test--flat_prompts=$merge--frozen=False--seed=123--n_prompts=0--trunc_router=$trunc--router_lr=0.001--learning_rate=$lr--encoder_type=$enc_type--router_variant=$router--freeze_exclude=$fex--stype=t5--skilled_variant=$skill--n_skills=4--follow_method=True--arg-prefix_dim=100 --scorers="rouge-bert" --data_path=${home}/atomic2020 --val_samples=10  --cycle=100 $g1 --batch_size=8 --model_id=$model --do_valid=True 
+runlite run -exp $exp -cfg ${cfg} -lp ${log} -bc base -ov $g2 -var method=${mt}--rel_filter=$filter--train_samples=$train--epochs_num=$epochs--prompt_token_num=8--repeat=1--temp_num=$tn--loop=custom--test_samples=$test--flat_prompts=$merge--frozen=False--seed=123--n_prompts=0--trunc_router=$trunc--router_lr=0.001--learning_rate=$lr--encoder_type=$enc_type--router_variant=$router--freeze_exclude=$fex--stype=t5--skilled_variant=$skill--n_skills=4--follow_method=True--arg-prefix_dim=100 --scorers="rouge-bert" --data_path=${home}/atomic2020 --val_samples=10  --cycle=100 $g1 --batch_size=8 --model_id=$model --do_valid=True 
 
 
 #alias show_results="python3 /home/pouramini/mt5-comet/comet/train/show.py full "

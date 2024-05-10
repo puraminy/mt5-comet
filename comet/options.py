@@ -132,6 +132,8 @@ class TrainingArguments(Seq2SeqTrainingArguments):
         default=False, metadata={"help": "If set measures the time."})
     compute_memory: Optional[bool] = field(
         default=False, metadata={"help": "if set, measures the memory"})
+    load_best_model_at_end: Optional[bool] = field(
+        default=False, metadata={"help": "if set, measures the memory"})
     prefix_length: Optional[int] = field(
         default=100, metadata={"help": "Defines the length for prefix tuning."})
     eval_all_at_last: bool = field(
@@ -139,6 +141,12 @@ class TrainingArguments(Seq2SeqTrainingArguments):
         metadata={
             "help": "evaluate all checkpoints on all tasks at the last"
         },
+    )
+    save_strategy: Optional[str] = field(
+        default="steps", metadata={"help": "The name of the dataset to use (via the datasets library)."}
+    )
+    evaluation_strategy: Optional[str] = field(
+        default="steps", metadata={"help": "The name of the dataset to use (via the datasets library)."}
     )
 
 
@@ -412,7 +420,7 @@ class DataTrainingArguments:
         metadata={
             "help": "Defines a dictionary from tasks to the tasks embeddings."}
     )
-    data_seed: Optional[int] = field(
+    d_seed: Optional[int] = field(
         default=42, metadata={"help": "seed used to shuffle the data."})
 
     train_file: Optional[str] = field(
